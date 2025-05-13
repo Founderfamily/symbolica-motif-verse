@@ -1,7 +1,17 @@
 
 import { useState, useEffect } from 'react';
 import { SymbolData, SymbolImage } from '@/types/supabase';
-import { ImageType, symbolToLocalImage, cultureToReuseImage } from '@/utils/symbolImageUtils';
+import { 
+  ImageType, 
+  symbolToLocalImage, 
+  getBestImageForSymbol,
+  isValidImageUrl
+} from '@/utils/symbolImageUtils';
+import { 
+  sanitizeImageUrl,
+  processAndUpdateImage,
+  getImageDescription
+} from '@/services/imageValidationService';
 import { fetchSymbolData, updateImageInSupabase } from '@/services/symbolImageService';
 import { useToast } from './use-toast';
 
@@ -34,65 +44,44 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
   const handleImageError = (type: ImageType) => {
     setImageErrors(prev => ({...prev, [type]: true}));
     
-    // Appliquer automatiquement un fallback approprié
-    if (type === 'pattern' && symbol && symbolToLocalImage[symbol.name]) {
-      const fallbackImage = symbolToLocalImage[symbol.name];
-      
-      // Mettre à jour l'état local immédiatement pour une meilleure expérience utilisateur
-      setImages(prev => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
-          image_url: fallbackImage,
-          id: prev[type]?.id || 'temp-fallback',
-          symbol_id: symbolId || 'temp-id',
-          image_type: type,
-          title: prev[type]?.title || 'Motif extrait',
-          description: prev[type]?.description || `Extraction graphique du symbole ${symbol.name}`,
-          created_at: prev[type]?.created_at || null
-        }
-      }));
-      
-      // Mettre à jour dans la base de données pour les futurs chargements
-      if (symbolId) {
-        updateImageInSupabase(
-          symbolId, 
-          type, 
-          fallbackImage, 
-          'Motif extrait',
-          `Extraction graphique du symbole ${symbol.name}`
-        );
+    // Si pas de symbole, ne rien faire
+    if (!symbol || !symbolId) return;
+    
+    // Obtenir une image de remplacement appropriée
+    const fallbackImage = getBestImageForSymbol(symbol.name, symbol.culture, type);
+    
+    // Mettre à jour l'état local immédiatement pour une meilleure expérience utilisateur
+    setImages(prev => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        image_url: fallbackImage,
+        id: prev[type]?.id || 'temp-fallback',
+        symbol_id: symbolId,
+        image_type: type,
+        title: type === 'original' ? 'Image originale' : 
+               type === 'pattern' ? 'Motif extrait' : 'Réutilisation contemporaine',
+        description: getImageDescription(symbol.name, symbol.culture, type),
+        created_at: prev[type]?.created_at || null
       }
-    } 
-    else if (type === 'reuse' && symbol && cultureToReuseImage[symbol.culture]) {
-      const fallbackImage = cultureToReuseImage[symbol.culture];
-      
-      // Mettre à jour l'état local immédiatement
-      setImages(prev => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
-          image_url: fallbackImage,
-          id: prev[type]?.id || 'temp-fallback',
-          symbol_id: symbolId || 'temp-id',
-          image_type: type,
-          title: prev[type]?.title || 'Réutilisation contemporaine',
-          description: prev[type]?.description || `Application moderne du symbole dans la culture ${symbol.culture}`,
-          created_at: prev[type]?.created_at || null
-        }
-      }));
-      
-      // Mettre à jour dans la base de données
-      if (symbolId) {
-        updateImageInSupabase(
-          symbolId, 
-          type, 
-          fallbackImage, 
-          'Réutilisation contemporaine',
-          `Application moderne du symbole dans la culture ${symbol.culture}`
-        );
-      }
-    }
+    }));
+    
+    // Mettre à jour dans la base de données
+    updateImageInSupabase(
+      symbolId, 
+      type, 
+      fallbackImage, 
+      type === 'original' ? 'Image originale' : 
+      type === 'pattern' ? 'Motif extrait' : 'Réutilisation contemporaine',
+      getImageDescription(symbol.name, symbol.culture, type)
+    );
+    
+    // Notification à l'utilisateur
+    toast({
+      title: "Image alternative chargée",
+      description: `Une image alternative a été utilisée pour ${symbol.name}`,
+      variant: "default",
+    });
   };
 
   useEffect(() => {
@@ -118,23 +107,26 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
         
         imagesData.forEach((img: SymbolImage) => {
           if (img.image_type === 'original' || img.image_type === 'pattern' || img.image_type === 'reuse') {
-            organizedImages[img.image_type] = img;
+            // Vérifier et nettoyer l'URL de l'image
+            const sanitizedUrl = sanitizeImageUrl(img.image_url);
+            organizedImages[img.image_type] = {
+              ...img,
+              image_url: sanitizedUrl
+            };
           }
         });
         
-        // Vérifier si nous devons mettre à jour ou ajouter des images automatiquement
+        // Vérifier si nous devons mettre à jour ou ajouter des images
         if (symbolData) {
-          // Image originale (images de musées ou historiques)
+          // Image originale
           if (!organizedImages.original) {
-            // Utiliser une image culturelle authentique pour l'original plutôt qu'une image générique
-            const culturalKeywords = `authentic+${symbolData.culture.toLowerCase()}+${symbolData.name.toLowerCase().replace(/\s+/g, '+')}+historical`;
-            const originalImage = `https://source.unsplash.com/featured/?${encodeURIComponent(culturalKeywords)}`;
+            const originalImage = getBestImageForSymbol(symbolData.name, symbolData.culture, 'original');
             const success = await updateImageInSupabase(
               symbolId, 
               'original', 
               originalImage, 
               'Image originale',
-              `Représentation historique authentique de ${symbolData.name}`
+              getImageDescription(symbolData.name, symbolData.culture, 'original')
             );
             
             if (success) {
@@ -144,9 +136,22 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
                 image_url: originalImage,
                 image_type: 'original',
                 title: 'Image originale',
-                description: `Représentation historique authentique de ${symbolData.name}`,
+                description: getImageDescription(symbolData.name, symbolData.culture, 'original'),
                 created_at: null
               };
+            }
+          } else if (organizedImages.original) {
+            // Vérifier la validité de l'image existante
+            const processedUrl = await processAndUpdateImage(
+              symbolId,
+              symbolData.name,
+              symbolData.culture,
+              'original',
+              organizedImages.original.image_url
+            );
+            
+            if (processedUrl !== organizedImages.original.image_url) {
+              organizedImages.original.image_url = processedUrl;
             }
           }
           
@@ -158,7 +163,7 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
               'pattern', 
               patternImage, 
               'Motif extrait',
-              `Extraction graphique du symbole ${symbolData.name}`
+              getImageDescription(symbolData.name, symbolData.culture, 'pattern')
             );
             
             if (success) {
@@ -168,21 +173,21 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
                 image_url: patternImage,
                 image_type: 'pattern',
                 title: 'Motif extrait',
-                description: `Extraction graphique du symbole ${symbolData.name}`,
+                description: getImageDescription(symbolData.name, symbolData.culture, 'pattern'),
                 created_at: null
               };
             }
           }
           
-          // Image réutilisation (basée sur la culture - exemples concrets)
-          if (!organizedImages.reuse && cultureToReuseImage[symbolData.culture]) {
-            const reuseImage = cultureToReuseImage[symbolData.culture];
+          // Image réutilisation
+          if (!organizedImages.reuse) {
+            const reuseImage = getBestImageForSymbol(symbolData.name, symbolData.culture, 'reuse');
             const success = await updateImageInSupabase(
               symbolId, 
               'reuse', 
               reuseImage, 
               'Réutilisation contemporaine',
-              `Application moderne du symbole dans la culture ${symbolData.culture}`
+              getImageDescription(symbolData.name, symbolData.culture, 'reuse')
             );
             
             if (success) {
@@ -192,9 +197,22 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
                 image_url: reuseImage,
                 image_type: 'reuse',
                 title: 'Réutilisation contemporaine',
-                description: `Application moderne du symbole dans la culture ${symbolData.culture}`,
+                description: getImageDescription(symbolData.name, symbolData.culture, 'reuse'),
                 created_at: null
               };
+            }
+          } else if (organizedImages.reuse) {
+            // Vérifier la validité de l'image existante
+            const processedUrl = await processAndUpdateImage(
+              symbolId,
+              symbolData.name,
+              symbolData.culture,
+              'reuse',
+              organizedImages.reuse.image_url
+            );
+            
+            if (processedUrl !== organizedImages.reuse.image_url) {
+              organizedImages.reuse.image_url = processedUrl;
             }
           }
         }

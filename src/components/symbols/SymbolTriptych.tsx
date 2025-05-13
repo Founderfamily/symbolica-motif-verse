@@ -4,6 +4,8 @@ import SymbolImage from './SymbolImage';
 import { EmptyState, LoadingState, ErrorState } from './SymbolTriptychState';
 import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { ImageType } from '@/utils/symbolImageUtils';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface SymbolTriptychProps {
   symbolId: string | null;
@@ -30,6 +32,9 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   if (error || !symbol) {
     return <ErrorState />;
   }
+  
+  // Calculer le nombre total d'erreurs d'image
+  const totalErrors = Object.values(imageErrors).filter(Boolean).length;
   
   const renderImage = (type: ImageType, title: string) => {
     return (
@@ -61,6 +66,16 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
           <p className="text-slate-700 mt-3 leading-relaxed">{symbol.description}</p>
         )}
       </div>
+      
+      {totalErrors > 0 && (
+        <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertTitle>Attention</AlertTitle>
+          <AlertDescription>
+            Certaines images authentiques n'ont pas pu être chargées. Des alternatives ont été affichées.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {renderImage('original', 'Image originale')}
