@@ -9,7 +9,101 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          is_admin: boolean | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          is_admin?: boolean | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      symbol_images: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_type: Database["public"]["Enums"]["image_type"]
+          image_url: string
+          symbol_id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_type: Database["public"]["Enums"]["image_type"]
+          image_url: string
+          symbol_id: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_type?: Database["public"]["Enums"]["image_type"]
+          image_url?: string
+          symbol_id?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_images_symbol_id_fkey"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      symbols: {
+        Row: {
+          created_at: string | null
+          culture: string
+          description: string | null
+          id: string
+          name: string
+          period: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          culture: string
+          description?: string | null
+          id?: string
+          name: string
+          period: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          culture?: string
+          description?: string | null
+          id?: string
+          name?: string
+          period?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +112,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      image_type: "original" | "pattern" | "reuse"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +227,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      image_type: ["original", "pattern", "reuse"],
+    },
   },
 } as const

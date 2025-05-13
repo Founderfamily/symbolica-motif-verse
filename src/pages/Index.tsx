@@ -4,7 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import NewsletterSignup from '@/components/newsletter/NewsletterSignup';
 import Hero from '@/components/sections/Hero';
-import SymbolGrid from '@/components/sections/SymbolGrid';
+import SymbolTriptychSection from '@/components/sections/SymbolTriptychSection';
 import Features from '@/components/sections/Features';
 import HowItWorks from '@/components/sections/HowItWorks';
 import Community from '@/components/sections/Community';
@@ -31,7 +31,7 @@ const Index = () => {
             <div className="absolute right-6 top-0">
               <OpenSourceBadge />
             </div>
-            <SymbolGrid />
+            <SymbolTriptychSection />
           </div>
         </div>
         
