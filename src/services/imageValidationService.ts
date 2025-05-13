@@ -10,11 +10,16 @@ export const checkImageAvailability = async (url: string): Promise<boolean> => {
   }
   
   try {
+    // Utiliser une approche plus fiable pour vérifier les URLs
     const response = await fetch(url, { 
       method: 'HEAD',
-      mode: 'no-cors' // Pour éviter les erreurs CORS lors de la vérification
+      // Ne pas utiliser no-cors car cela retourne toujours un statut "opaque"
+      // ce qui nous empêche de vérifier correctement la réponse
+      mode: 'cors'
     });
-    return true; // Si nous arrivons ici sans erreur, l'URL est probablement valide
+    
+    // Vérifier le statut HTTP (200-299 indique un succès)
+    return response.status >= 200 && response.status < 300;
   } catch (error) {
     console.error(`Erreur lors de la vérification de l'URL d'image: ${url}`, error);
     return false;
@@ -27,13 +32,30 @@ export const sanitizeImageUrl = (url: string | null | undefined): string => {
   
   // Vérifier si c'est une URL valide
   try {
+    // Vérifier si l'URL pointe vers un fichier image
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const lowercaseUrl = url.toLowerCase();
+    const isLikelyImageUrl = imageExtensions.some(ext => lowercaseUrl.endsWith(ext)) || 
+                             lowercaseUrl.includes('/image') || 
+                             lowercaseUrl.includes('/images');
+    
+    // Tester si c'est une URL valide
     new URL(url);
-    return url;
+    
+    // Retourner l'URL si elle semble pointer vers une image
+    if (isLikelyImageUrl) {
+      return url;
+    }
+    
+    // Sinon, signaler qu'il ne s'agit pas d'une URL d'image
+    console.warn(`L'URL ne semble pas pointer vers une image: ${url}`);
+    return PLACEHOLDER;
   } catch (e) {
     // Si ce n'est pas une URL absolue, vérifier si c'est un chemin local valide
     if (url.startsWith('/')) {
       return url;
     }
+    console.warn(`URL invalide: ${url}`);
     return PLACEHOLDER;
   }
 };
