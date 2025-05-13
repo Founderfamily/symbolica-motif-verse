@@ -1,22 +1,13 @@
 
 // src/data/symbols.ts
-// Import local images directly so Vite can handle them properly during build
-import aztecImage from '/images/symbols/aztec.png';
-import vikingImage from '/images/symbols/viking.png';
-import mandalaImage from '/images/symbols/mandala.png';
-import fleurDeLysImage from '/images/symbols/fleur-de-lys.png';
-import greekMeanderImage from '/images/symbols/greek-meander.png';
-import adinkraImage from '/images/symbols/adinkra.png';
-import seigaihaImage from '/images/symbols/seigaiha.png';
-import aboriginalImage from '/images/symbols/aboriginal.png';
-import arabesqueImage from '/images/symbols/arabesque.png';
+// Utilisation d'URLs externes pour une meilleure compatibilité avec le déploiement
 
 export interface Symbol {
   name: string;
   culture: string;
   period: string;
-  src: string | any; // Can be a string URL or an imported image
-  isExternal?: boolean; // Flag to indicate if the image is externally hosted
+  src: string; // Toujours une URL externe
+  isExternal: boolean; // Toutes les images sont externes
 }
 
 export const SYMBOLS: Symbol[] = [
@@ -31,54 +22,63 @@ export const SYMBOLS: Symbol[] = [
     name: "Fleur de Lys",
     culture: "Française",
     period: "Moyen Âge",
-    src: fleurDeLysImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Fleur_de_lys.svg/800px-Fleur_de_lys.svg.png",
+    isExternal: true,
   },
   {
     name: "Méandre grec",
     culture: "Grecque",
     period: "Antiquité",
-    src: greekMeanderImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Greek_key_design.svg/800px-Greek_key_design.svg.png",
+    isExternal: true,
   },
   {
     name: "Mandala",
     culture: "Indienne",
     period: "Traditionnelle",
-    src: mandalaImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mandala_of_Vajradhatu.jpg/800px-Mandala_of_Vajradhatu.jpg",
+    isExternal: true,
   },
   {
     name: "Symbole Adinkra",
     culture: "Ashanti",
     period: "Traditionnelle",
-    src: adinkraImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Adinkra_Symbols_from_Ntonso.JPG/800px-Adinkra_Symbols_from_Ntonso.JPG",
+    isExternal: true,
   },
   {
     name: "Motif Seigaiha",
     culture: "Japonaise",
     period: "Traditionnelle",
-    src: seigaihaImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Japanese_Traditional_Pattern_-_Seigaiha.svg/800px-Japanese_Traditional_Pattern_-_Seigaiha.svg.png",
+    isExternal: true,
   },
   {
     name: "Art aborigène",
     culture: "Aborigène",
     period: "Préhistorique-Contemporain",
-    src: aboriginalImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Bradshaw_rock_paintings.jpg/800px-Bradshaw_rock_paintings.jpg",
+    isExternal: true,
   },
   {
     name: "Motif viking",
     culture: "Nordique",
     period: "VIIIe-XI siècles",
-    src: vikingImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Urnes_Stave_Church_wood_carving.jpg/800px-Urnes_Stave_Church_wood_carving.jpg",
+    isExternal: true,
   },
   {
     name: "Arabesque",
     culture: "Islamique",
     period: "Médiévale",
-    src: arabesqueImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Alcazar_de_Sevilla_-_Patio_de_las_Doncellas_-_004.jpg/800px-Alcazar_de_Sevilla_-_Patio_de_las_Doncellas_-_004.jpg",
+    isExternal: true,
   },
   {
     name: "Motif aztèque",
     culture: "Mésoaméricaine",
     period: "Précolombienne",
-    src: aztecImage,
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Aztec_calendar_stone.svg/800px-Aztec_calendar_stone.svg.png",
+    isExternal: true,
   },
 ];

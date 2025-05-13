@@ -1,6 +1,6 @@
 
 // src/components/symbols/SymbolCard.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Symbol } from '@/data/symbols';
 
@@ -13,20 +13,39 @@ interface SymbolCardProps {
 
 const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Ici, pas besoin de manipulation supplémentaire car:
-  // - Les images importées sont gérées par Vite (qui génère les bons chemins)
-  // - Les URLs externes sont utilisées directement
+  // Réinitialiser l'état d'erreur si le motif change
+  useEffect(() => {
+    setError(false);
+    setLoading(true);
+  }, [motif.src]);
+
+  const handleImageLoad = () => {
+    setLoading(false);
+  };
+
+  const handleImageError = () => {
+    console.error(`Erreur de chargement de l'image: ${motif.name}`, motif.src);
+    setError(true);
+    setLoading(false);
+  };
 
   return (
     <div className="rounded-lg overflow-hidden shadow-sm border border-slate-200">
       <AspectRatio ratio={1} className="w-full bg-slate-50">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+          </div>
+        )}
         <img
           src={error ? PLACEHOLDER : motif.src}
           alt={motif.name}
-          className="object-cover w-full h-full"
-          onError={() => setError(true)}
-          crossOrigin={motif.isExternal ? "anonymous" : undefined}
+          className={`object-cover w-full h-full ${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+          crossOrigin="anonymous"
         />
       </AspectRatio>
       <div className="p-3 bg-white">
