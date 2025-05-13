@@ -82,6 +82,18 @@ export const processAndUpdateImage = async (
       case 'reuse':
         alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolCulture.toLowerCase())}+art+contemporary`;
         break;
+      default:
+        return url;
+    }
+    
+    // Définir le titre en fonction du type d'image
+    let title: string;
+    if (type === 'original') {
+      title = 'Image originale';
+    } else if (type === 'pattern') {
+      title = 'Motif extrait';
+    } else {
+      title = 'Réutilisation contemporaine';
     }
     
     // Mettre à jour dans Supabase avec l'alternative
@@ -90,8 +102,7 @@ export const processAndUpdateImage = async (
         .from('symbol_images')
         .update({
           image_url: alternativeUrl,
-          title: type === 'original' ? 'Image originale' : 
-                  type === 'pattern' ? 'Motif extrait' : 'Réutilisation contemporaine',
+          title: title,
           description: getImageDescription(symbolName, symbolCulture, type)
         })
         .eq('symbol_id', symbolId)

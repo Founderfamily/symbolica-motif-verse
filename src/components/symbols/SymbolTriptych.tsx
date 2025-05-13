@@ -68,7 +68,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
       </div>
       
       {totalErrors > 0 && (
-        <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
+        <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertTitle>Attention</AlertTitle>
           <AlertDescription>
