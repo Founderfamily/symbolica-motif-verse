@@ -1,4 +1,3 @@
-
 // src/data/symbols.ts
 export interface Symbol {
   name: string;
@@ -12,7 +11,7 @@ export const SYMBOLS: Symbol[] = [
     name: "Triskèle celtique",
     culture: "Celtique",
     period: "Âge du Fer",
-    src: "https://commons.m.wikimedia.org/wiki/File:Golden_Dawn_Meander.svg",
+    src: "/images/symbols/triskelion.png",
   },
   {
     name: "Fleur de Lys",
