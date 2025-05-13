@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
   Palette, Square, Flower2, Atom, Sun, Infinity, 
@@ -112,15 +112,42 @@ const motifs = [
 ];
 
 const SymbolGrid = () => {
+  // Use a ref to avoid multiple re-renders
   const [imageStatus, setImageStatus] = useState<Record<string, boolean>>({});
+  const [initialized, setInitialized] = useState<boolean>(false);
+
+  // Initialize image status only once when component mounts
+  useEffect(() => {
+    if (!initialized) {
+      // Pre-initialize all image statuses to avoid flickering
+      const initialStatus: Record<string, boolean> = {};
+      motifs.forEach(motif => {
+        initialStatus[motif.name] = false;
+      });
+      setImageStatus(initialStatus);
+      setInitialized(true);
+    }
+  }, [initialized]);
 
   const handleImageLoad = (name: string) => {
-    setImageStatus(prev => ({ ...prev, [name]: true }));
+    setImageStatus(prev => {
+      // Only update if status changed to avoid unnecessary re-renders
+      if (prev[name] !== true) {
+        return { ...prev, [name]: true };
+      }
+      return prev;
+    });
   };
 
   const handleImageError = (name: string) => {
-    setImageStatus(prev => ({ ...prev, [name]: false }));
-    console.log(`Image failed to load: ${name}`);
+    setImageStatus(prev => {
+      // Only update if status changed to avoid unnecessary re-renders
+      if (prev[name] !== false) {
+        console.log(`Image failed to load: ${name}`);
+        return { ...prev, [name]: false };
+      }
+      return prev;
+    });
   };
 
   return (
@@ -131,45 +158,56 @@ const SymbolGrid = () => {
       <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
         <div className="aspect-video w-full bg-gradient-to-br from-slate-50 to-white p-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 w-full">
-            {motifs.map((motif, i) => (
-              <div 
-                key={i} 
-                className={`group rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 border border-slate-100 hover:border-slate-200 symbol-card bg-gradient-to-br ${motif.color} ${motif.hoverColor}`}
-                style={{animation: `fade-in 0.5s ease-out ${i * 0.1}s both`}}
-              >
-                <div className="relative w-full aspect-square">
-                  <AspectRatio ratio={1} className="overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <img 
-                        src={imageStatus[motif.name] === false ? "/placeholder.svg" : motif.imagePath}
-                        alt={motif.name}
-                        className="object-cover w-full h-full transform hover:scale-110 transition-transform duration-300"
-                        onLoad={() => handleImageLoad(motif.name)}
-                        onError={() => handleImageError(motif.name)}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            {motifs.map((motif, i) => {
+              // Determine initial fade-in animation, but don't repeat it
+              const initialAnimation = initialized ? 
+                `fade-in 0.5s ease-out ${i * 0.1}s forwards` : '';
+              
+              return (
+                <div 
+                  key={i} 
+                  className={`group rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 border border-slate-100 hover:border-slate-200 symbol-card bg-gradient-to-br ${motif.color} ${motif.hoverColor}`}
+                  style={{animation: initialAnimation}}
+                >
+                  <div className="relative w-full aspect-square">
+                    <AspectRatio ratio={1} className="overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {/* Conditionally render image based on initialization status */}
+                        {initialized && (
+                          <img 
+                            src={imageStatus[motif.name] === false ? "/placeholder.svg" : motif.imagePath}
+                            alt={motif.name}
+                            className="object-cover w-full h-full transform hover:scale-110 transition-transform duration-300"
+                            onLoad={() => handleImageLoad(motif.name)}
+                            onError={() => handleImageError(motif.name)}
+                            // Add key to prevent React from reusing the same element
+                            key={imageStatus[motif.name] ? `loaded-${motif.name}` : `placeholder-${motif.name}`}
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-white/90 backdrop-blur-sm">
+                    <h4 className="text-xs sm:text-sm font-medium text-slate-800 line-clamp-1">{motif.name}</h4>
+                    <div className="flex flex-col mt-1">
+                      <span className="text-[10px] text-slate-600">{motif.culture}</span>
+                      <span className="text-[9px] text-slate-500">{motif.period}</span>
                     </div>
-                  </AspectRatio>
-                </div>
-                <div className="p-2 sm:p-3 bg-white/90 backdrop-blur-sm">
-                  <h4 className="text-xs sm:text-sm font-medium text-slate-800 line-clamp-1">{motif.name}</h4>
-                  <div className="flex flex-col mt-1">
-                    <span className="text-[10px] text-slate-600">{motif.culture}</span>
-                    <span className="text-[9px] text-slate-500">{motif.period}</span>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 p-3">
+                    <div className="flex flex-col items-center justify-center space-y-1 text-center transform scale-90 group-hover:scale-100 transition-transform">
+                      <div className={`p-2 rounded-full ${motif.bgColor} mb-1`}>
+                        {React.createElement(motif.icon, { className: "w-4 h-4 text-slate-700", strokeWidth: 1.5 })}
+                      </div>
+                      <h3 className="font-medium text-xs sm:text-sm text-slate-800">{motif.name}</h3>
+                      <p className="text-slate-600 text-[10px] sm:text-[11px]">{motif.culture}</p>
+                      <p className="text-slate-500 text-[9px]">{motif.period}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 p-3">
-                  <div className="flex flex-col items-center justify-center space-y-1 text-center transform scale-90 group-hover:scale-100 transition-transform">
-                    <div className={`p-2 rounded-full ${motif.bgColor} mb-1`}>
-                      {React.createElement(motif.icon, { className: "w-4 h-4 text-slate-700", strokeWidth: 1.5 })}
-                    </div>
-                    <h3 className="font-medium text-xs sm:text-sm text-slate-800">{motif.name}</h3>
-                    <p className="text-slate-600 text-[10px] sm:text-[11px]">{motif.culture}</p>
-                    <p className="text-slate-500 text-[9px]">{motif.period}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
