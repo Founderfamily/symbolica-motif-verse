@@ -14,16 +14,11 @@ interface SymbolCardProps {
 const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const [error, setError] = useState(false);
 
-  // Correction pour le premier symbole qui pointe vers une page Wikimedia et non une image directe
-  const imageUrl = motif.name === "Triskèle celtique" 
-    ? "/images/symbols/triskelion.png" 
-    : motif.src;
-
   return (
     <div className="rounded-lg overflow-hidden shadow-sm border border-slate-200">
       <AspectRatio ratio={1} className="w-full bg-slate-50">
         <img
-          src={error ? PLACEHOLDER : imageUrl}
+          src={error ? PLACEHOLDER : motif.src}
           alt={motif.name}
           className="object-cover w-full h-full"
           onError={() => setError(true)}
