@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { supabase } from '@/integrations/supabase/client';
-import { SymbolData, SymbolImage } from '@/integrations/supabase/types';
+import { SymbolData, SymbolImage } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 // Image de remplacement locale en cas d'erreur

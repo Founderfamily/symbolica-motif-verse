@@ -1,6 +1,5 @@
 
-/// <reference types="vite/client" />
-
+// Custom type definitions for Supabase data
 export interface SymbolData {
   id: string;
   name: string;

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { SymbolData } from '@/integrations/supabase/types';
+import { SymbolData } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 interface SymbolListProps {
