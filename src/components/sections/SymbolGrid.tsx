@@ -15,7 +15,7 @@ const motifs = [
     hoverColor: "group-hover:from-emerald-100 group-hover:to-emerald-200",
     icon: Square,
     bgColor: "bg-emerald-500/10",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Triskelion-shaped_Fibula.JPG/640px-Triskelion-shaped_Fibula.JPG"
+    image: "https://cdn.pixabay.com/photo/2022/02/07/13/15/celtic-knot-7000013_1280.png"
   },
   { 
     name: "Fleur de Lys", 
@@ -25,7 +25,7 @@ const motifs = [
     hoverColor: "group-hover:from-blue-100 group-hover:to-indigo-200",
     icon: Flower2,
     bgColor: "bg-blue-500/10",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fleur-de-lis-fill.svg/640px-Fleur-de-lis-fill.svg.png"
+    image: "https://cdn.pixabay.com/photo/2020/09/14/22/27/flower-5572630_1280.jpg"
   },
   { 
     name: "Méandre grec", 
@@ -35,7 +35,7 @@ const motifs = [
     hoverColor: "group-hover:from-cyan-100 group-hover:to-cyan-200",
     icon: Infinity,
     bgColor: "bg-cyan-500/10",
-    image: "https://img.freepik.com/premium-vector/greek-meander-pattern-set_532867-328.jpg"
+    image: "https://cdn.pixabay.com/photo/2020/01/27/22/14/greek-pattern-4798710_1280.jpg"
   },
   { 
     name: "Mandala", 
@@ -45,7 +45,7 @@ const motifs = [
     hoverColor: "group-hover:from-rose-100 group-hover:to-orange-200",
     icon: CircleDashed,
     bgColor: "bg-rose-500/10",
-    image: "https://img.rawpixel.com/s3fs-private/rawpixel_images/website_content/v546batch3-mynt-31-badgewatercolor_1.jpg?w=800&dpr=1&fit=default&crop=default&q=65&vib=3&con=3&usm=15&bg=F4F4F3&ixlib=js-2.2.1&s=bd4f37ade2d7dbfe80367a8351c86292"
+    image: "https://cdn.pixabay.com/photo/2023/05/02/14/52/mandala-7965661_1280.jpg"
   },
   { 
     name: "Symbole Adinkra", 
@@ -55,7 +55,7 @@ const motifs = [
     hoverColor: "group-hover:from-amber-100 group-hover:to-amber-200",
     icon: Star,
     bgColor: "bg-amber-500/10",
-    image: "https://i.etsystatic.com/24601145/r/il/70397e/3713678466/il_570xN.3713678466_55fa.jpg"
+    image: "https://cdn.pixabay.com/photo/2018/05/18/13/22/web-3411989_1280.jpg"
   },
   { 
     name: "Motif Seigaiha", 
@@ -65,7 +65,7 @@ const motifs = [
     hoverColor: "group-hover:from-sky-100 group-hover:to-sky-200",
     icon: Waves,
     bgColor: "bg-sky-500/10",
-    image: "https://i.pinimg.com/originals/e8/ff/87/e8ff87355895d96b2cc5712786ae739d.jpg"
+    image: "https://cdn.pixabay.com/photo/2019/06/21/07/49/japan-4288792_1280.jpg"
   },
   { 
     name: "Art aborigène", 
@@ -75,7 +75,7 @@ const motifs = [
     hoverColor: "group-hover:from-orange-100 group-hover:to-red-200",
     icon: Shapes,
     bgColor: "bg-orange-500/10",
-    image: "https://i0.wp.com/escapology.eu/wp-content/uploads/2019/09/aboriginal-art-transparent.png"
+    image: "https://cdn.pixabay.com/photo/2023/08/07/12/44/indigenous-8174449_1280.png"
   },
   { 
     name: "Motif viking", 
@@ -85,7 +85,7 @@ const motifs = [
     hoverColor: "group-hover:from-slate-100 group-hover:to-slate-200",
     icon: Compass,
     bgColor: "bg-slate-500/10",
-    image: "https://i.pinimg.com/originals/02/03/51/020351d24e0bc917dc9452a03f137cef.png"
+    image: "https://cdn.pixabay.com/photo/2020/10/22/04/30/viking-pattern-5674483_1280.png"
   },
   { 
     name: "Arabesque", 
@@ -95,7 +95,7 @@ const motifs = [
     hoverColor: "group-hover:from-teal-100 group-hover:to-teal-200",
     icon: Feather,
     bgColor: "bg-teal-500/10",
-    image: "https://static.vecteezy.com/system/resources/previews/013/379/334/original/arabesque-pattern-free-png.png"
+    image: "https://cdn.pixabay.com/photo/2021/11/20/07/17/pattern-6811337_1280.jpg"
   },
   { 
     name: "Motif aztèque", 
@@ -105,7 +105,7 @@ const motifs = [
     hoverColor: "group-hover:from-lime-100 group-hover:to-green-200",
     icon: Sun,
     bgColor: "bg-lime-500/10",
-    image: "https://img.freepik.com/premium-vector/aztec-tribal-ethnic-pattern_7688-594.jpg"
+    image: "https://cdn.pixabay.com/photo/2016/04/13/22/46/aztec-1328070_1280.jpg"
   }
 ];
 
