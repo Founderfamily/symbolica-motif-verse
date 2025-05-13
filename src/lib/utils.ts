@@ -12,7 +12,7 @@ export const fadeInAnimation = (index: number = 0, delay: number = 0.1) => {
   return {
     opacity: 0,
     transform: 'translateY(10px)',
-    animation: `fadeIn 0.5s ease-out ${baseDelay}s forwards`
+    animation: `fadeIn 0.6s ease-out ${baseDelay}s forwards`
   };
 };
 
@@ -33,4 +33,46 @@ export const culturalGradient = (culture: string) => {
   };
   
   return gradients[culture as keyof typeof gradients] || gradients.default;
+};
+
+// Generate gradient text utility
+export const gradientText = (from: string, to: string) => {
+  return `bg-gradient-to-r from-${from} to-${to} bg-clip-text text-transparent`;
+};
+
+// Animation delay utility for staggered animations
+export const staggerDelay = (index: number, baseDelay: number = 0.1) => {
+  return {
+    animationDelay: `${index * baseDelay}s`
+  };
+};
+
+// Hover animation utility
+export const hoverAnimation = (type: 'scale' | 'lift' | 'glow' | 'all') => {
+  switch (type) {
+    case 'scale':
+      return 'hover:scale-105 transition-transform duration-300';
+    case 'lift':
+      return 'hover:-translate-y-1 transition-transform duration-300';
+    case 'glow':
+      return 'hover:shadow-lg hover:shadow-amber-100/20 transition-shadow duration-300';
+    case 'all':
+      return 'hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-100/20 transition-all duration-300';
+    default:
+      return '';
+  }
+};
+
+// Pattern background utility
+export const patternBackground = (type: 'dots' | 'grid' | 'zigzag') => {
+  switch (type) {
+    case 'dots':
+      return 'pattern-dots-lg';
+    case 'grid':
+      return 'pattern-grid-lg';
+    case 'zigzag':
+      return 'pattern-zigzag-lg';
+    default:
+      return '';
+  }
 };

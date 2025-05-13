@@ -5,14 +5,21 @@ import { Button } from '@/components/ui/button';
 
 const Hero = () => {
   return (
-    <section className="pt-10 md:pt-16 px-4 md:px-8 max-w-7xl mx-auto">
-      <div className="text-center mb-10">
-        <div className="inline-block p-2 bg-amber-50 rounded-full mb-4">
-          <div className="bg-amber-800/10 px-4 py-1 rounded-full text-amber-900 text-sm font-medium">
+    <section className="relative pt-10 md:pt-16 px-4 md:px-8 max-w-7xl mx-auto">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-72 h-72 bg-amber-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-300/10 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="text-center mb-10 relative z-10">
+        <div className="inline-block p-2 bg-gradient-to-r from-amber-50 to-amber-100 rounded-full mb-4 animate-pulse-light">
+          <div className="bg-gradient-to-r from-amber-800/20 to-amber-700/20 px-4 py-1 rounded-full text-amber-900 text-sm font-medium">
             Version Alpha
           </div>
         </div>
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 text-slate-800">
+        <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
           Symbolica
         </h1>
         <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
@@ -20,11 +27,11 @@ const Hero = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-          <Button size="lg" className="bg-slate-800 hover:bg-slate-700">
+          <Button size="lg" className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-lg shadow-amber-600/20 transform hover:-translate-y-1 transition-all">
             Rejoindre la communauté <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Button size="lg" variant="outline" className="border-slate-500 text-slate-700 hover:bg-slate-50">
-            Découvrir les symboles <MapPin className="ml-2 h-4 w-4" />
+          <Button size="lg" variant="outline" className="border-slate-400 text-slate-700 hover:bg-slate-50 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
+            Découvrir les symboles <MapPin className="ml-2 h-4 w-4 text-amber-600" />
           </Button>
         </div>
       </div>

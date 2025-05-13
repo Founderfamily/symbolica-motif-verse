@@ -31,6 +31,7 @@ body {
   z-index: 10;
 }
 
+/* Animation keyframes */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -51,6 +52,28 @@ body {
   }
 }
 
+@keyframes floatAnimation {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes subtle-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation classes */
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out forwards;
 }
@@ -59,10 +82,102 @@ body {
   animation: pulseLight 2s infinite;
 }
 
+.animate-float {
+  animation: floatAnimation 6s ease-in-out infinite;
+}
+
+.animate-subtle-spin {
+  animation: subtle-spin 30s linear infinite;
+}
+
 .hover-scale {
   transition: transform 0.3s ease;
 }
 
 .hover-scale:hover {
   transform: scale(1.05);
+}
+
+/* Background patterns */
+.pattern-dots-lg {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+.pattern-dots-sm {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 0);
+  background-size: 10px 10px;
+}
+
+.pattern-grid-lg {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
+
+.pattern-zigzag-lg {
+  background-image: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%);
+  background-size: 60px 60px;
+}
+
+/* Text animations */
+.text-shimmer {
+  background: linear-gradient(90deg, #f8f4ed 0%, #f0e7d4 50%, #f8f4ed 100%);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Symbol specific styles */
+.symbol-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.symbol-card:hover .symbol-overlay {
+  opacity: 1;
+}
+
+/* Cultural gradients */
+.culture-gradient-celtic {
+  background: linear-gradient(to bottom right, #c9f2c7, #86cf85);
+}
+
+.culture-gradient-french {
+  background: linear-gradient(to bottom right, #bdd7f3, #7f94ce);
+}
+
+.culture-gradient-greek {
+  background: linear-gradient(to bottom right, #c1e9f3, #75c4e0);
+}
+
+.culture-gradient-japanese {
+  background: linear-gradient(to bottom right, #c2e2f3, #79b7e0);
+}
+
+.culture-gradient-islamic {
+  background: linear-gradient(to bottom right, #c5f2e9, #76d8c4);
+}
+
+.culture-gradient-aboriginal {
+  background: linear-gradient(to bottom right, #f9d3c5, #e79273);
+}
+
+.culture-gradient-viking {
+  background: linear-gradient(to bottom right, #dee1e6, #b0b6c0);
 }

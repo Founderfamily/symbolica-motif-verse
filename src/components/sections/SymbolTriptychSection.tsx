@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import SymbolList from '@/components/symbols/SymbolList';
 import SymbolTriptych from '@/components/symbols/SymbolTriptych';
 import { useAuth } from '@/hooks/useAuth';
+import { Sparkles } from 'lucide-react';
 
 const SymbolTriptychSection: React.FC = () => {
   const [selectedSymbolId, setSelectedSymbolId] = useState<string | null>(null);
@@ -10,34 +11,52 @@ const SymbolTriptychSection: React.FC = () => {
 
   return (
     <section className="relative mt-12 mb-20">
+      {/* Decorative background elements */}
+      <div className="absolute -z-10 inset-0 overflow-hidden">
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-200/20 rounded-full blur-3xl"></div>
+      </div>
+      
       {/* Bandeau muséal & communautaire */}
-      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-6 py-3 rounded-full border border-slate-200 z-10 flex items-center space-x-6">
+      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur shadow-2xl shadow-slate-200/50 px-6 py-3 rounded-full border border-slate-100 z-10 flex items-center space-x-6 animate-fade-in">
         <div>
-          <p className="text-lg font-serif text-slate-800">Musée Symbolica</p>
+          <p className="text-lg font-serif font-medium text-slate-800">
+            <span className="mr-1 inline-block">
+              <Sparkles className="w-4 h-4 text-amber-500 inline" />
+            </span>
+            Musée Symbolica
+          </p>
           <p className="text-sm text-slate-600">Portail collaboratif du patrimoine symbolique</p>
         </div>
         {isAdmin ? (
-          <a href="/admin" className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition">
+          <a href="/admin" className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full hover:shadow-md hover:shadow-blue-600/20 hover:-translate-y-0.5 transition-all">
             Administration
           </a>
         ) : (
-          <button className="px-4 py-1 text-sm font-medium text-white bg-amber-500 rounded hover:bg-amber-600 transition">
+          <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-amber-600 rounded-full hover:shadow-md hover:shadow-amber-500/20 hover:-translate-y-0.5 transition-all">
             Rejoindre une communauté
           </button>
         )}
       </div>
 
       {/* Contenu principal */}
-      <div className="bg-white border border-slate-200 shadow-md rounded-xl overflow-hidden pt-12">
-        <div className="px-6 pb-8">
+      <div className="bg-white border border-slate-100 shadow-xl rounded-xl overflow-hidden pt-12 relative z-0">
+        <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-r from-amber-50 to-amber-100/50"></div>
+        
+        <div className="px-6 pb-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Sidebar avec liste des symboles */}
-            <div className="md:col-span-1 border-r border-slate-200 pr-4">
-              <h3 className="text-lg font-serif text-slate-800 mb-4">Symboles</h3>
-              <SymbolList 
-                onSelectSymbol={setSelectedSymbolId} 
-                selectedSymbolId={selectedSymbolId} 
-              />
+            <div className="md:col-span-1 border-r border-slate-200 pr-4 bg-slate-50/50 rounded-l-lg">
+              <h3 className="text-lg font-serif text-slate-800 mb-4 flex items-center">
+                <span className="w-1.5 h-5 bg-amber-500 rounded-full inline-block mr-2"></span>
+                Symboles
+              </h3>
+              <div className="bg-white shadow-inner rounded-lg p-2">
+                <SymbolList 
+                  onSelectSymbol={setSelectedSymbolId} 
+                  selectedSymbolId={selectedSymbolId} 
+                />
+              </div>
             </div>
             
             {/* Affichage du triptyque */}

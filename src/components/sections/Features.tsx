@@ -4,33 +4,52 @@ import { MapPin, Book, Search } from 'lucide-react';
 
 const Features = () => {
   return (
-    <section className="py-16 px-4 md:px-8 bg-white">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-10 text-center">Découverte et documentation du patrimoine</h2>
+    <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-white to-amber-50 relative overflow-hidden">
+      {/* Decorative background pattern */}
+      <div className="absolute inset-0 opacity-5 pattern-grid-lg"></div>
+      
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-10">
+          <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
+            Fonctionnalités
+          </span>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
+            Découverte et documentation du patrimoine
+          </h2>
+        </div>
         
         <div className="grid md:grid-cols-3 gap-8 md:gap-12">
-          <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-            <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4">
-              <MapPin className="h-6 w-6 text-slate-700" />
+          <div className="bg-white rounded-xl border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+            <div className="h-2 bg-gradient-to-r from-blue-500 to-blue-600 w-full"></div>
+            <div className="p-6">
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
+                <MapPin className="h-7 w-7 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-slate-800">Cartographie culturelle</h3>
+              <p className="text-slate-600 leading-relaxed">Explorez les symboles géolocalisés à travers différentes cultures et époques avec notre interface de navigation intuitive.</p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Cartographie culturelle</h3>
-            <p className="text-slate-700">Explorez les symboles géolocalisés à travers différentes cultures et époques avec notre interface de navigation intuitive.</p>
           </div>
           
-          <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-            <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4">
-              <Search className="h-6 w-6 text-slate-700" />
+          <div className="bg-white rounded-xl border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+            <div className="h-2 bg-gradient-to-r from-amber-500 to-amber-600 w-full"></div>
+            <div className="p-6">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-6 group-hover:bg-amber-100 transition-colors">
+                <Search className="h-7 w-7 text-amber-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-slate-800">Identification avancée</h3>
+              <p className="text-slate-600 leading-relaxed">Notre technologie d'analyse permet d'identifier, classer et contextualiser les symboles culturels avec précision.</p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Identification avancée</h3>
-            <p className="text-slate-700">Notre technologie d'analyse permet d'identifier, classer et contextualiser les symboles culturels avec précision.</p>
           </div>
           
-          <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-            <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4">
-              <Book className="h-6 w-6 text-slate-700" />
+          <div className="bg-white rounded-xl border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+            <div className="h-2 bg-gradient-to-r from-emerald-500 to-emerald-600 w-full"></div>
+            <div className="p-6">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:bg-emerald-100 transition-colors">
+                <Book className="h-7 w-7 text-emerald-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-slate-800">Documentation collaborative</h3>
+              <p className="text-slate-600 leading-relaxed">Contribuez à enrichir la base de connaissances mondiale sur les symboles patrimoniaux partagés par notre communauté.</p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Documentation collaborative</h3>
-            <p className="text-slate-700">Contribuez à enrichir la base de connaissances mondiale sur les symboles patrimoniaux partagés par notre communauté.</p>
           </div>
         </div>
       </div>
