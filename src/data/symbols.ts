@@ -12,7 +12,7 @@ export const SYMBOLS: Symbol[] = [
     name: "Triskèle celtique",
     culture: "Celtique",
     period: "Âge du Fer",
-    src: "/images/symbols/triskelion.png",
+    src: "https://commons.m.wikimedia.org/wiki/File:Golden_Dawn_Meander.svg",
   },
   {
     name: "Fleur de Lys",
