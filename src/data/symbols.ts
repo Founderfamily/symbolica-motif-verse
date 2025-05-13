@@ -1,9 +1,11 @@
+
 // src/data/symbols.ts
 export interface Symbol {
   name: string;
   culture: string;
   period: string;
   src: string;
+  isExternal?: boolean; // Flag to indicate if the image is externally hosted
 }
 
 export const SYMBOLS: Symbol[] = [
@@ -11,7 +13,8 @@ export const SYMBOLS: Symbol[] = [
     name: "Triskèle celtique",
     culture: "Celtique",
     period: "Âge du Fer",
-    src: "/images/symbols/triskelion.png",
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Triskele-Symbol-spiral-five-thirds-turns.svg/800px-Triskele-Symbol-spiral-five-thirds-turns.svg.png",
+    isExternal: true,
   },
   {
     name: "Fleur de Lys",
