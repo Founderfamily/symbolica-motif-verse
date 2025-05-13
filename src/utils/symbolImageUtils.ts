@@ -13,18 +13,18 @@ export const symbolToLocalImage: Record<string, string> = {
   "Motif aztèque": "/images/symbols/aztec.png"
 };
 
-// Mapping des cultures aux images de réutilisation plus pertinentes
+// Mapping des cultures aux images de réutilisation plus pertinentes avec des exemples authentiques
 export const cultureToReuseImage: Record<string, string> = {
-  "Celtique": "https://images.unsplash.com/photo-1607439039734-c662293d51e3?q=80&w=800",
-  "Française": "https://images.unsplash.com/photo-1540162012087-080d9acf0da0?q=80&w=800",
-  "Grecque": "https://images.unsplash.com/photo-1603566541830-926010260166?q=80&w=800",
-  "Indienne": "https://images.unsplash.com/photo-1534430480872-3498386a78e0?q=80&w=800",
-  "Ashanti": "https://images.unsplash.com/photo-1603397023583-74b3ca45222f?q=80&w=800",
-  "Japonaise": "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=800",
-  "Aborigène": "https://images.unsplash.com/photo-1535082623926-b39352a03fb7?q=80&w=800",
-  "Nordique": "https://images.unsplash.com/photo-1560273313-28f297ab3a66?q=80&w=800",
-  "Islamique": "https://images.unsplash.com/photo-1585236243288-126dd5ee0769?q=80&w=800",
-  "Mésoaméricaine": "https://images.unsplash.com/photo-1559403128-d1fbe6983f62?q=80&w=800"
+  "Celtique": "https://images.unsplash.com/photo-1566840767200-73c54d10c5f0?q=80&w=800", // Bijoux celtiques
+  "Française": "https://images.unsplash.com/photo-1595609403171-aeb9d09db3d4?q=80&w=800", // Architecture française avec fleur de lys
+  "Grecque": "https://images.unsplash.com/photo-1586172342228-ecc80ea03d3a?q=80&w=800", // Vase grec avec méandres
+  "Indienne": "https://images.unsplash.com/photo-1566066053816-e784ad8add92?q=80&w=800", // Authentique mandala indien
+  "Ashanti": "https://images.unsplash.com/photo-1553521041-48ca659adb64?q=80&w=800", // Tissu africain avec motifs Adinkra
+  "Japonaise": "https://images.unsplash.com/photo-1624204386084-be798b4aa99c?q=80&w=800", // Tissu japonais avec motif Seigaiha
+  "Aborigène": "https://images.unsplash.com/photo-1610020057516-e6e7a5fbbacc?q=80&w=800", // Art aborigène authentique
+  "Nordique": "https://images.unsplash.com/photo-1580418717493-93f53b4302df?q=80&w=800", // Gravure viking
+  "Islamique": "https://images.unsplash.com/photo-1572056319836-66312adcbee5?q=80&w=800", // Architecture islamique avec arabesques
+  "Mésoaméricaine": "https://images.unsplash.com/photo-1665318248932-2d20d5304102?q=80&w=800" // Artisanat aztèque
 };
 
 // Image de remplacement locale en cas d'erreur

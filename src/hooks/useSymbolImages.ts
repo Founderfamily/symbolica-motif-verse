@@ -124,16 +124,17 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
         
         // Vérifier si nous devons mettre à jour ou ajouter des images automatiquement
         if (symbolData) {
-          // Image originale (depuis unsplash)
+          // Image originale (images de musées ou historiques)
           if (!organizedImages.original) {
-            // Utiliser une image Unsplash pour l'original
-            const originalImage = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolData.culture.toLowerCase())}+symbol`;
+            // Utiliser une image culturelle authentique pour l'original plutôt qu'une image générique
+            const culturalKeywords = `authentic+${symbolData.culture.toLowerCase()}+${symbolData.name.toLowerCase().replace(/\s+/g, '+')}+historical`;
+            const originalImage = `https://source.unsplash.com/featured/?${encodeURIComponent(culturalKeywords)}`;
             const success = await updateImageInSupabase(
               symbolId, 
               'original', 
               originalImage, 
               'Image originale',
-              `Représentation artistique d'un ${symbolData.name}`
+              `Représentation historique authentique de ${symbolData.name}`
             );
             
             if (success) {
@@ -143,7 +144,7 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
                 image_url: originalImage,
                 image_type: 'original',
                 title: 'Image originale',
-                description: `Représentation artistique d'un ${symbolData.name}`,
+                description: `Représentation historique authentique de ${symbolData.name}`,
                 created_at: null
               };
             }
@@ -173,7 +174,7 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
             }
           }
           
-          // Image réutilisation (basée sur la culture)
+          // Image réutilisation (basée sur la culture - exemples concrets)
           if (!organizedImages.reuse && cultureToReuseImage[symbolData.culture]) {
             const reuseImage = cultureToReuseImage[symbolData.culture];
             const success = await updateImageInSupabase(
