@@ -14,15 +14,15 @@ interface SymbolCardProps {
 const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const [error, setError] = useState(false);
 
-  // Pour les images externes, on utilise directement l'URL complète
-  // Pour les images locales, on utilise le chemin relatif qui sera correctement résolu par Vite
-  const imageUrl = motif.isExternal ? motif.src : motif.src;
+  // Ici, pas besoin de manipulation supplémentaire car:
+  // - Les images importées sont gérées par Vite (qui génère les bons chemins)
+  // - Les URLs externes sont utilisées directement
 
   return (
     <div className="rounded-lg overflow-hidden shadow-sm border border-slate-200">
       <AspectRatio ratio={1} className="w-full bg-slate-50">
         <img
-          src={error ? PLACEHOLDER : imageUrl}
+          src={error ? PLACEHOLDER : motif.src}
           alt={motif.name}
           className="object-cover w-full h-full"
           onError={() => setError(true)}

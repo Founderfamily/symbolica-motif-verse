@@ -1,10 +1,21 @@
 
 // src/data/symbols.ts
+// Import local images directly so Vite can handle them properly during build
+import aztecImage from '/images/symbols/aztec.png';
+import vikingImage from '/images/symbols/viking.png';
+import mandalaImage from '/images/symbols/mandala.png';
+import fleurDeLysImage from '/images/symbols/fleur-de-lys.png';
+import greekMeanderImage from '/images/symbols/greek-meander.png';
+import adinkraImage from '/images/symbols/adinkra.png';
+import seigaihaImage from '/images/symbols/seigaiha.png';
+import aboriginalImage from '/images/symbols/aboriginal.png';
+import arabesqueImage from '/images/symbols/arabesque.png';
+
 export interface Symbol {
   name: string;
   culture: string;
   period: string;
-  src: string;
+  src: string | any; // Can be a string URL or an imported image
   isExternal?: boolean; // Flag to indicate if the image is externally hosted
 }
 
@@ -20,54 +31,54 @@ export const SYMBOLS: Symbol[] = [
     name: "Fleur de Lys",
     culture: "Française",
     period: "Moyen Âge",
-    src: "/images/symbols/fleur-de-lys.png",
+    src: fleurDeLysImage,
   },
   {
     name: "Méandre grec",
     culture: "Grecque",
     period: "Antiquité",
-    src: "/images/symbols/greek-meander.png",
+    src: greekMeanderImage,
   },
   {
     name: "Mandala",
     culture: "Indienne",
     period: "Traditionnelle",
-    src: "/images/symbols/mandala.png",
+    src: mandalaImage,
   },
   {
     name: "Symbole Adinkra",
     culture: "Ashanti",
     period: "Traditionnelle",
-    src: "/images/symbols/adinkra.png",
+    src: adinkraImage,
   },
   {
     name: "Motif Seigaiha",
     culture: "Japonaise",
     period: "Traditionnelle",
-    src: "/images/symbols/seigaiha.png",
+    src: seigaihaImage,
   },
   {
     name: "Art aborigène",
     culture: "Aborigène",
     period: "Préhistorique-Contemporain",
-    src: "/images/symbols/aboriginal.png",
+    src: aboriginalImage,
   },
   {
     name: "Motif viking",
     culture: "Nordique",
     period: "VIIIe-XI siècles",
-    src: "/images/symbols/viking.png",
+    src: vikingImage,
   },
   {
     name: "Arabesque",
     culture: "Islamique",
     period: "Médiévale",
-    src: "/images/symbols/arabesque.png",
+    src: arabesqueImage,
   },
   {
     name: "Motif aztèque",
     culture: "Mésoaméricaine",
     period: "Précolombienne",
-    src: "/images/symbols/aztec.png",
+    src: aztecImage,
   },
 ];
