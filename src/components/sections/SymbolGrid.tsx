@@ -7,7 +7,7 @@ import {
   Waves, Shapes, Compass, Feather, Brush 
 } from "lucide-react";
 
-// Configuration of all the motifs with their respective properties
+// Configuration of all the motifs with their respective properties and direct Wikipedia URLs
 const motifs = [
   { 
     name: "Triskèle celtique", 
@@ -17,7 +17,7 @@ const motifs = [
     hoverColor: "group-hover:from-emerald-100 group-hover:to-emerald-200",
     icon: Square,
     bgColor: "bg-emerald-500/10",
-    imagePath: "/images/symbols/triskelion.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Celtic_spiral.svg/800px-Celtic_spiral.svg.png"
   },
   { 
     name: "Fleur de Lys", 
@@ -27,7 +27,7 @@ const motifs = [
     hoverColor: "group-hover:from-blue-100 group-hover:to-indigo-200",
     icon: Flower2,
     bgColor: "bg-blue-500/10",
-    imagePath: "/images/symbols/fleur-de-lys.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Fleur_de_lys_%28or%29.svg/800px-Fleur_de_lys_%28or%29.svg.png"
   },
   { 
     name: "Méandre grec", 
@@ -37,7 +37,7 @@ const motifs = [
     hoverColor: "group-hover:from-cyan-100 group-hover:to-cyan-200",
     icon: Infinity,
     bgColor: "bg-cyan-500/10",
-    imagePath: "/images/symbols/greek-meander.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Greek_meander_black.svg/800px-Greek_meander_black.svg.png"
   },
   { 
     name: "Mandala", 
@@ -47,7 +47,7 @@ const motifs = [
     hoverColor: "group-hover:from-rose-100 group-hover:to-orange-200",
     icon: CircleDashed,
     bgColor: "bg-rose-500/10",
-    imagePath: "/images/symbols/mandala.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Mandala_Buddhist.svg/800px-Mandala_Buddhist.svg.png"
   },
   { 
     name: "Symbole Adinkra", 
@@ -57,7 +57,7 @@ const motifs = [
     hoverColor: "group-hover:from-amber-100 group-hover:to-amber-200",
     icon: Star,
     bgColor: "bg-amber-500/10",
-    imagePath: "/images/symbols/adinkra.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Adinkra_Dwennimmen.svg/800px-Adinkra_Dwennimmen.svg.png"
   },
   { 
     name: "Motif Seigaiha", 
@@ -67,7 +67,7 @@ const motifs = [
     hoverColor: "group-hover:from-sky-100 group-hover:to-sky-200",
     icon: Waves,
     bgColor: "bg-sky-500/10",
-    imagePath: "/images/symbols/seigaiha.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Seigaiha_pattern.svg/800px-Seigaiha_pattern.svg.png"
   },
   { 
     name: "Art aborigène", 
@@ -77,7 +77,7 @@ const motifs = [
     hoverColor: "group-hover:from-orange-100 group-hover:to-red-200",
     icon: Shapes,
     bgColor: "bg-orange-500/10",
-    imagePath: "/images/symbols/aboriginal.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Aboriginal_Art_Australia.jpg/800px-Aboriginal_Art_Australia.jpg"
   },
   { 
     name: "Motif viking", 
@@ -87,7 +87,7 @@ const motifs = [
     hoverColor: "group-hover:from-slate-100 group-hover:to-slate-200",
     icon: Compass,
     bgColor: "bg-slate-500/10",
-    imagePath: "/images/symbols/viking.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Jelling-style_ornament_%28Mammen_style%29.svg/800px-Jelling-style_ornament_%28Mammen_style%29.svg.png"
   },
   { 
     name: "Arabesque", 
@@ -97,7 +97,7 @@ const motifs = [
     hoverColor: "group-hover:from-teal-100 group-hover:to-teal-200",
     icon: Feather,
     bgColor: "bg-teal-500/10",
-    imagePath: "/images/symbols/arabesque.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Arabesque_Ornament.svg/800px-Arabesque_Ornament.svg.png"
   },
   { 
     name: "Motif aztèque", 
@@ -107,47 +107,33 @@ const motifs = [
     hoverColor: "group-hover:from-lime-100 group-hover:to-green-200",
     icon: Sun,
     bgColor: "bg-lime-500/10",
-    imagePath: "/images/symbols/aztec.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Aztec_calendar.svg/800px-Aztec_calendar.svg.png"
   }
 ];
 
 const SymbolGrid = () => {
-  // Use a ref to avoid multiple re-renders
-  const [imageStatus, setImageStatus] = useState<Record<string, boolean>>({});
-  const [initialized, setInitialized] = useState<boolean>(false);
+  // Simplified state management - track loading state for each image
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
-  // Initialize image status only once when component mounts
+  // Initialize on first render only
   useEffect(() => {
-    if (!initialized) {
-      // Pre-initialize all image statuses to avoid flickering
-      const initialStatus: Record<string, boolean> = {};
-      motifs.forEach(motif => {
-        initialStatus[motif.name] = false;
-      });
-      setImageStatus(initialStatus);
-      setInitialized(true);
+    if (isFirstRender) {
+      setIsFirstRender(false);
     }
-  }, [initialized]);
+  }, [isFirstRender]);
 
   const handleImageLoad = (name: string) => {
-    setImageStatus(prev => {
-      // Only update if status changed to avoid unnecessary re-renders
-      if (prev[name] !== true) {
-        return { ...prev, [name]: true };
-      }
-      return prev;
-    });
+    setLoadedImages(prev => ({
+      ...prev,
+      [name]: true
+    }));
   };
 
   const handleImageError = (name: string) => {
-    setImageStatus(prev => {
-      // Only update if status changed to avoid unnecessary re-renders
-      if (prev[name] !== false) {
-        console.log(`Image failed to load: ${name}`);
-        return { ...prev, [name]: false };
-      }
-      return prev;
-    });
+    console.log(`Failed to load image: ${name}`);
+    // We don't set loading to false to avoid flicker between placeholder and error state
+    // Instead we'll continue showing the placeholder
   };
 
   return (
@@ -159,9 +145,9 @@ const SymbolGrid = () => {
         <div className="aspect-video w-full bg-gradient-to-br from-slate-50 to-white p-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 w-full">
             {motifs.map((motif, i) => {
-              // Determine initial fade-in animation, but don't repeat it
-              const initialAnimation = initialized ? 
-                `fade-in 0.5s ease-out ${i * 0.1}s forwards` : '';
+              // Only animate on initial render
+              const initialAnimation = !isFirstRender ? '' : 
+                `fade-in 0.5s ease-out ${i * 0.1}s forwards`;
               
               return (
                 <div 
@@ -172,18 +158,16 @@ const SymbolGrid = () => {
                   <div className="relative w-full aspect-square">
                     <AspectRatio ratio={1} className="overflow-hidden">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        {/* Conditionally render image based on initialization status */}
-                        {initialized && (
-                          <img 
-                            src={imageStatus[motif.name] === false ? "/placeholder.svg" : motif.imagePath}
-                            alt={motif.name}
-                            className="object-cover w-full h-full transform hover:scale-110 transition-transform duration-300"
-                            onLoad={() => handleImageLoad(motif.name)}
-                            onError={() => handleImageError(motif.name)}
-                            // Add key to prevent React from reusing the same element
-                            key={imageStatus[motif.name] ? `loaded-${motif.name}` : `placeholder-${motif.name}`}
-                          />
-                        )}
+                        <img 
+                          src={loadedImages[motif.name] === false ? "/placeholder.svg" : motif.imagePath}
+                          alt={motif.name}
+                          className="object-cover w-full h-full transform hover:scale-110 transition-transform duration-300"
+                          onLoad={() => handleImageLoad(motif.name)}
+                          onError={() => handleImageError(motif.name)}
+                          loading="lazy"
+                          crossOrigin="anonymous"
+                          key={`image-${motif.name}`} 
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     </AspectRatio>
