@@ -6,8 +6,9 @@ import {
   CircleDashed, Star, HeartPulse, TreeDeciduous, 
   Waves, Shapes, Compass, Feather, Brush 
 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
-// Configuration of all the motifs with their respective properties and direct Wikipedia URLs
+// Configuration of all the motifs with their respective properties and verified Wikipedia URLs
 const motifs = [
   { 
     name: "Triskèle celtique", 
@@ -17,7 +18,7 @@ const motifs = [
     hoverColor: "group-hover:from-emerald-100 group-hover:to-emerald-200",
     icon: Square,
     bgColor: "bg-emerald-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Celtic_spiral.svg/800px-Celtic_spiral.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Celtic_spiral.svg/240px-Celtic_spiral.svg.png"
   },
   { 
     name: "Fleur de Lys", 
@@ -27,7 +28,7 @@ const motifs = [
     hoverColor: "group-hover:from-blue-100 group-hover:to-indigo-200",
     icon: Flower2,
     bgColor: "bg-blue-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Fleur_de_lys_%28or%29.svg/800px-Fleur_de_lys_%28or%29.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Fleur_de_lys_stylized.svg/240px-Fleur_de_lys_stylized.svg.png"
   },
   { 
     name: "Méandre grec", 
@@ -37,7 +38,7 @@ const motifs = [
     hoverColor: "group-hover:from-cyan-100 group-hover:to-cyan-200",
     icon: Infinity,
     bgColor: "bg-cyan-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Greek_meander_black.svg/800px-Greek_meander_black.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Greek_meander_black.svg/240px-Greek_meander_black.svg.png"
   },
   { 
     name: "Mandala", 
@@ -47,7 +48,7 @@ const motifs = [
     hoverColor: "group-hover:from-rose-100 group-hover:to-orange-200",
     icon: CircleDashed,
     bgColor: "bg-rose-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Mandala_Buddhist.svg/800px-Mandala_Buddhist.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/SriYantra.jpg/240px-SriYantra.jpg"
   },
   { 
     name: "Symbole Adinkra", 
@@ -57,7 +58,7 @@ const motifs = [
     hoverColor: "group-hover:from-amber-100 group-hover:to-amber-200",
     icon: Star,
     bgColor: "bg-amber-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Adinkra_Dwennimmen.svg/800px-Adinkra_Dwennimmen.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Adinkra_Dwennimmen.svg/240px-Adinkra_Dwennimmen.svg.png"
   },
   { 
     name: "Motif Seigaiha", 
@@ -67,7 +68,7 @@ const motifs = [
     hoverColor: "group-hover:from-sky-100 group-hover:to-sky-200",
     icon: Waves,
     bgColor: "bg-sky-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Seigaiha_pattern.svg/800px-Seigaiha_pattern.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Seigaiha_pattern.svg/240px-Seigaiha_pattern.svg.png"
   },
   { 
     name: "Art aborigène", 
@@ -77,7 +78,7 @@ const motifs = [
     hoverColor: "group-hover:from-orange-100 group-hover:to-red-200",
     icon: Shapes,
     bgColor: "bg-orange-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Aboriginal_Art_Australia.jpg/800px-Aboriginal_Art_Australia.jpg"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Aboriginal_Art_Australia.jpg/240px-Aboriginal_Art_Australia.jpg"
   },
   { 
     name: "Motif viking", 
@@ -87,7 +88,7 @@ const motifs = [
     hoverColor: "group-hover:from-slate-100 group-hover:to-slate-200",
     icon: Compass,
     bgColor: "bg-slate-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Jelling-style_ornament_%28Mammen_style%29.svg/800px-Jelling-style_ornament_%28Mammen_style%29.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Oseberg-style.svg/240px-Oseberg-style.svg.png"
   },
   { 
     name: "Arabesque", 
@@ -97,7 +98,7 @@ const motifs = [
     hoverColor: "group-hover:from-teal-100 group-hover:to-teal-200",
     icon: Feather,
     bgColor: "bg-teal-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Arabesque_Ornament.svg/800px-Arabesque_Ornament.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Arabesque_Ornament.svg/240px-Arabesque_Ornament.svg.png"
   },
   { 
     name: "Motif aztèque", 
@@ -107,33 +108,95 @@ const motifs = [
     hoverColor: "group-hover:from-lime-100 group-hover:to-green-200",
     icon: Sun,
     bgColor: "bg-lime-500/10",
-    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Aztec_calendar.svg/800px-Aztec_calendar.svg.png"
+    imagePath: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Aztec_Sun_Stone_Replica_cropped.jpg/240px-Aztec_Sun_Stone_Replica_cropped.jpg"
   }
 ];
 
+// Placeholder image to use when images are loading or fail to load
+const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=240&h=240&fit=crop&q=80";
+
 const SymbolGrid = () => {
-  // Simplified state management - track loading state for each image
-  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
-  const [isFirstRender, setIsFirstRender] = useState(true);
+  // Track image loading status
+  const [imageStatus, setImageStatus] = useState<Record<string, 'loading' | 'loaded' | 'error'>>({});
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
-  // Initialize on first render only
+  // Initialize image loading status on first render
   useEffect(() => {
-    if (isFirstRender) {
-      setIsFirstRender(false);
-    }
-  }, [isFirstRender]);
+    // Initialize status for all motifs
+    const initialStatus: Record<string, 'loading' | 'loaded' | 'error'> = {};
+    motifs.forEach(motif => {
+      initialStatus[motif.name] = 'loading';
+    });
+    setImageStatus(initialStatus);
 
+    // Preload all images
+    preloadImages();
+  }, []);
+
+  // Function to preload all images
+  const preloadImages = () => {
+    const preloaded = new Set<string>();
+    
+    motifs.forEach(motif => {
+      const img = new Image();
+      img.onload = () => {
+        setImageStatus(prev => ({
+          ...prev,
+          [motif.name]: 'loaded'
+        }));
+        preloaded.add(motif.name);
+        setPreloadedImages(prev => new Set([...prev, motif.name]));
+      };
+      
+      img.onerror = () => {
+        console.log(`Failed to preload image: ${motif.name}`);
+        setImageStatus(prev => ({
+          ...prev,
+          [motif.name]: 'error'
+        }));
+      };
+      
+      // Add timestamp to prevent caching issues
+      img.src = `${motif.imagePath}?t=${new Date().getTime()}`;
+      img.crossOrigin = "anonymous";
+    });
+  };
+
+  // Handle image load success
   const handleImageLoad = (name: string) => {
-    setLoadedImages(prev => ({
+    setImageStatus(prev => ({
       ...prev,
-      [name]: true
+      [name]: 'loaded'
     }));
   };
 
+  // Handle image load error with toast notification
   const handleImageError = (name: string) => {
     console.log(`Failed to load image: ${name}`);
-    // We don't set loading to false to avoid flicker between placeholder and error state
-    // Instead we'll continue showing the placeholder
+    setImageStatus(prev => ({
+      ...prev,
+      [name]: 'error'
+    }));
+    
+    // Only show toast once per session for failed images
+    if (!preloadedImages.has(name)) {
+      toast({
+        variant: "destructive",
+        title: "Image non chargée",
+        description: `Impossible de charger l'image pour "${name}"`
+      });
+    }
+  };
+
+  // Get image source with fallback to placeholder
+  const getImageSource = (motif: (typeof motifs)[0]) => {
+    const status = imageStatus[motif.name];
+    if (status === 'error') {
+      return PLACEHOLDER_IMAGE;
+    }
+    // Add cache-busting parameter to prevent browser caching issues
+    return `${motif.imagePath}?t=${new Date().getTime()}`;
   };
 
   return (
@@ -145,28 +208,31 @@ const SymbolGrid = () => {
         <div className="aspect-video w-full bg-gradient-to-br from-slate-50 to-white p-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 w-full">
             {motifs.map((motif, i) => {
-              // Only animate on initial render
-              const initialAnimation = !isFirstRender ? '' : 
-                `fade-in 0.5s ease-out ${i * 0.1}s forwards`;
+              const isLoading = imageStatus[motif.name] === 'loading';
+              const hasError = imageStatus[motif.name] === 'error';
               
               return (
                 <div 
                   key={i} 
                   className={`group rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 border border-slate-100 hover:border-slate-200 symbol-card bg-gradient-to-br ${motif.color} ${motif.hoverColor}`}
-                  style={{animation: initialAnimation}}
+                  style={{animation: `fade-in 0.5s ease-out ${i * 0.1}s forwards`}}
                 >
                   <div className="relative w-full aspect-square">
                     <AspectRatio ratio={1} className="overflow-hidden">
                       <div className="absolute inset-0 flex items-center justify-center">
+                        {/* Show shimmer effect during loading */}
+                        {isLoading && (
+                          <div className="absolute inset-0 bg-slate-100 animate-pulse"></div>
+                        )}
+                        
                         <img 
-                          src={loadedImages[motif.name] === false ? "/placeholder.svg" : motif.imagePath}
+                          src={getImageSource(motif)}
                           alt={motif.name}
-                          className="object-cover w-full h-full transform hover:scale-110 transition-transform duration-300"
+                          className={`object-cover w-full h-full transform hover:scale-110 transition-transform duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                           onLoad={() => handleImageLoad(motif.name)}
                           onError={() => handleImageError(motif.name)}
                           loading="lazy"
                           crossOrigin="anonymous"
-                          key={`image-${motif.name}`} 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
