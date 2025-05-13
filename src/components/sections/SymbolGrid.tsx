@@ -2,7 +2,7 @@
 import React from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
-  Palette, Spiral, Flower2, Atom, Sun, Infinity, 
+  Palette, CircleSquare, Flower2, Atom, Sun, Infinity, 
   CircleDashed, Star, HeartPulse, TreeDeciduous, 
   Waves, Shapes, Compass, Feather, Brush 
 } from "lucide-react";
@@ -14,7 +14,7 @@ const motifs = [
     period: "Âge du Fer",
     color: "from-emerald-50 to-emerald-100",
     hoverColor: "group-hover:from-emerald-100 group-hover:to-emerald-200",
-    icon: Spiral,
+    icon: CircleSquare,
     bgColor: "bg-emerald-500/10",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Triskelion-shaped_Fibula.JPG/640px-Triskelion-shaped_Fibula.JPG"
   },
