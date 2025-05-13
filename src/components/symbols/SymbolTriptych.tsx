@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { supabase } from '@/integrations/supabase/client';
@@ -8,13 +7,16 @@ import { useToast } from '@/hooks/use-toast';
 // Image de remplacement locale en cas d'erreur
 const PLACEHOLDER = "/placeholder.svg";
 
+// Define the allowed image types
+type ImageType = 'original' | 'pattern' | 'reuse';
+
 interface SymbolTriptychProps {
   symbolId: string | null;
 }
 
 const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   const [symbol, setSymbol] = useState<SymbolData | null>(null);
-  const [images, setImages] = useState<Record<string, SymbolImage | null>>({
+  const [images, setImages] = useState<Record<ImageType, SymbolImage | null>>({
     original: null,
     pattern: null,
     reuse: null
@@ -24,7 +26,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   const { toast } = useToast();
 
   // Mapping des noms de symboles aux chemins d'images locales
-  const symbolToLocalImage = {
+  const symbolToLocalImage: Record<string, string> = {
     "Triskèle celtique": "/images/symbols/triskelion.png",
     "Fleur de Lys": "/images/symbols/fleur-de-lys.png",
     "Méandre grec": "/images/symbols/greek-meander.png",
@@ -38,7 +40,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   };
 
   // Mapping des cultures aux images de réutilisation (exemples fictifs pour l'instant)
-  const cultureToReuseImage = {
+  const cultureToReuseImage: Record<string, string> = {
     "Celtique": "https://images.unsplash.com/photo-1529677411545-89dec7ca8f18?q=80&w=800",
     "Française": "https://images.unsplash.com/photo-1561273557-95aec160db73?q=80&w=800",
     "Grecque": "https://images.unsplash.com/photo-1568805647685-709094825a48?q=80&w=800",
@@ -52,7 +54,13 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   };
   
   // Fonction pour mettre à jour automatiquement l'image dans Supabase
-  const updateImageInSupabase = async (symbolId: string, imageType: string, imageUrl: string, title: string, description: string = '') => {
+  const updateImageInSupabase = async (
+    symbolId: string, 
+    imageType: ImageType, 
+    imageUrl: string, 
+    title: string, 
+    description: string = ''
+  ) => {
     try {
       // Vérifier si l'image existe déjà
       const { data: existingImage, error: queryError } = await supabase
@@ -127,14 +135,16 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
         if (imagesError) throw imagesError;
         
         // Organiser les images par type
-        const organizedImages: Record<string, SymbolImage | null> = {
+        const organizedImages: Record<ImageType, SymbolImage | null> = {
           original: null,
           pattern: null,
           reuse: null
         };
         
         imagesData.forEach(img => {
-          organizedImages[img.image_type] = img;
+          if (img.image_type === 'original' || img.image_type === 'pattern' || img.image_type === 'reuse') {
+            organizedImages[img.image_type] = img;
+          }
         });
         
         // Vérifier si nous devons mettre à jour ou ajouter des images automatiquement
@@ -255,7 +265,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
     );
   }
   
-  const renderImage = (type: 'original' | 'pattern' | 'reuse', title: string) => {
+  const renderImage = (type: ImageType, title: string) => {
     const image = images[type];
     const imageUrl = image?.image_url || PLACEHOLDER;
     
@@ -265,7 +275,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
           <AspectRatio ratio={1} className="bg-slate-50 relative overflow-hidden">
             <img
               src={imageUrl}
-              alt={`${symbol.name} - ${title}`}
+              alt={`${symbol?.name || 'Symbol'} - ${title}`}
               className="object-cover w-full h-full transition-all duration-500 group-hover:scale-105"
               crossOrigin="anonymous"
             />
@@ -288,12 +298,14 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
       <div className="absolute -z-10 inset-0 opacity-[0.03] pattern-dots-lg"></div>
       
       <div className="mb-6 border-b border-slate-100 pb-4">
-        <h2 className="text-2xl font-serif bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">{symbol.name}</h2>
-        <p className="text-sm text-slate-600 mt-1 flex items-center">
-          <span className="inline-block w-3 h-3 rounded-full mr-2" style={{background: `var(--color-${symbol.culture.toLowerCase()})`}}></span>
-          {symbol.culture} · {symbol.period}
-        </p>
-        {symbol.description && (
+        <h2 className="text-2xl font-serif bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">{symbol?.name}</h2>
+        {symbol && (
+          <p className="text-sm text-slate-600 mt-1 flex items-center">
+            <span className="inline-block w-3 h-3 rounded-full mr-2" style={{background: `var(--color-${symbol.culture.toLowerCase()})`}}></span>
+            {symbol.culture} · {symbol.period}
+          </p>
+        )}
+        {symbol?.description && (
           <p className="text-slate-700 mt-3 leading-relaxed">{symbol.description}</p>
         )}
       </div>
