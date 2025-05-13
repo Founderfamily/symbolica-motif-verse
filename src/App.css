@@ -1,183 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-#root {
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+ 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+ 
+    --primary: 222.1 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 222.1 83.2% 53.3%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+ 
+    --primary: 222.1 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --ring: 222.1 83.2% 53.3%;
+ 
+    --radius: 0.5rem;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: #334155;
-  background-color: #ffffff;
+/* ===== Scrollbar CSS ===== */
+/* Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
-.heritage-header {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
 }
 
-.heritage-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1rem;
+*::-webkit-scrollbar-track {
+  background: #f1f5f9;
 }
 
-.symbol-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+*::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+  border: 0px solid #ffffff;
 }
 
-.symbol-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  z-index: 10;
-}
-
-/* Animation keyframes */
+/* Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulseLight {
-  0%, 100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes floatAnimation {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-@keyframes subtle-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Animation classes */
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out forwards;
 }
 
-.animate-pulse-light {
-  animation: pulseLight 2s infinite;
-}
-
-.animate-float {
-  animation: floatAnimation 6s ease-in-out infinite;
-}
-
-.animate-subtle-spin {
-  animation: subtle-spin 30s linear infinite;
-}
-
-.hover-scale {
-  transition: transform 0.3s ease;
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
-}
-
-/* Background patterns */
+/* Patterns for backgrounds */
 .pattern-dots-lg {
-  background-image: radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 0);
+  background-image: radial-gradient(#2a2a2a 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
-.pattern-dots-sm {
-  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 0);
-  background-size: 10px 10px;
-}
-
 .pattern-grid-lg {
-  background-size: 40px 40px;
-  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                    linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
-.pattern-zigzag-lg {
-  background-image: 
-    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
-    linear-gradient(225deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
-    linear-gradient(315deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
-    linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%);
-  background-size: 60px 60px;
+/* Symbol Card Styles */
+.symbol-card {
+  transition: all 0.3s ease;
 }
 
-/* Text animations */
-.text-shimmer {
-  background: linear-gradient(90deg, #f8f4ed 0%, #f0e7d4 50%, #f8f4ed 100%);
-  background-size: 200% auto;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 2s linear infinite;
-}
-
-@keyframes shimmer {
-  to {
-    background-position: 200% center;
-  }
-}
-
-/* Symbol specific styles */
-.symbol-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.symbol-card:hover .symbol-overlay {
-  opacity: 1;
-}
-
-/* Cultural gradients */
-.culture-gradient-celtic {
-  background: linear-gradient(to bottom right, #c9f2c7, #86cf85);
-}
-
-.culture-gradient-french {
-  background: linear-gradient(to bottom right, #bdd7f3, #7f94ce);
-}
-
-.culture-gradient-greek {
-  background: linear-gradient(to bottom right, #c1e9f3, #75c4e0);
-}
-
-.culture-gradient-japanese {
-  background: linear-gradient(to bottom right, #c2e2f3, #79b7e0);
-}
-
-.culture-gradient-islamic {
-  background: linear-gradient(to bottom right, #c5f2e9, #76d8c4);
-}
-
-.culture-gradient-aboriginal {
-  background: linear-gradient(to bottom right, #f9d3c5, #e79273);
-}
-
-.culture-gradient-viking {
-  background: linear-gradient(to bottom right, #dee1e6, #b0b6c0);
+.symbol-card:hover {
+  transform: translateY(-4px);
 }

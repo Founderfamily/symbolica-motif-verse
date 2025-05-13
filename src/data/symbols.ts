@@ -1,13 +1,14 @@
 
 // src/data/symbols.ts
 // Utilisation d'URLs externes pour une meilleure compatibilité avec le déploiement
+// et ajout de fallbacks vers des images locales
 
 export interface Symbol {
   name: string;
   culture: string;
   period: string;
-  src: string; // Toujours une URL externe
-  isExternal: boolean; // Toutes les images sont externes
+  src: string; // URL externe ou chemin local
+  isExternal: boolean;
 }
 
 export const SYMBOLS: Symbol[] = [
@@ -15,73 +16,73 @@ export const SYMBOLS: Symbol[] = [
     name: "Triskèle celtique",
     culture: "Celtique",
     period: "Âge du Fer",
-    src: "https://images.unsplash.com/photo-1591403716274-b6c83d426fc8?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/triskelion.png",
+    isExternal: false,
   },
   {
     name: "Fleur de Lys",
     culture: "Française",
     period: "Moyen Âge",
-    src: "https://images.unsplash.com/photo-1583623025817-d180a2fe0396?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/fleur-de-lys.png",
+    isExternal: false,
   },
   {
     name: "Méandre grec",
     culture: "Grecque",
     period: "Antiquité",
-    src: "https://images.unsplash.com/photo-1594736496525-ab640de34c63?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/greek-meander.png",
+    isExternal: false,
   },
   {
     name: "Mandala",
     culture: "Indienne",
     period: "Traditionnelle",
-    src: "https://images.unsplash.com/photo-1545158535-c3f7168c28b6?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/mandala.png",
+    isExternal: false,
   },
   {
     name: "Symbole Adinkra",
     culture: "Ashanti",
     period: "Traditionnelle",
-    src: "https://images.unsplash.com/photo-1516870214493-a0d44932f5a3?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/adinkra.png",
+    isExternal: false,
   },
   {
     name: "Motif Seigaiha",
     culture: "Japonaise",
     period: "Traditionnelle",
-    src: "https://images.unsplash.com/photo-1557434440-27f99e99abb5?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/seigaiha.png",
+    isExternal: false,
   },
   {
     name: "Art aborigène",
     culture: "Aborigène",
     period: "Préhistorique-Contemporain",
-    src: "https://images.unsplash.com/photo-1623682573534-daad80039ca6?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/aboriginal.png",
+    isExternal: false,
   },
   {
     name: "Motif viking",
     culture: "Nordique",
     period: "VIIIe-XI siècles",
-    src: "https://images.unsplash.com/photo-1605806616949-1e87b487fc2f?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/viking.png",
+    isExternal: false,
   },
   {
     name: "Arabesque",
     culture: "Islamique",
     period: "Médiévale",
-    src: "https://images.unsplash.com/photo-1564999261787-e7c15e5b4a5e?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/arabesque.png",
+    isExternal: false,
   },
   {
     name: "Motif aztèque",
     culture: "Mésoaméricaine",
     period: "Précolombienne",
-    src: "https://images.unsplash.com/photo-1594760467013-64ac2b80b7d3?q=80&w=800",
-    isExternal: true,
+    src: "/images/symbols/aztec.png",
+    isExternal: false,
   },
-  // Nouveaux symboles ajoutés
+  // Nouveaux symboles ajoutés - utilisant des images externes mais avec fallbacks possibles
   {
     name: "Yin et Yang",
     culture: "Chinoise",

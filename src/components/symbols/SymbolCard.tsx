@@ -9,6 +9,20 @@ import { Info } from 'lucide-react';
 // Image de remplacement locale en cas d'erreur
 const PLACEHOLDER = "/placeholder.svg";
 
+// Mapping des noms de symboles aux chemins d'images locales
+const symbolToLocalImage = {
+  "Triskèle celtique": "/images/symbols/triskelion.png",
+  "Fleur de Lys": "/images/symbols/fleur-de-lys.png",
+  "Méandre grec": "/images/symbols/greek-meander.png",
+  "Mandala": "/images/symbols/mandala.png",
+  "Symbole Adinkra": "/images/symbols/adinkra.png",
+  "Motif Seigaiha": "/images/symbols/seigaiha.png",
+  "Art aborigène": "/images/symbols/aboriginal.png",
+  "Motif viking": "/images/symbols/viking.png",
+  "Arabesque": "/images/symbols/arabesque.png",
+  "Motif aztèque": "/images/symbols/aztec.png"
+};
+
 interface SymbolCardProps {
   motif: Symbol;
 }
@@ -17,11 +31,13 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
 
   // Réinitialiser l'état d'erreur si le motif change
   useEffect(() => {
     setError(false);
     setLoading(true);
+    setUseFallback(false);
   }, [motif.src]);
 
   const handleImageLoad = () => {
@@ -31,8 +47,19 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const handleImageError = () => {
     console.error(`Erreur de chargement de l'image: ${motif.name}`, motif.src);
     setError(true);
+    // Tenter d'utiliser l'image locale correspondante si disponible
+    if (symbolToLocalImage[motif.name]) {
+      setUseFallback(true);
+    }
     setLoading(false);
   };
+
+  // Déterminer quelle source d'image utiliser
+  const imageSource = error && useFallback && symbolToLocalImage[motif.name] 
+    ? symbolToLocalImage[motif.name] 
+    : error && !symbolToLocalImage[motif.name] 
+      ? PLACEHOLDER 
+      : motif.src;
 
   return (
     <div 
@@ -47,7 +74,7 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
           </div>
         )}
         <img
-          src={error ? PLACEHOLDER : motif.src}
+          src={imageSource}
           alt={motif.name}
           className={`object-cover w-full h-full transition-all duration-500 ${loading ? 'opacity-0' : 'opacity-100'} ${isHovered ? 'scale-110' : 'scale-100'}`}
           onError={handleImageError}
