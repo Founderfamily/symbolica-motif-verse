@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
   Palette, Square, Flower2, Atom, Sun, Infinity, 
@@ -17,8 +17,7 @@ const motifs = [
     hoverColor: "group-hover:from-emerald-100 group-hover:to-emerald-200",
     icon: Square,
     bgColor: "bg-emerald-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/triskelion.png" // Path for when real image is added
+    imagePath: "/images/symbols/triskelion.png"
   },
   { 
     name: "Fleur de Lys", 
@@ -28,8 +27,7 @@ const motifs = [
     hoverColor: "group-hover:from-blue-100 group-hover:to-indigo-200",
     icon: Flower2,
     bgColor: "bg-blue-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/fleur-de-lys.png"
+    imagePath: "/images/symbols/fleur-de-lys.png"
   },
   { 
     name: "Méandre grec", 
@@ -39,8 +37,7 @@ const motifs = [
     hoverColor: "group-hover:from-cyan-100 group-hover:to-cyan-200",
     icon: Infinity,
     bgColor: "bg-cyan-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/greek-meander.png"
+    imagePath: "/images/symbols/greek-meander.png"
   },
   { 
     name: "Mandala", 
@@ -50,8 +47,7 @@ const motifs = [
     hoverColor: "group-hover:from-rose-100 group-hover:to-orange-200",
     icon: CircleDashed,
     bgColor: "bg-rose-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/mandala.png"
+    imagePath: "/images/symbols/mandala.png"
   },
   { 
     name: "Symbole Adinkra", 
@@ -61,8 +57,7 @@ const motifs = [
     hoverColor: "group-hover:from-amber-100 group-hover:to-amber-200",
     icon: Star,
     bgColor: "bg-amber-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/adinkra.png"
+    imagePath: "/images/symbols/adinkra.png"
   },
   { 
     name: "Motif Seigaiha", 
@@ -72,8 +67,7 @@ const motifs = [
     hoverColor: "group-hover:from-sky-100 group-hover:to-sky-200",
     icon: Waves,
     bgColor: "bg-sky-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/seigaiha.png"
+    imagePath: "/images/symbols/seigaiha.png"
   },
   { 
     name: "Art aborigène", 
@@ -83,8 +77,7 @@ const motifs = [
     hoverColor: "group-hover:from-orange-100 group-hover:to-red-200",
     icon: Shapes,
     bgColor: "bg-orange-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/aboriginal.png"
+    imagePath: "/images/symbols/aboriginal.png"
   },
   { 
     name: "Motif viking", 
@@ -94,8 +87,7 @@ const motifs = [
     hoverColor: "group-hover:from-slate-100 group-hover:to-slate-200",
     icon: Compass,
     bgColor: "bg-slate-500/10",
-    image: "/placeholder.svg", 
-    altImage: "/images/symbols/viking.png"
+    imagePath: "/images/symbols/viking.png"
   },
   { 
     name: "Arabesque", 
@@ -105,8 +97,7 @@ const motifs = [
     hoverColor: "group-hover:from-teal-100 group-hover:to-teal-200",
     icon: Feather,
     bgColor: "bg-teal-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/arabesque.png"
+    imagePath: "/images/symbols/arabesque.png"
   },
   { 
     name: "Motif aztèque", 
@@ -116,22 +107,20 @@ const motifs = [
     hoverColor: "group-hover:from-lime-100 group-hover:to-green-200",
     icon: Sun,
     bgColor: "bg-lime-500/10",
-    image: "/placeholder.svg",
-    altImage: "/images/symbols/aztec.png"
+    imagePath: "/images/symbols/aztec.png"
   }
 ];
 
 const SymbolGrid = () => {
-  // Function to try the real image and fall back to placeholder
-  const tryImage = (e: React.SyntheticEvent<HTMLImageElement>, altImage: string) => {
-    // Try to load the alt image after component mounts
-    const img = new Image();
-    img.onload = () => {
-      if (e.currentTarget) {
-        e.currentTarget.src = altImage;
-      }
-    };
-    img.src = altImage;
+  const [imageStatus, setImageStatus] = useState<Record<string, boolean>>({});
+
+  const handleImageLoad = (name: string) => {
+    setImageStatus(prev => ({ ...prev, [name]: true }));
+  };
+
+  const handleImageError = (name: string) => {
+    setImageStatus(prev => ({ ...prev, [name]: false }));
+    console.log(`Image failed to load: ${name}`);
   };
 
   return (
@@ -152,14 +141,11 @@ const SymbolGrid = () => {
                   <AspectRatio ratio={1} className="overflow-hidden">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <img 
-                        src={motif.image}
+                        src={imageStatus[motif.name] === false ? "/placeholder.svg" : motif.imagePath}
                         alt={motif.name}
                         className="object-cover w-full h-full transform hover:scale-110 transition-transform duration-300"
-                        onLoad={(e) => tryImage(e, motif.altImage)}
-                        onError={(e) => {
-                          // En cas d'erreur de chargement, utilisez l'image placeholder
-                          e.currentTarget.src = "/placeholder.svg";
-                        }}
+                        onLoad={() => handleImageLoad(motif.name)}
+                        onError={() => handleImageError(motif.name)}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
