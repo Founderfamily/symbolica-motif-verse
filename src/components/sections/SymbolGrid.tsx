@@ -1,128 +1,126 @@
-
+// src/components/sections/SymbolGrid.tsx
 import React, { useState } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
-// Configuration simplifiée des motifs avec des images locales
-const motifs = [
-  { 
-    name: "Triskèle celtique", 
+interface Motif {
+  name: string;
+  culture: string;
+  period: string;
+  src: string;
+}
+
+const MOTIFS: Motif[] = [
+  {
+    name: "Triskèle celtique",
     culture: "Celtique",
     period: "Âge du Fer",
-    color: "bg-emerald-50",
-    imagePath: "/images/symbols/triskelion.png"
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Triskele-Symbol3.svg/800px-Triskele-Symbol3.svg.png",
   },
-  { 
-    name: "Fleur de Lys", 
+  {
+    name: "Fleur de Lys",
     culture: "Française",
     period: "Moyen Âge",
-    color: "bg-blue-50",
-    imagePath: "/images/symbols/fleur-de-lys.png"
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Fleur_de_lys_%28golden%29.svg/800px-Fleur_de_lys_%28golden%29.svg.png",
   },
-  { 
-    name: "Méandre grec", 
+  {
+    name: "Méandre grec",
     culture: "Grecque",
     period: "Antiquité",
-    color: "bg-cyan-50",
-    imagePath: "/images/symbols/greek-meander.png"
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Greek_key_pattern.svg/800px-Greek_key_pattern.svg.png",
   },
-  { 
-    name: "Mandala", 
+  {
+    name: "Mandala",
     culture: "Indienne",
     period: "Traditionnelle",
-    color: "bg-rose-50",
-    imagePath: "/images/symbols/mandala.png"
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Mandala_gross.jpg/800px-Mandala_gross.jpg",
   },
-  { 
-    name: "Symbole Adinkra", 
+  {
+    name: "Symbole Adinkra",
     culture: "Ashanti",
     period: "Traditionnelle",
-    color: "bg-amber-50",
-    imagePath: "/images/symbols/adinkra.png"
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Adinkra_symbols.jpg/800px-Adinkra_symbols.jpg",
   },
-  { 
-    name: "Motif Seigaiha", 
+  {
+    name: "Motif Seigaiha",
     culture: "Japonaise",
     period: "Traditionnelle",
-    color: "bg-sky-50",
-    imagePath: "/images/symbols/seigaiha.png"
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Seigaiha_pattern.svg/800px-Seigaiha_pattern.svg.png",
   },
-  { 
-    name: "Art aborigène", 
+  {
+    name: "Art aborigène",
     culture: "Aborigène",
     period: "Préhistorique-Contemporain",
-    color: "bg-orange-50",
-    imagePath: "/images/symbols/aboriginal.png"
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Aboriginal_Australian_Art%2C_Australia_Museum_01.jpg/800px-Aboriginal_Australian_Art%2C_Australia_Museum_01.jpg",
   },
-  { 
-    name: "Motif viking", 
+  {
+    name: "Motif viking",
     culture: "Nordique",
-    period: "VIIIe-XIe siècles",
-    color: "bg-slate-50",
-    imagePath: "/images/symbols/viking.png"
+    period: "VIIIe-XI siècles",
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Urnes_Orm.jpg/800px-Urnes_Orm.jpg",
   },
-  { 
-    name: "Arabesque", 
+  {
+    name: "Arabesque",
     culture: "Islamique",
     period: "Médiévale",
-    color: "bg-teal-50",
-    imagePath: "/images/symbols/arabesque.png"
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Arabesque_Louvre_OA6802.jpg/800px-Arabesque_Louvre_OA6802.jpg",
   },
-  { 
-    name: "Motif aztèque", 
+  {
+    name: "Motif aztèque",
     culture: "Mésoaméricaine",
     period: "Précolombienne",
-    color: "bg-lime-50",
-    imagePath: "/images/symbols/aztec.png"
-  }
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Aztec_calendar_stone_interpretation.svg/800px-Aztec_calendar_stone_interpretation.svg.png",
+  },
 ];
 
-// Image par défaut à utiliser en cas d'échec de chargement
-const PLACEHOLDER_IMAGE = "/placeholder.svg";
+const PLACEHOLDER = "/placeholder.svg";
 
-// Composant pour une carte de symbole individuelle
-const SymbolCard = ({ motif }: { motif: typeof motifs[0] }) => {
-  const [hasError, setHasError] = useState(false);
+const SymbolCard: React.FC<{ motif: Motif }> = ({ motif }) => {
+  const [error, setError] = useState(false);
 
   return (
-    <div className={`rounded-lg overflow-hidden shadow-sm border border-slate-100 ${motif.color}`}>
-      <div className="relative w-full aspect-square">
-        <AspectRatio ratio={1} className="overflow-hidden">
-          <img 
-            src={hasError ? PLACEHOLDER_IMAGE : motif.imagePath}
-            alt={motif.name}
-            className="object-cover w-full h-full"
-            onError={() => setHasError(true)}
-          />
-        </AspectRatio>
-      </div>
-      <div className="p-2 sm:p-3 bg-white">
-        <h4 className="text-xs sm:text-sm font-medium text-slate-800 line-clamp-1">{motif.name}</h4>
-        <div className="flex flex-col mt-1">
-          <span className="text-[10px] text-slate-600">{motif.culture}</span>
-          <span className="text-[9px] text-slate-500">{motif.period}</span>
-        </div>
+    <div className="rounded-lg overflow-hidden shadow-sm border border-slate-200">
+      <AspectRatio ratio={1} className="w-full bg-slate-50">
+        <img
+          src={error ? PLACEHOLDER : motif.src}
+          alt={motif.name}
+          className="object-cover w-full h-full"
+          onError={() => setError(true)}
+        />
+      </AspectRatio>
+      <div className="p-3 bg-white">
+        <h4 className="text-sm font-serif text-slate-900 line-clamp-1">{motif.name}</h4>
+        <p className="mt-1 text-xs text-slate-600">
+          {motif.culture} · {motif.period}
+        </p>
       </div>
     </div>
   );
 };
 
-const SymbolGrid = () => {
-  return (
-    <div className="relative mt-8 md:mt-12 mb-16">
-      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white/80 backdrop-blur-sm px-4 py-1 rounded-full border border-slate-200 z-10">
-        <span className="text-slate-700 text-sm font-medium">Explorer le patrimoine symbolique mondial</span>
+const SymbolGrid: React.FC = () => (
+  <section className="relative mt-12 mb-20">
+    {/* Bandeau muséal & communautaire */}
+    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-6 py-3 rounded-full border border-slate-200 z-10 flex items-center space-x-6">
+      <div>
+        <p className="text-lg font-serif text-slate-800">Musée Symbolica</p>
+        <p className="text-sm text-slate-600">Portail collaboratif du patrimoine symbolique</p>
       </div>
-      <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
-        <div className="aspect-video w-full bg-gradient-to-br from-slate-50 to-white p-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 w-full">
-            {motifs.map((motif, i) => (
-              <SymbolCard key={i} motif={motif} />
-            ))}
-          </div>
+      <button className="px-4 py-1 text-sm font-medium text-white bg-amber-500 rounded hover:bg-amber-600 transition">
+        Rejoindre une communauté
+      </button>
+    </div>
+
+    {/* Grille des motifs */}
+    <div className="bg-white border border-slate-200 shadow-md rounded-xl overflow-hidden pt-12">
+      <div className="px-6 pb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+          {MOTIFS.map((m, idx) => (
+            <SymbolCard key={idx} motif={m} />
+          ))}
         </div>
       </div>
     </div>
-  );
-};
+  </section>
+);
 
 export default SymbolGrid;
