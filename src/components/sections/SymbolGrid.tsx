@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
@@ -15,7 +16,7 @@ const motifs = [
     hoverColor: "group-hover:from-emerald-100 group-hover:to-emerald-200",
     icon: Square,
     bgColor: "bg-emerald-500/10",
-    image: "https://cdn.pixabay.com/photo/2022/02/07/13/15/celtic-knot-7000013_1280.png"
+    image: "/images/symbols/triskelion.png"
   },
   { 
     name: "Fleur de Lys", 
@@ -25,7 +26,7 @@ const motifs = [
     hoverColor: "group-hover:from-blue-100 group-hover:to-indigo-200",
     icon: Flower2,
     bgColor: "bg-blue-500/10",
-    image: "https://cdn.pixabay.com/photo/2020/09/14/22/27/flower-5572630_1280.jpg"
+    image: "/images/symbols/fleur-de-lys.png"
   },
   { 
     name: "Méandre grec", 
@@ -35,7 +36,7 @@ const motifs = [
     hoverColor: "group-hover:from-cyan-100 group-hover:to-cyan-200",
     icon: Infinity,
     bgColor: "bg-cyan-500/10",
-    image: "https://cdn.pixabay.com/photo/2020/01/27/22/14/greek-pattern-4798710_1280.jpg"
+    image: "/images/symbols/greek-meander.png"
   },
   { 
     name: "Mandala", 
@@ -45,7 +46,7 @@ const motifs = [
     hoverColor: "group-hover:from-rose-100 group-hover:to-orange-200",
     icon: CircleDashed,
     bgColor: "bg-rose-500/10",
-    image: "https://cdn.pixabay.com/photo/2023/05/02/14/52/mandala-7965661_1280.jpg"
+    image: "/images/symbols/mandala.png"
   },
   { 
     name: "Symbole Adinkra", 
@@ -55,7 +56,7 @@ const motifs = [
     hoverColor: "group-hover:from-amber-100 group-hover:to-amber-200",
     icon: Star,
     bgColor: "bg-amber-500/10",
-    image: "https://cdn.pixabay.com/photo/2018/05/18/13/22/web-3411989_1280.jpg"
+    image: "/images/symbols/adinkra.png"
   },
   { 
     name: "Motif Seigaiha", 
@@ -65,7 +66,7 @@ const motifs = [
     hoverColor: "group-hover:from-sky-100 group-hover:to-sky-200",
     icon: Waves,
     bgColor: "bg-sky-500/10",
-    image: "https://cdn.pixabay.com/photo/2019/06/21/07/49/japan-4288792_1280.jpg"
+    image: "/images/symbols/seigaiha.png"
   },
   { 
     name: "Art aborigène", 
@@ -75,7 +76,7 @@ const motifs = [
     hoverColor: "group-hover:from-orange-100 group-hover:to-red-200",
     icon: Shapes,
     bgColor: "bg-orange-500/10",
-    image: "https://cdn.pixabay.com/photo/2023/08/07/12/44/indigenous-8174449_1280.png"
+    image: "/images/symbols/aboriginal.png"
   },
   { 
     name: "Motif viking", 
@@ -85,7 +86,7 @@ const motifs = [
     hoverColor: "group-hover:from-slate-100 group-hover:to-slate-200",
     icon: Compass,
     bgColor: "bg-slate-500/10",
-    image: "https://cdn.pixabay.com/photo/2020/10/22/04/30/viking-pattern-5674483_1280.png"
+    image: "/images/symbols/viking.png"
   },
   { 
     name: "Arabesque", 
@@ -95,7 +96,7 @@ const motifs = [
     hoverColor: "group-hover:from-teal-100 group-hover:to-teal-200",
     icon: Feather,
     bgColor: "bg-teal-500/10",
-    image: "https://cdn.pixabay.com/photo/2021/11/20/07/17/pattern-6811337_1280.jpg"
+    image: "/images/symbols/arabesque.png"
   },
   { 
     name: "Motif aztèque", 
@@ -105,7 +106,7 @@ const motifs = [
     hoverColor: "group-hover:from-lime-100 group-hover:to-green-200",
     icon: Sun,
     bgColor: "bg-lime-500/10",
-    image: "https://cdn.pixabay.com/photo/2016/04/13/22/46/aztec-1328070_1280.jpg"
+    image: "/images/symbols/aztec.png"
   }
 ];
 
@@ -131,6 +132,10 @@ const SymbolGrid = () => {
                         src={motif.image}
                         alt={motif.name}
                         className="object-cover w-full h-full transform hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          // En cas d'erreur de chargement, utilisez l'image placeholder
+                          e.currentTarget.src = "/placeholder.svg";
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
