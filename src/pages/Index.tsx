@@ -7,7 +7,8 @@ import Hero from '@/components/sections/Hero';
 import SymbolGrid from '@/components/sections/SymbolGrid';
 import Features from '@/components/sections/Features';
 import HowItWorks from '@/components/sections/HowItWorks';
-import Gamification from '@/components/sections/Gamification';
+import Community from '@/components/sections/Community';
+import UploadTools from '@/components/sections/UploadTools';
 import Partners from '@/components/sections/Partners';
 import Testimonials from '@/components/sections/Testimonials';
 import TimelineRoadmap from '@/components/sections/TimelineRoadmap';
@@ -17,14 +18,14 @@ import OpenSourceBadge from '@/components/ui/open-source-badge';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
       <Header />
       
       {/* Main Content */}
       <main className="flex-grow">
         {/* Hero Section with Grid */}
-        <div className="bg-gradient-to-b from-amber-50 to-white">
+        <div className="bg-white">
           <Hero />
           <div className="relative max-w-7xl mx-auto">
             <div className="absolute right-6 top-0">
@@ -34,14 +35,17 @@ const Index = () => {
           </div>
         </div>
         
+        {/* Community Section (New) */}
+        <Community />
+        
+        {/* Upload Tools Section (New) */}
+        <UploadTools />
+        
         {/* Features Section */}
         <Features />
         
         {/* How It Works */}
         <HowItWorks />
-        
-        {/* Gamification */}
-        <Gamification />
         
         {/* Testimonials */}
         <Testimonials />
@@ -52,9 +56,6 @@ const Index = () => {
         {/* Partners */}
         <Partners />
         
-        {/* FAQ */}
-        <FAQ />
-        
         {/* Call to Action */}
         <CallToAction />
         
@@ -62,7 +63,7 @@ const Index = () => {
         <NewsletterSignup />
       </main>
       
-      {/* Footer */}
+      {/* Footer with FAQ */}
       <Footer />
     </div>
   );
