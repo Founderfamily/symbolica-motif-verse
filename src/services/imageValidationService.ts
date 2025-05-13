@@ -88,12 +88,18 @@ export const processAndUpdateImage = async (
     
     // Définir le titre en fonction du type d'image
     let title: string;
-    if (type === 'original') {
-      title = 'Image originale';
-    } else if (type === 'pattern') {
-      title = 'Motif extrait';
-    } else {
-      title = 'Réutilisation contemporaine';
+    switch (type) {
+      case 'original':
+        title = 'Image originale';
+        break;
+      case 'pattern':
+        title = 'Motif extrait';
+        break;
+      case 'reuse':
+        title = 'Réutilisation contemporaine';
+        break;
+      default:
+        title = 'Image du symbole';
     }
     
     // Mettre à jour dans Supabase avec l'alternative
