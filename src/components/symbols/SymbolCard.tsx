@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Symbol } from '@/data/symbols';
 import { culturalGradient } from '@/lib/utils';
-import { Info } from 'lucide-react';
+import { Info, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 // Image de remplacement locale en cas d'erreur
 const PLACEHOLDER = "/placeholder.svg";
 
 // Mapping des noms de symboles aux chemins d'images locales
-const symbolToLocalImage = {
+const symbolToLocalImage: Record<string, string> = {
   "Triskèle celtique": "/images/symbols/triskelion.png",
   "Fleur de Lys": "/images/symbols/fleur-de-lys.png",
   "Méandre grec": "/images/symbols/greek-meander.png",
@@ -32,6 +33,7 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [useFallback, setUseFallback] = useState(false);
+  const { toast } = useToast();
 
   // Réinitialiser l'état d'erreur si le motif change
   useEffect(() => {
@@ -47,6 +49,16 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const handleImageError = () => {
     console.error(`Erreur de chargement de l'image: ${motif.name}`, motif.src);
     setError(true);
+    
+    // Notifier l'utilisateur de l'erreur uniquement si c'est une image externe
+    if (motif.isExternal) {
+      toast({
+        title: "Problème de chargement d'image",
+        description: `L'image pour "${motif.name}" n'a pas pu être chargée. Une image alternative sera utilisée.`,
+        variant: "default",
+      });
+    }
+    
     // Tenter d'utiliser l'image locale correspondante si disponible
     if (symbolToLocalImage[motif.name]) {
       setUseFallback(true);
@@ -69,8 +81,15 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
     >
       <AspectRatio ratio={1} className="w-full bg-slate-50 relative overflow-hidden">
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-slate-100/50 backdrop-blur-sm">
             <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+          </div>
+        )}
+        {error && !useFallback && (
+          <div className="absolute top-2 right-2 z-20">
+            <div className="bg-red-100 text-red-600 p-1 rounded-full">
+              <AlertCircle className="w-4 h-4" />
+            </div>
           </div>
         )}
         <img

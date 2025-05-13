@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import SymbolList from '@/components/symbols/SymbolList';
 import SymbolTriptych from '@/components/symbols/SymbolTriptych';
 import { useAuth } from '@/hooks/useAuth';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Database } from 'lucide-react';
 
 const SymbolTriptychSection: React.FC = () => {
   const [selectedSymbolId, setSelectedSymbolId] = useState<string | null>(null);
@@ -18,7 +18,7 @@ const SymbolTriptychSection: React.FC = () => {
       </div>
       
       {/* Bandeau muséal & communautaire */}
-      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur shadow-2xl shadow-slate-200/50 px-6 py-3 rounded-full border border-slate-100 z-10 flex items-center space-x-6 animate-fade-in">
+      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur shadow-2xl shadow-slate-200/50 px-6 py-3 rounded-full border border-slate-100 z-10 flex items-center space-x-6 animate-fade-in">
         <div>
           <p className="text-lg font-serif font-medium text-slate-800">
             <span className="mr-1 inline-block">
@@ -29,7 +29,8 @@ const SymbolTriptychSection: React.FC = () => {
           <p className="text-sm text-slate-600">Portail collaboratif du patrimoine symbolique</p>
         </div>
         {isAdmin ? (
-          <a href="/admin" className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full hover:shadow-md hover:shadow-blue-600/20 hover:-translate-y-0.5 transition-all">
+          <a href="/admin" className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full hover:shadow-md hover:shadow-blue-600/20 hover:-translate-y-0.5 transition-all flex items-center gap-2">
+            <Database className="w-4 h-4" />
             Administration
           </a>
         ) : (

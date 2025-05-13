@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { supabase } from '@/integrations/supabase/client';
 import { SymbolData, SymbolImage } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 // Image de remplacement locale en cas d'erreur
 const PLACEHOLDER = "/placeholder.svg";
 
-// Define the allowed image types
+// Définir les types d'images autorisés
 type ImageType = 'original' | 'pattern' | 'reuse';
 
 interface SymbolTriptychProps {
@@ -23,6 +25,11 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<ImageType, boolean>>({
+    original: false,
+    pattern: false,
+    reuse: false
+  });
   const { toast } = useToast();
 
   // Mapping des noms de symboles aux chemins d'images locales
@@ -39,16 +46,16 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
     "Motif aztèque": "/images/symbols/aztec.png"
   };
 
-  // Mapping des cultures aux images de réutilisation (exemples fictifs pour l'instant)
+  // Mapping des cultures aux images de réutilisation plus pertinentes
   const cultureToReuseImage: Record<string, string> = {
-    "Celtique": "https://images.unsplash.com/photo-1529677411545-89dec7ca8f18?q=80&w=800",
-    "Française": "https://images.unsplash.com/photo-1561273557-95aec160db73?q=80&w=800",
-    "Grecque": "https://images.unsplash.com/photo-1568805647685-709094825a48?q=80&w=800",
-    "Indienne": "https://images.unsplash.com/photo-1610555356070-d0efcdc6879e?q=80&w=800",
+    "Celtique": "https://images.unsplash.com/photo-1607439039734-c662293d51e3?q=80&w=800",
+    "Française": "https://images.unsplash.com/photo-1540162012087-080d9acf0da0?q=80&w=800",
+    "Grecque": "https://images.unsplash.com/photo-1603566541830-926010260166?q=80&w=800",
+    "Indienne": "https://images.unsplash.com/photo-1534430480872-3498386a78e0?q=80&w=800",
     "Ashanti": "https://images.unsplash.com/photo-1603397023583-74b3ca45222f?q=80&w=800",
-    "Japonaise": "https://images.unsplash.com/photo-1639645933453-9ba5d3c25ed1?q=80&w=800",
+    "Japonaise": "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=800",
     "Aborigène": "https://images.unsplash.com/photo-1535082623926-b39352a03fb7?q=80&w=800",
-    "Nordique": "https://images.unsplash.com/photo-1599431291717-d074dc17f850?q=80&w=800",
+    "Nordique": "https://images.unsplash.com/photo-1560273313-28f297ab3a66?q=80&w=800",
     "Islamique": "https://images.unsplash.com/photo-1585236243288-126dd5ee0769?q=80&w=800",
     "Mésoaméricaine": "https://images.unsplash.com/photo-1559403128-d1fbe6983f62?q=80&w=800"
   };
@@ -108,13 +115,76 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
     }
   };
 
+  // Gérer les erreurs d'image et appliquer le fallback
+  const handleImageError = (type: ImageType) => {
+    setImageErrors(prev => ({...prev, [type]: true}));
+    
+    // Appliquer automatiquement un fallback approprié
+    if (type === 'pattern' && symbol && symbolToLocalImage[symbol.name]) {
+      const fallbackImage = symbolToLocalImage[symbol.name];
+      
+      // Mettre à jour l'état local immédiatement pour une meilleure expérience utilisateur
+      setImages(prev => ({
+        ...prev,
+        [type]: {
+          ...prev[type],
+          image_url: fallbackImage,
+          id: prev[type]?.id || 'temp-fallback',
+          symbol_id: symbolId || 'temp-id',
+          image_type: type,
+          title: prev[type]?.title || 'Motif extrait',
+          description: prev[type]?.description || `Extraction graphique du symbole ${symbol.name}`,
+          created_at: prev[type]?.created_at || null
+        }
+      }));
+      
+      // Mettre à jour dans la base de données pour les futurs chargements
+      updateImageInSupabase(
+        symbolId!, 
+        type, 
+        fallbackImage, 
+        'Motif extrait',
+        `Extraction graphique du symbole ${symbol.name}`
+      );
+    } 
+    else if (type === 'reuse' && symbol && cultureToReuseImage[symbol.culture]) {
+      const fallbackImage = cultureToReuseImage[symbol.culture];
+      
+      // Mettre à jour l'état local immédiatement
+      setImages(prev => ({
+        ...prev,
+        [type]: {
+          ...prev[type],
+          image_url: fallbackImage,
+          id: prev[type]?.id || 'temp-fallback',
+          symbol_id: symbolId || 'temp-id',
+          image_type: type,
+          title: prev[type]?.title || 'Réutilisation contemporaine',
+          description: prev[type]?.description || `Application moderne du symbole dans la culture ${symbol.culture}`,
+          created_at: prev[type]?.created_at || null
+        }
+      }));
+      
+      // Mettre à jour dans la base de données
+      updateImageInSupabase(
+        symbolId!, 
+        type, 
+        fallbackImage, 
+        'Réutilisation contemporaine',
+        `Application moderne du symbole dans la culture ${symbol.culture}`
+      );
+    }
+  };
+
   useEffect(() => {
     if (!symbolId) return;
     
+    // Réinitialiser les états
+    setLoading(true);
+    setError(false);
+    setImageErrors({original: false, pattern: false, reuse: false});
+    
     const fetchSymbolData = async () => {
-      setLoading(true);
-      setError(false);
-      
       try {
         // Récupérer les infos du symbole
         const { data: symbolData, error: symbolError } = await supabase
@@ -152,7 +222,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
           // Image originale (depuis unsplash)
           if (!organizedImages.original) {
             // Utiliser une image Unsplash pour l'original
-            const originalImage = `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000) + 1500000000}?q=80&w=800`;
+            const originalImage = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolData.culture.toLowerCase())}+symbol`;
             const success = await updateImageInSupabase(
               symbolId, 
               'original', 
@@ -251,7 +321,10 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12 bg-gradient-to-br from-slate-50 to-amber-50 rounded-lg animate-pulse">
-        <div className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center">
+          <Loader2 className="w-12 h-12 text-amber-500 animate-spin" />
+          <p className="mt-4 text-amber-800">Chargement des données du symbole...</p>
+        </div>
       </div>
     );
   }
@@ -259,6 +332,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   if (error || !symbol) {
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-red-50 rounded-lg border border-red-100">
+        <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
         <p className="text-slate-800 text-lg">Erreur de chargement</p>
         <p className="text-slate-500">Impossible de charger les données du symbole</p>
       </div>
@@ -267,19 +341,33 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   
   const renderImage = (type: ImageType, title: string) => {
     const image = images[type];
+    const hasError = imageErrors[type];
     const imageUrl = image?.image_url || PLACEHOLDER;
     
     return (
       <div className="flex flex-col space-y-3">
         <div className="rounded-lg overflow-hidden border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 group">
           <AspectRatio ratio={1} className="bg-slate-50 relative overflow-hidden">
+            {!image && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
+                <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
+              </div>
+            )}
             <img
               src={imageUrl}
               alt={`${symbol?.name || 'Symbol'} - ${title}`}
-              className="object-cover w-full h-full transition-all duration-500 group-hover:scale-105"
+              className={`object-cover w-full h-full transition-all duration-500 group-hover:scale-105 ${!image ? 'opacity-0' : 'opacity-100'}`}
               crossOrigin="anonymous"
+              onError={() => handleImageError(type)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            {hasError && (
+              <div className="absolute top-2 right-2 z-20">
+                <div className="bg-amber-100 text-amber-600 p-1 rounded-full">
+                  <AlertCircle className="w-4 h-4" />
+                </div>
+              </div>
+            )}
           </AspectRatio>
         </div>
         <div className="text-center">
