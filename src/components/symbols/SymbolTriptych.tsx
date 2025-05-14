@@ -36,7 +36,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
     return <ErrorState />;
   }
   
-  // Calculer le nombre total d'erreurs d'image
+  // Calculate total image errors
   const totalErrors = Object.values(imageErrors).filter(Boolean).length;
   
   const renderImage = (type: ImageType) => {

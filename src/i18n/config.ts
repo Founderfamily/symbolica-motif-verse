@@ -6,9 +6,9 @@ import fr from './locales/fr.json';
 import en from './locales/en.json';
 
 i18n
-  // Détection de la langue du navigateur
+  // Browser language detection
   .use(LanguageDetector)
-  // Intégration avec React
+  // React integration
   .use(initReactI18next)
   // Configuration
   .init({
@@ -19,7 +19,7 @@ i18n
     fallbackLng: 'fr',
     supportedLngs: ['fr', 'en'],
     interpolation: {
-      escapeValue: false, // React escape déjà les valeurs
+      escapeValue: false, // React already escapes values
     },
     detection: {
       order: ['localStorage', 'navigator'],

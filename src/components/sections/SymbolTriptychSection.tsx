@@ -19,7 +19,7 @@ const SymbolTriptychSection: React.FC = () => {
         <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-200/20 rounded-full blur-3xl"></div>
       </div>
       
-      {/* Bandeau muséal & communautaire */}
+      {/* Museum & community banner */}
       <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur shadow-2xl shadow-slate-200/50 px-6 py-3 rounded-full border border-slate-100 z-10 flex items-center space-x-6 animate-fade-in">
         <div>
           <p className="text-lg font-serif font-medium text-slate-800">
@@ -42,13 +42,13 @@ const SymbolTriptychSection: React.FC = () => {
         )}
       </div>
 
-      {/* Contenu principal */}
+      {/* Main content */}
       <div className="bg-white border border-slate-100 shadow-xl rounded-xl overflow-hidden pt-12 relative z-0">
         <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-r from-amber-50 to-amber-100/50"></div>
         
         <div className="px-6 pb-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Sidebar avec liste des symboles */}
+            {/* Sidebar with symbol list */}
             <div className="md:col-span-1 border-r border-slate-200 pr-4 bg-slate-50/50 rounded-l-lg">
               <h3 className="text-lg font-serif text-slate-800 mb-4 flex items-center">
                 <span className="w-1.5 h-5 bg-amber-500 rounded-full inline-block mr-2"></span>
@@ -62,7 +62,7 @@ const SymbolTriptychSection: React.FC = () => {
               </div>
             </div>
             
-            {/* Affichage du triptyque */}
+            {/* Triptych display */}
             <div className="md:col-span-3">
               <SymbolTriptych symbolId={selectedSymbolId} />
             </div>

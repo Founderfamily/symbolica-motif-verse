@@ -123,6 +123,24 @@
     "imageErrorDesc": "Certaines images authentiques n'ont pas pu être chargées. Des alternatives ont été affichées.",
     "original": "Image originale",
     "pattern": "Extraction du motif",
-    "reuse": "Nouvelle utilisation"
+    "reuse": "Nouvelle utilisation",
+    "originalCaptions": {
+      "mosque": "Mosquée Arabesque",
+      "triskelion": "Nœud Celtique",
+      "fleurdelys": "Palais Royal"
+    },
+    "patternCaptions": {
+      "arabesque": "Extraction graphique d'une arabesque islamique",
+      "triskelion": "Extraction du triskèle celtique",
+      "fleurdelys": "Détail du motif de fleur de lys"
+    },
+    "reuseCaptions": {
+      "arabesque": "Utilisation du motif dans le design numérique contemporain",
+      "triskelion": "Application moderne dans la joaillerie",
+      "fleurdelys": "Utilisation dans l'héraldique contemporaine"
+    },
+    "location": "Lieu",
+    "source": "Source",
+    "tags": "Tags"
   }
 }

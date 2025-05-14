@@ -123,6 +123,24 @@
     "imageErrorDesc": "Some authentic images could not be loaded. Alternatives have been displayed.",
     "original": "Original image",
     "pattern": "Pattern extraction",
-    "reuse": "New usage"
+    "reuse": "New usage",
+    "originalCaptions": {
+      "mosque": "Mosque Arabesque",
+      "triskelion": "Celtic Knot",
+      "fleurdelys": "Royal Palace"
+    },
+    "patternCaptions": {
+      "arabesque": "Graphic extraction of an Islamic arabesque",
+      "triskelion": "Celtic triskelion extraction",
+      "fleurdelys": "Fleur-de-lis pattern detail"
+    },
+    "reuseCaptions": {
+      "arabesque": "Use of the pattern in contemporary digital design",
+      "triskelion": "Modern application in jewelry",
+      "fleurdelys": "Use in contemporary heraldry"
+    },
+    "location": "Location",
+    "source": "Source",
+    "tags": "Tags"
   }
 }
