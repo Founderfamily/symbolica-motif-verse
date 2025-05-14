@@ -1,4 +1,6 @@
 
+import { Json } from '@/integrations/supabase/types';
+
 // Custom type definitions for Supabase data
 export interface SymbolData {
   id: string;

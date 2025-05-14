@@ -38,7 +38,13 @@ export const useSymbolImages = (symbolId: string | null) => {
       try {
         const { symbolData, imagesData } = await fetchSymbolData(symbolId);
         
-        setSymbol(symbolData);
+        // Cast the data to the correct types
+        const typedSymbolData: SymbolData = {
+          ...symbolData,
+          translations: symbolData.translations as SymbolData['translations']
+        };
+        
+        setSymbol(typedSymbolData);
         
         // Organize images by type
         const organizedImages: Record<string, SymbolImage | null> = {
@@ -48,7 +54,11 @@ export const useSymbolImages = (symbolId: string | null) => {
         };
         
         imagesData.forEach(img => {
-          organizedImages[img.image_type] = img;
+          const typedImage: SymbolImage = {
+            ...img,
+            translations: img.translations as SymbolImage['translations']
+          };
+          organizedImages[img.image_type] = typedImage;
         });
         
         setImages(organizedImages);

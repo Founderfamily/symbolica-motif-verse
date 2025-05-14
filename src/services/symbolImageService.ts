@@ -78,7 +78,10 @@ export const fetchSymbolData = async (symbolId: string) => {
     
     if (imagesError) throw imagesError;
     
-    return { symbolData, imagesData };
+    return { 
+      symbolData: symbolData as SymbolData, 
+      imagesData: imagesData as SymbolImage[] 
+    };
   } catch (error) {
     console.error("Erreur lors du chargement des données:", error);
     throw error;

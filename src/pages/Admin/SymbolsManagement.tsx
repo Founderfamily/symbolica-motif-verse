@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,7 +37,14 @@ const SymbolsManagement = () => {
         .order('name');
 
       if (error) throw error;
-      setSymbols(data || []);
+      
+      // Cast the data to ensure type compatibility
+      const typedData: SymbolData[] = data.map(symbol => ({
+        ...symbol,
+        translations: symbol.translations as SymbolData['translations']
+      }));
+      
+      setSymbols(typedData);
     } catch (error: any) {
       console.error('Error fetching symbols:', error);
       toast({

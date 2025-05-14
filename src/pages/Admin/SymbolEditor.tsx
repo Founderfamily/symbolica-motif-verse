@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,7 +75,14 @@ const SymbolEditor = () => {
           .single();
         
         if (symbolError) throw symbolError;
-        setSymbol(symbolData);
+        
+        // Cast the data to ensure type compatibility
+        const typedSymbolData: SymbolData = {
+          ...symbolData,
+          translations: symbolData.translations as SymbolData['translations']
+        };
+        
+        setSymbol(typedSymbolData);
         
         // Récupérer les images du symbole
         const { data: imagesData, error: imagesError } = await supabase
@@ -94,7 +100,13 @@ const SymbolEditor = () => {
         };
         
         imagesData.forEach(img => {
-          organizedImages[img.image_type] = img;
+          // Cast the image data to ensure type compatibility
+          const typedImage: SymbolImage = {
+            ...img,
+            translations: img.translations as SymbolImage['translations']
+          };
+          
+          organizedImages[img.image_type] = typedImage;
           if (img.title) {
             setImageTitle(prev => ({...prev, [img.image_type]: img.title || prev[img.image_type]}));
           }
@@ -146,7 +158,7 @@ const SymbolEditor = () => {
     try {
       setUploading(prev => ({ ...prev, [type]: true }));
       
-      // 1. Upload de l'image dans le bucket Storage avec un nom de fichier sanitisé
+      // 1. Upload de l'image dans le bucket Storage
       const sanitizedFileName = sanitizeFileName(file.name);
       const fileName = `${Date.now()}-${sanitizedFileName}`;
       const filePath = `${symbol.id}/${type}/${fileName}`;
@@ -214,9 +226,15 @@ const SymbolEditor = () => {
         
       if (error) throw error;
       
+      // Cast the data to ensure type compatibility
+      const typedImage: SymbolImage = {
+        ...data,
+        translations: data.translations as SymbolImage['translations']
+      };
+      
       setImages(prev => ({
         ...prev,
-        [type]: data
+        [type]: typedImage
       }));
       
       toast({

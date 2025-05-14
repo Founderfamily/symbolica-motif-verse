@@ -23,11 +23,18 @@ const SymbolList: React.FC<SymbolListProps> = ({ onSelectSymbol, selectedSymbolI
           .order('name');
         
         if (error) throw error;
-        setSymbols(data || []);
+        
+        // Cast the data to ensure type compatibility
+        const typedData: SymbolData[] = data.map(symbol => ({
+          ...symbol,
+          translations: symbol.translations as SymbolData['translations']
+        }));
+        
+        setSymbols(typedData);
         
         // Sélectionner le premier symbole par défaut si aucun n'est sélectionné
-        if (data && data.length > 0 && !selectedSymbolId) {
-          onSelectSymbol(data[0].id);
+        if (typedData && typedData.length > 0 && !selectedSymbolId) {
+          onSelectSymbol(typedData[0].id);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des symboles:", error);
