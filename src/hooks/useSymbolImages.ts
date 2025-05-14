@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { SymbolData, SymbolImage } from '@/types/supabase';
 import { 
@@ -143,11 +142,10 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
           } else if (organizedImages.original) {
             // Vérifier la validité de l'image existante
             const processedUrl = await processAndUpdateImage(
-              symbolId,
               symbolData.name,
               symbolData.culture,
-              'original',
-              organizedImages.original.image_url
+              organizedImages.original.image_url,
+              'original'
             );
             
             if (processedUrl !== organizedImages.original.image_url) {
@@ -204,11 +202,10 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
           } else if (organizedImages.reuse) {
             // Vérifier la validité de l'image existante
             const processedUrl = await processAndUpdateImage(
-              symbolId,
               symbolData.name,
               symbolData.culture,
-              'reuse',
-              organizedImages.reuse.image_url
+              organizedImages.reuse.image_url,
+              'reuse'
             );
             
             if (processedUrl !== organizedImages.reuse.image_url) {

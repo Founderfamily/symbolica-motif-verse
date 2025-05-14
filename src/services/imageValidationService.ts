@@ -5,6 +5,38 @@ import { supabase } from '@/integrations/supabase/client';
 // Types d'images prises en charge
 export type ImageType = 'original' | 'pattern' | 'reuse';
 
+// Fonction pour nettoyer les URL d'images
+export function sanitizeImageUrl(url: string): string {
+  if (!url) return '';
+  
+  // Vérifier si l'URL est déjà valide
+  try {
+    new URL(url);
+    return url;
+  } catch (e) {
+    console.error("URL invalide:", url);
+    return '';
+  }
+}
+
+// Fonction pour générer une description d'image basée sur le type
+export function getImageDescription(
+  symbolName: string,
+  symbolCulture: string,
+  type: ImageType
+): string {
+  switch (type) {
+    case 'original':
+      return `Représentation authentique du symbole ${symbolName} de la culture ${symbolCulture}.`;
+    case 'pattern':
+      return `Motif extrait du symbole ${symbolName}, utilisé dans la culture ${symbolCulture}.`;
+    case 'reuse':
+      return `Réinterprétation contemporaine du symbole ${symbolName} d'origine ${symbolCulture}.`;
+    default:
+      return `Image du symbole ${symbolName}.`;
+  }
+}
+
 // Fonction pour valider les URL d'images
 export async function validateImageUrl(url: string): Promise<boolean> {
   if (!url || url.trim() === '') return false;
