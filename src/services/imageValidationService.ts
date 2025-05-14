@@ -94,6 +94,8 @@ export const processAndUpdateImage = async (
     console.log(`Image non disponible: ${url}, recherche d'alternative...`);
     
     let alternativeUrl = "";
+    
+    // Utiliser le switch avec tous les types possibles définis dans ImageType
     switch (type) {
       case 'original':
         alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolName.toLowerCase())}+${symbolCulture.toLowerCase()}+historical+artifact`;
