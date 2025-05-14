@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Textarea } from '@/components/ui/textarea';
+import { Info, Tag, MapPin, Link2 } from 'lucide-react';
 
 const SymbolEditor = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,13 +30,29 @@ const SymbolEditor = () => {
     reuse: false
   });
 
-  // Pour l'upload d'images
+  // Pour l'upload d'images et les métadonnées
   const [imageTitle, setImageTitle] = useState<Record<string, string>>({
     original: 'Image originale',
     pattern: 'Extraction du motif',
     reuse: 'Nouvelle utilisation'
   });
   const [imageDescription, setImageDescription] = useState<Record<string, string>>({
+    original: '',
+    pattern: '',
+    reuse: ''
+  });
+  // Nouveaux champs
+  const [imageLocation, setImageLocation] = useState<Record<string, string>>({
+    original: '',
+    pattern: '',
+    reuse: ''
+  });
+  const [imageSource, setImageSource] = useState<Record<string, string>>({
+    original: '',
+    pattern: '',
+    reuse: ''
+  });
+  const [imageTags, setImageTags] = useState<Record<string, string>>({
     original: '',
     pattern: '',
     reuse: ''
@@ -83,6 +101,16 @@ const SymbolEditor = () => {
           if (img.description) {
             setImageDescription(prev => ({...prev, [img.image_type]: img.description || ''}));
           }
+          // Initialiser les nouveaux champs
+          if (img.location) {
+            setImageLocation(prev => ({...prev, [img.image_type]: img.location || ''}));
+          }
+          if (img.source) {
+            setImageSource(prev => ({...prev, [img.image_type]: img.source || ''}));
+          }
+          if (img.tags) {
+            setImageTags(prev => ({...prev, [img.image_type]: img.tags?.join(', ') || ''}));
+          }
         });
         
         setImages(organizedImages);
@@ -102,26 +130,45 @@ const SymbolEditor = () => {
     fetchSymbolData();
   }, [id, navigate, toast]);
 
+  // Sanitize file name to avoid upload errors
+  const sanitizeFileName = (fileName: string) => {
+    // Replace spaces, accents, and special characters with underscores
+    return fileName
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remove accents
+      .replace(/[^a-zA-Z0-9.]/g, '_') // Replace special chars with underscore
+      .toLowerCase();
+  };
+
   const handleImageUpload = async (type: 'original' | 'pattern' | 'reuse', file: File) => {
     if (!symbol) return;
     
     try {
       setUploading(prev => ({ ...prev, [type]: true }));
       
-      // 1. Upload de l'image dans le bucket Storage
-      const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+      // 1. Upload de l'image dans le bucket Storage avec un nom de fichier sanitisé
+      const sanitizedFileName = sanitizeFileName(file.name);
+      const fileName = `${Date.now()}-${sanitizedFileName}`;
       const filePath = `${symbol.id}/${type}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('symbol_images')
         .upload(filePath, file);
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Erreur d'upload:", uploadError);
+        throw new Error(`Erreur lors de l'upload: ${uploadError.message}`);
+      }
       
       // 2. Récupérer l'URL publique de l'image
       const { data: { publicUrl } } = supabase.storage
         .from('symbol_images')
         .getPublicUrl(filePath);
+      
+      // Préparer les tags (convertir de la chaîne séparée par des virgules à un tableau)
+      const tagsArray = imageTags[type].split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag !== '');
       
       // 3. Mettre à jour ou créer l'entrée dans symbol_images
       if (images[type]) {
@@ -131,7 +178,10 @@ const SymbolEditor = () => {
           .update({
             image_url: publicUrl,
             title: imageTitle[type],
-            description: imageDescription[type] || null
+            description: imageDescription[type] || null,
+            location: imageLocation[type] || null,
+            source: imageSource[type] || null,
+            tags: tagsArray.length > 0 ? tagsArray : null
           })
           .eq('id', images[type]!.id);
           
@@ -145,7 +195,10 @@ const SymbolEditor = () => {
             image_url: publicUrl,
             image_type: type,
             title: imageTitle[type],
-            description: imageDescription[type] || null
+            description: imageDescription[type] || null,
+            location: imageLocation[type] || null,
+            source: imageSource[type] || null,
+            tags: tagsArray.length > 0 ? tagsArray : null
           });
           
         if (error) throw error;
@@ -174,7 +227,7 @@ const SymbolEditor = () => {
       console.error('Erreur lors de l\'upload de l\'image:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de télécharger l'image",
+        description: error instanceof Error ? error.message : "Impossible de télécharger l'image",
         variant: "destructive"
       });
     } finally {
@@ -186,11 +239,19 @@ const SymbolEditor = () => {
     if (!symbol || !images[type]) return;
     
     try {
+      // Convertir les tags de chaîne à tableau
+      const tagsArray = imageTags[type].split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag !== '');
+      
       const { error } = await supabase
         .from('symbol_images')
         .update({
           title: imageTitle[type],
-          description: imageDescription[type] || null
+          description: imageDescription[type] || null,
+          location: imageLocation[type] || null,
+          source: imageSource[type] || null,
+          tags: tagsArray.length > 0 ? tagsArray : null
         })
         .eq('id', images[type]!.id);
         
@@ -262,12 +323,53 @@ const SymbolEditor = () => {
             </div>
             
             <div>
-              <Label htmlFor={`${type}-description`}>Description</Label>
-              <textarea
+              <Label htmlFor={`${type}-description`} className="flex items-center gap-2">
+                <Info className="h-4 w-4" /> Description
+              </Label>
+              <Textarea
                 id={`${type}-description`}
                 value={imageDescription[type]}
                 onChange={(e) => setImageDescription(prev => ({ ...prev, [type]: e.target.value }))}
-                className="flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="h-20"
+              />
+            </div>
+
+            {/* Nouveau champ: Lieu */}
+            <div>
+              <Label htmlFor={`${type}-location`} className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" /> Lieu
+              </Label>
+              <Input
+                id={`${type}-location`}
+                value={imageLocation[type]}
+                onChange={(e) => setImageLocation(prev => ({ ...prev, [type]: e.target.value }))}
+                placeholder="Ex: Musée du Louvre, Paris"
+              />
+            </div>
+
+            {/* Nouveau champ: Source */}
+            <div>
+              <Label htmlFor={`${type}-source`} className="flex items-center gap-2">
+                <Link2 className="h-4 w-4" /> Source
+              </Label>
+              <Input
+                id={`${type}-source`}
+                value={imageSource[type]}
+                onChange={(e) => setImageSource(prev => ({ ...prev, [type]: e.target.value }))}
+                placeholder="Ex: Collection particulière, livre, site web..."
+              />
+            </div>
+
+            {/* Nouveau champ: Tags */}
+            <div>
+              <Label htmlFor={`${type}-tags`} className="flex items-center gap-2">
+                <Tag className="h-4 w-4" /> Tags (séparés par des virgules)
+              </Label>
+              <Input
+                id={`${type}-tags`}
+                value={imageTags[type]}
+                onChange={(e) => setImageTags(prev => ({ ...prev, [type]: e.target.value }))}
+                placeholder="Ex: céramique, géométrique, ancien"
               />
             </div>
             

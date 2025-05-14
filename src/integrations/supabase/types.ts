@@ -43,7 +43,10 @@ export type Database = {
           id: string
           image_type: Database["public"]["Enums"]["image_type"]
           image_url: string
+          location: string | null
+          source: string | null
           symbol_id: string
+          tags: string[] | null
           title: string | null
         }
         Insert: {
@@ -52,7 +55,10 @@ export type Database = {
           id?: string
           image_type: Database["public"]["Enums"]["image_type"]
           image_url: string
+          location?: string | null
+          source?: string | null
           symbol_id: string
+          tags?: string[] | null
           title?: string | null
         }
         Update: {
@@ -61,7 +67,10 @@ export type Database = {
           id?: string
           image_type?: Database["public"]["Enums"]["image_type"]
           image_url?: string
+          location?: string | null
+          source?: string | null
           symbol_id?: string
+          tags?: string[] | null
           title?: string | null
         }
         Relationships: [

@@ -18,6 +18,10 @@ export interface SymbolImage {
   title: string | null;
   description: string | null;
   created_at: string | null;
+  // Nouveaux champs
+  location: string | null;
+  source: string | null;
+  tags: string[] | null;
 }
 
 export interface Profile {
