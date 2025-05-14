@@ -6,6 +6,7 @@ import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { ImageType } from '@/utils/symbolImageUtils';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface SymbolTriptychProps {
   symbolId: string | null;
@@ -20,9 +21,11 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
     imageErrors, 
     handleImageError 
   } = useSymbolImages(symbolId);
+  
+  const { t } = useTranslation();
 
   if (!symbolId) {
-    return <EmptyState message="Sélectionnez un symbole pour voir ses détails" />;
+    return <EmptyState />;
   }
   
   if (loading) {
@@ -36,12 +39,12 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   // Calculer le nombre total d'erreurs d'image
   const totalErrors = Object.values(imageErrors).filter(Boolean).length;
   
-  const renderImage = (type: ImageType, title: string) => {
+  const renderImage = (type: ImageType, titleKey: string) => {
     return (
       <SymbolImage
         image={images[type]}
         type={type}
-        title={title}
+        title={t(titleKey)}
         hasError={imageErrors[type]}
         symbolName={symbol?.name || ''}
         onError={() => handleImageError(type)}
@@ -70,17 +73,17 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
       {totalErrors > 0 && (
         <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
           <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertTitle>Attention</AlertTitle>
+          <AlertTitle>{t('symbolTriptych.imageError')}</AlertTitle>
           <AlertDescription>
-            Certaines images authentiques n'ont pas pu être chargées. Des alternatives ont été affichées.
+            {t('symbolTriptych.imageErrorDesc')}
           </AlertDescription>
         </Alert>
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {renderImage('original', 'Image originale')}
-        {renderImage('pattern', 'Extraction du motif')}
-        {renderImage('reuse', 'Nouvelle utilisation')}
+        {renderImage('original', 'symbolTriptych.original')}
+        {renderImage('pattern', 'symbolTriptych.pattern')}
+        {renderImage('reuse', 'symbolTriptych.reuse')}
       </div>
     </div>
   );

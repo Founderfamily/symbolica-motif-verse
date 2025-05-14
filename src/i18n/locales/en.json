@@ -87,5 +87,42 @@
     "privacy": "Privacy",
     "license": "License",
     "copyright": "© 2025 Symbolica — Non-profit organization"
+  },
+  "uploadTools": {
+    "title": "Contribute to symbolic heritage",
+    "subtitle": "Symbolica offers you powerful tools to document, analyze and share cultural symbols",
+    "capture": {
+      "title": "Capture and upload",
+      "desc": "Photograph symbols during your cultural visits and upload them directly to the platform"
+    },
+    "analyze": {
+      "title": "Analyze and document",
+      "desc": "Our AI helps you identify patterns and associate them with their historical and cultural context"
+    },
+    "share": {
+      "title": "Share and exchange",
+      "desc": "The community can vote, comment and enrich your discoveries, allowing you to gain expertise"
+    },
+    "process": {
+      "title": "Analysis process",
+      "subtitle": "An example of architectural pattern processing",
+      "original": "Original photo",
+      "detection": "AI detection",
+      "extraction": "Pattern extraction",
+      "classification": "Classification",
+      "result": "Analysis result",
+      "example": "Art Nouveau Pattern - Period: 1890-1910 - Similarity with 24 other patterns"
+    }
+  },
+  "symbolTriptych": {
+    "empty": "Select a symbol to see its details",
+    "loading": "Loading symbol data...",
+    "error": "Error loading",
+    "errorDesc": "Unable to load symbol data",
+    "imageError": "Attention",
+    "imageErrorDesc": "Some authentic images could not be loaded. Alternatives have been displayed.",
+    "original": "Original image",
+    "pattern": "Pattern extraction",
+    "reuse": "New usage"
   }
 }

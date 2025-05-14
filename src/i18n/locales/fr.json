@@ -87,5 +87,42 @@
     "privacy": "Confidentialité",
     "license": "Licence",
     "copyright": "© 2025 Symbolica — Association loi 1901"
+  },
+  "uploadTools": {
+    "title": "Contribuez au patrimoine symbolique",
+    "subtitle": "Symbolica vous offre des outils puissants pour documenter, analyser et partager les symboles culturels",
+    "capture": {
+      "title": "Capturez et téléchargez",
+      "desc": "Photographiez des symboles lors de vos visites culturelles et téléchargez-les directement sur la plateforme"
+    },
+    "analyze": {
+      "title": "Analysez et documentez",
+      "desc": "Notre IA vous aide à identifier les motifs et les associer à leur contexte historique et culturel"
+    },
+    "share": {
+      "title": "Partagez et échangez",
+      "desc": "La communauté peut voter, commenter et enrichir vos découvertes, vous permettant de gagner en expertise"
+    },
+    "process": {
+      "title": "Processus d'analyse",
+      "subtitle": "Un exemple de traitement de motif architectural",
+      "original": "Photo originale",
+      "detection": "Détection IA",
+      "extraction": "Extraction de motif",
+      "classification": "Classification",
+      "result": "Résultat de l'analyse",
+      "example": "Motif Art Nouveau - Période: 1890-1910 - Similarité avec 24 autres motifs"
+    }
+  },
+  "symbolTriptych": {
+    "empty": "Sélectionnez un symbole pour voir ses détails",
+    "loading": "Chargement des données du symbole...",
+    "error": "Erreur de chargement",
+    "errorDesc": "Impossible de charger les données du symbole",
+    "imageError": "Attention",
+    "imageErrorDesc": "Certaines images authentiques n'ont pas pu être chargées. Des alternatives ont été affichées.",
+    "original": "Image originale",
+    "pattern": "Extraction du motif",
+    "reuse": "Nouvelle utilisation"
   }
 }
