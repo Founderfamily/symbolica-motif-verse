@@ -149,5 +149,43 @@
       "title": "Erreur",
       "description": "Impossible de charger la liste des symboles"
     }
+  },
+  "about": {
+    "title": "À propos de Symbolica",
+    "subtitle": "Une plateforme collaborative dédiée à la préservation et l'exploration du patrimoine symbolique mondial",
+    "mission": {
+      "title": "Notre Mission",
+      "description1": "Symbolica vise à documenter, préserver et partager la riche diversité des motifs symboliques présents à travers les cultures et l'histoire.",
+      "description2": "Grâce à une combinaison de contributions communautaires, d'expertise professionnelle et d'analyse assistée par IA, nous créons un référentiel complet du langage symbolique mondial."
+    },
+    "vision": {
+      "title": "Notre Vision",
+      "description": "Nous croyons que le patrimoine symbolique appartient à l'humanité dans son ensemble et devrait être accessible à tous pour l'éducation, l'inspiration et la compréhension culturelle.",
+      "value1": "Accès libre à la connaissance symbolique",
+      "value2": "Compréhension interculturelle à travers les symboles",
+      "value3": "Préservation des motifs traditionnels"
+    },
+    "analysisProcess": {
+      "title": "Processus d'analyse",
+      "subtitle": "Comment nous analysons et documentons les motifs symboliques"
+    },
+    "team": {
+      "title": "Notre Équipe",
+      "member1": {
+        "name": "Dr. Emma Johnson",
+        "role": "Fondatrice & Historienne d'art",
+        "bio": "Spécialiste de la communication symbolique à travers les anciennes civilisations"
+      },
+      "member2": {
+        "name": "Michael Chen",
+        "role": "Développeur IA",
+        "bio": "Expert en vision par ordinateur et algorithmes de reconnaissance de motifs"
+      },
+      "member3": {
+        "name": "Sophia Rodriguez",
+        "role": "Responsable Communauté",
+        "bio": "Création de ponts entre la recherche académique et les communautés d'enthousiastes"
+      }
+    }
   }
 }

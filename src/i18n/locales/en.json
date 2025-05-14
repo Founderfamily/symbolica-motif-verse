@@ -149,5 +149,43 @@
       "title": "Error",
       "description": "Unable to load the symbols list"
     }
+  },
+  "about": {
+    "title": "About Symbolica",
+    "subtitle": "A collaborative platform dedicated to preserving and exploring the world's symbolic heritage",
+    "mission": {
+      "title": "Our Mission",
+      "description1": "Symbolica aims to document, preserve, and share the rich diversity of symbolic patterns found across cultures and throughout history.",
+      "description2": "Through a combination of community contributions, expert knowledge, and AI-powered analysis, we're creating a comprehensive repository of the world's symbolic language."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "We believe that symbolic heritage belongs to humanity as a whole and should be accessible to everyone for education, inspiration, and cultural understanding.",
+      "value1": "Open access to symbolic knowledge",
+      "value2": "Cross-cultural understanding through symbols",
+      "value3": "Preservation of traditional patterns"
+    },
+    "analysisProcess": {
+      "title": "Analysis Process",
+      "subtitle": "How we analyze and document symbolic patterns"
+    },
+    "team": {
+      "title": "Our Team",
+      "member1": {
+        "name": "Dr. Emma Johnson",
+        "role": "Founder & Art Historian",
+        "bio": "Specializing in symbolic communication across ancient civilizations"
+      },
+      "member2": {
+        "name": "Michael Chen",
+        "role": "AI Developer",
+        "bio": "Expert in computer vision and pattern recognition algorithms"
+      },
+      "member3": {
+        "name": "Sophia Rodriguez",
+        "role": "Community Manager",
+        "bio": "Building bridges between academic research and enthusiast communities"
+      }
+    }
   }
 }
