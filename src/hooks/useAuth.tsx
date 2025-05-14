@@ -1,7 +1,9 @@
+
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { Profile } from '@/types/supabase';
+import { logger } from '@/services/logService';
 
 type AuthContextType = {
   session: Session | null;
@@ -16,6 +18,7 @@ type AuthContextType = {
   }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,16 +31,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    logger.info('Initializing auth state');
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event, newSession) => {
+        logger.info('Auth state changed', { event });
+        
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
 
         // Récupérer le profil utilisateur s'il est connecté
-        if (session?.user) {
+        if (newSession?.user) {
           setTimeout(() => {
-            fetchUserProfile(session.user.id);
+            fetchUserProfile(newSession.user.id);
           }, 0);
         } else {
           setProfile(null);
@@ -47,52 +54,148 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      logger.info('Checking existing session', { 
+        hasSession: !!existingSession 
+      });
       
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
+      setSession(existingSession);
+      setUser(existingSession?.user ?? null);
+      
+      if (existingSession?.user) {
+        fetchUserProfile(existingSession.user.id);
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      logger.info('Cleaning up auth subscription');
+      subscription.unsubscribe();
+    }
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (!error && data) {
-      setProfile(data);
-      setIsAdmin(data.is_admin);
-    }
+    logger.info('Fetching user profile', { userId });
     
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        logger.info('User profile fetched', { 
+          userId, 
+          isAdmin: data.is_admin 
+        });
+        
+        setProfile(data);
+        setIsAdmin(data.is_admin);
+      } else {
+        logger.warning('No profile found for user', { userId });
+        setProfile(null);
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      logger.error('Error fetching profile', { 
+        userId, 
+        error: (error as Error).message
+      });
+      
+      setProfile(null);
+      setIsAdmin(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    logger.info('Sign in attempt', { email });
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        logger.error('Sign in error', { 
+          email, 
+          error: error.message 
+        });
+        throw error;
+      }
+      
+      logger.info('Sign in successful', { email });
+      return { error: null };
+    } catch (error) {
+      logger.error('Sign in exception', { 
+        email, 
+        error: (error as Error).message 
+      });
+      return { error: error as Error };
+    }
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    return { error };
+    logger.info('Sign up attempt', { email });
+    
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) {
+        logger.error('Sign up error', { 
+          email, 
+          error: error.message 
+        });
+        throw error;
+      }
+      
+      logger.info('Sign up successful', { email });
+      return { error: null };
+    } catch (error) {
+      logger.error('Sign up exception', { 
+        email, 
+        error: (error as Error).message 
+      });
+      return { error: error as Error };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    logger.info('Sign out attempt');
+    
+    try {
+      await supabase.auth.signOut();
+      logger.info('Sign out successful');
+    } catch (error) {
+      logger.error('Sign out error', { 
+        error: (error as Error).message 
+      });
+      throw error;
+    }
+  };
+  
+  const refreshProfile = async () => {
+    if (!user) {
+      logger.warning('Cannot refresh profile: No user logged in');
+      return;
+    }
+    
+    logger.info('Manually refreshing user profile', { 
+      userId: user.id 
+    });
+    
+    await fetchUserProfile(user.id);
   };
 
   const value = {
@@ -104,6 +207,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     isAdmin,
+    refreshProfile
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

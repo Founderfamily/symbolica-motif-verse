@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/services/logService';
+import { ErrorHandler } from '@/utils/errorHandler';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,9 +18,19 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Log page view
+  useEffect(() => {
+    logger.info('Auth page viewed', { isLogin });
+  }, [isLogin]);
+
   // Rediriger vers la page appropriée si déjà connecté
   useEffect(() => {
     if (session) {
+      logger.info('User already authenticated, redirecting', { 
+        userId: session.user.id, 
+        isAdmin 
+      });
+      
       if (isAdmin) {
         navigate('/admin');
       } else {
@@ -27,15 +39,46 @@ const Auth = () => {
     }
   }, [session, isAdmin, navigate]);
 
+  const validateForm = (): boolean => {
+    if (!email || !email.includes('@')) {
+      toast({
+        title: 'Validation',
+        description: 'Veuillez saisir une adresse email valide',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    
+    if (!password || password.length < 6) {
+      toast({
+        title: 'Validation',
+        description: 'Le mot de passe doit contenir au moins 6 caractères',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setLoading(true);
 
     try {
+      logger.info(`Attempting ${isLogin ? 'login' : 'signup'}`, { email });
+      
       if (isLogin) {
         // Connexion
         const { error } = await signIn(email, password);
         if (error) throw error;
+        
+        logger.info('Login successful', { email });
         
         toast({
           title: 'Connexion réussie',
@@ -48,6 +91,8 @@ const Auth = () => {
         const { error } = await signUp(email, password);
         if (error) throw error;
         
+        logger.info('Signup successful', { email });
+        
         toast({
           title: 'Inscription réussie',
           description: 'Vérifiez votre email pour confirmer votre compte',
@@ -56,12 +101,9 @@ const Auth = () => {
         setIsLogin(true);
       }
     } catch (error: any) {
-      console.error('Authentication error:', error);
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Une erreur est survenue',
-        variant: 'destructive',
-      });
+      logger.error(`Authentication error: ${error.message}`, { error });
+      
+      ErrorHandler.handleAuthError(error);
     } finally {
       setLoading(false);
     }
@@ -118,6 +160,7 @@ const Auth = () => {
                 type="submit"
                 className="w-full bg-amber-500 hover:bg-amber-600"
                 disabled={loading}
+                aria-label={isLogin ? "Se connecter" : "S'inscrire"}
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -134,7 +177,10 @@ const Auth = () => {
             <button
               type="button"
               className="w-full text-center text-sm text-amber-600 hover:text-amber-700"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                logger.info('Auth mode switched', { isLogin: !isLogin });
+              }}
             >
               {isLogin
                 ? "Vous n'avez pas de compte ? Inscrivez-vous"
