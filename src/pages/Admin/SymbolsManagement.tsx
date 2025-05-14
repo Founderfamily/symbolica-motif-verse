@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { SymbolData } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ImageIcon, PencilIcon } from 'lucide-react';
 
 const SymbolsManagement = () => {
+  const navigate = useNavigate();
   const [symbols, setSymbols] = useState<SymbolData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSymbol, setSelectedSymbol] = useState<SymbolData | null>(null);
@@ -170,6 +172,10 @@ const SymbolsManagement = () => {
     }
   };
 
+  const handleEditImages = (symbolId: string) => {
+    navigate(`/admin/symbols/${symbolId}`);
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -189,18 +195,34 @@ const SymbolsManagement = () => {
               ) : (
                 <div className="space-y-1 max-h-[500px] overflow-y-auto pr-2">
                   {symbols.map((symbol) => (
-                    <button
-                      key={symbol.id}
-                      onClick={() => handleSelectSymbol(symbol)}
-                      className={`w-full text-left px-3 py-2 rounded-md transition ${
-                        selectedSymbol?.id === symbol.id
-                          ? 'bg-amber-100 text-amber-800 font-medium'
-                          : 'hover:bg-slate-100 text-slate-700'
-                      }`}
+                    <div 
+                      key={symbol.id} 
+                      className="flex items-center justify-between"
                     >
-                      <div className="text-sm">{symbol.name}</div>
-                      <div className="text-xs text-slate-500">{symbol.culture}</div>
-                    </button>
+                      <button
+                        onClick={() => handleSelectSymbol(symbol)}
+                        className={`flex-1 text-left px-3 py-2 rounded-md transition ${
+                          selectedSymbol?.id === symbol.id
+                            ? 'bg-amber-100 text-amber-800 font-medium'
+                            : 'hover:bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        <div className="text-sm">{symbol.name}</div>
+                        <div className="text-xs text-slate-500">{symbol.culture}</div>
+                      </button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditImages(symbol.id);
+                        }}
+                        title="Modifier les images"
+                        className="mr-1"
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
                   ))}
                   
                   {symbols.length === 0 && (
@@ -272,13 +294,24 @@ const SymbolsManagement = () => {
 
                   <div className="flex gap-2 justify-end">
                     {selectedSymbol && (
-                      <Button
-                        type="button"
-                        onClick={handleDelete}
-                        variant="destructive"
-                      >
-                        Supprimer
-                      </Button>
+                      <>
+                        <Button
+                          type="button"
+                          onClick={() => handleEditImages(selectedSymbol.id)}
+                          variant="outline"
+                          className="gap-2"
+                        >
+                          <ImageIcon className="h-4 w-4" />
+                          Gérer les images
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleDelete}
+                          variant="destructive"
+                        >
+                          Supprimer
+                        </Button>
+                      </>
                     )}
                     <Button type="button" variant="outline" onClick={handleCancel}>
                       Annuler
