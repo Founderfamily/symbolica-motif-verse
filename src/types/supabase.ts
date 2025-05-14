@@ -18,7 +18,7 @@ export interface SymbolImage {
   title: string | null;
   description: string | null;
   created_at: string | null;
-  // Nouveaux champs
+  // New fields
   location: string | null;
   source: string | null;
   tags: string[] | null;

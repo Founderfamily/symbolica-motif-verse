@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { SymbolData, SymbolImage } from '@/types/supabase';
 import { 
@@ -61,7 +62,11 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
         title: type === 'original' ? 'Image originale' : 
                type === 'pattern' ? 'Motif extrait' : 'Réutilisation contemporaine',
         description: getImageDescription(symbol.name, symbol.culture, type),
-        created_at: prev[type]?.created_at || null
+        created_at: prev[type]?.created_at || null,
+        // Add new fields with default values
+        location: prev[type]?.location || null,
+        source: prev[type]?.source || null,
+        tags: prev[type]?.tags || null
       }
     }));
     
@@ -136,7 +141,11 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
                 image_type: 'original',
                 title: 'Image originale',
                 description: getImageDescription(symbolData.name, symbolData.culture, 'original'),
-                created_at: null
+                created_at: null,
+                // Add new fields with default values
+                location: null,
+                source: null,
+                tags: null
               };
             }
           } else if (organizedImages.original) {
@@ -172,7 +181,11 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
                 image_type: 'pattern',
                 title: 'Motif extrait',
                 description: getImageDescription(symbolData.name, symbolData.culture, 'pattern'),
-                created_at: null
+                created_at: null,
+                // Add new fields with default values
+                location: null,
+                source: null,
+                tags: null
               };
             }
           }
@@ -196,7 +209,11 @@ export const useSymbolImages = (symbolId: string | null): SymbolImagesState => {
                 image_type: 'reuse',
                 title: 'Réutilisation contemporaine',
                 description: getImageDescription(symbolData.name, symbolData.culture, 'reuse'),
-                created_at: null
+                created_at: null,
+                // Add new fields with default values
+                location: null,
+                source: null,
+                tags: null
               };
             }
           } else if (organizedImages.reuse) {

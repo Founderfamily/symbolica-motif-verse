@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ImageType, PLACEHOLDER } from '@/utils/symbolImageUtils';
 import { SymbolImage as SymbolImageType } from '@/types/supabase';
-import { AlertCircle, Loader2, Image as ImageIcon } from 'lucide-react';
+import { AlertCircle, Loader2, Image as ImageIcon, MapPin, Link2, Tag } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SymbolImageProps {
@@ -85,6 +85,34 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
         {image?.description && (
           <p className="text-xs text-slate-600 mt-1 max-w-xs mx-auto">{image.description}</p>
         )}
+        
+        {/* Display new metadata fields if they exist */}
+        <div className="mt-2 flex flex-wrap gap-1 justify-center">
+          {image?.location && (
+            <div className="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+              <MapPin className="w-3 h-3 mr-1" />
+              {image.location}
+            </div>
+          )}
+          
+          {image?.source && (
+            <div className="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+              <Link2 className="w-3 h-3 mr-1" />
+              {image.source}
+            </div>
+          )}
+          
+          {image?.tags && image.tags.length > 0 && (
+            <div className="w-full mt-1 flex flex-wrap gap-1 justify-center">
+              {image.tags.map((tag, index) => (
+                <span key={index} className="inline-flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                  <Tag className="w-3 h-3 mr-1" />
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
