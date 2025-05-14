@@ -72,6 +72,9 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
     : error && !symbolToLocalImage[motif.name] 
       ? PLACEHOLDER 
       : motif.src;
+      
+  // Déterminer si l'image est locale ou distante
+  const isLocalImage = imageSource.startsWith('/');
 
   return (
     <div 
@@ -98,7 +101,7 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
           className={`object-cover w-full h-full transition-all duration-500 ${loading ? 'opacity-0' : 'opacity-100'} ${isHovered ? 'scale-110' : 'scale-100'}`}
           onError={handleImageError}
           onLoad={handleImageLoad}
-          crossOrigin="anonymous"
+          crossOrigin={isLocalImage ? "" : "anonymous"} // N'utiliser crossOrigin que pour les images distantes
         />
         {isHovered && (
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3 transition-opacity duration-300">
@@ -122,3 +125,4 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
 };
 
 export default SymbolCard;
+

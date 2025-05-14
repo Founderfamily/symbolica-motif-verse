@@ -35,6 +35,9 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
     onError();
   };
   
+  // Déterminer si l'image est locale ou distante
+  const isLocalImage = imageUrl.startsWith('/');
+  
   return (
     <div className="flex flex-col space-y-3">
       <div className="rounded-lg overflow-hidden border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 group">
@@ -55,7 +58,7 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
             src={imageUrl}
             alt={`${symbolName || 'Symbol'} - ${title}`}
             className={`object-cover w-full h-full transition-all duration-500 group-hover:scale-105 ${loading ? 'opacity-0' : 'opacity-100'}`}
-            crossOrigin="anonymous"
+            crossOrigin={isLocalImage ? "" : "anonymous"} // N'utiliser crossOrigin que pour les images distantes
             onError={handleError}
             onLoad={handleLoad}
           />
@@ -119,3 +122,4 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
 };
 
 export default SymbolImage;
+

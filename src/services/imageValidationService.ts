@@ -1,4 +1,3 @@
-
 import { SymbolImage } from '../types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logService';
@@ -15,6 +14,23 @@ export function sanitizeImageUrl(url: string): string {
   if (!url) {
     logger.warning('URL d\'image vide détectée');
     return '';
+  }
+  
+  // Vérifier si c'est un chemin local (commençant par '/')
+  if (url.startsWith('/')) {
+    // Pour les chemins locaux, on vérifie juste qu'ils ne sont pas vides
+    // et qu'ils pointent vers un format d'image valide
+    const validImageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'];
+    const hasValidExtension = validImageExtensions.some(ext => url.toLowerCase().endsWith(ext));
+    
+    if (hasValidExtension || url.includes('/images/')) {
+      logger.info('Chemin d\'image local valide', { url });
+      return url;
+    } else {
+      logger.warning('Chemin d\'image local potentiellement invalide', { url });
+      // On retourne quand même l'URL car c'est peut-être un chemin valide sans extension
+      return url;
+    }
   }
   
   // Vérifier si l'URL est déjà valide
@@ -153,6 +169,11 @@ export async function validateImage(
   minWidth: number = 100,
   minHeight: number = 100
 ): Promise<boolean> {
+  // Pour les URL locales, on les considère comme valides sans vérification
+  if (url.startsWith('/')) {
+    return true;
+  }
+  
   const urlValid = await validateImageUrl(url);
   if (!urlValid) return false;
   
@@ -173,6 +194,11 @@ export async function processAndUpdateImage(
   type: ImageType
 ): Promise<string> {
   logger.info('Vérification de l\'image', { symbolName, type, imageUrl });
+  
+  // Si c'est un chemin local, on le considère comme valide sans vérification
+  if (imageUrl.startsWith('/')) {
+    return imageUrl;
+  }
   
   // Vérifier si l'image est valide
   const isValid = await validateImageUrl(imageUrl);
