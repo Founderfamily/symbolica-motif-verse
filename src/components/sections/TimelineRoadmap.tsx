@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const TimelineItem = ({ 
   phase, 
@@ -29,10 +30,12 @@ const TimelineItem = ({
 };
 
 const TimelineRoadmap = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="py-16 px-4 md:px-8 bg-white">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4 text-center">Notre feuille de route</h2>
+        <h2 className="text-3xl font-bold mb-4 text-center">{t('sections.roadmap')}</h2>
         <p className="text-center text-slate-600 mb-10">
           Symbolica se construit progressivement avec votre participation
         </p>

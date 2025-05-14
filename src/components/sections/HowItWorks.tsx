@@ -1,37 +1,40 @@
 
 import React from 'react';
 import { Camera, Tag, Compass, Palette } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const HowItWorks = () => {
+  const { t } = useTranslation();
+  
   const steps = [
     { 
       step: "1", 
-      title: "Photographiez", 
-      desc: "Capturez et téléchargez des photos de symboles que vous trouvez",
+      title: t('howItWorks.steps.1.title'), 
+      desc: t('howItWorks.steps.1.desc'),
       icon: Camera,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50"
     },
     { 
       step: "2", 
-      title: "Annotez", 
-      desc: "Identifiez et décrivez les motifs de façon interactive",
+      title: t('howItWorks.steps.2.title'), 
+      desc: t('howItWorks.steps.2.desc'),
       icon: Tag,
       color: "from-amber-500 to-amber-600", 
       bgColor: "bg-amber-50"
     },
     { 
       step: "3", 
-      title: "Explorez", 
-      desc: "Découvrez les liens entre les symboles à travers cultures et époques",
+      title: t('howItWorks.steps.3.title'), 
+      desc: t('howItWorks.steps.3.desc'),
       icon: Compass,
       color: "from-emerald-500 to-emerald-600",
       bgColor: "bg-emerald-50"
     },
     { 
       step: "4", 
-      title: "Créez", 
-      desc: "Générez de nouveaux motifs inspirés par le patrimoine avec notre IA",
+      title: t('howItWorks.steps.4.title'), 
+      desc: t('howItWorks.steps.4.desc'),
       icon: Palette,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50"
@@ -49,10 +52,10 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-12">
           <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-slate-200 to-slate-300 text-slate-800 inline-block mb-2">
-            Processus
+            {t('howItWorks.process')}
           </span>
-          <h2 className="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Comment ça marche</h2>
-          <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">Une plateforme open-source pour préserver, éduquer et inspirer autour des symboles culturels</p>
+          <h2 className="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">{t('sections.howItWorks')}</h2>
+          <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">{t('howItWorks.intro')}</p>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">

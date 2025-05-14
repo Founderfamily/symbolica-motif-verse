@@ -2,6 +2,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const testimonials = [
   {
@@ -28,10 +29,12 @@ const testimonials = [
 ];
 
 const Testimonials = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="py-16 px-4 md:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4 text-center">Témoignages</h2>
+        <h2 className="text-3xl font-bold mb-4 text-center">{t('sections.testimonials')}</h2>
         <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
           Découvrez comment Symbolica transforme la façon dont les experts et passionnés interagissent avec les symboles culturels
         </p>

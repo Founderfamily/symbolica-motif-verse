@@ -3,8 +3,11 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Upload, Search, MapPin, Users } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const UploadTools = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="py-16 px-4 md:px-8 bg-slate-50">
       <div className="max-w-7xl mx-auto">
