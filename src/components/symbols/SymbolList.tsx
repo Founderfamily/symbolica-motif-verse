@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SymbolData } from '@/types/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface SymbolListProps {
   onSelectSymbol: (symbolId: string) => void;
@@ -13,6 +14,7 @@ const SymbolList: React.FC<SymbolListProps> = ({ onSelectSymbol, selectedSymbolI
   const [symbols, setSymbols] = useState<SymbolData[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { t, currentLanguage } = useTranslation();
   
   useEffect(() => {
     const fetchSymbols = async () => {
@@ -32,15 +34,15 @@ const SymbolList: React.FC<SymbolListProps> = ({ onSelectSymbol, selectedSymbolI
         
         setSymbols(typedData);
         
-        // Sélectionner le premier symbole par défaut si aucun n'est sélectionné
+        // Select the first symbol by default if none is selected
         if (typedData && typedData.length > 0 && !selectedSymbolId) {
           onSelectSymbol(typedData[0].id);
         }
       } catch (error) {
-        console.error("Erreur lors du chargement des symboles:", error);
+        console.error("Error loading symbols:", error);
         toast({
-          title: "Erreur",
-          description: "Impossible de charger la liste des symboles",
+          title: t('symbolList.error.title'),
+          description: t('symbolList.error.description'),
           variant: "destructive",
         });
       } finally {
@@ -49,7 +51,15 @@ const SymbolList: React.FC<SymbolListProps> = ({ onSelectSymbol, selectedSymbolI
     };
     
     fetchSymbols();
-  }, [onSelectSymbol, selectedSymbolId, toast]);
+  }, [onSelectSymbol, selectedSymbolId, toast, t]);
+  
+  // Helper function to get translated value or fallback to default
+  const getSymbolTranslation = (symbol: SymbolData, field: 'name' | 'culture' | 'period' | 'description') => {
+    if (symbol.translations && symbol.translations[currentLanguage]?.[field]) {
+      return symbol.translations[currentLanguage][field];
+    }
+    return symbol[field];
+  };
   
   if (loading) {
     return (
@@ -62,7 +72,7 @@ const SymbolList: React.FC<SymbolListProps> = ({ onSelectSymbol, selectedSymbolI
   if (symbols.length === 0) {
     return (
       <div className="p-4 text-center text-slate-600">
-        Aucun symbole trouvé
+        {t('symbolList.empty')}
       </div>
     );
   }
@@ -79,8 +89,8 @@ const SymbolList: React.FC<SymbolListProps> = ({ onSelectSymbol, selectedSymbolI
               : 'hover:bg-slate-100 text-slate-700'
           }`}
         >
-          <div className="text-sm">{symbol.name}</div>
-          <div className="text-xs text-slate-500">{symbol.culture}</div>
+          <div className="text-sm">{getSymbolTranslation(symbol, 'name')}</div>
+          <div className="text-xs text-slate-500">{getSymbolTranslation(symbol, 'culture')}</div>
         </button>
       ))}
     </div>

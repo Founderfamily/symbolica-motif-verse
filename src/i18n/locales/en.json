@@ -142,5 +142,12 @@
     "location": "Location",
     "source": "Source",
     "tags": "Tags"
+  },
+  "symbolList": {
+    "empty": "No symbols found",
+    "error": {
+      "title": "Error",
+      "description": "Unable to load the symbols list"
+    }
   }
 }
