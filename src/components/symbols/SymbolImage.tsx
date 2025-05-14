@@ -5,6 +5,7 @@ import { ImageType, PLACEHOLDER } from '@/utils/symbolImageUtils';
 import { SymbolImage as SymbolImageType } from '@/types/supabase';
 import { AlertCircle, Loader2, Image as ImageIcon, MapPin, Link2, Tag } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface SymbolImageProps {
   image: SymbolImageType | null;
@@ -25,6 +26,7 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
 }) => {
   const imageUrl = image?.image_url || PLACEHOLDER;
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
   
   const handleLoad = () => {
     setLoading(false);
@@ -76,7 +78,7 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>L'image d'origine n'a pas pu être chargée. Une alternative est affichée.</p>
+                  <p>{t('symbolTriptych.imageErrorDesc')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -84,7 +86,7 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
         </AspectRatio>
       </div>
       <div className="text-center">
-        <h4 className="text-sm font-medium text-slate-800">{image?.title || title}</h4>
+        <h4 className="text-sm font-medium text-slate-800">{title}</h4>
         {image?.description && (
           <p className="text-xs text-slate-600 mt-1 max-w-xs mx-auto">{image.description}</p>
         )}
@@ -122,4 +124,3 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
 };
 
 export default SymbolImage;
-

@@ -39,12 +39,20 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   // Calculer le nombre total d'erreurs d'image
   const totalErrors = Object.values(imageErrors).filter(Boolean).length;
   
-  const renderImage = (type: ImageType, titleKey: string) => {
+  const renderImage = (type: ImageType) => {
+    // Translate image titles based on image type
+    const titleKey = 
+      type === 'original' ? 'symbolTriptych.original' :
+      type === 'pattern' ? 'symbolTriptych.pattern' : 'symbolTriptych.reuse';
+    
+    // Get translated title
+    const translatedTitle = t(titleKey);
+    
     return (
       <SymbolImage
         image={images[type]}
         type={type}
-        title={t(titleKey)}
+        title={translatedTitle}
         hasError={imageErrors[type]}
         symbolName={symbol?.name || ''}
         onError={() => handleImageError(type)}
@@ -81,9 +89,9 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {renderImage('original', 'symbolTriptych.original')}
-        {renderImage('pattern', 'symbolTriptych.pattern')}
-        {renderImage('reuse', 'symbolTriptych.reuse')}
+        {renderImage('original')}
+        {renderImage('pattern')}
+        {renderImage('reuse')}
       </div>
     </div>
   );
