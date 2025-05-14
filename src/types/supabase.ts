@@ -8,6 +8,14 @@ export interface SymbolData {
   description: string | null;
   created_at: string | null;
   updated_at: string | null;
+  translations?: {
+    [language: string]: {
+      name: string;
+      culture: string;
+      period: string;
+      description?: string;
+    };
+  } | null;
 }
 
 export interface SymbolImage {
@@ -22,6 +30,12 @@ export interface SymbolImage {
   location: string | null;
   source: string | null;
   tags: string[] | null;
+  translations?: {
+    [language: string]: {
+      title?: string;
+      description?: string;
+    };
+  } | null;
 }
 
 export interface Profile {

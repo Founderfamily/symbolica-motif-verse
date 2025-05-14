@@ -22,7 +22,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
     handleImageError 
   } = useSymbolImages(symbolId);
   
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
 
   if (!symbolId) {
     return <EmptyState />;
@@ -39,6 +39,14 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   // Calculate total image errors
   const totalErrors = Object.values(imageErrors).filter(Boolean).length;
   
+  // Get translated symbol data
+  const getSymbolTranslation = (field: 'name' | 'culture' | 'period' | 'description') => {
+    if (symbol.translations && symbol.translations[currentLanguage]?.[field]) {
+      return symbol.translations[currentLanguage][field];
+    }
+    return symbol[field];
+  };
+  
   const renderImage = (type: ImageType) => {
     // Translate image titles based on image type
     const titleKey = 
@@ -54,8 +62,9 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
         type={type}
         title={translatedTitle}
         hasError={imageErrors[type]}
-        symbolName={symbol?.name || ''}
+        symbolName={getSymbolTranslation('name') || ''}
         onError={() => handleImageError(type)}
+        currentLanguage={currentLanguage}
       />
     );
   };
@@ -66,15 +75,17 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
       <div className="absolute -z-10 inset-0 opacity-[0.03] pattern-dots-lg"></div>
       
       <div className="mb-6 border-b border-slate-100 pb-4">
-        <h2 className="text-2xl font-serif bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">{symbol?.name}</h2>
+        <h2 className="text-2xl font-serif bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+          {getSymbolTranslation('name')}
+        </h2>
         {symbol && (
           <p className="text-sm text-slate-600 mt-1 flex items-center">
             <span className="inline-block w-3 h-3 rounded-full mr-2" style={{background: `var(--color-${symbol.culture.toLowerCase()})`}}></span>
-            {symbol.culture} · {symbol.period}
+            {getSymbolTranslation('culture')} · {getSymbolTranslation('period')}
           </p>
         )}
-        {symbol?.description && (
-          <p className="text-slate-700 mt-3 leading-relaxed">{symbol.description}</p>
+        {getSymbolTranslation('description') && (
+          <p className="text-slate-700 mt-3 leading-relaxed">{getSymbolTranslation('description')}</p>
         )}
       </div>
       

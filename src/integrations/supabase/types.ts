@@ -48,6 +48,7 @@ export type Database = {
           symbol_id: string
           tags: string[] | null
           title: string | null
+          translations: Json | null
         }
         Insert: {
           created_at?: string | null
@@ -60,6 +61,7 @@ export type Database = {
           symbol_id: string
           tags?: string[] | null
           title?: string | null
+          translations?: Json | null
         }
         Update: {
           created_at?: string | null
@@ -72,6 +74,7 @@ export type Database = {
           symbol_id?: string
           tags?: string[] | null
           title?: string | null
+          translations?: Json | null
         }
         Relationships: [
           {
@@ -91,6 +94,7 @@ export type Database = {
           id: string
           name: string
           period: string
+          translations: Json | null
           updated_at: string | null
         }
         Insert: {
@@ -100,6 +104,7 @@ export type Database = {
           id?: string
           name: string
           period: string
+          translations?: Json | null
           updated_at?: string | null
         }
         Update: {
@@ -109,6 +114,7 @@ export type Database = {
           id?: string
           name?: string
           period?: string
+          translations?: Json | null
           updated_at?: string | null
         }
         Relationships: []

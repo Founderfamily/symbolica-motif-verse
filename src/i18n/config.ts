@@ -24,7 +24,9 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
-    }
+      lookupLocalStorage: 'i18nextLng'
+    },
+    load: 'languageOnly' // Strip region code (en-US -> en)
   });
 
 export default i18n;

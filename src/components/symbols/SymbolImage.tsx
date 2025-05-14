@@ -14,6 +14,7 @@ interface SymbolImageProps {
   hasError: boolean;
   symbolName: string;
   onError: () => void;
+  currentLanguage: string;
 }
 
 const SymbolImage: React.FC<SymbolImageProps> = ({
@@ -22,7 +23,8 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
   title,
   hasError,
   symbolName,
-  onError
+  onError,
+  currentLanguage
 }) => {
   const imageUrl = image?.image_url || PLACEHOLDER;
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,14 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
   const handleError = () => {
     setLoading(false);
     onError();
+  };
+
+  // Get translated image data
+  const getImageTranslation = (field: 'title' | 'description') => {
+    if (image?.translations && image.translations[currentLanguage]?.[field]) {
+      return image.translations[currentLanguage][field];
+    }
+    return image?.[field] || '';
   };
   
   // Determine if the image is local or remote
@@ -88,10 +98,10 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
       <div className="text-center">
         <h4 className="text-sm font-medium text-slate-800">{title}</h4>
         {image?.description && (
-          <p className="text-xs text-slate-600 mt-1 max-w-xs mx-auto">{image.description}</p>
+          <p className="text-xs text-slate-600 mt-1 max-w-xs mx-auto">{getImageTranslation('description')}</p>
         )}
         
-        {/* Display new metadata fields if they exist */}
+        {/* Display metadata fields if they exist */}
         <div className="mt-2 flex flex-wrap gap-1 justify-center">
           {image?.location && (
             <div className="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
