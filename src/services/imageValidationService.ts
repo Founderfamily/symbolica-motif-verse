@@ -1,149 +1,169 @@
 
-import { ImageType, PLACEHOLDER } from "@/utils/symbolImageUtils";
-import { supabase } from "@/integrations/supabase/client";
+import { SymbolImage } from '../types/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
-// Fonction pour vérifier si une URL est accessible
-export const checkImageAvailability = async (url: string): Promise<boolean> => {
-  // Ne pas vérifier les images locales ou les placeholders
-  if (url.startsWith('/') || url === PLACEHOLDER) {
-    return true;
-  }
+// Types d'images prises en charge
+export type ImageType = 'original' | 'pattern' | 'reuse';
+
+// Fonction pour valider les URL d'images
+export async function validateImageUrl(url: string): Promise<boolean> {
+  if (!url || url.trim() === '') return false;
   
+  // Vérifier si l'URL est valide
   try {
-    // Utiliser une approche plus fiable pour vérifier les URLs
-    const response = await fetch(url, { 
-      method: 'HEAD',
-      // Ne pas utiliser no-cors car cela retourne toujours un statut "opaque"
-      // ce qui nous empêche de vérifier correctement la réponse
-      mode: 'cors'
-    });
-    
-    // Vérifier le statut HTTP (200-299 indique un succès)
-    return response.status >= 200 && response.status < 300;
-  } catch (error) {
-    console.error(`Erreur lors de la vérification de l'URL d'image: ${url}`, error);
+    new URL(url);
+  } catch (e) {
+    console.error("URL invalide:", url);
     return false;
   }
-};
 
-// Fonction pour nettoyer et valider une URL d'image
-export const sanitizeImageUrl = (url: string | null | undefined): string => {
-  if (!url) return PLACEHOLDER;
-  
-  // Vérifier si c'est une URL valide
-  try {
-    // Vérifier si l'URL pointe vers un fichier image
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-    const lowercaseUrl = url.toLowerCase();
-    const isLikelyImageUrl = imageExtensions.some(ext => lowercaseUrl.endsWith(ext)) || 
-                             lowercaseUrl.includes('/image') || 
-                             lowercaseUrl.includes('/images');
-    
-    // Tester si c'est une URL valide
-    new URL(url);
-    
-    // Retourner l'URL si elle semble pointer vers une image
-    if (isLikelyImageUrl) {
-      return url;
-    }
-    
-    // Sinon, signaler qu'il ne s'agit pas d'une URL d'image
-    console.warn(`L'URL ne semble pas pointer vers une image: ${url}`);
-    return PLACEHOLDER;
-  } catch (e) {
-    // Si ce n'est pas une URL absolue, vérifier si c'est un chemin local valide
-    if (url.startsWith('/')) {
-      return url;
-    }
-    console.warn(`URL invalide: ${url}`);
-    return PLACEHOLDER;
+  // Pour les URL de Supabase Storage
+  if (url.includes('supabase') && url.includes('storage')) {
+    // Nous faisons confiance à nos propres URL de stockage
+    return true;
   }
-};
 
-// Fonction pour obtenir la meilleure description pour un type d'image
-export const getImageDescription = (
+  try {
+    // Vérifier si l'image est accessible
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    console.error("Erreur lors de la vérification de l'URL:", error);
+    return false;
+  }
+}
+
+// Fonction pour valider les dimensions de l'image
+export async function validateImageDimensions(
+  url: string,
+  minWidth: number = 100,
+  minHeight: number = 100
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    
+    img.onload = () => {
+      const valid = img.width >= minWidth && img.height >= minHeight;
+      resolve(valid);
+    };
+    
+    img.onerror = () => {
+      console.error("Erreur lors du chargement de l'image:", url);
+      resolve(false);
+    };
+    
+    img.src = url;
+  });
+}
+
+// Fonction pour valider le type MIME de l'image
+export async function validateImageType(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    if (!response.ok) return false;
+    
+    const contentType = response.headers.get('content-type');
+    return contentType !== null && contentType.startsWith('image/');
+  } catch (error) {
+    console.error("Erreur lors de la vérification du type MIME:", error);
+    return false;
+  }
+}
+
+// Fonction principale pour valider une image complètement
+export async function validateImage(
+  url: string,
+  minWidth: number = 100,
+  minHeight: number = 100
+): Promise<boolean> {
+  const urlValid = await validateImageUrl(url);
+  if (!urlValid) return false;
+  
+  const dimensionsValid = await validateImageDimensions(url, minWidth, minHeight);
+  if (!dimensionsValid) return false;
+  
+  const typeValid = await validateImageType(url);
+  return typeValid;
+}
+
+// Fonction pour traiter et mettre à jour une image en cas d'échec
+export async function processAndUpdateImage(
   symbolName: string,
   symbolCulture: string,
+  imageUrl: string,
   type: ImageType
-): string => {
+): Promise<string> {
+  // Vérifier si l'image est valide
+  const isValid = await validateImageUrl(imageUrl);
+  
+  if (isValid) {
+    return imageUrl; // Image valide, renvoyer l'URL originale
+  }
+  
+  // Si l'image n'est pas valide, générer une alternative
+  console.log(`Image non disponible: ${imageUrl}, recherche d'alternative...`);
+  
+  let alternativeUrl = "";
+  
+  // Utiliser le switch avec tous les types possibles définis dans ImageType
   switch (type) {
     case 'original':
-      return `Représentation historique authentique d'un ${symbolName} de la culture ${symbolCulture}`;
+      alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolName.toLowerCase())}+${symbolCulture.toLowerCase()}+historical+artifact`;
+      break;
     case 'pattern':
-      return `Extraction graphique du motif ${symbolName}, utilisé dans la culture ${symbolCulture}`;
+      alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolName.toLowerCase())}+pattern+design`;
+      break;
     case 'reuse':
-      return `Application contemporaine du symbole ${symbolName} dans le contexte moderne de la culture ${symbolCulture}`;
+      alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolName.toLowerCase())}+modern+design`;
+      break;
     default:
-      return `Image du symbole ${symbolName}`;
+      alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolName.toLowerCase())}`;
   }
-};
+  
+  console.log(`URL alternative générée: ${alternativeUrl}`);
+  return alternativeUrl;
+}
 
-// Fonction pour traiter et mettre à jour l'URL d'une image dans Supabase
-export const processAndUpdateImage = async (
-  symbolId: string,
-  symbolName: string,
-  symbolCulture: string,
-  type: ImageType,
-  url: string
-): Promise<string> => {
-  // Valider d'abord l'URL
-  const isAvailable = await checkImageAvailability(url);
-  
-  if (!isAvailable) {
-    // Si l'URL n'est pas valide, utiliser une source alternative
-    console.log(`Image non disponible: ${url}, recherche d'alternative...`);
+// Sauvegarder une image dans Supabase Storage
+export async function saveImageToStorage(
+  file: File,
+  bucket: string,
+  path: string
+): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(path, file, {
+        upsert: true,
+        cacheControl: '3600',
+        contentType: file.type,
+      });
     
-    let alternativeUrl = "";
-    
-    // Utiliser le switch avec tous les types possibles définis dans ImageType
-    switch (type) {
-      case 'original':
-        alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolName.toLowerCase())}+${symbolCulture.toLowerCase()}+historical+artifact`;
-        break;
-      case 'pattern':
-        // Pour les motifs, utiliser notre base locale uniquement
-        return url;
-      case 'reuse':
-        alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolCulture.toLowerCase())}+art+contemporary`;
-        break;
-      default:
-        return url;
+    if (error) {
+      throw error;
     }
     
-    // Définir le titre en fonction du type d'image
-    let title: string;
-    switch (type) {
-      case 'original':
-        title = 'Image originale';
-        break;
-      case 'pattern':
-        title = 'Motif extrait';
-        break;
-      case 'reuse':
-        title = 'Réutilisation contemporaine';
-        break;
-      default:
-        title = 'Image du symbole';
-    }
+    // Construire l'URL de l'image stockée
+    const { data: urlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(data.path);
     
-    // Mettre à jour dans Supabase avec l'alternative
-    try {
-      await supabase
-        .from('symbol_images')
-        .update({
-          image_url: alternativeUrl,
-          title: title,
-          description: getImageDescription(symbolName, symbolCulture, type)
-        })
-        .eq('symbol_id', symbolId)
-        .eq('image_type', type);
-        
-      return alternativeUrl;
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour de l'image alternative:", error);
-      return url; // En cas d'erreur, retourner l'URL originale
-    }
+    return urlData.publicUrl;
+  } catch (error) {
+    console.error("Erreur lors de l'enregistrement de l'image:", error);
+    return null;
   }
-  
-  return url; // L'URL est valide, la retourner telle quelle
-};
+}
+
+// Fonctions pour valider spécifiquement chaque type d'image
+export function validateOriginalImage(url: string): Promise<boolean> {
+  return validateImage(url, 300, 300);
+}
+
+export function validatePatternImage(url: string): Promise<boolean> {
+  return validateImage(url, 200, 200);
+}
+
+export function validateReuseImage(url: string): Promise<boolean> {
+  return validateImage(url, 250, 250);
+}

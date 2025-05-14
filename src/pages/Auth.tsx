@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -12,16 +12,20 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, session } = useAuth();
+  const { signIn, signUp, session, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Rediriger vers la page d'accueil si déjà connecté
-  React.useEffect(() => {
+  // Rediriger vers la page appropriée si déjà connecté
+  useEffect(() => {
     if (session) {
-      navigate('/');
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     }
-  }, [session, navigate]);
+  }, [session, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +42,7 @@ const Auth = () => {
           description: 'Vous êtes maintenant connecté',
         });
         
-        navigate('/');
+        // La redirection sera gérée par le useEffect
       } else {
         // Inscription
         const { error } = await signUp(email, password);
