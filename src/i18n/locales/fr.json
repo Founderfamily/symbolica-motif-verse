@@ -1,0 +1,91 @@
+
+{
+  "app": {
+    "name": "Symbolica",
+    "version": "Alpha"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "explore": "Explorer",
+    "symbols": "Symboles",
+    "about": "À propos",
+    "community": "Communauté"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "register": "Inscription",
+    "admin": "Admin"
+  },
+  "hero": {
+    "heading": "Symbolica",
+    "subheading": "Explorez, documentez et partagez le patrimoine symbolique mondial avec notre communauté de passionnés",
+    "community": "Rejoindre la communauté",
+    "explore": "Découvrir les symboles"
+  },
+  "sections": {
+    "museumPortal": "Musée Symbolica",
+    "communityPortal": "Portail collaboratif du patrimoine symbolique",
+    "joinCommunity": "Rejoindre une communauté",
+    "features": "Fonctionnalités",
+    "howItWorks": "Comment ça marche",
+    "testimonials": "Témoignages",
+    "partners": "Nos partenaires",
+    "roadmap": "Notre feuille de route",
+    "faq": "Questions fréquentes",
+    "callToAction": "Rejoignez-nous",
+    "newsletter": "Restez informé",
+    "newsletterSub": "Inscrivez-vous à notre newsletter pour suivre l'évolution du projet",
+    "subscribe": "S'inscrire",
+    "partnerIntro": "Symbolica collabore avec des institutions culturelles et éducatives pour préserver et partager le patrimoine symbolique",
+    "interested": "Intéressé par un partenariat ?",
+    "contactUs": "Contactez-nous",
+    "openSource": "Open Source"
+  },
+  "howItWorks": {
+    "process": "Processus",
+    "intro": "Une plateforme open-source pour préserver, éduquer et inspirer autour des symboles culturels",
+    "steps": {
+      "1": {
+        "title": "Photographiez",
+        "desc": "Capturez et téléchargez des photos de symboles que vous trouvez"
+      },
+      "2": {
+        "title": "Annotez",
+        "desc": "Identifiez et décrivez les motifs de façon interactive"
+      },
+      "3": {
+        "title": "Explorez",
+        "desc": "Découvrez les liens entre les symboles à travers cultures et époques"
+      },
+      "4": {
+        "title": "Créez",
+        "desc": "Générez de nouveaux motifs inspirés par le patrimoine avec notre IA"
+      }
+    }
+  },
+  "callToAction": {
+    "joinUs": "Rejoignez la communauté Symbolica",
+    "description": "Participez à la préservation et à la redécouverte du patrimoine symbolique mondial. Une initiative ouverte et collaborative pour tous les passionnés de culture.",
+    "join": "M'inscrire et contribuer",
+    "explore": "Explorer les collections",
+    "support": "Projet soutenu par des musées, universités et institutions culturelles"
+  },
+  "footer": {
+    "tagline": "Une plateforme open-source dédiée à la découverte, l'analyse et la création autour des symboles & motifs culturels.",
+    "platform": "Plateforme",
+    "home": "Accueil",
+    "explore": "Explorer",
+    "contribute": "Contribuer",
+    "about": "À propos",
+    "community": "Communauté",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "legal": "Légal",
+    "terms": "Mentions légales",
+    "privacy": "Confidentialité",
+    "license": "Licence",
+    "copyright": "© 2025 Symbolica — Association loi 1901"
+  }
+}

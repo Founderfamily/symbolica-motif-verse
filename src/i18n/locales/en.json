@@ -1,0 +1,91 @@
+
+{
+  "app": {
+    "name": "Symbolica",
+    "version": "Alpha"
+  },
+  "navigation": {
+    "home": "Home",
+    "explore": "Explore",
+    "symbols": "Symbols",
+    "about": "About",
+    "community": "Community"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "admin": "Admin"
+  },
+  "hero": {
+    "heading": "Symbolica",
+    "subheading": "Explore, document and share the world's symbolic heritage with our community of enthusiasts",
+    "community": "Join the community",
+    "explore": "Discover symbols"
+  },
+  "sections": {
+    "museumPortal": "Symbolica Museum",
+    "communityPortal": "Collaborative portal for symbolic heritage",
+    "joinCommunity": "Join a community",
+    "features": "Features",
+    "howItWorks": "How it works",
+    "testimonials": "Testimonials",
+    "partners": "Our Partners",
+    "roadmap": "Our Roadmap",
+    "faq": "Frequently Asked Questions",
+    "callToAction": "Join us",
+    "newsletter": "Stay informed",
+    "newsletterSub": "Subscribe to our newsletter to follow the project's evolution",
+    "subscribe": "Subscribe",
+    "partnerIntro": "Symbolica collaborates with cultural and educational institutions to preserve and share symbolic heritage",
+    "interested": "Interested in a partnership?",
+    "contactUs": "Contact us",
+    "openSource": "Open Source"
+  },
+  "howItWorks": {
+    "process": "Process",
+    "intro": "An open-source platform to preserve, educate and inspire around cultural symbols",
+    "steps": {
+      "1": {
+        "title": "Photograph",
+        "desc": "Capture and upload photos of symbols you find"
+      },
+      "2": {
+        "title": "Annotate",
+        "desc": "Identify and describe patterns interactively"
+      },
+      "3": {
+        "title": "Explore",
+        "desc": "Discover links between symbols across cultures and eras"
+      },
+      "4": {
+        "title": "Create",
+        "desc": "Generate new patterns inspired by heritage with our AI"
+      }
+    }
+  },
+  "callToAction": {
+    "joinUs": "Join the Symbolica community",
+    "description": "Participate in the preservation and rediscovery of the world's symbolic heritage. An open and collaborative initiative for all culture enthusiasts.",
+    "join": "Register and contribute",
+    "explore": "Explore collections",
+    "support": "Project supported by museums, universities and cultural institutions"
+  },
+  "footer": {
+    "tagline": "An open-source platform dedicated to the discovery, analysis and creation around symbols & cultural patterns.",
+    "platform": "Platform",
+    "home": "Home",
+    "explore": "Explore",
+    "contribute": "Contribute",
+    "about": "About",
+    "community": "Community",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "legal": "Legal",
+    "terms": "Legal Notice",
+    "privacy": "Privacy",
+    "license": "License",
+    "copyright": "© 2025 Symbolica — Non-profit organization"
+  }
+}
