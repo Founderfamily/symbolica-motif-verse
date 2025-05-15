@@ -187,10 +187,10 @@ const ContributionDetail = () => {
                 />
                 {contribution.images[0].extracted_pattern_url && (
                   <div className="mt-4">
-                    <h3 className="text-lg font-medium mb-2">Motif extrait:</h3>
+                    <h3 className="text-lg font-medium mb-2">{t('contributions.detail.extractedPattern')}</h3>
                     <img
                       src={contribution.images[0].extracted_pattern_url}
-                      alt="Motif extrait"
+                      alt={t('contributions.detail.extractedPattern')}
                       className="max-w-full h-auto rounded-lg border"
                     />
                   </div>
@@ -200,9 +200,9 @@ const ContributionDetail = () => {
           </div>
           
           <div>
-            <h2 className="text-xl font-semibold mb-2">Description</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('contributions.detail.description')}</h2>
             <p className="text-slate-700 whitespace-pre-line">
-              {contribution.description || "Aucune description fournie."}
+              {contribution.description || t('contributions.detail.noDescription')}
             </p>
           </div>
           
@@ -229,7 +229,7 @@ const ContributionDetail = () => {
                       </Avatar>
                       <div>
                         <p className="font-medium">
-                          {comment.profiles?.username || "Administrateur"}
+                          {comment.profiles?.username || t('contributions.detail.admin.administrator')}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(comment.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}

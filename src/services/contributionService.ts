@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   UserContribution, 
@@ -257,8 +256,8 @@ export async function createContribution(
     }
 
     toast({
-      title: "Contribution soumise avec succès",
-      description: "Votre contribution a été enregistrée et sera examinée prochainement.",
+      title: "contributions.toast.contributionSubmitted",
+      description: "contributions.toast.contributionDescription",
     });
 
     return contribution.id;
@@ -266,7 +265,7 @@ export async function createContribution(
     console.error('Error creating contribution:', error.message);
     toast({
       variant: "destructive",
-      title: "Erreur lors de la création de la contribution",
+      title: "contributions.toast.errorCreating",
       description: error.message,
     });
     return null;
@@ -311,8 +310,8 @@ export async function updateContributionStatus(
     }
 
     toast({
-      title: `Contribution ${status === 'approved' ? 'approuvée' : 'rejetée'}`,
-      description: "Le statut de la contribution a été mis à jour.",
+      title: `contributions.toast.statusUpdateSuccess`,
+      description: `contributions.toast.statusUpdateSuccess`,
     });
 
     return true;
@@ -320,7 +319,7 @@ export async function updateContributionStatus(
     console.error('Error updating contribution status:', error.message);
     toast({
       variant: "destructive",
-      title: "Erreur lors de la mise à jour du statut",
+      title: "contributions.toast.errorUpdating",
       description: error.message,
     });
     return false;
