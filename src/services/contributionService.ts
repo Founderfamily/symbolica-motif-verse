@@ -136,26 +136,19 @@ export async function getContributionComments(contributionId: string): Promise<C
         contribution_id: item.contribution_id,
         user_id: item.user_id,
         comment: item.comment,
-        created_at: item.created_at
+        created_at: item.created_at,
+        comment_translations: item.comment_translations
       };
       
       // Safely access potential nullable properties
-      if (item.profiles !== null && 
-          item.profiles !== undefined && 
-          typeof item.profiles === 'object' && 
-          !('error' in item.profiles)) {
+      if (item.profiles) {
+        const profiles = item.profiles as { username?: string; full_name?: string };
         
-        // Make a local copy of profiles to avoid TypeScript null warnings
-        const profiles = item.profiles;
-        
-        // Only add the profiles property if it's valid and has the necessary fields
-        if (profiles && 
-            typeof profiles.username === 'string' && 
-            typeof profiles.full_name === 'string') {
-          
+        // Only add the profiles property if it's valid
+        if (profiles && typeof profiles === 'object') {
           comment.profiles = {
-            username: profiles.username,
-            full_name: profiles.full_name
+            username: profiles.username || '',
+            full_name: profiles.full_name || ''
           };
         }
       }
@@ -189,6 +182,27 @@ export async function createContribution(
         longitude: formData.longitude,
         cultural_context: formData.cultural_context,
         period: formData.period,
+        // Ajout des champs de traduction
+        title_translations: {
+          fr: formData.title,
+          en: formData.title
+        },
+        description_translations: formData.description ? {
+          fr: formData.description,
+          en: formData.description
+        } : null,
+        location_name_translations: formData.location_name ? {
+          fr: formData.location_name,
+          en: formData.location_name
+        } : null,
+        cultural_context_translations: formData.cultural_context ? {
+          fr: formData.cultural_context,
+          en: formData.cultural_context
+        } : null,
+        period_translations: formData.period ? {
+          fr: formData.period,
+          en: formData.period
+        } : null
       })
       .select()
       .single();
@@ -227,7 +241,11 @@ export async function createContribution(
     if (formData.tags && formData.tags.length > 0) {
       const tagInserts = formData.tags.map(tag => ({
         contribution_id: contribution.id,
-        tag
+        tag,
+        tag_translations: {
+          fr: tag,
+          en: tag
+        }
       }));
 
       const { error: tagError } = await supabase
@@ -281,7 +299,11 @@ export async function updateContributionStatus(
         .insert({
           contribution_id: contributionId,
           user_id: reviewerId,
-          comment
+          comment,
+          comment_translations: {
+            fr: comment,
+            en: comment
+          }
         });
 
       if (commentError) throw commentError;

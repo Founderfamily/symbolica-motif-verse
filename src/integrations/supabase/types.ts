@@ -81,6 +81,7 @@ export type Database = {
       contribution_comments: {
         Row: {
           comment: string
+          comment_translations: Json | null
           contribution_id: string
           created_at: string | null
           id: string
@@ -88,6 +89,7 @@ export type Database = {
         }
         Insert: {
           comment: string
+          comment_translations?: Json | null
           contribution_id: string
           created_at?: string | null
           id?: string
@@ -95,6 +97,7 @@ export type Database = {
         }
         Update: {
           comment?: string
+          comment_translations?: Json | null
           contribution_id?: string
           created_at?: string | null
           id?: string
@@ -154,18 +157,21 @@ export type Database = {
           created_at: string | null
           id: string
           tag: string
+          tag_translations: Json | null
         }
         Insert: {
           contribution_id: string
           created_at?: string | null
           id?: string
           tag: string
+          tag_translations?: Json | null
         }
         Update: {
           contribution_id?: string
           created_at?: string | null
           id?: string
           tag?: string
+          tag_translations?: Json | null
         }
         Relationships: [
           {
@@ -402,48 +408,63 @@ export type Database = {
         Row: {
           created_at: string | null
           cultural_context: string | null
+          cultural_context_translations: Json | null
           description: string | null
+          description_translations: Json | null
           id: string
           latitude: number | null
           location_name: string | null
+          location_name_translations: Json | null
           longitude: number | null
           period: string | null
+          period_translations: Json | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
           title: string
+          title_translations: Json | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           cultural_context?: string | null
+          cultural_context_translations?: Json | null
           description?: string | null
+          description_translations?: Json | null
           id?: string
           latitude?: number | null
           location_name?: string | null
+          location_name_translations?: Json | null
           longitude?: number | null
           period?: string | null
+          period_translations?: Json | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
           title: string
+          title_translations?: Json | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           cultural_context?: string | null
+          cultural_context_translations?: Json | null
           description?: string | null
+          description_translations?: Json | null
           id?: string
           latitude?: number | null
           location_name?: string | null
+          location_name_translations?: Json | null
           longitude?: number | null
           period?: string | null
+          period_translations?: Json | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
           title?: string
+          title_translations?: Json | null
           updated_at?: string | null
           user_id?: string
         }
