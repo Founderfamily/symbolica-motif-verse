@@ -116,7 +116,10 @@ const Dashboard = () => {
                       </DialogHeader>
                       <AnalysisExampleForm onSubmitSuccess={() => {
                         handleRefetch();
-                        document.querySelector('[data-radix-dialog-close]')?.click();
+                        const closeButton = document.querySelector('[data-radix-dialog-close]');
+                        if (closeButton && closeButton instanceof HTMLElement) {
+                          closeButton.click();
+                        }
                       }} />
                     </DialogContent>
                   </Dialog>

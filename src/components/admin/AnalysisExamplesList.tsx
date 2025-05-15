@@ -149,7 +149,10 @@ export default function AnalysisExamplesList({
                           existingExample={example} 
                           onSubmitSuccess={() => {
                             onUpdate();
-                            document.querySelector('[data-radix-dialog-close]')?.click();
+                            const closeButton = document.querySelector('[data-radix-dialog-close]');
+                            if (closeButton && closeButton instanceof HTMLElement) {
+                              closeButton.click();
+                            }
                           }} 
                         />
                       </DialogContent>
