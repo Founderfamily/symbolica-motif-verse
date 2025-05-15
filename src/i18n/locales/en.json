@@ -1,3 +1,4 @@
+
 {
   "header": {
     "home": "Home",
@@ -65,7 +66,10 @@
     "partners": "Our Partners",
     "testimonials": "User Stories",
     "roadmap": "Roadmap",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "museumPortal": "Museum & Community Portal",
+    "communityPortal": "Connecting museums and symbol enthusiasts",
+    "joinCommunity": "Join Community"
   },
   "howItWorks": {
     "process": "The Process",
@@ -254,5 +258,28 @@
       "result": "Results",
       "example": "Example pattern analysis:"
     }
+  },
+  "symbolTriptych": {
+    "empty": "Select a symbol from the list to view details",
+    "loading": "Loading symbol information...",
+    "error": "Unable to load symbol",
+    "errorDesc": "There was a problem loading this symbol. Please try again later.",
+    "original": "Original Artifact",
+    "pattern": "Extracted Pattern",
+    "reuse": "Creative Reuse",
+    "imageError": "Some images failed to load",
+    "imageErrorDesc": "We're having trouble loading some images. Please try again later."
+  },
+  "testimonials": {
+    "title": "User Stories",
+    "subtitle": "Discover how Symbolica transforms the way experts and enthusiasts interact with cultural symbols",
+    "fallback": {
+      "name": "Full Name",
+      "role": "Profession",
+      "quote": "Testimonial about Symbolica..."
+    }
+  },
+  "navigation": {
+    "symbols": "Featured Symbols"
   }
 }

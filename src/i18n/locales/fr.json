@@ -1,3 +1,4 @@
+
 {
   "header": {
     "home": "Accueil",
@@ -65,7 +66,10 @@
     "partners": "Nos Partenaires",
     "testimonials": "Témoignages",
     "roadmap": "Feuille de Route",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "museumPortal": "Portail Musée & Communauté",
+    "communityPortal": "Connecter les musées et les passionnés de symboles",
+    "joinCommunity": "Rejoindre la Communauté"
   },
   "howItWorks": {
     "process": "Le Processus",
@@ -254,5 +258,28 @@
       "result": "Résultats",
       "example": "Exemple d'analyse de motif :"
     }
+  },
+  "symbolTriptych": {
+    "empty": "Sélectionnez un symbole dans la liste pour voir les détails",
+    "loading": "Chargement des informations du symbole...",
+    "error": "Impossible de charger le symbole",
+    "errorDesc": "Un problème est survenu lors du chargement de ce symbole. Veuillez réessayer plus tard.",
+    "original": "Artefact Original",
+    "pattern": "Motif Extrait",
+    "reuse": "Réutilisation Créative",
+    "imageError": "Certaines images n'ont pas pu être chargées",
+    "imageErrorDesc": "Nous rencontrons des difficultés pour charger certaines images. Veuillez réessayer plus tard."
+  },
+  "testimonials": {
+    "title": "Témoignages",
+    "subtitle": "Découvrez comment Symbolica transforme la façon dont les experts et passionnés interagissent avec les symboles culturels",
+    "fallback": {
+      "name": "Nom Prénom",
+      "role": "Profession",
+      "quote": "Témoignage à propos de Symbolica..."
+    }
+  },
+  "navigation": {
+    "symbols": "Symboles Vedettes"
   }
 }

@@ -33,7 +33,7 @@ const Testimonials = () => {
       <div className="max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold mb-4 text-center">{t('sections.testimonials')}</h2>
         <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
-          Découvrez comment Symbolica transforme la façon dont les experts et passionnés interagissent avec les symboles culturels
+          {t('testimonials.subtitle')}
         </p>
         
         <div className="grid md:grid-cols-3 gap-6">
@@ -84,11 +84,11 @@ const Testimonials = () => {
                       <AvatarFallback className="bg-amber-100 text-amber-800">AB</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold">Nom Prénom</p>
-                      <p className="text-sm text-slate-500">Profession</p>
+                      <p className="font-semibold">{t('testimonials.fallback.name')}</p>
+                      <p className="text-sm text-slate-500">{t('testimonials.fallback.role')}</p>
                     </div>
                   </div>
-                  <p className="text-slate-600 italic">Témoignage à propos de Symbolica...</p>
+                  <p className="text-slate-600 italic">{t('testimonials.fallback.quote')}</p>
                 </CardContent>
               </Card>
             ))
