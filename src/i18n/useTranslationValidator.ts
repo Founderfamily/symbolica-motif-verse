@@ -43,7 +43,19 @@ export const useTranslationValidator = () => {
       }
     };
     
+    // Set up event listener for validation panel requests
+    const validateListener = () => {
+      toggleMissingTranslationsPanel();
+    };
+    
+    window.addEventListener('validate-translations', validateListener);
+    
     validateTranslations();
+    
+    // Clean up event listener on component unmount
+    return () => {
+      window.removeEventListener('validate-translations', validateListener);
+    };
   }, []);
 };
 
@@ -277,16 +289,18 @@ const highlightElementWithMissingTranslation = (key: string) => {
     const allElements = document.querySelectorAll('*');
     allElements.forEach(el => {
       if (el.textContent?.includes(key.split('.').pop() || '')) {
-        const originalBorder = el.style.border;
-        const originalBg = el.style.backgroundColor;
+        // Type assertion to access style properties
+        const element = el as HTMLElement;
+        const originalBorder = element.style.border;
+        const originalBg = element.style.backgroundColor;
         
-        el.style.border = '2px dashed #ef4444';
-        el.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        element.style.border = '2px dashed #ef4444';
+        element.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
         
         // Restore original styling after a short delay
         setTimeout(() => {
-          el.style.border = originalBorder;
-          el.style.backgroundColor = originalBg;
+          element.style.border = originalBorder;
+          element.style.backgroundColor = originalBg;
         }, 2000);
       }
     });

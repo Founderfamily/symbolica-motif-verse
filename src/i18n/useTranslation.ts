@@ -23,6 +23,7 @@ export const useTranslation = () => {
     
     // Call the original t function and ensure it returns a string
     const translated = originalT(key, options);
+    
     // Convert any non-string values to string to avoid type issues
     return typeof translated === 'string' ? translated : String(translated);
   };
@@ -41,6 +42,38 @@ export const useTranslation = () => {
     // Create or toggle the translations panel
     const event = new CustomEvent('validate-translations');
     window.dispatchEvent(event);
+    
+    // Highlight all missing translations on the page
+    highlightAllMissingTranslations();
+  };
+  
+  // Scan the current page and highlight all elements with missing translations
+  const highlightAllMissingTranslations = () => {
+    if (process.env.NODE_ENV !== 'development') return;
+    
+    const elements = document.querySelectorAll('[data-i18n-key]');
+    let missingCount = 0;
+    
+    elements.forEach(el => {
+      const key = el.getAttribute('data-i18n-key');
+      if (key) {
+        const translatedContent = originalT(key);
+        if (translatedContent === key) {
+          // This is a missing translation
+          (el as HTMLElement).style.outline = '2px dashed #ef4444';
+          (el as HTMLElement).style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+          missingCount++;
+        }
+      }
+    });
+    
+    if (missingCount > 0) {
+      console.warn(`🔎 Found ${missingCount} missing translations on the current page.`);
+    } else {
+      console.info('✅ No missing translations detected on the current page.');
+    }
+    
+    return missingCount;
   };
   
   return { 
@@ -48,7 +81,8 @@ export const useTranslation = () => {
     changeLanguage, 
     currentLanguage: i18n.language, 
     i18n,
-    validateCurrentPageTranslations
+    validateCurrentPageTranslations,
+    highlightAllMissingTranslations
   };
 };
 
@@ -72,3 +106,51 @@ const suggestSimilarKeys = (key: string) => {
     // Silently fail for suggestion feature
   }
 };
+
+// New utility function to make visual debugging easier
+export const displayMissingTranslationsOverlay = (show = true) => {
+  if (process.env.NODE_ENV !== 'development') return;
+  
+  if (show) {
+    // Create a button to toggle translation validation panel
+    const validationButton = document.createElement('button');
+    validationButton.textContent = '🔍 Check Translations';
+    validationButton.id = 'translation-validation-button';
+    validationButton.style.position = 'fixed';
+    validationButton.style.bottom = '20px';
+    validationButton.style.right = '20px';
+    validationButton.style.backgroundColor = '#3b82f6';
+    validationButton.style.color = 'white';
+    validationButton.style.padding = '8px 12px';
+    validationButton.style.borderRadius = '4px';
+    validationButton.style.border = 'none';
+    validationButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    validationButton.style.zIndex = '9999';
+    validationButton.style.cursor = 'pointer';
+    
+    validationButton.addEventListener('click', () => {
+      const event = new CustomEvent('validate-translations');
+      window.dispatchEvent(event);
+    });
+    
+    document.body.appendChild(validationButton);
+  } else {
+    // Remove the button
+    const validationButton = document.getElementById('translation-validation-button');
+    if (validationButton) {
+      validationButton.remove();
+    }
+  }
+};
+
+// Auto-enable the display of translation validation button in development
+if (process.env.NODE_ENV === 'development') {
+  // Wait for DOM to be ready
+  if (document.readyState === 'complete') {
+    displayMissingTranslationsOverlay();
+  } else {
+    window.addEventListener('load', () => {
+      displayMissingTranslationsOverlay();
+    });
+  }
+}
