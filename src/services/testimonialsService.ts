@@ -1,5 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export interface Testimonial {
   id: string;
@@ -31,7 +31,11 @@ export const getTestimonials = async (activeOnly: boolean = false): Promise<Test
     throw error;
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    role: item.role as Record<string, string>,
+    quote: item.quote as Record<string, string>
+  }));
 };
 
 export const getTestimonialById = async (id: string): Promise<Testimonial | null> => {
@@ -46,7 +50,11 @@ export const getTestimonialById = async (id: string): Promise<Testimonial | null
     return null;
   }
   
-  return data;
+  return data ? {
+    ...data,
+    role: data.role as Record<string, string>,
+    quote: data.quote as Record<string, string>
+  } : null;
 };
 
 export const updateTestimonial = async (testimonial: Testimonial): Promise<void> => {

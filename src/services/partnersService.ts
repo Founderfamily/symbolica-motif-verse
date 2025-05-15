@@ -1,5 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export interface Partner {
   id: string;
@@ -30,7 +30,10 @@ export const getPartners = async (activeOnly: boolean = false): Promise<Partner[
     throw error;
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    description: item.description as Record<string, string> | null
+  }));
 };
 
 export const getPartnerById = async (id: string): Promise<Partner | null> => {
@@ -45,7 +48,10 @@ export const getPartnerById = async (id: string): Promise<Partner | null> => {
     return null;
   }
   
-  return data;
+  return data ? {
+    ...data,
+    description: data.description as Record<string, string> | null
+  } : null;
 };
 
 export const updatePartner = async (partner: Partner): Promise<void> => {

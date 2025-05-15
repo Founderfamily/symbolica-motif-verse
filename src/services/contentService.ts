@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export interface ContentSection {
   id: string;
@@ -22,7 +23,12 @@ export const getContentSections = async (): Promise<ContentSection[]> => {
     throw error;
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    title: item.title as Record<string, string>,
+    subtitle: item.subtitle as Record<string, string>,
+    content: item.content as Record<string, string>
+  }));
 };
 
 export const getContentSectionByKey = async (key: string): Promise<ContentSection | null> => {
@@ -37,7 +43,12 @@ export const getContentSectionByKey = async (key: string): Promise<ContentSectio
     return null;
   }
   
-  return data;
+  return data ? {
+    ...data,
+    title: data.title as Record<string, string>,
+    subtitle: data.subtitle as Record<string, string>,
+    content: data.content as Record<string, string>
+  } : null;
 };
 
 export const updateContentSection = async (section: ContentSection): Promise<void> => {

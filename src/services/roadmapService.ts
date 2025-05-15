@@ -1,5 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export interface RoadmapItem {
   id: string;
@@ -24,7 +24,11 @@ export const getRoadmapItems = async (): Promise<RoadmapItem[]> => {
     throw error;
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    title: item.title as Record<string, string>,
+    description: item.description as Record<string, string>
+  }));
 };
 
 export const getRoadmapItemById = async (id: string): Promise<RoadmapItem | null> => {
@@ -39,7 +43,11 @@ export const getRoadmapItemById = async (id: string): Promise<RoadmapItem | null
     return null;
   }
   
-  return data;
+  return data ? {
+    ...data,
+    title: data.title as Record<string, string>,
+    description: data.description as Record<string, string>
+  } : null;
 };
 
 export const updateRoadmapItem = async (item: RoadmapItem): Promise<void> => {

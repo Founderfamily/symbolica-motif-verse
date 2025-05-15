@@ -8,7 +8,5 @@ export const useTranslation = () => {
     i18n.changeLanguage(lng);
   };
   
-  const currentLanguage = i18n.language;
-  
-  return { t, changeLanguage, currentLanguage };
+  return { t, changeLanguage, currentLanguage: i18n.language, i18n };
 };
