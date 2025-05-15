@@ -228,5 +228,31 @@
       "errorCreating": "Error creating contribution",
       "errorUpdating": "Error updating contribution status"
     }
+  },
+  "uploadTools": {
+    "title": "Symbol Upload Tools",
+    "subtitle": "Discover our AI-powered tools for identifying and analyzing cultural patterns and symbols",
+    "capture": {
+      "title": "Capture and Upload",
+      "desc": "Easily capture images of symbols and patterns you encounter in your travels or daily life"
+    },
+    "analyze": {
+      "title": "Automatic Analysis",
+      "desc": "Our AI algorithms automatically detect and extract patterns from your images"
+    },
+    "share": {
+      "title": "Share and Connect",
+      "desc": "Connect your findings with the global community and contribute to cultural preservation"
+    },
+    "process": {
+      "title": "Symbol Processing",
+      "subtitle": "See how our AI transforms your uploads",
+      "original": "Original",
+      "detection": "Pattern Detection",
+      "extraction": "Pattern Extraction",
+      "classification": "Classification",
+      "result": "Results",
+      "example": "Example pattern analysis:"
+    }
   }
 }

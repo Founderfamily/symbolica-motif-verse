@@ -228,5 +228,31 @@
       "errorCreating": "Erreur lors de la création de la contribution",
       "errorUpdating": "Erreur lors de la mise à jour du statut"
     }
+  },
+  "uploadTools": {
+    "title": "Outils de téléchargement de symboles",
+    "subtitle": "Découvrez nos outils alimentés par l'IA pour identifier et analyser les motifs et symboles culturels",
+    "capture": {
+      "title": "Capturer et télécharger",
+      "desc": "Capturez facilement des images de symboles et de motifs que vous rencontrez lors de vos voyages ou dans votre vie quotidienne"
+    },
+    "analyze": {
+      "title": "Analyse automatique",
+      "desc": "Nos algorithmes d'IA détectent et extraient automatiquement les motifs de vos images"
+    },
+    "share": {
+      "title": "Partager et connecter",
+      "desc": "Connectez vos découvertes avec la communauté mondiale et contribuez à la préservation culturelle"
+    },
+    "process": {
+      "title": "Traitement des symboles",
+      "subtitle": "Voyez comment notre IA transforme vos téléchargements",
+      "original": "Original",
+      "detection": "Détection de motifs",
+      "extraction": "Extraction de motifs",
+      "classification": "Classification",
+      "result": "Résultats",
+      "example": "Exemple d'analyse de motif :"
+    }
   }
 }
