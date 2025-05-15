@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -120,6 +121,14 @@ const AdminLayout = () => {
                   className="text-slate-600 hover:text-amber-600 transition"
                 >
                   Symboles
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/admin/content" 
+                  className="text-slate-600 hover:text-amber-600 transition"
+                >
+                  Contenu du site
                 </Link>
               </li>
               <li>

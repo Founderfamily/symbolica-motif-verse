@@ -1,11 +1,33 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ContentSection, getContentSectionByKey } from '@/services/contentService';
 
 const Hero = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [heroContent, setHeroContent] = useState<ContentSection | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchHeroContent = async () => {
+      try {
+        const content = await getContentSectionByKey('hero');
+        setHeroContent(content);
+      } catch (error) {
+        console.error('Error fetching hero content:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchHeroContent();
+  }, []);
+  
+  const lang = i18n.language || 'fr';
+  const title = heroContent?.title?.[lang] || t('hero.heading');
+  const subtitle = heroContent?.subtitle?.[lang] || t('hero.subheading');
   
   return (
     <section className="relative pt-10 md:pt-16 px-4 md:px-8 max-w-7xl mx-auto">
@@ -23,10 +45,10 @@ const Hero = () => {
           </div>
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
-          {t('hero.heading')}
+          {title}
         </h1>
         <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
-          {t('hero.subheading')}
+          {subtitle}
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">

@@ -10,6 +10,7 @@ import AdminLayout from '@/pages/Admin/AdminLayout';
 import Dashboard from '@/pages/Admin/Dashboard';
 import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
 import SymbolEditor from '@/pages/Admin/SymbolEditor';
+import ContentManagement from '@/pages/Admin/ContentManagement';
 import NotFound from '@/pages/NotFound';
 import './App.css';
 
@@ -36,6 +37,7 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="symbols" element={<SymbolsManagement />} />
               <Route path="symbols/:id" element={<SymbolEditor />} />
+              <Route path="content" element={<ContentManagement />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -48,6 +48,72 @@ export type Database = {
         }
         Relationships: []
       }
+      content_sections: {
+        Row: {
+          content: Json | null
+          created_at: string | null
+          id: string
+          section_key: string
+          subtitle: Json | null
+          title: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          content?: Json | null
+          created_at?: string | null
+          id?: string
+          section_key: string
+          subtitle?: Json | null
+          title?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: Json | null
+          created_at?: string | null
+          id?: string
+          section_key?: string
+          subtitle?: Json | null
+          title?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      partners: {
+        Row: {
+          created_at: string | null
+          description: Json | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          name: string
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: Json | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: Json | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -72,6 +138,42 @@ export type Database = {
           is_admin?: boolean | null
           updated_at?: string | null
           username?: string | null
+        }
+        Relationships: []
+      }
+      roadmap_items: {
+        Row: {
+          created_at: string | null
+          description: Json | null
+          display_order: number | null
+          id: string
+          is_completed: boolean | null
+          is_current: boolean | null
+          phase: string
+          title: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: Json | null
+          display_order?: number | null
+          id?: string
+          is_completed?: boolean | null
+          is_current?: boolean | null
+          phase: string
+          title?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: Json | null
+          display_order?: number | null
+          id?: string
+          is_completed?: boolean | null
+          is_current?: boolean | null
+          phase?: string
+          title?: Json | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -154,6 +256,45 @@ export type Database = {
           name?: string
           period?: string
           translations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          initials: string | null
+          is_active: boolean | null
+          name: string
+          quote: Json | null
+          role: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          initials?: string | null
+          is_active?: boolean | null
+          name: string
+          quote?: Json | null
+          role?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          initials?: string | null
+          is_active?: boolean | null
+          name?: string
+          quote?: Json | null
+          role?: Json | null
           updated_at?: string | null
         }
         Relationships: []

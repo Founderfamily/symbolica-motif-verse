@@ -1,35 +1,32 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/i18n/useTranslation';
-
-const testimonials = [
-  {
-    id: 1,
-    name: "Jean D.",
-    role: "Historien d'art",
-    quote: "Symbolica m'a permis de documenter et comparer des motifs médiévaux à travers l'Europe, facilitant grandement ma recherche comparative.",
-    initials: "JD"
-  },
-  {
-    id: 2,
-    name: "Sofia M.",
-    role: "Designer textile",
-    quote: "Une source d'inspiration inestimable pour mon travail créatif. J'ai découvert des motifs que je n'aurais jamais trouvés ailleurs.",
-    initials: "SM"
-  },
-  {
-    id: 3,
-    name: "Léo T.",
-    role: "Étudiant en design",
-    quote: "La fonctionnalité de génération IA m'a ouvert de nouvelles perspectives créatives pour mes projets universitaires.",
-    initials: "LT"
-  }
-];
+import { Testimonial, getTestimonials } from '@/services/testimonialsService';
 
 const Testimonials = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await getTestimonials(true); // Only active testimonials
+        setTestimonials(data);
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
+  const lang = i18n.language || 'fr';
   
   return (
     <section className="py-16 px-4 md:px-8 bg-white">
@@ -40,22 +37,62 @@ const Testimonials = () => {
         </p>
         
         <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="border-slate-200">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <Avatar>
-                    <AvatarFallback className="bg-amber-100 text-amber-800">{testimonial.initials}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">{testimonial.name}</p>
-                    <p className="text-sm text-slate-500">{testimonial.role}</p>
+          {loading ? (
+            // Placeholders while loading
+            Array(3).fill(0).map((_, i) => (
+              <Card key={i} className="border-slate-200 animate-pulse">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-slate-200 rounded-full"></div>
+                    <div>
+                      <div className="h-4 w-24 bg-slate-200 rounded mb-2"></div>
+                      <div className="h-3 w-16 bg-slate-100 rounded"></div>
+                    </div>
                   </div>
-                </div>
-                <p className="text-slate-600 italic">{testimonial.quote}</p>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="space-y-2">
+                    <div className="h-3 bg-slate-100 rounded"></div>
+                    <div className="h-3 bg-slate-100 rounded"></div>
+                    <div className="h-3 bg-slate-100 rounded w-4/5"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : testimonials.length > 0 ? (
+            testimonials.map((testimonial) => (
+              <Card key={testimonial.id} className="border-slate-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar>
+                      <AvatarFallback className="bg-amber-100 text-amber-800">{testimonial.initials || testimonial.name.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{testimonial.name}</p>
+                      <p className="text-sm text-slate-500">{testimonial.role?.[lang]}</p>
+                    </div>
+                  </div>
+                  <p className="text-slate-600 italic">{testimonial.quote?.[lang]}</p>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            // Fallback if no testimonials are available
+            Array(3).fill(0).map((_, i) => (
+              <Card key={i} className="border-slate-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar>
+                      <AvatarFallback className="bg-amber-100 text-amber-800">AB</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">Nom Prénom</p>
+                      <p className="text-sm text-slate-500">Profession</p>
+                    </div>
+                  </div>
+                  <p className="text-slate-600 italic">Témoignage à propos de Symbolica...</p>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </section>
