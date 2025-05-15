@@ -138,13 +138,19 @@ export async function getContributionComments(contributionId: string): Promise<C
         created_at: item.created_at
       };
       
-      // Check if profiles property exists, is not null, and doesn't have an error
-      if (item.profiles && typeof item.profiles === 'object' && !('error' in item.profiles)) {
-        // Only add the profiles property if it's valid
-        comment.profiles = {
-          username: item.profiles.username,
-          full_name: item.profiles.full_name
-        };
+      // Explicitly check for null and properly type-check the profiles property
+      if (item.profiles !== null && 
+          item.profiles !== undefined && 
+          typeof item.profiles === 'object' && 
+          !('error' in item.profiles)) {
+        // Only add the profiles property if it's valid and has the necessary fields
+        if (typeof item.profiles.username === 'string' && 
+            typeof item.profiles.full_name === 'string') {
+          comment.profiles = {
+            username: item.profiles.username,
+            full_name: item.profiles.full_name
+          };
+        }
       }
       
       return comment;
