@@ -89,5 +89,134 @@
         "desc": "Use the symbols as inspiration for your own creative projects"
       }
     }
+  },
+  "contributions": {
+    "title": "My Contributions",
+    "new": "New contribution",
+    "create": "Create my first contribution",
+    "loading": "Loading contributions...",
+    "empty": "No contributions found",
+    "emptyDescription": "You haven't submitted any contributions yet. Start by creating a new one.",
+    "list": "List of your contributions to the Symbolica project",
+    "table": {
+      "title": "Title",
+      "submissionDate": "Submission Date",
+      "status": "Status",
+      "tags": "Tags",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "unknown": "Unknown"
+    },
+    "form": {
+      "title": "New Contribution",
+      "subtitle": "Share a new symbol or motif with the Symbolica community",
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "Ex: Aztec Pattern from Temple Mayor",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe what you know about this symbol or pattern...",
+        "culture": "Culture",
+        "culturePlaceholder": "Ex: Aztec, Mayan, Greek...",
+        "period": "Period",
+        "periodPlaceholder": "Ex: 15th century, 1200-1300...",
+        "tags": "Tags",
+        "tagsPlaceholder": "New tag...",
+        "addTag": "Add",
+        "noTags": "No tags added",
+        "location": "Location",
+        "locationPlaceholder": "Select a location on the map"
+      },
+      "sections": {
+        "general": "General Information",
+        "generalDescription": "Essential details about the pattern or symbol",
+        "cultural": "Cultural Context",
+        "culturalDescription": "Origin and historical context",
+        "tags": "Tags",
+        "tagsDescription": "Add keywords to facilitate searching",
+        "image": "Symbol Image",
+        "imageDescription": "Upload a photo of the symbol or pattern",
+        "location": "Location",
+        "locationDescription": "Where did you find this symbol or pattern?"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "submit": "Submit Contribution",
+        "submitting": "Submitting..."
+      },
+      "validation": {
+        "required": "This field is required",
+        "imageRequired": "An image is required for the contribution",
+        "minLength": "Must contain at least {{count}} characters",
+        "minTags": "Add at least one tag"
+      },
+      "success": "Contribution submitted successfully",
+      "error": "Error creating contribution"
+    },
+    "map": {
+      "search": "Search for a place...",
+      "searchButton": "Search",
+      "loading": "Loading map...",
+      "placeholder": "Interactive map functionality in development",
+      "placeholderSub": "For the prototype, please enter the place name directly"
+    },
+    "image": {
+      "drop": "Drag and drop an image here, or click to select",
+      "dropActive": "Drop the image here...",
+      "formats": "JPG, PNG or WEBP images (max. 5MB)",
+      "remove": "Remove image",
+      "errors": {
+        "format": "The file must be an image (JPEG, PNG, etc.)",
+        "size": "The image must not exceed 5MB"
+      }
+    },
+    "detail": {
+      "back": "Back to contributions",
+      "notFound": "Contribution not found",
+      "notFoundDescription": "This contribution does not exist or has been deleted.",
+      "accessDenied": "Access denied",
+      "accessDeniedDescription": "You do not have the necessary permissions to view this contribution.",
+      "information": "Information",
+      "comments": "Comments",
+      "noComments": "No comments yet.",
+      "moderation": "Moderation Status",
+      "reviewedOn": "Reviewed on:",
+      "pendingReview": "Pending moderation",
+      "pendingReviewDescription": "This contribution is being reviewed by our moderators.",
+      "admin": {
+        "title": "Admin Actions",
+        "approve": "Approve",
+        "reject": "Reject",
+        "rejectReason": "Rejection reason (required)"
+      },
+      "fields": {
+        "culture": "Culture",
+        "period": "Period",
+        "location": "Location"
+      }
+    },
+    "admin": {
+      "title": "Contributions Management",
+      "subtitle": "Manage contributions submitted by users",
+      "pending": "Pending Contributions",
+      "pendingDescription": "Contributions requiring validation",
+      "noPending": "No pending contributions",
+      "noActive": "All contributions have been processed.",
+      "table": {
+        "title": "Title",
+        "submittedBy": "Submitted By",
+        "date": "Date",
+        "type": "Type",
+        "actions": "Actions",
+        "view": "View",
+        "caption": "List of contributions pending moderation"
+      },
+      "accessRestricted": "Access Restricted",
+      "accessRestrictedDescription": "You must be an administrator to access this page.",
+      "backToHome": "Back to Home"
+    }
   }
 }

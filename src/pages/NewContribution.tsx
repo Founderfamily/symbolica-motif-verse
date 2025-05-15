@@ -26,17 +26,6 @@ import { Badge } from '@/components/ui/badge';
 import MapSelector from '@/components/contributions/MapSelector';
 import ImageDropzone from '@/components/contributions/ImageDropzone';
 
-const formSchema = z.object({
-  title: z.string().min(5, 'Le titre doit contenir au moins 5 caractères'),
-  description: z.string().min(20, 'La description doit contenir au moins 20 caractères'),
-  location_name: z.string().optional(),
-  cultural_context: z.string().min(3, 'Le contexte culturel est requis'),
-  period: z.string().min(3, 'La période est requise'),
-  tags: z.array(z.string()).min(1, 'Ajoutez au moins un tag'),
-  latitude: z.number().nullable().optional(),
-  longitude: z.number().nullable().optional(),
-});
-
 const NewContribution = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -44,6 +33,17 @@ const NewContribution = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [currentTag, setCurrentTag] = useState('');
+
+  const formSchema = z.object({
+    title: z.string().min(5, t('contributions.form.validation.minLength', { count: 5 })),
+    description: z.string().min(20, t('contributions.form.validation.minLength', { count: 20 })),
+    location_name: z.string().optional(),
+    cultural_context: z.string().min(3, t('contributions.form.validation.required')),
+    period: z.string().min(3, t('contributions.form.validation.required')),
+    tags: z.array(z.string()).min(1, t('contributions.form.validation.minTags')),
+    latitude: z.number().nullable().optional(),
+    longitude: z.number().nullable().optional(),
+  });
 
   const form = useForm<ContributionFormData>({
     resolver: zodResolver(formSchema),
@@ -66,7 +66,7 @@ const NewContribution = () => {
     }
     
     if (!selectedImage) {
-      form.setError('root', { message: 'Une image est requise pour la contribution' });
+      form.setError('root', { message: t('contributions.form.validation.imageRequired') });
       return;
     }
 
@@ -102,17 +102,17 @@ const NewContribution = () => {
   if (!user) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">Vous devez être connecté pour créer une contribution</h1>
-        <Button onClick={() => navigate('/auth')}>Se connecter</Button>
+        <h1 className="text-2xl font-bold mb-6">{t('auth.loginTitle')}</h1>
+        <Button onClick={() => navigate('/auth')}>{t('auth.login')}</Button>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl md:text-3xl font-bold mb-2">Nouvelle Contribution</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('contributions.form.title')}</h1>
       <p className="text-muted-foreground mb-6">
-        Partagez un nouveau symbole ou motif avec la communauté Symbolica
+        {t('contributions.form.subtitle')}
       </p>
 
       <Form {...form}>
@@ -124,10 +124,10 @@ const NewContribution = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Info className="mr-2 h-5 w-5 text-primary" />
-                    Informations générales
+                    {t('contributions.form.sections.general')}
                   </CardTitle>
                   <CardDescription>
-                    Détails essentiels sur le motif ou symbole
+                    {t('contributions.form.sections.generalDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -136,9 +136,9 @@ const NewContribution = () => {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Titre</FormLabel>
+                        <FormLabel>{t('contributions.form.fields.title')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Motif Aztèque du Temple Mayor" {...field} />
+                          <Input placeholder={t('contributions.form.fields.titlePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -150,10 +150,10 @@ const NewContribution = () => {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>{t('contributions.form.fields.description')}</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Décrivez ce que vous savez sur ce symbole ou motif..."
+                            placeholder={t('contributions.form.fields.descriptionPlaceholder')}
                             rows={4}
                             {...field}
                           />
@@ -169,10 +169,10 @@ const NewContribution = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Globe className="mr-2 h-5 w-5 text-primary" />
-                    Contexte culturel
+                    {t('contributions.form.sections.cultural')}
                   </CardTitle>
                   <CardDescription>
-                    Origine et contexte historique
+                    {t('contributions.form.sections.culturalDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -181,9 +181,9 @@ const NewContribution = () => {
                     name="cultural_context"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Culture</FormLabel>
+                        <FormLabel>{t('contributions.form.fields.culture')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Aztèque, Maya, Grec..." {...field} />
+                          <Input placeholder={t('contributions.form.fields.culturePlaceholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -195,11 +195,11 @@ const NewContribution = () => {
                     name="period"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Période</FormLabel>
+                        <FormLabel>{t('contributions.form.fields.period')}</FormLabel>
                         <FormControl>
                           <div className="flex items-center">
                             <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Ex: 15ème siècle, 1200-1300..." {...field} />
+                            <Input placeholder={t('contributions.form.fields.periodPlaceholder')} {...field} />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -213,17 +213,17 @@ const NewContribution = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Tags className="mr-2 h-5 w-5 text-primary" />
-                    Tags
+                    {t('contributions.form.sections.tags')}
                   </CardTitle>
                   <CardDescription>
-                    Ajoutez des mots-clés pour faciliter la recherche
+                    {t('contributions.form.sections.tagsDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex">
                       <Input
-                        placeholder="Nouveau tag..."
+                        placeholder={t('contributions.form.fields.tagsPlaceholder')}
                         value={currentTag}
                         onChange={(e) => setCurrentTag(e.target.value)}
                         className="mr-2"
@@ -235,7 +235,7 @@ const NewContribution = () => {
                         }}
                       />
                       <Button type="button" onClick={handleAddTag}>
-                        Ajouter
+                        {t('contributions.form.fields.addTag')}
                       </Button>
                     </div>
 
@@ -252,7 +252,7 @@ const NewContribution = () => {
                       ))}
                       {form.getValues().tags.length === 0 && (
                         <p className="text-sm text-muted-foreground italic">
-                          Aucun tag ajouté
+                          {t('contributions.form.fields.noTags')}
                         </p>
                       )}
                     </div>
@@ -272,10 +272,10 @@ const NewContribution = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Upload className="mr-2 h-5 w-5 text-primary" />
-                    Image du symbole
+                    {t('contributions.form.sections.image')}
                   </CardTitle>
                   <CardDescription>
-                    Téléchargez une photo du symbole ou motif
+                    {t('contributions.form.sections.imageDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -295,10 +295,10 @@ const NewContribution = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <MapPin className="mr-2 h-5 w-5 text-primary" />
-                    Localisation
+                    {t('contributions.form.sections.location')}
                   </CardTitle>
                   <CardDescription>
-                    Où avez-vous trouvé ce symbole ou motif?
+                    {t('contributions.form.sections.locationDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -312,9 +312,9 @@ const NewContribution = () => {
                       name="location_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Lieu</FormLabel>
+                          <FormLabel>{t('contributions.form.fields.location')}</FormLabel>
                           <FormControl>
-                            <Input {...field} readOnly placeholder="Sélectionnez un lieu sur la carte" />
+                            <Input {...field} readOnly placeholder={t('contributions.form.fields.locationPlaceholder')} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -332,10 +332,10 @@ const NewContribution = () => {
               variant="outline"
               onClick={() => navigate('/contributions')}
             >
-              Annuler
+              {t('contributions.form.buttons.cancel')}
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Envoi en cours...' : 'Soumettre la contribution'}
+              {submitting ? t('contributions.form.buttons.submitting') : t('contributions.form.buttons.submit')}
             </Button>
           </div>
         </form>

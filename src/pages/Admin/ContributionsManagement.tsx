@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getPendingContributions } from '@/services/contributionService';
 import { CompleteContribution } from '@/types/contributions';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/i18n/useTranslation';
 import { 
   Table, 
   TableBody, 
@@ -30,6 +31,7 @@ const ContributionsManagement = () => {
   const [pendingContributions, setPendingContributions] = useState<CompleteContribution[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, isAdmin } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,12 +55,12 @@ const ContributionsManagement = () => {
     return (
       <div className="flex h-full flex-col items-center justify-center p-4">
         <AlertTriangle className="h-10 w-10 text-yellow-500 mb-4" />
-        <h1 className="text-2xl font-bold mb-2">Accès réservé</h1>
+        <h1 className="text-2xl font-bold mb-2">{t('contributions.admin.accessRestricted')}</h1>
         <p className="text-muted-foreground mb-4">
-          Vous devez être administrateur pour accéder à cette page.
+          {t('contributions.admin.accessRestrictedDescription')}
         </p>
         <Button onClick={() => navigate('/')}>
-          Retour à l'accueil
+          {t('contributions.admin.backToHome')}
         </Button>
       </div>
     );
@@ -68,9 +70,9 @@ const ContributionsManagement = () => {
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestion des contributions</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('contributions.admin.title')}</h1>
           <p className="text-muted-foreground">
-            Gérez les contributions soumises par les utilisateurs
+            {t('contributions.admin.subtitle')}
           </p>
         </div>
       </div>
@@ -78,34 +80,34 @@ const ContributionsManagement = () => {
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Contributions en attente ({pendingContributions.length})</CardTitle>
+            <CardTitle className="text-xl">{t('contributions.admin.pending')} ({pendingContributions.length})</CardTitle>
             <CardDescription>
-              Contributions nécessitant une validation
+              {t('contributions.admin.pendingDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="py-10 text-center">
-                <p className="text-muted-foreground">Chargement des contributions...</p>
+                <p className="text-muted-foreground">{t('contributions.loading')}</p>
               </div>
             ) : pendingContributions.length === 0 ? (
               <div className="py-10 text-center border rounded-lg bg-slate-50">
-                <h3 className="text-lg font-medium mb-2">Aucune contribution en attente</h3>
+                <h3 className="text-lg font-medium mb-2">{t('contributions.admin.noPending')}</h3>
                 <p className="text-muted-foreground">
-                  Toutes les contributions ont été traitées.
+                  {t('contributions.admin.noActive')}
                 </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableCaption>Liste des contributions en attente de modération</TableCaption>
+                  <TableCaption>{t('contributions.admin.table.caption')}</TableCaption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Titre</TableHead>
-                      <TableHead>Soumis par</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t('contributions.admin.table.title')}</TableHead>
+                      <TableHead>{t('contributions.admin.table.submittedBy')}</TableHead>
+                      <TableHead>{t('contributions.admin.table.date')}</TableHead>
+                      <TableHead>{t('contributions.admin.table.type')}</TableHead>
+                      <TableHead className="text-right">{t('contributions.admin.table.actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -132,7 +134,7 @@ const ContributionsManagement = () => {
                             onClick={() => handleViewContribution(contribution.id)}
                           >
                             <Eye className="h-4 w-4" />
-                            <span className="ml-1">Voir</span>
+                            <span className="ml-1">{t('contributions.admin.table.view')}</span>
                           </Button>
                         </TableCell>
                       </TableRow>

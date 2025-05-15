@@ -92,13 +92,13 @@ const ContributionDetail = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">En attente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">{t('contributions.status.pending')}</Badge>;
       case 'approved':
-        return <Badge className="bg-green-100 text-green-800 border-green-300">Approuvée</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-300">{t('contributions.status.approved')}</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-100 text-red-800 border-red-300">Rejetée</Badge>;
+        return <Badge className="bg-red-100 text-red-800 border-red-300">{t('contributions.status.rejected')}</Badge>;
       default:
-        return <Badge>Inconnu</Badge>;
+        return <Badge>{t('contributions.status.unknown')}</Badge>;
     }
   };
 
@@ -121,11 +121,11 @@ const ContributionDetail = () => {
   if (!contribution) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-4">Contribution introuvable</h1>
-        <p className="mb-6">Cette contribution n'existe pas ou a été supprimée.</p>
+        <h1 className="text-2xl font-bold mb-4">{t('contributions.detail.notFound')}</h1>
+        <p className="mb-6">{t('contributions.detail.notFoundDescription')}</p>
         <Button onClick={() => navigate('/contributions')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour aux contributions
+          {t('contributions.detail.back')}
         </Button>
       </div>
     );
@@ -134,11 +134,11 @@ const ContributionDetail = () => {
   if (!canView()) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-4">Accès refusé</h1>
-        <p className="mb-6">Vous n'avez pas les permissions nécessaires pour voir cette contribution.</p>
+        <h1 className="text-2xl font-bold mb-4">{t('contributions.detail.accessDenied')}</h1>
+        <p className="mb-6">{t('contributions.detail.accessDeniedDescription')}</p>
         <Button onClick={() => navigate('/contributions')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour aux contributions
+          {t('contributions.detail.back')}
         </Button>
       </div>
     );
@@ -152,7 +152,7 @@ const ContributionDetail = () => {
         onClick={() => navigate('/contributions')}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Retour aux contributions
+        {t('contributions.detail.back')}
       </Button>
       
       <div className="flex flex-col md:flex-row justify-between items-start gap-6">
@@ -167,7 +167,7 @@ const ContributionDetail = () => {
             {contribution.user_profile && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <User className="h-3 w-3" />
-                <span>Par {contribution.user_profile.username || contribution.user_profile.full_name}</span>
+                <span>{contribution.user_profile.username || contribution.user_profile.full_name}</span>
                 <Clock className="h-3 w-3 ml-2" />
                 <span>
                   {format(new Date(contribution.created_at), 'dd MMMM yyyy', { locale: fr })}
@@ -210,12 +210,12 @@ const ContributionDetail = () => {
           <div className="pt-4">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <MessageCircle className="mr-2 h-5 w-5" />
-              Commentaires ({contribution.comments.length})
+              {t('contributions.detail.comments')} ({contribution.comments.length})
             </h2>
             
             {contribution.comments.length === 0 ? (
               <p className="text-muted-foreground italic">
-                Aucun commentaire pour le moment.
+                {t('contributions.detail.noComments')}
               </p>
             ) : (
               <div className="space-y-4">
@@ -224,12 +224,12 @@ const ContributionDetail = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback>
-                          {(comment as any).profiles?.username?.charAt(0) || 'U'}
+                          {comment.profiles?.username?.charAt(0) || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">
-                          {(comment as any).profiles?.username || "Administrateur"}
+                          {comment.profiles?.username || "Administrateur"}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(comment.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
@@ -245,7 +245,7 @@ const ContributionDetail = () => {
             {/* Section admin pour approuver/rejeter */}
             {isAdmin && contribution.status === 'pending' && (
               <div className="mt-6 border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Actions d'administrateur</h3>
+                <h3 className="text-lg font-semibold mb-4">{t('contributions.detail.admin.title')}</h3>
                 
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
@@ -255,13 +255,13 @@ const ContributionDetail = () => {
                       disabled={submitting}
                     >
                       <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Approuver
+                      {t('contributions.detail.admin.approve')}
                     </Button>
                   </div>
                   
                   <div className="flex-1 space-y-2">
                     <Textarea
-                      placeholder="Motif du rejet (obligatoire)"
+                      placeholder={t('contributions.detail.admin.rejectReason')}
                       value={rejectionReason}
                       onChange={(e) => setRejectionReason(e.target.value)}
                       rows={2}
@@ -273,7 +273,7 @@ const ContributionDetail = () => {
                       disabled={submitting || !rejectionReason.trim()}
                     >
                       <XCircle className="mr-2 h-4 w-4" />
-                      Rejeter
+                      {t('contributions.detail.admin.reject')}
                     </Button>
                   </div>
                 </div>
@@ -287,7 +287,7 @@ const ContributionDetail = () => {
           {/* Informations */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="font-semibold mb-4">Informations</h3>
+              <h3 className="font-semibold mb-4">{t('contributions.detail.information')}</h3>
               
               <div className="space-y-3">
                 {contribution.cultural_context && (
@@ -296,7 +296,7 @@ const ContributionDetail = () => {
                       <Eye className="h-4 w-4 text-slate-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Culture</p>
+                      <p className="text-sm font-medium">{t('contributions.detail.fields.culture')}</p>
                       <p className="text-sm text-slate-600">{contribution.cultural_context}</p>
                     </div>
                   </div>
@@ -308,7 +308,7 @@ const ContributionDetail = () => {
                       <Calendar className="h-4 w-4 text-slate-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Période</p>
+                      <p className="text-sm font-medium">{t('contributions.detail.fields.period')}</p>
                       <p className="text-sm text-slate-600">{contribution.period}</p>
                     </div>
                   </div>
@@ -320,7 +320,7 @@ const ContributionDetail = () => {
                       <MapPin className="h-4 w-4 text-slate-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Localisation</p>
+                      <p className="text-sm font-medium">{t('contributions.detail.fields.location')}</p>
                       <p className="text-sm text-slate-600">{contribution.location_name}</p>
                     </div>
                   </div>
@@ -352,26 +352,26 @@ const ContributionDetail = () => {
           {/* Statut de modération */}
           <Card>
             <CardContent className="pt-6">
-              <h3 className="font-semibold mb-4">Statut de modération</h3>
+              <h3 className="font-semibold mb-4">{t('contributions.detail.moderation')}</h3>
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">Statut:</span>
+                  <span className="text-sm">{t('contributions.table.status')}:</span>
                   {getStatusBadge(contribution.status)}
                 </div>
                 
                 {contribution.reviewed_at && (
                   <div className="flex items-center justify-between text-sm">
-                    <span>Examiné le:</span>
+                    <span>{t('contributions.detail.reviewedOn')}</span>
                     <span>{format(new Date(contribution.reviewed_at), 'dd/MM/yyyy', { locale: fr })}</span>
                   </div>
                 )}
                 
                 {contribution.status === 'pending' && (
                   <Alert className="mt-4 bg-yellow-50 text-yellow-800 border-yellow-300">
-                    <AlertTitle className="text-yellow-800">En attente de modération</AlertTitle>
+                    <AlertTitle className="text-yellow-800">{t('contributions.detail.pendingReview')}</AlertTitle>
                     <AlertDescription className="text-yellow-700">
-                      Cette contribution est en cours d'examen par nos modérateurs.
+                      {t('contributions.detail.pendingReviewDescription')}
                     </AlertDescription>
                   </Alert>
                 )}

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface MapSelectorProps {
   onLocationSelected: (latitude: number, longitude: number, locationName: string) => void;
@@ -15,6 +16,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
   const mapRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialLocation);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const initMap = () => {
@@ -30,8 +32,8 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
         mapElement.innerHTML = `
           <div class="w-full h-[200px] bg-slate-100 rounded-md flex items-center justify-center">
             <div class="text-center p-4">
-              <p class="text-sm text-slate-500 mb-2">Fonctionnalité de carte interactive en développement</p>
-              <p class="text-xs text-slate-400">Pour le prototype, veuillez saisir directement le nom du lieu</p>
+              <p class="text-sm text-slate-500 mb-2">${t('contributions.map.placeholder')}</p>
+              <p class="text-xs text-slate-400">${t('contributions.map.placeholderSub')}</p>
             </div>
           </div>
         `;
@@ -44,7 +46,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
     };
 
     initMap();
-  }, []);
+  }, [t]);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
@@ -66,7 +68,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Rechercher un lieu..."
+          placeholder={t('contributions.map.search')}
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         />
         <button
@@ -74,7 +76,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
           onClick={handleSearch}
           className="h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
         >
-          Rechercher
+          {t('contributions.map.searchButton')}
         </button>
       </div>
       <div 
@@ -82,7 +84,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
         className="w-full h-[200px] bg-slate-100 rounded-md flex items-center justify-center"
       >
         {loading && (
-          <p className="text-sm text-slate-500">Chargement de la carte...</p>
+          <p className="text-sm text-slate-500">{t('contributions.map.loading')}</p>
         )}
       </div>
     </div>

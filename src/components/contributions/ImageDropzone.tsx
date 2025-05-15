@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface ImageDropzoneProps {
   onImageSelected: (file: File) => void;
@@ -12,6 +13,7 @@ interface ImageDropzoneProps {
 const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selectedImage }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError(null);
@@ -23,13 +25,13 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
     
     // Vérifier le type de fichier
     if (!file.type.startsWith('image/')) {
-      setError('Le fichier doit être une image (JPEG, PNG, etc.)');
+      setError(t('contributions.image.errors.format'));
       return;
     }
 
     // Vérifier la taille du fichier (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setError('L\'image ne doit pas dépasser 5MB');
+      setError(t('contributions.image.errors.size'));
       return;
     }
 
@@ -40,7 +42,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
 
     // Nettoyer l'URL d'aperçu quand le composant est démonté
     return () => URL.revokeObjectURL(objectUrl);
-  }, [onImageSelected]);
+  }, [onImageSelected, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -74,14 +76,14 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
           <div className="flex flex-col items-center justify-center space-y-2">
             <Upload className="h-8 w-8 text-muted-foreground" />
             {isDragActive ? (
-              <p className="text-sm font-medium">Déposez l'image ici...</p>
+              <p className="text-sm font-medium">{t('contributions.image.dropActive')}</p>
             ) : (
               <>
                 <p className="text-sm font-medium">
-                  Glissez-déposez une image ici, ou cliquez pour sélectionner
+                  {t('contributions.image.drop')}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Images JPG, PNG ou WEBP (max. 5MB)
+                  {t('contributions.image.formats')}
                 </p>
               </>
             )}
@@ -108,7 +110,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
               className="h-8 w-8 p-0"
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Supprimer l'image</span>
+              <span className="sr-only">{t('contributions.image.remove')}</span>
             </Button>
           </div>
         </div>

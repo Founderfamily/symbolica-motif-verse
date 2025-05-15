@@ -89,5 +89,134 @@
         "desc": "Utilisez les symboles comme inspiration pour vos propres projets créatifs"
       }
     }
+  },
+  "contributions": {
+    "title": "Mes Contributions",
+    "new": "Nouvelle contribution",
+    "create": "Créer ma première contribution",
+    "loading": "Chargement des contributions...",
+    "empty": "Aucune contribution trouvée",
+    "emptyDescription": "Vous n'avez pas encore soumis de contribution. Commencez par en créer une nouvelle.",
+    "list": "Liste de vos contributions au projet Symbolica",
+    "table": {
+      "title": "Titre",
+      "submissionDate": "Date de soumission",
+      "status": "Statut",
+      "tags": "Tags",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvée",
+      "rejected": "Rejetée",
+      "unknown": "Inconnu"
+    },
+    "form": {
+      "title": "Nouvelle Contribution",
+      "subtitle": "Partagez un nouveau symbole ou motif avec la communauté Symbolica",
+      "fields": {
+        "title": "Titre",
+        "titlePlaceholder": "Ex: Motif Aztèque du Temple Mayor",
+        "description": "Description",
+        "descriptionPlaceholder": "Décrivez ce que vous savez sur ce symbole ou motif...",
+        "culture": "Culture",
+        "culturePlaceholder": "Ex: Aztèque, Maya, Grec...",
+        "period": "Période",
+        "periodPlaceholder": "Ex: 15ème siècle, 1200-1300...",
+        "tags": "Tags",
+        "tagsPlaceholder": "Nouveau tag...",
+        "addTag": "Ajouter",
+        "noTags": "Aucun tag ajouté",
+        "location": "Lieu",
+        "locationPlaceholder": "Sélectionnez un lieu sur la carte"
+      },
+      "sections": {
+        "general": "Informations générales",
+        "generalDescription": "Détails essentiels sur le motif ou symbole",
+        "cultural": "Contexte culturel",
+        "culturalDescription": "Origine et contexte historique",
+        "tags": "Tags",
+        "tagsDescription": "Ajoutez des mots-clés pour faciliter la recherche",
+        "image": "Image du symbole",
+        "imageDescription": "Téléchargez une photo du symbole ou motif",
+        "location": "Localisation",
+        "locationDescription": "Où avez-vous trouvé ce symbole ou motif?"
+      },
+      "buttons": {
+        "cancel": "Annuler",
+        "submit": "Soumettre la contribution",
+        "submitting": "Envoi en cours..."
+      },
+      "validation": {
+        "required": "Ce champ est requis",
+        "imageRequired": "Une image est requise pour la contribution",
+        "minLength": "Doit contenir au moins {{count}} caractères",
+        "minTags": "Ajoutez au moins un tag"
+      },
+      "success": "Contribution soumise avec succès",
+      "error": "Erreur lors de la création de la contribution"
+    },
+    "map": {
+      "search": "Rechercher un lieu...",
+      "searchButton": "Rechercher",
+      "loading": "Chargement de la carte...",
+      "placeholder": "Fonctionnalité de carte interactive en développement",
+      "placeholderSub": "Pour le prototype, veuillez saisir directement le nom du lieu"
+    },
+    "image": {
+      "drop": "Glissez-déposez une image ici, ou cliquez pour sélectionner",
+      "dropActive": "Déposez l'image ici...",
+      "formats": "Images JPG, PNG ou WEBP (max. 5MB)",
+      "remove": "Supprimer l'image",
+      "errors": {
+        "format": "Le fichier doit être une image (JPEG, PNG, etc.)",
+        "size": "L'image ne doit pas dépasser 5MB"
+      }
+    },
+    "detail": {
+      "back": "Retour aux contributions",
+      "notFound": "Contribution introuvable",
+      "notFoundDescription": "Cette contribution n'existe pas ou a été supprimée.",
+      "accessDenied": "Accès refusé",
+      "accessDeniedDescription": "Vous n'avez pas les permissions nécessaires pour voir cette contribution.",
+      "information": "Informations",
+      "comments": "Commentaires",
+      "noComments": "Aucun commentaire pour le moment.",
+      "moderation": "Statut de modération",
+      "reviewedOn": "Examiné le:",
+      "pendingReview": "En attente de modération",
+      "pendingReviewDescription": "Cette contribution est en cours d'examen par nos modérateurs.",
+      "admin": {
+        "title": "Actions d'administrateur",
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "rejectReason": "Motif du rejet (obligatoire)"
+      },
+      "fields": {
+        "culture": "Culture",
+        "period": "Période",
+        "location": "Localisation"
+      }
+    },
+    "admin": {
+      "title": "Gestion des contributions",
+      "subtitle": "Gérez les contributions soumises par les utilisateurs",
+      "pending": "Contributions en attente",
+      "pendingDescription": "Contributions nécessitant une validation",
+      "noPending": "Aucune contribution en attente",
+      "noActive": "Toutes les contributions ont été traitées.",
+      "table": {
+        "title": "Titre",
+        "submittedBy": "Soumis par",
+        "date": "Date",
+        "type": "Type",
+        "actions": "Actions",
+        "view": "Voir",
+        "caption": "Liste des contributions en attente de modération"
+      },
+      "accessRestricted": "Accès réservé",
+      "accessRestrictedDescription": "Vous devez être administrateur pour accéder à cette page.",
+      "backToHome": "Retour à l'accueil"
+    }
   }
 }

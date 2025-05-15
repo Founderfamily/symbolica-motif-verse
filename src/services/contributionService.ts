@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { 
   UserContribution, 
@@ -138,17 +139,23 @@ export async function getContributionComments(contributionId: string): Promise<C
         created_at: item.created_at
       };
       
-      // Explicitly check for null and properly type-check the profiles property
+      // Safely access potential nullable properties
       if (item.profiles !== null && 
           item.profiles !== undefined && 
           typeof item.profiles === 'object' && 
           !('error' in item.profiles)) {
+        
+        // Make a local copy of profiles to avoid TypeScript null warnings
+        const profiles = item.profiles;
+        
         // Only add the profiles property if it's valid and has the necessary fields
-        if (typeof item.profiles.username === 'string' && 
-            typeof item.profiles.full_name === 'string') {
+        if (profiles && 
+            typeof profiles.username === 'string' && 
+            typeof profiles.full_name === 'string') {
+          
           comment.profiles = {
-            username: item.profiles.username,
-            full_name: item.profiles.full_name
+            username: profiles.username,
+            full_name: profiles.full_name
           };
         }
       }
