@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,9 +34,10 @@ const AdminLayout = () => {
         }
         
         // Ne rediriger que si isAdmin est explicitement false (pas undefined)
-        if (isAdmin === false) {
+        if (isAdmin === false) { // Check for explicitly false
           logger.warning('Unauthorized access attempt: Not admin', {
             userId: user.id,
+            isAdmin: isAdmin,
             path: window.location.pathname
           });
           setError("Vous n'avez pas les permissions d'administrateur nécessaires.");
@@ -45,6 +45,13 @@ const AdminLayout = () => {
           setTimeout(() => {
             navigate('/', { replace: true });
           }, 3000);
+        } else if (isAdmin === undefined && !loading) {
+          // Si isAdmin est undefined mais que le chargement est terminé, on attend
+          logger.info('Admin status is still being determined', {
+            userId: user.id,
+            loading: loading
+          });
+          // Ne pas rediriger, juste attendre
         }
       }
     } catch (err) {
@@ -53,10 +60,11 @@ const AdminLayout = () => {
     }
   }, [isAdmin, loading, navigate, user]);
   
-  if (loading || !authChecked) {
+  if (loading || isAdmin === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+        <p className="text-slate-600 ml-3">Vérification des autorisations...</p>
       </div>
     );
   }

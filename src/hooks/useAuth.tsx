@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -17,7 +16,7 @@ type AuthContextType = {
     error: Error | null;
   }>;
   signOut: () => Promise<void>;
-  isAdmin: boolean;
+  isAdmin: boolean | undefined; // Changed from just boolean to boolean | undefined
   refreshProfile: () => Promise<void>;
 };
 
@@ -28,7 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | undefined>(undefined); // Initialize as undefined instead of false
 
   useEffect(() => {
     logger.info('Initializing auth state');
@@ -48,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }, 0);
         } else {
           setProfile(null);
-          setIsAdmin(false);
+          setIsAdmin(undefined); // Set to undefined instead of false when logging out
         }
       }
     );
@@ -97,10 +96,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setProfile(data);
         setIsAdmin(data.is_admin);
+        logger.info('Admin status set', { isAdmin: data.is_admin });
       } else {
         logger.warning('No profile found for user', { userId });
         setProfile(null);
-        setIsAdmin(false);
+        setIsAdmin(false); // Explicitly set to false if no profile found
       }
     } catch (error) {
       logger.error('Error fetching profile', { 
@@ -108,8 +108,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error: (error as Error).message
       });
       
+      // Do not change isAdmin state on error, keep it as is
       setProfile(null);
-      setIsAdmin(false);
     } finally {
       setLoading(false);
     }
