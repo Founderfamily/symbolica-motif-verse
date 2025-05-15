@@ -1,8 +1,11 @@
 
 import React from 'react';
 import { MapPin, Book, Search } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const Features = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-white to-amber-50 relative overflow-hidden">
       {/* Decorative background pattern */}
@@ -11,10 +14,10 @@ const Features = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-10">
           <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
-            Fonctionnalités
+            {t('features.tagline')}
           </span>
           <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
-            Découverte et documentation du patrimoine
+            {t('features.title')}
           </h2>
         </div>
         
@@ -25,8 +28,8 @@ const Features = () => {
               <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
                 <MapPin className="h-7 w-7 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-slate-800">Cartographie culturelle</h3>
-              <p className="text-slate-600 leading-relaxed">Explorez les symboles géolocalisés à travers différentes cultures et époques avec notre interface de navigation intuitive.</p>
+              <h3 className="text-xl font-semibold mb-3 text-slate-800">{t('features.mapping.title')}</h3>
+              <p className="text-slate-600 leading-relaxed">{t('features.mapping.description')}</p>
             </div>
           </div>
           
@@ -36,8 +39,8 @@ const Features = () => {
               <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-6 group-hover:bg-amber-100 transition-colors">
                 <Search className="h-7 w-7 text-amber-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-slate-800">Identification avancée</h3>
-              <p className="text-slate-600 leading-relaxed">Notre technologie d'analyse permet d'identifier, classer et contextualiser les symboles culturels avec précision.</p>
+              <h3 className="text-xl font-semibold mb-3 text-slate-800">{t('features.identification.title')}</h3>
+              <p className="text-slate-600 leading-relaxed">{t('features.identification.description')}</p>
             </div>
           </div>
           
@@ -47,8 +50,8 @@ const Features = () => {
               <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:bg-emerald-100 transition-colors">
                 <Book className="h-7 w-7 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-slate-800">Documentation collaborative</h3>
-              <p className="text-slate-600 leading-relaxed">Contribuez à enrichir la base de connaissances mondiale sur les symboles patrimoniaux partagés par notre communauté.</p>
+              <h3 className="text-xl font-semibold mb-3 text-slate-800">{t('features.documentation.title')}</h3>
+              <p className="text-slate-600 leading-relaxed">{t('features.documentation.description')}</p>
             </div>
           </div>
         </div>

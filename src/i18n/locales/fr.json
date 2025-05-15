@@ -1,4 +1,3 @@
-
 {
   "header": {
     "home": "Accueil",
@@ -281,5 +280,86 @@
   },
   "navigation": {
     "symbols": "Symboles Vedettes"
+  },
+  "callToAction": {
+    "joinUs": "Rejoignez notre communauté",
+    "description": "Faites partie d'un réseau grandissant de passionnés de culture documentant le patrimoine symbolique mondial.",
+    "join": "Nous rejoindre",
+    "explore": "Explorer les symboles",
+    "support": "Nous soutenons les institutions culturelles et les chercheurs indépendants."
+  },
+  "features": {
+    "title": "Découverte et documentation du patrimoine",
+    "tagline": "Fonctionnalités",
+    "mapping": {
+      "title": "Cartographie culturelle",
+      "description": "Explorez les symboles géolocalisés à travers différentes cultures et époques avec notre interface de navigation intuitive."
+    },
+    "identification": {
+      "title": "Identification avancée",
+      "description": "Notre technologie d'analyse permet d'identifier, classer et contextualiser les symboles culturels avec précision."
+    },
+    "documentation": {
+      "title": "Documentation collaborative",
+      "description": "Contribuez à enrichir la base de connaissances mondiale sur les symboles patrimoniaux partagés par notre communauté."
+    }
+  },
+  "community": {
+    "title": "Notre communauté de passionnés",
+    "description": "Rejoignez des milliers d'amateurs et experts du patrimoine mondial, partagez vos découvertes et trouvez votre communauté thématique",
+    "groups": {
+      "artDeco": {
+        "name": "Art Déco",
+        "culture": "Française"
+      },
+      "celticSymbolism": {
+        "name": "Symbolisme Celtique",
+        "culture": "Celtique" 
+      },
+      "japanesePatterns": {
+        "name": "Motifs Japonais",
+        "culture": "Japonaise"
+      },
+      "islamicArt": {
+        "name": "Art Islamique",
+        "culture": "Islamique"
+      }
+    },
+    "stats": {
+      "members": "membres",
+      "discoveries": "découvertes",
+      "join": "Rejoindre"
+    },
+    "features": {
+      "thematicCommunities": {
+        "title": "Communautés thématiques",
+        "description": "Rejoignez des groupes spécialisés selon vos intérêts : Art Déco, Symbolisme Médiéval, Motifs Asiatiques..."
+      },
+      "personalSpace": {
+        "title": "Votre espace personnel",
+        "description": "Conservez vos découvertes, suivez vos contributions et visualisez votre progression d'expertise"
+      },
+      "intuitiveNavigation": {
+        "title": "Navigation intuitive",
+        "description": "Explorez les connexions entre symboles, lieux et cultures grâce à notre navigation \"mind mapping\""
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Explorer et préserver ensemble le patrimoine symbolique mondial.",
+    "platform": "Plateforme",
+    "home": "Accueil",
+    "explore": "Explorer",
+    "contribute": "Contribuer",
+    "about": "À propos",
+    "community": "Communauté",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "legal": "Mentions légales",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "license": "Licence",
+    "copyright": "© 2025 Symbolica. Tous droits réservés."
   }
 }

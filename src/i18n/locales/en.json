@@ -1,4 +1,3 @@
-
 {
   "header": {
     "home": "Home",
@@ -281,5 +280,86 @@
   },
   "navigation": {
     "symbols": "Featured Symbols"
+  },
+  "callToAction": {
+    "joinUs": "Join Our Community Today",
+    "description": "Be part of a growing network of cultural enthusiasts documenting the world's symbolic heritage.",
+    "join": "Join Now",
+    "explore": "Explore Symbols",
+    "support": "We support cultural institutions and independent researchers alike."
+  },
+  "features": {
+    "title": "Cultural Discovery and Documentation",
+    "tagline": "Features",
+    "mapping": {
+      "title": "Cultural Mapping",
+      "description": "Explore geolocated symbols across different cultures and eras with our intuitive navigation interface."
+    },
+    "identification": {
+      "title": "Advanced Identification",
+      "description": "Our analysis technology identifies, classifies and contextualizes cultural symbols with precision."
+    },
+    "documentation": {
+      "title": "Collaborative Documentation",
+      "description": "Contribute to enrich the global knowledge base of heritage symbols shared by our community."
+    }
+  },
+  "community": {
+    "title": "Our community of enthusiasts",
+    "description": "Join thousands of heritage enthusiasts and experts around the world, share your discoveries and find your thematic community",
+    "groups": {
+      "artDeco": {
+        "name": "Art Deco",
+        "culture": "French"
+      },
+      "celticSymbolism": {
+        "name": "Celtic Symbolism",
+        "culture": "Celtic" 
+      },
+      "japanesePatterns": {
+        "name": "Japanese Patterns",
+        "culture": "Japanese"
+      },
+      "islamicArt": {
+        "name": "Islamic Art",
+        "culture": "Islamic"
+      }
+    },
+    "stats": {
+      "members": "members",
+      "discoveries": "discoveries",
+      "join": "Join"
+    },
+    "features": {
+      "thematicCommunities": {
+        "title": "Thematic Communities",
+        "description": "Join specialized groups based on your interests: Art Deco, Medieval Symbolism, Asian Patterns..."
+      },
+      "personalSpace": {
+        "title": "Your Personal Space",
+        "description": "Save your discoveries, track your contributions and visualize your expertise progression"
+      },
+      "intuitiveNavigation": {
+        "title": "Intuitive Navigation",
+        "description": "Explore connections between symbols, places and cultures with our 'mind mapping' navigation"
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Exploring and preserving the world's symbolic heritage together.",
+    "platform": "Platform",
+    "home": "Home",
+    "explore": "Explore",
+    "contribute": "Contribute",
+    "about": "About",
+    "community": "Community",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "legal": "Legal",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "license": "License",
+    "copyright": "© 2025 Symbolica. All rights reserved."
   }
 }
