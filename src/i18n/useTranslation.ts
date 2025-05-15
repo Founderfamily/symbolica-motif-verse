@@ -6,14 +6,17 @@ export const useTranslation = () => {
   const { t: originalT, i18n } = useI18nTranslation();
   
   // Wrap the original t function to validate keys in development
-  const t = (key: string, options?: any) => {
+  // and ensure we always return a string
+  const t = (key: string, options?: any): string => {
     // Validate the key in development
     if (process.env.NODE_ENV === 'development') {
       validateTranslationKey(key);
     }
     
-    // Call the original t function
-    return originalT(key, options);
+    // Call the original t function and ensure it returns a string
+    const translated = originalT(key, options);
+    // Convert any non-string values to string to avoid type issues
+    return typeof translated === 'string' ? translated : String(translated);
   };
   
   const changeLanguage = (lng: string) => {

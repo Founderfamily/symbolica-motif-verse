@@ -80,6 +80,7 @@ const findMissingKeys = (
 
 /**
  * Use this hook to check if a specific key exists in both locales
+ * @returns boolean indicating if the key exists in both locales
  */
 export const validateTranslationKey = (key: string): boolean => {
   const keyExists = {
