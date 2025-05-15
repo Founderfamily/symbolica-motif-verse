@@ -45,6 +45,10 @@ export interface ContributionComment {
   user_id: string;
   comment: string;
   created_at: string;
+  profiles?: {
+    username: string;
+    full_name: string;
+  };
 }
 
 // Type pour une contribution complète avec ses images, tags et commentaires
@@ -56,6 +60,7 @@ export interface CompleteContribution extends UserContribution {
     username: string;
     full_name: string;
   };
+  profiles?: any; // Pour la compatibilité avec les résultats de Supabase
 }
 
 // Type pour le formulaire de création de contribution

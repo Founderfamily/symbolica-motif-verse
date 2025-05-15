@@ -6,6 +6,11 @@ interface MapSelectorProps {
   initialLocation?: string;
 }
 
+// Déclaration d'interface pour étendre Window avec l'API Google Maps
+interface WindowWithGoogleMaps extends Window {
+  google?: any;
+}
+
 const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLocation = '' }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +21,8 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
       if (!mapRef.current) return;
       
       // Vérifier si l'API Google Maps est déjà chargée
-      if (!window.google || !window.google.maps) {
+      const windowWithGoogle = window as WindowWithGoogleMaps;
+      if (!windowWithGoogle.google || !windowWithGoogle.google.maps) {
         setLoading(true);
         
         // Pour un prototype, on va simuler une carte avec une interface simple

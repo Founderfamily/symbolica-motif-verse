@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   UserContribution, 
   ContributionImage, 
-  ContributionTag, 
+  ContributionTag,
+  ContributionComment,
   CompleteContribution,
   ContributionFormData 
 } from '@/types/contributions';
@@ -126,7 +127,7 @@ export async function getContributionComments(contributionId: string): Promise<C
       .eq('contribution_id', contributionId);
 
     if (error) throw error;
-    return data as any[];
+    return data as ContributionComment[];
   } catch (error: any) {
     console.error('Error fetching contribution comments:', error.message);
     return [];
@@ -288,13 +289,14 @@ export async function getPendingContributions(): Promise<CompleteContribution[]>
         const tags = await getContributionTags(contribution.id);
         const comments = await getContributionComments(contribution.id);
 
+        // Utiliser as unknown as CompleteContribution pour éviter l'erreur de type
         return {
           ...contribution,
           images,
           tags,
           comments,
-          user_profile: contribution.profiles
-        } as CompleteContribution;
+          user_profile: contribution.profiles || undefined
+        } as unknown as CompleteContribution;
       })
     );
 
@@ -323,13 +325,14 @@ export async function getContributionById(contributionId: string): Promise<Compl
     const tags = await getContributionTags(contributionId);
     const comments = await getContributionComments(contributionId);
 
+    // Utiliser as unknown as CompleteContribution pour éviter l'erreur de type
     return {
       ...data,
       images,
       tags,
       comments,
-      user_profile: data.profiles
-    } as CompleteContribution;
+      user_profile: data.profiles || undefined
+    } as unknown as CompleteContribution;
   } catch (error: any) {
     console.error('Error fetching contribution by ID:', error.message);
     return null;
