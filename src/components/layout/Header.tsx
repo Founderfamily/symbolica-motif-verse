@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -22,11 +21,9 @@ const Header = () => {
   const { user, signOut, isAdmin } = useAuth();
   
   const navItems = [
-    { label: t('header.home'), path: '/' },
-    { label: t('header.about'), path: '/about' },
-    { label: t('header.explore'), path: '/explore' },
-    { label: t('header.contribute'), path: '/contribute' },
-    { label: t('header.community'), path: '/community' },
+    { label: t('navigation.home'), path: '/' },
+    { label: t('navigation.about'), path: '/about' },
+    { label: t('navigation.contributions'), path: '/contributions' },
   ];
   
   const isActive = (path: string) => {

@@ -78,6 +78,105 @@ export type Database = {
         }
         Relationships: []
       }
+      contribution_comments: {
+        Row: {
+          comment: string
+          contribution_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          contribution_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          contribution_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contribution_comments_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "user_contributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contribution_images: {
+        Row: {
+          annotations: Json | null
+          contribution_id: string
+          created_at: string | null
+          extracted_pattern_url: string | null
+          id: string
+          image_type: string
+          image_url: string
+        }
+        Insert: {
+          annotations?: Json | null
+          contribution_id: string
+          created_at?: string | null
+          extracted_pattern_url?: string | null
+          id?: string
+          image_type?: string
+          image_url: string
+        }
+        Update: {
+          annotations?: Json | null
+          contribution_id?: string
+          created_at?: string | null
+          extracted_pattern_url?: string | null
+          id?: string
+          image_type?: string
+          image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contribution_images_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "user_contributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contribution_tags: {
+        Row: {
+          contribution_id: string
+          created_at: string | null
+          id: string
+          tag: string
+        }
+        Insert: {
+          contribution_id: string
+          created_at?: string | null
+          id?: string
+          tag: string
+        }
+        Update: {
+          contribution_id?: string
+          created_at?: string | null
+          id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contribution_tags_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "user_contributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           created_at: string | null
@@ -296,6 +395,57 @@ export type Database = {
           quote?: Json | null
           role?: Json | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_contributions: {
+        Row: {
+          created_at: string | null
+          cultural_context: string | null
+          description: string | null
+          id: string
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          period: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          cultural_context?: string | null
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          period?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          cultural_context?: string | null
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          period?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
