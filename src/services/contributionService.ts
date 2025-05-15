@@ -129,19 +129,25 @@ export async function getContributionComments(contributionId: string): Promise<C
     
     // Transform the data to ensure it matches our ContributionComment type
     const transformedData = (data || []).map(item => {
-      // Check if profiles property has an error
-      const hasProfileError = item.profiles && typeof item.profiles === 'object' && 'error' in item.profiles;
-      
-      // Return a properly formatted ContributionComment object
-      return {
+      // First create the base comment object with required properties
+      const comment: ContributionComment = {
         id: item.id,
         contribution_id: item.contribution_id,
         user_id: item.user_id,
         comment: item.comment,
-        created_at: item.created_at,
-        // Only include profiles if there's no error
-        profiles: hasProfileError ? undefined : item.profiles
-      } as ContributionComment;
+        created_at: item.created_at
+      };
+      
+      // Check if profiles property exists, is not null, and doesn't have an error
+      if (item.profiles && typeof item.profiles === 'object' && !('error' in item.profiles)) {
+        // Only add the profiles property if it's valid
+        comment.profiles = {
+          username: item.profiles.username,
+          full_name: item.profiles.full_name
+        };
+      }
+      
+      return comment;
     });
     
     return transformedData;
