@@ -1,3 +1,4 @@
+
 {
   "header": {
     "home": "Accueil",
@@ -73,7 +74,8 @@
     "newsletter": "Abonnez-vous à notre newsletter",
     "newsletterSub": "Restez informé des dernières découvertes et symboles culturels",
     "subscribe": "S'abonner",
-    "openSource": "Projet Open Source"
+    "openSource": "Projet Open Source",
+    "contactUs": "Contactez-nous"
   },
   "howItWorks": {
     "process": "Le Processus",

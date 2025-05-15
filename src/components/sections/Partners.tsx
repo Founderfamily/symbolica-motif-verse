@@ -1,88 +1,57 @@
 
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from '@/i18n/useTranslation';
-import { ContentSection, getContentSectionByKey } from '@/services/contentService';
-import { Partner, getPartners } from '@/services/partnersService';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { I18nText } from '@/components/ui/i18n-text';
+import { cn } from '@/lib/utils';
+
+const partners = [
+  {
+    name: 'British Museum',
+    logo: '/path/to/british-museum-logo.svg',
+    width: 'w-36'
+  },
+  {
+    name: 'UNESCO',
+    logo: '/path/to/unesco-logo.svg',
+    width: 'w-24'
+  },
+  {
+    name: 'Smithsonian',
+    logo: '/path/to/smithsonian-logo.svg',
+    width: 'w-32'
+  },
+  {
+    name: 'Louvre Museum',
+    logo: '/path/to/louvre-logo.svg',
+    width: 'w-28'
+  }
+];
 
 const Partners = () => {
-  const { t, i18n } = useTranslation();
-  const [partnersContent, setPartnersContent] = useState<ContentSection | null>(null);
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [contentData, partnersData] = await Promise.all([
-          getContentSectionByKey('partners'),
-          getPartners(true) // Only active partners
-        ]);
-        
-        setPartnersContent(contentData);
-        setPartners(partnersData);
-      } catch (error) {
-        console.error('Error fetching partners data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, []);
-  
-  const lang = i18n.language || 'fr';
-  const title = partnersContent?.title?.[lang] || t('sections.partners');
-  const subtitle = partnersContent?.subtitle?.[lang] || t('sections.partnerIntro');
-  const content = partnersContent?.content?.[lang] || t('sections.interested');
-  
   return (
-    <section className="py-16 px-4 md:px-8 bg-slate-50">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4 text-center">{title}</h2>
-        <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
-          {subtitle}
-        </p>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {loading ? (
-            // Placeholders while loading
-            Array(4).fill(0).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl p-6 flex items-center justify-center h-24 border border-slate-200 animate-pulse">
-                <div className="w-32 h-8 bg-slate-200 rounded"></div>
-              </div>
-            ))
-          ) : partners.length > 0 ? (
-            partners.map((partner) => (
+    <section className="py-12 bg-slate-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+            <I18nText translationKey="sections.partners" />
+          </h2>
+          
+          <div className="flex flex-wrap justify-center gap-12 items-center mt-10">
+            {partners.map((partner, index) => (
               <div 
-                key={partner.id} 
-                className="bg-white rounded-xl p-6 flex items-center justify-center h-24 border border-slate-200 hover:shadow-md transition-shadow"
+                key={index}
+                className={cn("grayscale hover:grayscale-0 transition-all duration-300", 
+                  partner.width || "w-28")}
               >
-                {partner.logo_url ? (
-                  <img 
-                    src={partner.logo_url} 
-                    alt={partner.name} 
-                    className="max-h-full max-w-full object-contain"
-                  />
-                ) : (
-                  <div className="text-slate-600 font-semibold">{partner.name}</div>
-                )}
+                {/* Placeholder for actual logos */}
+                <div className="h-12 bg-slate-200 flex items-center justify-center rounded">
+                  {partner.name}
+                </div>
               </div>
-            ))
-          ) : (
-            // Fallback if no partners are available
-            Array(4).fill(0).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl p-6 flex items-center justify-center h-24 border border-slate-200">
-                <div className="text-slate-400 font-semibold">Institution {i+1}</div>
-              </div>
-            ))
-          )}
-        </div>
-        
-        <div className="mt-12 text-center">
-          <p className="text-slate-600">
-            {content} <Link to="/about" className="text-amber-700 hover:underline font-medium">{t('sections.contactUs')}</Link>
+            ))}
+          </div>
+          
+          <p className="mt-8 text-slate-600">
+            <I18nText translationKey="sections.contactUs" /> 
           </p>
         </div>
       </div>

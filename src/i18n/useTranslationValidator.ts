@@ -161,7 +161,7 @@ const scanPageForMissingTranslations = (container: HTMLElement) => {
   
   const missingKeys = potentialKeys.filter(key => {
     // Skip obvious non-translation keys
-    if (key.startsWith('http') || key.includes('@') || key.match(/\d+\.\d+/)) {
+    if (typeof key === 'string' && (key.startsWith('http') || key.includes('@') || key.match(/\d+\.\d+/))) {
       return false;
     }
     
