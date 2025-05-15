@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Book, Globe, LogOut, Search, Users } from 'lucide-react';
@@ -7,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/services/logService';
 import { useTranslation } from '@/i18n/useTranslation';
 import { LanguageSelector } from '@/components/ui/language-selector';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const { user, signOut, isAdmin } = useAuth();
@@ -70,42 +71,37 @@ const Header = () => {
           </Link>
         </nav>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <LanguageSelector />
           
           {user ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-700">
-                {user.email}
-              </span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="border-amber-700 text-amber-700 hover:bg-amber-50 flex items-center gap-1"
-                onClick={handleAuth}
-              >
-                <LogOut className="h-4 w-4" />
-                {t('auth.logout')}
-              </Button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-8 w-8 cursor-pointer">
+                  <AvatarImage src={user.avatar_url || undefined} />
+                  <AvatarFallback className="bg-amber-600 text-white">
+                    {user.full_name?.charAt(0) || user.username?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  {t('header.profile')}
+                </DropdownMenuItem>
+                {user.is_admin && (
+                  <DropdownMenuItem onClick={() => navigate('/admin')}>
+                    {t('header.admin')}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={signOut}>
+                  {t('header.signOut')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="border-amber-700 text-amber-700 hover:bg-amber-50"
-                onClick={() => navigate('/auth')}
-              >
-                {t('auth.login')}
-              </Button>
-              <Button 
-                size="sm" 
-                className="bg-amber-700 hover:bg-amber-800"
-                onClick={() => navigate('/auth')}
-              >
-                {t('auth.register')}
-              </Button>
-            </>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>
+              {t('header.signIn')}
+            </Button>
           )}
         </div>
       </div>

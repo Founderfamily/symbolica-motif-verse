@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Auth from '@/pages/Auth';
+import Profile from '@/pages/Profile';
 import AdminLayout from '@/pages/Admin/AdminLayout';
 import Dashboard from '@/pages/Admin/Dashboard';
 import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
@@ -33,6 +34,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="symbols" element={<SymbolsManagement />} />

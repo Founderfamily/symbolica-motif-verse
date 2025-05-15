@@ -1,190 +1,92 @@
 
 {
-  "app": {
-    "name": "Symbolica",
-    "version": "Alpha"
-  },
-  "navigation": {
+  "header": {
     "home": "Home",
-    "explore": "Explore",
-    "symbols": "Symbols",
     "about": "About",
-    "community": "Community"
+    "explore": "Explore Symbols",
+    "contribute": "Contribute",
+    "community": "Community",
+    "signIn": "Sign In",
+    "profile": "My Profile",
+    "admin": "Admin Dashboard",
+    "signOut": "Sign Out"
   },
   "auth": {
-    "login": "Login",
-    "logout": "Logout",
+    "login": "Log In",
     "register": "Register",
-    "admin": "Admin"
+    "loginTitle": "Welcome Back",
+    "registerTitle": "Create an Account",
+    "email": "Email",
+    "username": "Username",
+    "fullName": "Full Name",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "loggingIn": "Logging in...",
+    "creating": "Creating account...",
+    "intro": "Join our community to explore and contribute to the world's cultural symbols"
+  },
+  "profile": {
+    "memberSince": "Member since {{date}}",
+    "tabs": {
+      "overview": "Overview",
+      "contributions": "Contributions",
+      "settings": "Settings"
+    },
+    "stats": {
+      "contributions": "Contributions",
+      "symbols": "Symbols Added",
+      "verified": "Verified Uploads"
+    },
+    "about": {
+      "title": "About the Community",
+      "description": "Join our growing community of cultural explorers documenting the world's symbolic heritage."
+    },
+    "noContributions": "You haven't made any contributions yet.",
+    "startContributing": "Start Contributing",
+    "accountSettings": "Account Settings",
+    "settingsDescription": "Manage your account settings and preferences",
+    "signOut": "Sign Out",
+    "adminBadge": "ADMIN"
+  },
+  "app": {
+    "version": "Alpha Release 0.1"
   },
   "hero": {
-    "heading": "Symbolica",
-    "subheading": "Explore, document and share the world's symbolic heritage with our community of enthusiasts",
-    "community": "Join the community",
-    "explore": "Discover symbols"
+    "heading": "Discover the Language of Cultural Symbols",
+    "subheading": "Explore, interpret and preserve the visual cultural heritage from around the world",
+    "community": "Join the Community",
+    "explore": "Explore Motifs"
   },
   "sections": {
-    "museumPortal": "Symbolica Museum",
-    "communityPortal": "Collaborative portal for symbolic heritage",
-    "joinCommunity": "Join a community",
-    "features": "Features",
-    "howItWorks": "How it works",
-    "testimonials": "Testimonials",
+    "features": "Key Features",
+    "howItWorks": "How It Works",
+    "community": "Community",
+    "tools": "Tools & Resources",
     "partners": "Our Partners",
-    "roadmap": "Our Roadmap",
-    "faq": "Frequently Asked Questions",
-    "callToAction": "Join us",
-    "newsletter": "Stay informed",
-    "newsletterSub": "Subscribe to our newsletter to follow the project's evolution",
-    "subscribe": "Subscribe",
-    "partnerIntro": "Symbolica collaborates with cultural and educational institutions to preserve and share symbolic heritage",
-    "interested": "Interested in a partnership?",
-    "contactUs": "Contact us",
-    "openSource": "Open Source"
+    "testimonials": "User Stories",
+    "roadmap": "Roadmap",
+    "faq": "FAQ"
   },
   "howItWorks": {
-    "process": "Process",
-    "intro": "An open-source platform to preserve, educate and inspire around cultural symbols",
+    "process": "The Process",
+    "intro": "Learn how our platform helps document and preserve cultural symbols",
     "steps": {
       "1": {
-        "title": "Photograph",
-        "desc": "Capture and upload photos of symbols you find"
+        "title": "Upload & Identify",
+        "desc": "Upload images of cultural motifs you encounter for identification"
       },
       "2": {
-        "title": "Annotate",
-        "desc": "Identify and describe patterns interactively"
+        "title": "Tag & Annotate",
+        "desc": "Add tags, geographical context and cultural details to enrich the database"
       },
       "3": {
-        "title": "Explore",
-        "desc": "Discover links between symbols across cultures and eras"
+        "title": "Discover Connections",
+        "desc": "Explore the relationships between similar symbols across different cultures"
       },
       "4": {
-        "title": "Create",
-        "desc": "Generate new patterns inspired by heritage with our AI"
-      }
-    }
-  },
-  "callToAction": {
-    "joinUs": "Join the Symbolica community",
-    "description": "Participate in the preservation and rediscovery of the world's symbolic heritage. An open and collaborative initiative for all culture enthusiasts.",
-    "join": "Register and contribute",
-    "explore": "Explore collections",
-    "support": "Project supported by museums, universities and cultural institutions"
-  },
-  "footer": {
-    "tagline": "An open-source platform dedicated to the discovery, analysis and creation around symbols & cultural patterns.",
-    "platform": "Platform",
-    "home": "Home",
-    "explore": "Explore",
-    "contribute": "Contribute",
-    "about": "About",
-    "community": "Community",
-    "github": "GitHub",
-    "discord": "Discord",
-    "forum": "Forum",
-    "legal": "Legal",
-    "terms": "Legal Notice",
-    "privacy": "Privacy",
-    "license": "License",
-    "copyright": "© 2025 Symbolica — Non-profit organization"
-  },
-  "uploadTools": {
-    "title": "Contribute to symbolic heritage",
-    "subtitle": "Symbolica offers you powerful tools to document, analyze and share cultural symbols",
-    "capture": {
-      "title": "Capture and upload",
-      "desc": "Photograph symbols during your cultural visits and upload them directly to the platform"
-    },
-    "analyze": {
-      "title": "Analyze and document",
-      "desc": "Our AI helps you identify patterns and associate them with their historical and cultural context"
-    },
-    "share": {
-      "title": "Share and exchange",
-      "desc": "The community can vote, comment and enrich your discoveries, allowing you to gain expertise"
-    },
-    "process": {
-      "title": "Analysis process",
-      "subtitle": "An example of architectural pattern processing",
-      "original": "Original photo",
-      "detection": "AI detection",
-      "extraction": "Pattern extraction",
-      "classification": "Classification",
-      "result": "Analysis result",
-      "example": "Art Nouveau Pattern - Period: 1890-1910 - Similarity with 24 other patterns"
-    }
-  },
-  "symbolTriptych": {
-    "empty": "Select a symbol to see its details",
-    "loading": "Loading symbol data...",
-    "error": "Error loading",
-    "errorDesc": "Unable to load symbol data",
-    "imageError": "Attention",
-    "imageErrorDesc": "Some authentic images could not be loaded. Alternatives have been displayed.",
-    "original": "Original image",
-    "pattern": "Pattern extraction",
-    "reuse": "New usage",
-    "originalCaptions": {
-      "mosque": "Mosque Arabesque",
-      "triskelion": "Celtic Knot",
-      "fleurdelys": "Royal Palace"
-    },
-    "patternCaptions": {
-      "arabesque": "Graphic extraction of an Islamic arabesque",
-      "triskelion": "Celtic triskelion extraction",
-      "fleurdelys": "Fleur-de-lis pattern detail"
-    },
-    "reuseCaptions": {
-      "arabesque": "Use of the pattern in contemporary digital design",
-      "triskelion": "Modern application in jewelry",
-      "fleurdelys": "Use in contemporary heraldry"
-    },
-    "location": "Location",
-    "source": "Source",
-    "tags": "Tags"
-  },
-  "symbolList": {
-    "empty": "No symbols found",
-    "error": {
-      "title": "Error",
-      "description": "Unable to load the symbols list"
-    }
-  },
-  "about": {
-    "title": "About Symbolica",
-    "subtitle": "A collaborative platform dedicated to preserving and exploring the world's symbolic heritage",
-    "mission": {
-      "title": "Our Mission",
-      "description1": "Symbolica aims to document, preserve, and share the rich diversity of symbolic patterns found across cultures and throughout history.",
-      "description2": "Through a combination of community contributions, expert knowledge, and AI-powered analysis, we're creating a comprehensive repository of the world's symbolic language."
-    },
-    "vision": {
-      "title": "Our Vision",
-      "description": "We believe that symbolic heritage belongs to humanity as a whole and should be accessible to everyone for education, inspiration, and cultural understanding.",
-      "value1": "Open access to symbolic knowledge",
-      "value2": "Cross-cultural understanding through symbols",
-      "value3": "Preservation of traditional patterns"
-    },
-    "analysisProcess": {
-      "title": "Analysis Process",
-      "subtitle": "How we analyze and document symbolic patterns"
-    },
-    "team": {
-      "title": "Our Team",
-      "member1": {
-        "name": "Dr. Emma Johnson",
-        "role": "Founder & Art Historian",
-        "bio": "Specializing in symbolic communication across ancient civilizations"
-      },
-      "member2": {
-        "name": "Michael Chen",
-        "role": "AI Developer",
-        "bio": "Expert in computer vision and pattern recognition algorithms"
-      },
-      "member3": {
-        "name": "Sophia Rodriguez",
-        "role": "Community Manager",
-        "bio": "Building bridges between academic research and enthusiast communities"
+        "title": "Create & Reuse",
+        "desc": "Use the symbols as inspiration for your own creative projects"
       }
     }
   }

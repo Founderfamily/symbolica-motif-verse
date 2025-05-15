@@ -1,2 +1,10 @@
 
 project_id = "djczgpmhrbirbqrycodq"
+
+[auth.email]
+enable_confirmations = false
+
+[auth.external.google]
+enabled = false
+client_id = ""
+secret = ""

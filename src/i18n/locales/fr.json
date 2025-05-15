@@ -1,190 +1,92 @@
 
 {
-  "app": {
-    "name": "Symbolica",
-    "version": "Alpha"
-  },
-  "navigation": {
+  "header": {
     "home": "Accueil",
-    "explore": "Explorer",
-    "symbols": "Symboles",
     "about": "À propos",
-    "community": "Communauté"
+    "explore": "Explorer les Symboles",
+    "contribute": "Contribuer",
+    "community": "Communauté",
+    "signIn": "Connexion",
+    "profile": "Mon Profil",
+    "admin": "Administration",
+    "signOut": "Déconnexion"
   },
   "auth": {
     "login": "Connexion",
-    "logout": "Déconnexion",
     "register": "Inscription",
-    "admin": "Admin"
+    "loginTitle": "Bienvenue",
+    "registerTitle": "Créer un Compte",
+    "email": "Email",
+    "username": "Nom d'utilisateur",
+    "fullName": "Nom complet",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "loggingIn": "Connexion en cours...",
+    "creating": "Création du compte...",
+    "intro": "Rejoignez notre communauté pour explorer et contribuer aux symboles culturels du monde entier"
+  },
+  "profile": {
+    "memberSince": "Membre depuis {{date}}",
+    "tabs": {
+      "overview": "Aperçu",
+      "contributions": "Contributions",
+      "settings": "Paramètres"
+    },
+    "stats": {
+      "contributions": "Contributions",
+      "symbols": "Symboles Ajoutés",
+      "verified": "Uploads Vérifiés"
+    },
+    "about": {
+      "title": "À propos de la Communauté",
+      "description": "Rejoignez notre communauté d'explorateurs culturels qui documentent le patrimoine symbolique mondial."
+    },
+    "noContributions": "Vous n'avez pas encore fait de contributions.",
+    "startContributing": "Commencer à Contribuer",
+    "accountSettings": "Paramètres du Compte",
+    "settingsDescription": "Gérez vos paramètres et préférences de compte",
+    "signOut": "Déconnexion",
+    "adminBadge": "ADMIN"
+  },
+  "app": {
+    "version": "Version Alpha 0.1"
   },
   "hero": {
-    "heading": "Symbolica",
-    "subheading": "Explorez, documentez et partagez le patrimoine symbolique mondial avec notre communauté de passionnés",
-    "community": "Rejoindre la communauté",
-    "explore": "Découvrir les symboles"
+    "heading": "Découvrez le Langage des Symboles Culturels",
+    "subheading": "Explorez, interprétez et préservez le patrimoine culturel visuel du monde entier",
+    "community": "Rejoindre la Communauté",
+    "explore": "Explorer les Motifs"
   },
   "sections": {
-    "museumPortal": "Musée Symbolica",
-    "communityPortal": "Portail collaboratif du patrimoine symbolique",
-    "joinCommunity": "Rejoindre une communauté",
-    "features": "Fonctionnalités",
-    "howItWorks": "Comment ça marche",
+    "features": "Caractéristiques Principales",
+    "howItWorks": "Comment Ça Marche",
+    "community": "Communauté",
+    "tools": "Outils & Ressources",
+    "partners": "Nos Partenaires",
     "testimonials": "Témoignages",
-    "partners": "Nos partenaires",
-    "roadmap": "Notre feuille de route",
-    "faq": "Questions fréquentes",
-    "callToAction": "Rejoignez-nous",
-    "newsletter": "Restez informé",
-    "newsletterSub": "Inscrivez-vous à notre newsletter pour suivre l'évolution du projet",
-    "subscribe": "S'inscrire",
-    "partnerIntro": "Symbolica collabore avec des institutions culturelles et éducatives pour préserver et partager le patrimoine symbolique",
-    "interested": "Intéressé par un partenariat ?",
-    "contactUs": "Contactez-nous",
-    "openSource": "Open Source"
+    "roadmap": "Feuille de Route",
+    "faq": "FAQ"
   },
   "howItWorks": {
-    "process": "Processus",
-    "intro": "Une plateforme open-source pour préserver, éduquer et inspirer autour des symboles culturels",
+    "process": "Le Processus",
+    "intro": "Découvrez comment notre plateforme aide à documenter et préserver les symboles culturels",
     "steps": {
       "1": {
-        "title": "Photographiez",
-        "desc": "Capturez et téléchargez des photos de symboles que vous trouvez"
+        "title": "Télécharger & Identifier",
+        "desc": "Téléchargez des images de motifs culturels que vous rencontrez pour identification"
       },
       "2": {
-        "title": "Annotez",
-        "desc": "Identifiez et décrivez les motifs de façon interactive"
+        "title": "Étiqueter & Annoter",
+        "desc": "Ajoutez des tags, un contexte géographique et des détails culturels pour enrichir la base de données"
       },
       "3": {
-        "title": "Explorez",
-        "desc": "Découvrez les liens entre les symboles à travers cultures et époques"
+        "title": "Découvrir les Connexions",
+        "desc": "Explorez les relations entre symboles similaires à travers différentes cultures"
       },
       "4": {
-        "title": "Créez",
-        "desc": "Générez de nouveaux motifs inspirés par le patrimoine avec notre IA"
-      }
-    }
-  },
-  "callToAction": {
-    "joinUs": "Rejoignez la communauté Symbolica",
-    "description": "Participez à la préservation et à la redécouverte du patrimoine symbolique mondial. Une initiative ouverte et collaborative pour tous les passionnés de culture.",
-    "join": "M'inscrire et contribuer",
-    "explore": "Explorer les collections",
-    "support": "Projet soutenu par des musées, universités et institutions culturelles"
-  },
-  "footer": {
-    "tagline": "Une plateforme open-source dédiée à la découverte, l'analyse et la création autour des symboles & motifs culturels.",
-    "platform": "Plateforme",
-    "home": "Accueil",
-    "explore": "Explorer",
-    "contribute": "Contribuer",
-    "about": "À propos",
-    "community": "Communauté",
-    "github": "GitHub",
-    "discord": "Discord",
-    "forum": "Forum",
-    "legal": "Légal",
-    "terms": "Mentions légales",
-    "privacy": "Confidentialité",
-    "license": "Licence",
-    "copyright": "© 2025 Symbolica — Association loi 1901"
-  },
-  "uploadTools": {
-    "title": "Contribuez au patrimoine symbolique",
-    "subtitle": "Symbolica vous offre des outils puissants pour documenter, analyser et partager les symboles culturels",
-    "capture": {
-      "title": "Capturez et téléchargez",
-      "desc": "Photographiez des symboles lors de vos visites culturelles et téléchargez-les directement sur la plateforme"
-    },
-    "analyze": {
-      "title": "Analysez et documentez",
-      "desc": "Notre IA vous aide à identifier les motifs et les associer à leur contexte historique et culturel"
-    },
-    "share": {
-      "title": "Partagez et échangez",
-      "desc": "La communauté peut voter, commenter et enrichir vos découvertes, vous permettant de gagner en expertise"
-    },
-    "process": {
-      "title": "Processus d'analyse",
-      "subtitle": "Un exemple de traitement de motif architectural",
-      "original": "Photo originale",
-      "detection": "Détection IA",
-      "extraction": "Extraction de motif",
-      "classification": "Classification",
-      "result": "Résultat de l'analyse",
-      "example": "Motif Art Nouveau - Période: 1890-1910 - Similarité avec 24 autres motifs"
-    }
-  },
-  "symbolTriptych": {
-    "empty": "Sélectionnez un symbole pour voir ses détails",
-    "loading": "Chargement des données du symbole...",
-    "error": "Erreur de chargement",
-    "errorDesc": "Impossible de charger les données du symbole",
-    "imageError": "Attention",
-    "imageErrorDesc": "Certaines images authentiques n'ont pas pu être chargées. Des alternatives ont été affichées.",
-    "original": "Image originale",
-    "pattern": "Extraction du motif",
-    "reuse": "Nouvelle utilisation",
-    "originalCaptions": {
-      "mosque": "Mosquée Arabesque",
-      "triskelion": "Nœud Celtique",
-      "fleurdelys": "Palais Royal"
-    },
-    "patternCaptions": {
-      "arabesque": "Extraction graphique d'une arabesque islamique",
-      "triskelion": "Extraction du triskèle celtique",
-      "fleurdelys": "Détail du motif de fleur de lys"
-    },
-    "reuseCaptions": {
-      "arabesque": "Utilisation du motif dans le design numérique contemporain",
-      "triskelion": "Application moderne dans la joaillerie",
-      "fleurdelys": "Utilisation dans l'héraldique contemporaine"
-    },
-    "location": "Lieu",
-    "source": "Source",
-    "tags": "Tags"
-  },
-  "symbolList": {
-    "empty": "Aucun symbole trouvé",
-    "error": {
-      "title": "Erreur",
-      "description": "Impossible de charger la liste des symboles"
-    }
-  },
-  "about": {
-    "title": "À propos de Symbolica",
-    "subtitle": "Une plateforme collaborative dédiée à la préservation et l'exploration du patrimoine symbolique mondial",
-    "mission": {
-      "title": "Notre Mission",
-      "description1": "Symbolica vise à documenter, préserver et partager la riche diversité des motifs symboliques présents à travers les cultures et l'histoire.",
-      "description2": "Grâce à une combinaison de contributions communautaires, d'expertise professionnelle et d'analyse assistée par IA, nous créons un référentiel complet du langage symbolique mondial."
-    },
-    "vision": {
-      "title": "Notre Vision",
-      "description": "Nous croyons que le patrimoine symbolique appartient à l'humanité dans son ensemble et devrait être accessible à tous pour l'éducation, l'inspiration et la compréhension culturelle.",
-      "value1": "Accès libre à la connaissance symbolique",
-      "value2": "Compréhension interculturelle à travers les symboles",
-      "value3": "Préservation des motifs traditionnels"
-    },
-    "analysisProcess": {
-      "title": "Processus d'analyse",
-      "subtitle": "Comment nous analysons et documentons les motifs symboliques"
-    },
-    "team": {
-      "title": "Notre Équipe",
-      "member1": {
-        "name": "Dr. Emma Johnson",
-        "role": "Fondatrice & Historienne d'art",
-        "bio": "Spécialiste de la communication symbolique à travers les anciennes civilisations"
-      },
-      "member2": {
-        "name": "Michael Chen",
-        "role": "Développeur IA",
-        "bio": "Expert en vision par ordinateur et algorithmes de reconnaissance de motifs"
-      },
-      "member3": {
-        "name": "Sophia Rodriguez",
-        "role": "Responsable Communauté",
-        "bio": "Création de ponts entre la recherche académique et les communautés d'enthousiastes"
+        "title": "Créer & Réutiliser",
+        "desc": "Utilisez les symboles comme inspiration pour vos propres projets créatifs"
       }
     }
   }
