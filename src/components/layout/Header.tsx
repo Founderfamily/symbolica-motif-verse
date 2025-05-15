@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { OpenSourceBadge } from '@/components/ui/open-source-badge';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,7 +16,7 @@ const Header = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const { user, signOut, isAdmin } = useAuth();
