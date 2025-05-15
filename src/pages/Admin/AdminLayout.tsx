@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 const AdminLayout = () => {
-  const { isAdmin, loading, user } = useAuth();
+  const { isAdmin, isLoading, user } = useAuth();
   const navigate = useNavigate();
   const [authChecked, setAuthChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ const AdminLayout = () => {
     
     try {
       // Si le chargement est terminé
-      if (!loading) {
+      if (!isLoading) {
         setAuthChecked(true);
         
         if (!user) {
@@ -46,22 +46,15 @@ const AdminLayout = () => {
           setTimeout(() => {
             navigate('/', { replace: true });
           }, 3000);
-        } else if (isAdmin === undefined && !loading) {
-          // Si isAdmin est undefined mais que le chargement est terminé, on attend
-          logger.info('Admin status is still being determined', {
-            userId: user.id,
-            loading: loading
-          });
-          // Ne pas rediriger, juste attendre
         }
       }
     } catch (err) {
       logger.error('Error in AdminLayout authorization', { error: err });
       setError("Une erreur est survenue lors de la vérification des autorisations.");
     }
-  }, [isAdmin, loading, navigate, user]);
+  }, [isAdmin, isLoading, navigate, user]);
   
-  if (loading || isAdmin === undefined) {
+  if (isLoading || isAdmin === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>

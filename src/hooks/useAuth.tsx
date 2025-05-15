@@ -9,7 +9,8 @@ import { toast } from '@/components/ui/use-toast';
 interface AuthContextType {
   user: UserProfile | null;
   session: Session | null;
-  isLoading: boolean;
+  isAdmin: boolean; // Added this property
+  isLoading: boolean; // Changed from loading to isLoading to be consistent
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, userData: Partial<UserProfile>) => Promise<void>;
   signOut: () => Promise<void>;
@@ -23,6 +24,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Compute isAdmin based on user data
+  const isAdmin = user?.is_admin || false;
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -83,6 +87,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error('Error fetching user profile:', error);
       setUser(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -199,7 +205,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     user,
     session,
-    isLoading,
+    isAdmin, // Added isAdmin property
+    isLoading, // Changed from loading to isLoading to be consistent
     signIn,
     signUp,
     signOut,
