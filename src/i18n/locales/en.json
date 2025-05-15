@@ -49,6 +49,7 @@
     "adminBadge": "ADMIN"
   },
   "app": {
+    "name": "Symbolica",
     "version": "Alpha Release 0.1"
   },
   "hero": {
@@ -68,7 +69,10 @@
     "faq": "FAQ",
     "museumPortal": "Museum & Community Portal",
     "communityPortal": "Connecting museums and symbol enthusiasts",
-    "joinCommunity": "Join Community"
+    "joinCommunity": "Join Community",
+    "newsletter": "Subscribe to our newsletter",
+    "newsletterSub": "Stay updated with the latest discoveries and cultural symbols",
+    "subscribe": "Subscribe"
   },
   "howItWorks": {
     "process": "The Process",
@@ -279,6 +283,9 @@
     }
   },
   "navigation": {
+    "home": "Home",
+    "about": "About",
+    "contributions": "Contributions",
     "symbols": "Featured Symbols"
   },
   "callToAction": {
@@ -314,7 +321,7 @@
       },
       "celticSymbolism": {
         "name": "Celtic Symbolism",
-        "culture": "Celtic" 
+        "culture": "Celtic"
       },
       "japanesePatterns": {
         "name": "Japanese Patterns",

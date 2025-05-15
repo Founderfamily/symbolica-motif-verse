@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -43,7 +44,7 @@ const Header = () => {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center">
                 <span className="font-serif text-xl font-bold tracking-tight text-amber-700">
-                  Symbolica
+                  {t('app.name')}
                 </span>
                 <OpenSourceBadge className="ml-2" />
               </Link>
@@ -117,7 +118,7 @@ const Header = () => {
                 <div className="flex flex-col h-full">
                   <div className="flex justify-between items-center py-4 border-b">
                     <span className="font-serif text-xl font-bold tracking-tight text-amber-700">
-                      Symbolica
+                      {t('app.name')}
                     </span>
                     <Button
                       variant="ghost"

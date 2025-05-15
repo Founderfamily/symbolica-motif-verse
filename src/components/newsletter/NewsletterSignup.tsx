@@ -24,7 +24,7 @@ const NewsletterSignup = () => {
         
         <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
           <Input 
-            placeholder="Votre email" 
+            placeholder={t('header.email')} 
             className="bg-white/90 border-transparent focus:border-white focus:ring-white text-amber-900 shadow-lg"
           />
           <Button 

@@ -49,6 +49,7 @@
     "adminBadge": "ADMIN"
   },
   "app": {
+    "name": "Symbolica",
     "version": "Version Alpha 0.1"
   },
   "hero": {
@@ -68,7 +69,10 @@
     "faq": "FAQ",
     "museumPortal": "Portail Musée & Communauté",
     "communityPortal": "Connecter les musées et les passionnés de symboles",
-    "joinCommunity": "Rejoindre la Communauté"
+    "joinCommunity": "Rejoindre la Communauté",
+    "newsletter": "Abonnez-vous à notre newsletter",
+    "newsletterSub": "Restez informé des dernières découvertes et symboles culturels",
+    "subscribe": "S'abonner"
   },
   "howItWorks": {
     "process": "Le Processus",
@@ -185,7 +189,7 @@
       "comments": "Commentaires",
       "noComments": "Aucun commentaire pour le moment.",
       "moderation": "Statut de modération",
-      "reviewedOn": "Examiné le:",
+      "reviewedOn": "Examin�� le:",
       "pendingReview": "En attente de modération",
       "pendingReviewDescription": "Cette contribution est en cours d'examen par nos modérateurs.",
       "extractedPattern": "Motif extrait :",
@@ -279,6 +283,9 @@
     }
   },
   "navigation": {
+    "home": "Accueil",
+    "about": "À propos",
+    "contributions": "Contributions",
     "symbols": "Symboles Vedettes"
   },
   "callToAction": {
