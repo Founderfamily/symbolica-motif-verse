@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   UserContribution, 
@@ -127,7 +126,25 @@ export async function getContributionComments(contributionId: string): Promise<C
       .eq('contribution_id', contributionId);
 
     if (error) throw error;
-    return data as ContributionComment[];
+    
+    // Transform the data to ensure it matches our ContributionComment type
+    const transformedData = (data || []).map(item => {
+      // Check if profiles property has an error
+      const hasProfileError = item.profiles && typeof item.profiles === 'object' && 'error' in item.profiles;
+      
+      // Return a properly formatted ContributionComment object
+      return {
+        id: item.id,
+        contribution_id: item.contribution_id,
+        user_id: item.user_id,
+        comment: item.comment,
+        created_at: item.created_at,
+        // Only include profiles if there's no error
+        profiles: hasProfileError ? undefined : item.profiles
+      } as ContributionComment;
+    });
+    
+    return transformedData;
   } catch (error: any) {
     console.error('Error fetching contribution comments:', error.message);
     return [];
