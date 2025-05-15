@@ -125,7 +125,6 @@ const About = () => {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Team member cards would go here */}
               <Card className="p-6 text-center">
                 <div className="w-24 h-24 bg-amber-100 rounded-full mx-auto mb-4"></div>
                 <h3 className="text-lg font-medium text-slate-800">{t('about.team.member1.name')}</h3>

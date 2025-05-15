@@ -368,5 +368,43 @@
     "privacy": "Politique de confidentialité",
     "license": "Licence",
     "copyright": "© 2025 Symbolica. Tous droits réservés."
+  },
+  "about": {
+    "title": "À propos de Symbolica",
+    "subtitle": "Comprendre notre mission de préservation et d'exploration du patrimoine culturel à travers les symboles",
+    "mission": {
+      "title": "Notre Mission",
+      "description1": "Symbolica vise à documenter, préserver et partager le riche langage symbolique qui relie les cultures à travers le monde et l'histoire.",
+      "description2": "Nous croyons au pouvoir des symboles en tant que langage universel et à leur importance dans la compréhension de notre patrimoine humain commun."
+    },
+    "vision": {
+      "title": "Notre Vision",
+      "description": "Nous envisageons un monde où les symboles culturels sont accessibles, compris et appréciés par tous. Nos valeurs fondamentales comprennent :",
+      "value1": "Préservation du savoir culturel",
+      "value2": "Documentation ouverte et collaborative",
+      "value3": "Connecter les communautés par le patrimoine partagé"
+    },
+    "analysisProcess": {
+      "title": "Notre Processus d'Analyse",
+      "subtitle": "Découvrez comment notre technologie aide à identifier et documenter les motifs symboliques"
+    },
+    "team": {
+      "title": "Notre Équipe",
+      "member1": {
+        "name": "Elena Rodriguez",
+        "role": "Anthropologue Culturelle",
+        "bio": "Spécialisée dans le symbolisme comparatif des cultures méditerranéennes"
+      },
+      "member2": {
+        "name": "Jamal Williams",
+        "role": "Directeur Technique",
+        "bio": "Expert en reconnaissance d'images par IA pour artefacts culturels"
+      },
+      "member3": {
+        "name": "Sophia Chen",
+        "role": "Responsable Communauté",
+        "bio": "Crée des ponts entre institutions académiques et communautés d'enthousiastes"
+      }
+    }
   }
 }

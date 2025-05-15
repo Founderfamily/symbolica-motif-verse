@@ -11,6 +11,14 @@ export const useTranslation = () => {
     // Validate the key in development
     if (process.env.NODE_ENV === 'development') {
       validateTranslationKey(key);
+      
+      // Enhanced developer experience - warn when a key might be mistyped or missing
+      const translated = originalT(key, options);
+      if (translated === key) {
+        console.warn(`⚠️ Possible missing translation for key: '${key}'`);
+        // Detect similar keys that might be typos
+        suggestSimilarKeys(key);
+      }
     }
     
     // Call the original t function and ensure it returns a string
@@ -23,5 +31,44 @@ export const useTranslation = () => {
     i18n.changeLanguage(lng);
   };
   
-  return { t, changeLanguage, currentLanguage: i18n.language, i18n };
+  // A helper function to check if we're missing any translations on the current page
+  const validateCurrentPageTranslations = () => {
+    if (process.env.NODE_ENV !== 'development') {
+      console.warn('Translation validation is only available in development mode');
+      return;
+    }
+    
+    // Create or toggle the translations panel
+    const event = new CustomEvent('validate-translations');
+    window.dispatchEvent(event);
+  };
+  
+  return { 
+    t, 
+    changeLanguage, 
+    currentLanguage: i18n.language, 
+    i18n,
+    validateCurrentPageTranslations
+  };
+};
+
+/**
+ * Helper function to suggest similar keys when a key might be mistyped
+ */
+const suggestSimilarKeys = (key: string) => {
+  try {
+    // This would be implemented to search through the translation objects
+    // for keys that are similar to the provided key
+    // For now, just a placeholder
+    const similarKeys: string[] = [];
+    
+    if (similarKeys.length > 0) {
+      console.info('🔍 Similar translation keys found:');
+      similarKeys.forEach(similarKey => {
+        console.info(`  - ${similarKey}`);
+      });
+    }
+  } catch (error) {
+    // Silently fail for suggestion feature
+  }
 };

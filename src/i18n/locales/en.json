@@ -368,5 +368,43 @@
     "privacy": "Privacy Policy",
     "license": "License",
     "copyright": "© 2025 Symbolica. All rights reserved."
+  },
+  "about": {
+    "title": "About Symbolica",
+    "subtitle": "Understanding our mission to preserve and explore cultural heritage through symbols",
+    "mission": {
+      "title": "Our Mission",
+      "description1": "Symbolica aims to document, preserve, and share the rich symbolic language that connects cultures across the world and throughout history.",
+      "description2": "We believe in the power of symbols as a universal language and their importance in understanding our shared human heritage."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "We envision a world where cultural symbols are accessible, understood, and appreciated by everyone. Our core values include:",
+      "value1": "Preservation of cultural knowledge",
+      "value2": "Open and collaborative documentation",
+      "value3": "Connecting communities through shared heritage"
+    },
+    "analysisProcess": {
+      "title": "Our Analysis Process",
+      "subtitle": "Discover how our technology helps identify and document symbolic patterns"
+    },
+    "team": {
+      "title": "Our Team",
+      "member1": {
+        "name": "Elena Rodriguez",
+        "role": "Cultural Anthropologist",
+        "bio": "Specializing in comparative symbolism across Mediterranean cultures"
+      },
+      "member2": {
+        "name": "Jamal Williams",
+        "role": "Technology Director",
+        "bio": "Expert in AI-powered image recognition for cultural artifacts"
+      },
+      "member3": {
+        "name": "Sophia Chen",
+        "role": "Community Manager",
+        "bio": "Building bridges between academic institutions and enthusiast communities"
+      }
+    }
   }
 }
