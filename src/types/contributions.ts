@@ -1,5 +1,5 @@
 
-import { Database } from '@/integrations/supabase/types';
+import { Database, Json } from '@/integrations/supabase/types';
 
 // Types pour les contributions utilisateur
 export interface UserContribution {
@@ -17,12 +17,12 @@ export interface UserContribution {
   updated_at: string;
   reviewed_by: string | null;
   reviewed_at: string | null;
-  // Nouveaux champs de traduction
-  title_translations?: { [key: string]: string | null };
-  description_translations?: { [key: string]: string | null };
-  location_name_translations?: { [key: string]: string | null };
-  cultural_context_translations?: { [key: string]: string | null };
-  period_translations?: { [key: string]: string | null };
+  // Champs de traduction
+  title_translations?: { [key: string]: string | null } | null;
+  description_translations?: { [key: string]: string | null } | null;
+  location_name_translations?: { [key: string]: string | null } | null;
+  cultural_context_translations?: { [key: string]: string | null } | null;
+  period_translations?: { [key: string]: string | null } | null;
 }
 
 // Types pour les images de contribution
@@ -42,8 +42,8 @@ export interface ContributionTag {
   contribution_id: string;
   tag: string;
   created_at: string;
-  // Nouveau champ de traduction
-  tag_translations?: { [key: string]: string | null };
+  // Champ de traduction
+  tag_translations?: { [key: string]: string | null } | null;
 }
 
 // Types pour les commentaires de contribution
@@ -53,8 +53,8 @@ export interface ContributionComment {
   user_id: string;
   comment: string;
   created_at: string;
-  // Nouveau champ de traduction
-  comment_translations?: { [key: string]: string | null };
+  // Champ de traduction
+  comment_translations?: { [key: string]: string | null } | null;
   profiles?: {
     username: string;
     full_name: string;
