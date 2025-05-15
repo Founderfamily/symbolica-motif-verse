@@ -39,29 +39,48 @@ export const I18nText = ({
   // Check if translation is missing or mismatched between languages
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      const keyExists = translatedText !== translationKey;
+      // Check if translation exists for current language
+      const keyExists = i18n.exists(translationKey, { lng: i18n.language });
       setIsMissing(!keyExists);
       
-      // Check if the same key exists in both languages but has different formats
-      if (keyExists && i18n.exists(translationKey)) {
+      // If key exists, check for format mismatches between languages
+      if (keyExists) {
         const currentLang = i18n.language;
-        const otherLang = currentLang === 'fr' ? 'en' : 'fr';
+        const otherLangs = (i18n.options.supportedLngs || ['fr', 'en']).filter(
+          lang => lang !== currentLang && lang !== 'cimode'
+        );
         
-        try {
+        // Check all other languages for mismatches
+        let mismatchFound = false;
+        
+        for (const otherLang of otherLangs) {
+          if (!i18n.exists(translationKey, { lng: otherLang })) {
+            // Translation missing in other language
+            mismatchFound = true;
+            break;
+          }
+          
           const otherTranslation = i18n.getFixedT(otherLang)(translationKey);
           
-          // Check if both translations exist but might have format differences
-          // (e.g. one has "Alpha" and other has "Version Alpha")
           if (otherTranslation && translatedText) {
-            // Simple heuristic: if one contains the other or they share significant words,
-            // they're likely the same content in different formats
-            const mismatchDetected = !hasSimilarContent(translatedText, otherTranslation);
-            setIsMismatched(mismatchDetected);
+            // Check for format mismatches using improved algorithm
+            if (!hasSimilarContent(translatedText.toString(), otherTranslation.toString())) {
+              mismatchFound = true;
+              break;
+            }
+            
+            // Check for placeholder differences (like {name} vs no placeholder)
+            const currentPlaceholders = extractPlaceholders(translatedText.toString());
+            const otherPlaceholders = extractPlaceholders(otherTranslation.toString());
+            
+            if (!haveSamePlaceholders(currentPlaceholders, otherPlaceholders)) {
+              mismatchFound = true;
+              break;
+            }
           }
-        } catch (e) {
-          // Silently fail if there's an issue accessing the other translation
-          console.debug("Failed checking translations consistency", e);
         }
+        
+        setIsMismatched(mismatchFound);
       }
     }
   }, [translationKey, translatedText, i18n]);
@@ -149,8 +168,8 @@ const hasSimilarContent = (text1: string, text2: string): boolean => {
   }
   
   // Check if they share significant words (more than 50% in common)
-  const words1 = normalized1.split(/\s+/).filter(w => w.length > 3); // Only significant words
-  const words2 = normalized2.split(/\s+/).filter(w => w.length > 3);
+  const words1 = normalized1.split(/\s+/).filter(w => w.length > 2); // Only significant words
+  const words2 = normalized2.split(/\s+/).filter(w => w.length > 2);
   
   if (words1.length === 0 || words2.length === 0) return true; // Short strings considered similar
   
@@ -161,6 +180,26 @@ const hasSimilarContent = (text1: string, text2: string): boolean => {
   
   // If more than 50% of words match, consider them similar
   return matchCount / Math.max(words1.length, words2.length) > 0.5;
+};
+
+/**
+ * Extract placeholders like {name} from a string
+ */
+const extractPlaceholders = (text: string): string[] => {
+  const matches = text.match(/\{([^}]+)\}/g);
+  return matches ? matches : [];
+};
+
+/**
+ * Check if two arrays of placeholders have the same elements
+ */
+const haveSamePlaceholders = (placeholders1: string[], placeholders2: string[]): boolean => {
+  if (placeholders1.length !== placeholders2.length) return false;
+  
+  const sorted1 = [...placeholders1].sort();
+  const sorted2 = [...placeholders2].sort();
+  
+  return sorted1.every((val, idx) => val === sorted2[idx]);
 };
 
 export default I18nText;

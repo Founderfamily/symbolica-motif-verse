@@ -17,8 +17,9 @@ import Contributions from '@/pages/Contributions';
 import NewContribution from '@/pages/NewContribution';
 import ContributionDetail from '@/pages/ContributionDetail';
 import NotFound from '@/pages/NotFound';
-import { useTranslationValidator } from '@/i18n/useTranslationValidator';
+import { TranslationValidator } from '@/i18n/TranslationValidator';
 import './App.css';
+import SymbolExplorer from '@/pages/SymbolExplorer';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -29,12 +30,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// TranslationValidator component to initialize the validation system
-const TranslationValidator = () => {
-  useTranslationValidator();
-  return null;
-};
 
 function App() {
   return (
@@ -51,6 +46,7 @@ function App() {
             <Route path="/contributions" element={<Contributions />} />
             <Route path="/contributions/new" element={<NewContribution />} />
             <Route path="/contributions/:id" element={<ContributionDetail />} />
+            <Route path="/symbols" element={<SymbolExplorer />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="symbols" element={<SymbolsManagement />} />

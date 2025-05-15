@@ -1,413 +1,166 @@
 
 {
-  "header": {
-    "home": "Home",
-    "about": "About",
-    "explore": "Explore Symbols",
-    "contribute": "Contribute",
-    "community": "Community",
-    "signIn": "Sign In",
-    "profile": "My Profile",
-    "admin": "Admin Dashboard",
-    "signOut": "Sign Out"
-  },
-  "auth": {
-    "login": "Log In",
-    "register": "Register",
-    "loginTitle": "Welcome Back",
-    "registerTitle": "Create an Account",
+  "common": {
+    "viewMore": "View more",
+    "readMore": "Read more",
+    "loadMore": "Load more",
+    "showAll": "Show all",
+    "hide": "Hide",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "uploadImage": "Upload image",
+    "submit": "Submit",
+    "name": "Name",
     "email": "Email",
-    "username": "Username",
-    "fullName": "Full Name",
     "password": "Password",
     "confirmPassword": "Confirm Password",
-    "forgotPassword": "Forgot Password?",
-    "loggingIn": "Logging in...",
-    "creating": "Creating account...",
-    "intro": "Join our community to explore and contribute to the world's cultural symbols"
-  },
-  "profile": {
-    "memberSince": "Member since {{date}}",
-    "tabs": {
-      "overview": "Overview",
-      "contributions": "Contributions",
-      "settings": "Settings"
-    },
-    "stats": {
-      "contributions": "Contributions",
-      "symbols": "Symbols Added",
-      "verified": "Verified Uploads"
-    },
-    "about": {
-      "title": "About the Community",
-      "description": "Join our growing community of cultural explorers documenting the world's symbolic heritage."
-    },
-    "noContributions": "You haven't made any contributions yet.",
-    "startContributing": "Start Contributing",
-    "accountSettings": "Account Settings",
-    "settingsDescription": "Manage your account settings and preferences",
-    "signOut": "Sign Out",
-    "adminBadge": "ADMIN"
-  },
-  "app": {
-    "name": "Symbolica",
+    "fieldRequired": "This field is required",
     "version": "Alpha Release 0.1"
   },
-  "hero": {
-    "heading": "Discover the Language of Cultural Symbols",
-    "subheading": "Explore, interpret and preserve the visual cultural heritage from around the world",
-    "community": "Join the Community",
-    "explore": "Explore Motifs"
-  },
-  "sections": {
-    "features": "Key Features",
-    "howItWorks": "How It Works",
-    "community": "Community",
-    "tools": "Tools & Resources",
-    "partners": "Our Partners",
-    "testimonials": "User Stories",
-    "roadmap": "Roadmap",
-    "faq": "FAQ",
-    "museumPortal": "Museum & Community Portal",
-    "communityPortal": "Connecting museums and symbol enthusiasts",
-    "joinCommunity": "Join Community",
-    "newsletter": "Subscribe to our newsletter",
-    "newsletterSub": "Stay updated with the latest discoveries and cultural symbols",
-    "subscribe": "Subscribe",
-    "openSource": "Open Source Project",
-    "contactUs": "Contact us"
-  },
-  "howItWorks": {
-    "process": "The Process",
-    "intro": "Learn how our platform helps document and preserve cultural symbols",
-    "steps": {
-      "1": {
-        "title": "Upload & Identify",
-        "desc": "Upload images of cultural motifs you encounter for identification"
-      },
-      "2": {
-        "title": "Tag & Annotate",
-        "desc": "Add tags, geographical context and cultural details to enrich the database"
-      },
-      "3": {
-        "title": "Discover Connections",
-        "desc": "Explore the relationships between similar symbols across different cultures"
-      },
-      "4": {
-        "title": "Create & Reuse",
-        "desc": "Use the symbols as inspiration for your own creative projects"
-      }
-    }
-  },
-  "contributions": {
-    "title": "My Contributions",
-    "new": "New contribution",
-    "create": "Create my first contribution",
-    "loading": "Loading contributions...",
-    "empty": "No contributions found",
-    "emptyDescription": "You haven't submitted any contributions yet. Start by creating a new one.",
-    "list": "List of your contributions to the Symbolica project",
-    "table": {
-      "title": "Title",
-      "submissionDate": "Submission Date",
-      "status": "Status",
-      "tags": "Tags",
-      "actions": "Actions"
-    },
-    "status": {
-      "pending": "Pending",
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "unknown": "Unknown"
-    },
-    "form": {
-      "title": "New Contribution",
-      "subtitle": "Share a new symbol or motif with the Symbolica community",
-      "fields": {
-        "title": "Title",
-        "titlePlaceholder": "Ex: Aztec Pattern from Temple Mayor",
-        "description": "Description",
-        "descriptionPlaceholder": "Describe what you know about this symbol or pattern...",
-        "culture": "Culture",
-        "culturePlaceholder": "Ex: Aztec, Mayan, Greek...",
-        "period": "Period",
-        "periodPlaceholder": "Ex: 15th century, 1200-1300...",
-        "tags": "Tags",
-        "tagsPlaceholder": "New tag...",
-        "addTag": "Add",
-        "noTags": "No tags added",
-        "location": "Location",
-        "locationPlaceholder": "Select a location on the map"
-      },
-      "sections": {
-        "general": "General Information",
-        "generalDescription": "Essential details about the pattern or symbol",
-        "cultural": "Cultural Context",
-        "culturalDescription": "Origin and historical context",
-        "tags": "Tags",
-        "tagsDescription": "Add keywords to facilitate searching",
-        "image": "Symbol Image",
-        "imageDescription": "Upload a photo of the symbol or pattern",
-        "location": "Location",
-        "locationDescription": "Where did you find this symbol or pattern?"
-      },
-      "buttons": {
-        "cancel": "Cancel",
-        "submit": "Submit Contribution",
-        "submitting": "Submitting..."
-      },
-      "validation": {
-        "required": "This field is required",
-        "imageRequired": "An image is required for the contribution",
-        "minLength": "Must contain at least {{count}} characters",
-        "minTags": "Add at least one tag"
-      },
-      "success": "Contribution submitted successfully",
-      "error": "Error creating contribution"
-    },
-    "map": {
-      "search": "Search for a place...",
-      "searchButton": "Search",
-      "loading": "Loading map...",
-      "placeholder": "Interactive map functionality in development",
-      "placeholderSub": "For the prototype, please enter the place name directly"
-    },
-    "image": {
-      "drop": "Drag and drop an image here, or click to select",
-      "dropActive": "Drop the image here...",
-      "formats": "JPG, PNG or WEBP images (max. 5MB)",
-      "remove": "Remove image",
-      "errors": {
-        "format": "The file must be an image (JPEG, PNG, etc.)",
-        "size": "The image must not exceed 5MB"
-      }
-    },
-    "detail": {
-      "back": "Back to contributions",
-      "notFound": "Contribution not found",
-      "notFoundDescription": "This contribution does not exist or has been deleted.",
-      "accessDenied": "Access denied",
-      "accessDeniedDescription": "You do not have the necessary permissions to view this contribution.",
-      "information": "Information",
-      "comments": "Comments",
-      "noComments": "No comments yet.",
-      "moderation": "Moderation Status",
-      "reviewedOn": "Reviewed on:",
-      "pendingReview": "Pending moderation",
-      "pendingReviewDescription": "This contribution is being reviewed by our moderators.",
-      "extractedPattern": "Extracted Pattern:",
-      "description": "Description",
-      "noDescription": "No description provided.",
-      "admin": {
-        "title": "Admin Actions",
-        "approve": "Approve",
-        "reject": "Reject",
-        "rejectReason": "Rejection reason (required)",
-        "administrator": "Administrator"
-      },
-      "fields": {
-        "culture": "Culture",
-        "period": "Period",
-        "location": "Location"
-      }
-    },
-    "admin": {
-      "title": "Contributions Management",
-      "subtitle": "Manage contributions submitted by users",
-      "pending": "Pending Contributions",
-      "pendingDescription": "Contributions requiring validation",
-      "noPending": "No pending contributions",
-      "noActive": "All contributions have been processed.",
-      "table": {
-        "title": "Title",
-        "submittedBy": "Submitted By",
-        "date": "Date",
-        "type": "Type",
-        "actions": "Actions",
-        "view": "View",
-        "caption": "List of contributions pending moderation"
-      },
-      "accessRestricted": "Access Restricted",
-      "accessRestrictedDescription": "You must be an administrator to access this page.",
-      "backToHome": "Back to Home"
-    },
-    "toast": {
-      "contributionSubmitted": "Contribution submitted successfully",
-      "contributionDescription": "Your contribution has been saved and will be reviewed soon.",
-      "statusUpdateSuccess": "The contribution status has been updated.",
-      "errorCreating": "Error creating contribution",
-      "errorUpdating": "Error updating contribution status"
-    }
-  },
-  "uploadTools": {
-    "title": "Symbol Upload Tools",
-    "subtitle": "Discover our AI-powered tools for identifying and analyzing cultural patterns and symbols",
-    "capture": {
-      "title": "Capture and Upload",
-      "desc": "Easily capture images of symbols and patterns you encounter in your travels or daily life"
-    },
-    "analyze": {
-      "title": "Automatic Analysis",
-      "desc": "Our AI algorithms automatically detect and extract patterns from your images"
-    },
-    "share": {
-      "title": "Share and Connect",
-      "desc": "Connect your findings with the global community and contribute to cultural preservation"
-    },
-    "process": {
-      "title": "Symbol Processing",
-      "subtitle": "See how our AI transforms your uploads",
-      "original": "Original",
-      "detection": "Pattern Detection",
-      "extraction": "Pattern Extraction",
-      "classification": "Classification",
-      "result": "Results",
-      "example": "Example pattern analysis:"
-    }
-  },
-  "symbolTriptych": {
-    "empty": "Select a symbol from the list to view details",
-    "loading": "Loading symbol information...",
-    "error": "Unable to load symbol",
-    "errorDesc": "There was a problem loading this symbol. Please try again later.",
-    "original": "Original Artifact",
-    "pattern": "Extracted Pattern",
-    "reuse": "Creative Reuse",
-    "imageError": "Some images failed to load",
-    "imageErrorDesc": "We're having trouble loading some images. Please try again later."
-  },
-  "testimonials": {
-    "title": "User Stories",
-    "subtitle": "Discover how Symbolica transforms the way experts and enthusiasts interact with cultural symbols",
-    "fallback": {
-      "name": "Full Name",
-      "role": "Profession",
-      "quote": "Testimonial about Symbolica..."
-    }
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "profile": "Profile",
+    "contributions": "Contributions",
+    "symbols": "Symbols",
+    "login": "Log in",
+    "logout": "Log out",
+    "menu": "Menu"
   },
   "navigation": {
     "home": "Home",
     "about": "About",
+    "profile": "Profile",
     "contributions": "Contributions",
-    "symbols": "Featured Symbols"
+    "symbols": "Symbols"
   },
-  "callToAction": {
-    "joinUs": "Join Our Community Today",
-    "description": "Be part of a growing network of cultural enthusiasts documenting the world's symbolic heritage.",
-    "join": "Join Now",
-    "explore": "Explore Symbols",
-    "support": "We support cultural institutions and independent researchers alike."
+  "auth": {
+    "login": "Log in",
+    "register": "Register",
+    "loginToAccount": "Log in to your account",
+    "createAccount": "Create an account",
+    "forgotPassword": "Forgot password?",
+    "alreadyHaveAccount": "Already have an account?",
+    "needAccount": "Need an account?",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "username": "Username",
+    "fullName": "Full Name",
+    "admin": "Admin"
   },
-  "features": {
-    "title": "Cultural Discovery and Documentation",
-    "tagline": "Features",
-    "mapping": {
-      "title": "Cultural Mapping",
-      "description": "Explore geolocated symbols across different cultures and eras with our intuitive navigation interface."
-    },
-    "identification": {
-      "title": "Advanced Identification",
-      "description": "Our analysis technology identifies, classifies and contextualizes cultural symbols with precision."
-    },
-    "documentation": {
-      "title": "Collaborative Documentation",
-      "description": "Contribute to enrich the global knowledge base of heritage symbols shared by our community."
-    }
-  },
-  "community": {
-    "title": "Our community of enthusiasts",
-    "description": "Join thousands of heritage enthusiasts and experts around the world, share your discoveries and find your thematic community",
-    "groups": {
-      "artDeco": {
-        "name": "Art Deco",
-        "culture": "French"
-      },
-      "celticSymbolism": {
-        "name": "Celtic Symbolism",
-        "culture": "Celtic"
-      },
-      "japanesePatterns": {
-        "name": "Japanese Patterns",
-        "culture": "Japanese"
-      },
-      "islamicArt": {
-        "name": "Islamic Art",
-        "culture": "Islamic"
-      }
-    },
-    "stats": {
-      "members": "members",
-      "discoveries": "discoveries",
-      "join": "Join"
-    },
-    "features": {
-      "thematicCommunities": {
-        "title": "Thematic Communities",
-        "description": "Join specialized groups based on your interests: Art Deco, Medieval Symbolism, Asian Patterns..."
-      },
-      "personalSpace": {
-        "title": "Your Personal Space",
-        "description": "Save your discoveries, track your contributions and visualize your expertise progression"
-      },
-      "intuitiveNavigation": {
-        "title": "Intuitive Navigation",
-        "description": "Explore connections between symbols, places and cultures with our 'mind mapping' navigation"
-      }
-    }
+  "profile": {
+    "title": "Profile",
+    "username": "Username",
+    "email": "Email",
+    "fullName": "Full Name",
+    "contributions": "My Contributions",
+    "changePassword": "Change Password",
+    "deleteAccount": "Delete Account"
   },
   "footer": {
-    "tagline": "Exploring and preserving the world's symbolic heritage together.",
-    "platform": "Platform",
-    "home": "Home",
-    "explore": "Explore",
-    "contribute": "Contribute",
-    "about": "About",
-    "community": "Community",
-    "github": "GitHub",
-    "discord": "Discord",
-    "forum": "Forum",
-    "legal": "Legal",
-    "terms": "Terms of Service",
-    "privacy": "Privacy Policy",
-    "license": "License",
-    "copyright": "© 2025 Symbolica. All rights reserved."
+    "rights": "All rights reserved",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy"
   },
-  "about": {
-    "title": "About Symbolica",
-    "subtitle": "Understanding our mission to preserve and explore cultural heritage through symbols",
-    "mission": {
-      "title": "Our Mission",
-      "description1": "Symbolica aims to document, preserve, and share the rich symbolic language that connects cultures across the world and throughout history.",
-      "description2": "We believe in the power of symbols as a universal language and their importance in understanding our shared human heritage."
-    },
-    "vision": {
-      "title": "Our Vision",
-      "description": "We envision a world where cultural symbols are accessible, understood, and appreciated by everyone. Our core values include:",
-      "value1": "Preservation of cultural knowledge",
-      "value2": "Open and collaborative documentation",
-      "value3": "Connecting communities through shared heritage"
-    },
-    "analysisProcess": {
-      "title": "Our Analysis Process",
-      "subtitle": "Discover how our technology helps identify and document symbolic patterns"
-    },
-    "team": {
-      "title": "Our Team",
-      "member1": {
-        "name": "Elena Rodriguez",
-        "role": "Cultural Anthropologist",
-        "bio": "Specializing in comparative symbolism across Mediterranean cultures"
-      },
-      "member2": {
-        "name": "Jamal Williams",
-        "role": "Technology Director",
-        "bio": "Expert in AI-powered image recognition for cultural artifacts"
-      },
-      "member3": {
-        "name": "Sophia Chen",
-        "role": "Community Manager",
-        "bio": "Building bridges between academic institutions and enthusiast communities"
-      }
-    }
+  "homepage": {
+    "title": "Discover the world's symbolic heritage",
+    "subtitle": "Explore, contribute and learn about cultural patterns across ages",
+    "ctaButton": "Start exploring",
+    "featuresTitle": "A collaborative museum dedicated to symbols",
+    "howItWorksTitle": "How it works"
+  },
+  "sections": {
+    "museumPortal": "Symbolica Museum",
+    "communityPortal": "Collaborative symbolic heritage portal",
+    "joinCommunity": "Join a community"
+  },
+  "contributions": {
+    "title": "Contributions",
+    "myContributions": "My Contributions",
+    "communityContributions": "Community Contributions",
+    "newContribution": "New Contribution",
+    "contributionTitle": "Title",
+    "culturalContext": "Cultural Context",
+    "period": "Period",
+    "description": "Description",
+    "location": "Location",
+    "submitted": "Submitted",
+    "status": "Status",
+    "pendingReview": "Pending Review",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "viewContribution": "View Contribution",
+    "editContribution": "Edit Contribution",
+    "deleteContribution": "Delete Contribution",
+    "confirmDelete": "Are you sure you want to delete this contribution?",
+    "uploadImages": "Upload Images",
+    "dragImages": "Drag and drop your images here",
+    "browseFiles": "Browse Files",
+    "acceptedFormats": "Accepted formats: .jpg, .jpeg, .png",
+    "maxFileSize": "Max file size: 5MB",
+    "thanksForContribution": "Thank you for your contribution!",
+    "contributionSubmitted": "Your contribution has been successfully submitted and will be reviewed by our team.",
+    "errorSubmitting": "Error submitting your contribution. Please try again."
+  },
+  "symbolTriptych": {
+    "original": "Original Image",
+    "pattern": "Extracted Pattern",
+    "reuse": "Reuse",
+    "selectSymbol": "Select a symbol",
+    "noSymbolSelected": "No symbol selected",
+    "detailsTitle": "Symbol Details",
+    "culture": "Culture",
+    "period": "Period",
+    "description": "Description",
+    "noDescription": "No description available for this symbol.",
+    "relatedPatterns": "Related Patterns",
+    "noRelatedPatterns": "No related patterns.",
+    "imageErrorDesc": "The image couldn't be loaded properly. An alternative image is being displayed."
+  },
+  "symbolExplorer": {
+    "title": "Symbol Explorer",
+    "description": "Explore our collection of cultural symbols, patterns and motifs",
+    "filters": "Filters",
+    "searchPlaceholder": "Search symbols...",
+    "gridView": "Grid",
+    "listView": "List",
+    "mapView": "Map",
+    "activeFilters": "Active Filters",
+    "noFilters": "No active filters",
+    "clearFilters": "Clear all",
+    "resultsCount": "{{count}} symbols found",
+    "noResults": "No symbols match your filter criteria",
+    "mapViewComingSoon": "Interactive map view coming soon",
+    "mapViewDescription": "Explore symbols based on their geographical origin and distribution"
+  },
+  "searchFilters": {
+    "cultures": "Cultures",
+    "periods": "Periods",
+    "tags": "Tags",
+    "styles": "Styles",
+    "clearAll": "Clear all"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "symbolsManagement": "Symbols Management",
+    "contentManagement": "Content Management",
+    "contributionsManagement": "Contributions Management",
+    "usersManagement": "Users Management",
+    "settingsManagement": "Settings",
+    "welcomeAdmin": "Welcome to the Admin Panel",
+    "pendingContributions": "Pending Contributions",
+    "approvedContributions": "Approved Contributions",
+    "rejectedContributions": "Rejected Contributions",
+    "totalSymbols": "Total Symbols",
+    "totalContributions": "Total Contributions",
+    "totalUsers": "Total Users",
+    "recentActivity": "Recent Activity",
+    "newSymbol": "New Symbol"
   }
 }
