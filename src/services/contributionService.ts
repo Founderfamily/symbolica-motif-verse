@@ -137,7 +137,8 @@ export async function getContributionComments(contributionId: string): Promise<C
         user_id: item.user_id,
         comment: item.comment,
         created_at: item.created_at,
-        comment_translations: item.comment_translations
+        // Correction pour le champ comment_translations pour accepter le type Json de Supabase
+        comment_translations: item.comment_translations as { [key: string]: string | null } | null
       };
       
       // Safely access potential nullable properties
@@ -353,7 +354,13 @@ export async function getPendingContributions(): Promise<CompleteContribution[]>
           images,
           tags,
           comments,
-          user_profile: contribution.profiles || undefined
+          user_profile: contribution.profiles || undefined,
+          // S'assurer que les champs de traduction sont correctement typés
+          title_translations: contribution.title_translations as { [key: string]: string | null } | null,
+          description_translations: contribution.description_translations as { [key: string]: string | null } | null,
+          location_name_translations: contribution.location_name_translations as { [key: string]: string | null } | null,
+          cultural_context_translations: contribution.cultural_context_translations as { [key: string]: string | null } | null,
+          period_translations: contribution.period_translations as { [key: string]: string | null } | null
         } as unknown as CompleteContribution;
       })
     );
@@ -383,13 +390,18 @@ export async function getContributionById(contributionId: string): Promise<Compl
     const tags = await getContributionTags(contributionId);
     const comments = await getContributionComments(contributionId);
 
-    // Utiliser as unknown as CompleteContribution pour éviter l'erreur de type
+    // Correction pour éviter l'erreur de type
     return {
       ...data,
       images,
       tags,
       comments,
-      user_profile: data.profiles || undefined
+      user_profile: data.profiles || undefined,
+      title_translations: data.title_translations as { [key: string]: string | null } | null,
+      description_translations: data.description_translations as { [key: string]: string | null } | null,
+      location_name_translations: data.location_name_translations as { [key: string]: string | null } | null,
+      cultural_context_translations: data.cultural_context_translations as { [key: string]: string | null } | null,
+      period_translations: data.period_translations as { [key: string]: string | null } | null
     } as unknown as CompleteContribution;
   } catch (error: any) {
     console.error('Error fetching contribution by ID:', error.message);
