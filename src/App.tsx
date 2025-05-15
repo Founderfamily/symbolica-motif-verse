@@ -17,6 +17,7 @@ import Contributions from '@/pages/Contributions';
 import NewContribution from '@/pages/NewContribution';
 import ContributionDetail from '@/pages/ContributionDetail';
 import NotFound from '@/pages/NotFound';
+import { useTranslationValidator } from '@/i18n/useTranslationValidator';
 import './App.css';
 
 // Create a client
@@ -29,11 +30,19 @@ const queryClient = new QueryClient({
   },
 });
 
+// TranslationValidator component to initialize the validation system
+const TranslationValidator = () => {
+  useTranslationValidator();
+  return null;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
+          {/* Initialize translation validator */}
+          <TranslationValidator />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />

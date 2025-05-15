@@ -24,7 +24,8 @@
     "forgotPassword": "Mot de passe oublié ?",
     "loggingIn": "Connexion en cours...",
     "creating": "Création du compte...",
-    "intro": "Rejoignez notre communauté pour explorer et contribuer aux symboles culturels du monde entier"
+    "intro": "Rejoignez notre communauté pour explorer et contribuer aux symboles culturels du monde entier",
+    "admin": "Administration"
   },
   "profile": {
     "memberSince": "Membre depuis {{date}}",
@@ -51,7 +52,7 @@
   },
   "app": {
     "name": "Symbolica",
-    "version": "Version Alpha 0.1"
+    "version": "Alpha Release 0.1"
   },
   "hero": {
     "heading": "Découvrez le Langage des Symboles Culturels",
