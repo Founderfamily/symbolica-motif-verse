@@ -31,11 +31,14 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
         
         // Pour un prototype, on va simuler une carte avec une interface simple
         const mapElement = mapRef.current;
+        const placeholderText = t('contributions.map.placeholder');
+        const placeholderSubText = t('contributions.map.placeholderSub');
+        
         mapElement.innerHTML = `
           <div class="w-full h-[200px] bg-slate-100 rounded-md flex items-center justify-center">
             <div class="text-center p-4">
-              <p class="text-sm text-slate-500 mb-2">${t('contributions.map.placeholder')}</p>
-              <p class="text-xs text-slate-400">${t('contributions.map.placeholderSub')}</p>
+              <p class="text-sm text-slate-500 mb-2">${placeholderText}</p>
+              <p class="text-xs text-slate-400">${placeholderSubText}</p>
             </div>
           </div>
         `;
@@ -63,6 +66,8 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
     onLocationSelected(simulatedLatitude, simulatedLongitude, searchQuery);
   };
 
+  const searchPlaceholder = t('contributions.map.search');
+
   return (
     <div className="space-y-4">
       <div className="flex space-x-2">
@@ -70,7 +75,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t('contributions.map.search')}
+          placeholder={searchPlaceholder}
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         />
         <button

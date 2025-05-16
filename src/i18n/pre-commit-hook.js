@@ -50,6 +50,7 @@ try {
     console.error('To fix:');
     console.error('1. Replace {t("key")} with <I18nText translationKey="key" />');
     console.error('2. For attributes, use a local constant: const placeholder = t("key")');
+    console.error('3. Use the helper script: node src/i18n/convert-t-to-i18ntext.js path/to/file.tsx');
     console.error('\nYou can bypass this check with git commit --no-verify\n');
     
     process.exit(1); // Non-zero exit to abort commit

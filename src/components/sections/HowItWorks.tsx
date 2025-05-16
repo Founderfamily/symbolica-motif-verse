@@ -10,32 +10,32 @@ const HowItWorks = () => {
   const steps = [
     { 
       step: "1", 
-      title: t('howItWorks.steps.1.title'), 
-      desc: t('howItWorks.steps.1.desc'),
+      titleKey: "howItWorks.steps.1.title", 
+      descKey: "howItWorks.steps.1.desc",
       icon: Camera,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50"
     },
     { 
       step: "2", 
-      title: t('howItWorks.steps.2.title'), 
-      desc: t('howItWorks.steps.2.desc'),
+      titleKey: "howItWorks.steps.2.title", 
+      descKey: "howItWorks.steps.2.desc",
       icon: Tag,
       color: "from-amber-500 to-amber-600", 
       bgColor: "bg-amber-50"
     },
     { 
       step: "3", 
-      title: t('howItWorks.steps.3.title'), 
-      desc: t('howItWorks.steps.3.desc'),
+      titleKey: "howItWorks.steps.3.title", 
+      descKey: "howItWorks.steps.3.desc",
       icon: Compass,
       color: "from-emerald-500 to-emerald-600",
       bgColor: "bg-emerald-50"
     },
     { 
       step: "4", 
-      title: t('howItWorks.steps.4.title'), 
-      desc: t('howItWorks.steps.4.desc'),
+      titleKey: "howItWorks.steps.4.title", 
+      descKey: "howItWorks.steps.4.desc",
       icon: Palette,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50"
@@ -75,8 +75,12 @@ const HowItWorks = () => {
               <div className={`w-16 h-16 ${item.bgColor} rounded-2xl flex items-center justify-center mb-4 mt-2 group-hover:scale-110 transition-transform`}>
                 <item.icon className={`h-8 w-8 text-gradient-to-r ${item.color} bg-clip-text`} />
               </div>
-              <h3 className="text-xl font-semibold mb-2 mt-2 text-slate-800">{item.title}</h3>
-              <p className="text-slate-600">{item.desc}</p>
+              <h3 className="text-xl font-semibold mb-2 mt-2 text-slate-800">
+                <I18nText translationKey={item.titleKey} />
+              </h3>
+              <p className="text-slate-600">
+                <I18nText translationKey={item.descKey} />
+              </p>
             </div>
           ))}
         </div>

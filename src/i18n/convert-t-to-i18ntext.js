@@ -103,7 +103,7 @@ scanResult.lines.forEach(lineInfo => {
     const key = keyMatch.match(/t\(['"`](.+?)['"`]/)[1];
     
     // Check if this is an attribute (like placeholder={t('key')})
-    if (originalLine.match(new RegExp(`\\w+=\\{t\\(['"\`]${key}['"\`]\\)`))) {
+    if (originalLine.match(new RegExp(`\\w+=\\{t\\(['"\`]${key}['"\`]\\)\\}`))) {
       attributeReplacements.push({
         lineNumber,
         key,

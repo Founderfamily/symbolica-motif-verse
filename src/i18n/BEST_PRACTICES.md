@@ -99,9 +99,17 @@ Our CI workflow includes automated checks for:
 
 ### 10. Converting Legacy Code
 
-Use the directUsageScanner:
-```
+Use the directUsageScanner and convert-t-to-i18ntext:
+
+```bash
+# Find all direct t() usage
 node src/i18n/directUsageScanner.js
+
+# Convert a specific file
+node src/i18n/convert-t-to-i18ntext.js path/to/file.tsx
+
+# Verify conversion
+node src/i18n/directUsageScanner.js path/to/file.tsx
 ```
 
 ## Tools Available
@@ -109,6 +117,7 @@ node src/i18n/directUsageScanner.js
 - **I18nText Component**: Smart component that handles translations with validation
 - **translationValidator**: Validates all translations across languages
 - **directUsageScanner**: Scans for direct `t()` usage that should be replaced
+- **convert-t-to-i18ntext**: Assists with converting direct usage to component usage
 - **pre-commit-hook**: Prevents committing code with direct `t()` usage
 - **ci-translation-scanner**: Runs in CI pipelines to enforce translation quality
 - **ci-translation-validator**: Ensures all translations exist in all languages

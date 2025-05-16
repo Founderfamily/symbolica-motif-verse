@@ -55,6 +55,8 @@ const runScan = () => {
     worstFile.lines.slice(0, 3).forEach(line => {
       console.log(`  Line ${line.lineNumber}: ${line.content}`);
     });
+    console.log('\nUse the converter to fix this file:');
+    console.log(`  node src/i18n/convert-t-to-i18ntext.js ${worstFile.file}`);
   }
   
   // Check if we're within threshold
