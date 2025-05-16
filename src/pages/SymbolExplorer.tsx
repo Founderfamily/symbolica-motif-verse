@@ -76,7 +76,7 @@ const SymbolExplorer: React.FC = () => {
     <div className="container mx-auto p-4 pt-8 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
         <div>
-          <h1 className="text-2xl font-serif font-medium text-slate-900 mb-1">
+          <h1 className="text-xl font-medium text-slate-900 mb-1">
             <I18nText translationKey="symbolExplorer.title">Symbol Explorer</I18nText>
           </h1>
           <p className="text-slate-600">
