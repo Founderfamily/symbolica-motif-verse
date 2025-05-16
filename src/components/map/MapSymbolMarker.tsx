@@ -9,6 +9,7 @@ import {
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAuth } from '@/hooks/useAuth';
 import { gamificationService } from '@/services/gamificationService';
+import { I18nText } from '@/components/ui/i18n-text';
 import { SymbolLocation } from '@/services/symbolGeolocationService';
 
 interface MapSymbolMarkerProps {
@@ -117,31 +118,39 @@ const MapSymbolMarker = ({
               <h5 className="font-semibold">{name}</h5>
               {isVerified && (
                 <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                  {t('map.verified')}
+                  <I18nText translationKey="map.badges.verified" />
                 </span>
               )}
             </div>
             
-            <p className="text-sm text-muted-foreground">{t('map.culture')}: <span className="font-medium">{culture}</span></p>
+            <p className="text-sm text-muted-foreground">
+              <I18nText translationKey="map.labels.culture" />: <span className="font-medium">{culture}</span>
+            </p>
             
             {historicalPeriod && (
-              <p className="text-sm text-muted-foreground">{t('map.period')}: <span className="font-medium">{historicalPeriod}</span></p>
+              <p className="text-sm text-muted-foreground">
+                <I18nText translationKey="map.labels.period" />: <span className="font-medium">{historicalPeriod}</span>
+              </p>
             )}
             
-            <p className="text-sm text-muted-foreground">{t('map.location')}: {lat.toFixed(4)}, {lng.toFixed(4)}</p>
+            <p className="text-sm text-muted-foreground">
+              <I18nText translationKey="map.labels.location" />: {lat.toFixed(4)}, {lng.toFixed(4)}
+            </p>
             
             {description && (
               <p className="text-sm border-t pt-2 border-slate-100 mt-2">{description}</p>
             )}
             
             {source && (
-              <p className="text-xs text-slate-500">{t('map.source')}: {source}</p>
+              <p className="text-xs text-slate-500">
+                <I18nText translationKey="map.labels.source" />: {source}
+              </p>
             )}
             
             {hasBeenExplored && (
               <div className="bg-green-50 text-green-700 rounded px-2 py-1 flex items-center justify-between text-sm mt-2">
-                <span>{t('map.explored')}</span>
-                <span>+5 {t('gamification.points')}</span>
+                <span><I18nText translationKey="map.badges.explored" /></span>
+                <span>+5 <I18nText translationKey="gamification.labels.points" /></span>
               </div>
             )}
           </div>

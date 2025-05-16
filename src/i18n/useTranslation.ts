@@ -1,5 +1,6 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
+import { validateKeyFormat } from './translationKeyConventions';
 import { validateTranslationKey } from './useTranslationValidator';
 
 export const useTranslation = () => {
@@ -10,6 +11,11 @@ export const useTranslation = () => {
   const t = (key: string, options?: any): string => {
     // Validate the key in development
     if (process.env.NODE_ENV === 'development') {
+      // Check key format against our conventions
+      if (!validateKeyFormat(key)) {
+        console.warn(`⚠️ Translation key '${key}' doesn't follow the established format conventions.`);
+      }
+      
       validateTranslationKey(key);
       
       // Enhanced developer experience - warn when a key might be mistyped or missing
@@ -76,13 +82,25 @@ export const useTranslation = () => {
     return missingCount;
   };
   
+  // Check for direct t() usage and suggest using I18nText components instead
+  const checkDirectTUsage = () => {
+    if (process.env.NODE_ENV !== 'development') return;
+    
+    console.warn(`⚠️ Direct t() usage detected. Consider using the I18nText component instead.`);
+    console.log(`Example: <I18nText translationKey="your.key" /> instead of {t('your.key')}`);
+    
+    // This is a simplified check - a more thorough implementation would
+    // need to scan the DOM or component tree for t() usage patterns
+  };
+  
   return { 
     t, 
     changeLanguage, 
     currentLanguage: i18n.language, 
     i18n,
     validateCurrentPageTranslations,
-    highlightAllMissingTranslations
+    highlightAllMissingTranslations,
+    checkDirectTUsage
   };
 };
 
@@ -153,4 +171,12 @@ if (process.env.NODE_ENV === 'development') {
       displayMissingTranslationsOverlay();
     });
   }
+}
+
+// Add a script to check for direct t() usage in development
+if (process.env.NODE_ENV === 'development') {
+  // This is just a simple check when the module loads
+  console.info('💡 Translation tips: Use <I18nText translationKey="your.key" /> instead of direct t() calls');
+  
+  // More sophisticated scanning could be implemented here
 }

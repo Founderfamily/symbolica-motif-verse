@@ -11,24 +11,24 @@ const FAQ = () => {
   
   const faqs = [
     {
-      question: 'faq.question1',
-      answer: 'faq.answer1'
+      question: 'faq.questions.general.what',
+      answer: 'faq.answers.general.what'
     },
     {
-      question: 'faq.question2',
-      answer: 'faq.answer2'
+      question: 'faq.questions.general.how',
+      answer: 'faq.answers.general.how'
     },
     {
-      question: 'faq.question3',
-      answer: 'faq.answer3'
+      question: 'faq.questions.technical.compatibility',
+      answer: 'faq.answers.technical.compatibility'
     },
     {
-      question: 'faq.question4',
-      answer: 'faq.answer4'
+      question: 'faq.questions.technical.requirements',
+      answer: 'faq.answers.technical.requirements'
     },
     {
-      question: 'faq.question5',
-      answer: 'faq.answer5'
+      question: 'faq.questions.support.contact',
+      answer: 'faq.answers.support.contact'
     }
   ];
   
@@ -43,10 +43,10 @@ const FAQ = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h1 className="text-3xl font-bold text-slate-900 mb-4">
-                <I18nText translationKey="faq.pageTitle" />
+                <I18nText translationKey="faq.page.title" />
               </h1>
               <p className="text-slate-600 max-w-lg mx-auto">
-                <I18nText translationKey="faq.pageSubtitle" />
+                <I18nText translationKey="faq.page.subtitle" />
               </p>
             </div>
             
