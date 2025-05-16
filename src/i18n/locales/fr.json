@@ -1,4 +1,3 @@
-
 {
   "common": {
     "viewMore": "Voir plus",
@@ -212,9 +211,9 @@
   "searchFilters": {
     "cultures": "Cultures",
     "periods": "Périodes",
-    "tags": "Tags",
-    "styles": "Styles",
-    "clearAll": "Effacer tout"
+    "medium": "Support / Médium",
+    "technique": "Technique",
+    "function": "Fonction symbolique"
   },
   "admin": {
     "dashboard": "Tableau de bord",
