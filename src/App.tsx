@@ -5,10 +5,10 @@ import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import SymbolExplorer from './pages/SymbolExplorer';
-import NotFoundPage from './pages/NotFoundPage';
+import NotFoundPage from './pages/NotFound';
 import ContributionsPage from './pages/ContributionsPage';
-import ProfilePage from './pages/ProfilePage';
-import MapExplorerPage from './pages/MapExplorerPage';
+import ProfilePage from './pages/Profile';
+import MapExplorerPage from './pages/MapExplorer';
 import '@/i18n/config';
 import LanguageDebugger from './i18n/LanguageDebugger';
 

@@ -1,6 +1,6 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
-import { validateKeyFormat, formatKeyAsReadableText } from './translationUtils';
+import { validateKeyFormat, formatKeyAsReadableText, keyExistsInBothLanguages } from './translationUtils';
 
 // Store the current language in localStorage to ensure consistent language across page loads
 const LANGUAGE_STORAGE_KEY = 'app_language';
@@ -63,6 +63,55 @@ export const useTranslation = () => {
     i18n.changeLanguage(lng);
   };
   
+  // Validate translations on the current page
+  const validateCurrentPageTranslations = () => {
+    if (process.env.NODE_ENV !== 'development') {
+      return; // Only run in development
+    }
+    
+    // Get all elements with data-i18n-key attribute
+    const translatedElements = document.querySelectorAll('[data-i18n-key]');
+    const usedKeys = Array.from(translatedElements).map(el => 
+      (el as HTMLElement).getAttribute('data-i18n-key') || ''
+    );
+    
+    console.log(`Translation validation: Found ${usedKeys.length} keys on current page`);
+    
+    // Check each key for both languages
+    const missingInLanguages: Record<string, string[]> = {
+      en: [],
+      fr: []
+    };
+    
+    usedKeys.forEach(key => {
+      if (!i18n.exists(key, { lng: 'en' })) {
+        missingInLanguages.en.push(key);
+      }
+      
+      if (!i18n.exists(key, { lng: 'fr' })) {
+        missingInLanguages.fr.push(key);
+      }
+    });
+    
+    // Log results
+    if (missingInLanguages.en.length > 0) {
+      console.warn(`⚠️ Missing ${missingInLanguages.en.length} English translations:`, missingInLanguages.en);
+    }
+    
+    if (missingInLanguages.fr.length > 0) {
+      console.warn(`⚠️ Missing ${missingInLanguages.fr.length} French translations:`, missingInLanguages.fr);
+    }
+    
+    if (missingInLanguages.en.length === 0 && missingInLanguages.fr.length === 0) {
+      console.log('✅ All translations for this page are complete!');
+    }
+    
+    return {
+      usedKeys,
+      missingInLanguages
+    };
+  };
+  
   return { 
     t, 
     changeLanguage, 
@@ -70,6 +119,7 @@ export const useTranslation = () => {
     i18n,
     // Utility for debugging
     refreshLanguage: initializeLanguage,
+    validateCurrentPageTranslations
   };
 };
 
