@@ -11,24 +11,24 @@ const FAQ = () => {
   
   const faqs = [
     {
-      question: 'faq.questions.general.what',
-      answer: 'faq.answers.general.what'
+      question: 'faq.questions.whatIs.question',
+      answer: 'faq.questions.whatIs.answer'
     },
     {
-      question: 'faq.questions.general.how',
-      answer: 'faq.answers.general.how'
+      question: 'faq.questions.howContribute.question',
+      answer: 'faq.questions.howContribute.answer'
     },
     {
-      question: 'faq.questions.technical.compatibility',
-      answer: 'faq.answers.technical.compatibility'
+      question: 'faq.questions.rights.question',
+      answer: 'faq.questions.rights.answer'
     },
     {
-      question: 'faq.questions.technical.requirements',
-      answer: 'faq.answers.technical.requirements'
+      question: 'faq.questions.aiRecognition.question',
+      answer: 'faq.questions.aiRecognition.answer'
     },
     {
-      question: 'faq.questions.support.contact',
-      answer: 'faq.answers.support.contact'
+      question: 'faq.questions.commercial.question',
+      answer: 'faq.questions.commercial.answer'
     }
   ];
   

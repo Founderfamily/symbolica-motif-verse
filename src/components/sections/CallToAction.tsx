@@ -2,12 +2,10 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTranslation } from '@/i18n/useTranslation';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { I18nText } from '@/components/ui/i18n-text';
 
 const CallToAction = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   
   return (

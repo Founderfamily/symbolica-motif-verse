@@ -42,7 +42,11 @@
     "signOut": "Se déconnecter",
     "profile": "Profil",
     "admin": "Admin",
-    "email": "Email"
+    "email": "Email",
+    "home": "Accueil",
+    "explore": "Explorer",
+    "about": "À propos",
+    "contact": "Contact"
   },
   "auth": {
     "login": "Connexion",

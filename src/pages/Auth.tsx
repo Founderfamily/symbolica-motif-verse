@@ -19,7 +19,7 @@ const Auth: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md mb-8 text-center">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent mb-2">
-          Symbolica
+          <I18nText translationKey="app.name" />
         </h1>
         <p className="text-slate-600 mb-8">
           <I18nText translationKey="auth.intro" />

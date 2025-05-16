@@ -42,7 +42,11 @@
     "signOut": "Sign Out",
     "profile": "Profile",
     "admin": "Admin",
-    "email": "Email"
+    "email": "Email",
+    "home": "Home",
+    "explore": "Explore",
+    "about": "About Us",
+    "contact": "Contact"
   },
   "auth": {
     "login": "Log in",
@@ -282,6 +286,90 @@
       "classification": "AI Classification",
       "result": "Processing Result",
       "example": "Our system identifies recurring patterns, extracts them, and matches them against our database."
+    },
+    "faq": {
+        "title": "Frequently Asked Questions",
+        "questions": {
+            "whatIs": {
+                "question": "What exactly is Symbolica?",
+                "answer": "Symbolica is an open-source collaborative platform dedicated to discovering, analyzing, and creating around cultural symbols and patterns from around the world."
+            },
+            "howContribute": {
+                "question": "How can I contribute to Symbolica?",
+                "answer": "You can contribute by uploading photos of patterns, annotating existing images, enriching the knowledge base, or participating in community challenges."
+            },
+            "rights": {
+                "question": "Are Symbolica contents copyright-free?",
+                "answer": "Symbolica contents are generally under Creative Commons license. The exact details vary by contribution type, but we promote open data and knowledge sharing."
+            },
+            "aiRecognition": {
+                "question": "How does the AI pattern recognition work?",
+                "answer": "Our artificial intelligence system analyzes uploaded images to identify known patterns. It constantly improves through user feedback validating or correcting its suggestions."
+            },
+            "commercial": {
+                "question": "Is Symbolica a commercial project?",
+                "answer": "No, Symbolica is a non-profit project supported by an association. Our mission is cultural and educational, in the spirit of digital commons."
+            }
+        }
+    },
+    "roadmap": {
+        "subtitle": "Symbolica is being built progressively with your participation",
+        "fallback": {
+            "phase0": {
+                "phase": "Phase 0 - Completed",
+                "title": "Design & Research",
+                "description": "Project definition, preliminary studies, and identification of enthusiast community needs"
+            },
+            "phase1": {
+                "phase": "Phase 1 - In Progress",
+                "title": "Community Platform",
+                "description": "Launch of basic tools enabling sharing, analysis, and collaborative documentation of heritage symbols"
+            },
+            "phase2": {
+                "phase": "Phase 2 - Coming Soon",
+                "title": "Cultural Intelligence",
+                "description": "Deployment of advanced algorithms for identification, comparison, and contextual analysis of patterns"
+            }
+        }
+    },
+    "mapExplorer": {
+        "title": "Symbol Map Explorer",
+        "description": "Explore symbols and patterns from different cultures around the world",
+        "searchLocation": "Search a location...",
+        "filters": "Filters",
+        "zoom": "Zoom",
+        "mapView": "Map View",
+        "listView": "List View",
+        "symbolCount": "{{count}} symbols",
+        "countriesCount": "{{count}} countries",
+        "betaNotice": "The interactive map is currently in beta. More features and symbols will be added soon.",
+        "listViewComingSoon": "List view is coming soon!",
+        "popularRegions": "Popular Regions"
+    },
+    "map": {
+        "placeholder": "Interactive Map Coming Soon",
+        "comingSoon": "We're working on an interactive map to explore symbols around the world"
+    },
+    "gamification": {
+        "title": "Earn Rewards for Contributions",
+        "subtitle": "Join our community and earn points, badges and recognition for your contributions to the world of symbols",
+        "badges": {
+            "title": "Collect Badges",
+            "description": "Earn unique badges for your achievements and showcase them on your profile"
+        },
+        "points": {
+            "title": "Earn Points",
+            "description": "Gain points for every contribution, comment, and validation you make"
+        },
+        "leaderboard": {
+            "title": "Climb Leaderboards",
+            "description": "Compete with other contributors and climb the global and regional leaderboards"
+        },
+        "achievements": {
+            "title": "Complete Achievements",
+            "description": "Complete special challenges to unlock unique rewards and recognition"
+        },
+        "viewYourProgress": "View Your Progress"
     }
   },
   "features": {
@@ -370,91 +458,5 @@
       "role": "Heritage Enthusiast",
       "quote": "Symbolica has transformed the way I explore cultural patterns and motifs. The community is incredibly knowledgeable and supportive."
     }
-  },
-  "faq": {
-    "title": "Frequently Asked Questions",
-    "questions": {
-      "whatIs": {
-        "question": "What exactly is Symbolica?",
-        "answer": "Symbolica is an open-source collaborative platform dedicated to discovering, analyzing, and creating around cultural symbols and patterns from around the world."
-      },
-      "howContribute": {
-        "question": "How can I contribute to Symbolica?",
-        "answer": "You can contribute by uploading photos of patterns, annotating existing images, enriching the knowledge base, or participating in community challenges."
-      },
-      "rights": {
-        "question": "Are Symbolica contents copyright-free?",
-        "answer": "Symbolica contents are generally under Creative Commons license. The exact details vary by contribution type, but we promote open data and knowledge sharing."
-      },
-      "aiRecognition": {
-        "question": "How does the AI pattern recognition work?",
-        "answer": "Our artificial intelligence system analyzes uploaded images to identify known patterns. It constantly improves through user feedback validating or correcting its suggestions."
-      },
-      "commercial": {
-        "question": "Is Symbolica a commercial project?",
-        "answer": "No, Symbolica is a non-profit project supported by an association. Our mission is cultural and educational, in the spirit of digital commons."
-      }
-    }
-  },
-  "roadmap": {
-    "subtitle": "Symbolica is being built progressively with your participation",
-    "fallback": {
-      "phase0": {
-        "phase": "Phase 0 - Completed",
-        "title": "Design & Research",
-        "description": "Project definition, preliminary studies, and identification of enthusiast community needs"
-      },
-      "phase1": {
-        "phase": "Phase 1 - In Progress",
-        "title": "Community Platform",
-        "description": "Launch of basic tools enabling sharing, analysis, and collaborative documentation of heritage symbols"
-      },
-      "phase2": {
-        "phase": "Phase 2 - Coming Soon",
-        "title": "Cultural Intelligence",
-        "description": "Deployment of advanced algorithms for identification, comparison, and contextual analysis of patterns"
-      }
-    }
-  },
-  "mapExplorer": {
-    "title": "Symbol Map Explorer",
-    "description": "Explore symbols and patterns from different cultures around the world",
-    "searchLocation": "Search a location...",
-    "filters": "Filters",
-    "zoom": "Zoom",
-    "mapView": "Map View",
-    "listView": "List View",
-    "symbolCount": "{{count}} symbols",
-    "countriesCount": "{{count}} countries",
-    "betaNotice": "The interactive map is currently in beta. More features and symbols will be added soon.",
-    "listViewComingSoon": "List view is coming soon!",
-    "popularRegions": "Popular Regions"
-  },
-
-  "map": {
-    "placeholder": "Interactive Map Coming Soon",
-    "comingSoon": "We're working on an interactive map to explore symbols around the world"
-  },
-
-  "gamification": {
-    "title": "Earn Rewards for Contributions",
-    "subtitle": "Join our community and earn points, badges and recognition for your contributions to the world of symbols",
-    "badges": {
-      "title": "Collect Badges",
-      "description": "Earn unique badges for your achievements and showcase them on your profile"
-    },
-    "points": {
-      "title": "Earn Points",
-      "description": "Gain points for every contribution, comment, and validation you make"
-    },
-    "leaderboard": {
-      "title": "Climb Leaderboards",
-      "description": "Compete with other contributors and climb the global and regional leaderboards"
-    },
-    "achievements": {
-      "title": "Complete Achievements",
-      "description": "Complete special challenges to unlock unique rewards and recognition"
-    },
-    "viewYourProgress": "View Your Progress"
   }
 }
