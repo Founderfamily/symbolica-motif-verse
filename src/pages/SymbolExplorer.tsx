@@ -87,7 +87,7 @@ const SymbolExplorer: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          <Tabs defaultValue="grid" onValueChange={(v) => setView(v as any)} className="w-[400px]">
+          <Tabs value={view} onValueChange={(v) => setView(v as any)} defaultValue="grid">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="grid" className="flex gap-1 items-center">
                 <Grid className="w-4 h-4" />
@@ -205,61 +205,62 @@ const SymbolExplorer: React.FC = () => {
                     {filteredSymbols?.length || 0} symbols found
                   </I18nText>
                 </div>
-                
-                {/* Additional view controls could go here */}
               </div>
               
-              <TabsContent value="grid" className="m-0">
-                <SymbolGrid symbols={filteredSymbols || []} />
-              </TabsContent>
-              
-              <TabsContent value="list" className="m-0">
-                <Card className="p-4">
-                  <div className="space-y-4">
-                    {filteredSymbols?.map(symbol => (
-                      <div key={symbol.id} className="flex items-center gap-4 p-2 border-b last:border-0">
-                        <div className="w-16 h-16 bg-amber-100 rounded-lg"></div>
-                        <div>
-                          <h3 className="font-medium">{symbol.name}</h3>
-                          <div className="flex gap-2 mt-1">
-                            <span className="text-xs text-slate-600">{symbol.culture}</span>
-                            <span className="text-xs text-slate-500">{symbol.period}</span>
+              {/* Important: Wrap TabsContent components inside a Tabs component */}
+              <Tabs value={view} className="w-full">
+                <TabsContent value="grid" className="m-0">
+                  <SymbolGrid symbols={filteredSymbols || []} />
+                </TabsContent>
+                
+                <TabsContent value="list" className="m-0">
+                  <Card className="p-4">
+                    <div className="space-y-4">
+                      {filteredSymbols?.map(symbol => (
+                        <div key={symbol.id} className="flex items-center gap-4 p-2 border-b last:border-0">
+                          <div className="w-16 h-16 bg-amber-100 rounded-lg"></div>
+                          <div>
+                            <h3 className="font-medium">{symbol.name}</h3>
+                            <div className="flex gap-2 mt-1">
+                              <span className="text-xs text-slate-600">{symbol.culture}</span>
+                              <span className="text-xs text-slate-500">{symbol.period}</span>
+                            </div>
+                            {symbol.description && (
+                              <p className="text-sm text-slate-700 mt-1 line-clamp-2">{symbol.description}</p>
+                            )}
                           </div>
-                          {symbol.description && (
-                            <p className="text-sm text-slate-700 mt-1 line-clamp-2">{symbol.description}</p>
-                          )}
                         </div>
-                      </div>
-                    ))}
-                    
-                    {(filteredSymbols?.length || 0) === 0 && (
-                      <div className="py-8 text-center text-slate-500">
-                        <I18nText translationKey="symbolExplorer.noResults">
-                          No symbols match your filter criteria
+                      ))}
+                      
+                      {(filteredSymbols?.length || 0) === 0 && (
+                        <div className="py-8 text-center text-slate-500">
+                          <I18nText translationKey="symbolExplorer.noResults">
+                            No symbols match your filter criteria
+                          </I18nText>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="map" className="m-0">
+                  <Card className="p-8 flex items-center justify-center h-96 bg-slate-50">
+                    <div className="text-center">
+                      <Map className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                      <h3 className="font-medium text-slate-700">
+                        <I18nText translationKey="symbolExplorer.mapViewComingSoon">
+                          Interactive map view coming soon
                         </I18nText>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="map" className="m-0">
-                <Card className="p-8 flex items-center justify-center h-96 bg-slate-50">
-                  <div className="text-center">
-                    <Map className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-                    <h3 className="font-medium text-slate-700">
-                      <I18nText translationKey="symbolExplorer.mapViewComingSoon">
-                        Interactive map view coming soon
-                      </I18nText>
-                    </h3>
-                    <p className="text-slate-500 mt-2 max-w-md">
-                      <I18nText translationKey="symbolExplorer.mapViewDescription">
-                        Explore symbols based on their geographical origin and distribution
-                      </I18nText>
-                    </p>
-                  </div>
-                </Card>
-              </TabsContent>
+                      </h3>
+                      <p className="text-slate-500 mt-2 max-w-md">
+                        <I18nText translationKey="symbolExplorer.mapViewDescription">
+                          Explore symbols based on their geographical origin and distribution
+                        </I18nText>
+                      </p>
+                    </div>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </>
           )}
         </div>
