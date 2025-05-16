@@ -27,11 +27,6 @@ const Hero = () => {
   }, []);
   
   const lang = i18n.language || 'fr';
-  // Extract these values as constants to avoid direct t() usage in JSX
-  const defaultTitle = t('hero.heading');
-  const defaultSubtitle = t('hero.subheading');
-  const title = heroContent?.title?.[lang] || defaultTitle;
-  const subtitle = heroContent?.subtitle?.[lang] || defaultSubtitle;
   
   return (
     <section className="relative pt-10 md:pt-16 px-4 md:px-8 max-w-7xl mx-auto">
@@ -49,10 +44,18 @@ const Hero = () => {
           </div>
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
-          {title}
+          {heroContent?.title?.[lang] ? (
+            heroContent.title[lang]
+          ) : (
+            <I18nText translationKey="hero.heading" />
+          )}
         </h1>
         <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
-          {subtitle}
+          {heroContent?.subtitle?.[lang] ? (
+            heroContent.subtitle[lang]
+          ) : (
+            <I18nText translationKey="hero.subheading" />
+          )}
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
