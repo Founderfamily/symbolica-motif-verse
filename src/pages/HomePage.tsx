@@ -8,6 +8,7 @@ import UploadTools from '@/components/sections/UploadTools';
 import Partners from '@/components/sections/Partners';
 import HowItWorks from '@/components/sections/HowItWorks';
 import CallToAction from '@/components/sections/CallToAction';
+import Gamification from '@/components/sections/Gamification';
 
 const HomePage = () => {
   const { t } = useTranslation();
@@ -22,6 +23,9 @@ const HomePage = () => {
       
       {/* How It Works */}
       <HowItWorks />
+      
+      {/* Gamification Section */}
+      <Gamification />
       
       {/* Upload Tools */}
       <UploadTools />
