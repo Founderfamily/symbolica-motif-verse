@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import glob from 'glob';
+import * as glob from 'glob';
 
 // File extensions to scan
 const extensions = ['.tsx', '.jsx', '.ts', '.js'];
