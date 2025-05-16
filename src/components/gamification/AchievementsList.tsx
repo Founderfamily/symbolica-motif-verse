@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 import { Progress } from '@/components/ui/progress';
 import { Award, Lock } from 'lucide-react';
 import { Achievement, UserAchievement } from '@/types/gamification';
@@ -59,7 +60,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
   if (filteredAchievements.length === 0) {
     return (
       <div className="text-center py-4 text-slate-500">
-        <p>{t('gamification.noAchievements')}</p>
+        <p><I18nText translationKey="gamification.noAchievements" /></p>
       </div>
     );
   }
@@ -100,14 +101,16 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span>{progress} / {achievement.requirement}</span>
-                    <span>{achievement.points} {t('gamification.points')}</span>
+                    <span>
+                      {achievement.points} <I18nText translationKey="gamification.points" />
+                    </span>
                   </div>
                   <Progress value={progressPercentage} className="h-1.5" />
                 </div>
                 
                 {userAchievement?.earned_at && (
                   <p className="text-xs text-green-600">
-                    {t('gamification.earnedAt')}: {new Date(userAchievement.earned_at).toLocaleDateString()}
+                    <I18nText translationKey="gamification.earnedAt" />: {new Date(userAchievement.earned_at).toLocaleDateString()}
                   </p>
                 )}
               </div>
@@ -122,7 +125,7 @@ const AchievementsList: React.FC<AchievementsListProps> = ({
             href="#more" 
             className="text-sm text-amber-600 hover:text-amber-700 font-medium"
           >
-            {t('gamification.seeMoreAchievements')}
+            <I18nText translationKey="gamification.seeMoreAchievements" />
           </a>
         </div>
       )}

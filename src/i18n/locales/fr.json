@@ -466,6 +466,10 @@
       "title": "Complétez des Achievements",
       "description": "Relevez des défis spéciaux pour débloquer des récompenses uniques et de la reconnaissance"
     },
-    "viewYourProgress": "Voir Votre Progression"
+    "viewYourProgress": "Voir Votre Progression",
+    "noAchievements": "Pas d'achievements disponibles pour le moment",
+    "points": "points",
+    "earnedAt": "Obtenu le",
+    "seeMoreAchievements": "Voir plus d'achievements"
   }
 }

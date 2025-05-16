@@ -17,7 +17,9 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between">
             <div className="mb-8 md:mb-0">
-              <h2 className="text-2xl font-bold text-white mb-4">{t('app.name')}</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                <I18nText translationKey="app.name" />
+              </h2>
               <p className="max-w-md text-slate-400">
                 <I18nText translationKey="footer.tagline" />
               </p>

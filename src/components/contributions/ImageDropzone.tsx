@@ -4,6 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { Upload, X, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 
 interface ImageDropzoneProps {
   onImageSelected: (file: File) => void;
@@ -61,6 +62,12 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
     setError(null);
   };
 
+  // Get translated message strings
+  const dropActiveText = t('contributions.image.dropActive');
+  const dropText = t('contributions.image.drop');
+  const formatsText = t('contributions.image.formats');
+  const removeText = t('contributions.image.remove');
+
   return (
     <div className="space-y-4">
       {!previewUrl ? (
@@ -76,14 +83,16 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
           <div className="flex flex-col items-center justify-center space-y-2">
             <Upload className="h-8 w-8 text-muted-foreground" />
             {isDragActive ? (
-              <p className="text-sm font-medium">{t('contributions.image.dropActive')}</p>
+              <p className="text-sm font-medium">
+                <I18nText translationKey="contributions.image.dropActive" />
+              </p>
             ) : (
               <>
                 <p className="text-sm font-medium">
-                  {t('contributions.image.drop')}
+                  <I18nText translationKey="contributions.image.drop" />
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {t('contributions.image.formats')}
+                  <I18nText translationKey="contributions.image.formats" />
                 </p>
               </>
             )}
@@ -110,7 +119,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
               className="h-8 w-8 p-0"
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">{t('contributions.image.remove')}</span>
+              <span className="sr-only">
+                <I18nText translationKey="contributions.image.remove" />
+              </span>
             </Button>
           </div>
         </div>

@@ -66,6 +66,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
     onLocationSelected(simulatedLatitude, simulatedLongitude, searchQuery);
   };
 
+  // Get translated strings
   const searchPlaceholder = t('contributions.map.search');
 
   return (
