@@ -73,10 +73,10 @@ const SymbolExplorer: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto p-4 pt-24 pb-20">
+    <div className="container mx-auto p-4 pt-8 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-serif font-medium text-slate-900 mb-1">
+          <h1 className="text-2xl font-serif font-medium text-slate-900 mb-1">
             <I18nText translationKey="symbolExplorer.title">Symbol Explorer</I18nText>
           </h1>
           <p className="text-slate-600">
@@ -87,7 +87,7 @@ const SymbolExplorer: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          <Tabs value={view} onValueChange={(v) => setView(v as any)} defaultValue="grid">
+          <Tabs value={view} onValueChange={(v) => setView(v as any)}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="grid" className="flex gap-1 items-center">
                 <Grid className="w-4 h-4" />
@@ -207,8 +207,7 @@ const SymbolExplorer: React.FC = () => {
                 </div>
               </div>
               
-              {/* Important: Wrap TabsContent components inside a Tabs component */}
-              <Tabs value={view} className="w-full">
+              <Tabs value={view}>
                 <TabsContent value="grid" className="m-0">
                   <SymbolGrid symbols={filteredSymbols || []} />
                 </TabsContent>
