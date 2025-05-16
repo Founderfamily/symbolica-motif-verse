@@ -27,8 +27,11 @@ const Hero = () => {
   }, []);
   
   const lang = i18n.language || 'fr';
-  const title = heroContent?.title?.[lang] || t('hero.heading');
-  const subtitle = heroContent?.subtitle?.[lang] || t('hero.subheading');
+  // Extract these values as constants to avoid direct t() usage in JSX
+  const defaultTitle = t('hero.heading');
+  const defaultSubtitle = t('hero.subheading');
+  const title = heroContent?.title?.[lang] || defaultTitle;
+  const subtitle = heroContent?.subtitle?.[lang] || defaultSubtitle;
   
   return (
     <section className="relative pt-10 md:pt-16 px-4 md:px-8 max-w-7xl mx-auto">
