@@ -1,4 +1,3 @@
-
 {
   "common": {
     "viewMore": "Voir plus",
@@ -417,26 +416,45 @@
       }
     }
   },
+  "mapExplorer": {
+    "title": "Explorateur de Carte des Symboles",
+    "description": "Explorez les symboles et motifs de différentes cultures à travers le monde",
+    "searchLocation": "Rechercher un lieu...",
+    "filters": "Filtres",
+    "zoom": "Zoom",
+    "mapView": "Vue Carte",
+    "listView": "Vue Liste",
+    "symbolCount": "{{count}} symboles",
+    "countriesCount": "{{count}} pays",
+    "betaNotice": "La carte interactive est actuellement en version bêta. Plus de fonctionnalités et de symboles seront ajoutés prochainement.",
+    "listViewComingSoon": "La vue en liste arrive bientôt !",
+    "popularRegions": "Régions populaires"
+  },
+
+  "map": {
+    "placeholder": "Carte Interactive Bientôt Disponible",
+    "comingSoon": "Nous travaillons sur une carte interactive pour explorer les symboles à travers le monde"
+  },
+
   "gamification": {
-    "title": "Participez et progressez",
-    "subtitle": "Symbolica est une expérience enrichissante où chaque contribution est valorisée",
-    "badges": "Badges et récompenses",
-    "levels": "Niveaux et points",
-    "badgeTypes": {
-      "explorer": "Explorateur",
-      "scholar": "Érudit",
-      "photographer": "Photographe",
-      "curator": "Conservateur",
-      "mentor": "Mentor",
-      "detective": "Détective"
+    "title": "Gagnez des Récompenses pour vos Contributions",
+    "subtitle": "Rejoignez notre communauté et gagnez des points, des badges et de la reconnaissance pour vos contributions au monde des symboles",
+    "badges": {
+      "title": "Collectionnez des Badges",
+      "description": "Gagnez des badges uniques pour vos réalisations et affichez-les sur votre profil"
     },
-    "pointsActivities": {
-      "photoUpload": "Upload de photo",
-      "patternAnnotation": "Annotation de motif",
-      "validatedIdentification": "Identification validée",
-      "advancedDocumentation": "Documentation avancée"
+    "points": {
+      "title": "Gagnez des Points",
+      "description": "Obtenez des points pour chaque contribution, commentaire et validation que vous effectuez"
     },
-    "badgesDescription": "Gagnez des badges spéciaux en réalisant des missions spécifiques et en contribuant régulièrement à la communauté",
-    "levelsDescription": "Progressez en niveaux en accumulant des points. Chaque niveau débloque de nouvelles fonctionnalités et privilèges"
+    "leaderboard": {
+      "title": "Grimpez aux Classements",
+      "description": "Rivalisez avec d'autres contributeurs et grimpez dans les classements mondiaux et régionaux"
+    },
+    "achievements": {
+      "title": "Complétez des Achievements",
+      "description": "Relevez des défis spéciaux pour débloquer des récompenses uniques et de la reconnaissance"
+    },
+    "viewYourProgress": "Voir Votre Progression"
   }
 }

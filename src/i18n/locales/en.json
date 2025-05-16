@@ -1,4 +1,3 @@
-
 {
   "common": {
     "viewMore": "View more",
@@ -417,26 +416,45 @@
       }
     }
   },
+  "mapExplorer": {
+    "title": "Symbol Map Explorer",
+    "description": "Explore symbols and patterns from different cultures around the world",
+    "searchLocation": "Search a location...",
+    "filters": "Filters",
+    "zoom": "Zoom",
+    "mapView": "Map View",
+    "listView": "List View",
+    "symbolCount": "{{count}} symbols",
+    "countriesCount": "{{count}} countries",
+    "betaNotice": "The interactive map is currently in beta. More features and symbols will be added soon.",
+    "listViewComingSoon": "List view is coming soon!",
+    "popularRegions": "Popular Regions"
+  },
+
+  "map": {
+    "placeholder": "Interactive Map Coming Soon",
+    "comingSoon": "We're working on an interactive map to explore symbols around the world"
+  },
+
   "gamification": {
-    "title": "Participate and progress",
-    "subtitle": "Symbolica is an enriching experience where every contribution is valued",
-    "badges": "Badges and rewards",
-    "levels": "Levels and points",
-    "badgeTypes": {
-      "explorer": "Explorer",
-      "scholar": "Scholar",
-      "photographer": "Photographer",
-      "curator": "Curator",
-      "mentor": "Mentor",
-      "detective": "Detective"
+    "title": "Earn Rewards for Contributions",
+    "subtitle": "Join our community and earn points, badges and recognition for your contributions to the world of symbols",
+    "badges": {
+      "title": "Collect Badges",
+      "description": "Earn unique badges for your achievements and showcase them on your profile"
     },
-    "pointsActivities": {
-      "photoUpload": "Photo upload",
-      "patternAnnotation": "Pattern annotation",
-      "validatedIdentification": "Validated identification",
-      "advancedDocumentation": "Advanced documentation"
+    "points": {
+      "title": "Earn Points",
+      "description": "Gain points for every contribution, comment, and validation you make"
     },
-    "badgesDescription": "Earn special badges by completing specific missions and contributing regularly to the community",
-    "levelsDescription": "Progress through levels by accumulating points. Each level unlocks new features and privileges"
+    "leaderboard": {
+      "title": "Climb Leaderboards",
+      "description": "Compete with other contributors and climb the global and regional leaderboards"
+    },
+    "achievements": {
+      "title": "Complete Achievements",
+      "description": "Complete special challenges to unlock unique rewards and recognition"
+    },
+    "viewYourProgress": "View Your Progress"
   }
 }

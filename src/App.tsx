@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/hooks/useAuth';
@@ -6,20 +5,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Auth from '@/pages/Auth';
-import Profile from '@/pages/Profile';
-import AdminLayout from '@/pages/Admin/AdminLayout';
-import Dashboard from '@/pages/Admin/Dashboard';
-import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
-import SymbolEditor from '@/pages/Admin/SymbolEditor';
-import ContentManagement from '@/pages/Admin/ContentManagement';
-import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
+import ProfilePage from '@/pages/ProfilePage';
+import SymbolExplorer from '@/pages/SymbolExplorer';
+import MapExplorer from '@/pages/MapExplorer';
 import Contributions from '@/pages/Contributions';
 import NewContribution from '@/pages/NewContribution';
 import ContributionDetail from '@/pages/ContributionDetail';
 import NotFound from '@/pages/NotFound';
 import { TranslationValidator } from '@/i18n/TranslationValidator';
 import './App.css';
-import SymbolExplorer from '@/pages/SymbolExplorer';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -34,7 +28,7 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename="/">
         <AuthProvider>
           {/* Initialize translation validator */}
           <TranslationValidator />
@@ -42,16 +36,17 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/explore" element={<SymbolExplorer />} />
+            <Route path="/map" element={<MapExplorer />} />
             <Route path="/contributions" element={<Contributions />} />
             <Route path="/contributions/new" element={<NewContribution />} />
             <Route path="/contributions/:id" element={<ContributionDetail />} />
-            <Route path="/symbols" element={<SymbolExplorer />} />
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminLayout />} >
               <Route index element={<Dashboard />} />
+              <Route path="content" element={<ContentManagement />} />
               <Route path="symbols" element={<SymbolsManagement />} />
               <Route path="symbols/:id" element={<SymbolEditor />} />
-              <Route path="content" element={<ContentManagement />} />
               <Route path="contributions" element={<ContributionsManagement />} />
             </Route>
             <Route path="*" element={<NotFound />} />

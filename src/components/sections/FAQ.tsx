@@ -1,84 +1,63 @@
 
 import React from 'react';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDown } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
-
-const FAQItem = ({ questionKey, answerKey }: { questionKey: string, answerKey: string }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  
-  return (
-    <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      className="border-b border-slate-200 py-4"
-    >
-      <CollapsibleTrigger className="flex w-full items-center justify-between text-left">
-        <h3 className="text-lg font-medium">
-          <I18nText translationKey={questionKey} />
-        </h3>
-        <ChevronDown
-          className={`h-5 w-5 text-slate-500 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pt-2 pb-1">
-        <p className="text-slate-600">
-          <I18nText translationKey={answerKey} />
-        </p>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-};
 
 const FAQ = () => {
   const { t } = useTranslation();
   
-  const faqItems = [
+  const faqs = [
     {
-      questionKey: "faq.questions.whatIs.question",
-      answerKey: "faq.questions.whatIs.answer"
+      question: 'faq.question1',
+      answer: 'faq.answer1'
     },
     {
-      questionKey: "faq.questions.howContribute.question",
-      answerKey: "faq.questions.howContribute.answer"
+      question: 'faq.question2',
+      answer: 'faq.answer2'
     },
     {
-      questionKey: "faq.questions.rights.question",
-      answerKey: "faq.questions.rights.answer"
+      question: 'faq.question3',
+      answer: 'faq.answer3'
     },
     {
-      questionKey: "faq.questions.aiRecognition.question",
-      answerKey: "faq.questions.aiRecognition.answer"
+      question: 'faq.question4',
+      answer: 'faq.answer4'
     },
     {
-      questionKey: "faq.questions.commercial.question",
-      answerKey: "faq.questions.commercial.answer"
+      question: 'faq.question5',
+      answer: 'faq.answer5'
     }
   ];
-
+  
   return (
-    <section className="py-16 px-4 md:px-8 bg-slate-50">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold mb-10 text-center">
-          <I18nText translationKey="faq.title" />
-        </h2>
-        
-        <div>
-          {faqItems.map((item, index) => (
-            <FAQItem 
-              key={index} 
-              questionKey={item.questionKey} 
-              answerKey={item.answerKey} 
-            />
-          ))}
+    <section className="py-16 px-4 md:px-8 bg-slate-900">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            <I18nText translationKey="faq.title" />
+          </h2>
+          <p className="text-slate-300 max-w-lg mx-auto">
+            <I18nText translationKey="faq.subtitle" />
+          </p>
         </div>
+        
+        <Accordion type="single" collapsible className="space-y-4">
+          {faqs.map((faq, index) => (
+            <AccordionItem 
+              key={index} 
+              value={`item-${index}`}
+              className="bg-slate-800 rounded-lg overflow-hidden px-4"
+            >
+              <AccordionTrigger className="text-white py-4 hover:no-underline hover:text-amber-300 transition-colors">
+                <I18nText translationKey={faq.question} />
+              </AccordionTrigger>
+              <AccordionContent className="text-slate-300 pb-4">
+                <I18nText translationKey={faq.answer} />
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
-import FAQ from '@/components/sections/FAQ'; // Fixed import - using default import
+import FAQ from '@/components/sections/FAQ';
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -32,13 +32,16 @@ const Footer = () => {
                   <li><Link to="/" className="hover:text-white transition-colors">
                     <I18nText translationKey="footer.home" />
                   </Link></li>
-                  <li><Link to="/" className="hover:text-white transition-colors">
+                  <li><Link to="/explore" className="hover:text-white transition-colors">
                     <I18nText translationKey="footer.explore" />
                   </Link></li>
-                  <li><Link to="/" className="hover:text-white transition-colors">
+                  <li><Link to="/map" className="hover:text-white transition-colors">
+                    <I18nText translationKey="footer.map" />
+                  </Link></li>
+                  <li><Link to="/contributions" className="hover:text-white transition-colors">
                     <I18nText translationKey="footer.contribute" />
                   </Link></li>
-                  <li><Link to="/" className="hover:text-white transition-colors">
+                  <li><Link to="/about" className="hover:text-white transition-colors">
                     <I18nText translationKey="footer.about" />
                   </Link></li>
                 </ul>

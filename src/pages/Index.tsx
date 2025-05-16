@@ -12,9 +12,9 @@ import UploadTools from '@/components/sections/UploadTools';
 import Partners from '@/components/sections/Partners';
 import Testimonials from '@/components/sections/Testimonials';
 import TimelineRoadmap from '@/components/sections/TimelineRoadmap';
-import FAQ from '@/components/sections/FAQ';
 import CallToAction from '@/components/sections/CallToAction';
 import OpenSourceBadge from '@/components/ui/open-source-badge';
+import Gamification from '@/components/sections/Gamification';
 
 const Index = () => {
   return (
@@ -46,6 +46,9 @@ const Index = () => {
         
         {/* How It Works */}
         <HowItWorks />
+        
+        {/* Gamification Section */}
+        <Gamification />
         
         {/* Testimonials */}
         <Testimonials />
