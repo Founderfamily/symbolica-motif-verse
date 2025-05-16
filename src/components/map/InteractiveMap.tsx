@@ -1,13 +1,14 @@
 
-import React, { useEffect, useRef } from 'react';
-import { MapPin } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
+import MapSymbolMarker from './MapSymbolMarker';
 
 // This is a placeholder component for the interactive map
 // In a real implementation, we would integrate with a mapping library like Mapbox or Leaflet
 const InteractiveMap = () => {
   const { t } = useTranslation();
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const [activeLocation, setActiveLocation] = useState<number | null>(null);
   
   // Mock data for symbol locations
   const symbolLocations = [
@@ -40,27 +41,27 @@ const InteractiveMap = () => {
     };
   }, [t]);
   
+  const handleMarkerClick = (id: number | string) => {
+    setActiveLocation(Number(id));
+    console.log(`Clicked symbol location: ${id}`);
+  };
+  
   return (
     <div className="relative w-full h-[500px] rounded-lg overflow-hidden shadow-md border border-slate-200">
       <div ref={mapContainerRef} className="absolute inset-0 bg-slate-50">
         {/* Map will be rendered here */}
         
-        {/* Placeholder pins */}
+        {/* Locations markers */}
         {symbolLocations.map((location) => (
-          <div 
+          <MapSymbolMarker
             key={location.id}
-            className="absolute w-6 h-6 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-            style={{ 
-              left: `${(location.lng + 180) / 360 * 100}%`,
-              top: `${(90 - location.lat) / 180 * 100}%`
-            }}
-            title={location.name}
-          >
-            <MapPin className="h-6 w-6 text-amber-600 hover:text-amber-700" />
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white px-2 py-1 rounded shadow-md text-xs whitespace-nowrap">
-              <strong>{location.name}</strong> ({location.culture})
-            </div>
-          </div>
+            id={location.id}
+            name={location.name}
+            culture={location.culture}
+            lat={location.lat}
+            lng={location.lng}
+            onClick={() => handleMarkerClick(location.id)}
+          />
         ))}
       </div>
     </div>
