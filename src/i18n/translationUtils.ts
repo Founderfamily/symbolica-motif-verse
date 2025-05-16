@@ -91,11 +91,30 @@ export const validateTranslationFormat = (key: string): { valid: boolean; issue?
 
 /**
  * Gets the translated value for a key in a specific language
+ * Now with improved fallback to ensure we always return a string
  */
-export const getTranslationValue = (key: string, lang: string = 'fr'): string | undefined => {
+export const getTranslationValue = (key: string, lang: string = 'fr'): string => {
   const translations = lang === 'fr' ? fr : en;
+  const fallbackTranslations = lang === 'fr' ? en : fr; // Use the other language as fallback
   const flatTranslations = flattenObject(translations);
-  return flatTranslations[key];
+  const flatFallbackTranslations = flattenObject(fallbackTranslations);
+  
+  // Primary language -> fallback language -> formatted key
+  return flatTranslations[key] || flatFallbackTranslations[key] || formatKeyAsReadableText(key);
+};
+
+/**
+ * Format a key as readable text (fallback when translation is missing)
+ */
+export const formatKeyAsReadableText = (key: string): string => {
+  // Extract the last part of the key (e.g., "button.label" -> "label")
+  const parts = key.split('.');
+  const lastPart = parts[parts.length - 1];
+  
+  // Convert camelCase to spaced text
+  return lastPart
+    .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
+    .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
 };
 
 /**

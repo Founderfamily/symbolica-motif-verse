@@ -1,6 +1,6 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
-import { validateKeyFormat } from './translationUtils';
+import { validateKeyFormat, formatKeyAsReadableText } from './translationUtils';
 
 // Store the current language in localStorage to ensure consistent language across page loads
 const LANGUAGE_STORAGE_KEY = 'app_language';
@@ -61,18 +61,6 @@ export const useTranslation = () => {
   const changeLanguage = (lng: string) => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
     i18n.changeLanguage(lng);
-  };
-  
-  // Format a key as readable text (fallback when translation is missing)
-  const formatKeyAsReadableText = (key: string): string => {
-    // Extract the last part of the key (e.g., "button.label" -> "label")
-    const parts = key.split('.');
-    const lastPart = parts[parts.length - 1];
-    
-    // Convert camelCase to spaced text
-    return lastPart
-      .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
-      .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
   };
   
   return { 

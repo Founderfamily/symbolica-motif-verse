@@ -4,6 +4,7 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import fr from './locales/fr.json';
 import en from './locales/en.json';
+import { formatKeyAsReadableText } from './translationUtils';
 
 // Storage key for consistent language across sessions
 const LANGUAGE_STORAGE_KEY = 'app_language';
@@ -37,9 +38,13 @@ i18n
         console.warn(`Missing translation key: ${key} for language: ${lng}`);
       }
     },
-    // Prevent keys from being used as values in production
-    returnEmptyString: false,
+    // Better fallback handling - prevent keys from being used as values
     returnNull: false,
+    returnEmptyString: false,
+    parseMissingKeyHandler: (key) => {
+      // Format missing keys nicely for display
+      return formatKeyAsReadableText(key);
+    },
     // More verbose logging in development
     debug: process.env.NODE_ENV === 'development'
   });
@@ -68,6 +73,12 @@ if (process.env.NODE_ENV === 'development') {
       i18n.reloadResources().then(() => {
         console.log(`Translations reloaded for: ${currentLang}`);
       });
+    },
+    
+    // Check missing translations
+    checkMissingTranslations: () => {
+      const event = new CustomEvent('validate-translations');
+      window.dispatchEvent(event);
     }
   };
   
