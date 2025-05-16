@@ -40,7 +40,7 @@ const App = () => {
             <Route index element={<Dashboard />} />
             <Route path="content" element={<ContentManagement />} />
             <Route path="symbols" element={<SymbolsManagement />} />
-            <Route path="symbols/:id" element={<SymbolEditor />} /> {/* Add route for SymbolEditor */}
+            <Route path="symbols/:id" element={<SymbolEditor />} /> {/* Route for SymbolEditor */}
             <Route path="contributions" element={<ContributionsManagement />} />
           </Route>
           
