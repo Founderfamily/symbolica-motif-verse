@@ -7,6 +7,8 @@ import {
   HoverCardTrigger 
 } from '@/components/ui/hover-card';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
+import { gamificationService } from '@/services/gamificationService';
 
 interface MapSymbolMarkerProps {
   id: string | number;
@@ -19,6 +21,30 @@ interface MapSymbolMarkerProps {
 
 const MapSymbolMarker = ({ id, name, culture, lat, lng, onClick }: MapSymbolMarkerProps) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  
+  const handleClick = async () => {
+    // Track exploration activity if user is logged in
+    if (user) {
+      try {
+        // Award points for exploring symbols
+        await gamificationService.awardPoints(
+          user.id, 
+          'exploration', 
+          5, 
+          typeof id === 'string' ? id : id.toString(),
+          { symbolName: name, culture }
+        );
+      } catch (error) {
+        console.error("Error tracking symbol exploration:", error);
+      }
+    }
+    
+    // Call the original onClick handler if provided
+    if (onClick) {
+      onClick();
+    }
+  };
   
   return (
     <div 
@@ -28,7 +54,7 @@ const MapSymbolMarker = ({ id, name, culture, lat, lng, onClick }: MapSymbolMark
         top: `${(90 - lat) / 180 * 100}%`
       }}
       title={name}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <HoverCard>
         <HoverCardTrigger>

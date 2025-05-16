@@ -14,6 +14,11 @@ import { Loader, MapPin, Award, Trophy, Users, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getUserContributions } from '@/services/contributionService';
 import { CompleteContribution } from '@/types/contributions';
+import { gamificationService } from '@/services/gamificationService';
+import { UserAchievement, Achievement, UserPoints, UserActivity, UserLevel } from '@/types/gamification';
+import AchievementsList from '@/components/gamification/AchievementsList';
+import ActivityFeed from '@/components/gamification/ActivityFeed';
+import UserRanking from '@/components/gamification/UserRanking';
 
 const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
@@ -21,6 +26,13 @@ const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [contributions, setContributions] = useState<CompleteContribution[]>([]);
   const [loading, setLoading] = useState(false);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
+  const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
+  const [userLevel, setUserLevel] = useState<UserLevel | null>(null);
+  const [activities, setActivities] = useState<UserActivity[]>([]);
+  const [topUsers, setTopUsers] = useState<any[]>([]);
+  const [loadingGamification, setLoadingGamification] = useState(false);
   
   // Load user contributions
   useEffect(() => {
@@ -38,6 +50,41 @@ const ProfilePage: React.FC = () => {
     }
   }, [user]);
   
+  // Load gamification data
+  useEffect(() => {
+    if (user) {
+      setLoadingGamification(true);
+      
+      // Fetch all gamification data in parallel
+      Promise.all([
+        gamificationService.getAchievements(),
+        gamificationService.getUserAchievements(user.id),
+        gamificationService.getUserPoints(user.id),
+        gamificationService.getUserLevel(user.id),
+        gamificationService.getUserActivities(user.id),
+        gamificationService.getLeaderboard(10)
+      ]).then(([
+        achievementsData,
+        userAchievementsData,
+        userPointsData,
+        userLevelData,
+        activitiesData,
+        leaderboardData
+      ]) => {
+        setAchievements(achievementsData);
+        setUserAchievements(userAchievementsData);
+        setUserPoints(userPointsData);
+        setUserLevel(userLevelData);
+        setActivities(activitiesData);
+        setTopUsers(leaderboardData);
+        setLoadingGamification(false);
+      }).catch(error => {
+        console.error("Error loading gamification data:", error);
+        setLoadingGamification(false);
+      });
+    }
+  }, [user]);
+  
   // Redirect if user is not logged in
   if (!isLoading && !user) {
     return <Navigate to="/auth" replace />;
@@ -51,21 +98,17 @@ const ProfilePage: React.FC = () => {
     );
   }
   
-  // Mock gamification data (in a real app, this would come from the backend)
-  const gamificationData = {
-    level: 2,
-    points: 125,
-    nextLevelPoints: 200,
-    badges: [
-      { id: 1, name: 'First Contribution', icon: '🏆', date: '2023-04-15' },
-      { id: 2, name: 'Pattern Finder', icon: '🔍', date: '2023-05-20' },
-    ],
-    achievements: [
-      { id: 1, name: 'Upload 3 symbols', progress: 67, current: 2, target: 3 },
-      { id: 2, name: 'Add 5 comments', progress: 40, current: 2, target: 5 },
-      { id: 3, name: 'Complete your profile', progress: 100, current: 1, target: 1 },
-    ]
-  };
+  // Calculate in-progress achievements
+  const inProgressAchievements = userAchievements
+    .filter(ua => !ua.completed && ua.achievement)
+    .sort((a, b) => {
+      // Calculate progress percentage
+      const progressA = (a.progress / (a.achievement?.requirement || 1)) * 100;
+      const progressB = (b.progress / (b.achievement?.requirement || 1)) * 100;
+      // Sort by highest progress first
+      return progressB - progressA;
+    })
+    .slice(0, 3);
   
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -92,11 +135,11 @@ const ProfilePage: React.FC = () => {
                   </CardDescription>
                   <div className="flex flex-wrap gap-2 mt-2">
                     <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                      {t('profile.level', { level: gamificationData.level })}
+                      {t('profile.level', { level: userLevel?.level || 1 })}
                     </Badge>
                     <Badge variant="outline" className="flex items-center gap-1 bg-amber-50 text-amber-700 border-amber-200">
                       <Star className="h-3 w-3 fill-amber-500" />
-                      {gamificationData.points} {t('profile.points')}
+                      {userPoints?.total || 0} {t('profile.points')}
                     </Badge>
                   </div>
                 </div>
@@ -108,7 +151,7 @@ const ProfilePage: React.FC = () => {
                 <TabsList className="grid grid-cols-4 mb-4">
                   <TabsTrigger value="overview">{t('profile.tabs.overview')}</TabsTrigger>
                   <TabsTrigger value="contributions">{t('profile.tabs.contributions')}</TabsTrigger>
-                  <TabsTrigger value="badges">{t('profile.tabs.badges')}</TabsTrigger>
+                  <TabsTrigger value="achievements">{t('profile.tabs.achievements')}</TabsTrigger>
                   <TabsTrigger value="settings">{t('profile.tabs.settings')}</TabsTrigger>
                 </TabsList>
               </div>
@@ -122,14 +165,14 @@ const ProfilePage: React.FC = () => {
                       icon="📝"
                     />
                     <StatCard 
-                      title={t('profile.stats.symbols')} 
-                      value={user?.symbols_count || 0} 
-                      icon="🔍"
+                      title={t('profile.stats.points')} 
+                      value={userPoints?.total || 0} 
+                      icon="⭐"
                     />
                     <StatCard 
-                      title={t('profile.stats.verified')} 
-                      value={user?.verified_uploads || 0} 
-                      icon="✅"
+                      title={t('profile.stats.achievements')} 
+                      value={userAchievements.filter(ua => ua.completed).length} 
+                      icon="🏆"
                     />
                   </div>
                   
@@ -137,36 +180,45 @@ const ProfilePage: React.FC = () => {
                     <h3 className="font-medium mb-2">{t('profile.progress.nextLevel')}</h3>
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
-                        <span>Level {gamificationData.level}</span>
-                        <span>Level {gamificationData.level + 1}</span>
+                        <span>Level {userLevel?.level || 1}</span>
+                        <span>Level {(userLevel?.level || 1) + 1}</span>
                       </div>
-                      <Progress value={(gamificationData.points / gamificationData.nextLevelPoints) * 100} className="h-2" />
+                      <Progress 
+                        value={userLevel ? (userLevel.xp / userLevel.next_level_xp) * 100 : 0} 
+                        className="h-2" 
+                      />
                       <div className="text-xs text-slate-500 text-right">
-                        {gamificationData.points} / {gamificationData.nextLevelPoints} {t('profile.points')}
+                        {userLevel?.xp || 0} / {userLevel?.next_level_xp || 100} XP
                       </div>
                     </div>
                   </div>
                   
                   <div>
                     <h3 className="font-medium mb-2">{t('profile.achievements.inProgress')}</h3>
-                    <div className="space-y-3">
-                      {gamificationData.achievements.map(achievement => (
-                        <div key={achievement.id} className="bg-white p-3 rounded border border-slate-200">
-                          <div className="flex justify-between mb-1">
-                            <span className="font-medium">{achievement.name}</span>
-                            <span className="text-sm text-slate-500">
-                              {achievement.current}/{achievement.target}
-                            </span>
-                          </div>
-                          <Progress value={achievement.progress} className="h-1.5" />
-                        </div>
-                      ))}
-                    </div>
+                    {loadingGamification ? (
+                      <div className="text-center py-4">
+                        <div className="w-6 h-6 border-2 border-slate-200 border-t-amber-500 rounded-full animate-spin mx-auto"></div>
+                      </div>
+                    ) : inProgressAchievements.length > 0 ? (
+                      <div className="space-y-3">
+                        <AchievementsList 
+                          achievements={inProgressAchievements.map(ua => ua.achievement!)}
+                          userAchievements={inProgressAchievements}
+                        />
+                      </div>
+                    ) : (
+                      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-center">
+                        <p className="text-slate-500">{t('profile.noInProgressAchievements')}</p>
+                      </div>
+                    )}
                   </div>
                   
-                  <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                    <h3 className="font-medium text-amber-800 mb-2">{t('profile.about.title')}</h3>
-                    <p className="text-amber-700">{t('profile.about.description')}</p>
+                  <div>
+                    <h3 className="font-medium mb-2">{t('profile.activity.recent')}</h3>
+                    <ActivityFeed 
+                      activities={activities} 
+                      loading={loadingGamification}
+                    />
                   </div>
                 </CardContent>
               </TabsContent>
@@ -238,37 +290,115 @@ const ProfilePage: React.FC = () => {
                 </CardContent>
               </TabsContent>
               
-              <TabsContent value="badges">
-                <CardContent>
-                  <h3 className="font-medium text-lg mb-4">{t('profile.badges.earned')}</h3>
-                  
-                  {gamificationData.badges.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {gamificationData.badges.map(badge => (
-                        <div key={badge.id} className="bg-white p-4 rounded-lg border border-slate-200 text-center">
-                          <div className="text-3xl mb-2">{badge.icon}</div>
-                          <h4 className="font-medium">{badge.name}</h4>
-                          <p className="text-xs text-slate-500">{t('profile.badges.earned')} {new Date(badge.date).toLocaleDateString()}</p>
-                        </div>
-                      ))}
+              <TabsContent value="achievements">
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="font-medium text-lg mb-4 flex items-center gap-2">
+                        <Trophy className="h-5 w-5 text-amber-600" />
+                        {t('profile.leaderboard')}
+                      </h3>
+                      <UserRanking 
+                        users={topUsers} 
+                        title={t('profile.topContributors')} 
+                        translationKey="profile.topContributors"
+                        loading={loadingGamification}
+                      />
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium text-lg mb-4 flex items-center gap-2">
+                        <Star className="h-5 w-5 text-amber-600" />
+                        {t('profile.stats.summary')}
+                      </h3>
                       
-                      {/* Placeholder for unearned badges */}
-                      {[1, 2, 3, 4].map(i => (
-                        <div key={`placeholder-${i}`} className="bg-slate-50 p-4 rounded-lg border border-dashed border-slate-300 text-center">
-                          <div className="text-3xl mb-2 text-slate-300">?</div>
-                          <h4 className="font-medium text-slate-400">{t('profile.badges.locked')}</h4>
-                          <p className="text-xs text-slate-400">{t('profile.badges.keepContributing')}</p>
+                      <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-100">
+                        <div className="p-4">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <p className="text-sm text-slate-500">{t('profile.stats.contributions')}</p>
+                              <p className="text-2xl font-bold">{userPoints?.contribution_points || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-slate-500">{t('profile.stats.exploration')}</p>
+                              <p className="text-2xl font-bold">{userPoints?.exploration_points || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-slate-500">{t('profile.stats.validation')}</p>
+                              <p className="text-2xl font-bold">{userPoints?.validation_points || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-slate-500">{t('profile.stats.community')}</p>
+                              <p className="text-2xl font-bold">{userPoints?.community_points || 0}</p>
+                            </div>
+                          </div>
                         </div>
-                      ))}
+                        
+                        <div className="p-4 bg-amber-50">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="text-sm font-medium text-amber-800">{t('profile.stats.totalPoints')}</p>
+                              <p className="text-2xl font-bold text-amber-700">{userPoints?.total || 0}</p>
+                            </div>
+                            <div className="bg-amber-100 p-2 rounded-full">
+                              <Trophy className="h-8 w-8 text-amber-600" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-slate-500">{t('profile.noBadges')}</p>
-                      <Button variant="outline" className="mt-4">
-                        {t('profile.howToEarnBadges')}
-                      </Button>
-                    </div>
-                  )}
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">{t('profile.achievements.earned')}</h3>
+                    <Tabs defaultValue="all" className="mb-6">
+                      <TabsList className="mb-4">
+                        <TabsTrigger value="all">{t('gamification.allAchievements')}</TabsTrigger>
+                        <TabsTrigger value="contribution">{t('gamification.contribution')}</TabsTrigger>
+                        <TabsTrigger value="exploration">{t('gamification.exploration')}</TabsTrigger>
+                        <TabsTrigger value="community">{t('gamification.community')}</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="all">
+                        <AchievementsList 
+                          achievements={achievements} 
+                          userAchievements={userAchievements}
+                          loading={loadingGamification}
+                          showAll
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="contribution">
+                        <AchievementsList 
+                          achievements={achievements} 
+                          userAchievements={userAchievements}
+                          loading={loadingGamification}
+                          type="contribution"
+                          showAll
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="exploration">
+                        <AchievementsList 
+                          achievements={achievements} 
+                          userAchievements={userAchievements}
+                          loading={loadingGamification}
+                          type="exploration"
+                          showAll
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="community">
+                        <AchievementsList 
+                          achievements={achievements} 
+                          userAchievements={userAchievements}
+                          loading={loadingGamification}
+                          type="community"
+                          showAll
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  </div>
                 </CardContent>
               </TabsContent>
               

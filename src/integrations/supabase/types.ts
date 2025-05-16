@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          created_at: string | null
+          description: string
+          icon: string
+          id: string
+          level: string
+          name: string
+          points: number
+          requirement: number
+          translations: Json | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          icon: string
+          id?: string
+          level: string
+          name: string
+          points?: number
+          requirement?: number
+          translations?: Json | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          icon?: string
+          id?: string
+          level?: string
+          name?: string
+          points?: number
+          requirement?: number
+          translations?: Json | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       analysis_examples: {
         Row: {
           classification_image_url: string | null
@@ -404,6 +446,104 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          completed: boolean
+          created_at: string | null
+          earned_at: string | null
+          id: string
+          progress: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          completed?: boolean
+          created_at?: string | null
+          earned_at?: string | null
+          id?: string
+          progress?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          completed?: boolean
+          created_at?: string | null
+          earned_at?: string | null
+          id?: string
+          progress?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_activities: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          details: Json | null
+          entity_id: string | null
+          id: string
+          points_earned: number
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          id?: string
+          points_earned?: number
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          id?: string
+          points_earned?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          awarded_at: string
+          badge_name: string
+          badge_type: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          badge_name: string
+          badge_type: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          badge_name?: string
+          badge_type?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_contributions: {
         Row: {
           created_at: string | null
@@ -467,6 +607,72 @@ export type Database = {
           title_translations?: Json | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_levels: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          next_level_xp: number
+          updated_at: string | null
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          next_level_xp?: number
+          updated_at?: string | null
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          next_level_xp?: number
+          updated_at?: string | null
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      user_points: {
+        Row: {
+          community_points: number
+          contribution_points: number
+          created_at: string | null
+          exploration_points: number
+          id: string
+          total: number
+          updated_at: string | null
+          user_id: string
+          validation_points: number
+        }
+        Insert: {
+          community_points?: number
+          contribution_points?: number
+          created_at?: string | null
+          exploration_points?: number
+          id?: string
+          total?: number
+          updated_at?: string | null
+          user_id: string
+          validation_points?: number
+        }
+        Update: {
+          community_points?: number
+          contribution_points?: number
+          created_at?: string | null
+          exploration_points?: number
+          id?: string
+          total?: number
+          updated_at?: string | null
+          user_id?: string
+          validation_points?: number
         }
         Relationships: []
       }
