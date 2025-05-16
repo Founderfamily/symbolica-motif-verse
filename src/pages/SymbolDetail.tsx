@@ -101,14 +101,18 @@ const SymbolDetail: React.FC = () => {
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/">
-              <I18nText translationKey="breadcrumb.home">Home</I18nText>
+            <BreadcrumbLink asChild>
+              <Link to="/">
+                <I18nText translationKey="breadcrumb.home">Home</I18nText>
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/explore">
-              <I18nText translationKey="breadcrumb.symbolExplorer">Symbol Explorer</I18nText>
+            <BreadcrumbLink asChild>
+              <Link to="/explore">
+                <I18nText translationKey="breadcrumb.symbolExplorer">Symbol Explorer</I18nText>
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
