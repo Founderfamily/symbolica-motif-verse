@@ -45,8 +45,12 @@
     "email": "Email",
     "home": "Accueil",
     "explore": "Explorer",
+    "map": "Carte",
     "about": "À propos",
-    "contact": "Contact"
+    "contact": "Contact",
+    "menu": "Menu",
+    "close": "Fermer",
+    "contribute": "Contribuer"
   },
   "auth": {
     "login": "Connexion",
@@ -71,7 +75,10 @@
     "fullName": "Nom complet",
     "contributions": "Mes contributions",
     "changePassword": "Changer de mot de passe",
-    "deleteAccount": "Supprimer mon compte"
+    "deleteAccount": "Supprimer mon compte",
+    "profile": "Profil",
+    "viewProfile": "Voir le profil",
+    "signOut": "Se déconnecter"
   },
   "footer": {
     "rights": "Tous droits réservés",
