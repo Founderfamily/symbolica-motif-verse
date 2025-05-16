@@ -1,11 +1,14 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import MapSymbolMarker from './MapSymbolMarker';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin, Star, Loader2 } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { symbolGeolocationService, SymbolLocation } from '@/services/symbolGeolocationService';
+import { toast } from '@/components/ui/use-toast';
 
 // Temporary Mapbox token - in production this should be stored securely
 // and loaded from environment variables or server-side
@@ -17,18 +20,35 @@ const InteractiveMap = () => {
   const { user } = useAuth();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [activeLocation, setActiveLocation] = useState<number | null>(null);
+  const [activeLocation, setActiveLocation] = useState<string | null>(null);
   const [exploreCount, setExploreCount] = useState(0);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [symbolLocations, setSymbolLocations] = useState<SymbolLocation[]>([]);
+  const [error, setError] = useState<string | null>(null);
   
-  // Mock data for symbol locations - this will be replaced with data from Supabase later
-  const symbolLocations = [
-    { id: 1, name: 'Triskelion', lat: 51.5074, lng: -0.1278, culture: 'Celtic' },
-    { id: 2, name: 'Meander', lat: 37.9838, lng: 23.7275, culture: 'Greek' },
-    { id: 3, name: 'Fleur-de-lys', lat: 48.8566, lng: 2.3522, culture: 'French' },
-    { id: 4, name: 'Mandala', lat: 28.6139, lng: 77.2090, culture: 'Indian' },
-    { id: 5, name: 'Aboriginal Art', lat: -25.2744, lng: 133.7751, culture: 'Aboriginal' },
-  ];
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setLoading(true);
+        const locations = await symbolGeolocationService.getAllLocations();
+        setSymbolLocations(locations);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch symbol locations:", err);
+        setError("Failed to load symbol locations");
+        toast({
+          title: t('error.title'),
+          description: t('map.error.loadingLocations'),
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchLocations();
+  }, [t]);
   
   useEffect(() => {
     if (!mapContainerRef.current || map.current) return;
@@ -106,7 +126,6 @@ const InteractiveMap = () => {
       // Start animation loop
       const animationInterval = setInterval(spinGlobe, 1000);
       
-      // Keep reference to clear it later
       return () => clearInterval(animationInterval);
     });
 
@@ -121,10 +140,9 @@ const InteractiveMap = () => {
     };
   }, []);
   
-  const handleMarkerClick = (id: number | string) => {
-    setActiveLocation(Number(id));
+  const handleMarkerClick = (id: string) => {
+    setActiveLocation(id);
     setExploreCount(prev => prev + 1);
-    console.log(`Clicked symbol location: ${id}`);
   };
   
   return (
@@ -152,18 +170,51 @@ const InteractiveMap = () => {
         {/* Mapbox container */}
         <div ref={mapContainerRef} className="absolute inset-0 bg-slate-50" />
         
+        {/* Show loading state */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-50/70 z-30">
+            <div className="flex flex-col items-center space-y-2">
+              <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+              <p className="text-sm text-slate-600">{t('map.loading')}</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Show error message if any */}
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-50/90 z-30">
+            <div className="bg-white p-4 rounded-lg shadow-md border border-red-100 text-red-600 max-w-sm">
+              <p>{error}</p>
+              <p className="text-sm mt-2">{t('map.tryAgainLater')}</p>
+            </div>
+          </div>
+        )}
+        
         {/* Render map markers only after map is loaded */}
-        {mapLoaded && symbolLocations.map((location) => (
+        {mapLoaded && !loading && symbolLocations.map((location) => (
           <MapSymbolMarker
             key={location.id}
             id={location.id}
             name={location.name}
             culture={location.culture}
-            lat={location.lat}
-            lng={location.lng}
+            lat={location.latitude}
+            lng={location.longitude}
+            isVerified={location.is_verified || location.verification_status === 'verified'}
+            historicalPeriod={location.historical_period}
+            source={location.source}
+            description={location.description}
             onClick={() => handleMarkerClick(location.id)}
           />
         ))}
+        
+        {/* Show message when no locations are available */}
+        {mapLoaded && !loading && symbolLocations.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-md max-w-xs">
+              <p className="text-center text-slate-600">{t('map.noLocationsMessage')}</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { SymbolData } from '@/types/supabase';
 
 export interface SymbolLocation {
   id: string;
@@ -13,6 +12,12 @@ export interface SymbolLocation {
   source?: string;
   historical_period?: string;
   is_verified: boolean;
+  verification_status: 'unverified' | 'verified' | 'disputed';
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+  verified_by?: string;
+  translations?: Record<string, any>;
 }
 
 export const symbolGeolocationService = {
@@ -21,18 +26,12 @@ export const symbolGeolocationService = {
    */
   getAllLocations: async (): Promise<SymbolLocation[]> => {
     try {
-      // This is a placeholder for when we actually create the symbol_locations table
-      // For now, we'll return empty array but this function will be ready to use
-      // when we update the database structure
-      
-      // const { data, error } = await supabase
-      //   .from('symbol_locations')
-      //   .select('*');
-      //   
-      // if (error) throw error;
-      // return data as SymbolLocation[];
-      
-      return [];
+      const { data, error } = await supabase
+        .from('symbol_locations')
+        .select('*');
+        
+      if (error) throw error;
+      return data as SymbolLocation[];
     } catch (error) {
       console.error("Error fetching symbol locations:", error);
       return [];
@@ -44,19 +43,13 @@ export const symbolGeolocationService = {
    */
   getLocationsForSymbol: async (symbolId: string): Promise<SymbolLocation[]> => {
     try {
-      // This is a placeholder for when we actually create the symbol_locations table
-      // For now, we'll return empty array but this function will be ready to use
-      // when we update the database structure
-      
-      // const { data, error } = await supabase
-      //   .from('symbol_locations')
-      //   .select('*')
-      //   .eq('symbol_id', symbolId);
-      //   
-      // if (error) throw error;
-      // return data as SymbolLocation[];
-      
-      return [];
+      const { data, error } = await supabase
+        .from('symbol_locations')
+        .select('*')
+        .eq('symbol_id', symbolId);
+        
+      if (error) throw error;
+      return data as SymbolLocation[];
     } catch (error) {
       console.error(`Error fetching locations for symbol ${symbolId}:`, error);
       return [];
@@ -66,24 +59,16 @@ export const symbolGeolocationService = {
   /**
    * Add a new location for a symbol
    */
-  addSymbolLocation: async (location: Omit<SymbolLocation, 'id'>): Promise<SymbolLocation | null> => {
+  addSymbolLocation: async (location: Omit<SymbolLocation, 'id' | 'created_at' | 'updated_at'>): Promise<SymbolLocation | null> => {
     try {
-      // This is a placeholder for when we actually create the symbol_locations table
-      // For now, we'll just log the data but this function will be ready
-      // when we update the database structure
-      
-      console.log("Would add symbol location:", location);
-      
-      // const { data, error } = await supabase
-      //   .from('symbol_locations')
-      //   .insert(location)
-      //   .select()
-      //   .single();
-      //   
-      // if (error) throw error;
-      // return data as SymbolLocation;
-      
-      return null;
+      const { data, error } = await supabase
+        .from('symbol_locations')
+        .insert(location)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data as SymbolLocation;
     } catch (error) {
       console.error("Error adding symbol location:", error);
       return null;
@@ -95,17 +80,12 @@ export const symbolGeolocationService = {
    */
   updateSymbolLocation: async (id: string, updates: Partial<SymbolLocation>): Promise<boolean> => {
     try {
-      // This is a placeholder for when we actually create the symbol_locations table
-      
-      console.log("Would update symbol location:", id, updates);
-      
-      // const { error } = await supabase
-      //   .from('symbol_locations')
-      //   .update(updates)
-      //   .eq('id', id);
-      //   
-      // if (error) throw error;
-      
+      const { error } = await supabase
+        .from('symbol_locations')
+        .update(updates)
+        .eq('id', id);
+        
+      if (error) throw error;
       return true;
     } catch (error) {
       console.error(`Error updating symbol location ${id}:`, error);
@@ -118,21 +98,46 @@ export const symbolGeolocationService = {
    */
   deleteSymbolLocation: async (id: string): Promise<boolean> => {
     try {
-      // This is a placeholder for when we actually create the symbol_locations table
-      
-      console.log("Would delete symbol location:", id);
-      
-      // const { error } = await supabase
-      //   .from('symbol_locations')
-      //   .delete()
-      //   .eq('id', id);
-      //   
-      // if (error) throw error;
-      
+      const { error } = await supabase
+        .from('symbol_locations')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
       return true;
     } catch (error) {
       console.error(`Error deleting symbol location ${id}:`, error);
       return false;
+    }
+  },
+
+  /**
+   * Get locations grouped by region
+   */
+  getLocationsByRegion: async (): Promise<Record<string, SymbolLocation[]>> => {
+    try {
+      // Get all locations
+      const { data, error } = await supabase
+        .from('symbol_locations')
+        .select('*')
+        .order('culture');
+        
+      if (error) throw error;
+      
+      // Group by culture (as region)
+      const groupedLocations: Record<string, SymbolLocation[]> = {};
+      
+      (data as SymbolLocation[]).forEach(location => {
+        if (!groupedLocations[location.culture]) {
+          groupedLocations[location.culture] = [];
+        }
+        groupedLocations[location.culture].push(location);
+      });
+      
+      return groupedLocations;
+    } catch (error) {
+      console.error("Error fetching locations by region:", error);
+      return {};
     }
   }
 };

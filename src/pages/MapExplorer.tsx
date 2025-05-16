@@ -1,16 +1,81 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import InteractiveMap from '@/components/map/InteractiveMap';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
-import { MapPin, Filter, ZoomIn, Search } from 'lucide-react';
+import { MapPin, Filter, ZoomIn, Search, Globe, History } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { symbolGeolocationService } from '@/services/symbolGeolocationService';
+import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const MapExplorer = () => {
   const { t } = useTranslation();
+  const [regionCount, setRegionCount] = useState(0);
+  const [locationsCount, setLocationsCount] = useState(0);
+  const [regions, setRegions] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState<{
+    regions: string[];
+    verified: boolean;
+  }>({
+    regions: [],
+    verified: false
+  });
+  
+  useEffect(() => {
+    const fetchLocationMetadata = async () => {
+      try {
+        const locations = await symbolGeolocationService.getAllLocations();
+        
+        if (locations.length) {
+          const uniqueCultures = [...new Set(locations.map(loc => loc.culture))];
+          setRegions(uniqueCultures);
+          setRegionCount(uniqueCultures.length);
+          setLocationsCount(locations.length);
+        }
+      } catch (error) {
+        console.error('Error fetching location metadata:', error);
+      }
+    };
+    
+    fetchLocationMetadata();
+  }, []);
+  
+  const toggleRegionFilter = (region: string) => {
+    setSelectedFilters(prev => {
+      const newRegions = prev.regions.includes(region) 
+        ? prev.regions.filter(r => r !== region)
+        : [...prev.regions, region];
+        
+      return {
+        ...prev,
+        regions: newRegions
+      };
+    });
+  };
+  
+  const toggleVerifiedFilter = () => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      verified: !prev.verified
+    }));
+  };
+  
+  const clearFilters = () => {
+    setSelectedFilters({
+      regions: [],
+      verified: false
+    });
+    setSearchQuery("");
+  };
+  
+  const hasActiveFilters = selectedFilters.regions.length > 0 || selectedFilters.verified || searchQuery;
   
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -28,25 +93,153 @@ const MapExplorer = () => {
               </p>
             </div>
             
-            <div className="flex gap-2">
-              <div className="relative max-w-sm">
+            <div className="flex flex-wrap gap-2">
+              <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                 <Input 
                   type="search" 
                   placeholder={t('mapExplorer.searchLocation')} 
-                  className="pl-9"
+                  className="pl-9 w-[200px]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" className="gap-1">
-                <Filter className="h-4 w-4" />
-                {t('mapExplorer.filters')}
-              </Button>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="gap-1 relative">
+                    <Filter className="h-4 w-4" />
+                    {t('mapExplorer.filters')}
+                    {hasActiveFilters && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72">
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm">{t('filters.regions')}</h4>
+                    <ScrollArea className="h-[180px] pr-4">
+                      <div className="space-y-2">
+                        {regions.length > 0 ? (
+                          regions.map(region => (
+                            <div key={region} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`region-${region}`} 
+                                checked={selectedFilters.regions.includes(region)}
+                                onCheckedChange={() => toggleRegionFilter(region)}
+                              />
+                              <label htmlFor={`region-${region}`} className="text-sm cursor-pointer">
+                                {region}
+                              </label>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-slate-500">{t('filters.noRegionsAvailable')}</p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">{t('filters.status')}</h4>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="verified-only" 
+                          checked={selectedFilters.verified}
+                          onCheckedChange={toggleVerifiedFilter}
+                        />
+                        <label htmlFor="verified-only" className="text-sm cursor-pointer">
+                          {t('filters.verifiedOnly')}
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-2 flex justify-end">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={clearFilters}
+                        disabled={!hasActiveFilters}
+                      >
+                        {t('filters.clear')}
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
               <Button variant="outline" className="gap-1">
                 <ZoomIn className="h-4 w-4" />
                 {t('mapExplorer.zoom')}
               </Button>
+              
+              <Button variant="outline" className="gap-1">
+                <History className="h-4 w-4" />
+                {t('mapExplorer.history')}
+              </Button>
             </div>
           </div>
+          
+          {/* Active filters display */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm text-slate-500">{t('filters.activeFilters')}:</span>
+              
+              {selectedFilters.regions.map(region => (
+                <Badge 
+                  key={region} 
+                  variant="outline"
+                  className="px-2 py-1 bg-slate-100 gap-1"
+                >
+                  {region}
+                  <button 
+                    className="ml-1 text-slate-400 hover:text-slate-600"
+                    onClick={() => toggleRegionFilter(region)}
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+              
+              {selectedFilters.verified && (
+                <Badge 
+                  variant="outline"
+                  className="px-2 py-1 bg-green-50 text-green-800 border-green-200 gap-1"
+                >
+                  {t('filters.verifiedOnly')}
+                  <button 
+                    className="ml-1 text-green-600 hover:text-green-800"
+                    onClick={toggleVerifiedFilter}
+                  >
+                    ×
+                  </button>
+                </Badge>
+              )}
+              
+              {searchQuery && (
+                <Badge 
+                  variant="outline"
+                  className="px-2 py-1 bg-blue-50 text-blue-800 border-blue-200 gap-1"
+                >
+                  "{searchQuery}"
+                  <button 
+                    className="ml-1 text-blue-600 hover:text-blue-800"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    ×
+                  </button>
+                </Badge>
+              )}
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs h-7 hover:bg-slate-100"
+                onClick={clearFilters}
+              >
+                {t('filters.clearAll')}
+              </Button>
+            </div>
+          )}
           
           <Tabs defaultValue="map">
             <TabsList className="mb-4">
@@ -56,10 +249,10 @@ const MapExplorer = () => {
             
             <TabsContent value="map" className="space-y-6">
               <div className="flex items-center text-sm text-slate-500 mb-4">
-                <MapPin className="h-4 w-4 mr-1 text-amber-600" />
-                <span>{t('mapExplorer.symbolCount', { count: 5 })}</span>
+                <Globe className="h-4 w-4 mr-1 text-blue-600" />
+                <span>{t('mapExplorer.symbolCount', { count: locationsCount })}</span>
                 <span className="mx-2">•</span>
-                <span>{t('mapExplorer.countriesCount', { count: 5 })}</span>
+                <span>{t('mapExplorer.countriesCount', { count: regionCount })}</span>
               </div>
               
               <InteractiveMap />
@@ -83,16 +276,24 @@ const MapExplorer = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold mb-4">{t('mapExplorer.popularRegions')}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {['Europe', 'Asia', 'Africa', 'Americas'].map((region) => (
+              {regions.slice(0, 4).map((region) => (
                 <Button 
                   key={region} 
                   variant="outline" 
                   className="h-auto py-3 justify-start"
+                  onClick={() => {
+                    if (!selectedFilters.regions.includes(region)) {
+                      toggleRegionFilter(region);
+                    }
+                  }}
                 >
                   <MapPin className="h-4 w-4 mr-2 text-amber-600" />
                   {region}
                 </Button>
               ))}
+              {regions.length === 0 && (
+                <p className="text-slate-500 col-span-4">{t('mapExplorer.noRegionsAvailable')}</p>
+              )}
             </div>
           </div>
         </div>

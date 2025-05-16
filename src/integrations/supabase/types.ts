@@ -324,6 +324,57 @@ export type Database = {
         }
         Relationships: []
       }
+      symbol_connections: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          relationship_type: string
+          symbol_id_1: string
+          symbol_id_2: string
+          translations: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          relationship_type: string
+          symbol_id_1: string
+          symbol_id_2: string
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          relationship_type?: string
+          symbol_id_1?: string
+          symbol_id_2?: string
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_connections_symbol_id_1_fkey"
+            columns: ["symbol_id_1"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_connections_symbol_id_2_fkey"
+            columns: ["symbol_id_2"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       symbol_images: {
         Row: {
           created_at: string | null
@@ -370,6 +421,154 @@ export type Database = {
             columns: ["symbol_id"]
             isOneToOne: false
             referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      symbol_locations: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          culture: string
+          description: string | null
+          historical_period: string | null
+          id: string
+          is_verified: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          source: string | null
+          symbol_id: string
+          translations: Json | null
+          updated_at: string | null
+          verification_status:
+            | Database["public"]["Enums"]["symbol_location_verification_status"]
+            | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          culture: string
+          description?: string | null
+          historical_period?: string | null
+          id?: string
+          is_verified?: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          source?: string | null
+          symbol_id: string
+          translations?: Json | null
+          updated_at?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["symbol_location_verification_status"]
+            | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          culture?: string
+          description?: string | null
+          historical_period?: string | null
+          id?: string
+          is_verified?: boolean | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          source?: string | null
+          symbol_id?: string
+          translations?: Json | null
+          updated_at?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["symbol_location_verification_status"]
+            | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_locations_symbol_id_fkey"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      symbol_taxonomy: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          level: number | null
+          name: string
+          parent_id: string | null
+          translations: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          level?: number | null
+          name: string
+          parent_id?: string | null
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          level?: number | null
+          name?: string
+          parent_id?: string | null
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_taxonomy_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "symbol_taxonomy"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      symbol_taxonomy_mapping: {
+        Row: {
+          created_at: string | null
+          id: string
+          symbol_id: string
+          taxonomy_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          symbol_id: string
+          taxonomy_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          symbol_id?: string
+          taxonomy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_taxonomy_mapping_symbol_id_fkey"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_taxonomy_mapping_taxonomy_id_fkey"
+            columns: ["taxonomy_id"]
+            isOneToOne: false
+            referencedRelation: "symbol_taxonomy"
             referencedColumns: ["id"]
           },
         ]
@@ -685,6 +884,10 @@ export type Database = {
     }
     Enums: {
       image_type: "original" | "pattern" | "reuse"
+      symbol_location_verification_status:
+        | "unverified"
+        | "verified"
+        | "disputed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -801,6 +1004,11 @@ export const Constants = {
   public: {
     Enums: {
       image_type: ["original", "pattern", "reuse"],
+      symbol_location_verification_status: [
+        "unverified",
+        "verified",
+        "disputed",
+      ],
     },
   },
 } as const
