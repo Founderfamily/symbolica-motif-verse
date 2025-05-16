@@ -25,33 +25,37 @@ try {
     process.exit(0); // No relevant files staged
   }
 
-  // Only scan the staged files or their directories
-  const results = scanDirectUsage('src');
+  console.log('\n🔍 Checking for direct t() usage in staged files...');
+  
+  // Only scan the staged files
+  const results = scanDirectUsage('src', stagedFiles);
   
   if (results.length > 0) {
     console.error('\n⚠️ Direct t() usage detected in your code!');
     console.error('Please use the <I18nText> component instead.\n');
     
+    // Count total instances
+    const totalInstances = results.reduce((sum, file) => sum + file.lines.length, 0);
+    console.error(`Found ${totalInstances} instances across ${results.length} files:\n`);
+    
     // Show the found issues
     results.forEach(file => {
-      // Only report issues in staged files
-      if (stagedFiles.some(stagedFile => file.file.includes(stagedFile))) {
-        console.error(`File: ${file.file}`);
-        file.lines.forEach(line => {
-          console.error(`  Line ${line.lineNumber}: ${line.content}`);
-        });
-        console.error('');
-      }
+      console.error(`File: ${file.file}`);
+      file.lines.forEach(line => {
+        console.error(`  Line ${line.lineNumber}: ${line.content}`);
+      });
+      console.error('');
     });
     
     console.error('To fix:');
-    console.error('- Replace {t("key")} with <I18nText translationKey="key" />');
-    console.error('- For attributes, use a local constant: const placeholder = t("key")');
+    console.error('1. Replace {t("key")} with <I18nText translationKey="key" />');
+    console.error('2. For attributes, use a local constant: const placeholder = t("key")');
     console.error('\nYou can bypass this check with git commit --no-verify\n');
     
     process.exit(1); // Non-zero exit to abort commit
   }
 
+  console.log('✅ No direct t() usage detected in staged files.\n');
   process.exit(0); // Everything is fine
 } catch (error) {
   console.error('Error running pre-commit hook:', error);

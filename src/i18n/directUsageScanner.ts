@@ -22,7 +22,15 @@ const directUsagePatterns = [
   // Direct assignment
   /=\s*t\(['"`](.+?)['"`]\)/g,
   // Direct usage in JSX attributes
-  /(?:placeholder|title|alt|aria-label)=\{t\(['"`](.+?)['"`]\)\}/g
+  /(?:placeholder|title|alt|aria-label)=\{t\(['"`](.+?)['"`]\)\}/g,
+  // Simple cases with curly braces
+  /\{(?:\s*)t\(/g,
+  // Direct assignment without spacing
+  /=t\(/g,
+  // Multiline usage
+  /\{\s*t\s*\(\s*['"]/g,
+  // More attribute patterns
+  /\w+=\{t\(/g
 ];
 
 // Patterns to exclude as valid usage
@@ -34,7 +42,11 @@ const validExceptions = [
   // Comment lines
   /\/\/.*t\(/,
   // Inside translation utilities
-  /useTranslation|TranslationValidator/
+  /useTranslation|TranslationValidator/,
+  // Inside the scanner itself
+  /directUsageScanner|pre-commit-hook|scanDirectUsage/,
+  // Constants with t
+  /const\s+t\s*=/
 ];
 
 interface ScanResult {
@@ -46,19 +58,24 @@ interface ScanResult {
   }>;
 }
 
-export const scanDirectUsage = (rootDir: string = 'src'): ScanResult[] => {
-  console.log(`🔍 Scanning for direct t() usage in ${rootDir}...`);
+export const scanDirectUsage = (rootDir: string = 'src', specificFiles?: string[]): ScanResult[] => {
+  console.log(`🔍 Scanning for direct t() usage in ${specificFiles ? `${specificFiles.length} specific files` : rootDir}...`);
   
   const results: ScanResult[] = [];
   
-  // Get all files with specified extensions
-  const files = extensions.flatMap(ext => 
+  // Get files to scan
+  const files = specificFiles || extensions.flatMap(ext => 
     glob.sync(`${rootDir}/**/*${ext}`, { nodir: true })
   );
   
   // Scan each file
   files.forEach(file => {
     try {
+      if (!fs.existsSync(file)) {
+        // Skip if file doesn't exist (might be due to path format differences)
+        return;
+      }
+      
       const content = fs.readFileSync(file, 'utf-8');
       const lines = content.split('\n');
       const fileMatches: ScanResult['lines'] = [];
@@ -102,8 +119,8 @@ export const scanDirectUsage = (rootDir: string = 'src'): ScanResult[] => {
   return results;
 };
 
-export const generateDirectUsageReport = (rootDir: string = 'src'): string => {
-  const results = scanDirectUsage(rootDir);
+export const generateDirectUsageReport = (rootDir: string = 'src', specificFiles?: string[]): string => {
+  const results = scanDirectUsage(rootDir, specificFiles);
   
   if (results.length === 0) {
     return '✅ No direct t() usage detected. All translations use I18nText component.';
@@ -143,17 +160,64 @@ export const generateDirectUsageReport = (rootDir: string = 'src'): string => {
   report += "// REPLACE THIS:\n";
   report += "placeholder={t('form.placeholder.email')}\n\n";
   report += "// WITH THIS:\n";
-  report += "placeholder={t('form.placeholder.email')} // TEMPORARILY until we have proper attribute handling\n";
+  report += "const placeholderText = t('form.placeholder.email');\n";
+  report += "...\n";
+  report += "<input placeholder={placeholderText} />\n";
   report += "```\n";
   
   return report;
 };
 
+/**
+ * Standalone function to scan a specific file for direct t() usage
+ */
+export const scanSingleFile = (filePath: string): ScanResult | null => {
+  if (!fs.existsSync(filePath)) {
+    console.error(`File does not exist: ${filePath}`);
+    return null;
+  }
+  
+  const results = scanDirectUsage('', [filePath]);
+  return results.length > 0 ? results[0] : null;
+};
+
+/**
+ * CLI command to check a file or directory
+ */
+export const runCLI = () => {
+  const args = process.argv.slice(2);
+  
+  if (args.length === 0) {
+    console.log('Usage: node directUsageScanner.js [file_or_directory]');
+    process.exit(1);
+  }
+  
+  const target = args[0];
+  
+  if (fs.existsSync(target)) {
+    if (fs.lstatSync(target).isDirectory()) {
+      const report = generateDirectUsageReport(target);
+      console.log(report);
+    } else {
+      const result = scanSingleFile(target);
+      if (result) {
+        console.log(`Found ${result.lines.length} direct t() usage in ${target}:`);
+        result.lines.forEach(line => {
+          console.log(`Line ${line.lineNumber}: ${line.content}`);
+        });
+      } else {
+        console.log(`✅ No direct t() usage found in ${target}`);
+      }
+    }
+  } else {
+    console.error(`Path does not exist: ${target}`);
+    process.exit(1);
+  }
+};
+
 // If this script is run directly (not imported)
 if (require.main === module) {
-  const rootDir = process.argv[2] || 'src';
-  const report = generateDirectUsageReport(rootDir);
-  console.log(report);
+  runCLI();
 }
 
-export default { scanDirectUsage, generateDirectUsageReport };
+export default { scanDirectUsage, generateDirectUsageReport, scanSingleFile };

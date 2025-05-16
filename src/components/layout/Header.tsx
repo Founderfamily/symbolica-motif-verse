@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -41,7 +42,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="text-2xl font-bold text-slate-900 flex items-center gap-2">
           <img src="/logo.svg" alt={t('app.name')} className="h-8 w-8 mr-2" />
-          {t('app.name')}
+          <I18nText translationKey="app.name" />
         </Link>
 
         <nav className="hidden md:flex items-center space-x-6">
@@ -101,7 +102,7 @@ const Header = () => {
         {/* Mobile Menu Button */}
         <div className="md:hidden">
           <Button variant="outline" onClick={toggleMenu}>
-            {isMenuOpen ? t('header.close') : t('header.menu')}
+            <I18nText translationKey={isMenuOpen ? 'header.close' : 'header.menu'} />
           </Button>
         </div>
       </div>

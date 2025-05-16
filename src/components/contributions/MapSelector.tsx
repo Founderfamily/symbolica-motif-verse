@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 
 interface MapSelectorProps {
   onLocationSelected: (latitude: number, longitude: number, locationName: string) => void;
@@ -77,7 +78,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
           onClick={handleSearch}
           className="h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
         >
-          {t('contributions.map.searchButton')}
+          <I18nText translationKey="contributions.map.searchButton" />
         </button>
       </div>
       <div 
@@ -85,7 +86,9 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
         className="w-full h-[200px] bg-slate-100 rounded-md flex items-center justify-center"
       >
         {loading && (
-          <p className="text-sm text-slate-500">{t('contributions.map.loading')}</p>
+          <p className="text-sm text-slate-500">
+            <I18nText translationKey="contributions.map.loading" />
+          </p>
         )}
       </div>
     </div>

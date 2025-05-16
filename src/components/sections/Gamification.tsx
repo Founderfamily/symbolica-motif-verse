@@ -17,6 +17,8 @@ const GamificationItem = ({
   descriptionKey: string;
   points?: number;
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-amber-100 hover:shadow-lg transition-all hover:border-amber-200">
       <div className="bg-amber-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
@@ -31,7 +33,7 @@ const GamificationItem = ({
       {points !== undefined && (
         <div className="flex items-center text-amber-700 font-medium">
           <Star className="h-4 w-4 mr-1 fill-amber-500 stroke-amber-700" />
-          <span>{points} points</span>
+          <span>{points} {t('gamification.points')}</span>
         </div>
       )}
     </div>
@@ -95,7 +97,7 @@ const Gamification = () => {
         <div className="mt-12 text-center">
           <Button asChild className="gap-2 bg-amber-600 hover:bg-amber-700">
             <Link to="/profile">
-              {t('gamification.viewYourProgress')}
+              <I18nText translationKey="gamification.viewYourProgress" />
               <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>
