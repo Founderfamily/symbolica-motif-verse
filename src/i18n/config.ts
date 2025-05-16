@@ -33,7 +33,9 @@ i18n
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Missing translation key: ${key} for language: ${lng}`);
       }
-    }
+    },
+    // Add more verbose logging in development
+    debug: process.env.NODE_ENV === 'development'
   });
 
 // Add a global utility to check translation coverage
@@ -42,6 +44,13 @@ if (process.env.NODE_ENV === 'development') {
     const event = new CustomEvent('validate-translations');
     window.dispatchEvent(event);
   };
+  
+  // Register keyboard shortcut: Ctrl+Alt+T to check translations
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey && e.code === 'KeyT') {
+      (window as any).checkTranslations();
+    }
+  });
 }
 
 // Add helpful developer utilities
@@ -68,6 +77,10 @@ if (process.env.NODE_ENV === 'development') {
         onlyInEn,
         missingInEn: onlyInFr,
         missingInFr: onlyInEn,
+        total: {
+          fr: frKeys.length,
+          en: enKeys.length
+        }
       };
     },
     
@@ -75,6 +88,15 @@ if (process.env.NODE_ENV === 'development') {
     addTranslation: (key: string, value: string, lang: 'fr' | 'en') => {
       i18n.addResource(lang, 'translation', key, value);
       console.log(`Added translation for ${key} in ${lang}`);
+    },
+    
+    // Check for unused keys (this is an approximation)
+    findUnusedKeys: () => {
+      const allKeys = [...Object.keys(flattenObject(fr)), ...Object.keys(flattenObject(en))];
+      const uniqueKeys = [...new Set(allKeys)];
+      
+      console.log(`Found ${uniqueKeys.length} unique keys in translation files`);
+      console.log('Run checkTranslations() to find missing keys in the UI');
     }
   };
 }

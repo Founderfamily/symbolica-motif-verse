@@ -2,6 +2,7 @@
 import React from 'react';
 import { Camera, Tag, Compass, Palette } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 
 const HowItWorks = () => {
   const { t } = useTranslation();
@@ -52,10 +53,14 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-12">
           <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-slate-200 to-slate-300 text-slate-800 inline-block mb-2">
-            {t('howItWorks.process')}
+            <I18nText translationKey="howItWorks.process" />
           </span>
-          <h2 className="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">{t('sections.howItWorks')}</h2>
-          <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">{t('howItWorks.intro')}</p>
+          <h2 className="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <I18nText translationKey="sections.howItWorks" />
+          </h2>
+          <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
+            <I18nText translationKey="howItWorks.intro" />
+          </p>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">

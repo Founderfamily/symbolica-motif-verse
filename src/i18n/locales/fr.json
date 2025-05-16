@@ -106,7 +106,8 @@
     "testimonials": "Ce que les gens en disent",
     "newsletter": "Restez Informé",
     "newsletterSub": "Recevez les dernières mises à jour sur les nouveaux symboles et fonctionnalités",
-    "subscribe": "S'abonner"
+    "subscribe": "S'abonner",
+    "openSource": "Projet Open Source"
   },
   "contributions": {
     "title": "Contributions",
@@ -123,6 +124,7 @@
     "pendingReview": "En attente de révision",
     "approved": "Approuvé",
     "rejected": "Rejeté",
+    "unknown": "Inconnu",
     "viewContribution": "Voir la contribution",
     "editContribution": "Modifier la contribution",
     "deleteContribution": "Supprimer la contribution",
@@ -134,7 +136,20 @@
     "maxFileSize": "Taille maximale: 5MB",
     "thanksForContribution": "Merci pour votre contribution !",
     "contributionSubmitted": "Votre contribution a été soumise avec succès et sera examinée par notre équipe.",
-    "errorSubmitting": "Erreur lors de la soumission de votre contribution. Veuillez réessayer."
+    "errorSubmitting": "Erreur lors de la soumission de votre contribution. Veuillez réessayer.",
+    "empty": "Pas encore de contributions",
+    "emptyDescription": "Soyez le premier à contribuer à notre base de données du patrimoine symbolique",
+    "create": "Créer une contribution",
+    "new": "Nouvelle contribution",
+    "loading": "Chargement des contributions...",
+    "list": "Liste des contributions",
+    "tableHeaders": {
+      "title": "Titre",
+      "submissionDate": "Date de soumission",
+      "status": "Statut",
+      "tags": "Tags",
+      "actions": "Actions"
+    }
   },
   "symbolTriptych": {
     "original": "Image originale",
@@ -303,7 +318,7 @@
         "desc": "Découvrez le contexte culturel et la signification historique"
       },
       "4": {
-        "title": "Partager",
+        "title": "Participer",
         "desc": "Contribuez au répertoire mondial de connaissances symboliques"
       }
     }
@@ -401,5 +416,27 @@
         "description": "Déploiement des algorithmes avancés pour l'identification, la comparaison et l'analyse contextuelle des motifs"
       }
     }
+  },
+  "gamification": {
+    "title": "Participez et progressez",
+    "subtitle": "Symbolica est une expérience enrichissante où chaque contribution est valorisée",
+    "badges": "Badges et récompenses",
+    "levels": "Niveaux et points",
+    "badgeTypes": {
+      "explorer": "Explorateur",
+      "scholar": "Érudit",
+      "photographer": "Photographe",
+      "curator": "Conservateur",
+      "mentor": "Mentor",
+      "detective": "Détective"
+    },
+    "pointsActivities": {
+      "photoUpload": "Upload de photo",
+      "patternAnnotation": "Annotation de motif",
+      "validatedIdentification": "Identification validée",
+      "advancedDocumentation": "Documentation avancée"
+    },
+    "badgesDescription": "Gagnez des badges spéciaux en réalisant des missions spécifiques et en contribuant régulièrement à la communauté",
+    "levelsDescription": "Progressez en niveaux en accumulant des points. Chaque niveau débloque de nouvelles fonctionnalités et privilèges"
   }
 }

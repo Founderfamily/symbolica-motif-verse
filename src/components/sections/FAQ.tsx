@@ -11,7 +11,6 @@ import { I18nText } from '@/components/ui/i18n-text';
 
 const FAQItem = ({ questionKey, answerKey }: { questionKey: string, answerKey: string }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { t } = useTranslation();
   
   return (
     <Collapsible

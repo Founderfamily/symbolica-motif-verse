@@ -106,7 +106,8 @@
     "testimonials": "What people are saying",
     "newsletter": "Stay Updated",
     "newsletterSub": "Get the latest updates on new symbols and features",
-    "subscribe": "Subscribe"
+    "subscribe": "Subscribe",
+    "openSource": "Open Source Project"
   },
   "contributions": {
     "title": "Contributions",
@@ -123,6 +124,7 @@
     "pendingReview": "Pending Review",
     "approved": "Approved",
     "rejected": "Rejected",
+    "unknown": "Unknown",
     "viewContribution": "View Contribution",
     "editContribution": "Edit Contribution",
     "deleteContribution": "Delete Contribution",
@@ -134,7 +136,20 @@
     "maxFileSize": "Max file size: 5MB",
     "thanksForContribution": "Thank you for your contribution!",
     "contributionSubmitted": "Your contribution has been successfully submitted and will be reviewed by our team.",
-    "errorSubmitting": "Error submitting your contribution. Please try again."
+    "errorSubmitting": "Error submitting your contribution. Please try again.",
+    "empty": "No contributions yet",
+    "emptyDescription": "Be the first to contribute to our symbolic heritage database",
+    "create": "Create a contribution",
+    "new": "New contribution",
+    "loading": "Loading contributions...",
+    "list": "Contributions list",
+    "tableHeaders": {
+      "title": "Title",
+      "submissionDate": "Submission Date",
+      "status": "Status",
+      "tags": "Tags",
+      "actions": "Actions"
+    }
   },
   "symbolTriptych": {
     "original": "Original Image",
@@ -303,7 +318,7 @@
         "desc": "Discover the cultural context and historical significance"
       },
       "4": {
-        "title": "Share",
+        "title": "Participate",
         "desc": "Contribute to the global repository of symbolic knowledge"
       }
     }
@@ -401,5 +416,27 @@
         "description": "Deployment of advanced algorithms for identification, comparison, and contextual analysis of patterns"
       }
     }
+  },
+  "gamification": {
+    "title": "Participate and progress",
+    "subtitle": "Symbolica is an enriching experience where every contribution is valued",
+    "badges": "Badges and rewards",
+    "levels": "Levels and points",
+    "badgeTypes": {
+      "explorer": "Explorer",
+      "scholar": "Scholar",
+      "photographer": "Photographer",
+      "curator": "Curator",
+      "mentor": "Mentor",
+      "detective": "Detective"
+    },
+    "pointsActivities": {
+      "photoUpload": "Photo upload",
+      "patternAnnotation": "Pattern annotation",
+      "validatedIdentification": "Validated identification",
+      "advancedDocumentation": "Advanced documentation"
+    },
+    "badgesDescription": "Earn special badges by completing specific missions and contributing regularly to the community",
+    "levelsDescription": "Progress through levels by accumulating points. Each level unlocks new features and privileges"
   }
 }

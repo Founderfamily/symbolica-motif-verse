@@ -1,13 +1,42 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
+import { useToast } from '@/hooks/use-toast';
 
 const NewsletterSignup = () => {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes('@')) {
+      toast({
+        title: t('common.error'),
+        description: t('common.fieldRequired'),
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      toast({
+        title: t('common.success'),
+        description: t('sections.newsletterSuccess'),
+      });
+      setEmail('');
+      setIsSubmitting(false);
+    }, 1000);
+  };
   
   return (
     <section className="py-12 px-4 md:px-8 bg-gradient-to-r from-amber-700 via-amber-800 to-amber-700 relative overflow-hidden">
@@ -27,18 +56,24 @@ const NewsletterSignup = () => {
           </p>
         </div>
         
-        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+        <form onSubmit={handleSubmit} className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
           <Input 
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder={t('header.email')} 
             className="bg-white/90 border-transparent focus:border-white focus:ring-white text-amber-900 shadow-lg"
+            required
           />
           <Button 
+            type="submit"
+            disabled={isSubmitting}
             className="bg-white text-amber-900 hover:bg-amber-100 whitespace-nowrap shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
           >
             <I18nText translationKey="sections.subscribe" />
             <Send className="h-4 w-4" />
           </Button>
-        </div>
+        </form>
       </div>
     </section>
   );
