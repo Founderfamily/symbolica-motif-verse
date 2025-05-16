@@ -5,6 +5,9 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import fr from './locales/fr.json';
 import en from './locales/en.json';
 
+// Storage key for consistent language across sessions
+const LANGUAGE_STORAGE_KEY = 'app_language';
+
 // Initialize the translation system
 i18n
   // Browser language detection
@@ -25,7 +28,7 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
-      lookupLocalStorage: 'i18nextLng'
+      lookupLocalStorage: LANGUAGE_STORAGE_KEY
     },
     load: 'languageOnly', // Strip region code (en-US -> en)
     saveMissing: process.env.NODE_ENV === 'development', // Enable capturing missing translations
@@ -34,84 +37,46 @@ i18n
         console.warn(`Missing translation key: ${key} for language: ${lng}`);
       }
     },
-    // Add more verbose logging in development
+    // Prevent keys from being used as values in production
+    returnEmptyString: false,
+    returnNull: false,
+    // More verbose logging in development
     debug: process.env.NODE_ENV === 'development'
   });
 
-// Add a global utility to check translation coverage
+// Add a language toggle helper to the window object
 if (process.env.NODE_ENV === 'development') {
-  (window as any).checkTranslations = () => {
-    const event = new CustomEvent('validate-translations');
-    window.dispatchEvent(event);
+  (window as any).i18nTools = {
+    toggleLanguage: () => {
+      const currentLang = i18n.language;
+      const newLang = currentLang === 'fr' ? 'en' : 'fr';
+      i18n.changeLanguage(newLang);
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, newLang);
+      console.log(`Language switched to: ${newLang}`);
+    },
+    
+    // Check the current language
+    getCurrentLanguage: () => {
+      console.log(`Current language: ${i18n.language}`);
+      console.log(`Stored language: ${localStorage.getItem(LANGUAGE_STORAGE_KEY)}`);
+      return i18n.language;
+    },
+    
+    // Force reload translations
+    reloadTranslations: () => {
+      const currentLang = i18n.language;
+      i18n.reloadResources().then(() => {
+        console.log(`Translations reloaded for: ${currentLang}`);
+      });
+    }
   };
   
-  // Register keyboard shortcut: Ctrl+Alt+T to check translations
+  // Add keyboard shortcut to toggle language (Ctrl+Alt+L)
   document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.altKey && e.code === 'KeyT') {
-      (window as any).checkTranslations();
+    if (e.ctrlKey && e.altKey && e.code === 'KeyL') {
+      (window as any).i18nTools.toggleLanguage();
     }
   });
-}
-
-// Add helpful developer utilities
-if (process.env.NODE_ENV === 'development') {
-  (window as any).i18nDebug = {
-    // Get all loaded translations
-    getTranslations: () => {
-      return {
-        fr: fr,
-        en: en
-      };
-    },
-    
-    // Compare keys between languages
-    compareKeys: () => {
-      const frKeys = Object.keys(flattenObject(fr));
-      const enKeys = Object.keys(flattenObject(en));
-      
-      const onlyInFr = frKeys.filter(k => !enKeys.includes(k));
-      const onlyInEn = enKeys.filter(k => !frKeys.includes(k));
-      
-      return {
-        onlyInFr,
-        onlyInEn,
-        missingInEn: onlyInFr,
-        missingInFr: onlyInEn,
-        total: {
-          fr: frKeys.length,
-          en: enKeys.length
-        }
-      };
-    },
-    
-    // Add a translation directly during development
-    addTranslation: (key: string, value: string, lang: 'fr' | 'en') => {
-      i18n.addResource(lang, 'translation', key, value);
-      console.log(`Added translation for ${key} in ${lang}`);
-    },
-    
-    // Check for unused keys (this is an approximation)
-    findUnusedKeys: () => {
-      const allKeys = [...Object.keys(flattenObject(fr)), ...Object.keys(flattenObject(en))];
-      const uniqueKeys = [...new Set(allKeys)];
-      
-      console.log(`Found ${uniqueKeys.length} unique keys in translation files`);
-      console.log('Run checkTranslations() to find missing keys in the UI');
-    }
-  };
-}
-
-// Helper function to flatten nested objects
-function flattenObject(obj: any, prefix = ''): Record<string, string> {
-  return Object.keys(obj).reduce((acc: Record<string, string>, k) => {
-    const pre = prefix.length ? `${prefix}.` : '';
-    if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
-      Object.assign(acc, flattenObject(obj[k], `${pre}${k}`));
-    } else {
-      acc[`${pre}${k}`] = obj[k];
-    }
-    return acc;
-  }, {});
 }
 
 export default i18n;

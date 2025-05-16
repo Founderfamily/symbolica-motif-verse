@@ -35,10 +35,14 @@ const FAQ = () => {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-white mb-4">
-            <I18nText translationKey="faq.title" />
+            <I18nText translationKey="faq.title">
+              Frequently Asked Questions
+            </I18nText>
           </h2>
           <p className="text-slate-300 max-w-lg mx-auto">
-            <I18nText translationKey="faq.subtitle" />
+            <I18nText translationKey="faq.subtitle">
+              Common questions about the Symbolica platform
+            </I18nText>
           </p>
         </div>
         
@@ -50,10 +54,16 @@ const FAQ = () => {
               className="bg-slate-800 rounded-lg overflow-hidden px-4"
             >
               <AccordionTrigger className="text-white py-4 hover:no-underline hover:text-amber-300 transition-colors">
-                <I18nText translationKey={faq.question} />
+                <I18nText translationKey={faq.question}>
+                  {/* Fallback text derived from key if translation is missing */}
+                  {faq.question.split('.').pop()?.replace(/([A-Z])/g, ' $1')}
+                </I18nText>
               </AccordionTrigger>
               <AccordionContent className="text-slate-300 pb-4">
-                <I18nText translationKey={faq.answer} />
+                <I18nText translationKey={faq.answer}>
+                  {/* Descriptive fallback if translation is missing */}
+                  This answer is currently only available in the default language.
+                </I18nText>
               </AccordionContent>
             </AccordionItem>
           ))}
