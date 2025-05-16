@@ -16,7 +16,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { scanSingleFile } = require('./directUsageScanner');
 
 // Check if file path is provided
 if (process.argv.length < 3) {
@@ -37,15 +36,9 @@ if (!fs.existsSync(filePath)) {
 const fileContent = fs.readFileSync(filePath, 'utf-8');
 const lines = fileContent.split('\n');
 
-// Scan for direct t() usage
-const scanResult = scanSingleFile(filePath);
-
-if (!scanResult || scanResult.lines.length === 0) {
-  console.log(`✅ No direct t() usage found in ${filePath}`);
-  process.exit(0);
-}
-
-console.log(`Found ${scanResult.lines.length} instances of direct t() usage in ${filePath}`);
+// Regular expressions for finding t() calls
+const directTCallRegex = /\{t\(['"`](.+?)['"`](?:,\s*\{.*?\})?\)\}/g;
+const attributeTCallRegex = /(\w+)=\{t\(['"`](.+?)['"`](?:,\s*\{.*?\})?\)\}/g;
 
 // Check if I18nText is already imported
 let hasI18nTextImport = fileContent.includes("I18nText");
@@ -64,96 +57,35 @@ if (!hasI18nTextImport) {
   if (lastImportIndex !== -1) {
     // Add import after the last import
     newContent.splice(lastImportIndex + 1, 0, `import { I18nText } from '@/components/ui/i18n-text';`);
-    
-    // Update line numbers for scan results (they're now shifted by 1)
-    scanResult.lines.forEach(line => {
-      if (line.lineNumber > lastImportIndex) {
-        line.lineNumber++;
-      }
-    });
   } else {
     // Add at the top if no imports found
     newContent.unshift(`import { I18nText } from '@/components/ui/i18n-text';`);
-    
-    // All line numbers are now shifted by 1
-    scanResult.lines.forEach(line => {
-      line.lineNumber++;
-    });
   }
 }
 
-// Extract keys and process replacements
-// Start from the end to avoid line number issues when making replacements
-scanResult.lines.sort((a, b) => b.lineNumber - a.lineNumber);
-
 // Apply replacements
-let replacementCount = 0;
-const attributeReplacements = [];
-const directReplacements = [];
-
-scanResult.lines.forEach(lineInfo => {
-  const lineNumber = lineInfo.lineNumber - 1; // Zero-based index
-  const originalLine = newContent[lineNumber];
+// Start from the end to avoid line number issues when making replacements
+for (let i = lines.length - 1; i >= 0; i--) {
+  const line = newContent[i];
   
-  // Try to extract the key
-  const keyMatches = originalLine.match(/t\(['"`](.+?)['"`]/g);
-  if (!keyMatches) return;
-  
-  keyMatches.forEach(keyMatch => {
-    const key = keyMatch.match(/t\(['"`](.+?)['"`]/)[1];
-    
-    // Check if this is an attribute (like placeholder={t('key')})
-    if (originalLine.match(new RegExp(`\\w+=\\{t\\(['"\`]${key}['"\`]\\)\\}`))) {
-      attributeReplacements.push({
-        lineNumber,
-        key,
-        original: originalLine
-      });
-    } else {
-      // Direct usage like {t('key')}
-      const newLine = originalLine.replace(
-        new RegExp(`\\{t\\(['"\`]${key}['"\`]\\)\\}`, 'g'),
-        `<I18nText translationKey="${key}" />`
-      );
-      
-      if (newLine !== originalLine) {
-        newContent[lineNumber] = newLine;
-        directReplacements.push({
-          lineNumber,
-          key,
-          original: originalLine,
-          replacement: newLine
-        });
-        replacementCount++;
-      }
-    }
+  // Replace direct t() calls like {t('key')}
+  let newLine = line.replace(directTCallRegex, (match, key) => {
+    return `<I18nText translationKey="${key}" />`;
   });
-});
+  
+  // Handle attribute t() calls like placeholder={t('key')}
+  // This is more complex and often requires manual intervention
+  if (newLine.match(attributeTCallRegex)) {
+    // Add a comment to alert about manual review needed
+    newContent[i] = newLine;
+    newContent.splice(i, 0, `{/* TODO: Review this line for attribute t() usage conversion to I18nText */}`);
+  } else if (newLine !== line) {
+    newContent[i] = newLine;
+  }
+}
 
 // Write the updated content
 fs.writeFileSync(filePath, newContent.join('\n'), 'utf-8');
 
-console.log(`✅ Converted ${replacementCount} direct t() calls to I18nText components.`);
-
-if (attributeReplacements.length > 0) {
-  console.log(`\n⚠️ Found ${attributeReplacements.length} attribute usages that need manual conversion:`);
-  attributeReplacements.forEach(attr => {
-    console.log(`\nLine ${attr.lineNumber + 1}: ${attr.original.trim()}`);
-    console.log(`Key: ${attr.key}`);
-    console.log(`Suggested fix:`);
-    console.log(`const ${attr.key.replace(/\./g, '_')} = t('${attr.key}');`);
-    console.log(`// Then update the attribute to use this variable`);
-  });
-  
-  console.log(`\nPlease update attribute usages manually.`);
-}
-
-if (replacementCount > 0 || attributeReplacements.length > 0) {
-  console.log(`\n⚠️ Manual review is strongly recommended after conversion.`);
-}
-
-console.log(`\nNext steps:`);
-console.log(`1. Review the changes in ${filePath}`);
-console.log(`2. Manually handle any attribute usages`);
-console.log(`3. Run the scanner again to check for any remaining issues:`);
-console.log(`   node src/i18n/directUsageScanner.js ${filePath}`);
+console.log(`✅ Converted direct t() calls to I18nText components in ${filePath}`);
+console.log(`   Please review the file manually for any attribute t() usages that need further changes.`);

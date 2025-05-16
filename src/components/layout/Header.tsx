@@ -32,7 +32,7 @@ const Header = () => {
   const menuItems = [
     { text: 'header.home', route: '/' },
     { text: 'header.explore', route: '/explore' },
-    { text: 'header.map', route: '/map' }, // Add this line
+    { text: 'header.map', route: '/map' },
     { text: 'header.about', route: '/about' },
     { text: 'header.contribute', route: '/contributions' },
   ];
