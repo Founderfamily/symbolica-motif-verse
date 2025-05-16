@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapPin } from 'lucide-react';
 import { 
   HoverCard, 
@@ -24,8 +24,12 @@ const MapSymbolMarker = ({ id, name, culture, lat, lng, onClick }: MapSymbolMark
   const { user } = useAuth();
   const [isActive, setIsActive] = useState(false);
   const [hasBeenExplored, setHasBeenExplored] = useState(false);
+  const markerRef = useRef<HTMLDivElement>(null);
   
-  const handleClick = async () => {
+  const handleClick = async (e: React.MouseEvent) => {
+    // Prevent event bubbling to map
+    e.stopPropagation();
+    
     // Set active state for animation
     setIsActive(true);
     
@@ -57,6 +61,7 @@ const MapSymbolMarker = ({ id, name, culture, lat, lng, onClick }: MapSymbolMark
   
   return (
     <div 
+      ref={markerRef}
       className={`absolute w-6 h-6 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 
         ${isActive ? 'scale-125' : 'hover:scale-110'} 
         ${hasBeenExplored ? 'z-20' : 'z-10'}`}
@@ -68,7 +73,7 @@ const MapSymbolMarker = ({ id, name, culture, lat, lng, onClick }: MapSymbolMark
       onClick={handleClick}
     >
       <HoverCard>
-        <HoverCardTrigger>
+        <HoverCardTrigger asChild>
           <div className="relative">
             <MapPin 
               className={`h-6 w-6 ${hasBeenExplored ? 'text-green-500 hover:text-green-600' : 'text-amber-600 hover:text-amber-700'} 
