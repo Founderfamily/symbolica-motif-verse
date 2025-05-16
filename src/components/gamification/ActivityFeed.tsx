@@ -48,12 +48,18 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, loading = false
     switch (activity.activity_type) {
       case 'contribution':
         return details.title 
-          ? <I18nText translationKey="gamification.activity.contribution" params={{ title: details.title }} />
+          ? <I18nText 
+              translationKey="gamification.activity.contribution" 
+              params={{ title: details.title }} 
+            />
           : <I18nText translationKey="gamification.activity.genericContribution" />;
           
       case 'exploration':
         return details.symbolName
-          ? <I18nText translationKey="gamification.activity.exploredSymbol" params={{ name: details.symbolName }} />
+          ? <I18nText 
+              translationKey="gamification.activity.exploredSymbol" 
+              params={{ name: details.symbolName }} 
+            />
           : <I18nText translationKey="gamification.activity.genericExploration" />;
           
       case 'comment':

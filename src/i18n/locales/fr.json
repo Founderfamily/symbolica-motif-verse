@@ -1,3 +1,4 @@
+
 {
   "common": {
     "viewMore": "Voir plus",
@@ -159,6 +160,22 @@
       "status": "Statut",
       "tags": "Tags",
       "actions": "Actions"
+    },
+    "map": {
+      "placeholder": "Carte Interactive Bientôt Disponible",
+      "placeholderSub": "Nous travaillons sur l'intégration d'une carte pour une sélection précise de localisation",
+      "search": "Rechercher un lieu...",
+      "searchButton": "Rechercher"
+    },
+    "image": {
+      "errors": {
+        "format": "Format de fichier invalide. Seules les images sont acceptées.",
+        "size": "Le fichier est trop volumineux. La taille maximale est de 5MB."
+      },
+      "dropActive": "Déposez l'image ici...",
+      "drop": "Déposez votre image ici ou cliquez pour parcourir",
+      "formats": "Formats acceptés : JPEG, PNG, WebP",
+      "remove": "Supprimer l'image"
     }
   },
   "symbolTriptych": {
@@ -441,12 +458,10 @@
     "listViewComingSoon": "La vue en liste arrive bientôt !",
     "popularRegions": "Régions populaires"
   },
-
   "map": {
     "placeholder": "Carte Interactive Bientôt Disponible",
     "comingSoon": "Nous travaillons sur une carte interactive pour explorer les symboles à travers le monde"
   },
-
   "gamification": {
     "title": "Gagnez des Récompenses pour vos Contributions",
     "subtitle": "Rejoignez notre communauté et gagnez des points, des badges et de la reconnaissance pour vos contributions au monde des symboles",
