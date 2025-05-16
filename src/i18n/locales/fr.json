@@ -180,6 +180,97 @@
   "app": {
     "version": "Version 0.1.0"
   },
+  "about": {
+    "title": "À propos du Musée Symbolica",
+    "subtitle": "Préservation et exploration de notre patrimoine symbolique mondial",
+    "mission": {
+      "title": "Notre Mission",
+      "description1": "Au Musée Symbolica, nous nous consacrons à préserver et à mettre en valeur la riche tapisserie d'expressions symboliques à travers toutes les cultures humaines.",
+      "description2": "Grâce à des efforts collaboratifs, nous visons à documenter, analyser et célébrer le langage visuel qui nous relie à travers le temps et la géographie."
+    },
+    "vision": {
+      "title": "Notre Vision",
+      "description": "Nous envisageons un monde où les motifs culturels sont préservés, compris et continuellement source d'inspiration pour de nouvelles créations.",
+      "value1": "Préservation du patrimoine culturel par la documentation numérique",
+      "value2": "Compréhension interculturelle à travers le symbolisme visuel",
+      "value3": "Démocratisation de l'accès au savoir symbolique"
+    },
+    "analysisProcess": {
+      "title": "Notre Processus d'Analyse",
+      "subtitle": "Comment nous transformons les artefacts culturels en motifs symboliques catalogués"
+    },
+    "team": {
+      "title": "Rencontrez Notre Équipe",
+      "member1": {
+        "name": "Sarah Johnson",
+        "role": "Fondatrice & Anthropologue Culturelle",
+        "bio": "Avec plus de 15 ans en anthropologie culturelle, Sarah a fondé Symbolica pour préserver les traditions symboliques en danger."
+      },
+      "member2": {
+        "name": "David Chen",
+        "role": "Directeur Technique",
+        "bio": "David dirige nos efforts techniques, développant des systèmes d'IA qui aident à identifier et à classifier les motifs symboliques."
+      },
+      "member3": {
+        "name": "Maria Rodriguez",
+        "role": "Directrice de la Communauté",
+        "bio": "Maria établit des partenariats avec des institutions culturelles et coordonne notre communauté mondiale de contributeurs."
+      }
+    }
+  },
+  "uploadTools": {
+    "title": "Outils de Téléchargement & Analyse",
+    "subtitle": "Contribuez à notre base de données croissante de symboles",
+    "capture": "Capturer & Télécharger",
+    "analyze": "Analyse Automatisée",
+    "share": "Partager & Collaborer",
+    "process": {
+      "original": "Image d'Artefact Original",
+      "detection": "Détection de Motifs",
+      "extraction": "Extraction de Motifs",
+      "classification": "Classification par IA",
+      "result": "Résultat du Traitement",
+      "example": "Notre système identifie les motifs récurrents, les extrait et les compare à notre base de données."
+    }
+  },
+  "features": {
+    "tagline": "Découvrez Nos Fonctionnalités",
+    "title": "Outils pour l'Exploration des Symboles",
+    "mapping": {
+      "title": "Cartographie Mondiale",
+      "description": "Visualisez les connexions symboliques à travers les cultures et les époques grâce à notre interface cartographique interactive."
+    },
+    "identification": {
+      "title": "Identification des Symboles",
+      "description": "Téléchargez des images pour identifier des symboles et découvrir leur contexte culturel, leur histoire et leur signification."
+    },
+    "documentation": {
+      "title": "Documentation Collaborative",
+      "description": "Contribuez à notre base de données en ajoutant des symboles, leur contexte historique et leur signification culturelle."
+    }
+  },
+  "howItWorks": {
+    "process": "Notre Processus",
+    "intro": "De la découverte à la numérisation, nous rendons le patrimoine symbolique accessible",
+    "steps": {
+      "1": {
+        "title": "Capturer",
+        "desc": "Téléchargez des images de motifs provenant d'artefacts, d'architecture ou de textiles"
+      },
+      "2": {
+        "title": "Identifier",
+        "desc": "Notre IA aide à identifier le motif et à trouver des exemples similaires"
+      },
+      "3": {
+        "title": "Explorer",
+        "desc": "Découvrez le contexte culturel et la signification historique"
+      },
+      "4": {
+        "title": "Partager",
+        "desc": "Contribuez au répertoire mondial de connaissances symboliques"
+      }
+    }
+  },
   "community": {
     "title": "Rejoignez une communauté mondiale d'amateurs de symboles",
     "description": "Connectez-vous avec des passionnés de symboles culturels et de patrimoine du monde entier.",
