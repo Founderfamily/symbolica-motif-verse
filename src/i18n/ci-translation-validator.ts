@@ -6,14 +6,14 @@
  * It will exit with a non-zero code if issues are found, failing the build.
  */
 
-import translationValidator from './translationValidator';
+import translationValidatorService from './validators/translationValidatorService';
 import { validateKeyFormat } from './translationKeyConventions';
 
 // Run validation and collect results
 const validateForCI = () => {
   console.log('🔍 Running translation validation in CI mode...');
   
-  const report = translationValidator.validateAll();
+  const report = translationValidatorService.validateAll();
   let exitCode = 0;
   
   // Report missing keys (critical issue)
