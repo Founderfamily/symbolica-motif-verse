@@ -1,4 +1,4 @@
-
+#!/usr/bin/env node
 // Node.js script to validate translations
 // Run with: node validateTranslations.js
 

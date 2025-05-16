@@ -1,4 +1,3 @@
-
 #!/usr/bin/env node
 
 import { diagnoseTranslations, generateFixReport } from './translationUtils';
