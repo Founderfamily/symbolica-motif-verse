@@ -14,6 +14,13 @@ import LanguageDebugger from './i18n/LanguageDebugger';
 import { AuthProvider } from './hooks/useAuth';
 import Auth from './pages/Auth';
 
+// Import admin components
+import AdminLayout from './pages/Admin/AdminLayout';
+import Dashboard from './pages/Admin/Dashboard';
+import ContentManagement from './pages/Admin/ContentManagement';
+import SymbolsManagement from './pages/Admin/SymbolsManagement';
+import ContributionsManagement from './pages/Admin/ContributionsManagement';
+
 const App = () => {
   return (
     <AuthProvider>
@@ -26,6 +33,15 @@ const App = () => {
           <Route path="/contributions" element={<ContributionsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/auth" element={<Auth />} />
+          
+          {/* Admin routes with AdminLayout wrapper */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="content" element={<ContentManagement />} />
+            <Route path="symbols" element={<SymbolsManagement />} />
+            <Route path="contributions" element={<ContributionsManagement />} />
+          </Route>
+          
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Layout>
