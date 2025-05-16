@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { I18nText } from '@/components/ui/i18n-text';
 
 interface ActivityFeedProps {
   activities: UserActivity[];
@@ -47,19 +48,19 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, loading = false
     switch (activity.activity_type) {
       case 'contribution':
         return details.title 
-          ? t('gamification.activity.contribution', { title: details.title })
-          : t('gamification.activity.genericContribution');
+          ? <I18nText translationKey="gamification.activity.contribution" params={{ title: details.title }} />
+          : <I18nText translationKey="gamification.activity.genericContribution" />;
           
       case 'exploration':
         return details.symbolName
-          ? t('gamification.activity.exploredSymbol', { name: details.symbolName })
-          : t('gamification.activity.genericExploration');
+          ? <I18nText translationKey="gamification.activity.exploredSymbol" params={{ name: details.symbolName }} />
+          : <I18nText translationKey="gamification.activity.genericExploration" />;
           
       case 'comment':
-        return t('gamification.activity.comment');
+        return <I18nText translationKey="gamification.activity.comment" />;
         
       default:
-        return t('gamification.activity.generic');
+        return <I18nText translationKey="gamification.activity.generic" />;
     }
   };
   
@@ -74,7 +75,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, loading = false
   if (activities.length === 0) {
     return (
       <div className="text-center py-4 text-slate-500">
-        <p>{t('gamification.noActivity')}</p>
+        <I18nText translationKey="gamification.noActivity" />
       </div>
     );
   }
@@ -98,7 +99,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, loading = false
                 </span>
                 
                 <Badge variant="secondary" className="ml-auto">
-                  +{activity.points_earned} {t('gamification.points')}
+                  +{activity.points_earned} <I18nText translationKey="gamification.points" />
                 </Badge>
               </div>
             </div>

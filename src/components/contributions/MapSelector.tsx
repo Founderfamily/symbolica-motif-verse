@@ -31,14 +31,12 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
         
         // Pour un prototype, on va simuler une carte avec une interface simple
         const mapElement = mapRef.current;
-        const placeholderText = t('contributions.map.placeholder');
-        const placeholderSubText = t('contributions.map.placeholderSub');
         
         mapElement.innerHTML = `
           <div class="w-full h-[200px] bg-slate-100 rounded-md flex items-center justify-center">
             <div class="text-center p-4">
-              <p class="text-sm text-slate-500 mb-2">${placeholderText}</p>
-              <p class="text-xs text-slate-400">${placeholderSubText}</p>
+              <p class="text-sm text-slate-500 mb-2" data-i18n-key="contributions.map.placeholder"></p>
+              <p class="text-xs text-slate-400" data-i18n-key="contributions.map.placeholderSub"></p>
             </div>
           </div>
         `;
@@ -66,7 +64,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ onLocationSelected, initialLo
     onLocationSelected(simulatedLatitude, simulatedLongitude, searchQuery);
   };
 
-  // Get translated strings
+  // Get translated search placeholder
   const searchPlaceholder = t('contributions.map.search');
 
   return (

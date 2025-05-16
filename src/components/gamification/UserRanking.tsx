@@ -78,14 +78,14 @@ const UserRanking: React.FC<UserRankingProps> = ({
                 </div>
                 
                 <div className="text-amber-600 font-semibold">
-                  {user.points} {t('gamification.points')}
+                  {user.points} <I18nText translationKey="gamification.points" />
                 </div>
               </li>
             ))}
           </ul>
         ) : (
           <div className="py-8 text-center text-slate-500">
-            <p>{t('gamification.noRankingsYet')}</p>
+            <I18nText translationKey="gamification.noRankingsYet" />
           </div>
         )}
       </div>

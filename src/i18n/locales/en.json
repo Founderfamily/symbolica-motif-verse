@@ -1,3 +1,4 @@
+
 {
   "common": {
     "viewMore": "View more",
@@ -589,6 +590,16 @@
     "noAchievements": "No achievements available yet",
     "points": "points",
     "earnedAt": "Earned on",
-    "seeMoreAchievements": "See more achievements"
+    "seeMoreAchievements": "See more achievements",
+    "noActivity": "No recent activity",
+    "noRankingsYet": "No rankings available yet",
+    "activity": {
+      "contribution": "Contributed {{title}}",
+      "genericContribution": "Made a contribution",
+      "exploredSymbol": "Explored symbol {{name}}",
+      "genericExploration": "Explored a symbol",
+      "comment": "Commented on a contribution",
+      "generic": "Performed an activity"
+    }
   }
 }

@@ -470,6 +470,16 @@
     "noAchievements": "Pas d'achievements disponibles pour le moment",
     "points": "points",
     "earnedAt": "Obtenu le",
-    "seeMoreAchievements": "Voir plus d'achievements"
+    "seeMoreAchievements": "Voir plus d'achievements",
+    "noActivity": "Aucune activité récente",
+    "noRankingsYet": "Pas encore de classement disponible",
+    "activity": {
+      "contribution": "A contribué {{title}}",
+      "genericContribution": "A fait une contribution",
+      "exploredSymbol": "A exploré le symbole {{name}}",
+      "genericExploration": "A exploré un symbole",
+      "comment": "A commenté une contribution",
+      "generic": "A effectué une activité"
+    }
   }
 }
