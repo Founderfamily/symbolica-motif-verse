@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +42,16 @@ const SymbolExplorer: React.FC = () => {
   
   // Create translated filter values from symbols data
   const translatedFilters = useMemo(() => {
-    if (!symbols) return {};
+    if (!symbols) {
+      // Initialize with the correct structure even when symbols is not loaded yet
+      return {
+        cultures: {},
+        periods: {},
+        medium: {},
+        technique: {},
+        function: {}
+      } as Record<FilterCategory, Record<string, string>>;
+    }
     
     const result: Record<FilterCategory, Record<string, string>> = {
       cultures: {},
