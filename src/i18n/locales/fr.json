@@ -1,4 +1,3 @@
-
 {
   "common": {
     "viewMore": "Voir plus",
@@ -78,7 +77,9 @@
   "sections": {
     "museumPortal": "Musée Symbolica",
     "communityPortal": "Portail collaboratif du patrimoine symbolique",
-    "joinCommunity": "Rejoindre une communauté"
+    "joinCommunity": "Rejoindre une communauté",
+    "partners": "Nos Partenaires",
+    "contactUs": "Nous Contacter"
   },
   "contributions": {
     "title": "Contributions",
@@ -162,5 +163,19 @@
     "totalUsers": "Utilisateurs totaux",
     "recentActivity": "Activité récente",
     "newSymbol": "Nouveau symbole"
+  },
+  "callToAction": {
+    "joinUs": "Rejoignez notre communauté mondiale d'amateurs de patrimoine",
+    "description": "Aidez-nous à préserver et à célébrer les symboles culturels du monde entier par la documentation collaborative et le partage.",
+    "join": "Rejoindre la communauté",
+    "explore": "Explorer les symboles",
+    "support": "Vos contributions aident à préserver le patrimoine symbolique mondial pour les générations futures."
+  },
+  "hero": {
+    "community": "Rejoignez une communauté d'amateurs de culture",
+    "explore": "Commencer l'exploration"
+  },
+  "app": {
+    "version": "Version 0.1.0"
   }
 }

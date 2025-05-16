@@ -1,4 +1,3 @@
-
 {
   "common": {
     "viewMore": "View more",
@@ -78,7 +77,9 @@
   "sections": {
     "museumPortal": "Symbolica Museum",
     "communityPortal": "Collaborative symbolic heritage portal",
-    "joinCommunity": "Join a community"
+    "joinCommunity": "Join a community",
+    "partners": "Our Partners",
+    "contactUs": "Contact Us"
   },
   "contributions": {
     "title": "Contributions",
@@ -162,5 +163,19 @@
     "totalUsers": "Total Users",
     "recentActivity": "Recent Activity",
     "newSymbol": "New Symbol"
+  },
+  "callToAction": {
+    "joinUs": "Join our global community of heritage enthusiasts",
+    "description": "Help us preserve and celebrate cultural symbols from around the world through collaborative documentation and sharing.",
+    "join": "Join the community",
+    "explore": "Explore symbols",
+    "support": "Your contributions help preserve global symbolic heritage for future generations."
+  },
+  "hero": {
+    "community": "Join a community of cultural enthusiasts",
+    "explore": "Start exploring"
+  },
+  "app": {
+    "version": "Version 0.1.0"
   }
 }
