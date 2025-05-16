@@ -1,4 +1,3 @@
-
 import { Json } from '@/integrations/supabase/types';
 
 // Custom type definitions for Supabase data
@@ -10,12 +9,18 @@ export interface SymbolData {
   description: string | null;
   created_at: string | null;
   updated_at: string | null;
+  medium?: string[] | null;
+  technique?: string[] | null;
+  function?: string[] | null;
   translations?: {
     [language: string]: {
       name: string;
       culture: string;
       period: string;
       description?: string;
+      medium?: string[];
+      technique?: string[];
+      function?: string[];
     };
   } | null;
 }

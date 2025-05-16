@@ -578,9 +578,12 @@ export type Database = {
           created_at: string | null
           culture: string
           description: string | null
+          function: string[] | null
           id: string
+          medium: string[] | null
           name: string
           period: string
+          technique: string[] | null
           translations: Json | null
           updated_at: string | null
         }
@@ -588,9 +591,12 @@ export type Database = {
           created_at?: string | null
           culture: string
           description?: string | null
+          function?: string[] | null
           id?: string
+          medium?: string[] | null
           name: string
           period: string
+          technique?: string[] | null
           translations?: Json | null
           updated_at?: string | null
         }
@@ -598,9 +604,12 @@ export type Database = {
           created_at?: string | null
           culture?: string
           description?: string | null
+          function?: string[] | null
           id?: string
+          medium?: string[] | null
           name?: string
           period?: string
+          technique?: string[] | null
           translations?: Json | null
           updated_at?: string | null
         }
