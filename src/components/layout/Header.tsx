@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import OpenSourceBadge from '@/components/ui/open-source-badge';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import LanguageSelector from '@/components/ui/language-selector';
 
 const Header = () => {
   const { i18n } = useTranslation();
@@ -60,6 +61,7 @@ const Header = () => {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
+          <LanguageSelector />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -100,7 +102,8 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-2">
+          <LanguageSelector />
           <Button variant="outline" onClick={toggleMenu}>
             <I18nText translationKey={isMenuOpen ? 'header.close' : 'header.menu'} />
           </Button>
