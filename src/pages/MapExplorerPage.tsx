@@ -1,7 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import InteractiveMap from '@/components/map/InteractiveMap';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
@@ -78,10 +75,8 @@ const MapExplorer = () => {
   const hasActiveFilters = selectedFilters.regions.length > 0 || selectedFilters.verified || searchQuery;
   
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <Header />
-      
-      <main className="flex-grow p-4 md:p-8">
+    <div className="min-h-screen bg-slate-50">
+      <main className="p-4 md:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -298,8 +293,6 @@ const MapExplorer = () => {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 };
