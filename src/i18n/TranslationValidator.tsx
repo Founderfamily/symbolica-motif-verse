@@ -13,6 +13,13 @@ interface MissingTranslation {
   element?: HTMLElement;
 }
 
+// Add interface for the React DevTools global hook
+declare global {
+  interface Window {
+    __REACT_DEVTOOLS_GLOBAL_HOOK__?: any;
+  }
+}
+
 export const TranslationValidator = () => {
   const { i18n } = useTranslation();
   const [showPanel, setShowPanel] = useState(false);

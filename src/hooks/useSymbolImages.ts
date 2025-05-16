@@ -86,6 +86,8 @@ export const useSymbolImages = (symbolId: string | null) => {
     symbol,
     images,
     imageErrors,
-    handleImageError
+    handleImageError,
+    // Add the data property for backward compatibility
+    data: imagesData => imagesData?.find(img => img.image_type === 'pattern') || imagesData?.[0] || null
   };
 };

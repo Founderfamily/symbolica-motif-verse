@@ -41,9 +41,9 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ symbol }) => {
   const { toast } = useToast();
   
   // Get symbol image - we'll try to use the pattern image first
-  const { data: symbolImages } = useSymbolImages(symbol.id);
-  const patternImage = symbolImages?.find(img => img.image_type === 'pattern');
-  const originalImage = symbolImages?.find(img => img.image_type === 'original');
+  const { images, imageErrors } = useSymbolImages(symbol.id);
+  const patternImage = images?.pattern;
+  const originalImage = images?.original;
   
   // Fallback image paths
   const PLACEHOLDER = "/placeholder.svg";
