@@ -20,6 +20,7 @@ import Dashboard from './pages/Admin/Dashboard';
 import ContentManagement from './pages/Admin/ContentManagement';
 import SymbolsManagement from './pages/Admin/SymbolsManagement';
 import ContributionsManagement from './pages/Admin/ContributionsManagement';
+import SymbolEditor from './pages/Admin/SymbolEditor'; // Import the SymbolEditor component
 
 const App = () => {
   return (
@@ -39,6 +40,7 @@ const App = () => {
             <Route index element={<Dashboard />} />
             <Route path="content" element={<ContentManagement />} />
             <Route path="symbols" element={<SymbolsManagement />} />
+            <Route path="symbols/:id" element={<SymbolEditor />} /> {/* Add route for SymbolEditor */}
             <Route path="contributions" element={<ContributionsManagement />} />
           </Route>
           
