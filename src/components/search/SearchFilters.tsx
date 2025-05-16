@@ -53,10 +53,9 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     return (
       <AccordionItem key={category} value={category}>
         <AccordionTrigger className="text-sm font-medium">
-          <I18nText 
-            translationKey={filterTranslations[category]} 
-            fallback={filterDisplayNames[category]} 
-          />
+          <I18nText translationKey={filterTranslations[category]}>
+            {filterDisplayNames[category]}
+          </I18nText>
         </AccordionTrigger>
         <AccordionContent>
           <ScrollArea className="h-48 pr-4">
