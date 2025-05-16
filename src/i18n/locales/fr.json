@@ -1,3 +1,4 @@
+
 {
   "common": {
     "viewMore": "Voir plus",
@@ -240,6 +241,8 @@
     "support": "Vos contributions aident à préserver le patrimoine symbolique mondial pour les générations futures."
   },
   "hero": {
+    "heading": "Découvrez le patrimoine symbolique mondial",
+    "subheading": "Explorez, contribuez et apprenez sur les motifs culturels à travers les âges",
     "community": "Rejoignez une communauté d'amateurs de culture",
     "explore": "Commencer l'exploration"
   },

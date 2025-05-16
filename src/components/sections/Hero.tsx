@@ -7,17 +7,22 @@ import { ContentSection, getContentSectionByKey } from '@/services/contentServic
 import { I18nText } from '@/components/ui/i18n-text';
 
 const Hero = () => {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const [heroContent, setHeroContent] = useState<ContentSection | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   
   useEffect(() => {
     const fetchHeroContent = async () => {
+      setLoading(true);
+      setError(null);
+      
       try {
         const content = await getContentSectionByKey('hero');
         setHeroContent(content);
       } catch (error) {
         console.error('Error fetching hero content:', error);
+        setError(error as Error);
       } finally {
         setLoading(false);
       }
@@ -43,20 +48,31 @@ const Hero = () => {
             <I18nText translationKey="app.version" />
           </div>
         </div>
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
-          {heroContent?.title?.[lang] ? (
-            heroContent.title[lang]
-          ) : (
-            <I18nText translationKey="hero.heading" />
-          )}
-        </h1>
-        <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
-          {heroContent?.subtitle?.[lang] ? (
-            heroContent.subtitle[lang]
-          ) : (
-            <I18nText translationKey="hero.subheading" />
-          )}
-        </p>
+
+        {loading ? (
+          <div className="space-y-4">
+            <div className="h-12 w-3/4 mx-auto bg-slate-200 animate-pulse rounded"></div>
+            <div className="h-6 w-2/3 mx-auto bg-slate-200 animate-pulse rounded"></div>
+          </div>
+        ) : error ? (
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
+              <I18nText translationKey="hero.heading" />
+            </h1>
+            <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
+              <I18nText translationKey="hero.subheading" />
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
+              {heroContent?.title?.[lang] || <I18nText translationKey="hero.heading" />}
+            </h1>
+            <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
+              {heroContent?.subtitle?.[lang] || <I18nText translationKey="hero.subheading" />}
+            </p>
+          </div>
+        )}
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
           <Button size="lg" className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-lg shadow-amber-600/20 transform hover:-translate-y-1 transition-all">
