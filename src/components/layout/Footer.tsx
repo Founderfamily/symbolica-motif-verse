@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
-import { FAQ } from '@/components/sections/FAQ';
+import FAQ from '@/components/sections/FAQ'; // Fixed import - using default import
 
 const Footer = () => {
   const { t } = useTranslation();
