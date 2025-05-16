@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '@/components/auth/AuthForm';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 
 const Auth: React.FC = () => {
   const { t } = useTranslation();
@@ -21,7 +22,7 @@ const Auth: React.FC = () => {
           Symbolica
         </h1>
         <p className="text-slate-600 mb-8">
-          {t('auth.intro')}
+          <I18nText translationKey="auth.intro" />
         </p>
         <AuthForm />
       </div>

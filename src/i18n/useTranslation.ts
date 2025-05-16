@@ -14,6 +14,8 @@ export const useTranslation = () => {
       // Check key format against our conventions
       if (!validateKeyFormat(key)) {
         console.warn(`⚠️ Translation key '${key}' doesn't follow the established format conventions.`);
+        console.warn(`   Expected format: namespace.section.element[.qualifier]`);
+        console.warn(`   See TRANSLATION_STYLE_GUIDE.md for details.`);
       }
       
       validateTranslationKey(key);
@@ -24,6 +26,12 @@ export const useTranslation = () => {
         console.warn(`⚠️ Possible missing translation for key: '${key}'`);
         // Detect similar keys that might be typos
         suggestSimilarKeys(key);
+        
+        // Warn about direct t() usage
+        if (new Error().stack?.includes('.tsx') || new Error().stack?.includes('.jsx')) {
+          console.warn(`⚠️ IMPORTANT: Direct t() usage detected for '${key}'! Use <I18nText> component instead.`);
+          console.warn(`   Replace: {t('${key}')} with: <I18nText translationKey="${key}" />`);
+        }
       }
     }
     
@@ -51,6 +59,9 @@ export const useTranslation = () => {
     
     // Highlight all missing translations on the page
     highlightAllMissingTranslations();
+    
+    // New: Generate statistics about direct t() usage vs I18nText
+    generateUsageStatistics();
   };
   
   // Scan the current page and highlight all elements with missing translations
@@ -89,8 +100,69 @@ export const useTranslation = () => {
     console.warn(`⚠️ Direct t() usage detected. Consider using the I18nText component instead.`);
     console.log(`Example: <I18nText translationKey="your.key" /> instead of {t('your.key')}`);
     
-    // This is a simplified check - a more thorough implementation would
-    // need to scan the DOM or component tree for t() usage patterns
+    // New: Examine the stack to find the offending component
+    try {
+      const stack = new Error().stack;
+      if (stack) {
+        // Extract the filename and line number from the stack trace
+        const matches = stack.match(/at\s+([^\s]+)\s+\((.+?):(\d+):(\d+)\)/);
+        if (matches && matches.length >= 4) {
+          const [, fnName, filename, line, column] = matches;
+          console.warn(`   Location: ${filename}:${line}:${column}`);
+          console.warn(`   Function: ${fnName}`);
+        }
+      }
+    } catch (e) {
+      // Silently fail for this debugging feature
+    }
+  };
+  
+  // New: Generate statistics about I18nText usage vs direct t() calls
+  const generateUsageStatistics = () => {
+    if (process.env.NODE_ENV !== 'development') return;
+    
+    try {
+      console.group('📊 Translation Usage Statistics');
+      
+      // Count I18nText components
+      const i18nTextElements = document.querySelectorAll('[data-i18n-key]');
+      console.log(`✅ I18nText components: ${i18nTextElements.length}`);
+      
+      // Try to detect potential direct t() calls by scanning text nodes
+      // This is an approximation and may not catch all cases
+      const textNodes = [];
+      const walk = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+      
+      let potentialDirectUsage = 0;
+      let node;
+      while ((node = walk.nextNode())) {
+        const text = node.textContent?.trim();
+        if (text && text.includes('.') && !text.includes(' ') && text.length > 3) {
+          // This might be a translation key directly used
+          if (i18n.exists(text)) {
+            potentialDirectUsage++;
+          }
+        }
+      }
+      
+      if (potentialDirectUsage > 0) {
+        console.warn(`⚠️ Potential direct t() usage: ~${potentialDirectUsage} instances`);
+      } else {
+        console.log('✅ No obvious direct t() usage detected');
+      }
+      
+      console.log('📊 Coverage: ' + 
+        Math.round((i18nTextElements.length / (i18nTextElements.length + potentialDirectUsage)) * 100) + 
+        '% using I18nText');
+        
+      console.groupEnd();
+    } catch (e) {
+      console.error('Error generating translation statistics', e);
+    }
   };
   
   return { 
@@ -100,7 +172,9 @@ export const useTranslation = () => {
     i18n,
     validateCurrentPageTranslations,
     highlightAllMissingTranslations,
-    checkDirectTUsage
+    checkDirectTUsage,
+    // New export
+    generateUsageStatistics
   };
 };
 

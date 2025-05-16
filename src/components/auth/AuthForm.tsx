@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from '@/i18n/useTranslation';
 import { UserProfile } from '@/types/auth';
+import { I18nText } from '@/components/ui/i18n-text';
 
 // Validation schema for login
 const loginSchema = z.object({
@@ -85,14 +86,20 @@ export default function AuthForm() {
     <div className="w-full max-w-md mx-auto">
       <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
-          <TabsTrigger value="register">{t('auth.register')}</TabsTrigger>
+          <TabsTrigger value="login">
+            <I18nText translationKey="auth.buttons.login" />
+          </TabsTrigger>
+          <TabsTrigger value="register">
+            <I18nText translationKey="auth.buttons.register" />
+          </TabsTrigger>
         </TabsList>
         
         {/* Login Form */}
         <TabsContent value="login">
           <div className="p-6 border rounded-lg shadow-sm">
-            <h3 className="text-xl font-semibold mb-4">{t('auth.loginTitle')}</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              <I18nText translationKey="auth.titles.login" />
+            </h3>
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                 <FormField
@@ -100,7 +107,9 @@ export default function AuthForm() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.email')}</FormLabel>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.email" />
+                      </FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="example@mail.com" {...field} />
                       </FormControl>
@@ -113,7 +122,9 @@ export default function AuthForm() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.password')}</FormLabel>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.password" />
+                      </FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -125,7 +136,10 @@ export default function AuthForm() {
                   <div className="text-red-500 text-sm">{authError}</div>
                 )}
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? t('auth.loggingIn') : t('auth.login')}
+                  {isLoading ? 
+                    <I18nText translationKey="auth.buttons.loggingIn" /> : 
+                    <I18nText translationKey="auth.buttons.login" />
+                  }
                 </Button>
               </form>
             </Form>
@@ -135,7 +149,9 @@ export default function AuthForm() {
         {/* Register Form */}
         <TabsContent value="register">
           <div className="p-6 border rounded-lg shadow-sm">
-            <h3 className="text-xl font-semibold mb-4">{t('auth.registerTitle')}</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              <I18nText translationKey="auth.titles.register" />
+            </h3>
             <Form {...registerForm}>
               <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
                 <FormField
@@ -143,7 +159,9 @@ export default function AuthForm() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.email')}</FormLabel>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.email" />
+                      </FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="example@mail.com" {...field} />
                       </FormControl>
@@ -156,7 +174,9 @@ export default function AuthForm() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.username')}</FormLabel>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.username" />
+                      </FormLabel>
                       <FormControl>
                         <Input type="text" {...field} />
                       </FormControl>
@@ -169,7 +189,9 @@ export default function AuthForm() {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.fullName')}</FormLabel>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.fullName" />
+                      </FormLabel>
                       <FormControl>
                         <Input type="text" {...field} />
                       </FormControl>
@@ -182,7 +204,9 @@ export default function AuthForm() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.password')}</FormLabel>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.password" />
+                      </FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -195,7 +219,9 @@ export default function AuthForm() {
                   name="passwordConfirm"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.confirmPassword')}</FormLabel>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.confirmPassword" />
+                      </FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -207,7 +233,10 @@ export default function AuthForm() {
                   <div className="text-red-500 text-sm">{authError}</div>
                 )}
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? t('auth.creating') : t('auth.register')}
+                  {isLoading ? 
+                    <I18nText translationKey="auth.buttons.creating" /> : 
+                    <I18nText translationKey="auth.buttons.register" />
+                  }
                 </Button>
               </form>
             </Form>
