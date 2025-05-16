@@ -38,6 +38,13 @@
     "contributions": "Contributions",
     "symbols": "Symboles"
   },
+  "header": {
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "profile": "Profil",
+    "admin": "Admin",
+    "email": "Email"
+  },
   "auth": {
     "login": "Connexion",
     "register": "Inscription",
@@ -66,7 +73,20 @@
   "footer": {
     "rights": "Tous droits réservés",
     "terms": "Conditions d'utilisation",
-    "privacy": "Politique de confidentialité"
+    "privacy": "Politique de confidentialité",
+    "tagline": "Préserver et célébrer le patrimoine symbolique mondial",
+    "platform": "Plateforme",
+    "home": "Accueil",
+    "explore": "Explorer",
+    "contribute": "Contribuer",
+    "about": "À propos",
+    "community": "Communauté",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "legal": "Mentions légales",
+    "license": "Licence",
+    "copyright": "© 2025 Musée Symbolica"
   },
   "homepage": {
     "title": "Découvrez le patrimoine symbolique mondial",
@@ -81,7 +101,12 @@
     "joinCommunity": "Rejoindre une communauté",
     "partners": "Nos Partenaires",
     "contactUs": "Nous Contacter",
-    "community": "Communauté"
+    "community": "Communauté",
+    "roadmap": "Notre Feuille de Route",
+    "testimonials": "Ce que les gens en disent",
+    "newsletter": "Restez Informé",
+    "newsletterSub": "Recevez les dernières mises à jour sur les nouveaux symboles et fonctionnalités",
+    "subscribe": "S'abonner"
   },
   "contributions": {
     "title": "Contributions",
@@ -178,6 +203,7 @@
     "explore": "Commencer l'exploration"
   },
   "app": {
+    "name": "Symbolica",
     "version": "Version 0.1.0"
   },
   "about": {
@@ -221,10 +247,21 @@
   "uploadTools": {
     "title": "Outils de Téléchargement & Analyse",
     "subtitle": "Contribuez à notre base de données croissante de symboles",
-    "capture": "Capturer & Télécharger",
-    "analyze": "Analyse Automatisée",
-    "share": "Partager & Collaborer",
+    "capture": {
+      "title": "Capturer & Télécharger",
+      "desc": "Prenez des photos de motifs d'artefacts, d'architecture ou de textiles et téléchargez-les directement sur notre plateforme"
+    },
+    "analyze": {
+      "title": "Analyse Automatisée",
+      "desc": "Notre système d'IA examine vos soumissions pour identifier les motifs, les associer à notre base de données et suggérer des contextes culturels"
+    },
+    "share": {
+      "title": "Partager & Collaborer",
+      "desc": "Une fois analysées, vos contributions deviennent partie intégrante de notre référentiel mondial et peuvent être étudiées par la communauté"
+    },
     "process": {
+      "title": "Processus d'Analyse",
+      "subtitle": "Découvrez comment nous transformons les artefacts en motifs catalogués",
       "original": "Image d'Artefact Original",
       "detection": "Détection de Motifs",
       "extraction": "Extraction de Motifs",
@@ -309,6 +346,59 @@
       "intuitiveNavigation": {
         "title": "Découverte Avancée",
         "description": "Explorez les connexions entre les symboles à travers les cultures et les époques grâce à notre navigation intuitive."
+      }
+    }
+  },
+  "testimonials": {
+    "subtitle": "Ce que disent les membres de notre communauté",
+    "fallback": {
+      "name": "Jean Dupont",
+      "role": "Passionné de Patrimoine",
+      "quote": "Symbolica a transformé ma façon d'explorer les motifs et symboles culturels. La communauté est incroyablement savante et solidaire."
+    }
+  },
+  "faq": {
+    "title": "Questions Fréquemment Posées",
+    "questions": {
+      "whatIs": {
+        "question": "Qu'est-ce que Symbolica exactement ?",
+        "answer": "Symbolica est une plateforme collaborative open-source dédiée à la découverte, l'analyse et la création autour des symboles et motifs culturels du monde entier."
+      },
+      "howContribute": {
+        "question": "Comment puis-je contribuer à Symbolica ?",
+        "answer": "Vous pouvez contribuer en téléchargeant vos photos de motifs, en annotant des images existantes, en enrichissant la base de connaissances ou en participant aux défis communautaires."
+      },
+      "rights": {
+        "question": "Les contenus de Symbolica sont-ils libres de droits ?",
+        "answer": "Les contenus de Symbolica sont généralement sous licence Creative Commons. Les détails précis varient selon le type de contribution, mais nous favorisons l'open data et le partage des connaissances."
+      },
+      "aiRecognition": {
+        "question": "Comment fonctionne la reconnaissance IA de motifs ?",
+        "answer": "Notre système d'intelligence artificielle analyse les images téléchargées pour identifier des motifs connus. Il s'améliore constamment grâce aux retours des utilisateurs qui valident ou corrigent ses suggestions."
+      },
+      "commercial": {
+        "question": "Symbolica est-il un projet commercial ?",
+        "answer": "Non, Symbolica est un projet à but non lucratif porté par une association. Notre mission est culturelle et éducative, dans l'esprit des communs numériques."
+      }
+    }
+  },
+  "roadmap": {
+    "subtitle": "Symbolica se construit progressivement avec votre participation",
+    "fallback": {
+      "phase0": {
+        "phase": "Phase 0 - Terminée",
+        "title": "Conception et recherche",
+        "description": "Définition du projet, études préliminaires et identification des besoins des communautés de passionnés"
+      },
+      "phase1": {
+        "phase": "Phase 1 - En cours",
+        "title": "Plateforme communautaire",
+        "description": "Lancement des outils de base permettant le partage, l'analyse et la documentation collaborative des symboles patrimoniaux"
+      },
+      "phase2": {
+        "phase": "Phase 2 - À venir",
+        "title": "Intelligence culturelle",
+        "description": "Déploiement des algorithmes avancés pour l'identification, la comparaison et l'analyse contextuelle des motifs"
       }
     }
   }

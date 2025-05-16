@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 
 const NewsletterSignup = () => {
   const { t } = useTranslation();
@@ -18,8 +19,12 @@ const NewsletterSignup = () => {
       
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
         <div className="text-white">
-          <h2 className="text-2xl font-bold mb-2">{t('sections.newsletter')}</h2>
-          <p className="text-amber-100">{t('sections.newsletterSub')}</p>
+          <h2 className="text-2xl font-bold mb-2">
+            <I18nText translationKey="sections.newsletter" />
+          </h2>
+          <p className="text-amber-100">
+            <I18nText translationKey="sections.newsletterSub" />
+          </p>
         </div>
         
         <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
@@ -30,7 +35,7 @@ const NewsletterSignup = () => {
           <Button 
             className="bg-white text-amber-900 hover:bg-amber-100 whitespace-nowrap shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
           >
-            {t('sections.subscribe')}
+            <I18nText translationKey="sections.subscribe" />
             <Send className="h-4 w-4" />
           </Button>
         </div>

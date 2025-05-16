@@ -6,9 +6,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 
-const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
+const FAQItem = ({ questionKey, answerKey }: { questionKey: string, answerKey: string }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { t } = useTranslation();
   
   return (
     <Collapsible
@@ -17,7 +20,9 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
       className="border-b border-slate-200 py-4"
     >
       <CollapsibleTrigger className="flex w-full items-center justify-between text-left">
-        <h3 className="text-lg font-medium">{question}</h3>
+        <h3 className="text-lg font-medium">
+          <I18nText translationKey={questionKey} />
+        </h3>
         <ChevronDown
           className={`h-5 w-5 text-slate-500 transition-transform ${
             isOpen ? "rotate-180" : ""
@@ -25,44 +30,54 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
         />
       </CollapsibleTrigger>
       <CollapsibleContent className="pt-2 pb-1">
-        <p className="text-slate-600">{answer}</p>
+        <p className="text-slate-600">
+          <I18nText translationKey={answerKey} />
+        </p>
       </CollapsibleContent>
     </Collapsible>
   );
 };
 
 const FAQ = () => {
-  const faqs = [
+  const { t } = useTranslation();
+  
+  const faqItems = [
     {
-      question: "Qu'est-ce que Symbolica exactement ?",
-      answer: "Symbolica est une plateforme collaborative open-source dédiée à la découverte, l'analyse et la création autour des symboles et motifs culturels du monde entier."
+      questionKey: "faq.questions.whatIs.question",
+      answerKey: "faq.questions.whatIs.answer"
     },
     {
-      question: "Comment puis-je contribuer à Symbolica ?",
-      answer: "Vous pouvez contribuer en téléchargeant vos photos de motifs, en annotant des images existantes, en enrichissant la base de connaissances ou en participant aux défis communautaires."
+      questionKey: "faq.questions.howContribute.question",
+      answerKey: "faq.questions.howContribute.answer"
     },
     {
-      question: "Les contenus de Symbolica sont-ils libres de droits ?",
-      answer: "Les contenus de Symbolica sont généralement sous licence Creative Commons. Les détails précis varient selon le type de contribution, mais nous favorisons l'open data et le partage des connaissances."
+      questionKey: "faq.questions.rights.question",
+      answerKey: "faq.questions.rights.answer"
     },
     {
-      question: "Comment fonctionne la reconnaissance IA de motifs ?",
-      answer: "Notre système d'intelligence artificielle analyse les images téléchargées pour identifier des motifs connus. Il s'améliore constamment grâce aux retours des utilisateurs qui valident ou corrigent ses suggestions."
+      questionKey: "faq.questions.aiRecognition.question",
+      answerKey: "faq.questions.aiRecognition.answer"
     },
     {
-      question: "Symbolica est-il un projet commercial ?",
-      answer: "Non, Symbolica est un projet à but non lucratif porté par une association. Notre mission est culturelle et éducative, dans l'esprit des communs numériques."
+      questionKey: "faq.questions.commercial.question",
+      answerKey: "faq.questions.commercial.answer"
     }
   ];
 
   return (
     <section className="py-16 px-4 md:px-8 bg-slate-50">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold mb-10 text-center">Questions fréquentes</h2>
+        <h2 className="text-3xl font-bold mb-10 text-center">
+          <I18nText translationKey="faq.title" />
+        </h2>
         
         <div>
-          {faqs.map((faq, index) => (
-            <FAQItem key={index} question={faq.question} answer={faq.answer} />
+          {faqItems.map((item, index) => (
+            <FAQItem 
+              key={index} 
+              questionKey={item.questionKey} 
+              answerKey={item.answerKey} 
+            />
           ))}
         </div>
       </div>

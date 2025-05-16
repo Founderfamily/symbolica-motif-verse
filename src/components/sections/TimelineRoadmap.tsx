@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/i18n/useTranslation';
 import { RoadmapItem, getRoadmapItems } from '@/services/roadmapService';
+import { I18nText } from '@/components/ui/i18n-text';
 
 const TimelineItem = ({ 
   phase, 
@@ -17,6 +18,8 @@ const TimelineItem = ({
   isCurrent?: boolean;
   isCompleted?: boolean;
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className={`relative pl-8 ${isCurrent ? "" : "opacity-80"}`}>
       <div className={`absolute left-0 top-0 w-4 h-4 rounded-full ${
@@ -25,8 +28,8 @@ const TimelineItem = ({
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="text-lg font-semibold">{title}</h3>
-          {isCurrent && <Badge className="bg-slate-700">En cours</Badge>}
-          {isCompleted && <Badge className="bg-green-600">Terminée</Badge>}
+          {isCurrent && <Badge className="bg-slate-700">{t('roadmap.inProgress')}</Badge>}
+          {isCompleted && <Badge className="bg-green-600">{t('roadmap.completed')}</Badge>}
         </div>
         <p className="text-sm text-slate-500 mb-1">{phase}</p>
         <p className="text-slate-600">{description}</p>
@@ -61,9 +64,11 @@ const TimelineRoadmap = () => {
   return (
     <section className="py-16 px-4 md:px-8 bg-white">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4 text-center">{t('sections.roadmap')}</h2>
+        <h2 className="text-3xl font-bold mb-4 text-center">
+          <I18nText translationKey="sections.roadmap" />
+        </h2>
         <p className="text-center text-slate-600 mb-10">
-          Symbolica se construit progressivement avec votre participation
+          <I18nText translationKey="roadmap.subtitle" />
         </p>
         
         <div className="relative">
@@ -96,23 +101,23 @@ const TimelineRoadmap = () => {
             // Fallback if no roadmap items are available
             <>
               <TimelineItem 
-                phase="Phase 0 - Terminée"
-                title="Conception et recherche" 
-                description="Définition du projet, études préliminaires et identification des besoins des communautés de passionnés"
+                phase={t('roadmap.fallback.phase0.phase')}
+                title={t('roadmap.fallback.phase0.title')}
+                description={t('roadmap.fallback.phase0.description')}
                 isCompleted={true}
               />
               
               <TimelineItem 
-                phase="Phase 1 - En cours"
-                title="Plateforme communautaire" 
-                description="Lancement des outils de base permettant le partage, l'analyse et la documentation collaborative des symboles patrimoniaux"
+                phase={t('roadmap.fallback.phase1.phase')}
+                title={t('roadmap.fallback.phase1.title')} 
+                description={t('roadmap.fallback.phase1.description')}
                 isCurrent={true}
               />
               
               <TimelineItem 
-                phase="Phase 2 - À venir"
-                title="Intelligence culturelle" 
-                description="Déploiement des algorithmes avancés pour l'identification, la comparaison et l'analyse contextuelle des motifs"
+                phase={t('roadmap.fallback.phase2.phase')}
+                title={t('roadmap.fallback.phase2.title')}
+                description={t('roadmap.fallback.phase2.description')}
               />
             </>
           )}
