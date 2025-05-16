@@ -1,4 +1,3 @@
-
 {
   "common": {
     "viewMore": "Voir plus",
@@ -426,6 +425,8 @@
   },
   "roadmap": {
     "subtitle": "Symbolica se construit progressivement avec votre participation",
+    "inProgress": "En cours",
+    "completed": "Terminé",
     "fallback": {
       "phase0": {
         "phase": "Phase 0 - Terminée",

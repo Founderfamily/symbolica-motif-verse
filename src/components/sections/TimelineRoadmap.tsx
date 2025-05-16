@@ -18,8 +18,6 @@ const TimelineItem = ({
   isCurrent?: boolean;
   isCompleted?: boolean;
 }) => {
-  const { t } = useTranslation();
-  
   return (
     <div className={`relative pl-8 ${isCurrent ? "" : "opacity-80"}`}>
       <div className={`absolute left-0 top-0 w-4 h-4 rounded-full ${
@@ -28,8 +26,8 @@ const TimelineItem = ({
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="text-lg font-semibold">{title}</h3>
-          {isCurrent && <Badge className="bg-slate-700">{t('roadmap.inProgress')}</Badge>}
-          {isCompleted && <Badge className="bg-green-600">{t('roadmap.completed')}</Badge>}
+          {isCurrent && <Badge className="bg-slate-700"><I18nText translationKey="roadmap.inProgress" /></Badge>}
+          {isCompleted && <Badge className="bg-green-600"><I18nText translationKey="roadmap.completed" /></Badge>}
         </div>
         <p className="text-sm text-slate-500 mb-1">{phase}</p>
         <p className="text-slate-600">{description}</p>

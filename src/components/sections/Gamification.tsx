@@ -17,8 +17,6 @@ const GamificationItem = ({
   descriptionKey: string;
   points?: number;
 }) => {
-  const { t } = useTranslation();
-  
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-amber-100 hover:shadow-lg transition-all hover:border-amber-200">
       <div className="bg-amber-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
@@ -33,7 +31,9 @@ const GamificationItem = ({
       {points !== undefined && (
         <div className="flex items-center text-amber-700 font-medium">
           <Star className="h-4 w-4 mr-1 fill-amber-500 stroke-amber-700" />
-          <span>{points} {t('gamification.points')}</span>
+          <span>
+            {points} <I18nText translationKey="gamification.points" />
+          </span>
         </div>
       )}
     </div>
