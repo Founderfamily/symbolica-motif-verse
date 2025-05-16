@@ -74,7 +74,7 @@ const SymbolExplorer: React.FC = () => {
   
   return (
     <div className="container mx-auto p-4 pt-12 pb-20">
-      {/* Visual separator between header and content */}
+      {/* Enhanced visual separator between header and content */}
       <Separator className="mb-8 mt-2" />
       
       <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
