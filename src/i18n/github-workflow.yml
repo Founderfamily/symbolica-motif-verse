@@ -1,0 +1,54 @@
+
+name: Translation Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/i18n/**'
+      - 'src/components/**/*.tsx'
+      - 'src/pages/**/*.tsx'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/i18n/**'
+      - 'src/components/**/*.tsx'
+      - 'src/pages/**/*.tsx'
+
+jobs:
+  validate-translations:
+    name: Validate Translations
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Check for missing translations
+        run: node src/i18n/check-translation-completeness.js
+      
+      - name: Scan for direct t() usage
+        run: |
+          # Install ts-node to run TypeScript files
+          npm install -g ts-node
+          # Run the scanner
+          node -r ts-node/register src/i18n/directUsageScanner.ts src
+      
+      - name: Generate translation report
+        if: always()
+        run: node src/i18n/check-translation-completeness.js --report=translation-report.md
+      
+      - name: Upload translation report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: translation-report
+          path: translation-report.md
