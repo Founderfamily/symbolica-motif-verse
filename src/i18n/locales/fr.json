@@ -1,3 +1,4 @@
+
 {
   "common": {
     "viewMore": "Voir plus",
@@ -79,7 +80,8 @@
     "communityPortal": "Portail collaboratif du patrimoine symbolique",
     "joinCommunity": "Rejoindre une communauté",
     "partners": "Nos Partenaires",
-    "contactUs": "Nous Contacter"
+    "contactUs": "Nous Contacter",
+    "community": "Communauté"
   },
   "contributions": {
     "title": "Contributions",
@@ -177,5 +179,46 @@
   },
   "app": {
     "version": "Version 0.1.0"
+  },
+  "community": {
+    "title": "Rejoignez une communauté mondiale d'amateurs de symboles",
+    "description": "Connectez-vous avec des passionnés de symboles culturels et de patrimoine du monde entier.",
+    "stats": {
+      "members": "membres",
+      "discoveries": "découvertes",
+      "join": "Rejoindre"
+    },
+    "groups": {
+      "artDeco": {
+        "name": "Motifs Art Déco",
+        "culture": "Mondial"
+      },
+      "celticSymbolism": {
+        "name": "Symbolisme Celtique",
+        "culture": "Celtique"
+      },
+      "japanesePatterns": {
+        "name": "Motifs Japonais",
+        "culture": "Japonais"
+      },
+      "islamicArt": {
+        "name": "Motifs d'Art Islamique",
+        "culture": "Islamique" 
+      }
+    },
+    "features": {
+      "thematicCommunities": {
+        "title": "Communautés Thématiques",
+        "description": "Rejoignez des communautés spécialisées axées sur des traditions symboliques, des régions ou des périodes spécifiques."
+      },
+      "personalSpace": {
+        "title": "Collections Personnelles",
+        "description": "Créez et organisez votre propre bibliothèque de motifs symboliques qui vous inspirent."
+      },
+      "intuitiveNavigation": {
+        "title": "Découverte Avancée",
+        "description": "Explorez les connexions entre les symboles à travers les cultures et les époques grâce à notre navigation intuitive."
+      }
+    }
   }
 }

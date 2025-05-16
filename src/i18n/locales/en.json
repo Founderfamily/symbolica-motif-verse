@@ -1,3 +1,4 @@
+
 {
   "common": {
     "viewMore": "View more",
@@ -79,7 +80,8 @@
     "communityPortal": "Collaborative symbolic heritage portal",
     "joinCommunity": "Join a community",
     "partners": "Our Partners",
-    "contactUs": "Contact Us"
+    "contactUs": "Contact Us",
+    "community": "Community"
   },
   "contributions": {
     "title": "Contributions",
@@ -177,5 +179,46 @@
   },
   "app": {
     "version": "Version 0.1.0"
+  },
+  "community": {
+    "title": "Join a Global Community of Symbol Enthusiasts",
+    "description": "Connect with people passionate about cultural symbols and heritage from around the world.",
+    "stats": {
+      "members": "members",
+      "discoveries": "discoveries",
+      "join": "Join"
+    },
+    "groups": {
+      "artDeco": {
+        "name": "Art Deco Patterns",
+        "culture": "Global"
+      },
+      "celticSymbolism": {
+        "name": "Celtic Symbolism",
+        "culture": "Celtic"
+      },
+      "japanesePatterns": {
+        "name": "Japanese Patterns",
+        "culture": "Japanese"
+      },
+      "islamicArt": {
+        "name": "Islamic Art Patterns",
+        "culture": "Islamic" 
+      }
+    },
+    "features": {
+      "thematicCommunities": {
+        "title": "Thematic Communities",
+        "description": "Join specialized communities focused on particular symbol traditions, regions, or time periods."
+      },
+      "personalSpace": {
+        "title": "Personal Collections",
+        "description": "Build and organize your own library of symbolic patterns that resonate with you."
+      },
+      "intuitiveNavigation": {
+        "title": "Advanced Discovery",
+        "description": "Explore connections between symbols across cultures and time periods with our intuitive navigation."
+      }
+    }
   }
 }
