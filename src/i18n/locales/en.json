@@ -1,38 +1,10 @@
 
 {
-  "app": {
-    "name": "Symbolica"
-  },
-  "header": {
-    "home": "Home",
-    "explore": "Explore",
-    "map": "Map",
-    "about": "About",
-    "contribute": "Contribute",
-    "close": "Close",
-    "menu": "Menu"
-  },
   "searchFilters": {
     "cultures": "Cultures",
     "periods": "Periods",
     "medium": "Medium / Support",
     "technique": "Technique",
     "function": "Symbolic Function"
-  },
-  "symbolExplorer": {
-    "title": "Symbol Explorer",
-    "description": "Explore our collection of cultural symbols, patterns and motifs",
-    "gridView": "Grid",
-    "listView": "List",
-    "mapView": "Map",
-    "filters": "Filters",
-    "clearFilters": "Clear all",
-    "searchPlaceholder": "Search symbols...",
-    "activeFilters": "Active Filters",
-    "noFilters": "No active filters",
-    "resultsCount": "{{count}} symbols found",
-    "noResults": "No symbols match your filter criteria",
-    "mapViewComingSoon": "Interactive map view coming soon",
-    "mapViewDescription": "Explore symbols based on their geographical origin and distribution"
   }
 }

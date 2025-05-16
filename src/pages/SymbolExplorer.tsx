@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SymbolData } from '@/types/supabase';
@@ -17,7 +17,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { FilterCategory, FilterOptions } from '@/types/filters';
 
 const SymbolExplorer: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<FilterOptions>({
     cultures: [],
@@ -41,47 +41,110 @@ const SymbolExplorer: React.FC = () => {
     }
   });
   
+  // Create translated filter values from symbols data
+  const translatedFilters = useMemo(() => {
+    if (!symbols) return {};
+    
+    const result: Record<FilterCategory, Record<string, string>> = {
+      cultures: {},
+      periods: {},
+      medium: {},
+      technique: {},
+      function: {},
+    };
+    
+    symbols.forEach(symbol => {
+      // Get translations or fallback to original values
+      const translations = symbol.translations || {};
+      const langData = translations[currentLanguage];
+      
+      // Handle culture translations
+      if (symbol.culture) {
+        const translatedCulture = langData?.culture || symbol.culture;
+        result.cultures[symbol.culture] = translatedCulture;
+      }
+      
+      // Handle period translations
+      if (symbol.period) {
+        const translatedPeriod = langData?.period || symbol.period;
+        result.periods[symbol.period] = translatedPeriod;
+      }
+      
+      // Handle medium translations (array)
+      symbol.medium?.forEach(m => {
+        const translatedMedium = langData?.medium?.find(tm => tm === m) || m;
+        result.medium[m] = translatedMedium;
+      });
+      
+      // Handle technique translations (array)
+      symbol.technique?.forEach(t => {
+        const translatedTechnique = langData?.technique?.find(tt => tt === t) || t;
+        result.technique[t] = translatedTechnique;
+      });
+      
+      // Handle function translations (array)
+      symbol.function?.forEach(f => {
+        const translatedFunction = langData?.function?.find(tf => tf === f) || f;
+        result.function[f] = translatedFunction;
+      });
+    });
+    
+    return result;
+  }, [symbols, currentLanguage]);
+  
   // Extract unique filter values for each category
-  const availableFilters: FilterOptions = {
+  const availableFilters: FilterOptions = useMemo(() => ({
     cultures: [...new Set(symbols?.map(s => s.culture) || [])],
     periods: [...new Set(symbols?.map(s => s.period) || [])],
     medium: [...new Set(symbols?.flatMap(s => s.medium || []) || [])],
     technique: [...new Set(symbols?.flatMap(s => s.technique || []) || [])],
     function: [...new Set(symbols?.flatMap(s => s.function || []) || [])],
-  };
+  }), [symbols]);
   
   // Filter symbols based on search term and filters
-  const filteredSymbols = symbols?.filter(symbol => {
-    // Text search
-    const matchesSearch = searchTerm === '' || 
-      symbol.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      symbol.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      symbol.culture.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      symbol.period.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredSymbols = useMemo(() => {
+    return symbols?.filter(symbol => {
+      // Get translations for current language
+      const translations = symbol.translations || {};
+      const langData = translations[currentLanguage];
       
-    // Filter by culture
-    const matchesCulture = filters.cultures.length === 0 || 
-      filters.cultures.includes(symbol.culture);
+      // Get translated values or original values as fallback
+      const symbolName = langData?.name || symbol.name;
+      const symbolDesc = langData?.description || symbol.description;
+      const symbolCulture = langData?.culture || symbol.culture;
+      const symbolPeriod = langData?.period || symbol.period;
       
-    // Filter by period
-    const matchesPeriod = filters.periods.length === 0 || 
-      filters.periods.includes(symbol.period);
+      // Text search using translated values when available
+      const matchesSearch = searchTerm === '' || 
+        symbolName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (symbolDesc?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+        symbolCulture.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        symbolPeriod.toLowerCase().includes(searchTerm.toLowerCase());
+        
+      // Filter by culture
+      const matchesCulture = filters.cultures.length === 0 || 
+        filters.cultures.includes(symbol.culture);
+        
+      // Filter by period
+      const matchesPeriod = filters.periods.length === 0 || 
+        filters.periods.includes(symbol.period);
+        
+      // Filter by medium
+      const matchesMedium = filters.medium.length === 0 ||
+        filters.medium.some(m => symbol.medium?.includes(m));
       
-    // Filter by medium
-    const matchesMedium = filters.medium.length === 0 ||
-      filters.medium.some(m => symbol.medium?.includes(m));
-    
-    // Filter by technique
-    const matchesTechnique = filters.technique.length === 0 ||
-      filters.technique.some(t => symbol.technique?.includes(t));
-    
-    // Filter by function
-    const matchesFunction = filters.function.length === 0 ||
-      filters.function.some(f => symbol.function?.includes(f));
+      // Filter by technique
+      const matchesTechnique = filters.technique.length === 0 ||
+        filters.technique.some(t => symbol.technique?.includes(t));
       
-    return matchesSearch && matchesCulture && matchesPeriod && 
-           matchesMedium && matchesTechnique && matchesFunction;
-  });
+      // Filter by function
+      const matchesFunction = filters.function.length === 0 ||
+        filters.function.some(f => symbol.function?.includes(f));
+        
+      return matchesSearch && matchesCulture && matchesPeriod && 
+             matchesMedium && matchesTechnique && matchesFunction;
+    });
+  }, [symbols, searchTerm, filters, currentLanguage]);
   
   // Handle filter changes
   const handleFilterChange = (type: FilterCategory, value: string[]) => {
@@ -177,6 +240,7 @@ const SymbolExplorer: React.FC = () => {
               availableFilters={availableFilters}
               selectedFilters={filters}
               onFilterChange={handleFilterChange}
+              translatedFilters={translatedFilters}
             />
           </Card>
           
@@ -189,31 +253,38 @@ const SymbolExplorer: React.FC = () => {
             
             <div className="flex flex-wrap gap-2">
               {Object.entries(filters).map(([category, values]) => 
-                values.map(value => (
-                  <Badge 
-                    key={`${category}-${value}`} 
-                    variant="secondary" 
-                    className="flex gap-1"
-                  >
-                    <span className="text-xs text-slate-500 mr-1">
-                      {category === 'cultures' ? 'Culture' : 
-                       category === 'periods' ? 'Period' :
-                       category === 'medium' ? 'Medium' :
-                       category === 'technique' ? 'Technique' :
-                       category === 'function' ? 'Function' : ''}:
-                    </span>
-                    {value}
-                    <button 
-                      onClick={() => handleFilterChange(
-                        category as FilterCategory, 
-                        filters[category as FilterCategory].filter(v => v !== value)
-                      )}
-                      className="ml-1 text-xs"
+                values.map(value => {
+                  // Get translated filter display value
+                  const translatedValue = translatedFilters?.[category as FilterCategory]?.[value] || value;
+                  
+                  return (
+                    <Badge 
+                      key={`${category}-${value}`} 
+                      variant="secondary" 
+                      className="flex gap-1"
                     >
-                      ×
-                    </button>
-                  </Badge>
-                ))
+                      <span className="text-xs text-slate-500 mr-1">
+                        <I18nText translationKey={`searchFilters.${category}`}>
+                          {category === 'cultures' ? 'Culture' : 
+                           category === 'periods' ? 'Period' :
+                           category === 'medium' ? 'Medium' :
+                           category === 'technique' ? 'Technique' :
+                           category === 'function' ? 'Function' : ''}:
+                        </I18nText>
+                      </span>
+                      {translatedValue}
+                      <button 
+                        onClick={() => handleFilterChange(
+                          category as FilterCategory, 
+                          filters[category as FilterCategory].filter(v => v !== value)
+                        )}
+                        className="ml-1 text-xs"
+                      >
+                        ×
+                      </button>
+                    </Badge>
+                  );
+                })
               )}
               
               {!hasActiveFilters && (
@@ -252,21 +323,31 @@ const SymbolExplorer: React.FC = () => {
                 <TabsContent value="list" className="m-0">
                   <Card className="p-4">
                     <div className="space-y-4">
-                      {filteredSymbols?.map(symbol => (
-                        <div key={symbol.id} className="flex items-center gap-4 p-2 border-b last:border-0">
-                          <div className="w-16 h-16 bg-amber-100 rounded-lg"></div>
-                          <div>
-                            <h3 className="font-medium">{symbol.name}</h3>
-                            <div className="flex gap-2 mt-1">
-                              <span className="text-xs text-slate-600">{symbol.culture}</span>
-                              <span className="text-xs text-slate-500">{symbol.period}</span>
+                      {filteredSymbols?.map(symbol => {
+                        // Use translations if available
+                        const translations = symbol.translations || {};
+                        const langData = translations[currentLanguage];
+                        const displayName = langData?.name || symbol.name;
+                        const displayCulture = langData?.culture || symbol.culture;
+                        const displayPeriod = langData?.period || symbol.period;
+                        const displayDescription = langData?.description || symbol.description;
+                        
+                        return (
+                          <div key={symbol.id} className="flex items-center gap-4 p-2 border-b last:border-0">
+                            <div className="w-16 h-16 bg-amber-100 rounded-lg"></div>
+                            <div>
+                              <h3 className="font-medium">{displayName}</h3>
+                              <div className="flex gap-2 mt-1">
+                                <span className="text-xs text-slate-600">{displayCulture}</span>
+                                <span className="text-xs text-slate-500">{displayPeriod}</span>
+                              </div>
+                              {displayDescription && (
+                                <p className="text-sm text-slate-700 mt-1 line-clamp-2">{displayDescription}</p>
+                              )}
                             </div>
-                            {symbol.description && (
-                              <p className="text-sm text-slate-700 mt-1 line-clamp-2">{symbol.description}</p>
-                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       
                       {(filteredSymbols?.length || 0) === 0 && (
                         <div className="py-8 text-center text-slate-500">

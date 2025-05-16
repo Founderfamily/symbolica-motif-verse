@@ -5,12 +5,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { I18nText } from '@/components/ui/i18n-text';
+import { useTranslation } from '@/i18n/useTranslation';
 import { FilterCategory, FilterOptions } from '@/types/filters';
 
 interface SearchFiltersProps {
   availableFilters: FilterOptions;
   selectedFilters: FilterOptions;
   onFilterChange: (type: FilterCategory, values: string[]) => void;
+  // New prop for translated values
+  translatedFilters?: Record<FilterCategory, Record<string, string>>;
 }
 
 // Translation keys for filter categories
@@ -35,7 +38,10 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   availableFilters,
   selectedFilters,
   onFilterChange,
+  translatedFilters = {}
 }) => {
+  const { currentLanguage } = useTranslation();
+  
   // Handle checkbox changes for any filter category
   const handleFilterChange = (category: FilterCategory, value: string, checked: boolean) => {
     if (checked) {
@@ -43,6 +49,16 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     } else {
       onFilterChange(category, selectedFilters[category].filter(v => v !== value));
     }
+  };
+
+  // Get translated value if available, otherwise use original
+  const getTranslatedValue = (category: FilterCategory, value: string): string => {
+    if (translatedFilters && 
+        translatedFilters[category] && 
+        translatedFilters[category][value]) {
+      return translatedFilters[category][value];
+    }
+    return value;
   };
 
   // Generate accordion items for each filter category
@@ -71,7 +87,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                     htmlFor={`${category}-${value}`}
                     className="text-sm cursor-pointer"
                   >
-                    {value}
+                    {getTranslatedValue(category, value)}
                   </Label>
                 </div>
               ))}
