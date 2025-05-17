@@ -140,6 +140,5 @@ export const switchLanguage = (lang: 'fr' | 'en') => {
 declare global {
   interface Window {
     i18next: any;
-    i18n?: any;
   }
 }

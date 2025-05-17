@@ -159,6 +159,7 @@
     }
   },
   "features": {
+    "tagline": "Discover Our Features",
     "title": "Platform Features",
     "description": "Discover the tools and features that make Symbolica unique",
     "catalog": {
@@ -176,6 +177,18 @@
     "community": {
       "title": "Community Contributions",
       "description": "Join a global community preserving cultural heritage through symbols."
+    },
+    "mapping": {
+      "title": "Global Mapping",
+      "description": "Visualize symbolic connections across cultures and time periods through our interactive map interface."
+    },
+    "identification": {
+      "title": "Symbol Identification",
+      "description": "Upload images to identify symbols and discover their cultural context, history, and meaning."
+    },
+    "documentation": {
+      "title": "Collaborative Documentation",
+      "description": "Contribute to our database by adding symbols, their historical context, and cultural significance."
     }
   },
   "discover": {
@@ -198,18 +211,80 @@
     "contributors": "Active Contributors",
     "submissions": "Symbol Submissions",
     "discussions": "Active Discussions",
-    "join": "Join Now"
+    "join": "Join Now",
+    "description": "Connect with enthusiasts of cultural symbols and heritage from around the world.",
+    "stats": {
+      "members": "members",
+      "discoveries": "discoveries",
+      "join": "Join"
+    },
+    "groups": {
+      "artDeco": {
+        "name": "Art Deco Patterns",
+        "culture": "Global"
+      },
+      "celticSymbolism": {
+        "name": "Celtic Symbolism",
+        "culture": "Celtic"
+      },
+      "japanesePatterns": {
+        "name": "Japanese Patterns",
+        "culture": "Japanese"
+      },
+      "islamicArt": {
+        "name": "Islamic Art Patterns",
+        "culture": "Islamic"
+      }
+    },
+    "features": {
+      "thematicCommunities": {
+        "title": "Thematic Communities",
+        "description": "Join specialized communities focused on specific symbolic traditions, regions, or time periods."
+      },
+      "personalSpace": {
+        "title": "Personal Collections",
+        "description": "Create and organize your own library of symbolic patterns that inspire you."
+      },
+      "intuitiveNavigation": {
+        "title": "Advanced Discovery",
+        "description": "Explore connections between symbols across cultures and time periods through our intuitive navigation."
+      }
+    }
   },
   "testimonials": {
     "title": "What Users Say",
-    "subtitle": "Hear from our community of researchers, artists, and cultural enthusiasts."
+    "subtitle": "Hear from our community of researchers, artists, and cultural enthusiasts.",
+    "fallback": {
+      "name": "John Smith",
+      "role": "Heritage Enthusiast",
+      "quote": "Symbolica has transformed how I explore and learn about cultural patterns and symbols. The community is incredibly knowledgeable and supportive."
+    }
   },
   "roadmap": {
     "title": "Project Roadmap",
     "subtitle": "Our vision for the future of Symbolica",
     "current": "Current Phase",
     "next": "Next Up",
-    "future": "Future Plans"
+    "future": "Future Plans",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "fallback": {
+      "phase0": {
+        "phase": "Phase 0 - Completed",
+        "title": "Design and research",
+        "description": "Project definition, preliminary studies, and identification of enthusiast community needs"
+      },
+      "phase1": {
+        "phase": "Phase 1 - In Progress",
+        "title": "Community platform",
+        "description": "Launch of basic tools for sharing, analyzing, and collaboratively documenting heritage symbols"
+      },
+      "phase2": {
+        "phase": "Phase 2 - Upcoming",
+        "title": "Cultural intelligence",
+        "description": "Deployment of advanced algorithms for identification, comparison, and contextual analysis of patterns"
+      }
+    }
   },
   "partners": {
     "title": "Our Partners",
@@ -245,5 +320,181 @@
     "success": "Thank you for subscribing!",
     "error": "Something went wrong. Please try again.",
     "privacy": "We respect your privacy. No spam, ever."
+  },
+  "uploadTools": {
+    "title": "Upload & Analysis Tools",
+    "subtitle": "Contribute to our growing database of symbols",
+    "capture": {
+      "title": "Capture & Upload",
+      "desc": "Take photos of patterns from artifacts, architecture, or textiles and upload them directly to our platform"
+    },
+    "analyze": {
+      "title": "Automated Analysis",
+      "desc": "Our AI system examines your submissions to identify patterns, match them with our database, and suggest cultural contexts"
+    },
+    "share": {
+      "title": "Share & Collaborate",
+      "desc": "Once analyzed, your contributions become part of our global repository and can be studied by the community"
+    },
+    "process": {
+      "title": "Analysis Process",
+      "subtitle": "Discover how we transform artifacts into cataloged patterns",
+      "original": "Original Artifact Image",
+      "detection": "Pattern Detection",
+      "extraction": "Pattern Extraction",
+      "classification": "AI Classification",
+      "result": "Processing Result",
+      "example": "Our system identifies recurring patterns, extracts them, and compares them to our database."
+    }
+  },
+  "gamification": {
+    "title": "Earn Rewards for Your Contributions",
+    "subtitle": "Join our community and earn points, badges, and recognition for contributing to the world of symbols",
+    "badges": {
+      "title": "Collect Badges",
+      "description": "Earn unique badges for your achievements and display them on your profile"
+    },
+    "points": {
+      "title": "Earn Points",
+      "description": "Get points for every contribution, comment, and validation you make"
+    },
+    "leaderboard": {
+      "title": "Climb the Rankings",
+      "description": "Compete with other contributors and climb up global and regional leaderboards"
+    },
+    "achievements": {
+      "title": "Complete Achievements",
+      "description": "Take on special challenges to unlock unique rewards and recognition"
+    },
+    "viewYourProgress": "View Your Progress",
+    "noAchievements": "No achievements available yet",
+    "points": "points",
+    "earnedAt": "Earned on",
+    "seeMoreAchievements": "See more achievements",
+    "noActivity": "No recent activity",
+    "noRankingsYet": "No rankings available yet",
+    "activity": {
+      "contribution": "Contributed {{title}}",
+      "genericContribution": "Made a contribution",
+      "exploredSymbol": "Explored symbol {{name}}",
+      "genericExploration": "Explored a symbol",
+      "comment": "Commented on a contribution",
+      "generic": "Performed an activity"
+    }
+  },
+  "map": {
+    "placeholder": "Interactive Map Coming Soon",
+    "comingSoon": "We're working on an interactive map to explore symbols around the world"
+  },
+  "common": {
+    "viewMore": "View More",
+    "readMore": "Read More",
+    "loadMore": "Load More",
+    "showAll": "Show All",
+    "hide": "Hide",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "uploadImage": "Upload Image",
+    "submit": "Submit",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "fieldRequired": "This field is required",
+    "version": "Alpha Version 0.1"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "profile": "Profile",
+    "contributions": "Contributions",
+    "symbols": "Symbols",
+    "login": "Login",
+    "logout": "Logout",
+    "menu": "Menu"
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "profile": "Profile", 
+    "contributions": "Contributions",
+    "symbols": "Symbols"
+  },
+  "contributions": {
+    "title": "Contributions",
+    "myContributions": "My Contributions",
+    "communityContributions": "Community Contributions",
+    "newContribution": "New Contribution",
+    "contributionTitle": "Title",
+    "culturalContext": "Cultural Context",
+    "period": "Period",
+    "description": "Description",
+    "location": "Location",
+    "submitted": "Submitted",
+    "status": "Status",
+    "pendingReview": "Pending Review",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "unknown": "Unknown",
+    "viewContribution": "View Contribution",
+    "editContribution": "Edit Contribution",
+    "deleteContribution": "Delete Contribution",
+    "confirmDelete": "Are you sure you want to delete this contribution?",
+    "uploadImages": "Upload Images",
+    "dragImages": "Drag and drop your images here",
+    "browseFiles": "Browse Files",
+    "acceptedFormats": "Accepted formats: .jpg, .jpeg, .png",
+    "maxFileSize": "Max file size: 5MB",
+    "thanksForContribution": "Thank you for your contribution!",
+    "contributionSubmitted": "Your contribution has been successfully submitted and will be reviewed by our team.",
+    "errorSubmitting": "Error submitting your contribution. Please try again.",
+    "empty": "No contributions yet",
+    "emptyDescription": "Be the first to contribute to our symbolic heritage database",
+    "create": "Create Contribution",
+    "new": "New Contribution",
+    "loading": "Loading contributions...",
+    "list": "Contributions List",
+    "tableHeaders": {
+      "title": "Title",
+      "submissionDate": "Submission Date",
+      "status": "Status",
+      "tags": "Tags",
+      "actions": "Actions"
+    },
+    "map": {
+      "placeholder": "Interactive Map Coming Soon",
+      "placeholderSub": "We're working on integrating a map for precise location selection",
+      "search": "Search for a place...",
+      "searchButton": "Search"
+    },
+    "image": {
+      "errors": {
+        "format": "Invalid file format. Only images are accepted.",
+        "size": "File is too large. Maximum size is 5MB."
+      },
+      "dropActive": "Drop image here...",
+      "drop": "Drop your image here or click to browse",
+      "formats": "Accepted formats: JPEG, PNG, WebP",
+      "remove": "Remove image"
+    }
+  },
+  "symbolTriptych": {
+    "original": "Original Image",
+    "pattern": "Extracted Pattern",
+    "reuse": "Reuse",
+    "selectSymbol": "Select a Symbol",
+    "noSymbolSelected": "No symbol selected",
+    "detailsTitle": "Symbol Details",
+    "culture": "Culture",
+    "period": "Period",
+    "description": "Description",
+    "noDescription": "No description available for this symbol.",
+    "relatedPatterns": "Related Patterns",
+    "noRelatedPatterns": "No related patterns.",
+    "imageErrorDesc": "The image could not be loaded properly. An alternative image is displayed."
   }
 }
