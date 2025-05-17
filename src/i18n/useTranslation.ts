@@ -128,7 +128,11 @@ export const switchLanguage = (lang: 'fr' | 'en') => {
   if (typeof window !== 'undefined') {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
     
-    // Reload the page to ensure all components pick up the new language
-    window.location.reload();
+    // Instead of reloading, just change the language
+    // This provides a smoother experience
+    const i18nInstance = window.i18n;
+    if (i18nInstance) {
+      i18nInstance.changeLanguage(lang);
+    }
   }
 };
