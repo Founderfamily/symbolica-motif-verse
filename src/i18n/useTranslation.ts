@@ -1,6 +1,7 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 import { validateKeyFormat, formatKeyAsReadableText, keyExistsInBothLanguages } from './translationUtils';
+import { useEffect } from 'react';
 
 // Store the current language in localStorage to ensure consistent language across page loads
 const LANGUAGE_STORAGE_KEY = 'app_language';
@@ -8,14 +9,14 @@ const LANGUAGE_STORAGE_KEY = 'app_language';
 export const useTranslation = () => {
   const { t: originalT, i18n } = useI18nTranslation();
   
-  // Force language detection on first load
-  const initializeLanguage = () => {
+  // Force language detection on component mount
+  useEffect(() => {
     const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     
     if (savedLang && ['fr', 'en'].includes(savedLang)) {
       i18n.changeLanguage(savedLang);
-    } else {
-      // Detect browser language or default to French
+    } else if (i18n.language !== 'fr' && i18n.language !== 'en') {
+      // Detect browser language or default to French if current language is invalid
       const browserLang = navigator.language.split('-')[0];
       const detectedLang = ['fr', 'en'].includes(browserLang) ? browserLang : 'fr';
       
@@ -23,12 +24,7 @@ export const useTranslation = () => {
       localStorage.setItem(LANGUAGE_STORAGE_KEY, detectedLang);
       i18n.changeLanguage(detectedLang);
     }
-  };
-  
-  // Initialize language on first load
-  if (typeof window !== 'undefined' && !localStorage.getItem(LANGUAGE_STORAGE_KEY)) {
-    initializeLanguage();
-  }
+  }, [i18n]);
   
   // Enhanced t function with better fallbacks
   const t = (key: string, options?: any): string => {
@@ -118,7 +114,12 @@ export const useTranslation = () => {
     currentLanguage: i18n.language, 
     i18n,
     // Utility for debugging
-    refreshLanguage: initializeLanguage,
+    refreshLanguage: () => {
+      const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+      if (savedLang && ['fr', 'en'].includes(savedLang)) {
+        i18n.changeLanguage(savedLang);
+      }
+    },
     validateCurrentPageTranslations
   };
 };

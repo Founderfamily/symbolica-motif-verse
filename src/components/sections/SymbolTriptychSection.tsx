@@ -8,6 +8,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useBreakpoint } from '@/hooks/use-breakpoints';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const SymbolTriptychSection: React.FC = () => {
   const [selectedSymbolId, setSelectedSymbolId] = useState<string | null>(null);
@@ -41,10 +42,10 @@ const SymbolTriptychSection: React.FC = () => {
           <p className="text-xs sm:text-sm text-slate-600"><I18nText translationKey="sections.communityPortal" /></p>
         </div>
         {isAdmin ? (
-          <a href="/admin" className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full hover:shadow-md hover:shadow-blue-600/20 hover:-translate-y-0.5 transition-all flex items-center gap-2">
+          <Link to="/admin" className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full hover:shadow-md hover:shadow-blue-600/20 hover:-translate-y-0.5 transition-all flex items-center gap-2">
             <Database className="w-4 h-4" />
             <I18nText translationKey="auth.admin" />
-          </a>
+          </Link>
         ) : (
           <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-amber-600 rounded-full hover:shadow-md hover:shadow-amber-500/20 hover:-translate-y-0.5 transition-all">
             <I18nText translationKey="sections.joinCommunity" />

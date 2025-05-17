@@ -72,13 +72,13 @@ const Footer = () => {
                 <I18nText translationKey="footer.community">Community</I18nText>
               </h3>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">
+                <li><a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                   <I18nText translationKey="footer.github">GitHub</I18nText>
                 </a></li>
-                <li><a href="#" className="hover:text-white transition-colors">
+                <li><a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                   <I18nText translationKey="footer.discord">Discord</I18nText>
                 </a></li>
-                <li><a href="#" className="hover:text-white transition-colors">
+                <li><a href="https://forum.example.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                   <I18nText translationKey="footer.forum">Forum</I18nText>
                 </a></li>
               </ul>
