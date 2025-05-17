@@ -32,7 +32,11 @@
     "heading": "Discover the World's Cultural Symbols",
     "subheading": "Explore, learn and contribute to our growing collection of symbolic heritage",
     "community": "Join Community",
-    "explore": "Start Exploring"
+    "explore": "Start Exploring",
+    "new": "New Experience",
+    "heading2": "Explore Symbols Across Cultures & Time",
+    "subheading2": "Join our global community preserving the world's symbolic heritage through an interactive digital platform",
+    "contribute": "Contribute"
   },
   "header": {
     "home": "Home",
@@ -56,6 +60,20 @@
     "discord": "Discord",
     "forum": "Forum",
     "copyright": "© 2025 Symbolica Museum"
+  },
+  "compactFooter": {
+    "tagline": "Preserving the world's symbolic heritage through digital technology and community collaboration",
+    "platform": "Platform",
+    "community": "Community",
+    "discord": "Discord",
+    "github": "GitHub",
+    "forum": "Forum",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "cookies": "Cookie Policy",
+    "copyright": "© 2025 Symbolica. All rights reserved.",
+    "rights": "All symbols are documented with respect to their cultural origins"
   },
   "faq": {
     "title": "FAQ",
@@ -125,6 +143,141 @@
     "noFilters": "No active filters",
     "mapViewComingSoon": "Interactive map view coming soon",
     "mapViewDescription": "Explore symbols based on their geographical origin and distribution"
+  },
+  "symbolExplorerPreview": {
+    "title": "Explore Our Symbol Collection",
+    "description": "Discover thousands of cultural symbols and patterns from civilizations around the world",
+    "discover": "Discover",
+    "all": "All Categories",
+    "viewAll": "View All Symbols"
+  },
+  "museumHub": {
+    "title": "Museum & Community Hub",
+    "description": "A dual experience that combines a digital museum with an active community platform",
+    "dualExperience": "Dual Experience",
+    "museum": {
+      "title": "Digital Museum",
+      "description": "Explore curated collections of symbols with detailed historical and cultural context",
+      "feature1": "Professionally curated exhibits featuring thematic collections",
+      "feature2": "Interactive learning modules about symbolic traditions",
+      "feature3": "3D models and high-resolution imagery of artifacts",
+      "label": "Explore & Learn"
+    },
+    "community": {
+      "title": "Community Platform",
+      "description": "Connect with enthusiasts and experts to share knowledge and discoveries",
+      "feature1": "Contribute your own research and discoveries",
+      "feature2": "Participate in discussions with experts and researchers",
+      "feature3": "Collaborate on documentation and translation projects",
+      "label": "Connect & Contribute"
+    }
+  },
+  "aiTools": {
+    "title": "AI-Powered Discovery Tools",
+    "description": "Our advanced AI helps identify, analyze, and connect symbolic patterns across cultures",
+    "powered": "AI-Powered",
+    "patternIdentified": "Pattern Identified",
+    "feature1": {
+      "title": "Symbol Recognition",
+      "description": "Upload images to instantly identify symbols and discover their cultural context"
+    },
+    "feature2": {
+      "title": "Pattern Extraction",
+      "description": "Our AI isolates individual patterns from complex designs for detailed analysis"
+    },
+    "feature3": {
+      "title": "Cross-Cultural Connections",
+      "description": "Discover surprising links between symbols across different regions and time periods"
+    },
+    "tryIt": "Try Symbol Recognition"
+  },
+  "culturalMap": {
+    "title": "Explore Symbols by Region",
+    "description": "Navigate our interactive map to discover symbols from different cultures around the globe",
+    "interactive": "Interactive Map",
+    "comingSoon": "Enhanced Map Experience Coming Soon",
+    "comingSoonDescription": "Our team is developing an immersive 3D globe with advanced navigation features",
+    "popularRegions": "Popular Regions",
+    "viewSymbols": "View Symbols",
+    "fullMap": "Explore Full Map"
+  },
+  "streamlinedHow": {
+    "title": "How Symbolica Works",
+    "description": "Our platform makes it easy to discover, learn about, and contribute to symbolic heritage",
+    "simple": "Simple Process",
+    "steps": {
+      "1": {
+        "title": "Discover",
+        "description": "Explore our vast collection of symbols from cultures across the world and throughout history"
+      },
+      "2": {
+        "title": "Learn",
+        "description": "Understand the meaning, context, and cultural significance of each symbol through detailed information"
+      },
+      "3": {
+        "title": "Contribute",
+        "description": "Share your knowledge by submitting new symbols or enhancing existing documentation"
+      }
+    }
+  },
+  "communityAchievements": {
+    "title": "Community Achievements",
+    "description": "See how our global community is working together to preserve cultural heritage",
+    "community": "Community Impact",
+    "topContributors": "Top Contributors",
+    "contributions": "contributions",
+    "recentAchievements": "Community Milestones",
+    "progress": "{{value}}% complete",
+    "completed": "Completed",
+    "stats": {
+      "symbols": "Symbols Documented",
+      "contributors": "Active Contributors",
+      "interactions": "Community Interactions"
+    },
+    "achievement1": {
+      "title": "500 Symbols Milestone",
+      "description": "Our community has successfully documented 500 symbols from across Europe"
+    },
+    "achievement2": {
+      "title": "South Asian Collection",
+      "description": "Progress on documenting traditional South Asian symbolic patterns"
+    },
+    "achievement3": {
+      "title": "Indigenous Knowledge Project",
+      "description": "Collaborative documentation of indigenous symbolic traditions"
+    }
+  },
+  "researchTools": {
+    "title": "Research & Education Tools",
+    "description": "Specialized resources for researchers, educators, and students studying cultural symbols",
+    "forEducators": "For Educators & Researchers",
+    "learnMore": "Learn More",
+    "tools": {
+      "1": {
+        "title": "Research Database",
+        "description": "Access comprehensive metadata, historical sources, and academic references"
+      },
+      "2": {
+        "title": "Educational Materials",
+        "description": "Curriculum resources and teaching materials for classrooms at all levels"
+      },
+      "3": {
+        "title": "Comparative Analysis",
+        "description": "Tools to trace symbol evolution and compare patterns across cultures"
+      }
+    },
+    "caseStudy": {
+      "title": "Symbolica in the Classroom",
+      "description": "Learn how universities and schools are using Symbolica to teach cultural history and visual studies",
+      "button": "Read Case Study"
+    }
+  },
+  "dynamicCta": {
+    "title": "Contribute to the World's Symbolic Heritage",
+    "description": "Join our community of researchers, enthusiasts, and cultural stewards helping to document and preserve symbolic traditions",
+    "joinToday": "Join Today",
+    "createAccount": "Create Account",
+    "browseCollection": "Browse Collection"
   },
   "sections": {
     "howItWorks": "How It Works",
@@ -415,14 +568,18 @@
     "symbols": "Symbols",
     "login": "Login",
     "logout": "Logout",
-    "menu": "Menu"
+    "menu": "Menu",
+    "map": "Map",
+    "explore": "Explore"
   },
   "navigation": {
     "home": "Home",
     "about": "About",
     "profile": "Profile", 
     "contributions": "Contributions",
-    "symbols": "Symbols"
+    "symbols": "Symbols",
+    "map": "Map",
+    "explore": "Explore"
   },
   "contributions": {
     "title": "Contributions",

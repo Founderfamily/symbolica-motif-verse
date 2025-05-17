@@ -1,66 +1,61 @@
 
 import React from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
-import Hero from '@/components/sections/Hero';
-import Features from '@/components/sections/Features';
-import UploadTools from '@/components/sections/UploadTools';
-import Partners from '@/components/sections/Partners';
-import HowItWorks from '@/components/sections/HowItWorks';
-import CallToAction from '@/components/sections/CallToAction';
-import Gamification from '@/components/sections/Gamification';
-import Community from '@/components/sections/Community';
-import SymbolTriptychSection from '@/components/sections/SymbolTriptychSection';
-import Testimonials from '@/components/sections/Testimonials';
-import TimelineRoadmap from '@/components/sections/TimelineRoadmap';
-import NewsletterSignup from '@/components/newsletter/NewsletterSignup';
 import OpenSourceBadge from '@/components/ui/open-source-badge';
+
+// Import new homepage sections
+import HeroSection from '@/components/sections/HeroSection';
+import SymbolExplorerPreview from '@/components/sections/SymbolExplorerPreview';
+import MuseumCommunityHub from '@/components/sections/MuseumCommunityHub';
+import AIDiscoveryTools from '@/components/sections/AIDiscoveryTools';
+import CulturalMapPreview from '@/components/sections/CulturalMapPreview';
+import StreamlinedHowItWorks from '@/components/sections/StreamlinedHowItWorks';
+import CommunityAchievements from '@/components/sections/CommunityAchievements';
+import ResearchEducationTools from '@/components/sections/ResearchEducationTools';
+import DynamicCallToAction from '@/components/sections/DynamicCallToAction';
+import CompactFooter from '@/components/sections/CompactFooter';
+
+// Newsletter component
+import NewsletterSignup from '@/components/newsletter/NewsletterSignup';
 
 const HomePage = () => {
   const { t } = useTranslation();
 
   return (
     <div className="bg-white">
-      {/* Hero Section */}
-      <Hero />
-      
-      {/* SymbolTriptych Section with OpenSourceBadge */}
+      {/* Open Source Badge */}
       <div className="relative max-w-7xl mx-auto">
-        <div className="absolute right-6 top-0">
+        <div className="absolute right-6 top-4 z-50">
           <OpenSourceBadge />
         </div>
-        <SymbolTriptychSection />
       </div>
       
-      {/* Community Section */}
-      <Community />
+      {/* Hero Section */}
+      <HeroSection />
       
-      {/* Features Section */}
-      <Features />
+      {/* Symbol Explorer Preview */}
+      <SymbolExplorerPreview />
       
-      {/* How It Works */}
-      <HowItWorks />
+      {/* Museum & Community Hub */}
+      <MuseumCommunityHub />
       
-      {/* Gamification Section */}
-      <Gamification />
+      {/* AI-Powered Discovery Tools */}
+      <AIDiscoveryTools />
       
-      {/* Testimonials */}
-      <Testimonials />
+      {/* Cultural Map Preview */}
+      <CulturalMapPreview />
       
-      {/* Timeline/Roadmap */}
-      <TimelineRoadmap />
+      {/* Streamlined How It Works */}
+      <StreamlinedHowItWorks />
       
-      {/* Upload Tools */}
-      <UploadTools />
+      {/* Community Achievements */}
+      <CommunityAchievements />
       
-      {/* Partners */}
-      <Partners />
+      {/* Research & Education Tools */}
+      <ResearchEducationTools />
       
-      {/* Call to Action */}
-      <CallToAction />
-      
-      {/* Newsletter */}
-      <NewsletterSignup />
+      {/* Dynamic Call-to-Action */}
+      <DynamicCallToAction />
     </div>
   );
 };
