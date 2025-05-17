@@ -125,5 +125,125 @@
     "noFilters": "No active filters",
     "mapViewComingSoon": "Interactive map view coming soon",
     "mapViewDescription": "Explore symbols based on their geographical origin and distribution"
+  },
+  "sections": {
+    "howItWorks": "How It Works",
+    "features": "Platform Features",
+    "discover": "Discover Symbols",
+    "community": "Join Our Community",
+    "testimonials": "What Users Say",
+    "roadmap": "Project Roadmap",
+    "partners": "Our Partners",
+    "faq": "Frequently Asked Questions"
+  },
+  "howItWorks": {
+    "process": "Simple Process",
+    "intro": "Our platform makes it easy to discover, contribute, and learn about cultural symbols from around the world.",
+    "steps": {
+      "1": {
+        "title": "Upload & Discover",
+        "desc": "Upload images of cultural symbols or discover existing ones in our collection."
+      },
+      "2": {
+        "title": "Tag & Catalog",
+        "desc": "Add metadata, historical context, and cultural information to symbols."
+      },
+      "3": {
+        "title": "Explore & Learn",
+        "desc": "Browse our curated collection of symbols across different cultures and time periods."
+      },
+      "4": {
+        "title": "Share & Connect",
+        "desc": "Share symbols with others and connect with a community of cultural enthusiasts."
+      }
+    }
+  },
+  "features": {
+    "title": "Platform Features",
+    "description": "Discover the tools and features that make Symbolica unique",
+    "catalog": {
+      "title": "Comprehensive Catalog",
+      "description": "Access thousands of symbols from diverse cultures around the world."
+    },
+    "interactive": {
+      "title": "Interactive Exploration",
+      "description": "Explore symbols through maps, timelines, and cultural connections."
+    },
+    "ai": {
+      "title": "AI-Powered Recognition",
+      "description": "Identify symbols in images using our advanced AI recognition system."
+    },
+    "community": {
+      "title": "Community Contributions",
+      "description": "Join a global community preserving cultural heritage through symbols."
+    }
+  },
+  "discover": {
+    "title": "Discover Symbols",
+    "explore": "Explore Collection",
+    "popular": "Popular Categories",
+    "featured": "Featured Symbols",
+    "categories": {
+      "religious": "Religious",
+      "protection": "Protection",
+      "nature": "Nature",
+      "geometric": "Geometric",
+      "cosmic": "Cosmic",
+      "identity": "Identity"
+    }
+  },
+  "community": {
+    "title": "Join Our Community",
+    "subtitle": "Connect with fellow enthusiasts and contribute to the preservation of symbolic heritage.",
+    "contributors": "Active Contributors",
+    "submissions": "Symbol Submissions",
+    "discussions": "Active Discussions",
+    "join": "Join Now"
+  },
+  "testimonials": {
+    "title": "What Users Say",
+    "subtitle": "Hear from our community of researchers, artists, and cultural enthusiasts."
+  },
+  "roadmap": {
+    "title": "Project Roadmap",
+    "subtitle": "Our vision for the future of Symbolica",
+    "current": "Current Phase",
+    "next": "Next Up",
+    "future": "Future Plans"
+  },
+  "partners": {
+    "title": "Our Partners",
+    "subtitle": "Collaborating with museums, universities, and cultural institutions worldwide."
+  },
+  "callToAction": {
+    "joinUs": "Join Us in Preserving Cultural Heritage",
+    "description": "Be part of a global community dedicated to documenting and celebrating the world's symbolic traditions.",
+    "join": "Create Account",
+    "explore": "Browse Symbols",
+    "support": "Supported by grants from cultural preservation foundations worldwide."
+  },
+  "about": {
+    "mission": "Our Mission",
+    "vision": "Our Vision",
+    "team": "Our Team",
+    "contact": "Contact Us",
+    "missionStatement": "To catalog and preserve the world's symbolic heritage for future generations.",
+    "visionStatement": "Creating the most comprehensive digital library of cultural symbols from around the world.",
+    "values": {
+      "title": "Our Values",
+      "respect": "Cultural Respect",
+      "accuracy": "Historical Accuracy",
+      "access": "Universal Access",
+      "collaboration": "Global Collaboration"
+    }
+  },
+  "newsletter": {
+    "title": "Stay Updated",
+    "subtitle": "Subscribe to our newsletter for the latest additions and features",
+    "placeholder": "Enter your email",
+    "button": "Subscribe",
+    "success": "Thank you for subscribing!",
+    "error": "Something went wrong. Please try again.",
+    "privacy": "We respect your privacy. No spam, ever."
   }
 }

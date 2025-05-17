@@ -130,9 +130,16 @@ export const switchLanguage = (lang: 'fr' | 'en') => {
     
     // Instead of reloading, just change the language
     // This provides a smoother experience
-    const i18nInstance = window.i18n;
-    if (i18nInstance) {
-      i18nInstance.changeLanguage(lang);
+    if (window.i18next) {
+      window.i18next.changeLanguage(lang);
     }
   }
 };
+
+// Add type declaration for the i18next property on the window object
+declare global {
+  interface Window {
+    i18next: any;
+    i18n?: any;
+  }
+}
