@@ -80,13 +80,22 @@ export async function createInterestGroup(group: Partial<InterestGroup>): Promis
       throw new Error("Group name is required");
     }
     
+    // Extract the name and other properties from the group object
+    const { name, description, is_public, theme_color, ...rest } = group;
+    
+    // Create the properly formatted insert object
+    const insertData = {
+      name,
+      slug,
+      description,
+      is_public,
+      theme_color,
+      created_by: (await supabase.auth.getUser()).data.user?.id
+    };
+    
     const { data, error } = await supabase
       .from('interest_groups')
-      .insert({ 
-        ...group, 
-        slug,
-        created_by: (await supabase.auth.getUser()).data.user?.id
-      })
+      .insert(insertData)
       .select('*')
       .single();
 
