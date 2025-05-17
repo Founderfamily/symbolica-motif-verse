@@ -23,5 +23,107 @@
   "breadcrumb": {
     "home": "Home",
     "symbolExplorer": "Symbol Explorer"
+  },
+  "app": {
+    "name": "Symbolica",
+    "version": "Beta 0.9"
+  },
+  "hero": {
+    "heading": "Discover the World's Cultural Symbols",
+    "subheading": "Explore, learn and contribute to our growing collection of symbolic heritage",
+    "community": "Join Community",
+    "explore": "Start Exploring"
+  },
+  "header": {
+    "home": "Home",
+    "explore": "Explore",
+    "map": "Map",
+    "about": "About",
+    "contribute": "Contribute",
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "footer": {
+    "tagline": "Preserving and celebrating the world's symbolic heritage",
+    "platform": "Platform",
+    "home": "Home",
+    "explore": "Explore",
+    "map": "Map",
+    "contribute": "Contribute",
+    "about": "About",
+    "community": "Community",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "copyright": "© 2025 Symbolica Museum"
+  },
+  "faq": {
+    "title": "FAQ",
+    "questions": {
+      "whatIs": {
+        "question": "What is Symbolica?",
+        "answer": "Symbolica is a digital platform dedicated to cataloging, preserving, and sharing cultural symbols from around the world."
+      },
+      "howContribute": {
+        "question": "How can I contribute?",
+        "answer": "You can contribute by submitting symbols, improving descriptions, or helping with translations."
+      },
+      "rights": {
+        "question": "What about rights to symbols?",
+        "answer": "Symbolica respects traditional ownership and rights to cultural symbols. We provide attribution and context for all symbols."
+      }
+    }
+  },
+  "mapExplorer": {
+    "title": "Symbol Map Explorer",
+    "description": "Discover symbols and patterns across the world's cultures through our interactive map",
+    "searchLocation": "Search locations...",
+    "filters": "Filters",
+    "zoom": "Zoom",
+    "history": "History",
+    "mapView": "Map View",
+    "listView": "List View",
+    "symbolCount": "{{count}} symbols",
+    "countriesCount": "{{count}} regions",
+    "betaNotice": "The map feature is currently in beta. Some locations may not be accurately represented.",
+    "listViewComingSoon": "The list view is coming soon. Stay tuned!",
+    "popularRegions": "Popular Regions",
+    "noRegionsAvailable": "No regions available"
+  },
+  "filters": {
+    "regions": "Regions",
+    "status": "Status",
+    "verifiedOnly": "Verified Only",
+    "clear": "Clear",
+    "clearAll": "Clear All",
+    "activeFilters": "Active Filters",
+    "noRegionsAvailable": "No regions available"
+  },
+  "auth": {
+    "login": "Login"
+  },
+  "profile": {
+    "profile": "Profile",
+    "viewProfile": "View Profile",
+    "signOut": "Sign Out"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard"
+  },
+  "symbolExplorer": {
+    "title": "Symbol Explorer",
+    "description": "Explore our collection of cultural symbols, patterns and motifs",
+    "filters": "Filters",
+    "clearFilters": "Clear all",
+    "searchPlaceholder": "Search symbols...",
+    "resultsCount": "{{count}} symbols found",
+    "noResults": "No symbols match your filter criteria",
+    "gridView": "Grid",
+    "listView": "List",
+    "mapView": "Map",
+    "activeFilters": "Active Filters",
+    "noFilters": "No active filters",
+    "mapViewComingSoon": "Interactive map view coming soon",
+    "mapViewDescription": "Explore symbols based on their geographical origin and distribution"
   }
 }

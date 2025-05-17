@@ -9,7 +9,7 @@ import SymbolDetail from './pages/SymbolDetail';
 import NotFoundPage from './pages/NotFound';
 import ContributionsPage from './pages/ContributionsPage';
 import ProfilePage from './pages/Profile';
-import MapExplorerPage from './pages/MapExplorer';
+import MapExplorerPage from './pages/MapExplorerPage';
 import '@/i18n/config';
 import LanguageDebugger from './i18n/LanguageDebugger';
 import { AuthProvider } from './hooks/useAuth';
