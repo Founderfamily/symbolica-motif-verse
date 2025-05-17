@@ -6,9 +6,12 @@ import { MapPin, Users, Book, Search } from 'lucide-react';
 import { culturalGradient } from '@/lib/utils';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
+import { useBreakpoint } from '@/hooks/use-breakpoints';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Community = () => {
   const { t } = useTranslation();
+  const isSmallScreen = useBreakpoint('md');
   
   const communityGroups = [
     {
@@ -60,90 +63,128 @@ const Community = () => {
   }));
   
   return (
-    <section className="py-16 px-4 md:px-8 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
+    <section className="py-12 sm:py-16 px-4 md:px-8 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
       {/* Background patterns */}
       <div className="absolute inset-0 opacity-5 pattern-grid-lg"></div>
       
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-12">
-          <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
+        <div className="text-center mb-8 sm:mb-12">
+          <span className="px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
             <I18nText translationKey="sections.community" />
           </span>
-          <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
             <I18nText translationKey="community.title" />
           </h2>
-          <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
+          <p className="text-center text-slate-600 mb-6 sm:mb-10 max-w-2xl mx-auto text-sm sm:text-base">
             <I18nText translationKey="community.description" />
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {groupsWithCulture.map((group, i) => (
-            <Card key={i} className={`border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden symbol-card ${culturalGradient(group.culture)}`}>
-              <div className={`h-2 w-full bg-gradient-to-r ${group.color}`}></div>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <Avatar className="h-14 w-14 ring-2 ring-white shadow-md">
-                    <AvatarImage src={group.image} alt={t(group.nameKey)} />
-                    <AvatarFallback className={`bg-gradient-to-br ${group.color} text-white text-lg`}>{group.icon}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold text-lg text-slate-800">
-                      <I18nText translationKey={group.nameKey} />
-                    </p>
-                    <p className="text-sm text-slate-500 flex items-center">
-                      <Users className="h-3 w-3 mr-1 text-slate-400" /> 
-                      {group.members} <I18nText translationKey="community.stats.members" />
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-between text-sm items-center">
-                  <span className="flex items-center gap-1 text-slate-600">
-                    <MapPin className="h-4 w-4 text-slate-500" />
-                    {group.discoveries} <I18nText translationKey="community.stats.discoveries" />
-                  </span>
-                  <span className="px-3 py-1.5 text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
-                    <I18nText translationKey="community.stats.join" />
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <div className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-200">
-              <Users className="h-6 w-6" />
+        {isSmallScreen ? (
+          <ScrollArea className="w-full pb-6">
+            <div className="flex gap-4 pb-2 px-1">
+              {groupsWithCulture.map((group, i) => (
+                <Card key={i} className={`border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden symbol-card min-w-[260px] ${culturalGradient(group.culture)}`}>
+                  <div className={`h-2 w-full bg-gradient-to-r ${group.color}`}></div>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
+                        <AvatarImage src={group.image} alt={t(group.nameKey)} />
+                        <AvatarFallback className={`bg-gradient-to-br ${group.color} text-white text-lg`}>{group.icon}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold text-base sm:text-lg text-slate-800">
+                          <I18nText translationKey={group.nameKey} />
+                        </p>
+                        <p className="text-xs sm:text-sm text-slate-500 flex items-center">
+                          <Users className="h-3 w-3 mr-1 text-slate-400" /> 
+                          {group.members} <I18nText translationKey="community.stats.members" />
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs sm:text-sm items-center">
+                      <span className="flex items-center gap-1 text-slate-600">
+                        <MapPin className="h-3 sm:h-4 w-3 sm:w-4 text-slate-500" />
+                        {group.discoveries} <I18nText translationKey="community.stats.discoveries" />
+                      </span>
+                      <span className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
+                        <I18nText translationKey="community.stats.join" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <h3 className="text-xl font-semibold mb-2">
+          </ScrollArea>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {groupsWithCulture.map((group, i) => (
+              <Card key={i} className={`border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden symbol-card ${culturalGradient(group.culture)}`}>
+                <div className={`h-2 w-full bg-gradient-to-r ${group.color}`}></div>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar className="h-14 w-14 ring-2 ring-white shadow-md">
+                      <AvatarImage src={group.image} alt={t(group.nameKey)} />
+                      <AvatarFallback className={`bg-gradient-to-br ${group.color} text-white text-lg`}>{group.icon}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-lg text-slate-800">
+                        <I18nText translationKey={group.nameKey} />
+                      </p>
+                      <p className="text-sm text-slate-500 flex items-center">
+                        <Users className="h-3 w-3 mr-1 text-slate-400" /> 
+                        {group.members} <I18nText translationKey="community.stats.members" />
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm items-center">
+                    <span className="flex items-center gap-1 text-slate-600">
+                      <MapPin className="h-4 w-4 text-slate-500" />
+                      {group.discoveries} <I18nText translationKey="community.stats.discoveries" />
+                    </span>
+                    <span className="px-3 py-1.5 text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
+                      <I18nText translationKey="community.stats.join" />
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+        
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-200">
+              <Users className="h-5 sm:h-6 w-5 sm:w-6" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">
               <I18nText translationKey="community.features.thematicCommunities.title" />
             </h3>
-            <p className="text-slate-600">
+            <p className="text-sm text-slate-600">
               <I18nText translationKey="community.features.thematicCommunities.description" />
             </p>
           </div>
           
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <div className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-200">
-              <Book className="h-6 w-6" />
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-200">
+              <Book className="h-5 sm:h-6 w-5 sm:w-6" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">
               <I18nText translationKey="community.features.personalSpace.title" />
             </h3>
-            <p className="text-slate-600">
+            <p className="text-sm text-slate-600">
               <I18nText translationKey="community.features.personalSpace.description" />
             </p>
           </div>
           
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <div className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-200">
-              <Search className="h-6 w-6" />
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all sm:col-span-2 md:col-span-1">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-200">
+              <Search className="h-5 sm:h-6 w-5 sm:w-6" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">
               <I18nText translationKey="community.features.intuitiveNavigation.title" />
             </h3>
-            <p className="text-slate-600">
+            <p className="text-sm text-slate-600">
               <I18nText translationKey="community.features.intuitiveNavigation.description" />
             </p>
           </div>

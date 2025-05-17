@@ -25,8 +25,8 @@ const HomePage = () => {
       <Hero />
       
       {/* SymbolTriptych Section with OpenSourceBadge */}
-      <div className="relative max-w-7xl mx-auto">
-        <div className="absolute right-6 top-0">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="absolute right-4 sm:right-6 top-0 z-10">
           <OpenSourceBadge />
         </div>
         <SymbolTriptychSection />
