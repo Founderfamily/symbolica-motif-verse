@@ -15,6 +15,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const GroupsPage = lazy(() => import('./pages/Groups/GroupsPage'));
 const GroupDetailPage = lazy(() => import('./pages/Groups/GroupDetailPage'));
 const GroupCreatePage = lazy(() => import('./pages/Groups/GroupCreatePage'));
+const ProfilePage = lazy(() => import('./pages/Profile'));
 
 // Admin pages
 const AdminLayout = lazy(() => import('./pages/Admin/AdminLayout'));
@@ -43,6 +44,7 @@ function App() {
         <Route path="/map" element={<MapExplorerPage />} />
         <Route path="/contribute" element={<ContributionsPage />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/profile" element={<ProfilePage />} />
         
         {/* Groups routes */}
         <Route path="/groups" element={<GroupsPage />} />

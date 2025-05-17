@@ -63,6 +63,11 @@
       "action": "Explore Groups"
     }
   },
+  "error": {
+    "pageNotFound": "Oops! Page not found",
+    "routeNotExist": "The page you are looking for doesn't exist or has been moved.",
+    "returnHome": "Return to Home"
+  },
   "common": {
     "cancel": "Cancel",
     "save": "Save",
