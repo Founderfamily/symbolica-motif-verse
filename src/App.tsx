@@ -1,6 +1,6 @@
 
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
 
 // Lazily load pages for better performance
@@ -33,37 +33,35 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <Router>
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/explore" element={<SymbolExplorer />} />
-          <Route path="/explore/:id" element={<SymbolDetail />} />
-          <Route path="/map" element={<MapExplorerPage />} />
-          <Route path="/contribute" element={<ContributionsPage />} />
-          <Route path="/auth" element={<Auth />} />
-          
-          {/* Groups routes */}
-          <Route path="/groups" element={<GroupsPage />} />
-          <Route path="/groups/create" element={<GroupCreatePage />} />
-          <Route path="/groups/:slug" element={<GroupDetailPage />} />
-          
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="" element={<Dashboard />} />
-            <Route path="symbols" element={<SymbolsManagement />} />
-            <Route path="symbols/:id" element={<SymbolEditor />} />
-            <Route path="content" element={<ContentManagement />} />
-            <Route path="contributions" element={<ContributionsManagement />} />
-          </Route>
-          
-          {/* Not found route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-    </Router>
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/explore" element={<SymbolExplorer />} />
+        <Route path="/explore/:id" element={<SymbolDetail />} />
+        <Route path="/map" element={<MapExplorerPage />} />
+        <Route path="/contribute" element={<ContributionsPage />} />
+        <Route path="/auth" element={<Auth />} />
+        
+        {/* Groups routes */}
+        <Route path="/groups" element={<GroupsPage />} />
+        <Route path="/groups/create" element={<GroupCreatePage />} />
+        <Route path="/groups/:slug" element={<GroupDetailPage />} />
+        
+        {/* Admin routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="" element={<Dashboard />} />
+          <Route path="symbols" element={<SymbolsManagement />} />
+          <Route path="symbols/:id" element={<SymbolEditor />} />
+          <Route path="content" element={<ContentManagement />} />
+          <Route path="contributions" element={<ContributionsManagement />} />
+        </Route>
+        
+        {/* Not found route */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }
 
