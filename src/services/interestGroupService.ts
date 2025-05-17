@@ -1,6 +1,6 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Json } from '@/integrations/supabase/types';
 
 export interface InterestGroup {
   id: string;
@@ -28,6 +28,32 @@ export interface InterestGroup {
   discoveries_count: number;
 }
 
+// Define a type for the Supabase response
+type SupabaseInterestGroup = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  banner_image: string;
+  theme_color: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  is_public: boolean;
+  translations: Json;
+  members_count: number;
+  discoveries_count: number;
+}
+
+// Helper function to transform Supabase response to our interface
+function transformInterestGroup(group: SupabaseInterestGroup): InterestGroup {
+  return {
+    ...group,
+    translations: group.translations as InterestGroup['translations']
+  };
+}
+
 export async function getInterestGroups(): Promise<InterestGroup[]> {
   try {
     const { data, error } = await supabase
@@ -40,7 +66,7 @@ export async function getInterestGroups(): Promise<InterestGroup[]> {
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(transformInterestGroup);
   } catch (error) {
     console.error('Failed to fetch interest groups:', error);
     throw error;
@@ -63,22 +89,23 @@ export async function getInterestGroupBySlug(slug: string): Promise<InterestGrou
       throw error;
     }
 
-    return data;
+    return data ? transformInterestGroup(data) : null;
   } catch (error) {
     console.error('Failed to fetch interest group:', error);
     throw error;
   }
 }
 
-export async function createInterestGroup(group: Partial<InterestGroup>): Promise<InterestGroup> {
+export async function createInterestGroup(group: { name: string } & Partial<InterestGroup>): Promise<InterestGroup> {
   try {
     // Generate a slug from name (lowercase, hyphens instead of spaces)
-    const slug = group.name?.toLowerCase().replace(/\s+/g, '-') || '';
+    const slug = group.name.toLowerCase().replace(/\s+/g, '-') || '';
     
     const { data, error } = await supabase
       .from('interest_groups')
       .insert({ 
         ...group, 
+        name: group.name, // Ensure name is explicitly included
         slug,
         created_by: (await supabase.auth.getUser()).data.user?.id
       })
@@ -91,7 +118,7 @@ export async function createInterestGroup(group: Partial<InterestGroup>): Promis
     }
 
     toast.success('Group created successfully');
-    return data;
+    return transformInterestGroup(data);
   } catch (error: any) {
     console.error('Failed to create interest group:', error);
     toast.error(error.message || 'Failed to create group');
@@ -114,7 +141,7 @@ export async function updateInterestGroup(id: string, updates: Partial<InterestG
     }
 
     toast.success('Group updated successfully');
-    return data;
+    return transformInterestGroup(data);
   } catch (error: any) {
     console.error('Failed to update interest group:', error);
     toast.error(error.message || 'Failed to update group');
@@ -190,7 +217,20 @@ export async function isGroupMember(groupId: string): Promise<boolean> {
   }
 }
 
-export async function getGroupMembers(groupId: string) {
+export interface GroupMember {
+  id: string;
+  group_id: string;
+  user_id: string;
+  role: string;
+  joined_at: string;
+  profiles: {
+    id: string;
+    username: string | null;
+    full_name: string | null;
+  };
+}
+
+export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
   try {
     const { data, error } = await supabase
       .from('group_members')
@@ -205,7 +245,19 @@ export async function getGroupMembers(groupId: string) {
       throw error;
     }
 
-    return data || [];
+    // Transform the data to match our interface
+    const transformedData = (data || []).map((member: any) => {
+      return {
+        ...member,
+        profiles: {
+          id: member.user_id,
+          username: member.profiles?.username || null,
+          full_name: member.profiles?.full_name || null
+        }
+      };
+    });
+
+    return transformedData;
   } catch (error) {
     console.error('Failed to fetch group members:', error);
     throw error;
