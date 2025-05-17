@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -9,23 +8,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Users, Map, Settings, Edit, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { getInterestGroupBySlug, InterestGroup, isGroupMember, joinGroup, leaveGroup, getGroupMembers } from '@/services/interestGroupService';
+import { getInterestGroupBySlug, InterestGroup, isGroupMember, joinGroup, leaveGroup, getGroupMembers, GroupMember } from '@/services/interestGroupService';
 import { useBreakpoint } from '@/hooks/use-breakpoints';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
-interface GroupMember {
-  id: string;
-  group_id: string;
-  user_id: string;
-  role: string;
-  joined_at: string;
-  profiles: {
-    id: string;
-    username: string | null;
-    full_name: string | null;
-  };
-}
 
 const GroupDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -70,7 +56,7 @@ const GroupDetailPage = () => {
         
         // Get group members
         const membersData = await getGroupMembers(groupData.id);
-        setMembers(membersData as GroupMember[]);
+        setMembers(membersData);
         
       } catch (error) {
         console.error('Error fetching group:', error);
@@ -99,7 +85,7 @@ const GroupDetailPage = () => {
         
         // Refresh members list
         const membersData = await getGroupMembers(group.id);
-        setMembers(membersData as GroupMember[]);
+        setMembers(membersData);
       }
     } catch (error) {
       console.error('Error joining/leaving group:', error);

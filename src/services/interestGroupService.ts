@@ -40,7 +40,7 @@ export async function getInterestGroups(): Promise<InterestGroup[]> {
       throw error;
     }
 
-    return data || [];
+    return (data as unknown) as InterestGroup[] || [];
   } catch (error) {
     console.error('Failed to fetch interest groups:', error);
     throw error;
@@ -63,7 +63,7 @@ export async function getInterestGroupBySlug(slug: string): Promise<InterestGrou
       throw error;
     }
 
-    return data;
+    return (data as unknown) as InterestGroup;
   } catch (error) {
     console.error('Failed to fetch interest group:', error);
     throw error;
@@ -74,6 +74,11 @@ export async function createInterestGroup(group: Partial<InterestGroup>): Promis
   try {
     // Generate a slug from name (lowercase, hyphens instead of spaces)
     const slug = group.name?.toLowerCase().replace(/\s+/g, '-') || '';
+    
+    // Make sure name is required
+    if (!group.name) {
+      throw new Error("Group name is required");
+    }
     
     const { data, error } = await supabase
       .from('interest_groups')
@@ -91,7 +96,7 @@ export async function createInterestGroup(group: Partial<InterestGroup>): Promis
     }
 
     toast.success('Group created successfully');
-    return data;
+    return (data as unknown) as InterestGroup;
   } catch (error: any) {
     console.error('Failed to create interest group:', error);
     toast.error(error.message || 'Failed to create group');
@@ -114,7 +119,7 @@ export async function updateInterestGroup(id: string, updates: Partial<InterestG
     }
 
     toast.success('Group updated successfully');
-    return data;
+    return (data as unknown) as InterestGroup;
   } catch (error: any) {
     console.error('Failed to update interest group:', error);
     toast.error(error.message || 'Failed to update group');
@@ -190,7 +195,22 @@ export async function isGroupMember(groupId: string): Promise<boolean> {
   }
 }
 
-export async function getGroupMembers(groupId: string) {
+export interface GroupMemberProfile {
+  id: string;
+  username: string | null;
+  full_name: string | null;
+}
+
+export interface GroupMember {
+  id: string;
+  group_id: string;
+  user_id: string;
+  role: string;
+  joined_at: string;
+  profiles: GroupMemberProfile;
+}
+
+export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
   try {
     const { data, error } = await supabase
       .from('group_members')
@@ -205,7 +225,20 @@ export async function getGroupMembers(groupId: string) {
       throw error;
     }
 
-    return data || [];
+    // Transform the data to match our GroupMember interface
+    const transformedData = data.map(member => {
+      const profile = member.profiles as any;
+      return {
+        ...member,
+        profiles: {
+          id: profile?.id || '',
+          username: profile?.username || null,
+          full_name: profile?.full_name || null
+        }
+      } as GroupMember;
+    });
+
+    return transformedData;
   } catch (error) {
     console.error('Failed to fetch group members:', error);
     throw error;
