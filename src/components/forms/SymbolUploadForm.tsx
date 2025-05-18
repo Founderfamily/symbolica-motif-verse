@@ -69,7 +69,7 @@ const SymbolUploadForm: React.FC<SymbolUploadFormProps> = ({ onSubmit }) => {
         
         <div className="space-y-2">
           <Label><I18nText translationKey="uploadForm.image.label" /></Label>
-          <ImageUpload onFileChange={handleImageUpload} />
+          <ImageUpload onChange={handleImageUpload} />
         </div>
         
         <div className="space-y-2">

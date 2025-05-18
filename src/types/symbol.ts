@@ -15,6 +15,15 @@ export interface SymbolFormData {
     longitude: number;
     name: string;
   } | null;
+  translations?: Record<string, Partial<{
+    name: string;
+    description: string;
+    culture: string;
+    period: string;
+    medium: string[];
+    technique: string[];
+    function: string[];
+  }>>;
 }
 
 export interface Symbol extends SymbolFormData {
