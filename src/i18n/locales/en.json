@@ -1,4 +1,3 @@
-
 {
   "navigation": {
     "home": "Home",
@@ -125,5 +124,10 @@
   },
   "user": {
     "anonymous": "User"
+  },
+  "language": {
+    "en": "English",
+    "fr": "French",
+    "switchTo": "Switch to {language}"
   }
 }
