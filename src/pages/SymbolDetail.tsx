@@ -47,7 +47,7 @@ const SymbolDetail: React.FC = () => {
   
   // Get translated value using our new utility function
   const getTranslatedValue = (field: 'name' | 'description' | 'culture' | 'period') => {
-    return getTranslatedField(symbol, field, 'en');
+    return getTranslatedField<string>(symbol, field, 'en');
   };
   
   // For arrays like medium, technique, function
@@ -231,8 +231,8 @@ const SymbolDetail: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             {relatedSymbols.map(relatedSymbol => {
               // Get translated name using the utility function
-              const translatedName = getTranslatedField(relatedSymbol, 'name');
-              const translatedCulture = getTranslatedField(relatedSymbol, 'culture');
+              const translatedName = getTranslatedField<string>(relatedSymbol, 'name');
+              const translatedCulture = getTranslatedField<string>(relatedSymbol, 'culture');
               
               return (
                 <Link 

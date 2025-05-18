@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
-import { ImageUpload } from '../upload/ImageUpload';
+import ImageUpload from '../upload/ImageUpload';
 
 interface SymbolUploadFormProps {
   onSubmit: (data: any) => void;
