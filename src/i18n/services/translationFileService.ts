@@ -1,64 +1,77 @@
 
-import fs from 'fs';
-import path from 'path';
-
-const LOCALES_DIR = path.join(process.cwd(), 'src/i18n/locales');
+import en from '../locales/en.json';
+import fr from '../locales/fr.json';
 
 /**
- * Ensure the locales directory exists
+ * In the browser environment, we can't read/write disk files.
+ * Instead, we expose the imported JSON dictionaries directly
+ * and use localStorage for optional persistent storage.
  */
-function ensureLocalesDir() {
-  if (!fs.existsSync(LOCALES_DIR)) {
-    fs.mkdirSync(LOCALES_DIR, { recursive: true });
+type LocaleCode = 'en' | 'fr';
+type FlatDict = Record<string, string>;
+
+const CACHE_KEY = '__symbolica_translations_cache__';
+
+function getCached(): Record<LocaleCode, FlatDict> | null {
+  try {
+    return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+  } catch {
+    return null;
   }
 }
 
+function setCached(obj: Record<LocaleCode, FlatDict>) {
+  localStorage.setItem(CACHE_KEY, JSON.stringify(obj));
+}
+
+function flatten(obj: any, prefix = '', acc: FlatDict = {}): FlatDict {
+  Object.entries(obj).forEach(([k, v]) => {
+    const path = prefix ? `${prefix}.${k}` : k;
+    typeof v === 'object' && v !== null && !Array.isArray(v) 
+      ? flatten(v, path, acc) 
+      : (acc[path] = v as string);
+  });
+  return acc;
+}
+
 /**
- * Write translations to a file
+ * Browser-compatible file service that uses imported JSON files and localStorage
  */
+export const browserFileService = {
+  /**
+   * Read translations from imported JSON files or localStorage cache
+   */
+  readAll(): Record<LocaleCode, FlatDict> {
+    return getCached() ?? { en: flatten(en), fr: flatten(fr) };
+  },
+
+  /**
+   * Write translations to localStorage (useful after live editing)
+   */
+  writeAll(dict: Record<LocaleCode, FlatDict>) {
+    setCached(dict);
+  },
+};
+
+/**
+ * Legacy compatibility functions that use the browser service
+ * These are needed to maintain compatibility with existing code
+ */
+export async function readTranslationsFromFile(language: string): Promise<Record<string, any>> {
+  const allTranslations = browserFileService.readAll();
+  return allTranslations[language as LocaleCode] || {};
+}
+
 export async function writeTranslationsToFile(
   language: string, 
   translations: Record<string, any>
 ): Promise<void> {
-  try {
-    ensureLocalesDir();
-    const filePath = path.join(LOCALES_DIR, `${language}.json`);
-    await fs.promises.writeFile(
-      filePath,
-      JSON.stringify(translations, null, 2),
-      'utf8'
-    );
-    console.log(`Translations written to ${filePath}`);
-  } catch (error) {
-    console.error(`Error writing ${language} translations to file:`, error);
-    throw error;
-  }
+  const allTranslations = browserFileService.readAll();
+  allTranslations[language as LocaleCode] = translations;
+  browserFileService.writeAll(allTranslations);
+  console.log(`Translations written to localStorage cache for ${language}`);
 }
 
-/**
- * Read translations from a file
- */
-export async function readTranslationsFromFile(
-  language: string
-): Promise<Record<string, any>> {
-  try {
-    const filePath = path.join(LOCALES_DIR, `${language}.json`);
-    if (!fs.existsSync(filePath)) {
-      console.warn(`Translation file ${filePath} not found`);
-      return {};
-    }
-    
-    const content = await fs.promises.readFile(filePath, 'utf8');
-    return JSON.parse(content);
-  } catch (error) {
-    console.error(`Error reading ${language} translations from file:`, error);
-    return {};
-  }
-}
-
-/**
- * Compare translations from database with local files
- */
 export async function compareTranslations(
   dbTranslations: Record<string, any>,
   fileTranslations: Record<string, any>

@@ -5,8 +5,8 @@
 
 export interface FormatIssue {
   key: string;
-  en: string;        // Changed from enValue
-  fr: string;        // Changed from frValue
+  en: string;        // English value
+  fr: string;        // French value
   issue: string;
   details?: {
     missingInEn: string[];
@@ -15,13 +15,13 @@ export interface FormatIssue {
 }
 
 export interface ValidationReport {
-  valid: boolean;    // Added valid property
+  valid: boolean;    // Whether all validations passed
   missingKeys: {
-    en: string[];    // Changed structure to match implementation
-    fr: string[];
+    en: string[];    // Keys missing in English
+    fr: string[];    // Keys missing in French
   };
   formatIssues: FormatIssue[];
-  invalidKeyFormat: string[];  // Added invalidKeyFormat property
+  invalidKeyFormat: string[];  // Keys that don't follow format conventions
 }
 
 // Also include the original ValidationReport structure for backward compatibility

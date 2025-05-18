@@ -1,5 +1,5 @@
 
-import { diagnoseTranslations, generateFixReport } from './translationUtils';
+import { diagnoseTranslations, generateFixReport, convertToLegacyReport } from './translationUtils';
 import { LegacyValidationReport, ValidationReport } from './types/validationTypes';
 import { translationDatabaseService } from './services/translationDatabaseService';
 
@@ -13,8 +13,9 @@ const runValidation = async () => {
   console.log('Translation Validation Tool');
   console.log('======================================\n');
   
-  // Use as LegacyValidationReport since this script expects the old format
-  const diagnosis = diagnoseTranslations() as LegacyValidationReport;
+  // Get validation report and convert to legacy format for backward compatibility
+  const validationReport = diagnoseTranslations();
+  const diagnosis = convertToLegacyReport(validationReport);
   
   console.log('DIAGNOSIS RESULTS:');
   console.log('----------------');

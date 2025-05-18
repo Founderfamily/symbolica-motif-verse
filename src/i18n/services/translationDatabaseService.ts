@@ -1,8 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import en from '../locales/en.json';
-import fr from '../locales/fr.json';
-import { writeTranslationsToFile } from './translationFileService';
+import { browserFileService } from './translationFileService';
 
 /**
  * Interface for translation entry in database
@@ -230,12 +228,23 @@ export const translationDatabaseService = {
    */
   async initializeFromLocalFiles(): Promise<boolean> {
     try {
-      const enTranslations = await this.flattenTranslationsObject(en);
-      const frTranslations = await this.flattenTranslationsObject(fr);
+      // Check if translations already exist in database
+      const { count, error } = await supabase
+        .from('translations')
+        .select('*', { head: true, count: 'exact' });
+      
+      if (error) throw error;
+      if (count && count > 0) {
+        console.log(`Database already contains ${count} translations. Skipping initialization.`);
+        return true;
+      }
+      
+      // Get translations from the imported JSON files
+      const { en, fr } = browserFileService.readAll();
       
       const translations: TranslationEntry[] = [];
       
-      for (const [key, value] of Object.entries(enTranslations)) {
+      for (const [key, value] of Object.entries(en)) {
         translations.push({
           key,
           language: 'en',
@@ -243,7 +252,7 @@ export const translationDatabaseService = {
         });
       }
       
-      for (const [key, value] of Object.entries(frTranslations)) {
+      for (const [key, value] of Object.entries(fr)) {
         translations.push({
           key,
           language: 'fr',
@@ -252,6 +261,7 @@ export const translationDatabaseService = {
       }
       
       await this.saveMultipleTranslations(translations);
+      console.log(`Initialized database with ${translations.length} translations`);
       return true;
     } catch (error) {
       console.error('Error initializing translations from files:', error);
@@ -267,11 +277,14 @@ export const translationDatabaseService = {
       const enTranslations = await this.getTranslationsByLanguage('en');
       const frTranslations = await this.getTranslationsByLanguage('fr');
       
-      const enObject = this.buildNestedObject(enTranslations);
-      const frObject = this.buildNestedObject(frTranslations);
+      const enFlat: Record<string, string> = {};
+      const frFlat: Record<string, string> = {};
       
-      await writeTranslationsToFile('en', enObject);
-      await writeTranslationsToFile('fr', frObject);
+      enTranslations.forEach(t => { enFlat[t.key] = t.value; });
+      frTranslations.forEach(t => { frFlat[t.key] = t.value; });
+      
+      browserFileService.writeAll({ en: enFlat, fr: frFlat });
+      console.log('Exported translations to localStorage cache');
       
       return true;
     } catch (error) {
@@ -325,3 +338,7 @@ export const translationDatabaseService = {
     return result;
   }
 };
+
+// Export the functions directly for more concise imports
+export const initializeFromLocalFiles = translationDatabaseService.initializeFromLocalFiles.bind(translationDatabaseService);
+export const exportToLocalFiles = translationDatabaseService.exportToLocalFiles.bind(translationDatabaseService);

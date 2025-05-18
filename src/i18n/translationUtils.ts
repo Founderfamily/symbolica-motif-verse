@@ -2,9 +2,10 @@
 /**
  * Utilities for handling translations and validation
  */
-import { ValidationReport, FormatIssue } from './types/validationTypes';
+import { ValidationReport, LegacyValidationReport, FormatIssue } from './types/validationTypes';
 import { findMissingKeys as findMissingKeysOriginal } from './validators/validatorUtils';
 import { extractPlaceholders } from './validators/validatorUtils';
+import { findFormatIssues as findFormatIssuesImpl } from './validators/formatIssueValidator';
 
 // Re-export the findMissingKeys function for external use
 export const findMissingKeys = (source?: any, target?: any, prefix?: string) => {
@@ -66,34 +67,49 @@ const countKeys = (obj: any, prefix = ''): number => {
  */
 export const diagnoseTranslations = (): ValidationReport => {
   try {
-    const result = findMissingKeys();
+    const missingKeysResult = findMissingKeys();
     const formatIssues: FormatIssue[] = findFormatIssues();
     
     return {
-      missingKeys: result,
+      valid: missingKeysResult.missingInFr.length === 0 && missingKeysResult.missingInEn.length === 0 && formatIssues.length === 0,
+      missingKeys: {
+        en: missingKeysResult.missingInEn,
+        fr: missingKeysResult.missingInFr
+      },
       formatIssues,
-      invalidKeyFormat: [],
-      summary: {
-        missingCount: result.missingInFr.length + result.missingInEn.length,
-        formatIssuesCount: formatIssues.length,
-        invalidKeyFormatCount: 0,
-        isValid: result.missingInFr.length === 0 && result.missingInEn.length === 0 && formatIssues.length === 0
-      }
+      invalidKeyFormat: []
     };
   } catch (error) {
     console.error('Error diagnosing translations:', error);
     return {
-      missingKeys: { missingInFr: [], missingInEn: [], total: { en: 0, fr: 0 } },
+      valid: false,
+      missingKeys: { en: [], fr: [] },
       formatIssues: [],
-      invalidKeyFormat: [],
-      summary: {
-        missingCount: 0,
-        formatIssuesCount: 0,
-        invalidKeyFormatCount: 0,
-        isValid: false
-      }
+      invalidKeyFormat: []
     };
   }
+};
+
+/**
+ * Convert ValidationReport to LegacyValidationReport
+ * This is necessary for backward compatibility
+ */
+export const convertToLegacyReport = (report: ValidationReport): LegacyValidationReport => {
+  return {
+    missingKeys: {
+      missingInFr: report.missingKeys.fr,
+      missingInEn: report.missingKeys.en,
+      total: {
+        en: report.missingKeys.en.length + report.missingKeys.fr.length,
+        fr: report.missingKeys.fr.length + report.missingKeys.en.length
+      }
+    },
+    formatIssues: report.formatIssues,
+    summary: {
+      missingCount: report.missingKeys.en.length + report.missingKeys.fr.length,
+      formatIssuesCount: report.formatIssues.length
+    }
+  };
 };
 
 /**
@@ -103,38 +119,7 @@ export const findFormatIssues = (): FormatIssue[] => {
   try {
     const enTranslations = require('./locales/en.json');
     const frTranslations = require('./locales/fr.json');
-    const issues: FormatIssue[] = [];
-    
-    // Helper function to check nested objects
-    const checkFormat = (enObj: any, frObj: any, prefix = '') => {
-      for (const key in enObj) {
-        const fullKey = prefix ? `${prefix}.${key}` : key;
-        
-        if (typeof enObj[key] === 'object' && enObj[key] !== null && !Array.isArray(enObj[key])) {
-          if (frObj[key] && typeof frObj[key] === 'object') {
-            checkFormat(enObj[key], frObj[key], fullKey);
-          }
-        } else if (frObj[key] !== undefined) {
-          // Check for placeholder consistency
-          const enPlaceholders = extractPlaceholders(enObj[key]);
-          const frPlaceholders = extractPlaceholders(frObj[key]);
-          
-          // Find placeholders in one language but not the other
-          const missingInFr = enPlaceholders.filter(p => !frPlaceholders.includes(p));
-          const missingInEn = frPlaceholders.filter(p => !enPlaceholders.includes(p));
-          
-          if (missingInFr.length > 0 || missingInEn.length > 0) {
-            issues.push({
-              key: fullKey,
-              issue: `Placeholder mismatch: ${missingInFr.length > 0 ? `Missing in FR: ${missingInFr.join(', ')}` : ''}${missingInEn.length > 0 ? `Missing in EN: ${missingInEn.join(', ')}` : ''}`
-            });
-          }
-        }
-      }
-    };
-    
-    checkFormat(enTranslations, frTranslations);
-    return issues;
+    return findFormatIssuesImpl(enTranslations, frTranslations);
   } catch (error) {
     console.error('Error finding format issues:', error);
     return [];
@@ -146,7 +131,7 @@ export const findFormatIssues = (): FormatIssue[] => {
  */
 export const generateFixReport = (report: ValidationReport) => {
   const fixes = {
-    addMissingKeys: [...report.missingKeys.missingInEn, ...report.missingKeys.missingInFr],
+    addMissingKeys: [...report.missingKeys.en, ...report.missingKeys.fr],
     fixFormatIssues: report.formatIssues.map(issue => issue.key)
   };
   
@@ -215,3 +200,7 @@ export function formatKeyAsReadableText(key: string): string {
     return key; // Return the original key if something goes wrong
   }
 }
+
+// Export additional functions
+export { findMissingKeysOriginal } from './validators/validatorUtils';
+export { findFormatIssuesImpl as findFormatIssuesFromValidators } from './validators/formatIssueValidator';

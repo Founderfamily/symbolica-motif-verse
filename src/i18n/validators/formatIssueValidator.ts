@@ -62,3 +62,23 @@ export const findFormatIssues = (en: any, fr: any): FormatIssue[] => {
   compareObjects(en, fr);
   return issues;
 };
+
+/**
+ * Generate a diagnostic report for translations
+ * This functions is re-exported from translationUtils
+ */
+export const diagnoseTranslations = () => {
+  // Placeholder for backward compatibility
+  // The actual implementation is in translationUtils.ts
+  return {};
+};
+
+/**
+ * Generate a fix report for translation issues
+ * This functions is re-exported from translationUtils
+ */
+export const generateFixReport = () => {
+  // Placeholder for backward compatibility
+  // The actual implementation is in translationUtils.ts
+  return {};
+};
