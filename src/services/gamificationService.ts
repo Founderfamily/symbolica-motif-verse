@@ -1,4 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
+import { UserAchievement, Achievement, UserPoints, UserActivity, UserLevel } from '@/types/gamification';
 
 /**
  * Service for gamification-related operations, such as awarding points
@@ -28,7 +30,7 @@ export const gamificationService = {
       if (error) throw error;
       
       // Update user points
-      const pointsField = `${activityType}_points` as keyof typeof initialPoints;
+      const pointsField = `${activityType}_points` as keyof typeof initialPointsTemplate;
       
       // Get current points
       const { data: currentPoints, error: pointsError } = await supabase
@@ -80,5 +82,127 @@ export const gamificationService = {
       console.error("Error awarding points:", error);
       return false;
     }
+  },
+  
+  /**
+   * Get all available achievements
+   */
+  getAchievements: async (): Promise<Achievement[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('achievements')
+        .select('*')
+        .order('requirement', { ascending: true });
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      return [];
+    }
+  },
+  
+  /**
+   * Get achievements for a specific user
+   */
+  getUserAchievements: async (userId: string): Promise<UserAchievement[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_achievements')
+        .select('*, achievement:achievement_id(*)')
+        .eq('user_id', userId);
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      return [];
+    }
+  },
+  
+  /**
+   * Get points for a specific user
+   */
+  getUserPoints: async (userId: string): Promise<UserPoints | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_points')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    } catch (error) {
+      console.error("Error fetching user points:", error);
+      return null;
+    }
+  },
+  
+  /**
+   * Get level information for a specific user
+   */
+  getUserLevel: async (userId: string): Promise<UserLevel | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_levels')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    } catch (error) {
+      console.error("Error fetching user level:", error);
+      return null;
+    }
+  },
+  
+  /**
+   * Get recent activities for a specific user
+   */
+  getUserActivities: async (userId: string, limit: number = 10): Promise<UserActivity[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_activities')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching user activities:", error);
+      return [];
+    }
+  },
+  
+  /**
+   * Get leaderboard with top users by total points
+   */
+  getLeaderboard: async (limit: number = 10): Promise<any[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_points')
+        .select('*, profiles:user_id(*)')
+        .order('total', { ascending: false })
+        .limit(limit);
+        
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      return [];
+    }
   }
+};
+
+// Template for initial points when creating a new user_points record
+const initialPointsTemplate = {
+  total: 0,
+  contribution_points: 0,
+  exploration_points: 0,
+  validation_points: 0,
+  community_points: 0,
 };

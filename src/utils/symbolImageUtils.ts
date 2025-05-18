@@ -1,3 +1,4 @@
+
 import { Symbol } from '@/data/symbols';
 
 export type ImageType = 'original' | 'pattern' | 'reuse';
@@ -16,6 +17,46 @@ export const symbolToLocalImage: Record<string, string> = {
   "Motif viking": "/images/symbols/viking.png",
   "Arabesque": "/images/symbols/arabesque.png",
   "Motif aztèque": "/images/symbols/aztec.png"
+};
+
+// French to English culture mapping
+export const cultureMapping: Record<string, string> = {
+  // English to English (for direct matches)
+  'Celtic': 'Celtic',
+  'Viking': 'Viking',
+  'Greek': 'Greek',
+  'Aboriginal': 'Aboriginal',
+  'Aztec': 'Aztec',
+  'Mayan': 'Mayan',
+  'Japanese': 'Japanese',
+  'Indian': 'Indian',
+  'Buddhist': 'Buddhist',
+  'Persian': 'Persian',
+  'Islamic': 'Islamic',
+  'French': 'French',
+  'Egyptian': 'Egyptian',
+  'African': 'African',
+  
+  // French to English
+  'Celtique': 'Celtic',
+  'Nordique': 'Viking',
+  'Grec': 'Greek',
+  'Aborigène': 'Aboriginal',
+  'Aztèque': 'Aztec',
+  'Maya': 'Mayan',
+  'Japonais': 'Japanese',
+  'Indien': 'Indian',
+  'Bouddhiste': 'Buddhist',
+  'Perse': 'Persian',
+  'Islamique': 'Islamic',
+  'Français': 'French',
+  'Égyptien': 'Egyptian',
+  'Africain': 'African'
+};
+
+// Normalize culture name to English for consistent icon and color mapping
+const normalizeCulture = (culture: string): string => {
+  return cultureMapping[culture] || culture;
 };
 
 // Fonction pour obtenir une image de remplacement appropriée
@@ -45,6 +86,9 @@ export function isValidImageUrl(url: string): boolean {
 }
 
 export const getSymbolIconByType = (culture: string): string => {
+  // Normalize culture name to English
+  const normalizedCulture = normalizeCulture(culture);
+  
   // Map culture to icon
   const cultureMap: Record<string, string> = {
     'Celtic': '/images/symbols/triskelion.png',
@@ -63,10 +107,13 @@ export const getSymbolIconByType = (culture: string): string => {
     'African': '/images/symbols/adinkra.png'
   };
   
-  return cultureMap[culture] || '/images/symbols/mandala.png'; // Default to mandala if culture not found
+  return cultureMap[normalizedCulture] || '/images/symbols/mandala.png'; // Default to mandala if culture not found
 };
 
 export const getSymbolThemeColor = (culture: string): string => {
+  // Normalize culture name to English
+  const normalizedCulture = normalizeCulture(culture);
+  
   // Map culture to a color theme
   const colorMap: Record<string, string> = {
     'Celtic': 'bg-emerald-500',
@@ -85,5 +132,5 @@ export const getSymbolThemeColor = (culture: string): string => {
     'African': 'bg-yellow-700'
   };
   
-  return colorMap[culture] || 'bg-slate-500'; // Default color
+  return colorMap[normalizedCulture] || 'bg-slate-500'; // Default color
 };

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +15,7 @@ import CulturalMarker from './CulturalMarker';
 import SymbolCluster from './SymbolCluster';
 import CultureLegend from './CultureLegend';
 import { Button } from '@/components/ui/button';
+import { gamificationService } from '@/services/gamificationService';
 
 // Default map settings
 const DEFAULT_MAP_CENTER: [number, number] = [0, 20]; // Initial position at [longitude, latitude]
