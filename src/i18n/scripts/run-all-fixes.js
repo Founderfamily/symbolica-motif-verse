@@ -15,6 +15,7 @@
  * Options:
  *   --auto-fix       Attempt to automatically fix issues when possible
  *   --ignore-errors  Continue even if some steps fail (exit code 0)
+ *   --export-csv     Export results to CSV files
  */
 
 const fs = require('fs');
@@ -26,6 +27,7 @@ const glob = require('glob');
 const args = process.argv.slice(2);
 const shouldAutoFix = args.includes('--auto-fix');
 const ignoreErrors = args.includes('--ignore-errors');
+const exportCsv = args.includes('--export-csv');
 
 // Configuration
 const config = {
@@ -35,11 +37,18 @@ const config = {
     'src/pages/**/*.tsx',
     'src/App.tsx'
   ],
-  reportPath: 'translation-report.md'
+  reportPath: 'translation-report.md',
+  csvOutputDir: path.join('src', 'i18n', 'reports')
 };
+
+// Ensure CSV output directory exists
+if (exportCsv && !fs.existsSync(config.csvOutputDir)) {
+  fs.mkdirSync(config.csvOutputDir, { recursive: true });
+}
 
 console.log('=== Translation System - Run All Fixes ===\n');
 console.log(`Mode: ${shouldAutoFix ? 'Auto Fix' : 'Scan Only'}`);
+if (exportCsv) console.log('CSV Export: Enabled');
 
 let errors = [];
 let fixes = 0;
@@ -101,21 +110,48 @@ try {
     console.log(`✅ Converted ${convertedCount} files to use I18nText`);
   }
   
-  // Step 3: Check for translation completeness
-  console.log('\n🔍 Step 3: Checking translation completeness...');
-  
-  const checkCommand = `node ${config.srcDir}/i18n/check-translation-completeness.js${shouldAutoFix ? ' --fix' : ''} --report=${config.reportPath}`;
+  // Step 3: Check for generic keys and fix them
+  console.log('\n🔍 Step 3: Checking for generic translation keys...');
   
   try {
-    execSync(checkCommand, { encoding: 'utf8', stdio: 'inherit' });
+    const genericKeysCommand = `node ${config.srcDir}/i18n/scripts/find-generic-keys.js${shouldAutoFix ? ' --fix' : ''}`;
+    execSync(genericKeysCommand, { encoding: 'utf8', stdio: 'inherit' });
     
     if (shouldAutoFix) {
-      console.log('✅ Fixed missing translations where possible');
+      console.log('✅ Fixed generic keys where possible');
       fixes++;
     }
   } catch (error) {
-    console.error('❌ Error checking translations:', error.message);
-    errors.push(`Translation check failed: ${error.message}`);
+    console.error('❌ Error checking generic keys:', error.message);
+    errors.push(`Generic key check failed: ${error.message}`);
+  }
+  
+  // Step 4: Check for missing translations and add placeholders
+  console.log('\n🔍 Step 4: Checking for missing translations...');
+  
+  try {
+    const applyFixesCommand = `node ${config.srcDir}/i18n/scripts/apply-translation-fixes.js${shouldAutoFix ? '' : ' --dry-run'}`;
+    execSync(applyFixesCommand, { encoding: 'utf8', stdio: 'inherit' });
+    
+    if (shouldAutoFix) {
+      console.log('✅ Added placeholder translations for missing keys');
+      fixes++;
+    }
+  } catch (error) {
+    console.error('❌ Error adding missing translations:', error.message);
+    errors.push(`Missing translation check failed: ${error.message}`);
+  }
+  
+  // Step 5: Generate comprehensive report
+  console.log('\n🔍 Step 5: Generating comprehensive translation report...');
+  
+  try {
+    const reportCommand = `node ${config.srcDir}/i18n/scripts/generate-translation-report.js${exportCsv ? ' --csv' : ''}`;
+    execSync(reportCommand, { encoding: 'utf8', stdio: 'inherit' });
+    console.log(`✅ Generated comprehensive report`);
+  } catch (error) {
+    console.error('❌ Error generating report:', error.message);
+    errors.push(`Report generation failed: ${error.message}`);
   }
   
   // Summary
@@ -134,13 +170,18 @@ try {
   
   console.log(`📝 Generated report at: ${config.reportPath}`);
   
+  if (exportCsv) {
+    console.log(`📝 CSV exports saved to: ${config.csvOutputDir}`);
+  }
+  
   // Action items
   console.log('\n=== Next Steps ===');
   console.log('1. Review the translation report');
   console.log('2. Test the application to ensure all translations work correctly');
   
   if (shouldAutoFix) {
-    console.log('3. Commit the changes to your repository');
+    console.log('3. Review the automatically applied fixes');
+    console.log('4. Update the placeholder translations with actual content');
   } else {
     console.log('3. Run again with --auto-fix to apply fixes');
   }

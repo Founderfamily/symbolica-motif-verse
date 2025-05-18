@@ -48,7 +48,7 @@ const suggestBetterKey = (genericKey, filePath, lineNumber) => {
   let componentName = '';
   
   // Search nearby lines for component names
-  const contextRange = 5; // Lines to check before the occurrence
+  const contextRange = 10; // Expanded range to check more lines before the occurrence
   const startLine = Math.max(0, lineNumber - contextRange - 1);
   const contextLines = fileContent.slice(startLine, lineNumber);
   
@@ -63,8 +63,24 @@ const suggestBetterKey = (genericKey, filePath, lineNumber) => {
     section = componentName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   }
   
+  // Look for patterns in the line that could give more context
+  // Check if the key is inside specific UI elements
+  if (line.includes('<Button') || line.includes('button')) {
+    section = section + '.buttons';
+  } else if (line.includes('<Input') || line.includes('input') || 
+            line.includes('placeholder=') || line.includes('label=')) {
+    section = section + '.form';
+  } else if (line.includes('<h1') || line.includes('<h2') || line.includes('title')) {
+    section = section + '.headings';
+  } else if (line.includes('error') || line.includes('Error')) {
+    section = section + '.errors';
+  }
+  
   // Convert genericKey to lowercase for consistency
-  const keyPart = genericKey.toLowerCase();
+  // Remove any non-alphanumeric characters except dots and hyphens
+  const keyPart = genericKey.toLowerCase()
+    .replace(/[^a-z0-9.-]/g, '-')
+    .replace(/-+/g, '-');
   
   // Build the suggested key
   return `${namespace}.${section}.${keyPart}`;
@@ -120,8 +136,66 @@ const generateFixCode = (fixes) => {
   return fileChanges;
 };
 
+/**
+ * Apply fixes to files directly
+ * 
+ * @param {Array} fixes - List of fix suggestions
+ * @returns {Object} Results of the fix operation
+ */
+const applyFixes = (fixes) => {
+  const results = {
+    totalFiles: 0,
+    totalFixes: fixes.length,
+    modifiedFiles: [],
+    errors: []
+  };
+  
+  // Group fixes by file
+  const fixesByFile = {};
+  fixes.forEach(fix => {
+    if (!fixesByFile[fix.file]) {
+      fixesByFile[fix.file] = [];
+    }
+    fixesByFile[fix.file].push(fix);
+  });
+  
+  // Apply fixes to each file
+  Object.keys(fixesByFile).forEach(filePath => {
+    try {
+      const fileFixes = fixesByFile[filePath];
+      let content = fs.readFileSync(filePath, 'utf8');
+      const lines = content.split('\n');
+      
+      // Apply fixes in reverse line order to avoid position shifts
+      fileFixes
+        .sort((a, b) => b.lineNumber - a.lineNumber)
+        .forEach(fix => {
+          lines[fix.lineNumber - 1] = fix.replacement;
+        });
+      
+      // Write back the modified content
+      fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
+      
+      results.totalFiles++;
+      results.modifiedFiles.push({
+        path: filePath,
+        fixCount: fileFixes.length,
+        keys: fileFixes.map(f => ({ from: f.originalKey, to: f.suggestedKey }))
+      });
+    } catch (error) {
+      results.errors.push({
+        file: filePath,
+        error: error.message
+      });
+    }
+  });
+  
+  return results;
+};
+
 module.exports = {
   suggestBetterKey,
   generateFixSuggestions,
-  generateFixCode
+  generateFixCode,
+  applyFixes
 };
