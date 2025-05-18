@@ -32,6 +32,12 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
       document.addEventListener('keydown', handleLanguageToggle);
       return () => document.removeEventListener('keydown', handleLanguageToggle);
     }
+    
+    // Log translation status on mount in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`TranslationProvider mounted. Current language: ${i18n.language}`);
+      console.log('Supported languages:', i18n.options.supportedLngs);
+    }
   }, []);
 
   return (
