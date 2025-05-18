@@ -1,3 +1,4 @@
+
 /**
  * Utilities for handling translations from database content
  * These functions help display multilingual content from Supabase records
