@@ -1,5 +1,5 @@
 
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useMemo } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 
 type I18nTextProps = {
@@ -28,11 +28,19 @@ export const I18nText = ({
   children,
   highlightMissing = true
 }: I18nTextProps) => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n, currentLanguage } = useTranslation();
   const [showTooltip, setShowTooltip] = useState(false);
   
-  // Get the translated text
-  const translatedText = t(translationKey, params);
+  // Get the translated text with memoization based on key, params and language
+  const translatedText = useMemo(() => {
+    try {
+      return t(translationKey, params);
+    } catch (error) {
+      console.error(`Error translating key: ${translationKey}`, error);
+      return translationKey;
+    }
+  }, [t, translationKey, params, currentLanguage]);
+  
   const keyExists = i18n.exists(translationKey);
   
   // Consider key missing if it doesn't exist or if the translation is the same as the key
@@ -61,7 +69,8 @@ export const I18nText = ({
   const devAttributes = process.env.NODE_ENV === 'development' 
     ? { 
         'data-i18n-key': translationKey,
-        'data-i18n-missing': isMissing ? 'true' : 'false'
+        'data-i18n-missing': isMissing ? 'true' : 'false',
+        'data-i18n-lang': currentLanguage
       } 
     : {};
     

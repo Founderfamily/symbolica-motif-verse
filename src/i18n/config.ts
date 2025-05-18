@@ -45,6 +45,8 @@ i18n
     // Better fallback handling - prevent keys from being used as values
     returnNull: false,
     returnEmptyString: false,
+    // Allow returning objects (important for complex translations)
+    returnObjects: true,
     parseMissingKeyHandler: (key) => {
       // Format missing keys nicely for display
       return formatKeyAsReadableText(key);

@@ -1,6 +1,7 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 import { i18n } from './config';
+import { useCallback } from 'react';
 
 export const useTranslation = () => {
   // Use the underlying react-i18next hook
@@ -10,12 +11,14 @@ export const useTranslation = () => {
   const currentLanguage = i18nInstance.language || 'fr';
   
   // Function to change the language
-  const changeLanguage = (lang: string) => {
+  const changeLanguage = useCallback((lang: string) => {
+    console.log(`Attempting to change language to: ${lang}`);
+    localStorage.setItem('app_language', lang);
     return i18nInstance.changeLanguage(lang);
-  };
+  }, [i18nInstance]);
   
   // Add validation function for development environment
-  const validateCurrentPageTranslations = () => {
+  const validateCurrentPageTranslations = useCallback(() => {
     if (process.env.NODE_ENV === 'development') {
       // Find all elements with data-i18n-key attribute
       const translationElements = document.querySelectorAll('[data-i18n-key]');
@@ -46,7 +49,12 @@ export const useTranslation = () => {
     
     // Return empty result for production
     return { total: 0, missing: [], complete: 0 };
-  };
+  }, []);
+  
+  // Check if a specific key exists in the translation file
+  const hasTranslation = useCallback((key: string) => {
+    return i18nInstance.exists(key);
+  }, [i18nInstance]);
   
   // Simplified API that focuses only on i18n functionality
   return {
@@ -54,7 +62,8 @@ export const useTranslation = () => {
     i18n: i18nInstance,
     currentLanguage,
     changeLanguage,
-    validateCurrentPageTranslations
+    validateCurrentPageTranslations,
+    hasTranslation
   };
 };
 
