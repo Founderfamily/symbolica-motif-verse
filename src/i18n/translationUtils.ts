@@ -1,7 +1,8 @@
+
 import { i18n } from '@/i18n/config';
 import en from './locales/en.json';
 import fr from './locales/fr.json';
-import { FormatIssue, ValidationReport } from './types/validationTypes';
+import { FormatIssue, ValidationReport, LegacyValidationReport } from './types/validationTypes';
 
 /**
  * Format a translation key as a readable text
@@ -146,18 +147,61 @@ const countKeys = (obj: any): number => {
 /**
  * Diagnose translation issues including missing keys and format problems
  */
-export const diagnoseTranslations = (): ValidationReport => {
-  const missingKeys = findMissingKeys();
+export const diagnoseTranslations = (): ValidationReport | LegacyValidationReport => {
+  const missingKeysResult = findMissingKeys();
   const formatIssues = findFormatIssues();
+  const invalidFormatKeys = findInvalidFormatKeys();
   
-  return {
-    missingKeys,
+  // Create the modern ValidationReport format
+  const modernReport: ValidationReport = {
+    valid: missingKeysResult.missingInEn.length === 0 && 
+           missingKeysResult.missingInFr.length === 0 && 
+           formatIssues.length === 0,
+    missingKeys: {
+      en: missingKeysResult.missingInEn,
+      fr: missingKeysResult.missingInFr
+    },
+    formatIssues,
+    invalidKeyFormat: invalidFormatKeys
+  };
+  
+  // Also create the legacy format for backward compatibility
+  const legacyReport: LegacyValidationReport = {
+    missingKeys: {
+      missingInFr: missingKeysResult.missingInFr,
+      missingInEn: missingKeysResult.missingInEn,
+      total: missingKeysResult.total
+    },
     formatIssues,
     summary: {
-      missingCount: missingKeys.missingInEn.length + missingKeys.missingInFr.length,
-      formatIssuesCount: formatIssues.length,
+      missingCount: missingKeysResult.missingInEn.length + missingKeysResult.missingInFr.length,
+      formatIssuesCount: formatIssues.length
     }
   };
+  
+  // Return the modern format by default
+  return modernReport;
+};
+
+// Find keys that don't follow formatting conventions
+export const findInvalidFormatKeys = (): string[] => {
+  const allKeys: string[] = [];
+  
+  const findAllKeys = (obj: any, path = '') => {
+    for (const key in obj) {
+      const currentPath = path ? `${path}.${key}` : key;
+      
+      if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+        findAllKeys(obj[key], currentPath);
+      } else {
+        allKeys.push(currentPath);
+      }
+    }
+  };
+  
+  findAllKeys(en);
+  
+  return allKeys.filter(key => !validateKeyFormat(key));
 };
 
 /**
@@ -201,8 +245,8 @@ const findFormatIssues = (): FormatIssue[] => {
     if (enPlaceholders.length !== frPlaceholders.length) {
       issues.push({
         key,
-        enValue,
-        frValue,
+        en: enValue,
+        fr: frValue,
         issue: 'Different number of placeholders'
       });
       continue;
@@ -215,9 +259,13 @@ const findFormatIssues = (): FormatIssue[] => {
     if (missingInFr.length > 0 || missingInEn.length > 0) {
       issues.push({
         key,
-        enValue,
-        frValue,
-        issue: 'Mismatched placeholder names'
+        en: enValue,
+        fr: frValue,
+        issue: 'Mismatched placeholder names',
+        details: {
+          missingInFr,
+          missingInEn
+        }
       });
     }
   }
@@ -244,23 +292,27 @@ const getNestedValue = (obj: any, path: string): any => {
 
 /**
  * Generate a report for fixing translation issues
+ * Uses the legacy format for backward compatibility
  */
 export const generateFixReport = () => {
-  const diagnosis = diagnoseTranslations();
+  const diagnosis = diagnoseTranslations() as ValidationReport;
   
   return {
-    summary: diagnosis.summary,
+    summary: {
+      missingCount: diagnosis.missingKeys.en.length + diagnosis.missingKeys.fr.length,
+      formatIssuesCount: diagnosis.formatIssues.length
+    },
     missingKeys: {
-      french: diagnosis.missingKeys.missingInFr,
-      english: diagnosis.missingKeys.missingInEn
+      french: diagnosis.missingKeys.fr,
+      english: diagnosis.missingKeys.en
     },
     formatIssues: diagnosis.formatIssues,
     suggestedFixes: {
-      french: diagnosis.missingKeys.missingInFr.map(key => {
+      french: diagnosis.missingKeys.fr.map(key => {
         const enValue = getNestedValue(en, key);
         return { key, suggestedValue: enValue };
       }),
-      english: diagnosis.missingKeys.missingInEn.map(key => {
+      english: diagnosis.missingKeys.en.map(key => {
         const frValue = getNestedValue(fr, key);
         return { key, suggestedValue: frValue };
       })

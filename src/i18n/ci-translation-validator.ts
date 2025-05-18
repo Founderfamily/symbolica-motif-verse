@@ -8,6 +8,7 @@
 
 import translationValidatorService from './validators/translationValidatorService';
 import { validateKeyFormat } from './translationKeyConventions';
+import { ValidationReport } from './types/validationTypes';
 
 // Run validation and collect results
 const validateForCI = () => {

@@ -12,6 +12,7 @@ const runValidation = () => {
   console.log('Translation Validation Tool');
   console.log('======================================\n');
   
+  // Use as LegacyValidationReport since this script expects the old format
   const diagnosis = diagnoseTranslations() as LegacyValidationReport;
   
   console.log('DIAGNOSIS RESULTS:');
