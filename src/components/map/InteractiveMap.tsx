@@ -4,17 +4,17 @@ import { useTranslation } from '@/i18n/useTranslation';
 import MapSymbolMarker from './MapSymbolMarker';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star, Loader2 } from 'lucide-react';
+import { MapPin, Star, Loader2, AlertCircle } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { symbolGeolocationService, SymbolLocation } from '@/services/symbolGeolocationService';
 import { toast } from '@/components/ui/use-toast';
+import MapboxAuth from './MapboxAuth';
 
-// Temporary Mapbox token - in production this should be stored securely
-// and loaded from environment variables or server-side
-const MAPBOX_TOKEN = 'pk.eyJ1Ijoic3ltYm9saWNhIiwiYSI6ImNsdjV5Zm9nODFnMmEycXBwNDI2M3QwdXEifQ.pshEPEGmIHumtf9dqbJeBA';
+// Removed hard-coded token - will now be provided by the user or from environment
+const DEFAULT_MAP_CENTER = [0, 20]; // Initial position at [longitude, latitude]
+const DEFAULT_ZOOM = 1.5;
 
-// This is an upgraded component for the interactive map using Mapbox
 const InteractiveMap = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -26,12 +26,18 @@ const InteractiveMap = () => {
   const [loading, setLoading] = useState(true);
   const [symbolLocations, setSymbolLocations] = useState<SymbolLocation[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+  const [tokenError, setTokenError] = useState<boolean>(false);
+  const mapInitializedRef = useRef<boolean>(false);
   
+  // Fetch locations from the database
   useEffect(() => {
     const fetchLocations = async () => {
       try {
+        console.log("Fetching symbol locations data...");
         setLoading(true);
         const locations = await symbolGeolocationService.getAllLocations();
+        console.log(`Retrieved ${locations.length} symbol locations`);
         setSymbolLocations(locations);
         setError(null);
       } catch (err) {
@@ -50,100 +56,151 @@ const InteractiveMap = () => {
     fetchLocations();
   }, [t]);
   
+  // Initialize or reinitialize the map when token changes
   useEffect(() => {
-    if (!mapContainerRef.current || map.current) return;
+    // Skip if no token, no container, or map already initialized
+    if (!mapboxToken || !mapContainerRef.current || mapInitializedRef.current) return;
     
-    // Initialize Mapbox
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    console.log("Initializing map with token...");
+    setTokenError(false);
     
-    const newMap = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [0, 20], // Initial position at [longitude, latitude]
-      zoom: 1.5,
-      minZoom: 1,
-      projection: 'globe'
-    });
-
-    // Add navigation controls (zoom in/out)
-    newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
-    
-    // Add fullscreen control
-    newMap.addControl(new mapboxgl.FullscreenControl());
-
-    // Add atmosphere and fog for better globe visualization
-    newMap.on('style.load', () => {
-      newMap.setFog({
-        color: 'rgb(255, 255, 255)',
-        'high-color': 'rgb(200, 200, 225)',
-        'horizon-blend': 0.2,
+    try {
+      // Initialize Mapbox
+      mapboxgl.accessToken = mapboxToken;
+      
+      const newMap = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: DEFAULT_MAP_CENTER,
+        zoom: DEFAULT_ZOOM,
+        minZoom: 1,
+        projection: 'globe'
       });
-    });
 
-    // Add gentle globe rotation animation
-    const secondsPerRevolution = 240;
-    const maxSpinZoom = 3;
-    let userInteracting = false;
-    let spinEnabled = true;
-
-    // Function to spin the globe
-    function spinGlobe() {
-      if (!newMap) return;
+      // Add navigation controls (zoom in/out)
+      newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
       
-      const zoom = newMap.getZoom();
-      if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
-        const distancePerSecond = 360 / secondsPerRevolution;
-        const center = newMap.getCenter();
-        center.lng -= distancePerSecond * 0.05;
-        newMap.easeTo({ center, duration: 1000, easing: (n) => n });
+      // Add fullscreen control
+      newMap.addControl(new mapboxgl.FullscreenControl());
+
+      // Add atmosphere and fog for better globe visualization
+      newMap.on('style.load', () => {
+        newMap.setFog({
+          color: 'rgb(255, 255, 255)',
+          'high-color': 'rgb(200, 200, 225)',
+          'horizon-blend': 0.2,
+        });
+      });
+
+      // Add gentle globe rotation animation
+      const secondsPerRevolution = 240;
+      const maxSpinZoom = 3;
+      let userInteracting = false;
+      let spinEnabled = true;
+
+      // Function to spin the globe
+      function spinGlobe() {
+        if (!newMap) return;
+        
+        const zoom = newMap.getZoom();
+        if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
+          const distancePerSecond = 360 / secondsPerRevolution;
+          const center = newMap.getCenter();
+          center.lng -= distancePerSecond * 0.05;
+          newMap.easeTo({ center, duration: 1000, easing: (n) => n });
+        }
       }
+
+      // Event listeners for interaction
+      newMap.on('mousedown', () => {
+        userInteracting = true;
+      });
+      
+      newMap.on('mouseup', () => {
+        userInteracting = false;
+        spinGlobe();
+      });
+      
+      newMap.on('touchstart', () => {
+        userInteracting = true;
+      });
+      
+      newMap.on('touchend', () => {
+        userInteracting = false;
+        spinGlobe();
+      });
+
+      // Start the spinning once the map has loaded
+      newMap.on('load', () => {
+        console.log("Map loaded successfully");
+        setMapLoaded(true);
+        spinGlobe();
+        
+        // Start animation loop
+        const animationInterval = setInterval(spinGlobe, 1000);
+        
+        return () => clearInterval(animationInterval);
+      });
+
+      // Detect errors during map initialization
+      newMap.on('error', (e) => {
+        console.error("Mapbox map error:", e);
+        if (e.error?.status === 401) {
+          setTokenError(true);
+          setError("Invalid Mapbox token. Please try again with a valid token.");
+          mapInitializedRef.current = false;
+        }
+      });
+
+      map.current = newMap;
+      mapInitializedRef.current = true;
+
+      // Cleanup function
+      return () => {
+        if (map.current) {
+          map.current.remove();
+          map.current = null;
+          mapInitializedRef.current = false;
+        }
+      };
+    } catch (err) {
+      console.error("Error initializing map:", err);
+      setTokenError(true);
+      setError("Failed to initialize map. Please try again.");
+      mapInitializedRef.current = false;
     }
-
-    // Event listeners for interaction
-    newMap.on('mousedown', () => {
-      userInteracting = true;
-    });
-    
-    newMap.on('mouseup', () => {
-      userInteracting = false;
-      spinGlobe();
-    });
-    
-    newMap.on('touchstart', () => {
-      userInteracting = true;
-    });
-    
-    newMap.on('touchend', () => {
-      userInteracting = false;
-      spinGlobe();
-    });
-
-    // Start the spinning once the map has loaded
-    newMap.on('load', () => {
-      setMapLoaded(true);
-      spinGlobe();
-      
-      // Start animation loop
-      const animationInterval = setInterval(spinGlobe, 1000);
-      
-      return () => clearInterval(animationInterval);
-    });
-
-    map.current = newMap;
-
-    // Cleanup function
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-    };
-  }, []);
+  }, [mapboxToken]);
   
   const handleMarkerClick = (id: string) => {
     setActiveLocation(id);
     setExploreCount(prev => prev + 1);
   };
+  
+  const handleTokenSubmit = (token: string) => {
+    console.log("New Mapbox token received");
+    setMapboxToken(token);
+    // Reset error states
+    setTokenError(false);
+    setError(null);
+  };
+
+  // If we don't have a token yet, show the auth form
+  if (!mapboxToken || tokenError) {
+    return (
+      <div className="space-y-4">
+        <MapboxAuth onTokenSubmit={handleTokenSubmit} />
+        
+        {tokenError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
+            <p className="text-sm text-red-600">
+              <I18nText translationKey="map.error.invalidToken" />
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-4">
@@ -151,16 +208,16 @@ const InteractiveMap = () => {
         <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 flex justify-between items-center">
           <div>
             <p className="text-sm font-medium text-amber-800">
-              {t('map.exploreInstructions')}
+              <I18nText translationKey="map.exploreInstructions" />
             </p>
             <p className="text-xs text-amber-700">
-              {t('map.earnPoints')}
+              <I18nText translationKey="map.earnPoints" />
             </p>
           </div>
           {exploreCount > 0 && (
             <Badge className="bg-amber-100 text-amber-800 gap-1 flex items-center">
               <Star className="h-3 w-3 fill-amber-500" />
-              <span>+{exploreCount * 5} {t('gamification.points')}</span>
+              <span>+{exploreCount * 5} <I18nText translationKey="gamification.points" /></span>
             </Badge>
           )}
         </div>
@@ -175,7 +232,7 @@ const InteractiveMap = () => {
           <div className="absolute inset-0 flex items-center justify-center bg-slate-50/70 z-30">
             <div className="flex flex-col items-center space-y-2">
               <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
-              <p className="text-sm text-slate-600">{t('map.loading')}</p>
+              <p className="text-sm text-slate-600"><I18nText translationKey="map.loading" /></p>
             </div>
           </div>
         )}
@@ -185,7 +242,7 @@ const InteractiveMap = () => {
           <div className="absolute inset-0 flex items-center justify-center bg-slate-50/90 z-30">
             <div className="bg-white p-4 rounded-lg shadow-md border border-red-100 text-red-600 max-w-sm">
               <p>{error}</p>
-              <p className="text-sm mt-2">{t('map.tryAgainLater')}</p>
+              <p className="text-sm mt-2"><I18nText translationKey="map.tryAgainLater" /></p>
             </div>
           </div>
         )}
@@ -211,7 +268,7 @@ const InteractiveMap = () => {
         {mapLoaded && !loading && symbolLocations.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-md max-w-xs">
-              <p className="text-center text-slate-600">{t('map.noLocationsMessage')}</p>
+              <p className="text-center text-slate-600"><I18nText translationKey="map.noLocationsMessage" /></p>
             </div>
           </div>
         )}

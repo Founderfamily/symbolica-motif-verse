@@ -1,6 +1,6 @@
 
 import { logger } from '../services/logService';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 export interface AppError {
   code: string;
@@ -91,5 +91,21 @@ export class ErrorHandler {
       details: error?.details || undefined,
       originalError: error
     };
+  }
+  
+  /**
+   * Handle map errors
+   */
+  public static handleMapError(error: any): AppError {
+    logger.error('Map error', { error });
+    
+    const appError: AppError = {
+      code: error?.code || 'MAP_ERROR',
+      message: 'An error occurred with the map.',
+      details: error?.details || undefined,
+      originalError: error
+    };
+    
+    return appError;
   }
 }
