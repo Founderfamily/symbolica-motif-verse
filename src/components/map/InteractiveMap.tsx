@@ -11,8 +11,10 @@ import { symbolGeolocationService, SymbolLocation } from '@/services/symbolGeolo
 import { toast } from '@/components/ui/use-toast';
 import MapboxAuth from './MapboxAuth';
 import { I18nText } from '@/components/ui/i18n-text';
+import { mapboxAuthService } from '@/services/mapboxAuthService';
+import { ErrorHandler } from '@/utils/errorHandler';
 
-// Removed hard-coded token - will now be provided by the user or from environment
+// Default map settings
 const DEFAULT_MAP_CENTER: [number, number] = [0, 20]; // Initial position at [longitude, latitude]
 const DEFAULT_ZOOM = 1.5;
 
@@ -27,7 +29,7 @@ const InteractiveMap = () => {
   const [loading, setLoading] = useState(true);
   const [symbolLocations, setSymbolLocations] = useState<SymbolLocation[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+  const [mapboxToken, setMapboxToken] = useState<string | null>(mapboxAuthService.getToken());
   const [tokenError, setTokenError] = useState<boolean>(false);
   const mapInitializedRef = useRef<boolean>(false);
   
@@ -147,10 +149,22 @@ const InteractiveMap = () => {
       newMap.on('error', (e) => {
         console.error("Mapbox map error:", e);
         const mapError = e.error as any;
+        
+        // Handle authentication errors
         if (mapError?.status === 401) {
           setTokenError(true);
           setError("Invalid Mapbox token. Please try again with a valid token.");
           mapInitializedRef.current = false;
+          
+          // Clear invalid token
+          mapboxAuthService.clearToken();
+          
+          // Show a toast notification
+          toast({
+            title: "Authentication error",
+            description: "Your Mapbox token is invalid or expired. Please provide a new one.",
+            variant: "destructive",
+          });
         }
       });
 
@@ -167,6 +181,7 @@ const InteractiveMap = () => {
       };
     } catch (err) {
       console.error("Error initializing map:", err);
+      ErrorHandler.handleMapError(err);
       setTokenError(true);
       setError("Failed to initialize map. Please try again.");
       mapInitializedRef.current = false;
