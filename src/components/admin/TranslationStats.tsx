@@ -9,6 +9,115 @@ import { supabase } from '@/integrations/supabase/client';
 import { ValidationResultEntry } from '@/i18n/services/translationDatabaseService';
 import { RefreshCw, CheckCircle as CheckCircleIcon, AlertCircle as AlertCircleIcon } from "lucide-react";
 
+// Stats Grid component to display translation statistics
+const StatsGrid = ({ stats }) => {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded text-center">
+        <div className="text-2xl font-bold">{stats.totalEn}</div>
+        <div className="text-sm">English Keys</div>
+      </div>
+      
+      <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded text-center">
+        <div className="text-2xl font-bold">{stats.totalFr}</div>
+        <div className="text-sm">French Keys</div>
+      </div>
+      
+      <div className="p-3 bg-red-100 dark:bg-red-900/20 rounded text-center">
+        <div className="text-2xl font-bold text-red-700 dark:text-red-400">{stats.missingEn}</div>
+        <div className="text-sm">Missing in English</div>
+      </div>
+      
+      <div className="p-3 bg-red-100 dark:bg-red-900/20 rounded text-center">
+        <div className="text-2xl font-bold text-red-700 dark:text-red-400">{stats.missingFr}</div>
+        <div className="text-sm">Missing in French</div>
+      </div>
+      
+      <div className="p-3 bg-amber-100 dark:bg-amber-900/20 rounded text-center">
+        <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">{stats.formatIssues}</div>
+        <div className="text-sm">Format Issues</div>
+      </div>
+    </div>
+  );
+};
+
+// Validation History component to display recent validations
+const ValidationHistoryList = ({ validations }) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
+  
+  if (validations.length === 0) {
+    return (
+      <div className="text-center py-4 text-muted-foreground">
+        No validation history found
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-3">
+      {validations.map((validation) => (
+        <div 
+          key={validation.id} 
+          className="p-3 border rounded flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            {validation.valid ? (
+              <CheckCircleIcon className="h-5 w-5 text-green-500" />
+            ) : (
+              <AlertCircleIcon className="h-5 w-5 text-red-500" />
+            )}
+            
+            <div>
+              <div className="text-sm font-medium">
+                {validation.valid ? 'Validation Passed' : 'Validation Failed'}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {validation.timestamp ? formatDate(validation.timestamp) : 'Unknown date'}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            {validation.missing_count_en > 0 && (
+              <Badge variant="outline" className="text-red-500 border-red-200">
+                {validation.missing_count_en} EN missing
+              </Badge>
+            )}
+            
+            {validation.missing_count_fr > 0 && (
+              <Badge variant="outline" className="text-red-500 border-red-200">
+                {validation.missing_count_fr} FR missing
+              </Badge>
+            )}
+            
+            {validation.format_issues_count > 0 && (
+              <Badge variant="outline" className="text-amber-500 border-amber-200">
+                {validation.format_issues_count} format issues
+              </Badge>
+            )}
+            
+            {validation.invalid_key_format_count > 0 && (
+              <Badge variant="outline" className="text-blue-500 border-blue-200">
+                {validation.invalid_key_format_count} key format issues
+              </Badge>
+            )}
+            
+            {validation.valid && (
+              <Badge variant="outline" className="text-green-500 border-green-200">
+                All good
+              </Badge>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Main TranslationStats component
 const TranslationStats: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [validationHistory, setValidationHistory] = useState<ValidationResultEntry[]>([]);
@@ -84,11 +193,6 @@ const TranslationStats: React.FC = () => {
     fetchValidationHistory();
   }, []);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -111,98 +215,13 @@ const TranslationStats: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-              <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded text-center">
-                <div className="text-2xl font-bold">{translationStats.totalEn}</div>
-                <div className="text-sm">English Keys</div>
-              </div>
-              
-              <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded text-center">
-                <div className="text-2xl font-bold">{translationStats.totalFr}</div>
-                <div className="text-sm">French Keys</div>
-              </div>
-              
-              <div className="p-3 bg-red-100 dark:bg-red-900/20 rounded text-center">
-                <div className="text-2xl font-bold text-red-700 dark:text-red-400">{translationStats.missingEn}</div>
-                <div className="text-sm">Missing in English</div>
-              </div>
-              
-              <div className="p-3 bg-red-100 dark:bg-red-900/20 rounded text-center">
-                <div className="text-2xl font-bold text-red-700 dark:text-red-400">{translationStats.missingFr}</div>
-                <div className="text-sm">Missing in French</div>
-              </div>
-              
-              <div className="p-3 bg-amber-100 dark:bg-amber-900/20 rounded text-center">
-                <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">{translationStats.formatIssues}</div>
-                <div className="text-sm">Format Issues</div>
-              </div>
-            </div>
+            {/* Stats Grid */}
+            <StatsGrid stats={translationStats} />
             
             <h3 className="text-lg font-semibold mb-3">Recent Validation History</h3>
             
-            {validationHistory.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                No validation history found
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {validationHistory.map((validation) => (
-                  <div 
-                    key={validation.id} 
-                    className="p-3 border rounded flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      {validation.valid ? (
-                        <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <AlertCircleIcon className="h-5 w-5 text-red-500" />
-                      )}
-                      
-                      <div>
-                        <div className="text-sm font-medium">
-                          {validation.valid ? 'Validation Passed' : 'Validation Failed'}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {validation.timestamp ? formatDate(validation.timestamp) : 'Unknown date'}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      {validation.missing_count_en > 0 && (
-                        <Badge variant="outline" className="text-red-500 border-red-200">
-                          {validation.missing_count_en} EN missing
-                        </Badge>
-                      )}
-                      
-                      {validation.missing_count_fr > 0 && (
-                        <Badge variant="outline" className="text-red-500 border-red-200">
-                          {validation.missing_count_fr} FR missing
-                        </Badge>
-                      )}
-                      
-                      {validation.format_issues_count > 0 && (
-                        <Badge variant="outline" className="text-amber-500 border-amber-200">
-                          {validation.format_issues_count} format issues
-                        </Badge>
-                      )}
-                      
-                      {validation.invalid_key_format_count > 0 && (
-                        <Badge variant="outline" className="text-blue-500 border-blue-200">
-                          {validation.invalid_key_format_count} key format issues
-                        </Badge>
-                      )}
-                      
-                      {validation.valid && (
-                        <Badge variant="outline" className="text-green-500 border-green-200">
-                          All good
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* Validation History List */}
+            <ValidationHistoryList validations={validationHistory} />
             
             <div className="mt-6 flex justify-end">
               <Button 

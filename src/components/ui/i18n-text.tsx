@@ -35,7 +35,16 @@ export const I18nText = ({
   // Get the translated text
   const translatedText = t(translationKey, params);
   const keyExists = i18n.exists(translationKey);
-  const isMissing = !keyExists || translatedText === translationKey;
+  
+  // Consider key missing if it doesn't exist or if the translation is the same as the key
+  // (which happens for generic keys like "Title", "Description" etc.)
+  const isGenericKey = ['title', 'description', 'subtitle', 'name', 'button', 'text', 'label', 'header', 'content'].includes(
+    translationKey.toLowerCase()
+  );
+  
+  // Check if translation result is the same as the key (fallback behavior)
+  // or if we're dealing with a known generic key
+  const isMissing = !keyExists || translatedText === translationKey || isGenericKey;
   
   // Check if translation exists in both languages
   const existsInBothLanguages = keyExistsInBothLanguages(translationKey);
@@ -57,7 +66,8 @@ export const I18nText = ({
     ? { 
         'data-i18n-key': translationKey,
         'data-i18n-missing': isMissing ? 'true' : 'false',
-        'data-i18n-exists-both': existsInBothLanguages ? 'true' : 'false'
+        'data-i18n-exists-both': existsInBothLanguages ? 'true' : 'false',
+        'data-i18n-is-generic': isGenericKey ? 'true' : 'false'
       } 
     : {};
     
@@ -84,7 +94,7 @@ export const I18nText = ({
             fontWeight: 'bold'
           }}
         >
-          {!existsInBothLanguages ? 'Missing translation:' : 'Possibly incorrect:'} {translationKey}
+          {isGenericKey ? 'Generic key:' : (!existsInBothLanguages ? 'Missing translation:' : 'Possibly incorrect:')} {translationKey}
         </div>
       )
     : null;

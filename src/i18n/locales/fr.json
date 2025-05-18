@@ -1,3 +1,4 @@
+
 {
   "navigation": {
     "home": "Accueil",
@@ -176,7 +177,8 @@
     "logout": "Déconnexion"
   },
   "auth": {
-    "requiresLogin": "Vous devez être connecté pour accéder à cette page"
+    "requiresLogin": "Vous devez être connecté pour accéder à cette page",
+    "admin": "Tableau de Bord Admin"
   },
   "user": {
     "anonymous": "Utilisateur"
@@ -205,7 +207,11 @@
     "pattern": "Extraction de Motif",
     "reuse": "Utilisations Contemporaines",
     "imageError": "Problèmes de Chargement d'Image",
-    "imageErrorDesc": "Certaines images peuvent ne pas s'afficher correctement en raison de problèmes de chargement."
+    "imageErrorDesc": "Certaines images peuvent ne pas s'afficher correctement en raison de problèmes de chargement.",
+    "empty": "Sélectionnez un symbole pour voir les détails",
+    "loading": "Chargement des détails du symbole...",
+    "error": "Erreur lors du chargement du symbole",
+    "errorDesc": "Impossible de récupérer les informations du symbole. Veuillez réessayer plus tard."
   },
   "actions": {
     "hide": "Masquer la Liste",
@@ -232,5 +238,22 @@
       "title": "Réalisations Spéciales",
       "description": "Complétez des défis spéciaux pour débloquer des récompenses uniques"
     }
+  },
+  "admin": {
+    "translation": {
+      "stats": {
+        "title": "Statistiques de Traduction",
+        "description": "Aperçu de l'état des traductions et des résultats de validation récents"
+      }
+    }
+  },
+  "symbolList": {
+    "empty": "Aucun symbole disponible",
+    "select": "Sélectionnez un symbole pour voir les détails"
+  },
+  "error": {
+    "pageNotFound": "Oups ! Page non trouvée",
+    "routeNotExist": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "returnHome": "Retour à l'accueil"
   }
 }

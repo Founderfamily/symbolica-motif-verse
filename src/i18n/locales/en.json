@@ -1,3 +1,4 @@
+
 {
   "navigation": {
     "home": "Home",
@@ -181,7 +182,8 @@
     "logout": "Log Out"
   },
   "auth": {
-    "requiresLogin": "You need to be logged in to access this page"
+    "requiresLogin": "You need to be logged in to access this page",
+    "admin": "Admin Dashboard"
   },
   "user": {
     "anonymous": "User"
@@ -210,7 +212,11 @@
     "pattern": "Pattern Extraction",
     "reuse": "Contemporary Uses",
     "imageError": "Image Loading Issues",
-    "imageErrorDesc": "Some images may not be displayed correctly due to loading issues."
+    "imageErrorDesc": "Some images may not be displayed correctly due to loading issues.",
+    "empty": "Select a symbol to view details",
+    "loading": "Loading symbol details...",
+    "error": "Error loading symbol",
+    "errorDesc": "Could not retrieve symbol information. Please try again later."
   },
   "actions": {
     "hide": "Hide List",
@@ -237,5 +243,17 @@
       "title": "Special Achievements",
       "description": "Complete special challenges to unlock unique rewards"
     }
+  },
+  "admin": {
+    "translation": {
+      "stats": {
+        "title": "Translation Statistics",
+        "description": "Overview of translation status and recent validation results"
+      }
+    }
+  },
+  "symbolList": {
+    "empty": "No symbols available",
+    "select": "Select a symbol to view details"
   }
 }
