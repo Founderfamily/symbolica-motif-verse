@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { I18nText } from "@/components/ui/i18n-text";
+import TranslationStats from './TranslationStats';
 
 export interface MigrationStats {
   totalFiles: number;
@@ -105,106 +106,111 @@ const TranslationMigrationTracker = () => {
   }, []);
   
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>
-          <I18nText translationKey="admin.translation.migrationTracker.title">
-            Translation Migration Progress
-          </I18nText>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center py-8">Loading stats...</div>
-        ) : stats ? (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">
-                  <I18nText translationKey="admin.translation.migrationTracker.progress">
-                    Migration Progress
-                  </I18nText>
-                </span>
-                <span className="text-sm font-medium">{stats.migrationPercentage}%</span>
-              </div>
-              <Progress value={stats.migrationPercentage} />
-            </div>
-            
-            <div className="grid grid-cols-3 gap-2 text-center text-sm">
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded">
-                <div className="font-bold">{stats.migratedFiles}</div>
-                <div className="text-xs">
-                  <I18nText translationKey="admin.translation.migrationTracker.migratedFiles">
-                    Migrated
-                  </I18nText>
-                </div>
-              </div>
-              <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded">
-                <div className="font-bold">{stats.partiallyMigrated}</div>
-                <div className="text-xs">
-                  <I18nText translationKey="admin.translation.migrationTracker.partiallyMigrated">
-                    Partial
-                  </I18nText>
-                </div>
-              </div>
-              <div className="p-2 bg-red-100 dark:bg-red-900 rounded">
-                <div className="font-bold">{stats.notMigrated}</div>
-                <div className="text-xs">
-                  <I18nText translationKey="admin.translation.migrationTracker.notMigrated">
-                    Not Started
-                  </I18nText>
-                </div>
-              </div>
-            </div>
-            
-            {problemFiles.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-sm font-medium mb-2">
-                  <I18nText translationKey="admin.translation.migrationTracker.filesNeedingAttention">
-                    Files Needing Attention
-                  </I18nText>
-                </h4>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {problemFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-slate-100 dark:bg-slate-800 rounded text-xs">
-                      <span className="truncate max-w-[70%]">{file}</span>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => runFileMigration(file)}
-                      >
-                        <I18nText translationKey="admin.translation.migrationTracker.migrate">
-                          Migrate
-                        </I18nText>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <div className="flex justify-end mt-4">
-              <Button 
-                size="sm"
-                variant="outline" 
-                onClick={fetchStats} 
-                disabled={isLoading}
-              >
-                <I18nText translationKey="admin.translation.migrationTracker.refresh">
-                  Refresh Stats
-                </I18nText>
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <I18nText translationKey="admin.translation.migrationTracker.noStats">
-              No migration stats available
+    <div className="space-y-8">
+      {/* Translation DB Stats Component */}
+      <TranslationStats />
+      
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>
+            <I18nText translationKey="admin.translation.migrationTracker.title">
+              Translation Migration Progress
             </I18nText>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center py-8">Loading stats...</div>
+          ) : stats ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium">
+                    <I18nText translationKey="admin.translation.migrationTracker.progress">
+                      Migration Progress
+                    </I18nText>
+                  </span>
+                  <span className="text-sm font-medium">{stats.migrationPercentage}%</span>
+                </div>
+                <Progress value={stats.migrationPercentage} />
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                <div className="p-2 bg-green-100 dark:bg-green-900 rounded">
+                  <div className="font-bold">{stats.migratedFiles}</div>
+                  <div className="text-xs">
+                    <I18nText translationKey="admin.translation.migrationTracker.migratedFiles">
+                      Migrated
+                    </I18nText>
+                  </div>
+                </div>
+                <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded">
+                  <div className="font-bold">{stats.partiallyMigrated}</div>
+                  <div className="text-xs">
+                    <I18nText translationKey="admin.translation.migrationTracker.partiallyMigrated">
+                      Partial
+                    </I18nText>
+                  </div>
+                </div>
+                <div className="p-2 bg-red-100 dark:bg-red-900 rounded">
+                  <div className="font-bold">{stats.notMigrated}</div>
+                  <div className="text-xs">
+                    <I18nText translationKey="admin.translation.migrationTracker.notMigrated">
+                      Not Started
+                    </I18nText>
+                  </div>
+                </div>
+              </div>
+              
+              {problemFiles.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-medium mb-2">
+                    <I18nText translationKey="admin.translation.migrationTracker.filesNeedingAttention">
+                      Files Needing Attention
+                    </I18nText>
+                  </h4>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {problemFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-slate-100 dark:bg-slate-800 rounded text-xs">
+                        <span className="truncate max-w-[70%]">{file}</span>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => runFileMigration(file)}
+                        >
+                          <I18nText translationKey="admin.translation.migrationTracker.migrate">
+                            Migrate
+                          </I18nText>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex justify-end mt-4">
+                <Button 
+                  size="sm"
+                  variant="outline" 
+                  onClick={fetchStats} 
+                  disabled={isLoading}
+                >
+                  <I18nText translationKey="admin.translation.migrationTracker.refresh">
+                    Refresh Stats
+                  </I18nText>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <I18nText translationKey="admin.translation.migrationTracker.noStats">
+                No migration stats available
+              </I18nText>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

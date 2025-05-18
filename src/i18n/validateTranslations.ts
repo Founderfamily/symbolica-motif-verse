@@ -1,13 +1,14 @@
 
 import { diagnoseTranslations, generateFixReport } from './translationUtils';
-import { LegacyValidationReport } from './types/validationTypes';
+import { LegacyValidationReport, ValidationReport } from './types/validationTypes';
+import { translationDatabaseService } from './services/translationDatabaseService';
 
 /**
  * Simple command-line tool to validate translations
  * 
  * Usage: npm run validate-translations
  */
-const runValidation = () => {
+const runValidation = async () => {
   console.log('======================================');
   console.log('Translation Validation Tool');
   console.log('======================================\n');
@@ -64,13 +65,48 @@ const runValidation = () => {
   
   console.log('\n======================================\n');
   
+  // Save validation results to the database
+  try {
+    await saveValidationResult(diagnosis);
+    console.log('✅ Validation results saved to database');
+  } catch (error) {
+    console.error('❌ Failed to save validation results to database:', error);
+  }
+  
   return totalIssues === 0;
 };
 
+/**
+ * Save validation results to the database
+ */
+async function saveValidationResult(diagnosis: LegacyValidationReport) {
+  const validationEntry = {
+    valid: diagnosis.summary.missingCount === 0 && diagnosis.summary.formatIssuesCount === 0,
+    missing_count_fr: diagnosis.missingKeys.missingInFr.length,
+    missing_count_en: diagnosis.missingKeys.missingInEn.length,
+    format_issues_count: diagnosis.formatIssues.length,
+    invalid_key_format_count: 0, // This is not tracked in LegacyValidationReport
+    summary: `${diagnosis.summary.missingCount} missing translations, ${diagnosis.summary.formatIssuesCount} format issues`,
+    details: {
+      missingInFr: diagnosis.missingKeys.missingInFr,
+      missingInEn: diagnosis.missingKeys.missingInEn,
+      formatIssues: diagnosis.formatIssues
+    }
+  };
+  
+  await translationDatabaseService.saveValidationResult(validationEntry);
+}
+
 // Run the validation if this file is executed directly
 if (require.main === module) {
-  const success = runValidation();
-  process.exit(success ? 0 : 1); // Exit with error code if issues found
+  runValidation()
+    .then(success => {
+      process.exit(success ? 0 : 1); // Exit with error code if issues found
+    })
+    .catch(error => {
+      console.error('Error during validation:', error);
+      process.exit(1);
+    });
 }
 
 export default runValidation;

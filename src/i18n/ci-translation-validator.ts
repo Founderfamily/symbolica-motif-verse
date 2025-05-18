@@ -9,9 +9,10 @@
 import translationValidatorService from './validators/translationValidatorService';
 import { validateKeyFormat } from './translationKeyConventions';
 import { ValidationReport } from './types/validationTypes';
+import { translationDatabaseService } from './services/translationDatabaseService';
 
 // Run validation and collect results
-const validateForCI = () => {
+const validateForCI = async () => {
   console.log('🔍 Running translation validation in CI mode...');
   
   const report = translationValidatorService.validateAll();
@@ -66,13 +67,51 @@ const validateForCI = () => {
     console.error('❌ Translation validation failed! Please fix the issues before committing.');
   }
   
+  // Save validation results to database
+  try {
+    await saveValidationResult(report);
+    console.log('✅ Validation results saved to database');
+  } catch (error) {
+    console.error('❌ Failed to save validation results to database:', error);
+  }
+  
   return exitCode;
 };
 
+/**
+ * Save validation results to the database
+ */
+async function saveValidationResult(report: ValidationReport) {
+  const validationEntry = {
+    valid: report.valid,
+    missing_count_fr: report.missingKeys.fr.length,
+    missing_count_en: report.missingKeys.en.length,
+    format_issues_count: report.formatIssues.length,
+    invalid_key_format_count: report.invalidKeyFormat.length,
+    summary: report.valid 
+      ? 'All validations passed'
+      : `${report.missingKeys.fr.length + report.missingKeys.en.length} missing translations, ${report.formatIssues.length} format issues`,
+    details: {
+      missingInFr: report.missingKeys.fr,
+      missingInEn: report.missingKeys.en,
+      formatIssues: report.formatIssues,
+      invalidKeyFormat: report.invalidKeyFormat
+    }
+  };
+  
+  await translationDatabaseService.saveValidationResult(validationEntry);
+}
+
 // If this script is run directly (not imported)
 if (require.main === module) {
-  const exitCode = validateForCI();
-  process.exit(exitCode);
+  validateForCI()
+    .then(exitCode => {
+      process.exit(exitCode);
+    })
+    .catch(error => {
+      console.error('Error during validation:', error);
+      process.exit(1);
+    });
 }
 
 export default validateForCI;
