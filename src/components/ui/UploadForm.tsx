@@ -1,265 +1,216 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
-import ImageDropzone from '@/components/contributions/ImageDropzone';
-import MapSelector from '@/components/contributions/MapSelector';
+import { useToast } from '@/components/ui/use-toast';
+import ImageDropzone from '@/components/upload/ImageDropzone';
+import LocationPicker from '@/components/map/LocationPicker';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 
-// Define the basic types we need
-interface Location {
-  lat: number;
-  lng: number;
+interface FormData {
+  title: string;
+  description: string;
+  category: string;
+  tags: string;
+  imageFile: File | null;
+  location: {
+    latitude: number;
+    longitude: number;
+    name: string;
+  } | null;
 }
 
-interface UploadFormProps {
-  onSubmit?: (data: FormData) => void;
-  isLoading?: boolean;
-}
+const CATEGORIES = [
+  { id: 'symbol', name: 'Symbol' },
+  { id: 'pattern', name: 'Pattern' },
+  { id: 'artifact', name: 'Artifact' },
+  { id: 'site', name: 'Archaeological Site' },
+];
 
-const UploadForm: React.FC<UploadFormProps> = ({ 
-  onSubmit,
-  isLoading = false 
-}) => {
+const UploadForm = () => {
+  const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
+    defaultValues: {
+      title: '',
+      description: '',
+      category: '',
+      tags: '',
+      imageFile: null,
+      location: null,
+    }
+  });
   const { t } = useTranslation();
-  
-  // Form state
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [culture, setCulture] = useState('');
-  const [category, setCategory] = useState('');
-  const [selectedImage, setSelectedImage] = useState<File[]>([]);
-  const [location, setLocation] = useState<Location>({ lat: 0, lng: 0 });
-  const [activeTab, setActiveTab] = useState('info');
-  
-  // Sample options
-  const cultureOptions = [
-    'Ancient Egyptian', 
-    'Celtic', 
-    'Chinese', 
-    'Greek', 
-    'Japanese', 
-    'Maya', 
-    'Norse', 
-    'Roman'
-  ];
-  
-  const categoryOptions = [
-    'Religious',
-    'Cultural',
-    'Decorative',
-    'Historical',
-    'Political',
-    'Educational'
-  ];
-  
-  // Handle image selection
-  const handleImageSelected = useCallback((files: File[]) => {
-    if (files && files.length > 0) {
-      setSelectedImage(files);
-      toast.success(t('upload.imageUploaded'));
-    }
-  }, [t]);
-  
-  // Handle location selection
-  const handleLocationSelected = useCallback((loc: Location) => {
-    setLocation(loc);
-    toast.success(t('upload.locationSelected'));
-  }, [t]);
-  
-  // Form submission
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!name.trim()) {
-      toast.error(t('upload.validation.nameRequired'));
-      return;
-    }
-    
-    if (!description.trim()) {
-      toast.error(t('upload.validation.descriptionRequired'));
-      return;
-    }
-    
-    if (!culture) {
-      toast.error(t('upload.validation.cultureRequired'));
-      return;
-    }
-    
-    if (selectedImage.length === 0) {
-      toast.error(t('upload.validation.imageRequired'));
-      setActiveTab('media');
-      return;
-    }
-    
-    // Prepare form data
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('description', description);
-    formData.append('culture', culture);
-    formData.append('category', category);
-    
-    if (selectedImage.length > 0) {
-      formData.append('image', selectedImage[0]);
-    }
-    
-    if (location.lat !== 0 && location.lng !== 0) {
-      formData.append('location', JSON.stringify(location));
-    }
-    
-    // Submit form
-    if (onSubmit) {
-      onSubmit(formData);
-    } else {
-      console.log('Form submitted:', {
-        name,
-        description,
-        culture,
-        category,
-        image: selectedImage.length > 0 ? selectedImage[0].name : 'No image',
-        location: location.lat !== 0 ? `${location.lat}, ${location.lng}` : 'No location'
-      });
-      toast.success(t('upload.success'));
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      setIsSubmitting(true);
+      console.log('Form data submitted:', data);
       
-      // Reset form
-      setName('');
-      setDescription('');
-      setCulture('');
-      setCategory('');
-      setSelectedImage([]);
-      setLocation({ lat: 0, lng: 0 });
-      setActiveTab('info');
+      // Simulate API submission delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      // Show success toast
+      toast({
+        title: t('upload.success.title'),
+        description: t('upload.success.description'),
+      });
+      
+      // Reset form or redirect
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: t('upload.error.title'),
+        description: t('upload.error.description'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  
+
+  const handleImageSelected = (file: File) => {
+    setSelectedImage(file);
+    setValue('imageFile', file);
+  };
+
+  const handleLocationSelected = (latitude: number, longitude: number, locationName: string) => {
+    setValue('location', {
+      latitude,
+      longitude,
+      name: locationName,
+    });
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="info">
-            <I18nText translationKey="upload.tabs.info" />
-          </TabsTrigger>
-          <TabsTrigger value="media">
-            <I18nText translationKey="upload.tabs.media" />
-          </TabsTrigger>
-          <TabsTrigger value="location">
-            <I18nText translationKey="upload.tabs.location" />
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="info" className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              <I18nText translationKey="upload.fields.name" />
-            </label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('upload.placeholders.name')}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              <I18nText translationKey="upload.fields.description" />
-            </label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('upload.placeholders.description')}
-              className="min-h-[120px]"
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-slate-50">
+          <CardTitle>
+            <I18nText translationKey="upload.title" />
+          </CardTitle>
+        </CardHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CardContent className="p-6 space-y-6">
             <div className="space-y-2">
-              <label htmlFor="culture" className="text-sm font-medium">
-                <I18nText translationKey="upload.fields.culture" />
-              </label>
-              <Select value={culture} onValueChange={setCulture}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('upload.placeholders.culture')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {cultureOptions.map((option) => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="title" className="text-base">
+                <I18nText translationKey="upload.form.title.label" />
+              </Label>
+              <Input
+                id="title"
+                placeholder={t('upload.form.title.placeholder')}
+                {...register("title", { required: "Title is required" })}
+              />
+              {errors.title && (
+                <p className="text-sm text-red-500">{errors.title.message}</p>
+              )}
             </div>
-            
+
             <div className="space-y-2">
-              <label htmlFor="category" className="text-sm font-medium">
-                <I18nText translationKey="upload.fields.category" />
-              </label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('upload.placeholders.category')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoryOptions.map((option) => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="description" className="text-base">
+                <I18nText translationKey="upload.form.description.label" />
+              </Label>
+              <Textarea
+                id="description"
+                placeholder={t('upload.form.description.placeholder')}
+                {...register("description")}
+                rows={4}
+              />
             </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="media" className="pt-4">
-          <Card>
-            <CardContent className="pt-6">
+
+            <div className="space-y-2">
+              <Label htmlFor="category" className="text-base">
+                <I18nText translationKey="upload.form.category.label" />
+              </Label>
+              <Controller
+                name="category"
+                control={control}
+                rules={{ required: "Please select a category" }}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder={t('upload.form.category.placeholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map(category => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.category && (
+                <p className="text-sm text-red-500">{errors.category.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tags" className="text-base">
+                <I18nText translationKey="upload.form.tags.label" />
+              </Label>
+              <Input
+                id="tags"
+                placeholder={t('upload.form.tags.placeholder')}
+                {...register("tags")}
+              />
+              <p className="text-sm text-slate-500">
+                <I18nText translationKey="upload.form.tags.help" />
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-base">
+                <I18nText translationKey="upload.form.image.label" />
+              </Label>
               <ImageDropzone 
-                onImageSelected={(files) => handleImageSelected([files[0]])} 
+                onImageSelected={handleImageSelected}
+                selectedImage={selectedImage}
               />
-              
-              {selectedImage.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-green-600">
-                    <I18nText translationKey="upload.imageSelected" />: {selectedImage[0].name}
-                  </p>
-                </div>
+              {!selectedImage && (
+                <p className="text-sm text-red-500">
+                  <I18nText translationKey="upload.form.image.required" />
+                </p>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="location" className="pt-4">
-          <Card>
-            <CardContent className="pt-6">
-              <MapSelector 
-                onLocationSelected={handleLocationSelected} 
-              />
-              
-              {location.lat !== 0 && location.lng !== 0 && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-green-600">
-                    <I18nText translationKey="upload.locationSelected" />: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                  </p>
-                </div>
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-base">
+                <I18nText translationKey="upload.form.location.label" />
+              </Label>
+              <LocationPicker onLocationSelected={handleLocationSelected} />
+              <p className="text-sm text-slate-500">
+                <I18nText translationKey="upload.form.location.help" />
+              </p>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="bg-slate-50 p-6 flex justify-end space-x-2">
+            <Button variant="outline" type="button">
+              <I18nText translationKey="common.cancel" />
+            </Button>
+            <Button type="submit" disabled={isSubmitting || !selectedImage}>
+              {isSubmitting ? (
+                <I18nText translationKey="upload.form.submitting" />
+              ) : (
+                <I18nText translationKey="upload.form.submit" />
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
-          <I18nText translationKey="common.loading" />
-        ) : (
-          <I18nText translationKey="upload.submit" />
-        )}
-      </Button>
-    </form>
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   );
 };
 

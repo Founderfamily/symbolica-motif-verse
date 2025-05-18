@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -182,12 +183,10 @@ const SymbolExplorer: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
         <div>
           <h1 className="text-lg font-medium text-slate-700 mb-2">
-            <I18nText translationKey="symbolExplorer.title">Symbol Explorer</I18nText>
+            <I18nText translationKey="symbolExplorer.title" />
           </h1>
           <p className="text-slate-600">
-            <I18nText translationKey="symbolExplorer.description">
-              Explore our collection of cultural symbols, patterns and motifs
-            </I18nText>
+            <I18nText translationKey="symbolExplorer.description" />
           </p>
         </div>
         
@@ -196,15 +195,15 @@ const SymbolExplorer: React.FC = () => {
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="grid" className="flex gap-1 items-center">
                 <Grid className="w-4 h-4" />
-                <I18nText translationKey="symbolExplorer.gridView">Grid</I18nText>
+                <I18nText translationKey="symbolExplorer.gridView" />
               </TabsTrigger>
               <TabsTrigger value="list" className="flex gap-1 items-center">
                 <LayoutIcon className="w-4 h-4" />
-                <I18nText translationKey="symbolExplorer.listView">List</I18nText>
+                <I18nText translationKey="symbolExplorer.listView" />
               </TabsTrigger>
               <TabsTrigger value="map" className="flex gap-1 items-center">
                 <Map className="w-4 h-4" />
-                <I18nText translationKey="symbolExplorer.mapView">Map</I18nText>
+                <I18nText translationKey="symbolExplorer.mapView" />
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -218,7 +217,7 @@ const SymbolExplorer: React.FC = () => {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-medium text-slate-900">
-                  <I18nText translationKey="symbolExplorer.filters">Filters</I18nText>
+                  <I18nText translationKey="symbolExplorer.filters" />
                 </h3>
                 {hasActiveFilters && (
                   <Button 
@@ -228,7 +227,7 @@ const SymbolExplorer: React.FC = () => {
                     className="h-8 text-xs flex items-center gap-1 text-slate-500"
                   >
                     <FilterX className="w-3 h-3" />
-                    <I18nText translationKey="symbolExplorer.clearFilters">Clear all</I18nText>
+                    <I18nText translationKey="symbolExplorer.clearFilters" />
                   </Button>
                 )}
               </div>
@@ -236,7 +235,7 @@ const SymbolExplorer: React.FC = () => {
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                 <Input
-                  placeholder={t('symbolExplorer.searchPlaceholder', 'Search symbols...')}
+                  placeholder={t('symbolExplorer.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -255,7 +254,7 @@ const SymbolExplorer: React.FC = () => {
           <Card className="p-4 mt-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-slate-900">
-                <I18nText translationKey="symbolExplorer.activeFilters">Active Filters</I18nText>
+                <I18nText translationKey="symbolExplorer.activeFilters" />
               </h3>
             </div>
             
@@ -272,13 +271,7 @@ const SymbolExplorer: React.FC = () => {
                       className="flex gap-1"
                     >
                       <span className="text-xs text-slate-500 mr-1">
-                        <I18nText translationKey={`searchFilters.${category}`}>
-                          {category === 'cultures' ? 'Culture' : 
-                           category === 'periods' ? 'Period' :
-                           category === 'medium' ? 'Medium' :
-                           category === 'technique' ? 'Technique' :
-                           category === 'function' ? 'Function' : ''}:
-                        </I18nText>
+                        <I18nText translationKey={`searchFilters.${category}`} />:
                       </span>
                       {translatedValue}
                       <button 
@@ -297,7 +290,7 @@ const SymbolExplorer: React.FC = () => {
               
               {!hasActiveFilters && (
                 <span className="text-sm text-slate-500">
-                  <I18nText translationKey="symbolExplorer.noFilters">No active filters</I18nText>
+                  <I18nText translationKey="symbolExplorer.noFilters" />
                 </span>
               )}
             </div>
@@ -317,9 +310,7 @@ const SymbolExplorer: React.FC = () => {
                   <I18nText 
                     translationKey="symbolExplorer.resultsCount" 
                     params={{ count: filteredSymbols?.length || 0 }}
-                  >
-                    {filteredSymbols?.length || 0} symbols found
-                  </I18nText>
+                  />
                 </div>
               </div>
               
@@ -359,9 +350,7 @@ const SymbolExplorer: React.FC = () => {
                       
                       {(filteredSymbols?.length || 0) === 0 && (
                         <div className="py-8 text-center text-slate-500">
-                          <I18nText translationKey="symbolExplorer.noResults">
-                            No symbols match your filter criteria
-                          </I18nText>
+                          <I18nText translationKey="symbolExplorer.noResults" />
                         </div>
                       )}
                     </div>
@@ -373,14 +362,10 @@ const SymbolExplorer: React.FC = () => {
                     <div className="text-center">
                       <Map className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                       <h3 className="font-medium text-slate-700">
-                        <I18nText translationKey="symbolExplorer.mapViewComingSoon">
-                          Interactive map view coming soon
-                        </I18nText>
+                        <I18nText translationKey="symbolExplorer.mapViewComingSoon" />
                       </h3>
                       <p className="text-slate-500 mt-2 max-w-md">
-                        <I18nText translationKey="symbolExplorer.mapViewDescription">
-                          Explore symbols based on their geographical origin and distribution
-                        </I18nText>
+                        <I18nText translationKey="symbolExplorer.mapViewDescription" />
                       </p>
                     </div>
                   </Card>

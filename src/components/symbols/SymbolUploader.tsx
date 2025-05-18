@@ -1,158 +1,103 @@
 
 import React, { useState } from 'react';
-import SymbolForm from '@/components/symbols/SymbolForm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useTranslation } from '@/i18n/useTranslation';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { SymbolFormData } from '@/types/symbol';
+import SymbolForm from './SymbolForm';
+import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 
-// Define taxonomy options and form types
-interface TaxonomyOption {
-  value: string;
-  label: string;
-}
+// Mock upload function - In a real app this would connect to your API
+const uploadSymbolData = async (formData: SymbolFormData): Promise<{ id: string }> => {
+  // Simulate an API call
+  console.log('Uploading symbol data:', formData);
+  
+  // Simulate processing time
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // Return a mock response
+  return { id: 'symbol_' + Math.random().toString(36).substr(2, 9) };
+};
 
-interface Location {
-  lat: number;
-  lng: number;
-}
+// Mock function to upload image files
+const uploadSymbolImages = async (files: File[], symbolId: string): Promise<string[]> => {
+  // Simulate an API call
+  console.log(`Uploading ${files.length} images for symbol ${symbolId}`);
+  
+  // Simulate processing time
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  // Return mock image URLs
+  return files.map((_, index) => 
+    `https://placehold.co/600x400?text=Symbol+Image+${index + 1}`
+  );
+};
 
-interface SymbolFormData {
-  id?: string;
-  name: string;
-  description: string;
-  culture: string;
-  period: string;
-  location?: Location;
-  techniques: string[];
-  functions: string[];
-  mediums: string[];
-  images: File[];
-}
-
-interface SymbolUploaderProps {
-  onSubmit: (data: SymbolFormData) => Promise<{ success: boolean; symbolId?: string; error?: string }>;
-  initialData?: Partial<SymbolFormData>;
-  mode?: 'create' | 'edit';
-}
-
-const SymbolUploader: React.FC<SymbolUploaderProps> = ({
-  onSubmit,
-  initialData = {},
-  mode = 'create'
-}) => {
+const SymbolUploader: React.FC = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   
-  // Sample taxonomy options
-  const cultures: TaxonomyOption[] = [
-    { value: 'egyptian', label: t('taxonomies.cultures.egyptian') },
-    { value: 'greek', label: t('taxonomies.cultures.greek') },
-    { value: 'roman', label: t('taxonomies.cultures.roman') },
-    { value: 'mesopotamian', label: t('taxonomies.cultures.mesopotamian') },
-    { value: 'celtic', label: t('taxonomies.cultures.celtic') },
-    { value: 'mayan', label: t('taxonomies.cultures.mayan') },
-    { value: 'chinese', label: t('taxonomies.cultures.chinese') },
-    { value: 'japanese', label: t('taxonomies.cultures.japanese') },
-    { value: 'aboriginal', label: t('taxonomies.cultures.aboriginal') },
-    { value: 'islamic', label: t('taxonomies.cultures.islamic') },
-  ];
+  // Define the Form Data type explicitly to match with SymbolForm
+  interface SubmitFormData extends SymbolFormData {
+    images: File[];
+    techniques: string[];
+    functions: string[];
+    mediums: string[];
+  }
   
-  const periods: TaxonomyOption[] = [
-    { value: 'prehistoric', label: t('taxonomies.periods.prehistoric') },
-    { value: 'ancient', label: t('taxonomies.periods.ancient') },
-    { value: 'classical', label: t('taxonomies.periods.classical') },
-    { value: 'medieval', label: t('taxonomies.periods.medieval') },
-    { value: 'renaissance', label: t('taxonomies.periods.renaissance') },
-    { value: 'modern', label: t('taxonomies.periods.modern') },
-    { value: 'contemporary', label: t('taxonomies.periods.contemporary') },
-  ];
-  
-  const techniques: TaxonomyOption[] = [
-    { value: 'painting', label: t('taxonomies.techniques.painting') },
-    { value: 'carving', label: t('taxonomies.techniques.carving') },
-    { value: 'weaving', label: t('taxonomies.techniques.weaving') },
-    { value: 'embroidery', label: t('taxonomies.techniques.embroidery') },
-    { value: 'metalwork', label: t('taxonomies.techniques.metalwork') },
-    { value: 'pottery', label: t('taxonomies.techniques.pottery') },
-    { value: 'printing', label: t('taxonomies.techniques.printing') },
-  ];
-  
-  const functions: TaxonomyOption[] = [
-    { value: 'religious', label: t('taxonomies.functions.religious') },
-    { value: 'decorative', label: t('taxonomies.functions.decorative') },
-    { value: 'protective', label: t('taxonomies.functions.protective') },
-    { value: 'identity', label: t('taxonomies.functions.identity') },
-    { value: 'narrative', label: t('taxonomies.functions.narrative') },
-    { value: 'educational', label: t('taxonomies.functions.educational') },
-  ];
-  
-  const mediums: TaxonomyOption[] = [
-    { value: 'stone', label: t('taxonomies.mediums.stone') },
-    { value: 'textile', label: t('taxonomies.mediums.textile') },
-    { value: 'ceramic', label: t('taxonomies.mediums.ceramic') },
-    { value: 'metal', label: t('taxonomies.mediums.metal') },
-    { value: 'wood', label: t('taxonomies.mediums.wood') },
-    { value: 'paper', label: t('taxonomies.mediums.paper') },
-    { value: 'digital', label: t('taxonomies.mediums.digital') },
-  ];
-  
-  const handleSubmit = async (data: SymbolFormData) => {
-    setIsLoading(true);
+  const handleSubmit = async (data: SubmitFormData) => {
+    setIsSubmitting(true);
     
     try {
-      const result = await onSubmit(data);
+      // 1. First upload the symbol metadata
+      const { id } = await uploadSymbolData(data);
       
-      if (result.success) {
-        toast.success(
-          mode === 'create' 
-            ? t('symbols.uploader.createSuccess') 
-            : t('symbols.uploader.updateSuccess')
-        );
-        
-        if (result.symbolId) {
-          navigate(`/symbols/${result.symbolId}`);
-        } else {
-          navigate('/explore');
-        }
-      } else {
-        toast.error(result.error || t('symbols.uploader.genericError'));
+      // 2. Then upload any images if present
+      if (data.images && data.images.length > 0) {
+        await uploadSymbolImages(data.images, id);
       }
+      
+      // 3. Show success message
+      toast.success(t('symbolUploader.success.title'), {
+        description: t('symbolUploader.success.description'),
+      });
+      
+      // 4. Could redirect to the symbol details page here
+      // navigate(`/symbols/${id}`);
+      
     } catch (error) {
-      console.error('Error submitting symbol:', error);
-      toast.error(t('symbols.uploader.submitError'));
+      console.error('Error uploading symbol:', error);
+      toast.error(t('symbolUploader.error.title'), {
+        description: t('symbolUploader.error.description'),
+      });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
   
   return (
-    <Card className="border-slate-200">
-      <CardHeader>
-        <CardTitle>
-          {mode === 'create' ? (
-            <I18nText translationKey="symbols.uploader.createTitle">Upload New Symbol</I18nText>
-          ) : (
-            <I18nText translationKey="symbols.uploader.editTitle">Edit Symbol</I18nText>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <SymbolForm
-          initialData={initialData}
-          cultures={cultures}
-          periods={periods}
-          techniques={techniques}
-          functions={functions}
-          mediums={mediums}
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          mode={mode}
-        />
-      </CardContent>
-    </Card>
+    <div className="container mx-auto px-4 py-8">
+      <Card className="max-w-4xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            <I18nText translationKey="symbolUploader.title" />
+          </CardTitle>
+        </CardHeader>
+        
+        <CardContent>
+          <SymbolForm 
+            onSubmit={handleSubmit} 
+            isSubmitting={isSubmitting}
+          />
+        </CardContent>
+        
+        <CardFooter className="bg-slate-50 border-t flex flex-col items-start px-6 py-4">
+          <p className="text-sm text-slate-600">
+            <I18nText translationKey="symbolUploader.footer.note" />
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
   );
 };
 

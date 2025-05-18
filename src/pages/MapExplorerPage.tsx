@@ -19,7 +19,7 @@ const MapExplorerPage = () => {
   const [locationsCount, setLocationsCount] = useState(0);
   const [regions, setRegions] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false); // Ajout de l'état loading manquant
+  const [loading, setLoading] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<{
     regions: string[];
     verified: boolean;
@@ -80,9 +80,6 @@ const MapExplorerPage = () => {
   
   const hasActiveFilters = selectedFilters.regions.length > 0 || selectedFilters.verified || searchQuery;
   
-  // Create translation variables for needed texts
-  const searchPlaceholder = t('mapExplorer.searchLocation');
-  
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -99,7 +96,7 @@ const MapExplorerPage = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <Input 
-              placeholder={searchPlaceholder}
+              placeholder={t('mapExplorer.searchLocation')}
               className="pl-10 bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
