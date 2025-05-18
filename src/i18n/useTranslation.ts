@@ -42,9 +42,11 @@ export const useTranslation = () => {
       // If translation is an object, stringify it or return a fallback
       if (translated !== null && typeof translated === 'object') {
         console.warn(`Translation for key "${key}" returned an object instead of a string`, translated);
-        // Return a fallback string - either from a specific field if available or stringify
-        return translated.text || translated.value || translated.content || 
-               translated.toString() || key.split('.').pop() || key;
+        
+        // Type-safe approach: Use optional chaining and nullish coalescing for object properties
+        const objTranslated = translated as Record<string, any>;
+        return objTranslated?.text ?? objTranslated?.value ?? objTranslated?.content ?? 
+               String(objTranslated) ?? key.split('.').pop() ?? key;
       }
       
       return translated;
