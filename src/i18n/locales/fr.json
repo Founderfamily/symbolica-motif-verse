@@ -1,4 +1,3 @@
-
 {
   "navigation": {
     "home": "Accueil",
@@ -186,5 +185,52 @@
     "en": "Anglais",
     "fr": "Français",
     "switchTo": "Changer en {language}"
+  },
+  "triptych": {
+    "title": "Explorateur Interactif de Symboles",
+    "subtitle": "Explorez l'histoire et le contexte des symboles culturels",
+    "learnMore": "En Savoir Plus",
+    "block1": {
+      "title": "Sélection de Symbole"
+    },
+    "block2": {
+      "title": "Parcourir les Symboles"
+    },
+    "block3": {
+      "title": "Détails du Symbole"
+    }
+  },
+  "symbolTriptych": {
+    "original": "Contexte Original",
+    "pattern": "Extraction de Motif",
+    "reuse": "Utilisations Contemporaines",
+    "imageError": "Problèmes de Chargement d'Image",
+    "imageErrorDesc": "Certaines images peuvent ne pas s'afficher correctement en raison de problèmes de chargement."
+  },
+  "actions": {
+    "hide": "Masquer la Liste",
+    "show": "Afficher la Liste"
+  },
+  "gamification": {
+    "title": "Gagnez des Récompenses & Reconnaissance",
+    "subtitle": "Contribuez à la communauté et gagnez des points, badges et réalisations",
+    "viewYourProgress": "Voir Votre Progression",
+    "points": "points",
+    "badges": {
+      "title": "Badges Numériques",
+      "description": "Collectionnez de beaux badges pour vos découvertes et contributions"
+    },
+    "points": {
+      "title": "Système de Points",
+      "description": "Gagnez des points pour diverses activités et grimpez dans le classement"
+    },
+    "leaderboard": {
+      "title": "Classement Communautaire",
+      "description": "Rivalisez avec d'autres chercheurs et passionnés"
+    },
+    "achievements": {
+      "title": "Réalisations Spéciales",
+      "description": "Complétez des défis spéciaux pour débloquer des récompenses uniques"
+    }
   }
 }

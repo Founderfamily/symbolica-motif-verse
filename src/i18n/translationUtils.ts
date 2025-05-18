@@ -1,8 +1,7 @@
-
 import { i18n } from '@/i18n/config';
 import en from './locales/en.json';
 import fr from './locales/fr.json';
-import { FormatIssue } from './types/validationTypes';
+import { FormatIssue, ValidationReport } from './types/validationTypes';
 
 /**
  * Format a translation key as a readable text
@@ -147,7 +146,7 @@ const countKeys = (obj: any): number => {
 /**
  * Diagnose translation issues including missing keys and format problems
  */
-export const diagnoseTranslations = () => {
+export const diagnoseTranslations = (): ValidationReport => {
   const missingKeys = findMissingKeys();
   const formatIssues = findFormatIssues();
   
@@ -268,4 +267,3 @@ export const generateFixReport = () => {
     }
   };
 };
-

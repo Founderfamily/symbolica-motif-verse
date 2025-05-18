@@ -1,4 +1,3 @@
-
 {
   "navigation": {
     "home": "Home",
@@ -191,5 +190,52 @@
     "en": "English",
     "fr": "French",
     "switchTo": "Switch to {language}"
+  },
+  "triptych": {
+    "title": "Interactive Symbol Explorer",
+    "subtitle": "Explore the history and context of cultural symbols",
+    "learnMore": "Learn More",
+    "block1": {
+      "title": "Symbol Selection"
+    },
+    "block2": {
+      "title": "Browse Symbols"
+    },
+    "block3": {
+      "title": "Symbol Details"
+    }
+  },
+  "symbolTriptych": {
+    "original": "Original Context",
+    "pattern": "Pattern Extraction",
+    "reuse": "Contemporary Uses",
+    "imageError": "Image Loading Issues",
+    "imageErrorDesc": "Some images may not be displayed correctly due to loading issues."
+  },
+  "actions": {
+    "hide": "Hide List",
+    "show": "Show List"
+  },
+  "gamification": {
+    "title": "Earn Rewards & Recognition",
+    "subtitle": "Contribute to the community and earn points, badges, and achievements",
+    "viewYourProgress": "View Your Progress",
+    "points": "points",
+    "badges": {
+      "title": "Digital Badges",
+      "description": "Collect beautiful badges for your discoveries and contributions"
+    },
+    "points": {
+      "title": "Point System",
+      "description": "Earn points for various activities and climb the leaderboard"
+    },
+    "leaderboard": {
+      "title": "Community Leaderboard",
+      "description": "Compete with fellow researchers and enthusiasts"
+    },
+    "achievements": {
+      "title": "Special Achievements",
+      "description": "Complete special challenges to unlock unique rewards"
+    }
   }
 }
