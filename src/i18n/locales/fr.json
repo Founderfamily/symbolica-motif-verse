@@ -10,6 +10,7 @@
     "signup": "S'inscrire",
     "account": "Compte",
     "admin": "Admin",
+    "symbols": "Symboles",
     "groups": "Groupes"
   },
   "groups": {
@@ -215,7 +216,12 @@
   },
   "actions": {
     "hide": "Masquer la Liste",
-    "show": "Afficher la Liste"
+    "show": "Afficher la Liste",
+    "submit": "Soumettre",
+    "reset": "Réinitialiser",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "cancel": "Annuler"
   },
   "gamification": {
     "title": "Gagnez des Récompenses & Reconnaissance",

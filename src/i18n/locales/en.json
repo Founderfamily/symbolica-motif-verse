@@ -10,6 +10,7 @@
     "signup": "Sign up",
     "account": "Account",
     "admin": "Admin",
+    "symbols": "Symbols",
     "groups": "Groups"
   },
   "groups": {
@@ -220,7 +221,12 @@
   },
   "actions": {
     "hide": "Hide List",
-    "show": "Show List"
+    "show": "Show List",
+    "submit": "Submit",
+    "reset": "Reset",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel"
   },
   "gamification": {
     "title": "Earn Rewards & Recognition",
