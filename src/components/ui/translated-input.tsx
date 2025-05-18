@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Input, InputProps } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Globe } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 
-interface TranslatedInputProps extends Omit<InputProps, 'onChange'> {
+interface TranslatedInputProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -16,6 +16,9 @@ interface TranslatedInputProps extends Omit<InputProps, 'onChange'> {
   error?: string;
   required?: boolean;
   className?: string;
+  id?: string;
+  name?: string;
+  placeholder?: string;
 }
 
 const TranslatedInput: React.FC<TranslatedInputProps> = ({
@@ -28,6 +31,9 @@ const TranslatedInput: React.FC<TranslatedInputProps> = ({
   error,
   required = false,
   className = '',
+  id,
+  name,
+  placeholder,
   ...props
 }) => {
   const { currentLanguage } = useTranslation();
@@ -35,7 +41,7 @@ const TranslatedInput: React.FC<TranslatedInputProps> = ({
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center justify-between">
-        <Label htmlFor={props.id || props.name} className="text-base">
+        <Label htmlFor={id || name} className="text-base">
           {label}{required && <span className="text-red-500 ml-1">*</span>}
         </Label>
         <div className="flex items-center text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded">
@@ -50,16 +56,22 @@ const TranslatedInput: React.FC<TranslatedInputProps> = ({
       
       {multiline ? (
         <Textarea
+          id={id || name}
+          name={name}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={rows}
           className="resize-none w-full"
+          placeholder={placeholder}
           {...props as any}
         />
       ) : (
         <Input
+          id={id || name}
+          name={name}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
           {...props}
         />
       )}

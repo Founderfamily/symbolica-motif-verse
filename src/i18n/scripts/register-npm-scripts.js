@@ -1,60 +1,72 @@
 
 #!/usr/bin/env node
 
-/**
- * This script adds translation-related npm scripts to package.json
- * 
- * Usage:
- *   node register-npm-scripts.js
- */
+// This script adds NPM scripts to package.json for the translation tools
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
-// Path to package.json
-const packageJsonPath = path.resolve(__dirname, '../../../package.json');
+// Make the conversion script executable
+try {
+  execSync('chmod +x src/i18n/convert-t-to-i18ntext.js');
+  console.log('✅ Made conversion script executable');
+} catch (error) {
+  console.error('Error making script executable:', error.message);
+}
 
-// Check if package.json exists
-if (!fs.existsSync(packageJsonPath)) {
-  console.error('❌ package.json not found at:', packageJsonPath);
+// Read package.json
+const packageJsonPath = path.join(process.cwd(), 'package.json');
+let packageJson;
+
+try {
+  packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+} catch (error) {
+  console.error('Error reading package.json:', error.message);
   process.exit(1);
 }
 
-// Read the current package.json
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-
-// Scripts to add
-const scriptsToAdd = {
-  "validate-translations": "node src/i18n/check-translation-completeness.js",
-  "validate-translations:fix": "node src/i18n/check-translation-completeness.js --fix",
-  "validate-translations:report": "node src/i18n/check-translation-completeness.js --report=translation-report.md",
-  "scan-direct-usage": "node -r ts-node/register src/i18n/directUsageScanner.ts",
-  "convert-t-to-i18ntext": "node src/i18n/convert-t-to-i18ntext.js",
-  "i18n:pre-commit": "node src/i18n/pre-commit-hook.js"
-};
-
-// Add scripts if they don't exist
+// Add our translation scripts
 if (!packageJson.scripts) {
   packageJson.scripts = {};
 }
 
-let scriptsAdded = 0;
-Object.entries(scriptsToAdd).forEach(([name, script]) => {
-  if (!packageJson.scripts[name]) {
-    packageJson.scripts[name] = script;
-    scriptsAdded++;
+// Add new scripts
+const newScripts = {
+  'i18n:convert': 'node src/i18n/convert-t-to-i18ntext.js',
+  'i18n:validate': 'node src/i18n/validateTranslations.js',
+  'i18n:check-direct': 'node src/i18n/scripts/find-direct-t-usage.js'
+};
+
+let scriptsAdded = false;
+
+Object.entries(newScripts).forEach(([scriptName, scriptCommand]) => {
+  if (!packageJson.scripts[scriptName]) {
+    packageJson.scripts[scriptName] = scriptCommand;
+    scriptsAdded = true;
+    console.log(`✅ Added npm script: ${scriptName}`);
   }
 });
 
-// Write updated package.json if changes were made
-if (scriptsAdded > 0) {
-  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n', 'utf8');
-  console.log(`✅ Added ${scriptsAdded} translation npm scripts to package.json`);
-} else {
-  console.log('✓ All translation scripts are already in package.json');
+if (!scriptsAdded) {
+  console.log('ℹ️ All translation scripts already exist in package.json');
+  process.exit(0);
 }
 
-console.log('\nYou can now run these commands:');
-Object.keys(scriptsToAdd).forEach(script => {
-  console.log(`  npm run ${script}`);
-});
+// Write updated package.json
+try {
+  fs.writeFileSync(
+    packageJsonPath, 
+    JSON.stringify(packageJson, null, 2) + '\n',
+    'utf-8'
+  );
+  console.log('✅ Updated package.json with new scripts');
+} catch (error) {
+  console.error('Error writing package.json:', error.message);
+  process.exit(1);
+}
+
+console.log('\n📝 You can now use these npm commands:');
+console.log('  • npm run i18n:convert [file-path] - Convert t() calls to I18nText');
+console.log('  • npm run i18n:validate - Validate translation completeness');
+console.log('  • npm run i18n:check-direct - Find direct t() usage in code');
