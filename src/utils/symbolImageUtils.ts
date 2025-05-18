@@ -43,3 +43,47 @@ export function isValidImageUrl(url: string): boolean {
     return false;
   }
 }
+
+export const getSymbolIconByType = (culture: string): string => {
+  // Map culture to icon
+  const cultureMap: Record<string, string> = {
+    'Celtic': '/images/symbols/triskelion.png',
+    'Viking': '/images/symbols/viking.png',
+    'Greek': '/images/symbols/greek-meander.png',
+    'Aboriginal': '/images/symbols/aboriginal.png',
+    'Aztec': '/images/symbols/aztec.png',
+    'Mayan': '/images/symbols/aztec.png', // Using Aztec as fallback
+    'Japanese': '/images/symbols/seigaiha.png',
+    'Indian': '/images/symbols/mandala.png',
+    'Buddhist': '/images/symbols/mandala.png',
+    'Persian': '/images/symbols/arabesque.png',
+    'Islamic': '/images/symbols/arabesque.png',
+    'French': '/images/symbols/fleur-de-lys.png',
+    'Egyptian': '/images/symbols/adinkra.png', // Using another symbol as placeholder
+    'African': '/images/symbols/adinkra.png'
+  };
+  
+  return cultureMap[culture] || '/images/symbols/mandala.png'; // Default to mandala if culture not found
+};
+
+export const getSymbolThemeColor = (culture: string): string => {
+  // Map culture to a color theme
+  const colorMap: Record<string, string> = {
+    'Celtic': 'bg-emerald-500',
+    'Viking': 'bg-sky-600',
+    'Greek': 'bg-blue-500',
+    'Aboriginal': 'bg-orange-600',
+    'Aztec': 'bg-red-600',
+    'Mayan': 'bg-red-700',
+    'Japanese': 'bg-pink-500',
+    'Indian': 'bg-purple-500',
+    'Buddhist': 'bg-indigo-600',
+    'Persian': 'bg-amber-600',
+    'Islamic': 'bg-amber-600',
+    'French': 'bg-violet-500',
+    'Egyptian': 'bg-yellow-600',
+    'African': 'bg-yellow-700'
+  };
+  
+  return colorMap[culture] || 'bg-slate-500'; // Default color
+};

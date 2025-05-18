@@ -1,10 +1,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import MapSymbolMarker from './MapSymbolMarker';
-import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star, Loader2, AlertCircle } from 'lucide-react';
+import { MapPin, Star, Loader2, AlertCircle, Filter } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { symbolGeolocationService, SymbolLocation } from '@/services/symbolGeolocationService';
@@ -13,6 +11,11 @@ import MapboxAuth from './MapboxAuth';
 import { I18nText } from '@/components/ui/i18n-text';
 import { mapboxAuthService } from '@/services/mapboxAuthService';
 import { ErrorHandler } from '@/utils/errorHandler';
+import { useAuth } from '@/hooks/useAuth';
+import CulturalMarker from './CulturalMarker';
+import SymbolCluster from './SymbolCluster';
+import CultureLegend from './CultureLegend';
+import { Button } from '@/components/ui/button';
 
 // Default map settings
 const DEFAULT_MAP_CENTER: [number, number] = [0, 20]; // Initial position at [longitude, latitude]
@@ -32,7 +35,11 @@ const InteractiveMap = () => {
   const [mapboxToken, setMapboxToken] = useState<string | null>(mapboxAuthService.getToken());
   const [tokenError, setTokenError] = useState<boolean>(false);
   const mapInitializedRef = useRef<boolean>(false);
-  
+  const [exploredLocations, setExploredLocations] = useState<Set<string>>(new Set());
+  const [showLegend, setShowLegend] = useState(false);
+  const [activeCultureFilters, setActiveCultureFilters] = useState<Set<string>>(new Set());
+  const [availableCultures, setAvailableCultures] = useState<string[]>([]);
+
   // Fetch locations from the database
   useEffect(() => {
     const fetchLocations = async () => {
@@ -42,6 +49,13 @@ const InteractiveMap = () => {
         const locations = await symbolGeolocationService.getAllLocations();
         console.log(`Retrieved ${locations.length} symbol locations`);
         setSymbolLocations(locations);
+        
+        // Extract unique cultures for filtering
+        const cultures = [...new Set(locations.map(loc => loc.culture))];
+        setAvailableCultures(cultures);
+        // By default, show all cultures
+        setActiveCultureFilters(new Set(cultures));
+        
         setError(null);
       } catch (err) {
         console.error("Failed to fetch symbol locations:", err);
@@ -188,11 +202,75 @@ const InteractiveMap = () => {
     }
   }, [mapboxToken]);
   
-  const handleMarkerClick = (id: string) => {
-    setActiveLocation(id);
-    setExploreCount(prev => prev + 1);
+  // Handle marker click and award points for exploration
+  const handleLocationSelect = async (location: SymbolLocation) => {
+    setActiveLocation(location.id);
+    
+    // Mark the location as explored
+    if (!exploredLocations.has(location.id)) {
+      const newExplored = new Set(exploredLocations);
+      newExplored.add(location.id);
+      setExploredLocations(newExplored);
+      setExploreCount(prev => prev + 1);
+      
+      // Award points if user is logged in
+      if (user) {
+        try {
+          await gamificationService.awardPoints(
+            user.id,
+            'exploration',
+            5,
+            location.id,
+            {
+              locationName: location.name,
+              culture: location.culture,
+              coordinates: `${location.latitude},${location.longitude}`
+            }
+          );
+          
+          toast({
+            title: t('gamification.pointsEarned'),
+            description: t('gamification.earnedForExploration', { points: 5 }),
+            variant: "default",
+          });
+        } catch (error) {
+          console.error("Failed to award points:", error);
+        }
+      }
+    }
   };
   
+  // Toggle culture filter
+  const handleCultureFilterChange = (culture: string, active: boolean) => {
+    const newFilters = new Set(activeCultureFilters);
+    if (active) {
+      newFilters.add(culture);
+    } else {
+      newFilters.delete(culture);
+    }
+    setActiveCultureFilters(newFilters);
+  };
+  
+  // Group locations by culture for clustering
+  const getLocationsByCulture = () => {
+    // Only include locations that match current culture filters
+    const filteredLocations = symbolLocations.filter(loc => 
+      activeCultureFilters.has(loc.culture)
+    );
+    
+    // Group by culture
+    const grouped: Record<string, SymbolLocation[]> = {};
+    filteredLocations.forEach(loc => {
+      if (!grouped[loc.culture]) {
+        grouped[loc.culture] = [];
+      }
+      grouped[loc.culture].push(loc);
+    });
+    
+    return grouped;
+  };
+  
+  // Handle token submission from auth component
   const handleTokenSubmit = (token: string) => {
     console.log("New Mapbox token received");
     setMapboxToken(token);
@@ -219,6 +297,10 @@ const InteractiveMap = () => {
     );
   }
   
+  // Get grouped locations for efficient rendering
+  const locationsByCulture = getLocationsByCulture();
+  const totalLocations = Object.values(locationsByCulture).flat().length;
+
   return (
     <div className="space-y-4">
       {user && (
@@ -244,6 +326,35 @@ const InteractiveMap = () => {
         {/* Mapbox container */}
         <div ref={mapContainerRef} className="absolute inset-0 bg-slate-50" />
         
+        {/* Culture filter toggle */}
+        <div className="absolute top-4 left-4 z-20">
+          <Button 
+            variant={showLegend ? "default" : "outline"} 
+            size="sm"
+            className="bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-100"
+            onClick={() => setShowLegend(!showLegend)}
+          >
+            <Filter className="h-4 w-4 mr-1" />
+            <I18nText translationKey="map.filters.cultures" />
+            {availableCultures.length > 0 && (
+              <Badge variant="secondary" className="ml-2 bg-slate-200">
+                {activeCultureFilters.size}/{availableCultures.length}
+              </Badge>
+            )}
+          </Button>
+          
+          {/* Culture legend/filter panel */}
+          {showLegend && (
+            <div className="absolute top-12 left-0 z-30 animate-in fade-in slide-in-from-top-2 duration-200">
+              <CultureLegend 
+                cultures={availableCultures}
+                onFilterChange={handleCultureFilterChange}
+                activeCultures={activeCultureFilters}
+              />
+            </div>
+          )}
+        </div>
+        
         {/* Show loading state */}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-50/70 z-30">
@@ -264,28 +375,42 @@ const InteractiveMap = () => {
           </div>
         )}
         
-        {/* Render map markers only after map is loaded */}
-        {mapLoaded && !loading && symbolLocations.map((location) => (
-          <MapSymbolMarker
-            key={location.id}
-            id={location.id}
-            name={location.name}
-            culture={location.culture}
-            lat={location.latitude}
-            lng={location.longitude}
-            isVerified={location.is_verified || location.verification_status === 'verified'}
-            historicalPeriod={location.historical_period}
-            source={location.source}
-            description={location.description}
-            onClick={() => handleMarkerClick(location.id)}
-          />
+        {/* Render map markers/clusters after map is loaded */}
+        {mapLoaded && !loading && Object.entries(locationsByCulture).map(([culture, locations]) => (
+          // If there are multiple locations for this culture, create a cluster
+          locations.length > 1 ? (
+            <SymbolCluster
+              key={`cluster-${culture}`}
+              culture={culture}
+              locations={locations}
+              onLocationSelect={handleLocationSelect}
+              exploredLocations={exploredLocations}
+            />
+          ) : (
+            // If there's just one location, render a single marker
+            locations.length === 1 && (
+              <CulturalMarker 
+                key={locations[0].id}
+                location={locations[0]}
+                onClick={() => handleLocationSelect(locations[0])}
+                isActive={activeLocation === locations[0].id}
+                isExplored={exploredLocations.has(locations[0].id)}
+              />
+            )
+          )
         ))}
         
         {/* Show message when no locations are available */}
-        {mapLoaded && !loading && symbolLocations.length === 0 && (
+        {mapLoaded && !loading && totalLocations === 0 && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-md max-w-xs">
-              <p className="text-center text-slate-600"><I18nText translationKey="map.noLocationsMessage" /></p>
+              <p className="text-center text-slate-600">
+                {activeCultureFilters.size === 0 ? (
+                  <I18nText translationKey="map.noFilterSelected" />
+                ) : (
+                  <I18nText translationKey="map.noLocationsMessage" />
+                )}
+              </p>
             </div>
           </div>
         )}
