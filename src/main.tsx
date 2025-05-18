@@ -5,6 +5,7 @@ import './index.css'
 // Import i18n config to ensure it initializes
 import './i18n/config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AuthProvider } from './hooks/useAuth'
 
 // Create the query client
 const queryClient = new QueryClient({
@@ -19,6 +20,8 @@ const queryClient = new QueryClient({
 // Create root and render App
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </QueryClientProvider>
 );
