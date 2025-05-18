@@ -38,13 +38,7 @@ export const useSymbolImages = (symbolId: string | null) => {
       try {
         const { symbolData, imagesData } = await fetchSymbolData(symbolId);
         
-        // Cast the data to the correct types
-        const typedSymbolData: SymbolData = {
-          ...symbolData,
-          translations: symbolData.translations as SymbolData['translations']
-        };
-        
-        setSymbol(typedSymbolData);
+        setSymbol(symbolData);
         
         // Organize images by type
         const organizedImages: Record<string, SymbolImage | null> = {
@@ -54,11 +48,7 @@ export const useSymbolImages = (symbolId: string | null) => {
         };
         
         imagesData.forEach(img => {
-          const typedImage: SymbolImage = {
-            ...img,
-            translations: img.translations as SymbolImage['translations']
-          };
-          organizedImages[img.image_type] = typedImage;
+          organizedImages[img.image_type] = img;
         });
         
         setImages(organizedImages);
@@ -88,6 +78,6 @@ export const useSymbolImages = (symbolId: string | null) => {
     imageErrors,
     handleImageError,
     // Add the data property for backward compatibility
-    data: imagesData => imagesData?.find(img => img.image_type === 'pattern') || imagesData?.[0] || null
+    data: (imagesData: SymbolImage[] | undefined) => imagesData?.find(img => img.image_type === 'pattern') || imagesData?.[0] || null
   };
 };

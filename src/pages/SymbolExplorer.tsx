@@ -33,7 +33,8 @@ const SymbolExplorer: React.FC = () => {
         .select('*');
         
       if (error) throw error;
-      return data as SymbolData[];
+      // Cast the data to SymbolData[] with a type assertion
+      return (data as unknown) as SymbolData[];
     }
   });
   

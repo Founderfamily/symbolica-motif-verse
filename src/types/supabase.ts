@@ -10,6 +10,9 @@ export interface SymbolData {
   description: string | null;
   created_at: string | null;
   updated_at: string | null;
+  medium?: string[] | null;
+  technique?: string[] | null;
+  function?: string[] | null;
   translations?: {
     [language: string]: {
       name: string;
@@ -17,7 +20,7 @@ export interface SymbolData {
       period: string;
       description?: string;
     };
-  } | null;
+  } | Json | null;
 }
 
 export interface SymbolImage {
@@ -37,7 +40,7 @@ export interface SymbolImage {
       title?: string;
       description?: string;
     };
-  } | null;
+  } | Json | null;
 }
 
 export interface Profile {
