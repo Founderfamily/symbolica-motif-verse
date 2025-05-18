@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getTranslatedField, getTranslatedArray } from '@/utils/translationUtils';
+import { getTranslatedField, getTranslatedArray, TranslatableObject } from '@/utils/translationUtils';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -47,12 +47,12 @@ const SymbolDetail: React.FC = () => {
   
   // Get translated value using our new utility function
   const getTranslatedValue = (field: 'name' | 'description' | 'culture' | 'period') => {
-    return getTranslatedField<string>(symbol, field, 'en');
+    return getTranslatedField<string>(symbol as TranslatableObject, field, 'en');
   };
   
   // For arrays like medium, technique, function
   const getTranslatedArrayValue = (field: 'medium' | 'technique' | 'function') => {
-    return getTranslatedArray(symbol, field, 'en');
+    return getTranslatedArray(symbol as TranslatableObject, field, 'en');
   };
   
   if (loading) {
@@ -231,8 +231,8 @@ const SymbolDetail: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             {relatedSymbols.map(relatedSymbol => {
               // Get translated name using the utility function
-              const translatedName = getTranslatedField<string>(relatedSymbol, 'name');
-              const translatedCulture = getTranslatedField<string>(relatedSymbol, 'culture');
+              const translatedName = getTranslatedField<string>(relatedSymbol as TranslatableObject, 'name');
+              const translatedCulture = getTranslatedField<string>(relatedSymbol as TranslatableObject, 'culture');
               
               return (
                 <Link 

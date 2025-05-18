@@ -1,4 +1,3 @@
-
 /**
  * Utilities for handling translations from database content
  * These functions help display multilingual content from Supabase records
@@ -9,8 +8,8 @@ import { i18n } from '@/i18n/config';
  * Type representing an object with translations
  * Matches the structure of the 'translations' field in our database tables
  */
-type TranslatableObject = {
-  translations?: Record<string, Record<string, any>> | null;
+export type TranslatableObject = {
+  translations?: Record<string, Record<string, any>> | null | any;
   [key: string]: any;
 };
 

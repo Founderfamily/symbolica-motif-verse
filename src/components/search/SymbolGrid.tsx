@@ -5,6 +5,7 @@ import { SymbolData } from '@/types/supabase';
 import { Card } from '@/components/ui/card';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
+import { getTranslatedField, TranslatableObject } from '@/utils/translationUtils';
 
 interface SymbolGridProps {
   symbols: SymbolData[];
@@ -26,11 +27,9 @@ export const SymbolGrid: React.FC<SymbolGridProps> = ({ symbols }) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {symbols.map(symbol => {
-        // Use translations if available
-        const translations = symbol.translations || {};
-        const langData = translations[currentLanguage];
-        const displayName = langData?.name || symbol.name;
-        const displayCulture = langData?.culture || symbol.culture;
+        // Use translated values with our utility function
+        const displayName = getTranslatedField<string>(symbol as TranslatableObject, 'name');
+        const displayCulture = getTranslatedField<string>(symbol as TranslatableObject, 'culture');
         
         return (
           <Link to={`/symbols/${symbol.id}`} key={symbol.id}>
