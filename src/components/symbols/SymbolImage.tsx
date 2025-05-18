@@ -10,7 +10,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 interface SymbolImageProps {
   image: SymbolImageType | null;
   type: ImageType;
-  title: string;
+  title: React.ReactNode; // Changed from string to ReactNode
   hasError: boolean;
   symbolName: string;
   onError: () => void;
@@ -68,7 +68,7 @@ const SymbolImage: React.FC<SymbolImageProps> = ({
           
           <img
             src={imageUrl}
-            alt={`${symbolName || 'Symbol'} - ${title}`}
+            alt={`${symbolName || 'Symbol'} - ${typeof title === 'string' ? title : 'Image'}`}
             className={`object-cover w-full h-full transition-all duration-500 group-hover:scale-105 ${loading ? 'opacity-0' : 'opacity-100'}`}
             crossOrigin={isLocalImage ? "" : "anonymous"} // Only use crossOrigin for remote images
             onError={handleError}
