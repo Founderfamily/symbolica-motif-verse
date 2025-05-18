@@ -1,324 +1,413 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import TranslatedInput from '@/components/ui/TranslatedInput';
-import TaxonomySelector from '@/components/ui/TaxonomySelector';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import ImageDropzone from '@/components/contributions/ImageDropzone';
 import MapSelector from '@/components/contributions/MapSelector';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import TranslatedInput from '@/components/ui/TranslatedInput';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 
-// Define option types
-interface TaxonomyOption {
-  value: string;
-  label: string;
-}
-
-// Define location type
+// Define appropriate types
 interface Location {
   lat: number;
   lng: number;
 }
 
-// Define form data interface
-interface SymbolFormData {
-  id?: string;
-  name: string;
-  description: string;
-  culture: string;
-  period: string;
-  location?: Location;
-  techniques: string[];
-  functions: string[];
-  mediums: string[];
-  images: File[];
+interface SymbolFormProps {
+  onSubmit?: (data: SymbolFormData) => Promise<void>;
+  initialData?: Partial<SymbolFormData>;
+  isEditing?: boolean;
 }
 
-// Define props
-interface SymbolFormProps {
-  initialData?: Partial<SymbolFormData>;
-  cultures: TaxonomyOption[];
-  periods: TaxonomyOption[];
-  techniques: TaxonomyOption[];
-  functions: TaxonomyOption[];
-  mediums: TaxonomyOption[];
-  onSubmit: (data: SymbolFormData) => void;
-  isLoading?: boolean;
-  mode?: 'create' | 'edit';
+interface SymbolFormData {
+  name: string;
+  nameFr?: string;
+  nameEn?: string;
+  culture: string;
+  description: string;
+  descriptionFr?: string;
+  descriptionEn?: string;
+  period: string;
+  category: string;
+  tags: string[];
+  imageFile?: File[];
+  location?: Location;
 }
+
+// Sample categories and periods for the form
+const categories = [
+  'religious', 'cultural', 'historical', 'astronomical', 
+  'decorative', 'political', 'magical', 'educational'
+];
+
+const periods = [
+  'prehistoric', 'ancient', 'classical', 'medieval', 
+  'renaissance', 'modern', 'contemporary'
+];
+
+const cultures = [
+  'egyptian', 'greek', 'roman', 'chinese', 'japanese',
+  'indian', 'maya', 'aztec', 'inuit', 'celtic',
+  'nordic', 'aboriginal', 'persian', 'african'
+];
 
 const SymbolForm: React.FC<SymbolFormProps> = ({
-  initialData = {},
-  cultures,
-  periods,
-  techniques,
-  functions,
-  mediums,
   onSubmit,
-  isLoading = false,
-  mode = 'create'
+  initialData = {},
+  isEditing = false
 }) => {
-  const { t } = useTranslation();
-  
-  // Form state
-  const [formData, setFormData] = useState<SymbolFormData>({
-    id: initialData.id || undefined,
-    name: initialData.name || '',
-    description: initialData.description || '',
-    culture: initialData.culture || '',
-    period: initialData.period || '',
-    location: initialData.location,
-    techniques: initialData.techniques || [],
-    functions: initialData.functions || [],
-    mediums: initialData.mediums || [],
-    images: [] // Files cannot be pre-populated
+  const { t, currentLanguage } = useTranslation();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('general');
+  const [selectedImage, setSelectedImage] = useState<File[]>(initialData.imageFile || []);
+  const [selectedLocation, setSelectedLocation] = useState<Location>(initialData.location || { lat: 0, lng: 0 });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form validation schema
+  const formSchema = z.object({
+    name: z.string().min(3, { message: t('form.validation.nameRequired') }),
+    nameFr: z.string().optional(),
+    nameEn: z.string().optional(),
+    culture: z.string().min(1, { message: t('form.validation.cultureRequired') }),
+    description: z.string().min(10, { message: t('form.validation.descriptionRequired') }),
+    descriptionFr: z.string().optional(),
+    descriptionEn: z.string().optional(),
+    period: z.string().min(1, { message: t('form.validation.periodRequired') }),
+    category: z.string().min(1, { message: t('form.validation.categoryRequired') }),
+    tags: z.array(z.string()).optional().default([])
   });
-  
-  // Validation state
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  // Update specific field
-  const updateField = <K extends keyof SymbolFormData>(field: K, value: SymbolFormData[K]) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when field is updated
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue
+  } = useForm<SymbolFormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: initialData.name || '',
+      nameFr: initialData.nameFr || '',
+      nameEn: initialData.nameEn || '',
+      culture: initialData.culture || '',
+      description: initialData.description || '',
+      descriptionFr: initialData.descriptionFr || '',
+      descriptionEn: initialData.descriptionEn || '',
+      period: initialData.period || '',
+      category: initialData.category || '',
+      tags: initialData.tags || []
+    }
+  });
+
+  const handleImageSelected = useCallback((files: File[]) => {
+    if (files && files.length > 0) {
+      setSelectedImage(files);
+    }
+  }, []);
+
+  const handleLocationSelected = useCallback((location: Location) => {
+    setSelectedLocation(location);
+  }, []);
+
+  const processForm = async (data: SymbolFormData) => {
+    if (selectedImage.length === 0 && !isEditing) {
+      toast.error(t('form.validation.imageRequired'));
+      setActiveTab('media');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      // Include the image file and location in the data
+      const completeData = {
+        ...data,
+        imageFile: selectedImage,
+        location: selectedLocation
+      };
+
+      if (onSubmit) {
+        await onSubmit(completeData);
+      } else {
+        // Default submission logic if no onSubmit prop provided
+        console.log('Form submitted:', completeData);
+        toast.success(isEditing ? t('form.editSuccess') : t('form.createSuccess'));
+        navigate('/symbols');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error(t('form.submissionError'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  
-  // Validate form
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.name.trim()) {
-      newErrors.name = t('validation.required');
-    }
-    
-    if (!formData.culture) {
-      newErrors.culture = t('validation.required');
-    }
-    
-    if (!formData.period) {
-      newErrors.period = t('validation.required');
-    }
-    
-    // In edit mode, don't require images if none are provided
-    if (mode === 'create' && formData.images.length === 0) {
-      newErrors.images = t('validation.requiredImages');
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      onSubmit(formData);
-    }
-  };
-  
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="symbols.form.basicInfo">Basic Information</I18nText>
-            </h3>
-            
-            <TranslatedInput
-              id="name"
-              label="Name"
-              translationKey="symbols.form.name"
-              value={formData.name}
-              onChange={(value) => updateField('name', value)}
-              required
-              className={errors.name ? "border-red-300" : ""}
-            />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-            
-            <TranslatedInput
-              id="description"
-              label="Description"
-              translationKey="symbols.form.description"
-              value={formData.description}
-              onChange={(value) => updateField('description', value)}
-              multiline
-              rows={4}
-            />
-          </div>
-          
-          {/* Cultural Context */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="symbols.form.culturalContext">Cultural Context</I18nText>
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="culture" className="block text-sm font-medium text-slate-700 mb-1">
-                  <I18nText translationKey="symbols.form.culture.label">Culture</I18nText>
-                  <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="culture"
-                  className={`w-full h-10 px-3 rounded-md border ${
-                    errors.culture ? "border-red-300" : "border-input"
-                  }`}
-                  value={formData.culture}
-                  onChange={(e) => updateField('culture', e.target.value)}
-                  required
+    <form onSubmit={handleSubmit(processForm)} className="space-y-6 mb-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="general">
+            <I18nText translationKey="symbolForm.tabs.general" />
+          </TabsTrigger>
+          <TabsTrigger value="details">
+            <I18nText translationKey="symbolForm.tabs.details" />
+          </TabsTrigger>
+          <TabsTrigger value="media">
+            <I18nText translationKey="symbolForm.tabs.media" />
+          </TabsTrigger>
+          <TabsTrigger value="location">
+            <I18nText translationKey="symbolForm.tabs.location" />
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="space-y-4">
+          {/* Name field with translations */}
+          <TranslatedInput 
+            name="name"
+            register={register}
+            errors={errors}
+            setValue={setValue}
+            translationKey="symbolForm.fields.name"
+          />
+
+          {/* Culture field */}
+          <div className="space-y-2">
+            <label htmlFor="culture" className="block text-sm font-medium">
+              <I18nText translationKey="symbolForm.fields.culture" />
+            </label>
+            <Controller
+              name="culture"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
                 >
-                  <option value="" disabled>
-                    <I18nText translationKey="symbols.form.culture.placeholder">Select culture</I18nText>
-                  </option>
-                  {cultures.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.culture && <p className="text-red-500 text-xs mt-1">{errors.culture}</p>}
-              </div>
-              
-              <div>
-                <label htmlFor="period" className="block text-sm font-medium text-slate-700 mb-1">
-                  <I18nText translationKey="symbols.form.period.label">Period</I18nText>
-                  <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="period"
-                  className={`w-full h-10 px-3 rounded-md border ${
-                    errors.period ? "border-red-300" : "border-input"
-                  }`}
-                  value={formData.period}
-                  onChange={(e) => updateField('period', e.target.value)}
-                  required
-                >
-                  <option value="" disabled>
-                    <I18nText translationKey="symbols.form.period.placeholder">Select period</I18nText>
-                  </option>
-                  {periods.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.period && <p className="text-red-500 text-xs mt-1">{errors.period}</p>}
-              </div>
-            </div>
-          </div>
-          
-          {/* Taxonomy Selectors */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="symbols.form.categorization">Categorization</I18nText>
-            </h3>
-            
-            <TaxonomySelector
-              label="Medium/Support"
-              translationPrefix="symbols.form.medium"
-              options={mediums}
-              selectedValues={formData.mediums}
-              onChange={(values) => updateField('mediums', values)}
-            />
-            
-            <TaxonomySelector
-              label="Techniques"
-              translationPrefix="symbols.form.techniques"
-              options={techniques}
-              selectedValues={formData.techniques}
-              onChange={(values) => updateField('techniques', values)}
-            />
-            
-            <TaxonomySelector
-              label="Functions"
-              translationPrefix="symbols.form.functions"
-              options={functions}
-              selectedValues={formData.functions}
-              onChange={(values) => updateField('functions', values)}
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-6">
-          {/* Images */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-slate-800">
-                <I18nText translationKey="symbols.form.images">Images</I18nText>
-                {mode === 'create' && <span className="text-red-500 ml-1">*</span>}
-              </h3>
-              
-              {mode === 'edit' && (
-                <p className="text-xs text-slate-500">
-                  <I18nText translationKey="symbols.form.imagesEditNote">
-                    Upload new images to replace existing ones
-                  </I18nText>
-                </p>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('symbolForm.placeholders.selectCulture')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cultures.map(culture => (
+                      <SelectItem key={culture} value={culture}>
+                        {culture.charAt(0).toUpperCase() + culture.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
-            </div>
-            
-            <ImageDropzone
-              onImageSelected={(files) => updateField('images', files)}
-              maxFiles={5}
-              className={errors.images ? "border-red-300" : ""}
             />
-            
-            {errors.images && <p className="text-red-500 text-xs mt-1">{errors.images}</p>}
-            
-            {formData.images.length > 0 && (
-              <p className="text-sm text-slate-600">
-                <I18nText 
-                  translationKey="symbols.form.selectedImages" 
-                  params={{ count: formData.images.length }}
-                >
-                  {formData.images.length} images selected
-                </I18nText>
-              </p>
+            {errors.culture && (
+              <p className="text-red-500 text-sm">{errors.culture.message}</p>
             )}
           </div>
-          
-          {/* Geographic Location */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="symbols.form.location">Geographic Location</I18nText>
-            </h3>
-            
-            <div className="h-64 md:h-80 border rounded-md overflow-hidden">
-              <MapSelector
-                onLocationSelected={(location) => updateField('location', location)}
-                selectedLocation={formData.location}
+
+          {/* Description field with translations */}
+          <div className="space-y-2">
+            <label htmlFor="description" className="block text-sm font-medium">
+              <I18nText translationKey="symbolForm.fields.description" />
+            </label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              className="min-h-[150px]"
+              placeholder={t('symbolForm.placeholders.enterDescription')}
+            />
+            {errors.description && (
+              <p className="text-red-500 text-sm">{errors.description.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="descriptionTranslations" className="block text-sm font-medium text-slate-500">
+              <I18nText translationKey="symbolForm.fields.translatedDescriptions" />
+            </label>
+
+            <div className="space-y-2">
+              <label htmlFor="descriptionFr" className="block text-sm font-medium">
+                <I18nText translationKey="common.languages.french" />
+              </label>
+              <Textarea
+                id="descriptionFr"
+                {...register('descriptionFr')}
+                className="min-h-[100px]"
+                placeholder={t('symbolForm.placeholders.frenchDescription')}
               />
             </div>
-            
-            {formData.location && (
-              <p className="text-sm text-slate-600">
-                <I18nText translationKey="symbols.form.locationSelected">Location selected</I18nText>: 
-                {' '}{formData.location.lat.toFixed(6)}, {formData.location.lng.toFixed(6)}
-              </p>
+
+            <div className="space-y-2">
+              <label htmlFor="descriptionEn" className="block text-sm font-medium">
+                <I18nText translationKey="common.languages.english" />
+              </label>
+              <Textarea
+                id="descriptionEn"
+                {...register('descriptionEn')}
+                className="min-h-[100px]"
+                placeholder={t('symbolForm.placeholders.englishDescription')}
+              />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="details" className="space-y-4">
+          {/* Category field */}
+          <div className="space-y-2">
+            <label htmlFor="category" className="block text-sm font-medium">
+              <I18nText translationKey="symbolForm.fields.category" />
+            </label>
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('symbolForm.placeholders.selectCategory')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(category => (
+                      <SelectItem key={category} value={category}>
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.category && (
+              <p className="text-red-500 text-sm">{errors.category.message}</p>
             )}
           </div>
-        </div>
-      </div>
-      
-      {/* Submit Button */}
-      <div className="flex justify-end pt-4">
-        <Button type="submit" disabled={isLoading} className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700">
-          {isLoading ? (
-            <I18nText translationKey="common.submitting">Submitting...</I18nText>
-          ) : mode === 'create' ? (
-            <I18nText translationKey="common.create">Create</I18nText>
+
+          {/* Period field */}
+          <div className="space-y-2">
+            <label htmlFor="period" className="block text-sm font-medium">
+              <I18nText translationKey="symbolForm.fields.period" />
+            </label>
+            <Controller
+              name="period"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('symbolForm.placeholders.selectPeriod')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {periods.map(period => (
+                      <SelectItem key={period} value={period}>
+                        {period.charAt(0).toUpperCase() + period.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.period && (
+              <p className="text-red-500 text-sm">{errors.period.message}</p>
+            )}
+          </div>
+
+          {/* Tags field (simplified for now) */}
+          <div className="space-y-2">
+            <label htmlFor="tags" className="block text-sm font-medium">
+              <I18nText translationKey="symbolForm.fields.tags" />
+              <span className="text-xs text-slate-500 ml-1">
+                <I18nText translationKey="symbolForm.fields.tagsHint" />
+              </span>
+            </label>
+            <Input
+              id="tags"
+              placeholder={t('symbolForm.placeholders.enterTags')}
+              onChange={(e) => {
+                const tagsArray = e.target.value.split(',').map(tag => tag.trim());
+                setValue('tags', tagsArray);
+              }}
+              defaultValue={initialData.tags?.join(', ') || ''}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="media" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              {/* Image upload */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">
+                  <I18nText translationKey="symbolForm.fields.image" />
+                </label>
+                <ImageDropzone 
+                  onImageSelected={(files) => handleImageSelected([files[0]])} 
+                  className="border-2 border-dashed border-gray-300 rounded-md p-6"
+                />
+                
+                {selectedImage.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-sm text-green-600">
+                      <I18nText translationKey="symbolForm.fields.imageSelected" />: {selectedImage[0].name}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="location" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              {/* Map selector */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">
+                  <I18nText translationKey="symbolForm.fields.location" />
+                </label>
+                <MapSelector 
+                  onLocationSelected={handleLocationSelected} 
+                />
+                
+                {selectedLocation && selectedLocation.lat !== 0 && (
+                  <div className="mt-2">
+                    <p className="text-sm text-green-600">
+                      <I18nText translationKey="symbolForm.fields.locationSelected" />: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <div className="flex justify-between">
+        <Button 
+          type="button" 
+          variant="outline"
+          onClick={() => navigate(-1)}
+        >
+          <I18nText translationKey="common.buttons.cancel" />
+        </Button>
+        <Button 
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <I18nText translationKey="common.buttons.submitting" />
+          ) : isEditing ? (
+            <I18nText translationKey="common.buttons.update" />
           ) : (
-            <I18nText translationKey="common.save">Save</I18nText>
+            <I18nText translationKey="common.buttons.create" />
           )}
         </Button>
       </div>

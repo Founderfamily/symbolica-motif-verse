@@ -1,252 +1,264 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import TaxonomySelector from '@/components/ui/TaxonomySelector';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import { toast } from 'sonner';
 import ImageDropzone from '@/components/contributions/ImageDropzone';
 import MapSelector from '@/components/contributions/MapSelector';
 import { useTranslation } from '@/i18n/useTranslation';
-import TranslatedInput from '@/components/ui/TranslatedInput';
 import { I18nText } from '@/components/ui/i18n-text';
 
-// Define option types
-interface TaxonomyOption {
-  value: string;
-  label: string;
+// Define the basic types we need
+interface Location {
+  lat: number;
+  lng: number;
 }
 
-// Define main props type
 interface UploadFormProps {
-  cultures: TaxonomyOption[];
-  periods: TaxonomyOption[];
-  techniques: TaxonomyOption[];
-  functions: TaxonomyOption[];
-  mediums: TaxonomyOption[];
-  onSubmit: (data: FormData) => void;
+  onSubmit?: (data: FormData) => void;
   isLoading?: boolean;
 }
 
-// Define form data interface
-interface FormData {
-  name: string;
-  description: string;
-  culture: string;
-  period: string;
-  location?: { lat: number; lng: number };
-  techniques: string[];
-  functions: string[];
-  mediums: string[];
-  images: File[];
-}
-
-const UploadForm: React.FC<UploadFormProps> = ({
-  cultures,
-  periods,
-  techniques,
-  functions,
-  mediums,
+const UploadForm: React.FC<UploadFormProps> = ({ 
   onSubmit,
-  isLoading = false
+  isLoading = false 
 }) => {
   const { t } = useTranslation();
   
-  // Default form state
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    description: '',
-    culture: '',
-    period: '',
-    techniques: [],
-    functions: [],
-    mediums: [],
-    images: [],
-    location: undefined,
-  });
+  // Form state
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [culture, setCulture] = useState('');
+  const [category, setCategory] = useState('');
+  const [selectedImage, setSelectedImage] = useState<File[]>([]);
+  const [location, setLocation] = useState<Location>({ lat: 0, lng: 0 });
+  const [activeTab, setActiveTab] = useState('info');
   
-  // Form handling
-  const handleChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  // Sample options
+  const cultureOptions = [
+    'Ancient Egyptian', 
+    'Celtic', 
+    'Chinese', 
+    'Greek', 
+    'Japanese', 
+    'Maya', 
+    'Norse', 
+    'Roman'
+  ];
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const categoryOptions = [
+    'Religious',
+    'Cultural',
+    'Decorative',
+    'Historical',
+    'Political',
+    'Educational'
+  ];
+  
+  // Handle image selection
+  const handleImageSelected = useCallback((files: File[]) => {
+    if (files && files.length > 0) {
+      setSelectedImage(files);
+      toast.success(t('upload.imageUploaded'));
+    }
+  }, [t]);
+  
+  // Handle location selection
+  const handleLocationSelected = useCallback((loc: Location) => {
+    setLocation(loc);
+    toast.success(t('upload.locationSelected'));
+  }, [t]);
+  
+  // Form submission
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Validation
+    if (!name.trim()) {
+      toast.error(t('upload.validation.nameRequired'));
+      return;
+    }
+    
+    if (!description.trim()) {
+      toast.error(t('upload.validation.descriptionRequired'));
+      return;
+    }
+    
+    if (!culture) {
+      toast.error(t('upload.validation.cultureRequired'));
+      return;
+    }
+    
+    if (selectedImage.length === 0) {
+      toast.error(t('upload.validation.imageRequired'));
+      setActiveTab('media');
+      return;
+    }
+    
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('description', description);
+    formData.append('culture', culture);
+    formData.append('category', category);
+    
+    if (selectedImage.length > 0) {
+      formData.append('image', selectedImage[0]);
+    }
+    
+    if (location.lat !== 0 && location.lng !== 0) {
+      formData.append('location', JSON.stringify(location));
+    }
+    
+    // Submit form
+    if (onSubmit) {
+      onSubmit(formData);
+    } else {
+      console.log('Form submitted:', {
+        name,
+        description,
+        culture,
+        category,
+        image: selectedImage.length > 0 ? selectedImage[0].name : 'No image',
+        location: location.lat !== 0 ? `${location.lat}, ${location.lng}` : 'No location'
+      });
+      toast.success(t('upload.success'));
+      
+      // Reset form
+      setName('');
+      setDescription('');
+      setCulture('');
+      setCategory('');
+      setSelectedImage([]);
+      setLocation({ lat: 0, lng: 0 });
+      setActiveTab('info');
+    }
   };
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="upload.basicInfo">Basic Information</I18nText>
-            </h3>
-            
-            <TranslatedInput
-              id="name"
-              label="Name"
-              translationKey="upload.name"
-              value={formData.name}
-              onChange={(value) => handleChange('name', value)}
-              required
-            />
-            
-            <TranslatedInput
-              id="description"
-              label="Description"
-              translationKey="upload.description"
-              value={formData.description}
-              onChange={(value) => handleChange('description', value)}
-              multiline
-              rows={4}
-            />
-          </div>
-          
-          {/* Historical Context */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="upload.historicalContext">Historical Context</I18nText>
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="culture">
-                  <I18nText translationKey="upload.culture.label">Culture</I18nText>
-                </Label>
-                <select
-                  id="culture"
-                  className="w-full h-10 px-3 rounded-md border border-input"
-                  value={formData.culture}
-                  onChange={(e) => handleChange('culture', e.target.value)}
-                  required
-                >
-                  <option value="" disabled>
-                    {t('upload.culture.placeholder', 'Select a culture')}
-                  </option>
-                  {cultures.map((culture) => (
-                    <option key={culture.value} value={culture.value}>
-                      {culture.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <Label htmlFor="period">
-                  <I18nText translationKey="upload.period.label">Period</I18nText>
-                </Label>
-                <select
-                  id="period"
-                  className="w-full h-10 px-3 rounded-md border border-input"
-                  value={formData.period}
-                  onChange={(e) => handleChange('period', e.target.value)}
-                  required
-                >
-                  <option value="" disabled>
-                    {t('upload.period.placeholder', 'Select a period')}
-                  </option>
-                  {periods.map((period) => (
-                    <option key={period.value} value={period.value}>
-                      {period.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          {/* Taxonomy */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="upload.categorization">Categorization</I18nText>
-            </h3>
-            
-            <TaxonomySelector
-              label="Techniques"
-              translationPrefix="upload.techniques"
-              options={techniques}
-              selectedValues={formData.techniques}
-              onChange={(values) => handleChange('techniques', values)}
-            />
-            
-            <TaxonomySelector
-              label="Functions"
-              translationPrefix="upload.functions"
-              options={functions}
-              selectedValues={formData.functions}
-              onChange={(values) => handleChange('functions', values)}
-            />
-            
-            <TaxonomySelector
-              label="Medium/Support"
-              translationPrefix="upload.mediums"
-              options={mediums}
-              selectedValues={formData.mediums}
-              onChange={(values) => handleChange('mediums', values)}
-            />
-          </div>
-        </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="info">
+            <I18nText translationKey="upload.tabs.info" />
+          </TabsTrigger>
+          <TabsTrigger value="media">
+            <I18nText translationKey="upload.tabs.media" />
+          </TabsTrigger>
+          <TabsTrigger value="location">
+            <I18nText translationKey="upload.tabs.location" />
+          </TabsTrigger>
+        </TabsList>
         
-        <div className="space-y-6">
-          {/* Images Upload */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="upload.images">Images</I18nText>
-            </h3>
-            
-            <ImageDropzone
-              onImageSelected={(files) => handleChange('images', files)}
-              maxFiles={5}
+        <TabsContent value="info" className="space-y-4 pt-4">
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              <I18nText translationKey="upload.fields.name" />
+            </label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('upload.placeholders.name')}
             />
-            
-            {formData.images.length > 0 && (
-              <p className="text-sm text-slate-500">
-                <I18nText 
-                  translationKey="upload.imagesSelected" 
-                  params={{ count: formData.images.length }}
-                >
-                  {formData.images.length} images selected
-                </I18nText>
-              </p>
-            )}
           </div>
           
-          {/* Geographic Location */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              <I18nText translationKey="upload.geographicLocation">Geographic Location</I18nText>
-            </h3>
-            
-            <div className="h-64 md:h-80 border rounded-md overflow-hidden">
-              <MapSelector
-                onLocationSelected={(location) => handleChange('location', location)}
-                selectedLocation={formData.location}
-              />
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm font-medium">
+              <I18nText translationKey="upload.fields.description" />
+            </label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t('upload.placeholders.description')}
+              className="min-h-[120px]"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="culture" className="text-sm font-medium">
+                <I18nText translationKey="upload.fields.culture" />
+              </label>
+              <Select value={culture} onValueChange={setCulture}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('upload.placeholders.culture')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {cultureOptions.map((option) => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
-            {formData.location && (
-              <p className="text-sm text-slate-500">
-                <I18nText translationKey="upload.locationSelected">Location selected</I18nText>: 
-                {' '}{formData.location.lat.toFixed(6)}, {formData.location.lng.toFixed(6)}
-              </p>
-            )}
+            <div className="space-y-2">
+              <label htmlFor="category" className="text-sm font-medium">
+                <I18nText translationKey="upload.fields.category" />
+              </label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('upload.placeholders.category')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryOptions.map((option) => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="media" className="pt-4">
+          <Card>
+            <CardContent className="pt-6">
+              <ImageDropzone 
+                onImageSelected={(files) => handleImageSelected([files[0]])} 
+              />
+              
+              {selectedImage.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-green-600">
+                    <I18nText translationKey="upload.imageSelected" />: {selectedImage[0].name}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="location" className="pt-4">
+          <Card>
+            <CardContent className="pt-6">
+              <MapSelector 
+                onLocationSelected={handleLocationSelected} 
+              />
+              
+              {location.lat !== 0 && location.lng !== 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-green-600">
+                    <I18nText translationKey="upload.locationSelected" />: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
       
-      {/* Submit Button */}
-      <div className="flex justify-end pt-4">
-        <Button type="submit" disabled={isLoading} className="px-6">
-          {isLoading ? (
-            <I18nText translationKey="common.submitting">Submitting...</I18nText>
-          ) : (
-            <I18nText translationKey="common.submit">Submit</I18nText>
-          )}
-        </Button>
-      </div>
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? (
+          <I18nText translationKey="common.loading" />
+        ) : (
+          <I18nText translationKey="upload.submit" />
+        )}
+      </Button>
     </form>
   );
 };

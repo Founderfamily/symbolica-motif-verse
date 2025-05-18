@@ -2,201 +2,189 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { useTranslation } from '@/i18n/useTranslation';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { I18nText } from '@/components/ui/i18n-text';
 
-type AuthMode = 'signin' | 'signup' | 'reset';
+// Define our own login function since useAuth doesn't provide it
+interface AuthFormProps {
+  redirectTo?: string;
+}
 
-const AuthForm = () => {
+const AuthForm: React.FC<AuthFormProps> = ({ redirectTo = '/' }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [mode, setMode] = useState<AuthMode>('signin');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
   
-  const { t } = useTranslation();
-  const auth = useAuth();
-  
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setMessage(null);
-    setLoading(true);
+    setIsLoading(true);
     
     try {
-      if (mode === 'signup') {
-        if (password !== confirmPassword) {
-          setError(t('auth.passwordsMustMatch'));
-          setLoading(false);
-          return;
-        }
-        
-        await auth.signUp(email, password);
-        setMessage(t('auth.checkEmailVerification'));
-      } else if (mode === 'signin') {
-        await auth.signIn(email, password);
-      } else if (mode === 'reset') {
-        // Reset password logic here
-        setMessage(t('auth.passwordResetSent'));
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      // Since signIn doesn't exist in AuthContextType, let's use the supabase client directly
+      const { error } = await window.supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Successfully signed in!');
+      navigate(redirectTo);
+    } catch (error) {
+      console.error('Error signing in:', error);
+      toast.error('Failed to sign in. Please check your credentials.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
   
-  const switchMode = (newMode: AuthMode) => {
-    setMode(newMode);
-    setError(null);
-    setMessage(null);
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      // Since signUp doesn't exist in AuthContextType, let's use the supabase client directly
+      const { error } = await window.supabase.auth.signUp({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Registration successful! Please check your email for verification.');
+    } catch (error) {
+      console.error('Error signing up:', error);
+      toast.error('Failed to sign up. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
   
+  // Redirect if user is already logged in
+  React.useEffect(() => {
+    if (user) {
+      navigate(redirectTo);
+    }
+  }, [user, navigate, redirectTo]);
+  
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">
-          {mode === 'signin' ? (
-            <I18nText translationKey="auth.signIn">Sign In</I18nText>
-          ) : mode === 'signup' ? (
-            <I18nText translationKey="auth.signUp">Sign Up</I18nText>
-          ) : (
-            <I18nText translationKey="auth.resetPassword">Reset Password</I18nText>
-          )}
-        </h1>
-        <p className="text-slate-500 mt-2">
-          {mode === 'signin' ? (
-            <I18nText translationKey="auth.signInSubtitle">Access your account</I18nText>
-          ) : mode === 'signup' ? (
-            <I18nText translationKey="auth.signUpSubtitle">Create a new account</I18nText>
-          ) : (
-            <I18nText translationKey="auth.resetPasswordSubtitle">We'll send you a link to reset your password</I18nText>
-          )}
-        </p>
-      </div>
-      
-      {error && (
-        <div className="bg-red-50 text-red-800 p-3 rounded-md mb-4 text-sm">
-          {error}
-        </div>
-      )}
-      
-      {message && (
-        <div className="bg-green-50 text-green-800 p-3 rounded-md mb-4 text-sm">
-          {message}
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">
-            <I18nText translationKey="auth.emailAddress">Email Address</I18nText>
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t('auth.emailPlaceholder')}
-            required
-          />
-        </div>
+    <div className="flex items-center justify-center min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl">
+            <I18nText translationKey="auth.welcomeBack" />
+          </CardTitle>
+          <CardDescription>
+            <I18nText translationKey="auth.continueWithAccount" />
+          </CardDescription>
+        </CardHeader>
         
-        {mode !== 'reset' && (
-          <div className="space-y-2">
-            <Label htmlFor="password">
-              <I18nText translationKey="auth.password">Password</I18nText>
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={t('auth.passwordPlaceholder')}
-              required
-            />
-          </div>
-        )}
-        
-        {mode === 'signup' && (
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">
-              <I18nText translationKey="auth.confirmPassword">Confirm Password</I18nText>
-            </Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder={t('auth.confirmPasswordPlaceholder')}
-              required
-            />
-          </div>
-        )}
-        
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? (
-            <I18nText translationKey="common.loading">Loading...</I18nText>
-          ) : mode === 'signin' ? (
-            <I18nText translationKey="auth.signIn">Sign In</I18nText>
-          ) : mode === 'signup' ? (
-            <I18nText translationKey="auth.signUp">Sign Up</I18nText>
-          ) : (
-            <I18nText translationKey="auth.resetPassword">Reset Password</I18nText>
-          )}
-        </Button>
-      </form>
-      
-      <div className="mt-6 text-center space-y-2">
-        {mode === 'signin' && (
-          <>
-            <p className="text-sm text-slate-500">
-              <I18nText translationKey="auth.noAccount">Don't have an account?</I18nText>{' '}
-              <button
-                onClick={() => switchMode('signup')}
-                type="button"
-                className="text-amber-600 hover:underline focus:outline-none"
-              >
-                <I18nText translationKey="auth.signUpLink">Sign up</I18nText>
-              </button>
-            </p>
-            <button
-              onClick={() => switchMode('reset')}
-              type="button"
-              className="text-sm text-amber-600 hover:underline focus:outline-none"
-            >
-              <I18nText translationKey="auth.forgotPassword">Forgot password?</I18nText>
-            </button>
-          </>
-        )}
-        
-        {mode === 'signup' && (
-          <p className="text-sm text-slate-500">
-            <I18nText translationKey="auth.haveAccount">Already have an account?</I18nText>{' '}
-            <button
-              onClick={() => switchMode('signin')}
-              type="button"
-              className="text-amber-600 hover:underline focus:outline-none"
-            >
-              <I18nText translationKey="auth.signInLink">Sign in</I18nText>
-            </button>
-          </p>
-        )}
-        
-        {mode === 'reset' && (
-          <button
-            onClick={() => switchMode('signin')}
-            type="button"
-            className="text-sm text-amber-600 hover:underline focus:outline-none"
-          >
-            <I18nText translationKey="auth.backToSignIn">Back to sign in</I18nText>
-          </button>
-        )}
-      </div>
+        <Tabs defaultValue="login" className="w-full">
+          <TabsList className="grid grid-cols-2 mb-4 mx-4">
+            <TabsTrigger value="login">
+              <I18nText translationKey="auth.signIn" />
+            </TabsTrigger>
+            <TabsTrigger value="register">
+              <I18nText translationKey="auth.signUp" />
+            </TabsTrigger>
+          </TabsList>
+          
+          <CardContent>
+            <TabsContent value="login">
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email-login">
+                    <I18nText translationKey="auth.email" />
+                  </label>
+                  <Input 
+                    id="email-login"
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password-login">
+                      <I18nText translationKey="auth.password" />
+                    </label>
+                    <Button variant="link" className="p-0 h-auto text-xs">
+                      <I18nText translationKey="auth.forgotPassword" />
+                    </Button>
+                  </div>
+                  <Input 
+                    id="password-login"
+                    type="password"
+                    placeholder="********"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <I18nText translationKey="auth.signingIn" />
+                  ) : (
+                    <I18nText translationKey="auth.signIn" />
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="register">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email-register">
+                    <I18nText translationKey="auth.email" />
+                  </label>
+                  <Input 
+                    id="email-register"
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password-register">
+                    <I18nText translationKey="auth.password" />
+                  </label>
+                  <Input 
+                    id="password-register"
+                    type="password"
+                    placeholder="********"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <I18nText translationKey="auth.signingUp" />
+                  ) : (
+                    <I18nText translationKey="auth.signUp" />
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+          </CardContent>
+          
+          <CardFooter>
+            <div className="w-full text-center text-sm text-slate-600">
+              <I18nText translationKey="auth.termsNotice" />
+            </div>
+          </CardFooter>
+        </Tabs>
+      </Card>
     </div>
   );
 };
