@@ -1,13 +1,8 @@
-
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
-import { Button } from '@/components/ui/button';
 
 const NotFound = () => {
   const location = useLocation();
-  const { t } = useTranslation();
 
   useEffect(() => {
     console.error(
@@ -17,20 +12,13 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center py-16 bg-slate-50">
-      <div className="text-center max-w-md mx-auto px-4">
-        <h1 className="text-7xl font-bold text-slate-800 mb-6">404</h1>
-        <p className="text-xl text-slate-600 mb-6">
-          <I18nText translationKey="error.pageNotFound" />
-        </p>
-        <p className="text-slate-500 mb-8">
-          <I18nText translationKey="error.routeNotExist" />
-        </p>
-        <Button asChild variant="default" className="bg-amber-500 hover:bg-amber-600">
-          <Link to="/">
-            <I18nText translationKey="error.returnHome" />
-          </Link>
-        </Button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">404</h1>
+        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
+        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
+          Return to Home
+        </a>
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
 
+import { validateKeyFormat } from '../translationKeyConventions';
+
 /**
  * Extract placeholders like {name} from a string
  */
@@ -53,6 +55,3 @@ export const findMissingKeys = (source: any, target: any, prefix = ''): string[]
   
   return missingKeys;
 };
-
-// Import validateKeyFormat function from translationKeyConventions
-import { validateKeyFormat } from '../translationKeyConventions';

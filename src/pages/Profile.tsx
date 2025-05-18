@@ -1,400 +1,451 @@
+
 import React, { useEffect, useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Bookmark, UploadCloud, Award, UserCircle, Settings, LogOut } from 'lucide-react';
+import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import { Loader, MapPin, Award, Trophy, Users, Star } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { getUserContributions } from '@/services/contributionService';
+import { CompleteContribution } from '@/types/contributions';
+import { gamificationService } from '@/services/gamificationService';
+import { UserAchievement, Achievement, UserPoints, UserActivity, UserLevel } from '@/types/gamification';
+import AchievementsList from '@/components/gamification/AchievementsList';
+import ActivityFeed from '@/components/gamification/ActivityFeed';
+import UserRanking from '@/components/gamification/UserRanking';
 
-// Type definitions needed to fix the build errors
-interface EnhancedUser {
-  avatar_url?: string;
-  full_name?: string;
-  username?: string;
-  is_admin?: boolean;
-}
-
-const ProfilePage = () => {
+const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState('contributions');
+  const { user, isLoading, signOut } = useAuth();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [contributions, setContributions] = useState<CompleteContribution[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
+  const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
+  const [userLevel, setUserLevel] = useState<UserLevel | null>(null);
+  const [activities, setActivities] = useState<UserActivity[]>([]);
+  const [topUsers, setTopUsers] = useState<any[]>([]);
+  const [loadingGamification, setLoadingGamification] = useState(false);
   
-  // Cast the user to EnhancedUser to access the properties
-  const enhancedUser = user as EnhancedUser | null;
-  
-  // Contributions mock data
-  const contributions = [
-    { 
-      id: '1', 
-      name: 'Fleur de Lys', 
-      culture: 'French', 
-      date: '2023-04-15', 
-      status: 'approved' 
-    },
-    { 
-      id: '2', 
-      name: 'Celtic Knot', 
-      culture: 'Celtic', 
-      date: '2023-04-10', 
-      status: 'pending' 
-    },
-    { 
-      id: '3', 
-      name: 'Greek Meander', 
-      culture: 'Greek', 
-      date: '2023-03-28', 
-      status: 'approved' 
-    }
-  ];
-  
-  // Bookmarks mock data
-  const bookmarks = [
-    { 
-      id: '101', 
-      name: 'Aztec Calendar', 
-      culture: 'Aztec', 
-      date: '2023-04-05' 
-    },
-    { 
-      id: '102', 
-      name: 'Chinese Dragon', 
-      culture: 'Chinese', 
-      date: '2023-03-20' 
-    }
-  ];
-  
-  // Badges mock data
-  const badges = [
-    { 
-      id: '201', 
-      name: 'First Contribution', 
-      description: 'Successfully contributed your first symbol', 
-      date: '2023-03-15' 
-    },
-    { 
-      id: '202', 
-      name: 'Explorer', 
-      description: 'Viewed 50+ symbols in the database', 
-      date: '2023-03-28' 
-    },
-    { 
-      id: '203', 
-      name: 'Scholar', 
-      description: 'Contributed symbols from 3 different cultures', 
-      date: '2023-04-10' 
-    }
-  ];
-  
-  // Ensure the page returns to the top when loaded
+  // Load user contributions
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    if (user) {
+      setLoading(true);
+      getUserContributions(user.id)
+        .then(data => {
+          setContributions(data);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error("Error fetching contributions:", error);
+          setLoading(false);
+        });
+    }
+  }, [user]);
   
-  if (!user) {
+  // Load gamification data
+  useEffect(() => {
+    if (user) {
+      setLoadingGamification(true);
+      
+      // Fetch all gamification data in parallel
+      Promise.all([
+        gamificationService.getAchievements(),
+        gamificationService.getUserAchievements(user.id),
+        gamificationService.getUserPoints(user.id),
+        gamificationService.getUserLevel(user.id),
+        gamificationService.getUserActivities(user.id),
+        gamificationService.getLeaderboard(10)
+      ]).then(([
+        achievementsData,
+        userAchievementsData,
+        userPointsData,
+        userLevelData,
+        activitiesData,
+        leaderboardData
+      ]) => {
+        setAchievements(achievementsData);
+        setUserAchievements(userAchievementsData);
+        setUserPoints(userPointsData);
+        setUserLevel(userLevelData);
+        setActivities(activitiesData);
+        setTopUsers(leaderboardData);
+        setLoadingGamification(false);
+      }).catch(error => {
+        console.error("Error loading gamification data:", error);
+        setLoadingGamification(false);
+      });
+    }
+  }, [user]);
+  
+  // Redirect if user is not logged in
+  if (!isLoading && !user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            <I18nText translationKey="profile.notSignedIn">Not Signed In</I18nText>
-          </h1>
-          <p className="mb-6 text-slate-600">
-            <I18nText translationKey="profile.signInToView">Please sign in to view your profile</I18nText>
-          </p>
-          <Button asChild>
-            <a href="/auth">
-              <I18nText translationKey="auth.signIn">Sign In</I18nText>
-            </a>
-          </Button>
-        </div>
+        <Loader className="w-8 h-8 animate-spin" />
       </div>
     );
   }
   
+  // Calculate in-progress achievements
+  const inProgressAchievements = userAchievements
+    .filter(ua => !ua.completed && ua.achievement)
+    .sort((a, b) => {
+      // Calculate progress percentage
+      const progressA = (a.progress / (a.achievement?.requirement || 1)) * 100;
+      const progressB = (b.progress / (b.achievement?.requirement || 1)) * 100;
+      // Sort by highest progress first
+      return progressB - progressA;
+    })
+    .slice(0, 3);
+  
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center text-center mb-6">
-                  <Avatar className="h-24 w-24 mb-4">
-                    {enhancedUser?.avatar_url ? (
-                      <AvatarImage src={enhancedUser.avatar_url} alt={enhancedUser.full_name || enhancedUser.username || 'User'} />
-                    ) : (
-                      <AvatarFallback className="text-3xl bg-amber-100 text-amber-800">
-                        {(enhancedUser?.full_name || enhancedUser?.username || 'U').charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <h2 className="text-xl font-bold">{enhancedUser?.username}</h2>
-                  <p className="text-slate-500">{enhancedUser?.username}</p>
-                  
-                  {enhancedUser?.is_admin && (
-                    <Badge className="mt-2 bg-amber-600">
-                      <I18nText translationKey="profile.admin">Admin</I18nText>
+    <div className="min-h-screen flex flex-col bg-slate-50">
+      <Header />
+      
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Card className="shadow-md">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="w-24 h-24 border-4 border-white shadow-md">
+                  <AvatarImage src={user?.avatar_url || undefined} />
+                  <AvatarFallback className="text-2xl bg-amber-600 text-white">
+                    {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl">{user?.full_name || user?.username}</CardTitle>
+                  <CardDescription>
+                    {user?.username && <span className="font-medium">@{user.username}</span>}
+                    <span className="text-sm ml-2">
+                      {t('profile.memberSince', { date: new Date(user?.created_at || '').toLocaleDateString() })}
+                    </span>
+                  </CardDescription>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                      {t('profile.level', { level: userLevel?.level || 1 })}
                     </Badge>
-                  )}
-                  
-                  <Button variant="outline" size="sm" className="mt-4">
-                    <Edit className="h-4 w-4 mr-2" />
-                    <I18nText translationKey="profile.editProfile">Edit Profile</I18nText>
-                  </Button>
+                    <Badge variant="outline" className="flex items-center gap-1 bg-amber-50 text-amber-700 border-amber-200">
+                      <Star className="h-3 w-3 fill-amber-500" />
+                      {userPoints?.total || 0} {t('profile.points')}
+                    </Badge>
+                  </div>
                 </div>
-                
-                <nav className="space-y-1">
-                  <Button 
-                    variant="ghost" 
-                    className={`w-full justify-start ${activeTab === 'contributions' ? 'bg-amber-50 text-amber-900' : ''}`}
-                    onClick={() => setActiveTab('contributions')}
-                  >
-                    <UploadCloud className="h-5 w-5 mr-2" />
-                    <I18nText translationKey="profile.contributions">Contributions</I18nText>
-                  </Button>
+              </div>
+            </CardHeader>
+            
+            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
+              <div className="px-6">
+                <TabsList className="grid grid-cols-4 mb-4">
+                  <TabsTrigger value="overview">{t('profile.tabs.overview')}</TabsTrigger>
+                  <TabsTrigger value="contributions">{t('profile.tabs.contributions')}</TabsTrigger>
+                  <TabsTrigger value="achievements">{t('profile.tabs.achievements')}</TabsTrigger>
+                  <TabsTrigger value="settings">{t('profile.tabs.settings')}</TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <TabsContent value="overview">
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <StatCard 
+                      title={t('profile.stats.contributions')} 
+                      value={contributions.length} 
+                      icon="📝"
+                    />
+                    <StatCard 
+                      title={t('profile.stats.points')} 
+                      value={userPoints?.total || 0} 
+                      icon="⭐"
+                    />
+                    <StatCard 
+                      title={t('profile.stats.achievements')} 
+                      value={userAchievements.filter(ua => ua.completed).length} 
+                      icon="🏆"
+                    />
+                  </div>
                   
-                  <Button 
-                    variant="ghost" 
-                    className={`w-full justify-start ${activeTab === 'bookmarks' ? 'bg-amber-50 text-amber-900' : ''}`}
-                    onClick={() => setActiveTab('bookmarks')}
-                  >
-                    <Bookmark className="h-5 w-5 mr-2" />
-                    <I18nText translationKey="profile.bookmarks">Bookmarks</I18nText>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className={`w-full justify-start ${activeTab === 'badges' ? 'bg-amber-50 text-amber-900' : ''}`}
-                    onClick={() => setActiveTab('badges')}
-                  >
-                    <Award className="h-5 w-5 mr-2" />
-                    <I18nText translationKey="profile.badges">Badges</I18nText>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className={`w-full justify-start ${activeTab === 'account' ? 'bg-amber-50 text-amber-900' : ''}`}
-                    onClick={() => setActiveTab('account')}
-                  >
-                    <UserCircle className="h-5 w-5 mr-2" />
-                    <I18nText translationKey="profile.account">Account</I18nText>
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className={`w-full justify-start ${activeTab === 'settings' ? 'bg-amber-50 text-amber-900' : ''}`}
-                    onClick={() => setActiveTab('settings')}
-                  >
-                    <Settings className="h-5 w-5 mr-2" />
-                    <I18nText translationKey="profile.settings">Settings</I18nText>
-                  </Button>
-                </nav>
-                
-                <div className="mt-6 pt-6 border-t">
-                  <Button variant="ghost" className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => signOut()}>
-                    <LogOut className="h-5 w-5 mr-2" />
-                    <I18nText translationKey="auth.signOut">Sign Out</I18nText>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {activeTab === 'contributions' && (
-              <Card>
-                <CardHeader>
-                  <h3 className="text-xl font-bold">
-                    <I18nText translationKey="profile.myContributions">My Contributions</I18nText>
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  {contributions.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-slate-500 mb-4">
-                        <I18nText translationKey="profile.noContributions">
-                          You haven't contributed any symbols yet
-                        </I18nText>
-                      </p>
-                      <Button asChild>
-                        <a href="/contribute">
-                          <UploadCloud className="h-5 w-5 mr-2" />
-                          <I18nText translationKey="profile.contributeNow">
-                            Contribute Now
-                          </I18nText>
-                        </a>
-                      </Button>
+                  <div>
+                    <h3 className="font-medium mb-2">{t('profile.progress.nextLevel')}</h3>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Level {userLevel?.level || 1}</span>
+                        <span>Level {(userLevel?.level || 1) + 1}</span>
+                      </div>
+                      <Progress 
+                        value={userLevel ? (userLevel.xp / userLevel.next_level_xp) * 100 : 0} 
+                        className="h-2" 
+                      />
+                      <div className="text-xs text-slate-500 text-right">
+                        {userLevel?.xp || 0} / {userLevel?.next_level_xp || 100} XP
+                      </div>
                     </div>
-                  ) : (
-                    <div className="divide-y divide-slate-200">
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-2">{t('profile.achievements.inProgress')}</h3>
+                    {loadingGamification ? (
+                      <div className="text-center py-4">
+                        <div className="w-6 h-6 border-2 border-slate-200 border-t-amber-500 rounded-full animate-spin mx-auto"></div>
+                      </div>
+                    ) : inProgressAchievements.length > 0 ? (
+                      <div className="space-y-3">
+                        <AchievementsList 
+                          achievements={inProgressAchievements.map(ua => ua.achievement!)}
+                          userAchievements={inProgressAchievements}
+                        />
+                      </div>
+                    ) : (
+                      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-center">
+                        <p className="text-slate-500">{t('profile.noInProgressAchievements')}</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-2">{t('profile.activity.recent')}</h3>
+                    <ActivityFeed 
+                      activities={activities} 
+                      loading={loadingGamification}
+                    />
+                  </div>
+                </CardContent>
+              </TabsContent>
+              
+              <TabsContent value="contributions">
+                <CardContent>
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <Loader className="h-6 w-6 animate-spin mx-auto mb-2" />
+                      <p>{t('profile.loadingContributions')}</p>
+                    </div>
+                  ) : contributions.length > 0 ? (
+                    <div className="space-y-4">
+                      <h3 className="font-medium text-lg mb-2">{t('profile.yourContributions')}</h3>
+                      
                       {contributions.map(contribution => (
-                        <div key={contribution.id} className="py-4 flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium">{contribution.name}</h4>
-                            <p className="text-sm text-slate-500">{contribution.culture}</p>
-                            <p className="text-xs text-slate-400">{contribution.date}</p>
+                        <Link 
+                          key={contribution.id} 
+                          to={`/contributions/${contribution.id}`}
+                          className="block"
+                        >
+                          <div className="bg-white p-4 rounded-lg border border-slate-200 hover:border-amber-300 transition-colors">
+                            <div className="flex justify-between">
+                              <h4 className="font-medium">{contribution.title}</h4>
+                              <Badge 
+                                variant={
+                                  contribution.status === 'approved' ? 'default' : 
+                                  contribution.status === 'rejected' ? 'destructive' : 
+                                  'outline'
+                                }
+                              >
+                                {t(`contributions.status.${contribution.status}`)}
+                              </Badge>
+                            </div>
+                            
+                            {contribution.location_name && (
+                              <div className="flex items-center text-sm text-slate-500 mt-1">
+                                <MapPin className="h-3 w-3 mr-1" />
+                                {contribution.location_name}
+                              </div>
+                            )}
+                            
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {contribution.tags.slice(0, 3).map(tag => (
+                                <Badge key={tag.id} variant="secondary" className="text-xs">
+                                  {tag.tag}
+                                </Badge>
+                              ))}
+                              {contribution.tags.length > 3 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{contribution.tags.length - 3}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <Badge 
-                              variant={contribution.status === 'approved' ? 'default' : 'outline'}
-                              className={contribution.status === 'approved' ? 'bg-green-500' : ''}
-                            >
-                              <I18nText translationKey={`status.${contribution.status}`}>
-                                {contribution.status}
-                              </I18nText>
-                            </Badge>
-                          </div>
-                        </div>
+                        </Link>
                       ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === 'bookmarks' && (
-              <Card>
-                <CardHeader>
-                  <h3 className="text-xl font-bold">
-                    <I18nText translationKey="profile.myBookmarks">My Bookmarks</I18nText>
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  {bookmarks.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-slate-500 mb-4">
-                        <I18nText translationKey="profile.noBookmarks">
-                          You haven't bookmarked any symbols yet
-                        </I18nText>
-                      </p>
-                      <Button asChild>
-                        <a href="/explore">
-                          <I18nText translationKey="profile.exploreSymbols">Explore Symbols</I18nText>
-                        </a>
-                      </Button>
                     </div>
                   ) : (
-                    <div className="divide-y divide-slate-200">
-                      {bookmarks.map(bookmark => (
-                        <div key={bookmark.id} className="py-4 flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium">{bookmark.name}</h4>
-                            <p className="text-sm text-slate-500">{bookmark.culture}</p>
-                            <p className="text-xs text-slate-400">{bookmark.date}</p>
-                          </div>
-                          <div>
-                            <Button variant="ghost" size="sm">
-                              <I18nText translationKey="profile.viewSymbol">View</I18nText>
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="text-center py-8">
+                      <p className="text-slate-500 mb-4">{t('profile.noContributions')}</p>
+                      <Button asChild variant="outline">
+                        <Link to="/contributions/new">
+                          {t('profile.startContributing')}
+                        </Link>
+                      </Button>
                     </div>
                   )}
                 </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === 'badges' && (
-              <Card>
-                <CardHeader>
-                  <h3 className="text-xl font-bold">
-                    <I18nText translationKey="profile.myBadges">My Badges</I18nText>
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {badges.map(badge => (
-                      <div key={badge.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                        <div className="flex items-center justify-center w-12 h-12 bg-amber-100 text-amber-800 rounded-full mx-auto mb-3">
-                          <Award />
+              </TabsContent>
+              
+              <TabsContent value="achievements">
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="font-medium text-lg mb-4 flex items-center gap-2">
+                        <Trophy className="h-5 w-5 text-amber-600" />
+                        {t('profile.leaderboard')}
+                      </h3>
+                      <UserRanking 
+                        users={topUsers} 
+                        title={t('profile.topContributors')} 
+                        translationKey="profile.topContributors"
+                        loading={loadingGamification}
+                      />
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium text-lg mb-4 flex items-center gap-2">
+                        <Star className="h-5 w-5 text-amber-600" />
+                        {t('profile.stats.summary')}
+                      </h3>
+                      
+                      <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-100">
+                        <div className="p-4">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <p className="text-sm text-slate-500">{t('profile.stats.contributions')}</p>
+                              <p className="text-2xl font-bold">{userPoints?.contribution_points || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-slate-500">{t('profile.stats.exploration')}</p>
+                              <p className="text-2xl font-bold">{userPoints?.exploration_points || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-slate-500">{t('profile.stats.validation')}</p>
+                              <p className="text-2xl font-bold">{userPoints?.validation_points || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-slate-500">{t('profile.stats.community')}</p>
+                              <p className="text-2xl font-bold">{userPoints?.community_points || 0}</p>
+                            </div>
+                          </div>
                         </div>
-                        <h4 className="font-medium text-center">{badge.name}</h4>
-                        <p className="text-xs text-slate-500 text-center mt-1">{badge.description}</p>
-                        <p className="text-xs text-slate-400 text-center mt-2">{badge.date}</p>
+                        
+                        <div className="p-4 bg-amber-50">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="text-sm font-medium text-amber-800">{t('profile.stats.totalPoints')}</p>
+                              <p className="text-2xl font-bold text-amber-700">{userPoints?.total || 0}</p>
+                            </div>
+                            <div className="bg-amber-100 p-2 rounded-full">
+                              <Trophy className="h-8 w-8 text-amber-600" />
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">{t('profile.achievements.earned')}</h3>
+                    <Tabs defaultValue="all" className="mb-6">
+                      <TabsList className="mb-4">
+                        <TabsTrigger value="all">{t('gamification.allAchievements')}</TabsTrigger>
+                        <TabsTrigger value="contribution">{t('gamification.contribution')}</TabsTrigger>
+                        <TabsTrigger value="exploration">{t('gamification.exploration')}</TabsTrigger>
+                        <TabsTrigger value="community">{t('gamification.community')}</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="all">
+                        <AchievementsList 
+                          achievements={achievements} 
+                          userAchievements={userAchievements}
+                          loading={loadingGamification}
+                          showAll
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="contribution">
+                        <AchievementsList 
+                          achievements={achievements} 
+                          userAchievements={userAchievements}
+                          loading={loadingGamification}
+                          type="contribution"
+                          showAll
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="exploration">
+                        <AchievementsList 
+                          achievements={achievements} 
+                          userAchievements={userAchievements}
+                          loading={loadingGamification}
+                          type="exploration"
+                          showAll
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="community">
+                        <AchievementsList 
+                          achievements={achievements} 
+                          userAchievements={userAchievements}
+                          loading={loadingGamification}
+                          type="community"
+                          showAll
+                        />
+                      </TabsContent>
+                    </Tabs>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </TabsContent>
+              
+              <TabsContent value="settings">
+                <CardContent className="space-y-4">
+                  <h3 className="font-semibold text-lg">{t('profile.accountSettings')}</h3>
+                  <p className="text-slate-500">{t('profile.settingsDescription')}</p>
+                  
+                  <div className="pt-4">
+                    <Button variant="destructive" onClick={signOut}>
+                      {t('profile.signOut')}
+                    </Button>
+                  </div>
+                </CardContent>
+              </TabsContent>
+            </Tabs>
             
-            {activeTab === 'account' && (
-              <Card>
-                <CardHeader>
-                  <h3 className="text-xl font-bold">
-                    <I18nText translationKey="profile.accountDetails">Account Details</I18nText>
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm text-slate-500 block mb-1">
-                        <I18nText translationKey="profile.email">Email</I18nText>
-                      </label>
-                      <p className="font-medium">{user.email}</p>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm text-slate-500 block mb-1">
-                        <I18nText translationKey="profile.memberSince">Member Since</I18nText>
-                      </label>
-                      <p className="font-medium">April 2023</p>
-                    </div>
-                    
-                    <div className="pt-4">
-                      <Button variant="outline" className="mr-4">
-                        <I18nText translationKey="profile.changePassword">Change Password</I18nText>
-                      </Button>
-                      <Button variant="destructive">
-                        <I18nText translationKey="profile.deleteAccount">Delete Account</I18nText>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeTab === 'settings' && (
-              <Card>
-                <CardHeader>
-                  <h3 className="text-xl font-bold">
-                    <I18nText translationKey="profile.settings">Settings</I18nText>
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  {/* Settings content */}
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="font-medium mb-2">
-                        <I18nText translationKey="profile.preferences">Preferences</I18nText>
-                      </h4>
-                      <div className="space-y-2">
-                        {/* Preferences settings */}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium mb-2">
-                        <I18nText translationKey="profile.notifications">Notifications</I18nText>
-                      </h4>
-                      <div className="space-y-2">
-                        {/* Notification settings */}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+            <CardFooter className="border-t bg-slate-50">
+              <div className="text-xs text-slate-500">
+                {user?.is_admin && (
+                  <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium mr-2">
+                    {t('profile.adminBadge')}
+                  </span>
+                )}
+                ID: {user?.id}
+              </div>
+            </CardFooter>
+          </Card>
         </div>
-      </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };
+
+// Helper component for stats
+const StatCard = ({ title, value, icon }: { title: string; value: number; icon: string }) => (
+  <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-sm text-slate-500">{title}</p>
+        <p className="text-2xl font-bold">{value}</p>
+      </div>
+      <div className="text-2xl">{icon}</div>
+    </div>
+  </div>
+);
 
 export default ProfilePage;

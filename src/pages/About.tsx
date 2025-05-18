@@ -1,10 +1,13 @@
+
 import React, { useEffect } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { I18nText } from '@/components/ui/i18n-text';
 
-const AboutPage = () => {
+const About = () => {
   const { t, validateCurrentPageTranslations } = useTranslation();
 
   // In development mode, automatically validate translations on this page
@@ -21,6 +24,8 @@ const AboutPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <Header />
+      
       <main className="flex-grow">
         {/* Hero section */}
         <section className="bg-gradient-to-r from-amber-50 to-amber-100 py-16">
@@ -246,8 +251,10 @@ const AboutPage = () => {
           </div>
         </section>
       </main>
+      
+      <Footer />
     </div>
   );
 };
 
-export default AboutPage;
+export default About;

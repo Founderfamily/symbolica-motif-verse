@@ -1,192 +1,248 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from '@/i18n/useTranslation';
+import { UserProfile } from '@/types/auth';
 import { I18nText } from '@/components/ui/i18n-text';
 
-// Define our own login function since useAuth doesn't provide it
-interface AuthFormProps {
-  redirectTo?: string;
-}
+// Validation schema for login
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
 
-const AuthForm: React.FC<AuthFormProps> = ({ redirectTo = '/' }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
+// Extended validation schema for registration
+const registerSchema = loginSchema.extend({
+  username: z.string().min(3).max(50),
+  fullName: z.string().min(2).max(100),
+  passwordConfirm: z.string().min(6),
+}).refine((data) => data.password === data.passwordConfirm, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["passwordConfirm"],
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
+
+export default function AuthForm() {
+  const { t } = useTranslation();
+  const { signIn, signUp, isLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState('login');
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Login form
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  // Register form
+  const registerForm = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: '',
+      username: '',
+      fullName: '',
+      password: '',
+      passwordConfirm: '',
+    },
+  });
+
+  // Handle login submission
+  const onLoginSubmit = async (values: LoginFormValues) => {
+    setAuthError(null);
     try {
-      // Since signIn doesn't exist in AuthContextType, let's use the supabase client directly
-      const { error } = await window.supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) throw error;
-      
-      toast.success('Successfully signed in!');
-      navigate(redirectTo);
-    } catch (error) {
-      console.error('Error signing in:', error);
-      toast.error('Failed to sign in. Please check your credentials.');
-    } finally {
-      setIsLoading(false);
+      await signIn(values.email, values.password);
+    } catch (error: any) {
+      setAuthError(error.message);
     }
   };
-  
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
+
+  // Handle registration submission
+  const onRegisterSubmit = async (values: RegisterFormValues) => {
+    setAuthError(null);
     try {
-      // Since signUp doesn't exist in AuthContextType, let's use the supabase client directly
-      const { error } = await window.supabase.auth.signUp({
-        email,
-        password
-      });
-      
-      if (error) throw error;
-      
-      toast.success('Registration successful! Please check your email for verification.');
-    } catch (error) {
-      console.error('Error signing up:', error);
-      toast.error('Failed to sign up. Please try again.');
-    } finally {
-      setIsLoading(false);
+      const userData: Partial<UserProfile> = {
+        username: values.username,
+        full_name: values.fullName,
+      };
+      await signUp(values.email, values.password, userData);
+    } catch (error: any) {
+      setAuthError(error.message);
     }
   };
-  
-  // Redirect if user is already logged in
-  React.useEffect(() => {
-    if (user) {
-      navigate(redirectTo);
-    }
-  }, [user, navigate, redirectTo]);
-  
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl">
-            <I18nText translationKey="auth.welcomeBack" />
-          </CardTitle>
-          <CardDescription>
-            <I18nText translationKey="auth.continueWithAccount" />
-          </CardDescription>
-        </CardHeader>
+    <div className="w-full max-w-md mx-auto">
+      <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="login">
+            <I18nText translationKey="auth.buttons.login" />
+          </TabsTrigger>
+          <TabsTrigger value="register">
+            <I18nText translationKey="auth.buttons.register" />
+          </TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4 mx-4">
-            <TabsTrigger value="login">
-              <I18nText translationKey="auth.signIn" />
-            </TabsTrigger>
-            <TabsTrigger value="register">
-              <I18nText translationKey="auth.signUp" />
-            </TabsTrigger>
-          </TabsList>
-          
-          <CardContent>
-            <TabsContent value="login">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email-login">
-                    <I18nText translationKey="auth.email" />
-                  </label>
-                  <Input 
-                    id="email-login"
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password-login">
-                      <I18nText translationKey="auth.password" />
-                    </label>
-                    <Button variant="link" className="p-0 h-auto text-xs">
-                      <I18nText translationKey="auth.forgotPassword" />
-                    </Button>
-                  </div>
-                  <Input 
-                    id="password-login"
-                    type="password"
-                    placeholder="********"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <I18nText translationKey="auth.signingIn" />
-                  ) : (
-                    <I18nText translationKey="auth.signIn" />
+        {/* Login Form */}
+        <TabsContent value="login">
+          <div className="p-6 border rounded-lg shadow-sm">
+            <h3 className="text-xl font-semibold mb-4">
+              <I18nText translationKey="auth.titles.login" />
+            </h3>
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.email" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="example@mail.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
+                />
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.password" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {authError && (
+                  <div className="text-red-500 text-sm">{authError}</div>
+                )}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 
+                    <I18nText translationKey="auth.buttons.loggingIn" /> : 
+                    <I18nText translationKey="auth.buttons.login" />
+                  }
                 </Button>
               </form>
-            </TabsContent>
-            
-            <TabsContent value="register">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email-register">
-                    <I18nText translationKey="auth.email" />
-                  </label>
-                  <Input 
-                    id="email-register"
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password-register">
-                    <I18nText translationKey="auth.password" />
-                  </label>
-                  <Input 
-                    id="password-register"
-                    type="password"
-                    placeholder="********"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <I18nText translationKey="auth.signingUp" />
-                  ) : (
-                    <I18nText translationKey="auth.signUp" />
+            </Form>
+          </div>
+        </TabsContent>
+        
+        {/* Register Form */}
+        <TabsContent value="register">
+          <div className="p-6 border rounded-lg shadow-sm">
+            <h3 className="text-xl font-semibold mb-4">
+              <I18nText translationKey="auth.titles.register" />
+            </h3>
+            <Form {...registerForm}>
+              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                <FormField
+                  control={registerForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.email" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="example@mail.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.username" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="text" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.fullName" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="text" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.password" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={registerForm.control}
+                  name="passwordConfirm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.confirmPassword" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {authError && (
+                  <div className="text-red-500 text-sm">{authError}</div>
+                )}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 
+                    <I18nText translationKey="auth.buttons.creating" /> : 
+                    <I18nText translationKey="auth.buttons.register" />
+                  }
                 </Button>
               </form>
-            </TabsContent>
-          </CardContent>
-          
-          <CardFooter>
-            <div className="w-full text-center text-sm text-slate-600">
-              <I18nText translationKey="auth.termsNotice" />
-            </div>
-          </CardFooter>
-        </Tabs>
-      </Card>
+            </Form>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
-
-export default AuthForm;
+}

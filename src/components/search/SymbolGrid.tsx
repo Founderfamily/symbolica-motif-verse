@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import { SymbolData } from '@/types/supabase';
 import { Card } from '@/components/ui/card';
 import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
-import { getTranslatedField, TranslatableObject } from '@/utils/translationUtils';
 
 interface SymbolGridProps {
   symbols: SymbolData[];
@@ -17,9 +15,7 @@ export const SymbolGrid: React.FC<SymbolGridProps> = ({ symbols }) => {
   if (symbols.length === 0) {
     return (
       <div className="text-center py-12 bg-slate-50 rounded-lg">
-        <p className="text-slate-500">
-          <I18nText translationKey="symbols.noResults" />
-        </p>
+        <p className="text-slate-500">No symbols found matching your criteria</p>
       </div>
     );
   }
@@ -27,9 +23,11 @@ export const SymbolGrid: React.FC<SymbolGridProps> = ({ symbols }) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {symbols.map(symbol => {
-        // Use translated values with our utility function
-        const displayName = getTranslatedField<string>(symbol as TranslatableObject, 'name');
-        const displayCulture = getTranslatedField<string>(symbol as TranslatableObject, 'culture');
+        // Use translations if available
+        const translations = symbol.translations || {};
+        const langData = translations[currentLanguage];
+        const displayName = langData?.name || symbol.name;
+        const displayCulture = langData?.culture || symbol.culture;
         
         return (
           <Link to={`/symbols/${symbol.id}`} key={symbol.id}>

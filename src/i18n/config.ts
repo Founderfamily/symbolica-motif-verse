@@ -21,11 +21,7 @@ i18n
       fr: { translation: fr },
       en: { translation: en },
     },
-    fallbackLng: {
-      'fr': ['en'],
-      'en': ['fr'],
-      'default': ['fr', 'en']
-    },
+    fallbackLng: 'fr',
     supportedLngs: ['fr', 'en'],
     interpolation: {
       escapeValue: false, // React already escapes values
@@ -45,9 +41,6 @@ i18n
     // Better fallback handling - prevent keys from being used as values
     returnNull: false,
     returnEmptyString: false,
-    // Allow returning objects (important for complex translations)
-    returnObjects: true,
-    // Ensure nested objects are properly handled and don't cause direct rendering
     parseMissingKeyHandler: (key) => {
       // Format missing keys nicely for display
       return formatKeyAsReadableText(key);
@@ -80,10 +73,21 @@ if (process.env.NODE_ENV === 'development') {
       i18n.reloadResources().then(() => {
         console.log(`Translations reloaded for: ${currentLang}`);
       });
+    },
+    
+    // Check missing translations
+    checkMissingTranslations: () => {
+      const event = new CustomEvent('validate-translations');
+      window.dispatchEvent(event);
     }
   };
+  
+  // Add keyboard shortcut to toggle language (Ctrl+Alt+L)
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey && e.code === 'KeyL') {
+      (window as any).i18nTools.toggleLanguage();
+    }
+  });
 }
 
-// Export the i18n instance for direct access to language
-export { i18n };
 export default i18n;

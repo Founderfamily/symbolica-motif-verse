@@ -1,6 +1,7 @@
 
-import React, { ReactNode, useState, useMemo } from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { keyExistsInBothLanguages } from '@/i18n/translationUtils';
 
 type I18nTextProps = {
   /** The translation key to be used */
@@ -28,48 +29,23 @@ export const I18nText = ({
   children,
   highlightMissing = true
 }: I18nTextProps) => {
-  const { t, i18n, currentLanguage } = useTranslation();
-  const [showTooltip, setShowTooltip] = useState(false);
+  const { t, i18n } = useTranslation();
   
-  // Get the translated text with memoization based on key, params and language
-  const translatedText = useMemo(() => {
-    try {
-      const result = t(translationKey, params);
-      
-      // If result is an object (shouldn't happen with our safeT but just in case)
-      if (result !== null && typeof result === 'object') {
-        console.warn(`Translation for key "${translationKey}" returned an object:`, result);
-        return translationKey.split('.').pop() || translationKey;
-      }
-      
-      return result;
-    } catch (error) {
-      console.error(`Error translating key: ${translationKey}`, error);
-      return translationKey;
-    }
-  }, [t, translationKey, params, currentLanguage]);
-  
+  // Get the translated text
+  const translatedText = t(translationKey, params);
   const keyExists = i18n.exists(translationKey);
+  const isMissing = !keyExists || translatedText === translationKey;
   
-  // Consider key missing if it doesn't exist or if the translation is the same as the key
-  // (which happens for generic keys like "Title", "Description" etc.)
-  const isGenericKey = ['title', 'description', 'subtitle', 'name', 'button', 'text', 'label', 'header', 'content'].includes(
-    translationKey.toLowerCase()
-  );
-  
-  // Check if translation result is the same as the key (fallback behavior)
-  // or if we're dealing with a known generic key
-  const isMissing = !keyExists || translatedText === translationKey || isGenericKey;
+  // Check if translation exists in both languages
+  const existsInBothLanguages = keyExistsInBothLanguages(translationKey);
   
   // Add visual styling for missing translations in development
   const warningStyle = process.env.NODE_ENV === 'development' && highlightMissing && isMissing
     ? { 
-        outline: '2px dashed #ef4444', 
-        backgroundColor: 'rgba(239, 68, 68, 0.15)',
-        padding: '0 4px',
+        outline: '1px dashed #ef4444', 
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        padding: '0 2px',
         position: 'relative' as const,
-        cursor: 'help',
-        borderRadius: '2px'
       }
     : {};
   
@@ -78,7 +54,7 @@ export const I18nText = ({
     ? { 
         'data-i18n-key': translationKey,
         'data-i18n-missing': isMissing ? 'true' : 'false',
-        'data-i18n-lang': currentLanguage
+        'data-i18n-exists-both': existsInBothLanguages ? 'true' : 'false'
       } 
     : {};
     
@@ -89,44 +65,46 @@ export const I18nText = ({
           className="translation-issue-tooltip"
           style={{
             position: 'absolute',
-            top: '-28px',
+            top: '-20px',
             left: '0',
             backgroundColor: '#ef4444',
             color: 'white',
-            fontSize: '11px',
-            padding: '2px 5px',
+            fontSize: '10px',
+            padding: '2px 4px',
             borderRadius: '3px',
             whiteSpace: 'nowrap',
             pointerEvents: 'none',
-            opacity: showTooltip ? 1 : 0,
+            opacity: 0,
             transition: 'opacity 0.2s',
             zIndex: 9999,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-            fontWeight: 'bold'
           }}
         >
-          {isGenericKey ? 'Generic key:' : 'Missing translation:'} {translationKey}
+          Missing: {translationKey}
         </div>
       )
     : null;
-    
-  // In production, provide best experience with fallback
-  const displayText = isMissing && children 
-    ? children 
-    : (isMissing && process.env.NODE_ENV === 'production' 
-        ? translationKey.split('.').pop()?.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) 
-        : translatedText);
     
   return (
     <Component 
       className={className} 
       style={warningStyle}
       {...devAttributes} 
-      onMouseEnter={isMissing ? () => setShowTooltip(true) : undefined}
-      onMouseLeave={isMissing ? () => setShowTooltip(false) : undefined}
+      onMouseEnter={isMissing ? (e) => {
+        const tooltip = (e.currentTarget as HTMLElement).querySelector('.translation-issue-tooltip');
+        if (tooltip) {
+          (tooltip as HTMLElement).style.opacity = '1';
+        }
+      } : undefined}
+      onMouseLeave={isMissing ? (e) => {
+        const tooltip = (e.currentTarget as HTMLElement).querySelector('.translation-issue-tooltip');
+        if (tooltip) {
+          (tooltip as HTMLElement).style.opacity = '0';
+        }
+      } : undefined}
     >
       {warningTooltip}
-      {displayText}
+      {/* Use children as fallback if provided and translation is missing */}
+      {isMissing && children ? children : translatedText}
     </Component>
   );
 };

@@ -1,238 +1,178 @@
 
 /**
- * Utilities for handling translations and validation
+ * Comprehensive utilities for translation management
  */
-import { ValidationReport, LegacyValidationReport, FormatIssue } from './types/validationTypes';
-import { extractPlaceholders } from './validators/validatorUtils';
-import en from './locales/en.json';
 import fr from './locales/fr.json';
+import en from './locales/en.json';
 
 /**
- * Find keys that exist in source but not in target
+ * Flattens a nested object structure into a single level object with dot notation keys
  */
-export const findMissingKeys = (source: any, target: any, prefix = ''): string[] => {
-  const missingKeys: string[] = [];
-  
-  for (const key in source) {
-    const fullKey = prefix ? `${prefix}.${key}` : key;
-    if (typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      // Recurse into nested objects
-      if (!target[key] || typeof target[key] !== 'object') {
-        missingKeys.push(fullKey);
-      } else {
-        missingKeys.push(...findMissingKeys(source[key], target[key], fullKey));
-      }
-    } else if (!target.hasOwnProperty(key)) {
-      missingKeys.push(fullKey);
-    }
-  }
-  
-  return missingKeys;
-};
-
-/**
- * Run a full diagnosis of the translations
- */
-export const diagnoseTranslations = () => {
-  try {
-    // Use imported translation files directly
-    const enTranslations = en;
-    const frTranslations = fr;
-    
-    // Find keys missing in each language
-    const missingInFr = findMissingKeys(enTranslations, frTranslations);
-    const missingInEn = findMissingKeys(frTranslations, enTranslations);
-    
-    // Create a simple validation report
-    return {
-      valid: missingInFr.length === 0 && missingInEn.length === 0,
-      missingKeys: {
-        en: missingInEn,
-        fr: missingInFr
-      },
-      formatIssues: [],
-      invalidKeyFormat: []
-    };
-  } catch (error) {
-    console.error('Error diagnosing translations:', error);
-    return {
-      valid: false,
-      missingKeys: { en: [], fr: [] },
-      formatIssues: [],
-      invalidKeyFormat: []
-    };
-  }
-};
-
-/**
- * Count the total number of keys in a nested object
- */
-const countKeys = (obj: any, prefix = ''): number => {
-  let count = 0;
-  
-  for (const key in obj) {
-    const fullKey = prefix ? `${prefix}.${key}` : key;
+export const flattenObject = (obj: any, prefix = ''): Record<string, string> => {
+  return Object.keys(obj).reduce((acc: Record<string, string>, key) => {
+    const pre = prefix.length ? `${prefix}.` : '';
     
     if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-      // Count keys in nested objects
-      count += countKeys(obj[key], fullKey);
+      Object.assign(acc, flattenObject(obj[key], `${pre}${key}`));
     } else {
-      count += 1;
+      acc[`${pre}${key}`] = obj[key];
     }
-  }
+    
+    return acc;
+  }, {});
+};
+
+/**
+ * Finds missing translation keys between languages
+ */
+export const findMissingKeys = () => {
+  const flatEn = flattenObject(en);
+  const flatFr = flattenObject(fr);
   
-  return count;
-};
-
-/**
- * Find format inconsistencies between translations
- */
-export const findFormatIssues = (): FormatIssue[] => {
-  try {
-    // Use imported translation files directly
-    const enTranslations = en;
-    const frTranslations = fr;
-    
-    const issues: FormatIssue[] = [];
-    const checkValue = (enValue: string, frValue: string, key: string) => {
-      // Check for placeholder differences
-      const enPlaceholders = extractPlaceholders(enValue);
-      const frPlaceholders = extractPlaceholders(frValue);
-      
-      // Different number of placeholders
-      if (enPlaceholders.length !== frPlaceholders.length) {
-        issues.push({
-          key,
-          en: enValue,
-          fr: frValue,
-          issue: 'placeholderCount'
-        });
-        return;
-      }
-      
-      // Different placeholder names
-      const missingInFr = enPlaceholders.filter(p => !frPlaceholders.includes(p));
-      const missingInEn = frPlaceholders.filter(p => !enPlaceholders.includes(p));
-      if (missingInFr.length > 0 || missingInEn.length > 0) {
-        issues.push({
-          key,
-          en: enValue,
-          fr: frValue,
-          issue: 'placeholderNames',
-          details: {
-            missingInFr,
-            missingInEn
-          }
-        });
-      }
-    };
-    
-    const compareObjects = (enObj: any, frObj: any, currentPrefix = '') => {
-      for (const key in enObj) {
-        const fullKey = currentPrefix ? `${currentPrefix}.${key}` : key;
-        const enValue = enObj[key];
-        const frValue = frObj?.[key];
-        
-        if (!frValue) continue; // Skip already reported missing keys
-        
-        if (typeof enValue === 'object' && enValue !== null && !Array.isArray(enValue)) {
-          // Recurse into nested objects
-          compareObjects(enValue, frValue, fullKey);
-        } else if (typeof enValue === 'string' && typeof frValue === 'string') {
-          // Compare string values
-          checkValue(enValue, frValue, fullKey);
-        }
-      }
-    };
-    
-    compareObjects(enTranslations, frTranslations);
-    return issues;
-  } catch (error) {
-    console.error('Error finding format issues:', error);
-    return [];
-  }
-};
-
-/**
- * Convert ValidationReport to LegacyValidationReport
- * This is necessary for backward compatibility
- */
-export const convertToLegacyReport = (report: ValidationReport): LegacyValidationReport => {
+  const missingInFr = Object.keys(flatEn).filter(key => !flatFr[key]);
+  const missingInEn = Object.keys(flatFr).filter(key => !flatEn[key]);
+  
   return {
-    missingKeys: {
-      missingInFr: report.missingKeys.fr,
-      missingInEn: report.missingKeys.en,
-      total: {
-        en: report.missingKeys.en.length + report.missingKeys.fr.length,
-        fr: report.missingKeys.fr.length + report.missingKeys.en.length
-      }
-    },
-    formatIssues: report.formatIssues,
-    summary: {
-      missingCount: report.missingKeys.en.length + report.missingKeys.fr.length,
-      formatIssuesCount: report.formatIssues.length
+    missingInFr,
+    missingInEn,
+    total: {
+      en: Object.keys(flatEn).length,
+      fr: Object.keys(flatFr).length
     }
   };
 };
 
 /**
- * Generate a fix report for translation issues
+ * Checks if a key exists in both languages
  */
-export const generateFixReport = (report: ValidationReport) => {
-  const fixes = {
-    addMissingKeys: [...report.missingKeys.en, ...report.missingKeys.fr],
-    fixFormatIssues: report.formatIssues.map(issue => issue.key)
-  };
+export const keyExistsInBothLanguages = (key: string): boolean => {
+  const flatEn = flattenObject(en);
+  const flatFr = flattenObject(fr);
   
-  return fixes;
+  return flatEn[key] !== undefined && flatFr[key] !== undefined;
 };
 
 /**
- * Check if a translation key exists in both English and French
+ * Extract placeholders like {name} from a string
  */
-export function keyExistsInBothLanguages(key: string): boolean {
-  try {
-    // Use imported translation files directly
-    const enTranslations = en;
-    const frTranslations = fr;
-    
-    // Helper to check nested keys
-    const getNestedValue = (obj: any, path: string) => {
-      return path.split('.').reduce((prev, curr) => {
-        return prev && prev[curr] ? prev[curr] : undefined;
-      }, obj);
+export const extractPlaceholders = (text: string): string[] => {
+  if (typeof text !== 'string') return [];
+  const matches = text.match(/\{([^}]+)\}/g);
+  return matches ? matches : [];
+};
+
+/**
+ * Validates a translation key for format issues between languages
+ */
+export const validateTranslationFormat = (key: string): { valid: boolean; issue?: string } => {
+  const flatEn = flattenObject(en);
+  const flatFr = flattenObject(fr);
+  
+  if (!flatEn[key] || !flatFr[key]) {
+    return { valid: false, issue: 'missing' };
+  }
+  
+  const enPlaceholders = extractPlaceholders(flatEn[key]);
+  const frPlaceholders = extractPlaceholders(flatFr[key]);
+  
+  // Check if both languages have the same placeholders
+  const missingInFr = enPlaceholders.filter(p => !frPlaceholders.includes(p));
+  const missingInEn = frPlaceholders.filter(p => !enPlaceholders.includes(p));
+  
+  if (missingInFr.length > 0 || missingInEn.length > 0) {
+    return { 
+      valid: false, 
+      issue: 'placeholders',
     };
-    
-    return !!getNestedValue(enTranslations, key) && !!getNestedValue(frTranslations, key);
-  } catch (e) {
-    return false;
   }
-}
+  
+  return { valid: true };
+};
 
 /**
- * Validate that a translation key follows the format convention
+ * Gets the translated value for a key in a specific language
+ * Now with improved fallback to ensure we always return a string
  */
-export function validateKeyFormat(key: string): boolean {
-  // Basic check: at least one dot, no spaces, lowercase
-  const validFormatRegex = /^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+$/;
-  return validFormatRegex.test(key);
-}
+export const getTranslationValue = (key: string, lang: string = 'fr'): string => {
+  const translations = lang === 'fr' ? fr : en;
+  const fallbackTranslations = lang === 'fr' ? en : fr; // Use the other language as fallback
+  const flatTranslations = flattenObject(translations);
+  const flatFallbackTranslations = flattenObject(fallbackTranslations);
+  
+  // Primary language -> fallback language -> formatted key
+  return flatTranslations[key] || flatFallbackTranslations[key] || formatKeyAsReadableText(key);
+};
 
 /**
- * Format a translation key as readable text
+ * Format a key as readable text (fallback when translation is missing)
  */
-export function formatKeyAsReadableText(key: string): string {
-  try {
-    // Get the last part of the key (after the last dot)
-    const lastPart = key.split('.').pop() || '';
-    
-    // Replace camelCase with spaces and capitalize first letter
-    const text = lastPart
-      .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
-      .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
-    
-    return text;
-  } catch (e) {
-    return key; // Return the original key if something goes wrong
-  }
-}
+export const formatKeyAsReadableText = (key: string): string => {
+  // Extract the last part of the key (e.g., "button.label" -> "label")
+  const parts = key.split('.');
+  const lastPart = parts[parts.length - 1];
+  
+  // Convert camelCase to spaced text
+  return lastPart
+    .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
+    .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
+};
+
+/**
+ * Run a quick diagnostic of the translation system
+ */
+export const diagnoseTranslations = () => {
+  const missingKeys = findMissingKeys();
+  const formatIssues: { key: string; issue: string }[] = [];
+  
+  // Check for format issues in keys that exist in both languages
+  const flatEn = flattenObject(en);
+  
+  Object.keys(flatEn).forEach(key => {
+    if (flattenObject(fr)[key]) {
+      const validation = validateTranslationFormat(key);
+      if (!validation.valid && validation.issue) {
+        formatIssues.push({ key, issue: validation.issue });
+      }
+    }
+  });
+  
+  return {
+    missingKeys,
+    formatIssues,
+    summary: {
+      totalKeys: missingKeys.total.en + missingKeys.total.fr,
+      missingCount: missingKeys.missingInEn.length + missingKeys.missingInFr.length,
+      formatIssuesCount: formatIssues.length
+    }
+  };
+};
+
+/**
+ * Generates a fix report for translation issues
+ */
+export const generateFixReport = () => {
+  const diagnosis = diagnoseTranslations();
+  const report = {
+    timestamp: new Date().toISOString(),
+    issues: diagnosis.summary.missingCount + diagnosis.summary.formatIssuesCount,
+    details: {
+      missing: {
+        inFrench: diagnosis.missingKeys.missingInFr.length,
+        inEnglish: diagnosis.missingKeys.missingInEn.length,
+      },
+      format: diagnosis.formatIssues.length
+    },
+    fixes: [] as string[]
+  };
+  
+  return report;
+};
+
+/**
+ * Validates that a translation key follows the established format
+ */
+export const validateKeyFormat = (key: string): boolean => {
+  // Keys should follow: namespace.section.element[.qualifier]
+  const keyPattern = /^[a-z0-9]+(\.[a-z0-9]+){1,4}$/;
+  return keyPattern.test(key);
+};

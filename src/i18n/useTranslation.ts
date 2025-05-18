@@ -1,110 +1,144 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
-import { i18n } from './config';
-import { useCallback, useState, useEffect } from 'react';
+import { validateKeyFormat, formatKeyAsReadableText, keyExistsInBothLanguages } from './translationUtils';
+
+// Store the current language in localStorage to ensure consistent language across page loads
+const LANGUAGE_STORAGE_KEY = 'app_language';
 
 export const useTranslation = () => {
-  // Use the underlying react-i18next hook
-  const { t, i18n: i18nInstance } = useI18nTranslation();
+  const { t: originalT, i18n } = useI18nTranslation();
   
-  // Track language changes to force re-renders
-  const [currentLanguage, setCurrentLanguage] = useState(i18nInstance.language || 'fr');
-  
-  // Update currentLanguage when i18n language changes
-  useEffect(() => {
-    const handleLanguageChanged = (lang: string) => {
-      console.log(`Language changed in useTranslation: ${lang}`);
-      setCurrentLanguage(lang);
-    };
+  // Force language detection on first load
+  const initializeLanguage = () => {
+    const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     
-    i18nInstance.on('languageChanged', handleLanguageChanged);
-    return () => {
-      i18nInstance.off('languageChanged', handleLanguageChanged);
-    };
-  }, [i18nInstance]);
-  
-  // Function to change the language
-  const changeLanguage = useCallback((lang: string) => {
-    console.log(`Attempting to change language to: ${lang}`);
-    localStorage.setItem('app_language', lang);
-    return i18nInstance.changeLanguage(lang).then(() => {
-      console.log(`Language successfully changed to: ${lang}`);
-      // We don't need to setCurrentLanguage here since the effect will handle it
-      return lang;
-    });
-  }, [i18nInstance]);
-  
-  // Safely handle translations that might return objects
-  const safeT = useCallback((key: string, options?: any) => {
-    try {
-      const translated = t(key, options);
+    if (savedLang && ['fr', 'en'].includes(savedLang)) {
+      i18n.changeLanguage(savedLang);
+    } else {
+      // Detect browser language or default to French
+      const browserLang = navigator.language.split('-')[0];
+      const detectedLang = ['fr', 'en'].includes(browserLang) ? browserLang : 'fr';
       
-      // If translation is an object, stringify it or return a fallback
-      if (translated !== null && typeof translated === 'object') {
-        console.warn(`Translation for key "${key}" returned an object instead of a string`, translated);
-        
-        // Type-safe approach: Use optional chaining and nullish coalescing for object properties
-        const objTranslated = translated as Record<string, any>;
-        return objTranslated?.text ?? objTranslated?.value ?? objTranslated?.content ?? 
-               String(objTranslated) ?? key.split('.').pop() ?? key;
-      }
-      
-      return translated;
-    } catch (error) {
-      console.error(`Error translating key: ${key}`, error);
-      return key;
+      // Save and set the language
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, detectedLang);
+      i18n.changeLanguage(detectedLang);
     }
-  }, [t]);
+  };
   
-  // Add validation function for development environment
-  const validateCurrentPageTranslations = useCallback(() => {
+  // Initialize language on first load
+  if (typeof window !== 'undefined' && !localStorage.getItem(LANGUAGE_STORAGE_KEY)) {
+    initializeLanguage();
+  }
+  
+  // Enhanced t function with better fallbacks
+  const t = (key: string, options?: any): string => {
+    // Validate the key in development
     if (process.env.NODE_ENV === 'development') {
-      // Find all elements with data-i18n-key attribute
-      const translationElements = document.querySelectorAll('[data-i18n-key]');
-      
-      // Log translation validation results
-      console.group('Translation validation');
-      console.log(`Found ${translationElements.length} translated elements on current page`);
-      
-      // Check for missing translations
-      const missingTranslations = Array.from(translationElements)
-        .filter(el => el.getAttribute('data-i18n-missing') === 'true')
-        .map(el => el.getAttribute('data-i18n-key'));
-        
-      if (missingTranslations.length > 0) {
-        console.warn(`Missing ${missingTranslations.length} translations:`, missingTranslations);
-      } else {
-        console.log('✅ All translations found for current page');
+      if (!validateKeyFormat(key)) {
+        console.warn(`⚠️ Translation key '${key}' doesn't follow the format convention.`);
       }
-      
-      console.groupEnd();
-      
-      return {
-        total: translationElements.length,
-        missing: missingTranslations,
-        complete: translationElements.length - missingTranslations.length
-      };
     }
     
-    // Return empty result for production
-    return { total: 0, missing: [], complete: 0 };
-  }, []);
+    // Call the original t function 
+    const translated = originalT(key, options);
+    
+    // Handle case where translation is missing (returns key)
+    if (translated === key) {
+      // In development, log missing keys
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`⚠️ Missing translation for key: '${key}'`);
+      }
+      
+      // Return a formatted version of the key for better readability in production
+      return formatKeyAsReadableText(key);
+    }
+    
+    // Ensure string output
+    return typeof translated === 'string' ? translated : String(translated);
+  };
   
-  // Check if a specific key exists in the translation file
-  const hasTranslation = useCallback((key: string) => {
-    return i18nInstance.exists(key);
-  }, [i18nInstance]);
+  // Change language and save preference
+  const changeLanguage = (lng: string) => {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
+    i18n.changeLanguage(lng);
+  };
   
-  // Simplified API that focuses only on i18n functionality
-  return {
-    t: safeT, // Use our safe translation function
-    originalT: t, // Keep the original for advanced use cases
-    i18n: i18nInstance,
-    currentLanguage,
-    changeLanguage,
-    validateCurrentPageTranslations,
-    hasTranslation
+  // Validate translations on the current page
+  const validateCurrentPageTranslations = () => {
+    if (process.env.NODE_ENV !== 'development') {
+      return; // Only run in development
+    }
+    
+    // Get all elements with data-i18n-key attribute
+    const translatedElements = document.querySelectorAll('[data-i18n-key]');
+    const usedKeys = Array.from(translatedElements).map(el => 
+      (el as HTMLElement).getAttribute('data-i18n-key') || ''
+    );
+    
+    console.log(`Translation validation: Found ${usedKeys.length} keys on current page`);
+    
+    // Check each key for both languages
+    const missingInLanguages: Record<string, string[]> = {
+      en: [],
+      fr: []
+    };
+    
+    usedKeys.forEach(key => {
+      if (!i18n.exists(key, { lng: 'en' })) {
+        missingInLanguages.en.push(key);
+      }
+      
+      if (!i18n.exists(key, { lng: 'fr' })) {
+        missingInLanguages.fr.push(key);
+      }
+    });
+    
+    // Log results
+    if (missingInLanguages.en.length > 0) {
+      console.warn(`⚠️ Missing ${missingInLanguages.en.length} English translations:`, missingInLanguages.en);
+    }
+    
+    if (missingInLanguages.fr.length > 0) {
+      console.warn(`⚠️ Missing ${missingInLanguages.fr.length} French translations:`, missingInLanguages.fr);
+    }
+    
+    if (missingInLanguages.en.length === 0 && missingInLanguages.fr.length === 0) {
+      console.log('✅ All translations for this page are complete!');
+    }
+    
+    return {
+      usedKeys,
+      missingInLanguages
+    };
+  };
+  
+  return { 
+    t, 
+    changeLanguage, 
+    currentLanguage: i18n.language, 
+    i18n,
+    // Utility for debugging
+    refreshLanguage: initializeLanguage,
+    validateCurrentPageTranslations
   };
 };
 
-export default useTranslation;
+// Function to switch language programmatically from anywhere
+export const switchLanguage = (lang: 'fr' | 'en') => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    
+    // Instead of reloading, just change the language
+    // This provides a smoother experience
+    if (window.i18next) {
+      window.i18next.changeLanguage(lang);
+    }
+  }
+};
+
+// Add type declaration for the i18next property on the window object
+declare global {
+  interface Window {
+    i18next: any;
+  }
+}

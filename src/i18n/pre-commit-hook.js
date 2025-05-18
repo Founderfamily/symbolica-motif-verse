@@ -2,101 +2,64 @@
 #!/usr/bin/env node
 
 /**
- * Pre-commit Hook for Translation Usage
+ * Pre-commit hook to detect direct t() usage
  * 
- * This script checks for direct t() function usage in staged files
- * and warns the developer about the preferred <I18nText> component approach.
- * 
- * Add to your .git/hooks/pre-commit or use husky to set up.
+ * To install:
+ * 1. Make this file executable: chmod +x src/i18n/pre-commit-hook.js
+ * 2. Link it as a git hook: ln -sf ../../src/i18n/pre-commit-hook.js .git/hooks/pre-commit
  */
 
 const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const checkI18nProgress = require('../scripts/check-i18n-progress.js');
+const { scanDirectUsage } = require('./directUsageScanner');
 
-// Get all staged files with .ts, .tsx, .js, .jsx extensions
-const getStagedFiles = () => {
-  try {
-    const output = execSync('git diff --cached --name-only --diff-filter=ACM').toString();
-    return output
-      .split('\n')
-      .filter(file => /\.(tsx|ts|jsx|js)$/.test(file) && file.trim() !== '');
-  } catch (error) {
-    console.error('Error getting staged files:', error.message);
-    return [];
+// Only check files that are staged for commit
+try {
+  // Get staged files
+  const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACMR')
+    .toString()
+    .trim()
+    .split('\n')
+    .filter(file => /\.(tsx?|jsx?)$/.test(file));
+
+  if (stagedFiles.length === 0) {
+    process.exit(0); // No relevant files staged
   }
-};
 
-// Check if a file has direct t() usage
-const checkFileForDirectUsage = (filePath) => {
-  if (!fs.existsSync(filePath)) return { hasDirectUsage: false };
+  console.log('\n🔍 Checking for direct t() usage in staged files...');
   
-  try {
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const result = checkI18nProgress.scanFile(filePath);
-    return { 
-      hasDirectUsage: result.tUsageCount > 0,
-      usageCount: result.tUsageCount,
-      usageLines: result.tUsageLines 
-    };
-  } catch (error) {
-    console.error(`Error checking file ${filePath}:`, error.message);
-    return { hasDirectUsage: false };
-  }
-};
-
-// Main function
-const main = () => {
-  const stagedFiles = getStagedFiles();
-  let hasDirectUsage = false;
-  const filesWithDirectUsage = [];
+  // Only scan the staged files
+  const results = scanDirectUsage('src', stagedFiles);
   
-  stagedFiles.forEach(file => {
-    const result = checkFileForDirectUsage(file);
-    if (result.hasDirectUsage) {
-      hasDirectUsage = true;
-      filesWithDirectUsage.push({
-        file,
-        usageCount: result.usageCount,
-        usageLines: result.usageLines
-      });
-    }
-  });
-  
-  if (hasDirectUsage) {
-    console.log('\n🚨 Warning: Direct t() usage detected in staged files!\n');
-    console.log('The following files contain direct t() function calls:');
+  if (results.length > 0) {
+    console.error('\n⚠️ Direct t() usage detected in your code!');
+    console.error('Please use the <I18nText> component instead.\n');
     
-    filesWithDirectUsage.forEach(({ file, usageCount, usageLines }) => {
-      console.log(`\n📄 ${file}: ${usageCount} instances`);
-      
-      // Show up to 3 examples
-      const examples = usageLines.slice(0, 3);
-      examples.forEach(line => {
-        console.log(`   Line ${line.lineNumber}: ${line.content.substring(0, 80)}${line.content.length > 80 ? '...' : ''}`);
+    // Count total instances
+    const totalInstances = results.reduce((sum, file) => sum + file.lines.length, 0);
+    console.error(`Found ${totalInstances} instances across ${results.length} files:\n`);
+    
+    // Show the found issues
+    results.forEach(file => {
+      console.error(`File: ${file.file}`);
+      file.lines.forEach(line => {
+        console.error(`  Line ${line.lineNumber}: ${line.content}`);
       });
-      
-      if (usageLines.length > 3) {
-        console.log(`   ... and ${usageLines.length - 3} more instances`);
-      }
+      console.error('');
     });
     
-    console.log('\n⚠️  Consider using <I18nText> components instead of direct t() calls.');
-    console.log('Run the following command to automatically convert them:');
-    console.log('\n   npm run migrate-i18n\n');
-    console.log('You can choose to continue with the commit, but direct t() usage is discouraged.\n');
+    console.error('To fix:');
+    console.error('1. Replace {t("key")} with <I18nText translationKey="key" />');
+    console.error('2. For attributes, use a local constant: const placeholder = t("key")');
+    console.error('3. Use the helper script: node src/i18n/convert-t-to-i18ntext.js path/to/file.tsx');
+    console.error('\nYou can bypass this check with git commit --no-verify\n');
     
-    // Uncomment to make this hook block commits with t() usage
-    // process.exit(1);
+    process.exit(1); // Non-zero exit to abort commit
   }
-  
-  return { hasDirectUsage, filesWithDirectUsage };
-};
 
-// Run script if executed directly
-if (require.main === module) {
-  main();
+  console.log('✅ No direct t() usage detected in staged files.\n');
+  process.exit(0); // Everything is fine
+} catch (error) {
+  console.error('Error running pre-commit hook:', error);
+  // Don't block the commit if the hook fails
+  process.exit(0);
 }
-
-module.exports = { main, getStagedFiles, checkFileForDirectUsage };

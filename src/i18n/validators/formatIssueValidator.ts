@@ -62,6 +62,3 @@ export const findFormatIssues = (en: any, fr: any): FormatIssue[] => {
   compareObjects(en, fr);
   return issues;
 };
-
-// Make sure we only export the findFormatIssues function with the correct name
-export { findFormatIssues as findFormatIssuesImpl };

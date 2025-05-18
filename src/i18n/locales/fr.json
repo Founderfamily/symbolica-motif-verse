@@ -1,143 +1,124 @@
+
 {
-  "translation": {
-    "appTitle": "Symbolica",
-    "auth": {
-      "login": "Se connecter",
-      "logout": "Se déconnecter",
-      "register": "S'inscrire",
-      "admin": "Administration",
-      "requiresLogin": "Vous devez être connecté pour accéder à cette page."
+  "navigation": {
+    "home": "Accueil",
+    "explore": "Explorer",
+    "map": "Carte",
+    "contribute": "Contribuer",
+    "about": "À propos",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "account": "Compte",
+    "admin": "Admin",
+    "groups": "Groupes"
+  },
+  "groups": {
+    "title": "Espaces Thématiques & Groupes d'Intérêt",
+    "subtitle": "Rejoignez des communautés axées sur différents symboles et motifs culturels",
+    "createNew": "Créer un Groupe",
+    "searchPlaceholder": "Rechercher des groupes...",
+    "noResults": "Aucun groupe ne correspond à vos critères de recherche",
+    "notFound": "Groupe introuvable",
+    "loadError": "Erreur lors du chargement des détails du groupe",
+    "manage": "Gérer le Groupe",
+    "join": "Rejoindre",
+    "leave": "Quitter",
+    "processing": "Traitement...",
+    "membersList": "Membres",
+    "noPostsYet": "Aucune discussion dans ce groupe pour le moment",
+    "beTheFirst": "Lancez une conversation pour être le premier !",
+    "noDiscoveriesYet": "Aucune découverte n'a été ajoutée à ce groupe pour le moment",
+    "contributeFirst": "Ajoutez vos découvertes à partager avec le groupe",
+    "noCollectionsYet": "Aucune collection n'a été créée dans ce groupe pour le moment",
+    "createFirstCollection": "Créez une collection pour organiser les symboles et les découvertes",
+    "createPost": "Nouveau Message",
+    "createCollection": "Nouvelle Collection",
+    "tabs": {
+      "discussions": "Discussions",
+      "discoveries": "Découvertes",
+      "members": "Membres",
+      "collections": "Collections"
     },
-    "actions": {
-      "show": "Afficher",
-      "hide": "Masquer",
-      "edit": "Modifier",
-      "delete": "Supprimer",
-      "cancel": "Annuler",
-      "save": "Enregistrer",
-      "create": "Créer",
-      "submit": "Soumettre",
-      "loadMore": "Charger plus",
-      "confirm": "Confirmer"
+    "roles": {
+      "admin": "Administrateur",
+      "moderator": "Modérateur",
+      "member": "Membre"
     },
-    "breadcrumb": {
-      "home": "Accueil",
-      "symbolExplorer": "Explorateur de symboles"
+    "create": {
+      "title": "Créer un Nouveau Groupe",
+      "formTitle": "Détails du Groupe",
+      "name": "Nom du Groupe",
+      "namePlaceholder": "Entrez un nom pour votre groupe",
+      "description": "Description",
+      "descriptionPlaceholder": "Décrivez le sujet de ce groupe",
+      "themeColor": "Couleur du Thème",
+      "isPublic": "Rendre ce groupe public (tout le monde peut rejoindre)"
     },
-    "error": {
-      "title": "Oops! Une erreur est survenue.",
-      "goBack": "Retourner à la page précédente",
-      "notFound": "Page non trouvée"
+    "validation": {
+      "nameRequired": "Le nom du groupe est requis"
     },
-    "gamification": {
-      "points": "points",
-      "labels": {
-        "points": "Points",
-        "level": "Niveau"
+    "exploreBanner": {
+      "title": "Rejoignez des Communautés Thématiques",
+      "description": "Connectez-vous avec d'autres personnes partageant votre intérêt pour les symboles culturels, les motifs et les traditions.",
+      "action": "Explorer les Groupes"
+    }
+  },
+  "common": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "creating": "Création...",
+    "loading": "Chargement..."
+  },
+  "community": {
+    "title": "Rejoignez une Communauté Dynamique",
+    "description": "Connectez-vous avec des passionnés, des chercheurs et des créateurs qui partagent votre passion pour les symboles et motifs culturels.",
+    "exploreGroups": "Explorer Tous les Groupes",
+    "groups": {
+      "artDeco": {
+        "name": "Motifs Art Déco",
+        "culture": "Occidental"
       },
-      "badges": {
-        "newbie": "Novice",
-        "explorer": "Explorateur",
-        "expert": "Expert",
-        "master": "Maître"
+      "celticSymbolism": {
+        "name": "Symbolisme Celtique",
+        "culture": "Celtique"
       },
-      "messages": {
-        "levelUp": "Félicitations ! Vous avez atteint le niveau {level}."
+      "japanesePatterns": {
+        "name": "Motifs Japonais",
+        "culture": "Japonais"
+      },
+      "islamicArt": {
+        "name": "Art Géométrique Islamique",
+        "culture": "Islamique"
       }
     },
-    "map": {
-      "title": "Carte interactive des symboles",
-      "exploreInstructions": "Explorez les symboles sur la carte pour gagner des points !",
-      "earnPoints": "Chaque symbole exploré vous rapporte des points.",
-      "loading": "Chargement de la carte...",
-      "tryAgainLater": "Veuillez réessayer plus tard.",
-      "noLocationsMessage": "Aucun symbole géolocalisé n'est disponible pour le moment.",
-      "labels": {
-        "culture": "Culture",
-        "period": "Période",
-        "location": "Localisation",
-        "source": "Source"
-      },
-      "badges": {
-        "verified": "Vérifié",
-        "explored": "Exploré"
-      },
-      "error": {
-        "loadingLocations": "Erreur lors du chargement des localisations des symboles."
-      },
-      "exploreSymbol": "Explorer le symbole"
+    "stats": {
+      "members": "membres",
+      "discoveries": "découvertes",
+      "join": "Rejoindre",
+      "view": "Voir"
     },
-    "symbolExplorer": {
-      "title": "Explorateur de symboles",
-      "description": "Découvrez une collection diversifiée de symboles culturels du monde entier.",
-      "gridView": "Vue grille",
-      "listView": "Vue liste",
-      "mapView": "Vue carte",
-      "filters": "Filtres",
-      "searchPlaceholder": "Rechercher un symbole...",
-      "clearFilters": "Effacer les filtres",
-      "activeFilters": "Filtres actifs",
-      "noFilters": "Aucun filtre actif",
-      "resultsCount": "{count} résultats",
-      "noResults": "Aucun symbole ne correspond à vos critères de recherche.",
-      "mapViewComingSoon": "Vue Carte à venir !",
-      "mapViewDescription": "Nous travaillons dur pour vous offrir une expérience de carte interactive. Revenez bientôt !"
-    },
-    "searchFilters": {
-      "cultures": "Cultures",
-      "periods": "Périodes",
-      "medium": "Médiums",
-      "technique": "Techniques",
-      "function": "Fonctions"
-    },
-    "symbolDetail": {
-      "errorTitle": "Symbole introuvable",
-      "errorMessage": "Le symbole que vous recherchez n'existe pas ou a été supprimé.",
-      "backToExplorer": "Retour à l'explorateur",
-      "share": "Partager",
-      "linkCopied": "Lien copié dans le presse-papiers!",
-      "description": "Description",
-      "visualRepresentations": "Représentations visuelles",
-      "relatedSymbols": "Symboles similaires",
-      "medium": "Médium",
-      "technique": "Technique",
-      "function": "Fonction"
-    },
-    "triptych": {
-      "title": "Musée Symbolica",
-      "subtitle": "Explorez les symboles culturels du monde entier.",
-      "learnMore": "En savoir plus",
-      "block1": {
-        "title": "Liste des symboles"
+    "features": {
+      "thematicCommunities": {
+        "title": "Communautés Thématiques",
+        "description": "Rejoignez des groupes axés sur des thèmes culturels spécifiques, des périodes historiques ou des catégories de symboles."
       },
-      "block2": {
-        "title": "Sélectionnez un symbole"
+      "personalSpace": {
+        "title": "Collections Personnelles",
+        "description": "Créez vos propres collections de symboles et de motifs, organisez vos découvertes et partagez-les avec d'autres."
       },
-      "block3": {
-        "title": "Visualisation du triptyque"
-      },
-      "empty": "Aucun symbole sélectionné.",
-      "loading": "Chargement des symboles...",
-      "error": "Erreur lors du chargement des symboles.",
-      "errorDesc": "Veuillez réessayer plus tard."
-    },
-    "symbolTriptych": {
-      "original": "Original",
-      "pattern": "Motif",
-      "reuse": "Réutilisation",
-      "imageError": "Erreur de chargement d'image",
-      "imageErrorDesc": "Impossible de charger l'image. Veuillez réessayer plus tard."
-    },
-    "symbols": {
-      "noSelection": "Veuillez sélectionner un symbole pour afficher les détails",
-      "loading": "Chargement des détails du symbole...",
-      "error": "Erreur de chargement du symbole",
-      "errorDescription": "Un problème est survenu lors du chargement de ce symbole. Veuillez réessayer plus tard.",
-      "imageError": "Certaines images n'ont pas pu être chargées",
-      "imageErrorDescription": "Une ou plusieurs images de ce symbole n'ont pas pu être affichées.",
-      "original": "Symbole Original",
-      "pattern": "Version Motif",
-      "reuse": "Réutilisation Moderne"
+      "intuitiveNavigation": {
+        "title": "Navigation Intuitive",
+        "description": "Naviguez facilement entre les communautés, découvrez des symboles connexes et trouvez des projets collaboratifs."
+      }
     }
+  },
+  "auth": {
+    "requiresLogin": "Vous devez être connecté pour accéder à cette page"
+  },
+  "user": {
+    "anonymous": "Utilisateur"
   }
 }

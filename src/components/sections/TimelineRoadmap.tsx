@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -32,12 +31,12 @@ const TimelineItem = ({
           <h3 className="text-lg font-semibold">{title}</h3>
           {isCurrent && (
             <Badge className="bg-slate-700">
-              <I18nText translationKey="roadmap.inProgress" />
+              {t('roadmap.inProgress')}
             </Badge>
           )}
           {isCompleted && (
             <Badge className="bg-green-600">
-              <I18nText translationKey="roadmap.completed" />
+              {t('roadmap.completed')}
             </Badge>
           )}
         </div>

@@ -33,33 +33,35 @@ const Footer = () => {
             {/* Column 1: About & Logo */}
             <div>
               <h2 className="text-2xl font-bold text-white mb-4">
-                <I18nText translationKey="app.name" />
+                <I18nText translationKey="app.name">Symbolica</I18nText>
               </h2>
               <p className="max-w-md text-slate-400 mb-4">
-                <I18nText translationKey="footer.tagline" />
+                <I18nText translationKey="footer.tagline">
+                  Preserving and celebrating the world's symbolic heritage
+                </I18nText>
               </p>
             </div>
             
             {/* Column 2: Platform Links */}
             <div>
               <h3 className="font-medium text-white mb-4">
-                <I18nText translationKey="footer.platform" />
+                <I18nText translationKey="footer.platform">Platform</I18nText>
               </h3>
               <ul className="space-y-2">
                 <li><Link to="/" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.home" />
+                  <I18nText translationKey="footer.home">Home</I18nText>
                 </Link></li>
                 <li><Link to="/explore" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.explore" />
+                  <I18nText translationKey="footer.explore">Explore</I18nText>
                 </Link></li>
                 <li><Link to="/map" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.map" />
+                  <I18nText translationKey="footer.map">Map</I18nText>
                 </Link></li>
                 <li><Link to="/contributions" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.contribute" />
+                  <I18nText translationKey="footer.contribute">Contribute</I18nText>
                 </Link></li>
                 <li><Link to="/about" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.about" />
+                  <I18nText translationKey="footer.about">About</I18nText>
                 </Link></li>
               </ul>
             </div>
@@ -67,31 +69,25 @@ const Footer = () => {
             {/* Column 3: Community Links */}
             <div>
               <h3 className="font-medium text-white mb-4">
-                <I18nText translationKey="footer.community" />
+                <I18nText translationKey="footer.community">Community</I18nText>
               </h3>
               <ul className="space-y-2">
-                <li><a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.github" />
+                <li><a href="#" className="hover:text-white transition-colors">
+                  <I18nText translationKey="footer.github">GitHub</I18nText>
                 </a></li>
-                <li><a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.discord" />
+                <li><a href="#" className="hover:text-white transition-colors">
+                  <I18nText translationKey="footer.discord">Discord</I18nText>
                 </a></li>
-                <li><a href="https://forum.example.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.forum" />
+                <li><a href="#" className="hover:text-white transition-colors">
+                  <I18nText translationKey="footer.forum">Forum</I18nText>
                 </a></li>
-                <li><Link to="/terms" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.terms" />
-                </Link></li>
-                <li><Link to="/privacy" className="hover:text-white transition-colors">
-                  <I18nText translationKey="footer.privacy" />
-                </Link></li>
               </ul>
             </div>
             
             {/* Column 4: FAQ Accordion */}
             <div>
               <h3 className="font-medium text-white mb-4">
-                <I18nText translationKey="faq.title" />
+                <I18nText translationKey="faq.title">FAQ</I18nText>
               </h3>
               <Accordion 
                 type="single" 
@@ -121,12 +117,10 @@ const Footer = () => {
           {/* Copyright section */}
           <div className="border-t border-slate-800 mt-6 pt-6 flex flex-col md:flex-row justify-between items-center">
             <p>
-              <I18nText translationKey="footer.copyright" />
+              <I18nText translationKey="footer.copyright">
+                © 2025 Symbolica Museum
+              </I18nText>
             </p>
-            
-            <div className="flex items-center mt-4 md:mt-0">
-              <I18nText translationKey="footer.language" className="mr-2" />
-            </div>
           </div>
         </div>
       </div>

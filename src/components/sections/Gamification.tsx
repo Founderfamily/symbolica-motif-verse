@@ -37,7 +37,7 @@ const GamificationItem = ({
         <div className="flex items-center text-amber-700 font-medium">
           <Star className="h-4 w-4 mr-1 fill-amber-500 stroke-amber-700" />
           <span>
-            {points} <I18nText translationKey="gamification.points" />
+            {points} <I18nText translationKey="gamification.points">points</I18nText>
           </span>
         </div>
       )}
@@ -46,6 +46,8 @@ const GamificationItem = ({
 };
 
 const Gamification = () => {
+  const { t } = useTranslation();
+  
   const gamificationItems = [
     {
       icon: Trophy,
@@ -78,10 +80,14 @@ const Gamification = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">
-            <I18nText translationKey="gamification.title" />
+            <I18nText translationKey="gamification.title">
+              Earn Rewards for Contributions
+            </I18nText>
           </h2>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            <I18nText translationKey="gamification.subtitle" />
+            <I18nText translationKey="gamification.subtitle">
+              Join our community and earn points, badges and recognition
+            </I18nText>
           </p>
         </div>
         
@@ -100,7 +106,9 @@ const Gamification = () => {
         <div className="mt-12 text-center">
           <Button asChild className="gap-2 bg-amber-600 hover:bg-amber-700">
             <Link to="/profile">
-              <I18nText translationKey="gamification.viewYourProgress" />
+              <I18nText translationKey="gamification.viewYourProgress">
+                View Your Progress
+              </I18nText>
               <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>

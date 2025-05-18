@@ -1,38 +1,129 @@
 
 /**
- * Utilities for validating translation key conventions
+ * Translation Key Conventions
+ * 
+ * This file documents the conventions for translation keys in the project.
+ * These conventions ensure consistency across the application and make it easier
+ * to find and manage translations.
  */
 
 /**
- * Validate that a translation key follows the format convention
- * Keys should be in dot notation format: section.subsection.element
+ * Key Structure Format:
  * 
- * @param key The translation key to validate
- * @returns Whether the key follows the format convention
+ * Keys should follow the format: `namespace.section.element.qualifier`
+ * 
+ * Examples:
+ * - map.labels.culture
+ * - faq.questions.general.what
+ * - profile.buttons.save
+ * - auth.errors.invalidEmail
+ */
+
+/**
+ * Namespaces
+ * Top-level organization of keys into functional areas of the application.
+ * Common namespaces include:
+ */
+export const namespaces = [
+  'app',       // App-wide elements like app name, tagline
+  'auth',      // Authentication related 
+  'map',       // Map explorer related
+  'faq',       // FAQ sections and pages
+  'profile',   // User profile related
+  'symbols',   // Symbol-related content
+  'footer',    // Footer sections
+  'header',    // Header and navigation
+  'explore',   // Exploration sections
+  'about',     // About page and sections
+  'common',    // Common UI elements
+  'errors',    // Error messages
+  'gamification', // Points, achievements, etc.
+] as const;
+
+/**
+ * Sections
+ * Second-level organization within a namespace.
+ * Common sections include:
+ */
+export const commonSections = [
+  'labels',     // Text labels for UI elements
+  'buttons',    // Button text
+  'titles',     // Page or section titles
+  'subtitles',  // Page or section subtitles
+  'placeholders', // Input placeholders
+  'errors',     // Error messages
+  'success',    // Success messages
+  'tooltips',   // Tooltip text
+  'badges',     // Badge text
+  'questions',  // For FAQ questions
+  'answers',    // For FAQ answers
+  'filters',    // Filter options
+  'sections',   // Page sections
+] as const;
+
+/**
+ * Elements
+ * Third-level specification of what element the key refers to.
+ * Examples: save, cancel, submit, email, password, etc.
+ */
+
+/**
+ * Qualifiers
+ * Optional fourth level to further specify variants.
+ * Examples: hover, active, disabled, etc.
+ */
+
+/**
+ * Validation function that can be used to check if a key follows the conventions
  */
 export function validateKeyFormat(key: string): boolean {
-  // Basic check: at least one dot, no spaces, lowercase
-  const validFormatRegex = /^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+$/;
-  return validFormatRegex.test(key);
+  // A valid key should have at least 2 levels (namespace.section)
+  const parts = key.split('.');
+  if (parts.length < 2) return false;
+  
+  // Namespace should be one of the predefined namespaces
+  const namespace = parts[0];
+  if (!namespaces.includes(namespace as any)) {
+    console.warn(`Key "${key}" uses non-standard namespace "${namespace}"`);
+    return false;
+  }
+  
+  return true;
 }
 
 /**
- * Format a translation key as readable text
- * Used as fallback when a translation is missing
- * 
- * @param key The translation key to format
- * @returns A more human-readable version of the key
+ * Helper to create a key following the conventions
  */
-export function formatKeyAsReadableText(key: string): string {
-  try {
-    // Get the last part of the key (after the last dot)
-    const lastPart = key.split('.').pop() || '';
-    
-    // Replace camelCase with spaces and capitalize first letter
-    return lastPart
-      .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
-      .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
-  } catch (e) {
-    return key; // Return the original key if something goes wrong
-  }
+export function createKey(
+  namespace: typeof namespaces[number], 
+  section: string,
+  element: string,
+  qualifier?: string
+): string {
+  return qualifier 
+    ? `${namespace}.${section}.${element}.${qualifier}`
+    : `${namespace}.${section}.${element}`;
 }
+
+/**
+ * Examples of using the conventions:
+ * 
+ * Button text:
+ * - auth.buttons.login
+ * - auth.buttons.signup
+ * - profile.buttons.save
+ * 
+ * Form labels:
+ * - auth.labels.email
+ * - auth.labels.password
+ * - profile.labels.username
+ * 
+ * Page titles:
+ * - map.titles.main
+ * - explore.titles.symbols
+ * - about.titles.team
+ * 
+ * Error messages:
+ * - auth.errors.invalidEmail
+ * - form.errors.required
+ */

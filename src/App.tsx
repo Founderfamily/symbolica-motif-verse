@@ -1,16 +1,7 @@
 
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import Layout from './components/layout/Layout';
-import TranslationProvider from './i18n/TranslationProvider';
-
-// Common loading component for lazy-loaded routes
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center w-full h-screen">
-    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-amber-500"></div>
-  </div>
-);
 
 // Lazily load pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -24,7 +15,6 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const GroupsPage = lazy(() => import('./pages/Groups/GroupsPage'));
 const GroupDetailPage = lazy(() => import('./pages/Groups/GroupDetailPage'));
 const GroupCreatePage = lazy(() => import('./pages/Groups/GroupCreatePage'));
-const ProfilePage = lazy(() => import('./pages/Profile'));
 
 // Admin pages
 const AdminLayout = lazy(() => import('./pages/Admin/AdminLayout'));
@@ -34,40 +24,33 @@ const SymbolEditor = lazy(() => import('./pages/Admin/SymbolEditor'));
 const ContentManagement = lazy(() => import('./pages/Admin/ContentManagement'));
 const ContributionsManagement = lazy(() => import('./pages/Admin/ContributionsManagement'));
 
-// Wrapper that decides whether to use Layout or not
-const PageWrapper = ({ children }: { children: React.ReactNode }) => {
-  const location = useLocation();
-  
-  // Admin pages have their own layout
-  if (location.pathname.startsWith('/admin')) {
-    return <>{children}</>;
-  }
-  
-  // All other pages use the default Layout
-  return <Layout>{children}</Layout>;
-};
+// Common loading component for lazy-loaded routes
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center w-full h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-amber-500"></div>
+  </div>
+);
 
 function App() {
   return (
-    <TranslationProvider>
+    <Router>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
-          <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
-          <Route path="/explore" element={<PageWrapper><SymbolExplorer /></PageWrapper>} />
-          <Route path="/explore/:id" element={<PageWrapper><SymbolDetail /></PageWrapper>} />
-          <Route path="/map" element={<PageWrapper><MapExplorerPage /></PageWrapper>} />
-          <Route path="/contribute" element={<PageWrapper><ContributionsPage /></PageWrapper>} />
-          <Route path="/auth" element={<PageWrapper><Auth /></PageWrapper>} />
-          <Route path="/profile" element={<PageWrapper><ProfilePage /></PageWrapper>} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/explore" element={<SymbolExplorer />} />
+          <Route path="/explore/:id" element={<SymbolDetail />} />
+          <Route path="/map" element={<MapExplorerPage />} />
+          <Route path="/contribute" element={<ContributionsPage />} />
+          <Route path="/auth" element={<Auth />} />
           
           {/* Groups routes */}
-          <Route path="/groups" element={<PageWrapper><GroupsPage /></PageWrapper>} />
-          <Route path="/groups/create" element={<PageWrapper><GroupCreatePage /></PageWrapper>} />
-          <Route path="/groups/:slug" element={<PageWrapper><GroupDetailPage /></PageWrapper>} />
+          <Route path="/groups" element={<GroupsPage />} />
+          <Route path="/groups/create" element={<GroupCreatePage />} />
+          <Route path="/groups/:slug" element={<GroupDetailPage />} />
           
-          {/* Admin routes - uses AdminLayout */}
+          {/* Admin routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="" element={<Dashboard />} />
             <Route path="symbols" element={<SymbolsManagement />} />
@@ -77,10 +60,10 @@ function App() {
           </Route>
           
           {/* Not found route */}
-          <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-    </TranslationProvider>
+    </Router>
   );
 }
 
