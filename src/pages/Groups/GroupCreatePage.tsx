@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -10,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { createInterestGroup } from '@/services/interestGroupService';
 import { CirclePicker } from 'react-color';
+import { I18nText } from '@/components/ui/i18n-text';
 
 const GroupCreatePage = () => {
   const { t } = useTranslation();
@@ -61,42 +63,56 @@ const GroupCreatePage = () => {
     }
   };
   
+  // Translate form placeholders/labels
+  const namePlaceholder = t('groups.create.namePlaceholder');
+  const descriptionPlaceholder = t('groups.create.descriptionPlaceholder');
+  
   return (
     <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
-      <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">{t('groups.create.title')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">
+        <I18nText translationKey="groups.create.title" />
+      </h1>
       
       <Card>
         <CardHeader>
-          <CardTitle>{t('groups.create.formTitle')}</CardTitle>
+          <CardTitle>
+            <I18nText translationKey="groups.create.formTitle" />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">{t('groups.create.name')}</Label>
+              <Label htmlFor="name">
+                <I18nText translationKey="groups.create.name" />
+              </Label>
               <Input
                 id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder={t('groups.create.namePlaceholder')}
+                placeholder={namePlaceholder}
                 required
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="description">{t('groups.create.description')}</Label>
+              <Label htmlFor="description">
+                <I18nText translationKey="groups.create.description" />
+              </Label>
               <Textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder={t('groups.create.descriptionPlaceholder')}
+                placeholder={descriptionPlaceholder}
                 rows={4}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="theme_color">{t('groups.create.themeColor')}</Label>
+              <Label htmlFor="theme_color">
+                <I18nText translationKey="groups.create.themeColor" />
+              </Label>
               <div className="mt-2">
                 <CirclePicker
                   color={formData.theme_color}
@@ -117,7 +133,9 @@ const GroupCreatePage = () => {
                 checked={formData.is_public}
                 onCheckedChange={handleSwitchChange}
               />
-              <Label htmlFor="is_public">{t('groups.create.isPublic')}</Label>
+              <Label htmlFor="is_public">
+                <I18nText translationKey="groups.create.isPublic" />
+              </Label>
             </div>
             
             <div className="pt-2 flex gap-3 justify-end">
@@ -126,14 +144,17 @@ const GroupCreatePage = () => {
                 variant="outline"
                 onClick={() => navigate('/groups')}
               >
-                {t('common.cancel')}
+                <I18nText translationKey="common.cancel" />
               </Button>
               <Button 
                 type="submit"
                 disabled={loading}
                 className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
               >
-                {loading ? t('common.creating') : t('common.create')}
+                {loading ? 
+                  <I18nText translationKey="common.creating" /> : 
+                  <I18nText translationKey="common.create" />
+                }
               </Button>
             </div>
           </form>
