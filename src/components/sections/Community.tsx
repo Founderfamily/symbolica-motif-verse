@@ -141,7 +141,7 @@ const Community = () => {
                         <div className="bg-slate-50 p-2 rounded-lg">
                           <div className="flex items-center text-slate-600">
                             <Users className="h-3 w-3 mr-1" />
-                            <span className="text-xs">{membersText}</span>
+                            <span className="text-xs"><I18nText translationKey="community.members" /></span>
                           </div>
                           <p className="font-medium text-slate-800">{group.members_count.toLocaleString()}</p>
                         </div>
@@ -149,7 +149,7 @@ const Community = () => {
                         <div className="bg-slate-50 p-2 rounded-lg">
                           <div className="flex items-center text-slate-600">
                             <Search className="h-3 w-3 mr-1" />
-                            <span className="text-xs">{discoveriesText}</span>
+                            <span className="text-xs"><I18nText translationKey="community.discoveries" /></span>
                           </div>
                           <p className="font-medium text-slate-800">{group.discoveries_count.toLocaleString()}</p>
                         </div>
@@ -165,7 +165,7 @@ const Community = () => {
                 to="/groups" 
                 className="inline-flex items-center space-x-2 text-amber-600 hover:text-amber-700 font-medium"
               >
-                <span>{showAllGroupsText}</span>
+                <span><I18nText translationKey="community.showAllGroups" /></span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>

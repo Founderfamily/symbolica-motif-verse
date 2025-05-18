@@ -5,6 +5,7 @@ import Footer from './Footer';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 import { supabase } from '@/integrations/supabase/client';
 
 interface LayoutProps {
@@ -56,7 +57,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const requiresAuth = location.pathname.startsWith('/groups/create');
     
     if (requiresAuth && isAuthenticated === false) {
-      toast.error(t('auth.requiresLogin'));
+      // Create a variable for the auth error message
+      const authErrorMessage = t('auth.requiresLogin');
+      toast.error(authErrorMessage);
       // Let the router handle the redirect
     }
     

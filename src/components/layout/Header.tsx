@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import LanguageSelector from '@/components/ui/language-selector';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 import { supabase } from '@/integrations/supabase/client';
 import { useBreakpoint } from '@/hooks/use-breakpoints';
 import {
@@ -70,6 +71,14 @@ const Header = () => {
   }, [location]);
 
   const isLoggedIn = !!user;
+  
+  // Create translation variables for texts used in attributes
+  const loginText = t('navigation.login');
+  const signupText = t('navigation.signup');
+  const accountText = t('navigation.account');
+  const groupsText = t('navigation.groups');
+  const adminText = t('navigation.admin');
+  const logoutText = t('navigation.logout');
 
   const navLinks = [
     { to: '/', label: t('navigation.home') },
@@ -128,22 +137,22 @@ const Header = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate('/profile')}>
                         <Settings className="mr-2 h-4 w-4" />
-                        <span>{t('navigation.account')}</span>
+                        <span><I18nText translationKey="navigation.account" /></span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate('/groups')}>
                         <Users className="mr-2 h-4 w-4" />
-                        <span>{t('navigation.groups')}</span>
+                        <span><I18nText translationKey="navigation.groups" /></span>
                       </DropdownMenuItem>
                       {user?.app_metadata?.isAdmin && (
                         <DropdownMenuItem onClick={() => navigate('/admin')}>
                           <Settings className="mr-2 h-4 w-4" />
-                          <span>{t('navigation.admin')}</span>
+                          <span><I18nText translationKey="navigation.admin" /></span>
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleLogout}>
                         <LogOut className="mr-2 h-4 w-4" />
-                        <span>{t('navigation.logout')}</span>
+                        <span><I18nText translationKey="navigation.logout" /></span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -154,14 +163,14 @@ const Header = () => {
                       size="sm"
                       onClick={() => navigate('/auth?mode=login')}
                     >
-                      {t('navigation.login')}
+                      <I18nText translationKey="navigation.login" />
                     </Button>
                     <Button 
                       size="sm"
                       onClick={() => navigate('/auth?mode=signup')}
                       className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
                     >
-                      {t('navigation.signup')}
+                      <I18nText translationKey="navigation.signup" />
                     </Button>
                   </div>
                 )}
@@ -213,7 +222,7 @@ const Header = () => {
                       >
                         <div className="flex items-center">
                           <Settings className="mr-2 h-4 w-4" />
-                          <span>{t('navigation.account')}</span>
+                          <span><I18nText translationKey="navigation.account" /></span>
                         </div>
                       </Link>
                       <Link
@@ -223,7 +232,7 @@ const Header = () => {
                       >
                         <div className="flex items-center">
                           <Users className="mr-2 h-4 w-4" />
-                          <span>{t('navigation.groups')}</span>
+                          <span><I18nText translationKey="navigation.groups" /></span>
                         </div>
                       </Link>
                       {user?.app_metadata?.isAdmin && (
@@ -234,7 +243,7 @@ const Header = () => {
                         >
                           <div className="flex items-center">
                             <Settings className="mr-2 h-4 w-4" />
-                            <span>{t('navigation.admin')}</span>
+                            <span><I18nText translationKey="navigation.admin" /></span>
                           </div>
                         </Link>
                       )}
@@ -247,7 +256,7 @@ const Header = () => {
                       >
                         <div className="flex items-center">
                           <LogOut className="mr-2 h-4 w-4" />
-                          <span>{t('navigation.logout')}</span>
+                          <span><I18nText translationKey="navigation.logout" /></span>
                         </div>
                       </button>
                     </div>
@@ -259,14 +268,14 @@ const Header = () => {
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-600"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      {t('navigation.login')}
+                      <I18nText translationKey="navigation.login" />
                     </Link>
                     <Link
                       to="/auth?mode=signup"
                       className="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-amber-500 to-amber-600 text-white m-2"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      {t('navigation.signup')}
+                      <I18nText translationKey="navigation.signup" />
                     </Link>
                   </div>
                 )}
