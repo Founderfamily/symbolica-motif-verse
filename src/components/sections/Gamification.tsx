@@ -17,11 +17,6 @@ const GamificationItem = ({
   descriptionKey: string;
   points?: number;
 }) => {
-  const { t } = useTranslation();
-  
-  // Créer une variable de traduction pour "points"
-  const pointsText = t('gamification.points');
-  
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-amber-100 hover:shadow-lg transition-all hover:border-amber-200">
       <div className="bg-amber-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
@@ -51,8 +46,6 @@ const GamificationItem = ({
 };
 
 const Gamification = () => {
-  const { t } = useTranslation();
-  
   const gamificationItems = [
     {
       icon: Trophy,
