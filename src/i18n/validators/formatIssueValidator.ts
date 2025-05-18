@@ -63,25 +63,5 @@ export const findFormatIssues = (en: any, fr: any): FormatIssue[] => {
   return issues;
 };
 
-/**
- * Generate a diagnostic report for translations
- * This functions is re-exported from translationUtils
- */
-export const diagnoseTranslations = () => {
-  // Placeholder for backward compatibility
-  // The actual implementation is in translationUtils.ts
-  return {};
-};
-
-/**
- * Generate a fix report for translation issues
- * This functions is re-exported from translationUtils
- */
-export const generateFixReport = () => {
-  // Placeholder for backward compatibility
-  // The actual implementation is in translationUtils.ts
-  return {};
-};
-
 // Make sure we only export the findFormatIssues function with the correct name
 export { findFormatIssues as findFormatIssuesImpl };
