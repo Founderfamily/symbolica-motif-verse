@@ -1,4 +1,3 @@
-
 {
   "navigation": {
     "home": "Home",
@@ -305,5 +304,16 @@
   },
   "app": {
     "version": "Beta Version 0.9.5"
+  },
+  "symbols": {
+    "noSelection": "Please select a symbol to view details",
+    "loading": "Loading symbol details...",
+    "error": "Error loading symbol",
+    "errorDescription": "There was a problem loading this symbol. Please try again later.",
+    "imageError": "Some images couldn't be loaded",
+    "imageErrorDescription": "One or more images for this symbol could not be displayed.",
+    "original": "Original Symbol",
+    "pattern": "Pattern Version",
+    "reuse": "Modern Reuse"
   }
 }

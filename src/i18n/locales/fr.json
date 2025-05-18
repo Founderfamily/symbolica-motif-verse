@@ -1,309 +1,143 @@
-
 {
-  "navigation": {
-    "home": "Accueil",
-    "explore": "Explorer",
-    "map": "Carte",
-    "contribute": "Contribuer",
-    "about": "À propos",
-    "login": "Connexion",
-    "signup": "S'inscrire",
-    "account": "Compte",
-    "admin": "Admin",
-    "symbols": "Symboles",
-    "groups": "Groupes",
-    "symbolExplorer": "Explorateur de Symboles",
-    "mapExplorer": "Explorateur Géographique"
-  },
-  "hero": {
-    "heading": "Découvrez des Symboles Culturels du Monde Entier",
-    "subheading": "Explorez, comprenez et connectez-vous avec le riche patrimoine symbolique à travers diverses cultures et traditions",
-    "community": "Rejoindre la Communauté",
-    "explore": "Explorer les Symboles",
-    "version": "Version Bêta 0.9.5"
-  },
-  "groups": {
-    "title": "Espaces Thématiques & Groupes d'Intérêt",
-    "subtitle": "Rejoignez des communautés axées sur différents symboles et motifs culturels",
-    "createNew": "Créer un Groupe",
-    "searchPlaceholder": "Rechercher des groupes...",
-    "noResults": "Aucun groupe ne correspond à vos critères de recherche",
-    "notFound": "Groupe introuvable",
-    "loadError": "Erreur lors du chargement des détails du groupe",
-    "manage": "Gérer le Groupe",
-    "join": "Rejoindre",
-    "leave": "Quitter",
-    "processing": "Traitement...",
-    "membersList": "Membres",
-    "noPostsYet": "Aucune discussion dans ce groupe pour le moment",
-    "beTheFirst": "Lancez une conversation pour être le premier !",
-    "noDiscoveriesYet": "Aucune découverte n'a été ajoutée à ce groupe pour le moment",
-    "contributeFirst": "Ajoutez vos découvertes à partager avec le groupe",
-    "noCollectionsYet": "Aucune collection n'a été créée dans ce groupe pour le moment",
-    "createFirstCollection": "Créez une collection pour organiser les symboles et les découvertes",
-    "createPost": "Nouveau Message",
-    "createCollection": "Nouvelle Collection",
-    "tabs": {
-      "discussions": "Discussions",
-      "discoveries": "Découvertes",
-      "members": "Membres",
-      "collections": "Collections"
+  "translation": {
+    "appTitle": "Symbolica",
+    "auth": {
+      "login": "Se connecter",
+      "logout": "Se déconnecter",
+      "register": "S'inscrire",
+      "admin": "Administration",
+      "requiresLogin": "Vous devez être connecté pour accéder à cette page."
     },
-    "roles": {
-      "admin": "Administrateur",
-      "moderator": "Modérateur",
-      "member": "Membre"
+    "actions": {
+      "show": "Afficher",
+      "hide": "Masquer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "create": "Créer",
+      "submit": "Soumettre",
+      "loadMore": "Charger plus",
+      "confirm": "Confirmer"
     },
-    "create": {
-      "title": "Créer un Nouveau Groupe",
-      "formTitle": "Détails du Groupe",
-      "name": "Nom du Groupe",
-      "namePlaceholder": "Entrez un nom pour votre groupe",
+    "breadcrumb": {
+      "home": "Accueil",
+      "symbolExplorer": "Explorateur de symboles"
+    },
+    "error": {
+      "title": "Oops! Une erreur est survenue.",
+      "goBack": "Retourner à la page précédente",
+      "notFound": "Page non trouvée"
+    },
+    "gamification": {
+      "points": "points",
+      "labels": {
+        "points": "Points",
+        "level": "Niveau"
+      },
+      "badges": {
+        "newbie": "Novice",
+        "explorer": "Explorateur",
+        "expert": "Expert",
+        "master": "Maître"
+      },
+      "messages": {
+        "levelUp": "Félicitations ! Vous avez atteint le niveau {level}."
+      }
+    },
+    "map": {
+      "title": "Carte interactive des symboles",
+      "exploreInstructions": "Explorez les symboles sur la carte pour gagner des points !",
+      "earnPoints": "Chaque symbole exploré vous rapporte des points.",
+      "loading": "Chargement de la carte...",
+      "tryAgainLater": "Veuillez réessayer plus tard.",
+      "noLocationsMessage": "Aucun symbole géolocalisé n'est disponible pour le moment.",
+      "labels": {
+        "culture": "Culture",
+        "period": "Période",
+        "location": "Localisation",
+        "source": "Source"
+      },
+      "badges": {
+        "verified": "Vérifié",
+        "explored": "Exploré"
+      },
+      "error": {
+        "loadingLocations": "Erreur lors du chargement des localisations des symboles."
+      },
+      "exploreSymbol": "Explorer le symbole"
+    },
+    "symbolExplorer": {
+      "title": "Explorateur de symboles",
+      "description": "Découvrez une collection diversifiée de symboles culturels du monde entier.",
+      "gridView": "Vue grille",
+      "listView": "Vue liste",
+      "mapView": "Vue carte",
+      "filters": "Filtres",
+      "searchPlaceholder": "Rechercher un symbole...",
+      "clearFilters": "Effacer les filtres",
+      "activeFilters": "Filtres actifs",
+      "noFilters": "Aucun filtre actif",
+      "resultsCount": "{count} résultats",
+      "noResults": "Aucun symbole ne correspond à vos critères de recherche.",
+      "mapViewComingSoon": "Vue Carte à venir !",
+      "mapViewDescription": "Nous travaillons dur pour vous offrir une expérience de carte interactive. Revenez bientôt !"
+    },
+    "searchFilters": {
+      "cultures": "Cultures",
+      "periods": "Périodes",
+      "medium": "Médiums",
+      "technique": "Techniques",
+      "function": "Fonctions"
+    },
+    "symbolDetail": {
+      "errorTitle": "Symbole introuvable",
+      "errorMessage": "Le symbole que vous recherchez n'existe pas ou a été supprimé.",
+      "backToExplorer": "Retour à l'explorateur",
+      "share": "Partager",
+      "linkCopied": "Lien copié dans le presse-papiers!",
       "description": "Description",
-      "descriptionPlaceholder": "Décrivez le sujet de ce groupe",
-      "themeColor": "Couleur du Thème",
-      "isPublic": "Rendre ce groupe public (tout le monde peut rejoindre)"
+      "visualRepresentations": "Représentations visuelles",
+      "relatedSymbols": "Symboles similaires",
+      "medium": "Médium",
+      "technique": "Technique",
+      "function": "Fonction"
     },
-    "validation": {
-      "nameRequired": "Le nom du groupe est requis"
-    },
-    "exploreBanner": {
-      "title": "Rejoignez des Communautés Thématiques",
-      "description": "Connectez-vous avec d'autres personnes partageant votre intérêt pour les symboles culturels, les motifs et les traditions.",
-      "action": "Explorer les Groupes"
-    }
-  },
-  "callToAction": {
-    "joinUs": "Rejoignez Notre Communauté Mondiale de Symboles",
-    "description": "Faites partie d'un réseau grandissant dédié à documenter, analyser et préserver les symboles culturels du monde entier.",
-    "join": "Rejoindre Maintenant",
-    "explore": "Explorer la Collection",
-    "support": "Nous accueillons des contributeurs de tous horizons et niveaux d'expertise."
-  },
-  "common": {
-    "cancel": "Annuler",
-    "save": "Enregistrer",
-    "delete": "Supprimer",
-    "edit": "Modifier",
-    "create": "Créer",
-    "creating": "Création...",
-    "loading": "Chargement..."
-  },
-  "community": {
-    "title": "Rejoignez une Communauté Dynamique",
-    "description": "Connectez-vous avec des passionnés, des chercheurs et des créateurs qui partagent votre passion pour les symboles et motifs culturels.",
-    "exploreGroups": "Explorer Tous les Groupes",
-    "groups": {
-      "artDeco": {
-        "name": "Motifs Art Déco",
-        "culture": "Occidental"
+    "triptych": {
+      "title": "Musée Symbolica",
+      "subtitle": "Explorez les symboles culturels du monde entier.",
+      "learnMore": "En savoir plus",
+      "block1": {
+        "title": "Liste des symboles"
       },
-      "celticSymbolism": {
-        "name": "Symbolisme Celtique",
-        "culture": "Celtique"
+      "block2": {
+        "title": "Sélectionnez un symbole"
       },
-      "japanesePatterns": {
-        "name": "Motifs Japonais",
-        "culture": "Japonais"
+      "block3": {
+        "title": "Visualisation du triptyque"
       },
-      "islamicArt": {
-        "name": "Art Géométrique Islamique",
-        "culture": "Islamique"
-      }
+      "empty": "Aucun symbole sélectionné.",
+      "loading": "Chargement des symboles...",
+      "error": "Erreur lors du chargement des symboles.",
+      "errorDesc": "Veuillez réessayer plus tard."
     },
-    "stats": {
-      "members": "membres",
-      "discoveries": "découvertes",
-      "join": "Rejoindre",
-      "view": "Voir"
+    "symbolTriptych": {
+      "original": "Original",
+      "pattern": "Motif",
+      "reuse": "Réutilisation",
+      "imageError": "Erreur de chargement d'image",
+      "imageErrorDesc": "Impossible de charger l'image. Veuillez réessayer plus tard."
     },
-    "features": {
-      "thematicCommunities": {
-        "title": "Communautés Thématiques",
-        "description": "Rejoignez des groupes axés sur des thèmes culturels spécifiques, des périodes historiques ou des catégories de symboles."
-      },
-      "personalSpace": {
-        "title": "Collections Personnelles",
-        "description": "Créez vos propres collections de symboles et de motifs, organisez vos découvertes et partagez-les avec d'autres."
-      },
-      "intuitiveNavigation": {
-        "title": "Navigation Intuitive",
-        "description": "Naviguez facilement entre les communautés, découvrez des symboles connexes et trouvez des projets collaboratifs."
-      }
+    "symbols": {
+      "noSelection": "Veuillez sélectionner un symbole pour afficher les détails",
+      "loading": "Chargement des détails du symbole...",
+      "error": "Erreur de chargement du symbole",
+      "errorDescription": "Un problème est survenu lors du chargement de ce symbole. Veuillez réessayer plus tard.",
+      "imageError": "Certaines images n'ont pas pu être chargées",
+      "imageErrorDescription": "Une ou plusieurs images de ce symbole n'ont pas pu être affichées.",
+      "original": "Symbole Original",
+      "pattern": "Version Motif",
+      "reuse": "Réutilisation Moderne"
     }
-  },
-  "about": {
-    "title": "À Propos de Notre Projet",
-    "subtitle": "Documenter et préserver les symboles culturels pour les générations futures",
-    "mission": {
-      "title": "Notre Mission",
-      "description1": "Nous visons à créer une archive numérique complète des symboles et motifs culturels du monde entier, les rendant accessibles pour l'étude, l'appréciation et la préservation culturelle.",
-      "description2": "Grâce à la collaboration entre experts et passionnés, nous travaillons à documenter les contextes, significations et langages visuels qui ont façonné l'expression humaine à travers l'histoire."
-    },
-    "vision": {
-      "title": "Notre Vision",
-      "description": "Nous envisageons un monde où les symboles culturels sont préservés, compris et célébrés à travers les générations:",
-      "value1": "Accessibilité pour tous, quel que soit le milieu",
-      "value2": "Rigueur scientifique et sensibilité culturelle",
-      "value3": "Construction de connaissances communautaires"
-    },
-    "team": {
-      "title": "Rencontrez Notre Équipe",
-      "member1": {
-        "name": "Dr. Emily Chen",
-        "role": "Anthropologue Culturelle",
-        "bio": "Spécialiste des systèmes symboliques à travers les cultures asiatiques, avec 15 ans d'expérience de terrain."
-      },
-      "member2": {
-        "name": "Marco Rossi",
-        "role": "Spécialiste du Patrimoine Numérique",
-        "bio": "Expert dans l'application de l'IA à la préservation du patrimoine culturel et aux techniques d'archivage numérique."
-      },
-      "member3": {
-        "name": "Aisha Nkosi",
-        "role": "Responsable Communautaire",
-        "bio": "Coordonne notre réseau mondial de contributeurs et gère les programmes de sensibilisation éducative."
-      }
-    },
-    "analysisProcess": {
-      "title": "Notre Processus d'Analyse",
-      "subtitle": "Comment nous documentons et classifions les symboles culturels"
-    }
-  },
-  "uploadTools": {
-    "process": {
-      "original": "Image Originale",
-      "detection": "Détection de Motifs",
-      "extraction": "Extraction de Symboles",
-      "classification": "Classification IA",
-      "result": "Résultat Final",
-      "example": "Notre système identifie et extrait les motifs, puis les associe à notre base de données de symboles connus."
-    }
-  },
-  "sidebar": {
-    "dashboard": "Tableau de Bord",
-    "symbols": "Symboles",
-    "groups": "Groupes",
-    "logout": "Déconnexion"
-  },
-  "auth": {
-    "requiresLogin": "Vous devez être connecté pour accéder à cette page",
-    "admin": "Tableau de Bord Admin"
-  },
-  "user": {
-    "anonymous": "Utilisateur"
-  },
-  "language": {
-    "en": "Anglais",
-    "fr": "Français",
-    "switchTo": "Changer en {language}"
-  },
-  "symbolExplorer": {
-    "title": "Explorateur de Symboles",
-    "description": "Parcourez notre collection de symboles culturels du monde entier",
-    "gridView": "Grille",
-    "listView": "Liste",
-    "mapView": "Carte",
-    "filters": "Filtres",
-    "clearFilters": "Effacer",
-    "searchPlaceholder": "Rechercher des symboles...",
-    "activeFilters": "Filtres actifs",
-    "noFilters": "Aucun filtre actif",
-    "resultsCount": "{count} symboles trouvés",
-    "noResults": "Aucun symbole ne correspond à vos critères de recherche",
-    "mapViewComingSoon": "Visualisation cartographique bientôt disponible",
-    "mapViewDescription": "Explorez les symboles dans leur contexte géographique. Cette fonctionnalité sera disponible prochainement."
-  },
-  "searchFilters": {
-    "cultures": "Cultures",
-    "periods": "Périodes",
-    "medium": "Support",
-    "technique": "Technique",
-    "function": "Fonction"
-  },
-  "breadcrumb": {
-    "home": "Accueil",
-    "symbolExplorer": "Explorateur de Symboles"
-  },
-  "symbolDetail": {
-    "backToExplorer": "Retour à l'explorateur"
-  },
-  "sections": {
-    "openSource": "Open Source"
-  },
-  "triptych": {
-    "title": "Explorateur Interactif de Symboles",
-    "subtitle": "Explorez l'histoire et le contexte des symboles culturels",
-    "learnMore": "En Savoir Plus",
-    "block1": {
-      "title": "Sélection de Symbole"
-    },
-    "block2": {
-      "title": "Parcourir les Symboles"
-    },
-    "block3": {
-      "title": "Détails du Symbole"
-    }
-  },
-  "symbolTriptych": {
-    "original": "Contexte Original",
-    "pattern": "Extraction de Motif",
-    "reuse": "Utilisations Contemporaines",
-    "imageError": "Problèmes de Chargement d'Image",
-    "imageErrorDesc": "Certaines images peuvent ne pas s'afficher correctement en raison de problèmes de chargement.",
-    "empty": "Sélectionnez un symbole pour voir les détails",
-    "loading": "Chargement des détails du symbole...",
-    "error": "Erreur lors du chargement du symbole",
-    "errorDesc": "Impossible de récupérer les informations du symbole. Veuillez réessayer plus tard."
-  },
-  "actions": {
-    "hide": "Masquer la Liste",
-    "show": "Afficher la Liste",
-    "submit": "Soumettre",
-    "reset": "Réinitialiser",
-    "edit": "Modifier",
-    "delete": "Supprimer",
-    "cancel": "Annuler"
-  },
-  "gamification": {
-    "title": "Gagnez des Récompenses & Reconnaissance",
-    "subtitle": "Contribuez à la communauté et gagnez des points, badges et réalisations",
-    "viewYourProgress": "Voir Votre Progression",
-    "badges": {
-      "title": "Badges Numériques",
-      "description": "Collectionnez de beaux badges pour vos découvertes et contributions"
-    },
-    "points": {
-      "title": "Système de Points",
-      "description": "Gagnez des points pour diverses activités et grimpez dans le classement"
-    },
-    "leaderboard": {
-      "title": "Classement Communautaire",
-      "description": "Rivalisez avec d'autres chercheurs et passionnés"
-    },
-    "achievements": {
-      "title": "Réalisations Spéciales",
-      "description": "Complétez des défis spéciaux pour débloquer des récompenses uniques"
-    }
-  },
-  "admin": {
-    "translation": {
-      "stats": {
-        "title": "Statistiques de Traduction",
-        "description": "Aperçu de l'état des traductions et des résultats de validation récents"
-      }
-    }
-  },
-  "symbolList": {
-    "empty": "Aucun symbole disponible",
-    "select": "Sélectionnez un symbole pour voir les détails"
-  },
-  "error": {
-    "pageNotFound": "Oups ! Page non trouvée",
-    "routeNotExist": "La page que vous recherchez n'existe pas ou a été déplacée.",
-    "returnHome": "Retour à l'accueil"
-  },
-  "app": {
-    "version": "Version Bêta 0.9.5"
   }
 }

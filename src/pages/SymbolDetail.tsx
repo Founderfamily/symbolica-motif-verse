@@ -3,12 +3,10 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useSymbolImages } from '@/hooks/useSymbolImages';
-import SymbolTriptych from '@/components/symbols/SymbolTriptych';
+import SymbolDisplay from '@/components/symbols/SymbolDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getTranslatedField, getTranslatedArray, TranslatableObject } from '@/utils/translationUtils';
 import {
@@ -24,7 +22,22 @@ import { ArrowLeft, Share2, Tag } from 'lucide-react';
 const SymbolDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { t, currentLanguage } = useTranslation();
-  const { symbol, images, loading, error } = useSymbolImages(id || null);
+  
+  // Fetch symbol data
+  const { data: symbol, isLoading: loading, error } = useQuery({
+    queryKey: ['symbol', id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from('symbols')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+  });
   
   // Related symbols query
   const { data: relatedSymbols } = useQuery({
@@ -45,7 +58,7 @@ const SymbolDetail: React.FC = () => {
     enabled: !!symbol
   });
   
-  // Get translated value using our new utility function
+  // Get translated value using the utility function
   const getTranslatedValue = (field: 'name' | 'description' | 'culture' | 'period') => {
     return getTranslatedField<string>(symbol as TranslatableObject, field, 'en');
   };
@@ -67,15 +80,15 @@ const SymbolDetail: React.FC = () => {
     return (
       <div className="container mx-auto p-6 text-center min-h-[60vh] flex flex-col items-center justify-center">
         <h2 className="text-2xl font-medium text-slate-800 mb-4">
-          <I18nText translationKey="symbolDetail.errorTitle" />
+          {t('symbolDetail.errorTitle')}
         </h2>
         <p className="text-slate-600 mb-6">
-          <I18nText translationKey="symbolDetail.errorMessage" />
+          {t('symbolDetail.errorMessage')}
         </p>
         <Button asChild>
           <Link to="/explore">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            <I18nText translationKey="symbolDetail.backToExplorer" />
+            {t('symbolDetail.backToExplorer')}
           </Link>
         </Button>
       </div>
@@ -93,7 +106,7 @@ const SymbolDetail: React.FC = () => {
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
               <Link to="/">
-                <I18nText translationKey="breadcrumb.home" />
+                {t('breadcrumb.home')}
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -101,7 +114,7 @@ const SymbolDetail: React.FC = () => {
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
               <Link to="/explore">
-                <I18nText translationKey="breadcrumb.symbolExplorer" />
+                {t('breadcrumb.symbolExplorer')}
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -117,7 +130,7 @@ const SymbolDetail: React.FC = () => {
         <Button variant="outline" size="sm" asChild>
           <Link to="/explore" className="flex items-center">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            <I18nText translationKey="symbolDetail.backToExplorer" />
+            {t('symbolDetail.backToExplorer')}
           </Link>
         </Button>
       </div>
@@ -149,7 +162,7 @@ const SymbolDetail: React.FC = () => {
           }
         }} className="flex items-center">
           <Share2 className="mr-2 h-4 w-4" />
-          <I18nText translationKey="symbolDetail.share" />
+          {t('symbolDetail.share')}
         </Button>
       </div>
       
@@ -157,7 +170,7 @@ const SymbolDetail: React.FC = () => {
       {getTranslatedValue('description') && (
         <div className="mb-8">
           <h2 className="text-xl font-medium text-slate-800 mb-2">
-            <I18nText translationKey="symbolDetail.description" />
+            {t('symbolDetail.description')}
           </h2>
           <p className="text-slate-700 leading-relaxed">{getTranslatedValue('description')}</p>
         </div>
@@ -169,7 +182,7 @@ const SymbolDetail: React.FC = () => {
         {getTranslatedArrayValue('medium')?.length > 0 && (
           <div className="p-4 border rounded-lg bg-slate-50">
             <h3 className="text-sm font-medium text-slate-700 mb-2">
-              <I18nText translationKey="symbolDetail.medium" />
+              {t('symbolDetail.medium')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {getTranslatedArrayValue('medium').map((item, index) => (
@@ -185,7 +198,7 @@ const SymbolDetail: React.FC = () => {
         {getTranslatedArrayValue('technique')?.length > 0 && (
           <div className="p-4 border rounded-lg bg-slate-50">
             <h3 className="text-sm font-medium text-slate-700 mb-2">
-              <I18nText translationKey="symbolDetail.technique" />
+              {t('symbolDetail.technique')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {getTranslatedArrayValue('technique').map((item, index) => (
@@ -201,7 +214,7 @@ const SymbolDetail: React.FC = () => {
         {getTranslatedArrayValue('function')?.length > 0 && (
           <div className="p-4 border rounded-lg bg-slate-50">
             <h3 className="text-sm font-medium text-slate-700 mb-2">
-              <I18nText translationKey="symbolDetail.function" />
+              {t('symbolDetail.function')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {getTranslatedArrayValue('function').map((item, index) => (
@@ -216,16 +229,16 @@ const SymbolDetail: React.FC = () => {
       
       {/* Symbol images section */}
       <h2 className="text-xl font-medium text-slate-800 mb-4">
-        <I18nText translationKey="symbolDetail.visualRepresentations" />
+        {t('symbolDetail.visualRepresentations')}
       </h2>
-      <SymbolTriptych symbolId={id || null} />
+      <SymbolDisplay symbolId={id || null} />
       
       {/* Related symbols section */}
       {relatedSymbols && relatedSymbols.length > 0 && (
         <div className="mt-16">
           <h2 className="text-xl font-medium text-slate-800 mb-4 flex items-center">
             <Tag className="mr-2 h-5 w-5 text-slate-600" />
-            <I18nText translationKey="symbolDetail.relatedSymbols" />
+            {t('symbolDetail.relatedSymbols')}
           </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
