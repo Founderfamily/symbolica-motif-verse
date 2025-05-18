@@ -16,6 +16,8 @@ interface SymbolCardProps {
   onClick?: () => void;
   className?: string;
   compact?: boolean;
+  creator?: string;
+  createdAt?: string;
 }
 
 const SymbolCard: React.FC<SymbolCardProps> = ({
@@ -27,7 +29,9 @@ const SymbolCard: React.FC<SymbolCardProps> = ({
   tags = [],
   onClick,
   className = '',
-  compact = false
+  compact = false,
+  creator,
+  createdAt
 }) => {
   const { currentLanguage } = useTranslation();
   
@@ -37,6 +41,9 @@ const SymbolCard: React.FC<SymbolCardProps> = ({
       onClick();
     }
   };
+
+  // Format date if provided
+  const formattedDate = createdAt ? new Date(createdAt).toLocaleDateString() : null;
   
   return (
     <Link to={`/symbols/${id}`} onClick={handleClick} className={`block ${className}`}>
@@ -62,6 +69,18 @@ const SymbolCard: React.FC<SymbolCardProps> = ({
           <div className={`text-slate-600 ${compact ? 'text-xs' : 'text-sm'}`}>
             <p>{culture}</p>
             {period && <p>{period}</p>}
+            
+            {creator && (
+              <p className="text-xs mt-1 text-slate-500">
+                <I18nText translationKey="symbolCard.creator" />: {creator}
+              </p>
+            )}
+            
+            {formattedDate && (
+              <p className="text-xs text-slate-400">
+                <I18nText translationKey="symbolCard.date" />: {formattedDate}
+              </p>
+            )}
           </div>
           
           {!compact && tags && tags.length > 0 && (
@@ -76,6 +95,12 @@ const SymbolCard: React.FC<SymbolCardProps> = ({
                   +{tags.length - 3}
                 </Badge>
               )}
+            </div>
+          )}
+          
+          {!compact && (
+            <div className="mt-2 text-xs text-amber-600 hover:text-amber-700">
+              <I18nText translationKey="symbolCard.viewDetails" />
             </div>
           )}
         </CardContent>

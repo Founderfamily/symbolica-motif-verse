@@ -79,6 +79,12 @@ const Footer = () => {
                 <li><a href="https://forum.example.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                   <I18nText translationKey="footer.forum" />
                 </a></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">
+                  <I18nText translationKey="footer.terms" />
+                </Link></li>
+                <li><Link to="/privacy" className="hover:text-white transition-colors">
+                  <I18nText translationKey="footer.privacy" />
+                </Link></li>
               </ul>
             </div>
             
@@ -117,6 +123,10 @@ const Footer = () => {
             <p>
               <I18nText translationKey="footer.copyright" />
             </p>
+            
+            <div className="flex items-center mt-4 md:mt-0">
+              <I18nText translationKey="footer.language" className="mr-2" />
+            </div>
           </div>
         </div>
       </div>

@@ -1,389 +1,294 @@
 
 import React, { useState, useEffect } from 'react';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
+import { useForm, Controller } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MultiSelect } from '@/components/ui/multi-select';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TranslatedInput } from '@/components/ui/translated-input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { useTranslation } from '@/i18n/useTranslation';
+import TranslatedInput from '@/components/ui/translated-input';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { SymbolFormData } from '@/types/symbol';
-import { I18nText } from '@/components/ui/i18n-text';
+import { z } from 'zod';
 import ImageDropzone from '@/components/upload/ImageDropzone';
 import LocationPicker from '@/components/map/LocationPicker';
-import { Location } from '@/types/location';
+import { LocationData } from '@/types/location';
+import { I18nText } from '@/components/ui/i18n-text';
 
-const CULTURE_OPTIONS = [
-  { value: 'berber', label: 'Berber' },
-  { value: 'amazigh', label: 'Amazigh' },
-  { value: 'tuareg', label: 'Tuareg' },
-  { value: 'kabyle', label: 'Kabyle' },
-  { value: 'moorish', label: 'Moorish' },
-];
-
-const PERIOD_OPTIONS = [
-  { value: 'prehistoric', label: 'Prehistoric' },
-  { value: 'ancient', label: 'Ancient' },
-  { value: 'medieval', label: 'Medieval' },
-  { value: 'modern', label: 'Modern' },
-  { value: 'contemporary', label: 'Contemporary' },
-];
-
-const TECHNIQUE_OPTIONS = [
-  { value: 'carving', label: 'Carving' },
+// Default values for select options
+const TECHNIQUES = [
   { value: 'painting', label: 'Painting' },
-  { value: 'engraving', label: 'Engraving' },
+  { value: 'carving', label: 'Carving' },
   { value: 'weaving', label: 'Weaving' },
-  { value: 'pottery', label: 'Pottery' },
+  { value: 'printing', label: 'Printing' },
+  { value: 'embroidery', label: 'Embroidery' },
 ];
 
-const MEDIUM_OPTIONS = [
-  { value: 'rock', label: 'Rock' },
-  { value: 'textile', label: 'Textile' },
-  { value: 'pottery', label: 'Pottery' },
-  { value: 'metal', label: 'Metal' },
-  { value: 'wood', label: 'Wood' },
-];
-
-const FUNCTION_OPTIONS = [
-  { value: 'decorative', label: 'Decorative' },
+const FUNCTIONS = [
   { value: 'religious', label: 'Religious' },
-  { value: 'cultural', label: 'Cultural' },
-  { value: 'practical', label: 'Practical' },
+  { value: 'decorative', label: 'Decorative' },
+  { value: 'protective', label: 'Protective' },
+  { value: 'narrative', label: 'Narrative' },
+  { value: 'identification', label: 'Identification' },
 ];
+
+const MEDIUMS = [
+  { value: 'stone', label: 'Stone' },
+  { value: 'wood', label: 'Wood' },
+  { value: 'metal', label: 'Metal' },
+  { value: 'textile', label: 'Textile' },
+  { value: 'clay', label: 'Clay' },
+];
+
+// Create validation schema
+const symbolSchema = z.object({
+  name: z.string().min(3, "Name is required and must be at least 3 characters"),
+  description: z.string().optional(),
+  culture: z.string().min(1, "Culture is required"),
+  period: z.string().min(1, "Period is required"),
+  techniques: z.array(z.string()).optional(),
+  functions: z.array(z.string()).optional(),
+  mediums: z.array(z.string()).optional(),
+  images: z.array(z.any()).optional(),
+});
 
 interface SymbolFormProps {
-  defaultValues?: Partial<SymbolFormData>;
-  onSubmit: (data: SymbolFormData) => Promise<void>;
+  initialData?: SymbolFormData;
+  onSubmit: (data: SymbolFormData & { images: File[], techniques: string[], functions: string[], mediums: string[] }) => Promise<void> | void;
   isSubmitting?: boolean;
 }
 
-const SymbolForm: React.FC<SymbolFormProps> = ({ 
-  defaultValues, 
+const SymbolForm: React.FC<SymbolFormProps> = ({
+  initialData,
   onSubmit,
-  isSubmitting = false
+  isSubmitting = false,
 }) => {
-  const { register, handleSubmit, formState: { errors }, control, setValue } = useForm<SymbolFormData>({
-    defaultValues: {
+  const { t, currentLanguage } = useTranslation();
+  const { toast } = useToast();
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
+    initialData?.location || null
+  );
+
+  // Set up form with validation
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<SymbolFormData>({
+    resolver: zodResolver(symbolSchema),
+    defaultValues: initialData || {
       name: '',
-      name_fr: '',
       description: '',
-      description_fr: '',
       culture: '',
       period: '',
       techniques: [],
-      mediums: [],
       functions: [],
-      location: undefined,
+      mediums: [],
       images: [],
-      ...defaultValues,
     }
   });
-  
-  const [activeTab, setActiveTab] = useState<string>('info');
-  const { t } = useTranslation();
-  
-  const formSubmitHandler: SubmitHandler<SymbolFormData> = async (data) => {
-    // Add validation if needed
-    try {
-      await onSubmit(data);
-      // Success handling is done in the parent component
-    } catch (error) {
-      console.error('Error in form submission:', error);
-      // Error handling is done in the parent component
+
+  useEffect(() => {
+    // Reset form if initialData changes
+    if (initialData) {
+      reset(initialData);
+      if (initialData.images && initialData.images.length > 0) {
+        setSelectedImage(initialData.images[0]);
+      }
     }
-  };
-  
-  const handleLocationSelected = (latitude: number, longitude: number, locationName: string) => {
-    setValue('location', { 
-      latitude,
-      longitude,
-      name: locationName
-    });
+  }, [initialData, reset]);
+
+  const handleImageSelected = (file: File) => {
+    setSelectedImage(file);
+    setValue('images', file ? [file] : []);
   };
 
-  const handleImageSelected = (files: File[]) => {
-    if (files && files.length > 0) {
-      // Add to existing images
-      setValue('images', [...(defaultValues?.images || []), ...files]);
-    }
+  const handleLocationSelected = (latitude: number, longitude: number, locationName: string) => {
+    const location = latitude && longitude ? {
+      latitude,
+      longitude,
+      name: locationName,
+    } : null;
+    
+    setSelectedLocation(location);
   };
-  
-  // Example of how to handle existing images (e.g., when editing)
-  const [existingImages, setExistingImages] = useState<string[]>([]);
-  
-  useEffect(() => {
-    // This would typically load from an API or props
-    // For now, we'll just simulate with default values
-    if (defaultValues?.imageUrls) {
-      setExistingImages(defaultValues.imageUrls);
-    }
-  }, [defaultValues?.imageUrls]);
-  
+
+  const processSubmit = (data: SymbolFormData) => {
+    // Add the selected image to the form data
+    const formData = {
+      ...data,
+      images: selectedImage ? [selectedImage] : [],
+      techniques: data.techniques || [],
+      functions: data.functions || [],
+      mediums: data.mediums || [],
+      location: selectedLocation,
+    };
+
+    // Submit the form data
+    onSubmit(formData);
+  };
+
   return (
-    <form onSubmit={handleSubmit(formSubmitHandler)} className="space-y-6">
-      <Tabs 
-        value={activeTab} 
-        onValueChange={setActiveTab}
-        className="w-full"
-      >
-        <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="info">
-            <I18nText translationKey="symbolForm.tabs.basicInfo" />
-          </TabsTrigger>
-          <TabsTrigger value="details">
-            <I18nText translationKey="symbolForm.tabs.details" />
-          </TabsTrigger>
-          <TabsTrigger value="media">
-            <I18nText translationKey="symbolForm.tabs.media" />
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="info" className="space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">
-                    <I18nText translationKey="symbolForm.name.label" />
-                  </Label>
-                  <Input
-                    id="name"
-                    {...register("name", { required: "This field is required" })}
-                    error={errors.name?.message}
-                  />
-                  {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="name_fr">
-                    <I18nText translationKey="symbolForm.nameFr.label" />
-                  </Label>
-                  <Input
-                    id="name_fr"
-                    {...register("name_fr")}
-                    error={errors.name_fr?.message}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">
-                    <I18nText translationKey="symbolForm.description.label" />
-                  </Label>
-                  <Textarea
-                    id="description"
-                    {...register("description")}
-                    rows={4}
-                    error={errors.description?.message}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description_fr">
-                    <I18nText translationKey="symbolForm.descriptionFr.label" />
-                  </Label>
-                  <Textarea
-                    id="description_fr"
-                    {...register("description_fr")}
-                    rows={4}
-                    error={errors.description_fr?.message}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="details" className="space-y-6">
-          {/* Classification and Taxonomy */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="culture">
-                    <I18nText translationKey="symbolForm.culture.label" />
-                  </Label>
-                  <Controller
-                    name="culture"
-                    control={control}
-                    render={({ field }) => (
-                      <div>
-                        <select 
-                          {...field}
-                          className="w-full border border-gray-300 rounded-md py-2 px-3"
-                        >
-                          <option value="">
-                            <I18nText translationKey="symbolForm.culture.placeholder" />
-                          </option>
-                          {CULTURE_OPTIONS.map(option => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="period">
-                    <I18nText translationKey="symbolForm.period.label" />
-                  </Label>
-                  <Controller
-                    name="period"
-                    control={control}
-                    render={({ field }) => (
-                      <div>
-                        <select 
-                          {...field}
-                          className="w-full border border-gray-300 rounded-md py-2 px-3"
-                        >
-                          <option value="">
-                            <I18nText translationKey="symbolForm.period.placeholder" />
-                          </option>
-                          {PERIOD_OPTIONS.map(option => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="techniques">
-                    <I18nText translationKey="symbolForm.techniques.label" />
-                  </Label>
-                  <Controller
-                    name="techniques"
-                    control={control}
-                    render={({ field }) => (
-                      <MultiSelect
-                        options={TECHNIQUE_OPTIONS}
-                        value={TECHNIQUE_OPTIONS.filter(option => 
-                          field.value?.includes(option.value)
-                        )}
-                        onChange={(selected) => {
-                          field.onChange(selected.map(item => item.value));
-                        }}
-                        placeholder={t('symbolForm.techniques.placeholder')}
-                      />
-                    )}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="mediums">
-                    <I18nText translationKey="symbolForm.mediums.label" />
-                  </Label>
-                  <Controller
-                    name="mediums"
-                    control={control}
-                    render={({ field }) => (
-                      <MultiSelect
-                        options={MEDIUM_OPTIONS}
-                        value={MEDIUM_OPTIONS.filter(option => 
-                          field.value?.includes(option.value)
-                        )}
-                        onChange={(selected) => {
-                          field.onChange(selected.map(item => item.value));
-                        }}
-                        placeholder={t('symbolForm.mediums.placeholder')}
-                      />
-                    )}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="functions">
-                    <I18nText translationKey="symbolForm.functions.label" />
-                  </Label>
-                  <Controller
-                    name="functions"
-                    control={control}
-                    render={({ field }) => (
-                      <MultiSelect
-                        options={FUNCTION_OPTIONS}
-                        value={FUNCTION_OPTIONS.filter(option => 
-                          field.value?.includes(option.value)
-                        )}
-                        onChange={(selected) => {
-                          field.onChange(selected.map(item => item.value));
-                        }}
-                        placeholder={t('symbolForm.functions.placeholder')}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Location */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <Label>
-                  <I18nText translationKey="symbolForm.location.label" />
-                </Label>
-                <LocationPicker 
-                  onLocationSelected={handleLocationSelected}
-                  initialLocation={defaultValues?.location}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="media" className="space-y-6">
-          {/* Images */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <Label>
-                  <I18nText translationKey="symbolForm.images.label" />
-                </Label>
-                <ImageDropzone 
-                  onImageSelected={(files) => handleImageSelected([files])}
-                  selectedImage={null}
-                />
-                
-                {/* Display existing images when editing */}
-                {existingImages.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {existingImages.map((imageUrl, index) => (
-                      <div key={index} className="relative">
-                        <img 
-                          src={imageUrl} 
-                          alt={`Symbol image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-md"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline">
-          <I18nText translationKey="common.cancel" />
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
+    <form onSubmit={handleSubmit(processSubmit)} className="space-y-6">
+      {/* Name field */}
+      <div className="space-y-2">
+        <Label htmlFor="name" className="text-base">
+          <I18nText translationKey="symbolForm.name.label" />
+          <span className="text-red-500 ml-1">*</span>
+        </Label>
+        <Input
+          id="name"
+          placeholder={t('symbolForm.name.placeholder')}
+          {...register("name")}
+        />
+        {errors.name && (
+          <p className="text-sm text-red-500">{errors.name.message}</p>
+        )}
+      </div>
+
+      {/* Culture field */}
+      <div className="space-y-2">
+        <Label htmlFor="culture" className="text-base">
+          <I18nText translationKey="symbolForm.culture.label" />
+          <span className="text-red-500 ml-1">*</span>
+        </Label>
+        <Input
+          id="culture"
+          placeholder={t('symbolForm.culture.placeholder')}
+          {...register("culture")}
+        />
+        {errors.culture && (
+          <p className="text-sm text-red-500">{errors.culture.message}</p>
+        )}
+      </div>
+
+      {/* Period field */}
+      <div className="space-y-2">
+        <Label htmlFor="period" className="text-base">
+          <I18nText translationKey="symbolForm.period.label" />
+          <span className="text-red-500 ml-1">*</span>
+        </Label>
+        <Input
+          id="period"
+          placeholder={t('symbolForm.period.placeholder')}
+          {...register("period")}
+        />
+        {errors.period && (
+          <p className="text-sm text-red-500">{errors.period.message}</p>
+        )}
+      </div>
+
+      {/* Description field */}
+      <div className="space-y-2">
+        <Label htmlFor="description" className="text-base">
+          <I18nText translationKey="symbolForm.description.label" />
+        </Label>
+        <Textarea
+          id="description"
+          rows={4}
+          placeholder={t('symbolForm.description.placeholder')}
+          {...register("description")}
+        />
+        {errors.description && (
+          <p className="text-sm text-red-500">{errors.description.message}</p>
+        )}
+      </div>
+
+      {/* Multi-select fields */}
+      <div className="space-y-6 pt-2">
+        <div className="space-y-2">
+          <Label className="text-base">
+            <I18nText translationKey="symbolForm.techniques.label" />
+          </Label>
+          <Controller
+            name="techniques"
+            control={control}
+            render={({ field }) => (
+              <MultiSelect
+                options={TECHNIQUES}
+                selected={field.value || []}
+                onChange={(selected) => field.onChange(selected)}
+                placeholder={t('symbolForm.techniques.placeholder')}
+                allowAddNew
+              />
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-base">
+            <I18nText translationKey="symbolForm.functions.label" />
+          </Label>
+          <Controller
+            name="functions"
+            control={control}
+            render={({ field }) => (
+              <MultiSelect
+                options={FUNCTIONS}
+                selected={field.value || []}
+                onChange={(selected) => field.onChange(selected)}
+                placeholder={t('symbolForm.functions.placeholder')}
+                allowAddNew
+              />
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-base">
+            <I18nText translationKey="symbolForm.mediums.label" />
+          </Label>
+          <Controller
+            name="mediums"
+            control={control}
+            render={({ field }) => (
+              <MultiSelect
+                options={MEDIUMS}
+                selected={field.value || []}
+                onChange={(selected) => field.onChange(selected)}
+                placeholder={t('symbolForm.mediums.placeholder')}
+                allowAddNew
+              />
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Image upload */}
+      <div className="space-y-4">
+        <Label className="text-base">
+          <I18nText translationKey="symbolForm.images.label" />
+        </Label>
+        <ImageDropzone 
+          onImageSelected={handleImageSelected}
+          selectedImage={selectedImage}
+        />
+      </div>
+
+      {/* Location picker */}
+      <div className="space-y-4">
+        <Label className="text-base">
+          <I18nText translationKey="symbolForm.location.label" />
+        </Label>
+        <LocationPicker 
+          onLocationSelected={handleLocationSelected} 
+          initialLocation={selectedLocation}
+        />
+      </div>
+
+      {/* Submit button */}
+      <div className="pt-4">
+        <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? (
-            <I18nText translationKey="common.submitting" />
+            <I18nText translationKey="symbolForm.submitting" />
           ) : (
-            <I18nText translationKey="common.submit" />
+            <I18nText translationKey="symbolForm.submit" />
           )}
         </Button>
       </div>
