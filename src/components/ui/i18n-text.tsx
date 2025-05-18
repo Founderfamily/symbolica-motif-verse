@@ -43,11 +43,12 @@ export const I18nText = ({
   // Add visual styling for missing translations in development
   const warningStyle = process.env.NODE_ENV === 'development' && highlightMissing && isMissing
     ? { 
-        outline: '1px dashed #ef4444', 
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        padding: '0 2px',
+        outline: '2px dashed #ef4444', 
+        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+        padding: '0 4px',
         position: 'relative' as const,
-        cursor: 'help'
+        cursor: 'help',
+        borderRadius: '2px'
       }
     : {};
   
@@ -67,19 +68,20 @@ export const I18nText = ({
           className="translation-issue-tooltip"
           style={{
             position: 'absolute',
-            top: '-24px',
+            top: '-28px',
             left: '0',
             backgroundColor: '#ef4444',
             color: 'white',
-            fontSize: '10px',
-            padding: '2px 4px',
+            fontSize: '11px',
+            padding: '2px 5px',
             borderRadius: '3px',
             whiteSpace: 'nowrap',
             pointerEvents: 'none',
             opacity: showTooltip ? 1 : 0,
             transition: 'opacity 0.2s',
             zIndex: 9999,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+            fontWeight: 'bold'
           }}
         >
           {!existsInBothLanguages ? 'Missing translation:' : 'Possibly incorrect:'} {translationKey}
@@ -110,6 +112,13 @@ export const I18nText = ({
       )
     : null;
     
+  // In production, provide best experience with fallback
+  const displayText = isMissing && children 
+    ? children 
+    : (isMissing && process.env.NODE_ENV === 'production' 
+        ? translationKey.split('.').pop()?.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) 
+        : translatedText);
+    
   return (
     <Component 
       className={className} 
@@ -120,8 +129,7 @@ export const I18nText = ({
     >
       {warningTooltip}
       {missingLanguageIndicator}
-      {/* Use children as fallback if provided and translation is missing */}
-      {isMissing && children ? children : translatedText}
+      {displayText}
     </Component>
   );
 };

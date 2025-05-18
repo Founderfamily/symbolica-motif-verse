@@ -1,3 +1,4 @@
+
 {
   "navigation": {
     "home": "Home",
@@ -118,6 +119,67 @@
         "description": "Easily navigate between communities, discover related symbols, and find collaborative projects."
       }
     }
+  },
+  "callToAction": {
+    "joinUs": "Join Our Global Symbols Community",
+    "description": "Be part of a growing network dedicated to documenting, analyzing, and preserving cultural symbols from around the world.",
+    "join": "Join Now",
+    "explore": "Explore the Collection",
+    "support": "We welcome contributors of all backgrounds and expertise levels."
+  },
+  "about": {
+    "title": "About Our Project",
+    "subtitle": "Documenting and preserving cultural symbols for future generations",
+    "mission": {
+      "title": "Our Mission",
+      "description1": "We aim to create a comprehensive digital archive of cultural symbols and patterns from around the world, making them accessible for study, appreciation, and cultural preservation.",
+      "description2": "Through collaboration between experts and enthusiasts, we work to document the contexts, meanings, and visual languages that have shaped human expression throughout history."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "We envision a world where cultural symbols are preserved, understood, and celebrated across generations:",
+      "value1": "Accessibility for all, regardless of background",
+      "value2": "Scientific rigor and cultural sensitivity",
+      "value3": "Community-driven knowledge building"
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "member1": {
+        "name": "Dr. Emily Chen",
+        "role": "Cultural Anthropologist",
+        "bio": "Specializing in symbolic systems across Asian cultures, with 15 years of fieldwork experience."
+      },
+      "member2": {
+        "name": "Marco Rossi",
+        "role": "Digital Heritage Specialist",
+        "bio": "Expert in applying AI to cultural heritage preservation and digital archiving techniques."
+      },
+      "member3": {
+        "name": "Aisha Nkosi",
+        "role": "Community Lead",
+        "bio": "Coordinates our global network of contributors and manages educational outreach programs."
+      }
+    },
+    "analysisProcess": {
+      "title": "Our Analysis Process",
+      "subtitle": "How we document and classify cultural symbols"
+    }
+  },
+  "uploadTools": {
+    "process": {
+      "original": "Original Image",
+      "detection": "Pattern Detection",
+      "extraction": "Symbol Extraction",
+      "classification": "AI Classification",
+      "result": "Final Result",
+      "example": "Our system identifies and extracts patterns, then matches them with our database of known symbols."
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "symbols": "Symbols",
+    "groups": "Groups",
+    "logout": "Log Out"
   },
   "auth": {
     "requiresLogin": "You need to be logged in to access this page"

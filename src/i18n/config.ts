@@ -45,6 +45,12 @@ i18n
       // Format missing keys nicely for display
       return formatKeyAsReadableText(key);
     },
+    // Fallback behavior to ensure language consistency
+    fallbackLng: {
+      'fr': ['en'],
+      'en': ['fr'],
+      'default': ['fr', 'en']
+    },
     // More verbose logging in development
     debug: process.env.NODE_ENV === 'development'
   });
@@ -79,6 +85,17 @@ if (process.env.NODE_ENV === 'development') {
     checkMissingTranslations: () => {
       const event = new CustomEvent('validate-translations');
       window.dispatchEvent(event);
+    },
+    
+    // Get all missing keys
+    getMissingKeys: () => {
+      // This is a simple check, not exhaustive
+      const components = document.querySelectorAll('[data-i18n-missing="true"]');
+      const missingKeys = Array.from(components).map(el => 
+        (el as HTMLElement).getAttribute('data-i18n-key') || ''
+      );
+      console.log(`Found ${missingKeys.length} missing translation keys:`, missingKeys);
+      return missingKeys;
     }
   };
   
@@ -86,6 +103,13 @@ if (process.env.NODE_ENV === 'development') {
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.altKey && e.code === 'KeyL') {
       (window as any).i18nTools.toggleLanguage();
+    }
+  });
+  
+  // Add keyboard shortcut to check translations (Ctrl+Alt+T)
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey && e.code === 'KeyT') {
+      (window as any).i18nTools.checkMissingTranslations();
     }
   });
 }

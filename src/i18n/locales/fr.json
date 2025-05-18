@@ -1,3 +1,4 @@
+
 {
   "navigation": {
     "home": "Accueil",
@@ -62,6 +63,13 @@
       "action": "Explorer les Groupes"
     }
   },
+  "callToAction": {
+    "joinUs": "Rejoignez Notre Communauté Mondiale de Symboles",
+    "description": "Faites partie d'un réseau grandissant dédié à documenter, analyser et préserver les symboles culturels du monde entier.",
+    "join": "Rejoindre Maintenant",
+    "explore": "Explorer la Collection",
+    "support": "Nous accueillons des contributeurs de tous horizons et niveaux d'expertise."
+  },
   "common": {
     "cancel": "Annuler",
     "save": "Enregistrer",
@@ -113,6 +121,60 @@
         "description": "Naviguez facilement entre les communautés, découvrez des symboles connexes et trouvez des projets collaboratifs."
       }
     }
+  },
+  "about": {
+    "title": "À Propos de Notre Projet",
+    "subtitle": "Documenter et préserver les symboles culturels pour les générations futures",
+    "mission": {
+      "title": "Notre Mission",
+      "description1": "Nous visons à créer une archive numérique complète des symboles et motifs culturels du monde entier, les rendant accessibles pour l'étude, l'appréciation et la préservation culturelle.",
+      "description2": "Grâce à la collaboration entre experts et passionnés, nous travaillons à documenter les contextes, significations et langages visuels qui ont façonné l'expression humaine à travers l'histoire."
+    },
+    "vision": {
+      "title": "Notre Vision",
+      "description": "Nous envisageons un monde où les symboles culturels sont préservés, compris et célébrés à travers les générations:",
+      "value1": "Accessibilité pour tous, quel que soit le milieu",
+      "value2": "Rigueur scientifique et sensibilité culturelle",
+      "value3": "Construction de connaissances communautaires"
+    },
+    "team": {
+      "title": "Rencontrez Notre Équipe",
+      "member1": {
+        "name": "Dr. Emily Chen",
+        "role": "Anthropologue Culturelle",
+        "bio": "Spécialiste des systèmes symboliques à travers les cultures asiatiques, avec 15 ans d'expérience de terrain."
+      },
+      "member2": {
+        "name": "Marco Rossi",
+        "role": "Spécialiste du Patrimoine Numérique",
+        "bio": "Expert dans l'application de l'IA à la préservation du patrimoine culturel et aux techniques d'archivage numérique."
+      },
+      "member3": {
+        "name": "Aisha Nkosi",
+        "role": "Responsable Communautaire",
+        "bio": "Coordonne notre réseau mondial de contributeurs et gère les programmes de sensibilisation éducative."
+      }
+    },
+    "analysisProcess": {
+      "title": "Notre Processus d'Analyse",
+      "subtitle": "Comment nous documentons et classifions les symboles culturels"
+    }
+  },
+  "uploadTools": {
+    "process": {
+      "original": "Image Originale",
+      "detection": "Détection de Motifs",
+      "extraction": "Extraction de Symboles",
+      "classification": "Classification IA",
+      "result": "Résultat Final",
+      "example": "Notre système identifie et extrait les motifs, puis les associe à notre base de données de symboles connus."
+    }
+  },
+  "sidebar": {
+    "dashboard": "Tableau de Bord",
+    "symbols": "Symboles",
+    "groups": "Groupes",
+    "logout": "Déconnexion"
   },
   "auth": {
     "requiresLogin": "Vous devez être connecté pour accéder à cette page"
