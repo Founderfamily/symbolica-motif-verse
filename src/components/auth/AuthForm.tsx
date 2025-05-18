@@ -1,248 +1,204 @@
 
-import { useState } from 'react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
-import { UserProfile } from '@/types/auth';
 import { I18nText } from '@/components/ui/i18n-text';
 
-// Validation schema for login
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
+type AuthMode = 'signin' | 'signup' | 'reset';
 
-// Extended validation schema for registration
-const registerSchema = loginSchema.extend({
-  username: z.string().min(3).max(50),
-  fullName: z.string().min(2).max(100),
-  passwordConfirm: z.string().min(6),
-}).refine((data) => data.password === data.passwordConfirm, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["passwordConfirm"],
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
-
-export default function AuthForm() {
+const AuthForm = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [mode, setMode] = useState<AuthMode>('signin');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  
   const { t } = useTranslation();
-  const { signIn, signUp, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('login');
-  const [authError, setAuthError] = useState<string | null>(null);
-
-  // Login form
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  // Register form
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      email: '',
-      username: '',
-      fullName: '',
-      password: '',
-      passwordConfirm: '',
-    },
-  });
-
-  // Handle login submission
-  const onLoginSubmit = async (values: LoginFormValues) => {
-    setAuthError(null);
+  const auth = useAuth();
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setMessage(null);
+    setLoading(true);
+    
     try {
-      await signIn(values.email, values.password);
-    } catch (error: any) {
-      setAuthError(error.message);
+      if (mode === 'signup') {
+        if (password !== confirmPassword) {
+          setError(t('auth.passwordsMustMatch'));
+          setLoading(false);
+          return;
+        }
+        
+        await auth.signUp(email, password);
+        setMessage(t('auth.checkEmailVerification'));
+      } else if (mode === 'signin') {
+        await auth.signIn(email, password);
+      } else if (mode === 'reset') {
+        // Reset password logic here
+        setMessage(t('auth.passwordResetSent'));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Handle registration submission
-  const onRegisterSubmit = async (values: RegisterFormValues) => {
-    setAuthError(null);
-    try {
-      const userData: Partial<UserProfile> = {
-        username: values.username,
-        full_name: values.fullName,
-      };
-      await signUp(values.email, values.password, userData);
-    } catch (error: any) {
-      setAuthError(error.message);
-    }
+  
+  const switchMode = (newMode: AuthMode) => {
+    setMode(newMode);
+    setError(null);
+    setMessage(null);
   };
-
+  
   return (
     <div className="w-full max-w-md mx-auto">
-      <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">
-            <I18nText translationKey="auth.buttons.login" />
-          </TabsTrigger>
-          <TabsTrigger value="register">
-            <I18nText translationKey="auth.buttons.register" />
-          </TabsTrigger>
-        </TabsList>
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold">
+          {mode === 'signin' ? (
+            <I18nText translationKey="auth.signIn">Sign In</I18nText>
+          ) : mode === 'signup' ? (
+            <I18nText translationKey="auth.signUp">Sign Up</I18nText>
+          ) : (
+            <I18nText translationKey="auth.resetPassword">Reset Password</I18nText>
+          )}
+        </h1>
+        <p className="text-slate-500 mt-2">
+          {mode === 'signin' ? (
+            <I18nText translationKey="auth.signInSubtitle">Access your account</I18nText>
+          ) : mode === 'signup' ? (
+            <I18nText translationKey="auth.signUpSubtitle">Create a new account</I18nText>
+          ) : (
+            <I18nText translationKey="auth.resetPasswordSubtitle">We'll send you a link to reset your password</I18nText>
+          )}
+        </p>
+      </div>
+      
+      {error && (
+        <div className="bg-red-50 text-red-800 p-3 rounded-md mb-4 text-sm">
+          {error}
+        </div>
+      )}
+      
+      {message && (
+        <div className="bg-green-50 text-green-800 p-3 rounded-md mb-4 text-sm">
+          {message}
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">
+            <I18nText translationKey="auth.emailAddress">Email Address</I18nText>
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t('auth.emailPlaceholder')}
+            required
+          />
+        </div>
         
-        {/* Login Form */}
-        <TabsContent value="login">
-          <div className="p-6 border rounded-lg shadow-sm">
-            <h3 className="text-xl font-semibold mb-4">
-              <I18nText translationKey="auth.titles.login" />
-            </h3>
-            <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                <FormField
-                  control={loginForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <I18nText translationKey="auth.labels.email" />
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="example@mail.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={loginForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <I18nText translationKey="auth.labels.password" />
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {authError && (
-                  <div className="text-red-500 text-sm">{authError}</div>
-                )}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 
-                    <I18nText translationKey="auth.buttons.loggingIn" /> : 
-                    <I18nText translationKey="auth.buttons.login" />
-                  }
-                </Button>
-              </form>
-            </Form>
+        {mode !== 'reset' && (
+          <div className="space-y-2">
+            <Label htmlFor="password">
+              <I18nText translationKey="auth.password">Password</I18nText>
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t('auth.passwordPlaceholder')}
+              required
+            />
           </div>
-        </TabsContent>
+        )}
         
-        {/* Register Form */}
-        <TabsContent value="register">
-          <div className="p-6 border rounded-lg shadow-sm">
-            <h3 className="text-xl font-semibold mb-4">
-              <I18nText translationKey="auth.titles.register" />
-            </h3>
-            <Form {...registerForm}>
-              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                <FormField
-                  control={registerForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <I18nText translationKey="auth.labels.email" />
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="example@mail.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <I18nText translationKey="auth.labels.username" />
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <I18nText translationKey="auth.labels.fullName" />
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <I18nText translationKey="auth.labels.password" />
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="passwordConfirm"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <I18nText translationKey="auth.labels.confirmPassword" />
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {authError && (
-                  <div className="text-red-500 text-sm">{authError}</div>
-                )}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 
-                    <I18nText translationKey="auth.buttons.creating" /> : 
-                    <I18nText translationKey="auth.buttons.register" />
-                  }
-                </Button>
-              </form>
-            </Form>
+        {mode === 'signup' && (
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">
+              <I18nText translationKey="auth.confirmPassword">Confirm Password</I18nText>
+            </Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder={t('auth.confirmPasswordPlaceholder')}
+              required
+            />
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+        
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? (
+            <I18nText translationKey="common.loading">Loading...</I18nText>
+          ) : mode === 'signin' ? (
+            <I18nText translationKey="auth.signIn">Sign In</I18nText>
+          ) : mode === 'signup' ? (
+            <I18nText translationKey="auth.signUp">Sign Up</I18nText>
+          ) : (
+            <I18nText translationKey="auth.resetPassword">Reset Password</I18nText>
+          )}
+        </Button>
+      </form>
+      
+      <div className="mt-6 text-center space-y-2">
+        {mode === 'signin' && (
+          <>
+            <p className="text-sm text-slate-500">
+              <I18nText translationKey="auth.noAccount">Don't have an account?</I18nText>{' '}
+              <button
+                onClick={() => switchMode('signup')}
+                type="button"
+                className="text-amber-600 hover:underline focus:outline-none"
+              >
+                <I18nText translationKey="auth.signUpLink">Sign up</I18nText>
+              </button>
+            </p>
+            <button
+              onClick={() => switchMode('reset')}
+              type="button"
+              className="text-sm text-amber-600 hover:underline focus:outline-none"
+            >
+              <I18nText translationKey="auth.forgotPassword">Forgot password?</I18nText>
+            </button>
+          </>
+        )}
+        
+        {mode === 'signup' && (
+          <p className="text-sm text-slate-500">
+            <I18nText translationKey="auth.haveAccount">Already have an account?</I18nText>{' '}
+            <button
+              onClick={() => switchMode('signin')}
+              type="button"
+              className="text-amber-600 hover:underline focus:outline-none"
+            >
+              <I18nText translationKey="auth.signInLink">Sign in</I18nText>
+            </button>
+          </p>
+        )}
+        
+        {mode === 'reset' && (
+          <button
+            onClick={() => switchMode('signin')}
+            type="button"
+            className="text-sm text-amber-600 hover:underline focus:outline-none"
+          >
+            <I18nText translationKey="auth.backToSignIn">Back to sign in</I18nText>
+          </button>
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default AuthForm;

@@ -198,7 +198,7 @@ const UploadForm: React.FC<UploadFormProps> = ({
             </h3>
             
             <ImageDropzone
-              onImagesSelected={(files) => handleChange('images', files)}
+              onImageSelected={(files) => handleChange('images', files)}
               maxFiles={5}
             />
             
@@ -222,7 +222,7 @@ const UploadForm: React.FC<UploadFormProps> = ({
             
             <div className="h-64 md:h-80 border rounded-md overflow-hidden">
               <MapSelector
-                onLocationSelect={(location) => handleChange('location', location)}
+                onLocationSelected={(location) => handleChange('location', location)}
                 selectedLocation={formData.location}
               />
             </div>

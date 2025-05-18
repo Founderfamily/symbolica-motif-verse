@@ -1,33 +1,47 @@
 
-// src/components/sections/SymbolGrid.tsx
 import React from 'react';
 import SymbolCard from '@/components/symbols/SymbolCard';
-import { SYMBOLS } from '@/data/symbols';
+import { I18nText } from '@/components/ui/i18n-text';
 
-const SymbolGrid: React.FC = () => (
-  <section className="relative mt-12 mb-20">
-    {/* Bandeau muséal & communautaire */}
-    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-6 py-3 rounded-full border border-slate-200 z-10 flex items-center space-x-6">
-      <div>
-        <p className="text-lg font-serif text-slate-800">Musée Symbolica</p>
-        <p className="text-sm text-slate-600">Portail collaboratif du patrimoine symbolique</p>
-      </div>
-      <button className="px-4 py-1 text-sm font-medium text-white bg-amber-500 rounded hover:bg-amber-600 transition">
-        Rejoindre une communauté
-      </button>
-    </div>
+interface Symbol {
+  id: string;
+  name: string;
+  culture: string;
+  imageUrl?: string;
+}
 
-    {/* Grille des motifs */}
-    <div className="bg-white border border-slate-200 shadow-md rounded-xl overflow-hidden pt-12">
-      <div className="px-6 pb-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
-          {SYMBOLS.map((motif, idx) => (
-            <SymbolCard key={idx} motif={motif} />
+interface SymbolGridProps {
+  symbols: Symbol[];
+  title?: string;
+  translationKey?: string;
+}
+
+const SymbolGrid: React.FC<SymbolGridProps> = ({ 
+  symbols, 
+  title = 'Explore Symbols',
+  translationKey = 'sections.symbols.title'
+}) => {
+  return (
+    <section className="py-12 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-slate-900 mb-8">
+          <I18nText translationKey={translationKey}>{title}</I18nText>
+        </h2>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+          {symbols.map((symbol, index) => (
+            <SymbolCard
+              key={symbol.id || index}
+              id={symbol.id}
+              name={symbol.name}
+              culture={symbol.culture}
+              imageUrl={symbol.imageUrl}
+            />
           ))}
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default SymbolGrid;

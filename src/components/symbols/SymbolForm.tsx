@@ -268,7 +268,7 @@ const SymbolForm: React.FC<SymbolFormProps> = ({
             </div>
             
             <ImageDropzone
-              onImagesSelected={(files) => updateField('images', files)}
+              onImageSelected={(files) => updateField('images', files)}
               maxFiles={5}
               className={errors.images ? "border-red-300" : ""}
             />
@@ -295,7 +295,7 @@ const SymbolForm: React.FC<SymbolFormProps> = ({
             
             <div className="h-64 md:h-80 border rounded-md overflow-hidden">
               <MapSelector
-                onLocationSelect={(location) => updateField('location', location)}
+                onLocationSelected={(location) => updateField('location', location)}
                 selectedLocation={formData.location}
               />
             </div>

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Testimonial, getTestimonials } from '@/services/testimonialsService';
+import { I18nText } from '@/components/ui/i18n-text';
 
 const Testimonials = () => {
   const { t, i18n } = useTranslation();
@@ -31,9 +32,11 @@ const Testimonials = () => {
   return (
     <section className="py-16 px-4 md:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4 text-center">{t('sections.testimonials')}</h2>
+        <h2 className="text-3xl font-bold mb-4 text-center">
+          <I18nText translationKey="sections.testimonials" />
+        </h2>
         <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
-          {t('testimonials.subtitle')}
+          <I18nText translationKey="testimonials.subtitle" />
         </p>
         
         <div className="grid md:grid-cols-3 gap-6">
@@ -84,11 +87,17 @@ const Testimonials = () => {
                       <AvatarFallback className="bg-amber-100 text-amber-800">AB</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold">{t('testimonials.fallback.name')}</p>
-                      <p className="text-sm text-slate-500">{t('testimonials.fallback.role')}</p>
+                      <p className="font-semibold">
+                        <I18nText translationKey="testimonials.fallback.name" />
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        <I18nText translationKey="testimonials.fallback.role" />
+                      </p>
                     </div>
                   </div>
-                  <p className="text-slate-600 italic">{t('testimonials.fallback.quote')}</p>
+                  <p className="text-slate-600 italic">
+                    <I18nText translationKey="testimonials.fallback.quote" />
+                  </p>
                 </CardContent>
               </Card>
             ))
