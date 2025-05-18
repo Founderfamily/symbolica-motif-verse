@@ -82,3 +82,6 @@ export const generateFixReport = () => {
   // The actual implementation is in translationUtils.ts
   return {};
 };
+
+// Make sure we only export the findFormatIssues function with the correct name
+export { findFormatIssues as findFormatIssuesImpl };

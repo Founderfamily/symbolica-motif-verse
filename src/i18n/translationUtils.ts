@@ -3,22 +3,23 @@
  * Utilities for handling translations and validation
  */
 import { ValidationReport, LegacyValidationReport, FormatIssue } from './types/validationTypes';
-import { findMissingKeys as findMissingKeysOriginal } from './validators/validatorUtils';
-import { extractPlaceholders } from './validators/validatorUtils';
+import { extractPlaceholders, findMissingKeys as findMissingKeysUtil } from './validators/validatorUtils';
 import { findFormatIssues as findFormatIssuesImpl } from './validators/formatIssueValidator';
+import en from './locales/en.json';
+import fr from './locales/fr.json';
 
 // Re-export the findMissingKeys function for external use
 export const findMissingKeys = (source?: any, target?: any, prefix?: string) => {
   // If no parameters are provided, perform a default diagnosis
   if (!source && !target) {
     try {
-      // Import translation files dynamically
-      const enTranslations = require('./locales/en.json');
-      const frTranslations = require('./locales/fr.json');
+      // Use imported translation files directly instead of require()
+      const enTranslations = en;
+      const frTranslations = fr;
       
       // Find keys missing in each language
-      const missingInFr = findMissingKeysOriginal(enTranslations, frTranslations);
-      const missingInEn = findMissingKeysOriginal(frTranslations, enTranslations);
+      const missingInFr = findMissingKeysUtil(enTranslations, frTranslations);
+      const missingInEn = findMissingKeysUtil(frTranslations, enTranslations);
       
       return {
         missingInFr,
@@ -38,8 +39,8 @@ export const findMissingKeys = (source?: any, target?: any, prefix?: string) => 
     }
   }
   
-  // Use the original function if parameters are provided
-  return findMissingKeysOriginal(source, target, prefix);
+  // Use the utility function if parameters are provided
+  return findMissingKeysUtil(source, target, prefix);
 };
 
 /**
@@ -70,6 +71,7 @@ export const diagnoseTranslations = (): ValidationReport => {
     const missingKeysResult = findMissingKeys();
     const formatIssues: FormatIssue[] = findFormatIssues();
     
+    // Type-safe access since we know missingKeysResult is not a string[]
     return {
       valid: missingKeysResult.missingInFr.length === 0 && missingKeysResult.missingInEn.length === 0 && formatIssues.length === 0,
       missingKeys: {
@@ -117,8 +119,9 @@ export const convertToLegacyReport = (report: ValidationReport): LegacyValidatio
  */
 export const findFormatIssues = (): FormatIssue[] => {
   try {
-    const enTranslations = require('./locales/en.json');
-    const frTranslations = require('./locales/fr.json');
+    // Use imported translation files directly
+    const enTranslations = en;
+    const frTranslations = fr;
     return findFormatIssuesImpl(enTranslations, frTranslations);
   } catch (error) {
     console.error('Error finding format issues:', error);
@@ -147,10 +150,9 @@ export const generateFixReport = (report: ValidationReport) => {
  */
 export function keyExistsInBothLanguages(key: string): boolean {
   try {
-    // Dynamic import of translation files
-    // This is a simplified check - in production, you'd want to use the i18n instance directly
-    const enTranslations = require('./locales/en.json');
-    const frTranslations = require('./locales/fr.json');
+    // Use imported translation files directly
+    const enTranslations = en;
+    const frTranslations = fr;
     
     // Helper to check nested keys
     const getNestedValue = (obj: any, path: string) => {
@@ -201,6 +203,7 @@ export function formatKeyAsReadableText(key: string): string {
   }
 }
 
-// Export additional functions
-export { findMissingKeysOriginal } from './validators/validatorUtils';
-export { findFormatIssuesImpl as findFormatIssuesFromValidators } from './validators/formatIssueValidator';
+// Proper re-exports with correct names
+export { findMissingKeysUtil };
+export { findFormatIssuesImpl };
+
