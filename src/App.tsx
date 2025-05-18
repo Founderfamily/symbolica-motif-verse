@@ -3,6 +3,13 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import './App.css';
 
+// Common loading component for lazy-loaded routes
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center w-full h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-amber-500"></div>
+  </div>
+);
+
 // Lazily load pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -24,13 +31,6 @@ const SymbolsManagement = lazy(() => import('./pages/Admin/SymbolsManagement'));
 const SymbolEditor = lazy(() => import('./pages/Admin/SymbolEditor'));
 const ContentManagement = lazy(() => import('./pages/Admin/ContentManagement'));
 const ContributionsManagement = lazy(() => import('./pages/Admin/ContributionsManagement'));
-
-// Common loading component for lazy-loaded routes
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center w-full h-screen">
-    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-amber-500"></div>
-  </div>
-);
 
 function App() {
   return (

@@ -13,13 +13,23 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { t, currentLanguage, refreshLanguage } = useTranslation();
+  const { t, currentLanguage, refreshLanguage, validateCurrentPageTranslations } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   
-  // Log current location for debugging
+  // Enhanced logging for better debugging
   useEffect(() => {
     console.log(`Layout: Rendering page at path: ${location.pathname} with language: ${currentLanguage}`);
-  }, [location.pathname, currentLanguage]);
+    
+    // In development, validate the translations on the current page
+    if (process.env.NODE_ENV === 'development') {
+      // Wait for the page to render fully before validating translations
+      const timeoutId = setTimeout(() => {
+        validateCurrentPageTranslations();
+      }, 1000);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [location.pathname, currentLanguage, validateCurrentPageTranslations]);
   
   // Make sure language is consistent when changing routes
   useEffect(() => {
@@ -38,6 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     
     // Subscribe to auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log(`Auth state changed: ${event}`);
       setIsAuthenticated(!!session);
     });
     

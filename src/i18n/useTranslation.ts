@@ -1,7 +1,7 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 import { validateKeyFormat, formatKeyAsReadableText, keyExistsInBothLanguages } from './translationUtils';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 // Store the current language in localStorage to ensure consistent language across page loads
 const LANGUAGE_STORAGE_KEY = 'app_language';
@@ -59,24 +59,24 @@ export const useTranslation = () => {
     return typeof translated === 'string' ? translated : String(translated);
   };
   
-  // Change language and save preference
-  const changeLanguage = (lng: string) => {
+  // Change language and save preference - memoized to prevent recreation
+  const changeLanguage = useCallback((lng: string) => {
     console.log(`Changing language to: ${lng}`);
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
     i18n.changeLanguage(lng);
-  };
+  }, [i18n]);
   
-  // Force refresh of the language from localStorage
-  const refreshLanguage = () => {
+  // Force refresh of the language from localStorage - memoized
+  const refreshLanguage = useCallback(() => {
     const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (savedLang && ['fr', 'en'].includes(savedLang) && i18n.language !== savedLang) {
       console.log(`Refreshing language from localStorage: ${savedLang}`);
       i18n.changeLanguage(savedLang);
     }
-  };
+  }, [i18n]);
   
   // Validate translations on the current page
-  const validateCurrentPageTranslations = () => {
+  const validateCurrentPageTranslations = useCallback(() => {
     if (process.env.NODE_ENV !== 'development') {
       return; // Only run in development
     }
@@ -122,7 +122,7 @@ export const useTranslation = () => {
       usedKeys,
       missingInLanguages
     };
-  };
+  }, [i18n]);
   
   return { 
     t, 
