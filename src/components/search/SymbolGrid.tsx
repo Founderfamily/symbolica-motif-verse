@@ -124,7 +124,7 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ symbol }) => {
           {isHovered && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3 transition-opacity duration-300">
               <span className="text-white text-xs font-medium">
-                {symbol.period}
+                <I18nText translationKey="symbols.card.period" />: {symbol.period}
               </span>
             </div>
           )}
@@ -133,7 +133,7 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ symbol }) => {
           <h4 className="text-sm font-serif text-slate-900 font-medium">{symbol.name}</h4>
           <div className="flex justify-between items-center mt-1">
             <span className="text-xs text-slate-600">{symbol.culture}</span>
-            <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 cursor-pointer hover:bg-amber-200 transition-colors">
+            <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 cursor-pointer hover:bg-amber-200 transition-colors" title={`${symbol.name} info`}>
               <Info className="w-3 h-3" />
             </div>
           </div>

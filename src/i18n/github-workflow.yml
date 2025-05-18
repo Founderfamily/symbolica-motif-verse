@@ -39,8 +39,8 @@ jobs:
         run: |
           # Install ts-node to run TypeScript files
           npm install -g ts-node
-          # Run the scanner with threshold to not fail the build yet
-          node -r ts-node/register src/i18n/directUsageScanner.ts src --threshold=50
+          # Run the scanner with threshold to fail the build if too many direct usages found
+          node -r ts-node/register src/i18n/directUsageScanner.ts src --threshold=10
       
       - name: Generate translation report
         if: always()

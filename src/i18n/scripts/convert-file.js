@@ -46,6 +46,9 @@ const patterns = {
   
   // t() with parameters: {t('key', { param: value })}
   paramTCallRegex: /\{t\(['"`](.+?)['"`],\s*(\{.+?\})\)\}/g,
+  
+  // Multiline t() calls
+  multilineTCallRegex: /\{\s*t\s*\(\s*['"]([\w.-]+)['"]\s*\)\s*\}/g
 };
 
 // Check if I18nText is already imported
@@ -83,15 +86,39 @@ for (let i = 0; i < newContent.length; i++) {
     continue;
   }
   
-  // Replace direct t() calls
+  // Handle param cases first (more specific)
+  let paramMatches = [...line.matchAll(patterns.paramTCallRegex)];
+  if (paramMatches.length > 0) {
+    // This is a more complex case, let's add a TODO comment for manual review
+    newContent.splice(i, 0, `{/* TODO: Parameter case needs manual review: ${line.trim()} */}`);
+    i++; // Skip the next line since we added one
+    continue;
+  }
+  
+  // Handle attribute cases
+  let attrMatches = [...line.matchAll(patterns.attributeTCallRegex)];
+  if (attrMatches.length > 0) {
+    // Add a TODO for manual review
+    newContent.splice(i, 0, `{/* TODO: Attribute translation needs manual review: ${line.trim()} */}`);
+    i++;
+    continue;
+  }
+  
+  // Replace direct t() calls (simplest case)
   const updatedLine = line.replace(patterns.directTCallRegex, (match, key) => {
     replacements++;
     return `<I18nText translationKey="${key}" />`;
   });
   
+  // Replace multiline t() calls
+  const updatedMultiline = updatedLine.replace(patterns.multilineTCallRegex, (match, key) => {
+    replacements++;
+    return `<I18nText translationKey="${key}" />`;
+  });
+  
   // Update the line if changes were made
-  if (updatedLine !== line) {
-    newContent[i] = updatedLine;
+  if (updatedLine !== line || updatedMultiline !== line) {
+    newContent[i] = updatedMultiline;
   }
 }
 
