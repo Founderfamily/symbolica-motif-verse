@@ -10,7 +10,9 @@
     "account": "Compte",
     "admin": "Admin",
     "symbols": "Symboles",
-    "groups": "Groupes"
+    "groups": "Groupes",
+    "symbolExplorer": "Explorateur de Symboles",
+    "mapExplorer": "Explorateur Géographique"
   },
   "hero": {
     "heading": "Découvrez des Symboles Culturels du Monde Entier",
@@ -194,6 +196,39 @@
     "en": "Anglais",
     "fr": "Français",
     "switchTo": "Changer en {language}"
+  },
+  "symbolExplorer": {
+    "title": "Explorateur de Symboles",
+    "description": "Parcourez notre collection de symboles culturels du monde entier",
+    "gridView": "Grille",
+    "listView": "Liste",
+    "mapView": "Carte",
+    "filters": "Filtres",
+    "clearFilters": "Effacer",
+    "searchPlaceholder": "Rechercher des symboles...",
+    "activeFilters": "Filtres actifs",
+    "noFilters": "Aucun filtre actif",
+    "resultsCount": "{count} symboles trouvés",
+    "noResults": "Aucun symbole ne correspond à vos critères de recherche",
+    "mapViewComingSoon": "Visualisation cartographique bientôt disponible",
+    "mapViewDescription": "Explorez les symboles dans leur contexte géographique. Cette fonctionnalité sera disponible prochainement."
+  },
+  "searchFilters": {
+    "cultures": "Cultures",
+    "periods": "Périodes",
+    "medium": "Support",
+    "technique": "Technique",
+    "function": "Fonction"
+  },
+  "breadcrumb": {
+    "home": "Accueil",
+    "symbolExplorer": "Explorateur de Symboles"
+  },
+  "symbolDetail": {
+    "backToExplorer": "Retour à l'explorateur"
+  },
+  "sections": {
+    "openSource": "Open Source"
   },
   "triptych": {
     "title": "Explorateur Interactif de Symboles",

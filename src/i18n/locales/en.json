@@ -10,7 +10,9 @@
     "account": "Account",
     "admin": "Admin",
     "symbols": "Symbols",
-    "groups": "Groups"
+    "groups": "Groups",
+    "symbolExplorer": "Symbol Explorer",
+    "mapExplorer": "Map Explorer"
   },
   "hero": {
     "heading": "Discover Cultural Symbols from Around the World",
@@ -171,6 +173,39 @@
       "title": "Our Analysis Process",
       "subtitle": "How we document and classify cultural symbols"
     }
+  },
+  "symbolExplorer": {
+    "title": "Symbol Explorer",
+    "description": "Browse our collection of cultural symbols from around the world",
+    "gridView": "Grid",
+    "listView": "List",
+    "mapView": "Map",
+    "filters": "Filters",
+    "clearFilters": "Clear",
+    "searchPlaceholder": "Search symbols...",
+    "activeFilters": "Active Filters",
+    "noFilters": "No active filters",
+    "resultsCount": "{count} symbols found",
+    "noResults": "No symbols match your search criteria",
+    "mapViewComingSoon": "Map view coming soon",
+    "mapViewDescription": "Explore symbols in their geographic context. This feature will be available soon."
+  },
+  "searchFilters": {
+    "cultures": "Cultures",
+    "periods": "Periods",
+    "medium": "Medium / Support",
+    "technique": "Technique",
+    "function": "Function"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "symbolExplorer": "Symbol Explorer"
+  },
+  "symbolDetail": {
+    "backToExplorer": "Back to Explorer"
+  },
+  "sections": {
+    "openSource": "Open Source"
   },
   "uploadTools": {
     "process": {

@@ -15,6 +15,7 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { Search, Grid, Layout as LayoutIcon, Map, FilterX } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { FilterCategory, FilterOptions } from '@/types/filters';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 
 const SymbolExplorer: React.FC = () => {
   const { t, currentLanguage } = useTranslation();
@@ -177,6 +178,21 @@ const SymbolExplorer: React.FC = () => {
   
   return (
     <div className="container mx-auto p-4 pt-12 pb-20">
+      {/* Breadcrumb navigation */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">
+              <I18nText translationKey="breadcrumb.home" />
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <I18nText translationKey="breadcrumb.symbolExplorer" />
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      
       {/* Enhanced visual separator between header and content */}
       <Separator className="mb-8 mt-2" />
       
