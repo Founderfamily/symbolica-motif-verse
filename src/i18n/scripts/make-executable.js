@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const scriptsDir = path.join(__dirname, '../scripts');
+const scriptsDir = path.join(__dirname, '.');
 const i18nDir = path.join(__dirname, '..');
 
 const scriptFiles = [
@@ -60,14 +60,14 @@ console.log('\n✅ Done making scripts executable');
 // Run the scripts with Node directly
 console.log('\n🚀 Running the i18n-generate-missing script...');
 try {
-  require('../scripts/i18n-generate-missing.js').main();
+  require('./i18n-generate-missing.js').main();
 } catch (error) {
   console.error('❌ Error running i18n-generate-missing.js:', error.message);
 }
 
 console.log('\n🔍 Running the find-generic-keys script...');
 try {
-  require('../scripts/find-generic-keys.js').main();
+  require('./find-generic-keys.js').main();
 } catch (error) {
   console.error('❌ Error running find-generic-keys.js:', error.message);
 }
