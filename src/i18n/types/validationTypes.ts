@@ -1,24 +1,31 @@
 
 /**
- * Types for translation validation
+ * Types for translation validation system
  */
-export interface ValidationReport {
-  valid: boolean;
-  missingKeys: {
-    en: string[];
-    fr: string[];
-  };
-  formatIssues: FormatIssue[];
-  invalidKeyFormat: string[];
-}
 
 export interface FormatIssue {
   key: string;
-  en: string;
-  fr: string;
-  issue: 'placeholderCount' | 'placeholderNames' | 'format';
+  enValue?: string;
+  frValue?: string;
+  issue: string;
   details?: {
-    missingInEn: string[];
+    missingInEn?: string[];
+    missingInFr?: string[];
+  };
+}
+
+export interface ValidationReport {
+  missingKeys: {
     missingInFr: string[];
+    missingInEn: string[];
+    total: {
+      en: number;
+      fr: number;
+    }
+  };
+  formatIssues: FormatIssue[];
+  summary: {
+    missingCount: number;
+    formatIssuesCount: number;
   };
 }

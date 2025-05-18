@@ -21,7 +21,11 @@ i18n
       fr: { translation: fr },
       en: { translation: en },
     },
-    fallbackLng: 'fr',
+    fallbackLng: {
+      'fr': ['en'],
+      'en': ['fr'],
+      'default': ['fr', 'en']
+    },
     supportedLngs: ['fr', 'en'],
     interpolation: {
       escapeValue: false, // React already escapes values
@@ -44,12 +48,6 @@ i18n
     parseMissingKeyHandler: (key) => {
       // Format missing keys nicely for display
       return formatKeyAsReadableText(key);
-    },
-    // Fallback behavior to ensure language consistency
-    fallbackLng: {
-      'fr': ['en'],
-      'en': ['fr'],
-      'default': ['fr', 'en']
     },
     // More verbose logging in development
     debug: process.env.NODE_ENV === 'development'
