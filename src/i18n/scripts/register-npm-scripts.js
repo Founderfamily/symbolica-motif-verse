@@ -2,71 +2,49 @@
 #!/usr/bin/env node
 
 // This script adds NPM scripts to package.json for the translation tools
+// Instead of directly modifying package.json, it will show instructions for the user
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
-// Make the conversion script executable
-try {
-  execSync('chmod +x src/i18n/convert-t-to-i18ntext.js');
-  console.log('✅ Made conversion script executable');
-} catch (error) {
-  console.error('Error making script executable:', error.message);
-}
-
-// Read package.json
-const packageJsonPath = path.join(process.cwd(), 'package.json');
-let packageJson;
-
-try {
-  packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-} catch (error) {
-  console.error('Error reading package.json:', error.message);
-  process.exit(1);
-}
-
-// Add our translation scripts
-if (!packageJson.scripts) {
-  packageJson.scripts = {};
-}
-
-// Add new scripts
-const newScripts = {
-  'i18n:convert': 'node src/i18n/convert-t-to-i18ntext.js',
-  'i18n:validate': 'node src/i18n/validateTranslations.js',
-  'i18n:check-direct': 'node src/i18n/scripts/find-direct-t-usage.js'
+// Define the scripts we want to add
+const scripts = {
+  "i18n:scan": "node src/i18n/directUsageScanner.ts",
+  "i18n:convert": "node src/i18n/convert-t-to-i18ntext.js",
+  "i18n:check": "node src/i18n/check-translation-completeness.js",
+  "i18n:pre-commit": "node src/i18n/pre-commit-hook.js",
+  "i18n:export-csv": "node src/scripts/export-translation-status.js"
 };
 
-let scriptsAdded = false;
+console.log('\n📌 Translation Scripts Registration');
+console.log('================================\n');
+console.log('Since package.json is read-only, please manually add these scripts to your package.json file:\n');
 
-Object.entries(newScripts).forEach(([scriptName, scriptCommand]) => {
-  if (!packageJson.scripts[scriptName]) {
-    packageJson.scripts[scriptName] = scriptCommand;
-    scriptsAdded = true;
-    console.log(`✅ Added npm script: ${scriptName}`);
-  }
+Object.entries(scripts).forEach(([name, command]) => {
+  console.log(`    "${name}": "${command}",`);
 });
 
-if (!scriptsAdded) {
-  console.log('ℹ️ All translation scripts already exist in package.json');
-  process.exit(0);
-}
+console.log('\n✅ After adding these scripts, you can run them with:');
+console.log('  npm run i18n:scan     - Find direct t() usage');
+console.log('  npm run i18n:convert  - Convert t() to I18nText');
+console.log('  npm run i18n:check    - Check translation completeness');
+console.log('  npm run i18n:pre-commit - Run pre-commit hook manually');
+console.log('  npm run i18n:export-csv - Export translation status to CSV\n');
 
-// Write updated package.json
-try {
-  fs.writeFileSync(
-    packageJsonPath, 
-    JSON.stringify(packageJson, null, 2) + '\n',
-    'utf-8'
-  );
-  console.log('✅ Updated package.json with new scripts');
-} catch (error) {
-  console.error('Error writing package.json:', error.message);
-  process.exit(1);
-}
+// Create reference file for scripts
+const packageScriptsPath = path.join(process.cwd(), 'src/package-scripts.js');
+const packageScriptsContent = `/**
+ * Custom scripts for Symbolica project
+ * Add to package.json under "scripts" section:
+ * 
+ * "check-i18n": "node src/scripts/check-i18n-progress.js",
+ * "migrate-i18n": "node src/i18n/convert-t-to-i18ntext.js",
+ * "pre-commit": "node src/i18n/pre-commit-hook.js"
+ */
 
-console.log('\n📝 You can now use these npm commands:');
-console.log('  • npm run i18n:convert [file-path] - Convert t() calls to I18nText');
-console.log('  • npm run i18n:validate - Validate translation completeness');
-console.log('  • npm run i18n:check-direct - Find direct t() usage in code');
+// This file is just a reference and not executed directly
+console.log('Please add these scripts to your package.json');
+`;
+
+fs.writeFileSync(packageScriptsPath, packageScriptsContent, 'utf-8');
+console.log(`📄 Created reference file at ${packageScriptsPath}`);
