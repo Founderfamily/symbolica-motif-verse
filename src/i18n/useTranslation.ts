@@ -1,7 +1,7 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 import { validateKeyFormat, formatKeyAsReadableText, keyExistsInBothLanguages } from './translationUtils';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 
 // Store the current language in localStorage to ensure consistent language across page loads
 const LANGUAGE_STORAGE_KEY = 'app_language';
@@ -9,7 +9,7 @@ const LANGUAGE_STORAGE_KEY = 'app_language';
 export const useTranslation = () => {
   const { t: originalT, i18n } = useI18nTranslation();
   
-  // Force language detection on component mount
+  // Force language detection on component mount - runs once per component
   useEffect(() => {
     const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     
@@ -32,8 +32,8 @@ export const useTranslation = () => {
     }
   }, [i18n]);
   
-  // Enhanced t function with better fallbacks
-  const t = (key: string, options?: any): string => {
+  // Enhanced t function with better fallbacks - memoized to avoid recreating on each render
+  const t = useCallback((key: string, options?: any): string => {
     // Validate the key in development
     if (process.env.NODE_ENV === 'development') {
       if (!validateKeyFormat(key)) {
@@ -57,7 +57,7 @@ export const useTranslation = () => {
     
     // Ensure string output
     return typeof translated === 'string' ? translated : String(translated);
-  };
+  }, [originalT]);
   
   // Change language and save preference - memoized to prevent recreation
   const changeLanguage = useCallback((lng: string) => {
@@ -75,7 +75,7 @@ export const useTranslation = () => {
     }
   }, [i18n]);
   
-  // Validate translations on the current page
+  // Validate translations on the current page - memoized
   const validateCurrentPageTranslations = useCallback(() => {
     if (process.env.NODE_ENV !== 'development') {
       return; // Only run in development
@@ -124,14 +124,15 @@ export const useTranslation = () => {
     };
   }, [i18n]);
   
-  return { 
+  // Use memo to create a stable object reference for the return value
+  return useMemo(() => ({ 
     t, 
     changeLanguage, 
     currentLanguage: i18n.language, 
     i18n,
     refreshLanguage,
     validateCurrentPageTranslations
-  };
+  }), [t, changeLanguage, i18n, refreshLanguage, validateCurrentPageTranslations]);
 };
 
 // Function to switch language programmatically from anywhere

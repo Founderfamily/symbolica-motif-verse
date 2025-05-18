@@ -1,5 +1,5 @@
 
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { ReactNode, useState, useEffect, useCallback } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import { useLocation } from 'react-router-dom';
@@ -13,7 +13,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { t, currentLanguage, refreshLanguage, validateCurrentPageTranslations } = useTranslation();
+  const { t, currentLanguage, validateCurrentPageTranslations } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   
   // Enhanced logging for better debugging
@@ -31,17 +31,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [location.pathname, currentLanguage, validateCurrentPageTranslations]);
   
-  // Make sure language is consistent when changing routes
-  useEffect(() => {
-    // Ensure the language is correctly set when the route changes
-    refreshLanguage();
-  }, [location.pathname, refreshLanguage]);
-  
+  // Check and notify about authentication status 
   useEffect(() => {
     // Check authentication status
     const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
+      try {
+        const { data } = await supabase.auth.getSession();
+        setIsAuthenticated(!!data.session);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        setIsAuthenticated(false);
+      }
     };
     
     checkAuth();

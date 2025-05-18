@@ -1,7 +1,9 @@
 
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
+import Layout from './components/layout/Layout';
+import TranslationProvider from './i18n/TranslationProvider';
 
 // Common loading component for lazy-loaded routes
 const LoadingFallback = () => (
@@ -32,38 +34,53 @@ const SymbolEditor = lazy(() => import('./pages/Admin/SymbolEditor'));
 const ContentManagement = lazy(() => import('./pages/Admin/ContentManagement'));
 const ContributionsManagement = lazy(() => import('./pages/Admin/ContributionsManagement'));
 
+// Wrapper that decides whether to use Layout or not
+const PageWrapper = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  
+  // Admin pages have their own layout
+  if (location.pathname.startsWith('/admin')) {
+    return <>{children}</>;
+  }
+  
+  // All other pages use the default Layout
+  return <Layout>{children}</Layout>;
+};
+
 function App() {
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/explore" element={<SymbolExplorer />} />
-        <Route path="/explore/:id" element={<SymbolDetail />} />
-        <Route path="/map" element={<MapExplorerPage />} />
-        <Route path="/contribute" element={<ContributionsPage />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        
-        {/* Groups routes */}
-        <Route path="/groups" element={<GroupsPage />} />
-        <Route path="/groups/create" element={<GroupCreatePage />} />
-        <Route path="/groups/:slug" element={<GroupDetailPage />} />
-        
-        {/* Admin routes */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="" element={<Dashboard />} />
-          <Route path="symbols" element={<SymbolsManagement />} />
-          <Route path="symbols/:id" element={<SymbolEditor />} />
-          <Route path="content" element={<ContentManagement />} />
-          <Route path="contributions" element={<ContributionsManagement />} />
-        </Route>
-        
-        {/* Not found route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
+    <TranslationProvider>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
+          <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
+          <Route path="/explore" element={<PageWrapper><SymbolExplorer /></PageWrapper>} />
+          <Route path="/explore/:id" element={<PageWrapper><SymbolDetail /></PageWrapper>} />
+          <Route path="/map" element={<PageWrapper><MapExplorerPage /></PageWrapper>} />
+          <Route path="/contribute" element={<PageWrapper><ContributionsPage /></PageWrapper>} />
+          <Route path="/auth" element={<PageWrapper><Auth /></PageWrapper>} />
+          <Route path="/profile" element={<PageWrapper><ProfilePage /></PageWrapper>} />
+          
+          {/* Groups routes */}
+          <Route path="/groups" element={<PageWrapper><GroupsPage /></PageWrapper>} />
+          <Route path="/groups/create" element={<PageWrapper><GroupCreatePage /></PageWrapper>} />
+          <Route path="/groups/:slug" element={<PageWrapper><GroupDetailPage /></PageWrapper>} />
+          
+          {/* Admin routes - uses AdminLayout */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="" element={<Dashboard />} />
+            <Route path="symbols" element={<SymbolsManagement />} />
+            <Route path="symbols/:id" element={<SymbolEditor />} />
+            <Route path="content" element={<ContentManagement />} />
+            <Route path="contributions" element={<ContributionsManagement />} />
+          </Route>
+          
+          {/* Not found route */}
+          <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
+        </Routes>
+      </Suspense>
+    </TranslationProvider>
   );
 }
 
