@@ -99,12 +99,27 @@ export class ErrorHandler {
   public static handleMapError(error: any): AppError {
     logger.error('Map error', { error });
     
+    let userMessage = 'An error occurred with the map.';
+    
+    // Check for specific Mapbox errors
+    if (error?.status === 401 || (error.originalError && error.originalError?.status === 401)) {
+      userMessage = 'Invalid Mapbox access token. Please provide a valid token.';
+    } else if (error?.message) {
+      userMessage = error.message;
+    }
+    
     const appError: AppError = {
       code: error?.code || 'MAP_ERROR',
-      message: 'An error occurred with the map.',
+      message: userMessage,
       details: error?.details || undefined,
       originalError: error
     };
+    
+    toast({
+      title: "Map Error",
+      description: userMessage,
+      variant: "destructive",
+    });
     
     return appError;
   }

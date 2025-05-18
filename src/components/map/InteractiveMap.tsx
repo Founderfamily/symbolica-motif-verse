@@ -10,9 +10,10 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { symbolGeolocationService, SymbolLocation } from '@/services/symbolGeolocationService';
 import { toast } from '@/components/ui/use-toast';
 import MapboxAuth from './MapboxAuth';
+import { I18nText } from '@/components/ui/i18n-text';
 
 // Removed hard-coded token - will now be provided by the user or from environment
-const DEFAULT_MAP_CENTER = [0, 20]; // Initial position at [longitude, latitude]
+const DEFAULT_MAP_CENTER: [number, number] = [0, 20]; // Initial position at [longitude, latitude]
 const DEFAULT_ZOOM = 1.5;
 
 const InteractiveMap = () => {
@@ -145,7 +146,8 @@ const InteractiveMap = () => {
       // Detect errors during map initialization
       newMap.on('error', (e) => {
         console.error("Mapbox map error:", e);
-        if (e.error?.status === 401) {
+        const mapError = e.error as any;
+        if (mapError?.status === 401) {
           setTokenError(true);
           setError("Invalid Mapbox token. Please try again with a valid token.");
           mapInitializedRef.current = false;
