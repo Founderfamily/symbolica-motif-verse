@@ -23,29 +23,31 @@ import SymbolEditor from './pages/Admin/SymbolEditor'; // Import the SymbolEdito
 
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Layout><HomePage /></Layout>} />
-      <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-      <Route path="/explore" element={<Layout><SymbolExplorer /></Layout>} />
-      <Route path="/map" element={<Layout><MapExplorer /></Layout>} />
-      <Route path="/contributions" element={<Layout><ContributionsPage /></Layout>} />
-      <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
-      <Route path="/auth" element={<Layout><Auth /></Layout>} />
+    <>
+      <Routes>
+        <Route path="/" element={<Layout><HomePage /></Layout>} />
+        <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+        <Route path="/explore" element={<Layout><SymbolExplorer /></Layout>} />
+        <Route path="/map" element={<Layout><MapExplorer /></Layout>} />
+        <Route path="/contributions" element={<Layout><ContributionsPage /></Layout>} />
+        <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
+        <Route path="/auth" element={<Layout><Auth /></Layout>} />
+        
+        {/* Admin routes with AdminLayout wrapper */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="content" element={<ContentManagement />} />
+          <Route path="symbols" element={<SymbolsManagement />} />
+          <Route path="symbols/:id" element={<SymbolEditor />} /> {/* Route for SymbolEditor */}
+          <Route path="contributions" element={<ContributionsManagement />} />
+        </Route>
+        
+        <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
+      </Routes>
       
-      {/* Admin routes with AdminLayout wrapper */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="content" element={<ContentManagement />} />
-        <Route path="symbols" element={<SymbolsManagement />} />
-        <Route path="symbols/:id" element={<SymbolEditor />} /> {/* Route for SymbolEditor */}
-        <Route path="contributions" element={<ContributionsManagement />} />
-      </Route>
-      
-      <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
-      
-      {/* Language debugger tool (only visible in development) */}
+      {/* Language debugger tool (only visible in development) - placed outside Routes */}
       <LanguageDebugger />
-    </Routes>
+    </>
   );
 };
 
