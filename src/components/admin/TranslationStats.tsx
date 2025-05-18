@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { I18nText } from "@/components/ui/i18n-text";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { ValidationResultEntry } from '@/i18n/services/translationDatabaseService';
-import { RefreshCw, CheckCircle as CheckCircleIcon, AlertCircle as AlertCircleIcon } from "lucide-react";
+import { ValidationResultEntry, translationDatabaseService } from '@/i18n/services/translationDatabaseService';
+import { RefreshCw, CheckCircle as CheckCircleIcon, AlertCircle as AlertCircleIcon, Download, Upload, FileCheck } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Stats Grid component to display translation statistics
 const StatsGrid = ({ stats }) => {
@@ -120,6 +121,7 @@ const ValidationHistoryList = ({ validations }) => {
 // Main TranslationStats component
 const TranslationStats: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [validationHistory, setValidationHistory] = useState<ValidationResultEntry[]>([]);
   const [translationStats, setTranslationStats] = useState({
     totalEn: 0,
@@ -193,6 +195,68 @@ const TranslationStats: React.FC = () => {
     fetchValidationHistory();
   }, []);
 
+  // Function to sync from DB to files
+  const syncDbToFiles = async () => {
+    setIsSyncing(true);
+    try {
+      const success = await translationDatabaseService.exportToLocalFiles();
+      if (success) {
+        toast({
+          title: "Sync Complete",
+          description: "Translations exported from database to local files successfully",
+          variant: "success"
+        });
+      } else {
+        toast({
+          title: "Sync Failed",
+          description: "Failed to export translations from database",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      console.error("Error syncing translations:", error);
+      toast({
+        title: "Sync Error",
+        description: error.message || "An error occurred during synchronization",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Function to sync from files to DB
+  const syncFilesToDb = async () => {
+    setIsSyncing(true);
+    try {
+      const success = await translationDatabaseService.initializeFromLocalFiles();
+      if (success) {
+        toast({
+          title: "Sync Complete",
+          description: "Translations imported from local files to database successfully",
+          variant: "success"
+        });
+        // Refresh stats after sync
+        fetchValidationHistory();
+      } else {
+        toast({
+          title: "Sync Failed",
+          description: "Failed to import translations to database",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      console.error("Error syncing translations:", error);
+      toast({
+        title: "Sync Error",
+        description: error.message || "An error occurred during synchronization",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -223,12 +287,37 @@ const TranslationStats: React.FC = () => {
             {/* Validation History List */}
             <ValidationHistoryList validations={validationHistory} />
             
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end space-x-3">
+              {/* Sync Dropdown Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={isSyncing}>
+                    {isSyncing ? (
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileCheck className="mr-2 h-4 w-4" />
+                    )}
+                    Sync Translations
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={syncFilesToDb} disabled={isSyncing}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Import from files to DB
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={syncDbToFiles} disabled={isSyncing}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export from DB to files
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Refresh Button */}
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={fetchValidationHistory}
-                disabled={isLoading}
+                disabled={isLoading || isSyncing}
               >
                 {isLoading ? (
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
