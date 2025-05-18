@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
@@ -5,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 const AboutPage = () => {
-  const { t, validateCurrentPageTranslations } = useTranslation();
+  const { validateCurrentPageTranslations } = useTranslation();
 
   // In development mode, automatically validate translations on this page
   useEffect(() => {

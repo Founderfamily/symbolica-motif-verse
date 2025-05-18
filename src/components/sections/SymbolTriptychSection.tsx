@@ -72,7 +72,7 @@ const SymbolTriptychSection: React.FC = () => {
                 className="text-slate-600 hover:bg-slate-100"
               >
                 {showSymbolList ? <ChevronLeft className="h-4 w-4 mr-1" /> : <ChevronRight className="h-4 w-4 mr-1" />}
-                {showSymbolList ? t('actions.hide') : t('actions.show')}
+                {showSymbolList ? <I18nText translationKey="actions.hide" /> : <I18nText translationKey="actions.show" />}
               </Button>
             </div>
           )}
