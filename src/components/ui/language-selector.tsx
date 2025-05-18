@@ -1,14 +1,18 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Globe, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { I18nText } from '@/components/ui/i18n-text';
 import { toast } from 'sonner';
 
 export const LanguageSelector = () => {
   const { changeLanguage, currentLanguage, i18n } = useTranslation();
+  
+  // Log the current language when the component renders
+  useEffect(() => {
+    console.log(`LanguageSelector rendered with language: ${currentLanguage}`);
+  }, [currentLanguage]);
   
   const languages = [
     { code: 'fr', label: 'Français' },
@@ -18,10 +22,20 @@ export const LanguageSelector = () => {
   const currentLanguageDisplay = currentLanguage === 'fr' ? 'FR' : 'EN';
   
   const handleLanguageChange = async (langCode: string) => {
+    if (langCode === currentLanguage) {
+      console.log(`Language is already set to ${langCode}, no change needed`);
+      return;
+    }
+    
     try {
+      console.log(`LanguageSelector: changing language from ${currentLanguage} to ${langCode}`);
       await changeLanguage(langCode);
       toast.success(`Language changed to ${langCode === 'fr' ? 'Français' : 'English'}`);
-      console.log(`Language manually changed to: ${langCode}`);
+      console.log(`Language manually changed to: ${langCode}, reloading translations...`);
+      
+      // Force reload translations to ensure everything is updated
+      await i18n.reloadResources();
+      console.log(`Translations reloaded for ${langCode}`);
     } catch (error) {
       console.error('Failed to change language:', error);
       toast.error('Failed to change language');

@@ -33,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [location.pathname, currentLanguage, validateCurrentPageTranslations]);
   
-  // Force re-render on language change
+  // Log when language changes to help debug
   useEffect(() => {
     console.log(`Layout detected language change to: ${currentLanguage}`);
   }, [currentLanguage]);
@@ -74,7 +74,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   
   // Use key to force complete re-render on language change
   return (
-    <div className="flex flex-col min-h-screen overflow-x-hidden" key={`layout-${currentLanguage}`}>
+    <div 
+      className="flex flex-col min-h-screen overflow-x-hidden" 
+      key={`layout-${currentLanguage}`}
+      data-current-language={currentLanguage}
+    >
       <Header />
       <main className="flex-grow">
         {children}

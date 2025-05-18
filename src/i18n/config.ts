@@ -47,6 +47,7 @@ i18n
     returnEmptyString: false,
     // Allow returning objects (important for complex translations)
     returnObjects: true,
+    // Ensure nested objects are properly handled and don't cause direct rendering
     parseMissingKeyHandler: (key) => {
       // Format missing keys nicely for display
       return formatKeyAsReadableText(key);

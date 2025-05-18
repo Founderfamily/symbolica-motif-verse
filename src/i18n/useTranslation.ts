@@ -1,21 +1,58 @@
 
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 import { i18n } from './config';
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 
 export const useTranslation = () => {
   // Use the underlying react-i18next hook
   const { t, i18n: i18nInstance } = useI18nTranslation();
   
-  // Get the current language
-  const currentLanguage = i18nInstance.language || 'fr';
+  // Track language changes to force re-renders
+  const [currentLanguage, setCurrentLanguage] = useState(i18nInstance.language || 'fr');
+  
+  // Update currentLanguage when i18n language changes
+  useEffect(() => {
+    const handleLanguageChanged = (lang: string) => {
+      console.log(`Language changed in useTranslation: ${lang}`);
+      setCurrentLanguage(lang);
+    };
+    
+    i18nInstance.on('languageChanged', handleLanguageChanged);
+    return () => {
+      i18nInstance.off('languageChanged', handleLanguageChanged);
+    };
+  }, [i18nInstance]);
   
   // Function to change the language
   const changeLanguage = useCallback((lang: string) => {
     console.log(`Attempting to change language to: ${lang}`);
     localStorage.setItem('app_language', lang);
-    return i18nInstance.changeLanguage(lang);
+    return i18nInstance.changeLanguage(lang).then(() => {
+      console.log(`Language successfully changed to: ${lang}`);
+      // We don't need to setCurrentLanguage here since the effect will handle it
+      return lang;
+    });
   }, [i18nInstance]);
+  
+  // Safely handle translations that might return objects
+  const safeT = useCallback((key: string, options?: any) => {
+    try {
+      const translated = t(key, options);
+      
+      // If translation is an object, stringify it or return a fallback
+      if (translated !== null && typeof translated === 'object') {
+        console.warn(`Translation for key "${key}" returned an object instead of a string`, translated);
+        // Return a fallback string - either from a specific field if available or stringify
+        return translated.text || translated.value || translated.content || 
+               translated.toString() || key.split('.').pop() || key;
+      }
+      
+      return translated;
+    } catch (error) {
+      console.error(`Error translating key: ${key}`, error);
+      return key;
+    }
+  }, [t]);
   
   // Add validation function for development environment
   const validateCurrentPageTranslations = useCallback(() => {
@@ -58,7 +95,8 @@ export const useTranslation = () => {
   
   // Simplified API that focuses only on i18n functionality
   return {
-    t,
+    t: safeT, // Use our safe translation function
+    originalT: t, // Keep the original for advanced use cases
     i18n: i18nInstance,
     currentLanguage,
     changeLanguage,

@@ -34,7 +34,15 @@ export const I18nText = ({
   // Get the translated text with memoization based on key, params and language
   const translatedText = useMemo(() => {
     try {
-      return t(translationKey, params);
+      const result = t(translationKey, params);
+      
+      // If result is an object (shouldn't happen with our safeT but just in case)
+      if (result !== null && typeof result === 'object') {
+        console.warn(`Translation for key "${translationKey}" returned an object:`, result);
+        return translationKey.split('.').pop() || translationKey;
+      }
+      
+      return result;
     } catch (error) {
       console.error(`Error translating key: ${translationKey}`, error);
       return translationKey;
