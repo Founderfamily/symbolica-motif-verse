@@ -83,11 +83,6 @@ const Community = () => {
   // Use real groups if available, otherwise use fallback
   const groupsToDisplay = featuredGroups.length > 0 ? featuredGroups : fallbackGroups;
   
-  // Créer des variables de traduction pour les textes utilisés en attributs
-  const membersText = t('community.members');
-  const discoveriesText = t('community.discoveries');
-  const showAllGroupsText = t('community.showAllGroups');
-  
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-white to-amber-50">
       <div className="max-w-7xl mx-auto">

@@ -1,289 +1,297 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import {
-  CircleUser,
-  Menu,
-  X,
-  LogOut,
-  Settings,
-  ChevronDown,
-  Users,
-} from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import LanguageSelector from '@/components/ui/language-selector';
-import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
-import { supabase } from '@/integrations/supabase/client';
-import { useBreakpoint } from '@/hooks/use-breakpoints';
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  Menu, 
+  X, 
+  ChevronDown, 
+  LogIn, 
+  LogOut, 
+  User, 
+  Settings,
+  Plus,
+  Users,
+  Map,
+  Search
+} from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
+import { useBreakpoint } from '@/hooks/use-breakpoints';
+import { I18nText } from '@/components/ui/i18n-text';
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
+import { useAuth } from '@/hooks/useAuth';
 
-const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+const Header: React.FC = () => {
   const { t } = useTranslation();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useBreakpoint('md');
+  const isMobile = useBreakpoint('lg');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, profileData, isLoading, isAdmin, signOut } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const { data } = await supabase.auth.getUser();
-        setUser(data.user);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      } finally {
-        setLoading(false);
-      }
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
     };
 
-    fetchUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null);
-    });
-
+    window.addEventListener('scroll', handleScroll);
     return () => {
-      authListener.subscription.unsubscribe();
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
-  const handleLogout = async () => {
+  useEffect(() => {
+    // Close mobile menu on navigation
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
+  const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate('/');
+      await signOut();
     } catch (error) {
       console.error('Error signing out:', error);
     }
   };
 
-  // Close mobile menu when navigating
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location]);
-
-  const isLoggedIn = !!user;
-  
-  // Create translation variables for texts used in attributes
-  const loginText = t('navigation.login');
-  const signupText = t('navigation.signup');
-  const accountText = t('navigation.account');
-  const groupsText = t('navigation.groups');
-  const adminText = t('navigation.admin');
-  const logoutText = t('navigation.logout');
-
-  const navLinks = [
-    { to: '/', label: t('navigation.home') },
-    { to: '/explore', label: t('navigation.explore') },
-    { to: '/map', label: t('navigation.map') },
-    { to: '/contribute', label: t('navigation.contribute') },
-    { to: '/groups', label: t('navigation.groups') },
-    { to: '/about', label: t('navigation.about') },
-  ];
+  const headerClasses = cn(
+    "fixed top-0 w-full z-50 transition-all duration-200",
+    {
+      "bg-white/80 backdrop-blur-md shadow-sm": scrolled,
+      "bg-transparent": !scrolled
+    }
+  );
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center flex-shrink-0">
-            <Link to="/" className="text-amber-600 font-bold text-xl flex items-center">
-              <img src="/logo.svg" alt="Logo" className="h-8 w-auto mr-2" />
-              CulturalPatterns.ai
+    <header className={headerClasses}>
+      <div className="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+          </div>
+          <span className="font-semibold text-lg">
+            <I18nText translationKey="app.name" />
+          </span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        {!isMobile && (
+          <nav className="hidden lg:flex items-center space-x-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-1">
+                  <I18nText translationKey="navigation.explore" />
+                  <ChevronDown size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center">
+                <DropdownMenuItem asChild>
+                  <Link to="/explore" className="flex items-center gap-2">
+                    <Search size={14} />
+                    <I18nText translationKey="navigation.symbolExplorer" />
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/map" className="flex items-center gap-2">
+                    <Map size={14} />
+                    <I18nText translationKey="navigation.mapExplorer" />
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Link to="/groups">
+              <Button variant="ghost" className="flex items-center gap-1">
+                <Users size={16} className="mr-1" />
+                <I18nText translationKey="navigation.groups" />
+              </Button>
             </Link>
-          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-4 mx-4 flex-1 justify-center">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`px-3 py-2 text-sm font-medium hover:text-amber-500 transition-colors ${
-                  location.pathname === link.to
-                    ? 'text-amber-600 border-b-2 border-amber-500'
-                    : 'text-slate-600'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-1">
+                  <I18nText translationKey="navigation.contribute" />
+                  <ChevronDown size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center">
+                <DropdownMenuItem asChild>
+                  <Link to="/upload" className="flex items-center gap-2">
+                    <Plus size={14} />
+                    <I18nText translationKey="navigation.upload" />
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/contributions" className="flex items-center gap-2">
+                    <Users size={14} />
+                    <I18nText translationKey="navigation.community" />
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Link to="/about">
+              <Button variant="ghost">
+                <I18nText translationKey="navigation.about" />
+              </Button>
+            </Link>
           </nav>
+        )}
 
-          {/* Account & Language Desktop */}
-          <div className="hidden md:flex items-center space-x-2">
-            <LanguageSelector />
-            {!loading && (
-              <>
-                {isLoggedIn ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                        <CircleUser className="h-5 w-5" />
-                        <ChevronDown className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuItem disabled className="text-sm opacity-70">
-                        {user.email}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/profile')}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span><I18nText translationKey="navigation.account" /></span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/groups')}>
-                        <Users className="mr-2 h-4 w-4" />
-                        <span><I18nText translationKey="navigation.groups" /></span>
-                      </DropdownMenuItem>
-                      {user?.app_metadata?.isAdmin && (
-                        <DropdownMenuItem onClick={() => navigate('/admin')}>
-                          <Settings className="mr-2 h-4 w-4" />
-                          <span><I18nText translationKey="navigation.admin" /></span>
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span><I18nText translationKey="navigation.logout" /></span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate('/auth?mode=login')}
+        {/* Right side actions */}
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+
+          {/* User menu or Auth buttons */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="rounded-full p-2" aria-label="User Menu">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profileData?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-amber-100 text-amber-800">
+                      {profileData?.username?.substring(0, 2).toUpperCase() || 
+                       profileData?.full_name?.substring(0, 2).toUpperCase() || 
+                       'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="flex items-center gap-2">
+                    <User size={14} />
+                    <I18nText translationKey="auth.profile" />
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="flex items-center gap-2">
+                    <Settings size={14} />
+                    <I18nText translationKey="auth.settings" />
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
+                  <LogOut size={14} />
+                  <I18nText translationKey="auth.signOut" />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/auth">
+              <Button variant="ghost" className="hidden md:flex items-center gap-1">
+                <LogIn size={16} className="mr-1" />
+                <I18nText translationKey="auth.signIn" />
+              </Button>
+              <Button variant="ghost" className="md:hidden p-2" aria-label="Sign In">
+                <LogIn size={20} />
+              </Button>
+            </Link>
+          )}
+
+          {/* Mobile menu trigger */}
+          {isMobile && (
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="lg:hidden">
+                <div className="flex flex-col gap-6 py-6">
+                  <h2 className="text-lg font-medium">
+                    <I18nText translationKey="navigation.menu" />
+                  </h2>
+                  <nav className="flex flex-col space-y-4">
+                    <div className="space-y-3">
+                      <div className="font-medium text-sm text-slate-500">
+                        <I18nText translationKey="navigation.explore" />
+                      </div>
+                      <Link 
+                        to="/explore"
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Search size={16} />
+                        <I18nText translationKey="navigation.symbolExplorer" />
+                      </Link>
+                      <Link 
+                        to="/map"
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Map size={16} />
+                        <I18nText translationKey="navigation.mapExplorer" />
+                      </Link>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="font-medium text-sm text-slate-500">
+                        <I18nText translationKey="navigation.community" />
+                      </div>
+                      <Link 
+                        to="/groups"
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Users size={16} />
+                        <I18nText translationKey="navigation.groups" />
+                      </Link>
+                      <Link 
+                        to="/contributions"
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Users size={16} />
+                        <I18nText translationKey="navigation.community" />
+                      </Link>
+                    </div>
+                    
+                    <Link 
+                      to="/upload"
+                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100"
+                      onClick={() => setIsMenuOpen(false)}
                     >
-                      <I18nText translationKey="navigation.login" />
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => navigate('/auth?mode=signup')}
-                      className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+                      <Plus size={16} />
+                      <I18nText translationKey="navigation.upload" />
+                    </Link>
+                    
+                    <Link 
+                      to="/about"
+                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100"
+                      onClick={() => setIsMenuOpen(false)}
                     >
-                      <I18nText translationKey="navigation.signup" />
-                    </Button>
+                      <I18nText translationKey="navigation.about" />
+                    </Link>
+                  </nav>
+                  
+                  <div className="pt-4 border-t">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <I18nText translationKey="settings.language" />
+                        <LanguageSwitcher />
+                      </div>
+                    </div>
                   </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <LanguageSelector />
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-gray-400 hover:text-amber-500 hover:bg-gray-100"
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
       </div>
-
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  location.pathname === link.to
-                    ? 'text-amber-600 bg-amber-50'
-                    : 'text-gray-600 hover:bg-amber-50 hover:text-amber-600'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {!loading && (
-              <>
-                {isLoggedIn ? (
-                  <>
-                    <div className="border-t border-gray-200 pt-2">
-                      <div className="px-3 py-2 text-sm text-gray-500">{user.email}</div>
-                      <Link
-                        to="/profile"
-                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-600"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <div className="flex items-center">
-                          <Settings className="mr-2 h-4 w-4" />
-                          <span><I18nText translationKey="navigation.account" /></span>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/groups"
-                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-600"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <div className="flex items-center">
-                          <Users className="mr-2 h-4 w-4" />
-                          <span><I18nText translationKey="navigation.groups" /></span>
-                        </div>
-                      </Link>
-                      {user?.app_metadata?.isAdmin && (
-                        <Link
-                          to="/admin"
-                          className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-600"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <div className="flex items-center">
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span><I18nText translationKey="navigation.admin" /></span>
-                          </div>
-                        </Link>
-                      )}
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          setMobileMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-600"
-                      >
-                        <div className="flex items-center">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          <span><I18nText translationKey="navigation.logout" /></span>
-                        </div>
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="border-t border-gray-200 pt-2">
-                    <Link
-                      to="/auth?mode=login"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-600"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <I18nText translationKey="navigation.login" />
-                    </Link>
-                    <Link
-                      to="/auth?mode=signup"
-                      className="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-amber-500 to-amber-600 text-white m-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <I18nText translationKey="navigation.signup" />
-                    </Link>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </header>
   );
 };
