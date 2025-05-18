@@ -4,6 +4,7 @@ import { Globe, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { I18nText } from '@/components/ui/i18n-text';
 
 export const LanguageSelector = () => {
   const { changeLanguage, currentLanguage } = useTranslation();

@@ -2,7 +2,7 @@
 import React, { ReactNode, useState, useEffect, useCallback } from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
@@ -14,6 +14,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { t, currentLanguage, validateCurrentPageTranslations } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   
@@ -57,9 +58,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const requiresAuth = location.pathname.startsWith('/groups/create');
     
     if (requiresAuth && isAuthenticated === false) {
-      // Create a variable for the auth error message
-      const authErrorMessage = t('auth.requiresLogin');
-      toast.error(authErrorMessage);
+      toast.error(<I18nText translationKey="auth.requiresLogin" />);
       // Let the router handle the redirect
     }
     
