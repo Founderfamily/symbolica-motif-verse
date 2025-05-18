@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -11,6 +12,7 @@ import { getInterestGroupBySlug, InterestGroup, isGroupMember, joinGroup, leaveG
 import { useBreakpoint } from '@/hooks/use-breakpoints';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { I18nText } from '@/components/ui/i18n-text';
 
 const GroupDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -140,11 +142,11 @@ const GroupDetailPage = () => {
               <div className="flex flex-wrap items-center mt-2 gap-4">
                 <div className="flex items-center text-sm text-slate-600">
                   <Users className="h-4 w-4 mr-1" />
-                  {group.members_count} {t('community.stats.members')}
+                  {group.members_count} <I18nText translationKey="community.stats.members" />
                 </div>
                 <div className="flex items-center text-sm text-slate-600">
                   <Map className="h-4 w-4 mr-1" />
-                  {group.discoveries_count} {t('community.stats.discoveries')}
+                  {group.discoveries_count} <I18nText translationKey="community.stats.discoveries" />
                 </div>
               </div>
             </div>
@@ -157,7 +159,7 @@ const GroupDetailPage = () => {
                   onClick={() => navigate(`/groups/${slug}/edit`)}
                 >
                   <Settings className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('groups.manage')}</span>
+                  <span className="hidden sm:inline"><I18nText translationKey="groups.manage" /></span>
                 </Button>
               ) : (
                 <Button
@@ -167,11 +169,11 @@ const GroupDetailPage = () => {
                   disabled={joiningOrLeaving || !currentUserId}
                 >
                   {joiningOrLeaving ? (
-                    t('groups.processing')
+                    <I18nText translationKey="groups.processing" />
                   ) : isMember ? (
-                    t('groups.leave')
+                    <I18nText translationKey="groups.leave" />
                   ) : (
-                    t('groups.join')
+                    <I18nText translationKey="groups.join" />
                   )}
                 </Button>
               )}
@@ -186,10 +188,10 @@ const GroupDetailPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs defaultValue="discussions" className="w-full">
           <TabsList className="mb-6">
-            <TabsTrigger value="discussions">{t('groups.tabs.discussions')}</TabsTrigger>
-            <TabsTrigger value="discoveries">{t('groups.tabs.discoveries')}</TabsTrigger>
-            <TabsTrigger value="members">{t('groups.tabs.members')}</TabsTrigger>
-            <TabsTrigger value="collections">{t('groups.tabs.collections')}</TabsTrigger>
+            <TabsTrigger value="discussions"><I18nText translationKey="groups.tabs.discussions" /></TabsTrigger>
+            <TabsTrigger value="discoveries"><I18nText translationKey="groups.tabs.discoveries" /></TabsTrigger>
+            <TabsTrigger value="members"><I18nText translationKey="groups.tabs.members" /></TabsTrigger>
+            <TabsTrigger value="collections"><I18nText translationKey="groups.tabs.collections" /></TabsTrigger>
           </TabsList>
           
           <TabsContent value="discussions">
@@ -197,29 +199,29 @@ const GroupDetailPage = () => {
               <Button 
                 className="mb-6 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
               >
-                <Plus className="mr-2 h-4 w-4" /> {t('groups.createPost')}
+                <Plus className="mr-2 h-4 w-4" /> <I18nText translationKey="groups.createPost" />
               </Button>
             )}
             
             <div className="text-center py-10">
-              <p className="text-slate-500">{t('groups.noPostsYet')}</p>
+              <p className="text-slate-500"><I18nText translationKey="groups.noPostsYet" /></p>
               {isMember && (
-                <p className="mt-2 text-slate-500">{t('groups.beTheFirst')}</p>
+                <p className="mt-2 text-slate-500"><I18nText translationKey="groups.beTheFirst" /></p>
               )}
             </div>
           </TabsContent>
           
           <TabsContent value="discoveries">
             <div className="text-center py-10">
-              <p className="text-slate-500">{t('groups.noDiscoveriesYet')}</p>
+              <p className="text-slate-500"><I18nText translationKey="groups.noDiscoveriesYet" /></p>
               {isMember && (
-                <p className="mt-2 text-slate-500">{t('groups.contributeFirst')}</p>
+                <p className="mt-2 text-slate-500"><I18nText translationKey="groups.contributeFirst" /></p>
               )}
             </div>
           </TabsContent>
           
           <TabsContent value="members">
-            <h3 className="text-xl font-semibold mb-4">{t('groups.membersList')}</h3>
+            <h3 className="text-xl font-semibold mb-4"><I18nText translationKey="groups.membersList" /></h3>
             
             <div className={`grid ${isSmallScreen ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'} gap-4`}>
               {members.map((member) => (
@@ -234,12 +236,12 @@ const GroupDetailPage = () => {
                       </Avatar>
                       <div>
                         <p className="font-medium">
-                          {member.profiles.full_name || member.profiles.username || t('user.anonymous')}
+                          {member.profiles.full_name || member.profiles.username || <I18nText translationKey="user.anonymous" />}
                         </p>
                         <p className="text-xs text-slate-500 capitalize">
-                          {member.role === 'admin' ? t('groups.roles.admin') : 
-                           member.role === 'moderator' ? t('groups.roles.moderator') : 
-                           t('groups.roles.member')}
+                          {member.role === 'admin' ? <I18nText translationKey="groups.roles.admin" /> : 
+                           member.role === 'moderator' ? <I18nText translationKey="groups.roles.moderator" /> : 
+                           <I18nText translationKey="groups.roles.member" />}
                         </p>
                       </div>
                     </div>
@@ -254,14 +256,14 @@ const GroupDetailPage = () => {
               <Button 
                 className="mb-6 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
               >
-                <Plus className="mr-2 h-4 w-4" /> {t('groups.createCollection')}
+                <Plus className="mr-2 h-4 w-4" /> <I18nText translationKey="groups.createCollection" />
               </Button>
             )}
             
             <div className="text-center py-10">
-              <p className="text-slate-500">{t('groups.noCollectionsYet')}</p>
+              <p className="text-slate-500"><I18nText translationKey="groups.noCollectionsYet" /></p>
               {isMember && (
-                <p className="mt-2 text-slate-500">{t('groups.createFirstCollection')}</p>
+                <p className="mt-2 text-slate-500"><I18nText translationKey="groups.createFirstCollection" /></p>
               )}
             </div>
           </TabsContent>

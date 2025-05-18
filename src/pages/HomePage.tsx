@@ -22,11 +22,6 @@ import { Link } from 'react-router-dom';
 const HomePage = () => {
   const { t } = useTranslation();
   
-  // Create translation variables for texts used in attributes
-  const exploreGroupsText = t('groups.exploreBanner.title');
-  const groupsBannerDesc = t('groups.exploreBanner.description');
-  const groupsBannerAction = t('groups.exploreBanner.action');
-
   return (
     <div className="bg-white">
       {/* Hero Section */}
