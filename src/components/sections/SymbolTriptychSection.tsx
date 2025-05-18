@@ -9,7 +9,8 @@ import { I18nText } from '@/components/ui/i18n-text';
 
 const SymbolTriptychSection: React.FC = () => {
   const [selectedSymbolId, setSelectedSymbolId] = useState<string | null>(null);
-  const { isAdmin } = useAuth();
+  const auth = useAuth();
+  const isAdmin = auth?.isAdmin || false;
   const { t } = useTranslation();
 
   return (

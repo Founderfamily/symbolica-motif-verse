@@ -14,14 +14,16 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button';
-import OpenSourceBadge from '@/components/ui/open-source-badge';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import LanguageSelector from '@/components/ui/language-selector';
 
 const Header = () => {
   const { i18n } = useTranslation();
-  const { user, signOut, isAdmin } = useAuth();
+  const auth = useAuth();
+  const user = auth?.user || null;
+  const signOut = auth?.signOut || (() => console.warn('Auth provider not available'));
+  const isAdmin = auth?.isAdmin || false;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 

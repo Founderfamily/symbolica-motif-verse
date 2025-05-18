@@ -90,6 +90,51 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_items: {
+        Row: {
+          added_by: string
+          collection_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          symbol_id: string
+          translations: Json | null
+        }
+        Insert: {
+          added_by: string
+          collection_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          symbol_id: string
+          translations?: Json | null
+        }
+        Update: {
+          added_by?: string
+          collection_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          symbol_id?: string
+          translations?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "group_symbol_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_items_symbol_id_fkey"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_sections: {
         Row: {
           content: Json | null
@@ -225,6 +270,228 @@ export type Database = {
           },
         ]
       }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
+      group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "interest_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_posts: {
+        Row: {
+          comments_count: number
+          content: string
+          created_at: string
+          group_id: string
+          id: string
+          likes_count: number
+          translations: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comments_count?: number
+          content: string
+          created_at?: string
+          group_id: string
+          id?: string
+          likes_count?: number
+          translations?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comments_count?: number
+          content?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          likes_count?: number
+          translations?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_posts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "interest_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_symbol_collections: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          group_id: string
+          id: string
+          name: string
+          translations: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          group_id: string
+          id?: string
+          name: string
+          translations?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          group_id?: string
+          id?: string
+          name?: string
+          translations?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_symbol_collections_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "interest_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interest_groups: {
+        Row: {
+          banner_image: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          discoveries_count: number
+          icon: string | null
+          id: string
+          is_public: boolean
+          members_count: number
+          name: string
+          slug: string
+          theme_color: string | null
+          translations: Json | null
+          updated_at: string
+        }
+        Insert: {
+          banner_image?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          discoveries_count?: number
+          icon?: string | null
+          id?: string
+          is_public?: boolean
+          members_count?: number
+          name: string
+          slug: string
+          theme_color?: string | null
+          translations?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          banner_image?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          discoveries_count?: number
+          icon?: string | null
+          id?: string
+          is_public?: boolean
+          members_count?: number
+          name?: string
+          slug?: string
+          theme_color?: string | null
+          translations?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          read: boolean
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          id?: string
+          read?: boolean
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          read?: boolean
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       partners: {
         Row: {
           created_at: string | null
@@ -260,6 +527,73 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          translations: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          translations?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          translations?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "group_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "group_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -578,9 +912,12 @@ export type Database = {
           created_at: string | null
           culture: string
           description: string | null
+          function: string[] | null
           id: string
+          medium: string[] | null
           name: string
           period: string
+          technique: string[] | null
           translations: Json | null
           updated_at: string | null
         }
@@ -588,9 +925,12 @@ export type Database = {
           created_at?: string | null
           culture: string
           description?: string | null
+          function?: string[] | null
           id?: string
+          medium?: string[] | null
           name: string
           period: string
+          technique?: string[] | null
           translations?: Json | null
           updated_at?: string | null
         }
@@ -598,9 +938,12 @@ export type Database = {
           created_at?: string | null
           culture?: string
           description?: string | null
+          function?: string[] | null
           id?: string
+          medium?: string[] | null
           name?: string
           period?: string
+          technique?: string[] | null
           translations?: Json | null
           updated_at?: string | null
         }
@@ -806,6 +1149,27 @@ export type Database = {
           title_translations?: Json | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          followed_id: string
+          follower_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          followed_id: string
+          follower_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          followed_id?: string
+          follower_id?: string
+          id?: string
         }
         Relationships: []
       }
