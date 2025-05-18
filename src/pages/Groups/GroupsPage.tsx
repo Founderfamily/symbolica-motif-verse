@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,6 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Users, Plus, Map, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import Layout from '@/components/layout/Layout';
 import { getInterestGroups, InterestGroup } from '@/services/interestGroupService';
 import { useNavigate } from 'react-router-dom';
 import { useBreakpoint } from '@/hooks/use-breakpoints';
@@ -43,69 +41,67 @@ const GroupsPage: React.FC = () => {
     : groups;
   
   return (
-    <Layout>
-      <div className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{t('groups.title')}</h1>
-            <p className="text-sm sm:text-base text-slate-600 mt-1">{t('groups.subtitle')}</p>
-          </div>
-          <Button 
-            className="mt-4 md:mt-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
-            onClick={() => navigate('/groups/create')}
-          >
-            <Plus className="mr-2 h-4 w-4" /> {t('groups.createNew')}
-          </Button>
+    <div className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{t('groups.title')}</h1>
+          <p className="text-sm sm:text-base text-slate-600 mt-1">{t('groups.subtitle')}</p>
         </div>
-        
-        <div className="mb-8">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-            <Input
-              placeholder={t('groups.searchPlaceholder')}
-              className="pl-10 bg-white"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        <Button 
+          className="mt-4 md:mt-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+          onClick={() => navigate('/groups/create')}
+        >
+          <Plus className="mr-2 h-4 w-4" /> {t('groups.createNew')}
+        </Button>
+      </div>
+      
+      <div className="mb-8">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+          <Input
+            placeholder={t('groups.searchPlaceholder')}
+            className="pl-10 bg-white"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <Card key={i} className="border shadow-md animate-pulse">
-                <div className="h-32 bg-slate-200"></div>
-                <CardContent className="p-5">
-                  <div className="h-6 bg-slate-200 rounded mb-2 w-3/4"></div>
-                  <div className="h-4 bg-slate-100 rounded mb-1 w-1/2"></div>
-                  <div className="h-4 bg-slate-100 rounded w-full"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : filteredGroups.length > 0 ? (
-          isSmallScreen ? (
-            <ScrollArea className="w-full pb-4">
-              <div className="flex gap-4 pb-2 px-1">
-                {filteredGroups.map(group => (
-                  <GroupCard key={group.id} group={group} />
-                ))}
-              </div>
-            </ScrollArea>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      </div>
+      
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <Card key={i} className="border shadow-md animate-pulse">
+              <div className="h-32 bg-slate-200"></div>
+              <CardContent className="p-5">
+                <div className="h-6 bg-slate-200 rounded mb-2 w-3/4"></div>
+                <div className="h-4 bg-slate-100 rounded mb-1 w-1/2"></div>
+                <div className="h-4 bg-slate-100 rounded w-full"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : filteredGroups.length > 0 ? (
+        isSmallScreen ? (
+          <ScrollArea className="w-full pb-4">
+            <div className="flex gap-4 pb-2 px-1">
               {filteredGroups.map(group => (
                 <GroupCard key={group.id} group={group} />
               ))}
             </div>
-          )
+          </ScrollArea>
         ) : (
-          <div className="text-center py-16">
-            <p className="text-slate-500">{t('groups.noResults')}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredGroups.map(group => (
+              <GroupCard key={group.id} group={group} />
+            ))}
           </div>
-        )}
-      </div>
-    </Layout>
+        )
+      ) : (
+        <div className="text-center py-16">
+          <p className="text-slate-500">{t('groups.noResults')}</p>
+        </div>
+      )}
+    </div>
   );
 };
 

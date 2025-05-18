@@ -1,8 +1,6 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -64,86 +62,84 @@ const GroupCreatePage = () => {
   };
   
   return (
-    <Layout>
-      <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">{t('groups.create.title')}</h1>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('groups.create.formTitle')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">{t('groups.create.name')}</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder={t('groups.create.namePlaceholder')}
-                  required
+    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
+      <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">{t('groups.create.title')}</h1>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('groups.create.formTitle')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">{t('groups.create.name')}</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder={t('groups.create.namePlaceholder')}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">{t('groups.create.description')}</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder={t('groups.create.descriptionPlaceholder')}
+                rows={4}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="theme_color">{t('groups.create.themeColor')}</Label>
+              <div className="mt-2">
+                <CirclePicker
+                  color={formData.theme_color}
+                  onChangeComplete={handleColorChange}
+                  colors={colorOptions}
+                  width="100%"
                 />
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">{t('groups.create.description')}</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder={t('groups.create.descriptionPlaceholder')}
-                  rows={4}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="theme_color">{t('groups.create.themeColor')}</Label>
-                <div className="mt-2">
-                  <CirclePicker
-                    color={formData.theme_color}
-                    onChangeComplete={handleColorChange}
-                    colors={colorOptions}
-                    width="100%"
-                  />
-                </div>
-                <div 
-                  className="mt-3 h-8 rounded-md" 
-                  style={{ backgroundColor: formData.theme_color }}
-                />
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="is_public"
-                  checked={formData.is_public}
-                  onCheckedChange={handleSwitchChange}
-                />
-                <Label htmlFor="is_public">{t('groups.create.isPublic')}</Label>
-              </div>
-              
-              <div className="pt-2 flex gap-3 justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/groups')}
-                >
-                  {t('common.cancel')}
-                </Button>
-                <Button 
-                  type="submit"
-                  disabled={loading}
-                  className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
-                >
-                  {loading ? t('common.creating') : t('common.create')}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </Layout>
+              <div 
+                className="mt-3 h-8 rounded-md" 
+                style={{ backgroundColor: formData.theme_color }}
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Switch
+                id="is_public"
+                checked={formData.is_public}
+                onCheckedChange={handleSwitchChange}
+              />
+              <Label htmlFor="is_public">{t('groups.create.isPublic')}</Label>
+            </div>
+            
+            <div className="pt-2 flex gap-3 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/groups')}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button 
+                type="submit"
+                disabled={loading}
+                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+              >
+                {loading ? t('common.creating') : t('common.create')}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

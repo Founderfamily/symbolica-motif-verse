@@ -14,7 +14,6 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { Search, Grid, Layout as LayoutIcon, Map, FilterX } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { FilterCategory, FilterOptions } from '@/types/filters';
-import Layout from '@/components/layout/Layout';
 
 const SymbolExplorer: React.FC = () => {
   const { t, currentLanguage } = useTranslation();
@@ -176,224 +175,222 @@ const SymbolExplorer: React.FC = () => {
   const hasActiveFilters = Object.values(filters).some(filterArray => filterArray.length > 0) || searchTerm !== '';
   
   return (
-    <Layout>
-      <div className="container mx-auto p-4 pt-12 pb-20">
-        {/* Enhanced visual separator between header and content */}
-        <Separator className="mb-8 mt-2" />
-        
-        <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
-          <div>
-            <h1 className="text-lg font-medium text-slate-700 mb-2">
-              <I18nText translationKey="symbolExplorer.title">Symbol Explorer</I18nText>
-            </h1>
-            <p className="text-slate-600">
-              <I18nText translationKey="symbolExplorer.description">
-                Explore our collection of cultural symbols, patterns and motifs
-              </I18nText>
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Tabs value={view} onValueChange={(v) => setView(v as any)}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="grid" className="flex gap-1 items-center">
-                  <Grid className="w-4 h-4" />
-                  <I18nText translationKey="symbolExplorer.gridView">Grid</I18nText>
-                </TabsTrigger>
-                <TabsTrigger value="list" className="flex gap-1 items-center">
-                  <LayoutIcon className="w-4 h-4" />
-                  <I18nText translationKey="symbolExplorer.listView">List</I18nText>
-                </TabsTrigger>
-                <TabsTrigger value="map" className="flex gap-1 items-center">
-                  <Map className="w-4 h-4" />
-                  <I18nText translationKey="symbolExplorer.mapView">Map</I18nText>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
+    <div className="container mx-auto p-4 pt-12 pb-20">
+      {/* Enhanced visual separator between header and content */}
+      <Separator className="mb-8 mt-2" />
+      
+      <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
+        <div>
+          <h1 className="text-lg font-medium text-slate-700 mb-2">
+            <I18nText translationKey="symbolExplorer.title">Symbol Explorer</I18nText>
+          </h1>
+          <p className="text-slate-600">
+            <I18nText translationKey="symbolExplorer.description">
+              Explore our collection of cultural symbols, patterns and motifs
+            </I18nText>
+          </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Left sidebar with filters */}
-          <div className="md:col-span-1">
-            <Card className="p-4">
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-slate-900">
-                    <I18nText translationKey="symbolExplorer.filters">Filters</I18nText>
-                  </h3>
-                  {hasActiveFilters && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={clearFilters}
-                      className="h-8 text-xs flex items-center gap-1 text-slate-500"
-                    >
-                      <FilterX className="w-3 h-3" />
-                      <I18nText translationKey="symbolExplorer.clearFilters">Clear all</I18nText>
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                  <Input
-                    placeholder={t('symbolExplorer.searchPlaceholder', 'Search symbols...')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-              
-              <SearchFilters 
-                availableFilters={availableFilters}
-                selectedFilters={filters}
-                onFilterChange={handleFilterChange}
-                translatedFilters={translatedFilters}
-              />
-            </Card>
-            
-            <Card className="p-4 mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-slate-900">
-                  <I18nText translationKey="symbolExplorer.activeFilters">Active Filters</I18nText>
-                </h3>
-              </div>
-              
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(filters).map(([category, values]) => 
-                  values.map(value => {
-                    // Get translated filter display value
-                    const translatedValue = translatedFilters?.[category as FilterCategory]?.[value] || value;
-                    
-                    return (
-                      <Badge 
-                        key={`${category}-${value}`} 
-                        variant="secondary" 
-                        className="flex gap-1"
-                      >
-                        <span className="text-xs text-slate-500 mr-1">
-                          <I18nText translationKey={`searchFilters.${category}`}>
-                            {category === 'cultures' ? 'Culture' : 
-                             category === 'periods' ? 'Period' :
-                             category === 'medium' ? 'Medium' :
-                             category === 'technique' ? 'Technique' :
-                             category === 'function' ? 'Function' : ''}:
-                          </I18nText>
-                        </span>
-                        {translatedValue}
-                        <button 
-                          onClick={() => handleFilterChange(
-                            category as FilterCategory, 
-                            filters[category as FilterCategory].filter(v => v !== value)
-                          )}
-                          className="ml-1 text-xs"
-                        >
-                          ×
-                        </button>
-                      </Badge>
-                    );
-                  })
-                )}
-                
-                {!hasActiveFilters && (
-                  <span className="text-sm text-slate-500">
-                    <I18nText translationKey="symbolExplorer.noFilters">No active filters</I18nText>
-                  </span>
-                )}
-              </div>
-            </Card>
-          </div>
-          
-          {/* Main content area */}
-          <div className="md:col-span-3">
-            {isLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
-              </div>
-            ) : (
-              <>
-                <div className="mb-4 px-2 flex justify-between items-center">
-                  <div className="text-slate-600">
-                    <I18nText 
-                      translationKey="symbolExplorer.resultsCount" 
-                      params={{ count: filteredSymbols?.length || 0 }}
-                    >
-                      {filteredSymbols?.length || 0} symbols found
-                    </I18nText>
-                  </div>
-                </div>
-                
-                <Tabs value={view}>
-                  <TabsContent value="grid" className="m-0">
-                    <SymbolGrid symbols={filteredSymbols || []} />
-                  </TabsContent>
-                  
-                  <TabsContent value="list" className="m-0">
-                    <Card className="p-4">
-                      <div className="space-y-4">
-                        {filteredSymbols?.map(symbol => {
-                          // Use translations if available
-                          const translations = symbol.translations || {};
-                          const langData = translations[currentLanguage];
-                          const displayName = langData?.name || symbol.name;
-                          const displayCulture = langData?.culture || symbol.culture;
-                          const displayPeriod = langData?.period || symbol.period;
-                          const displayDescription = langData?.description || symbol.description;
-                          
-                          return (
-                            <div key={symbol.id} className="flex items-center gap-4 p-2 border-b last:border-0">
-                              <div className="w-16 h-16 bg-amber-100 rounded-lg"></div>
-                              <div>
-                                <h3 className="font-medium">{displayName}</h3>
-                                <div className="flex gap-2 mt-1">
-                                  <span className="text-xs text-slate-600">{displayCulture}</span>
-                                  <span className="text-xs text-slate-500">{displayPeriod}</span>
-                                </div>
-                                {displayDescription && (
-                                  <p className="text-sm text-slate-700 mt-1 line-clamp-2">{displayDescription}</p>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                        
-                        {(filteredSymbols?.length || 0) === 0 && (
-                          <div className="py-8 text-center text-slate-500">
-                            <I18nText translationKey="symbolExplorer.noResults">
-                              No symbols match your filter criteria
-                            </I18nText>
-                          </div>
-                        )}
-                      </div>
-                    </Card>
-                  </TabsContent>
-                  
-                  <TabsContent value="map" className="m-0">
-                    <Card className="p-8 flex items-center justify-center h-96 bg-slate-50">
-                      <div className="text-center">
-                        <Map className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-                        <h3 className="font-medium text-slate-700">
-                          <I18nText translationKey="symbolExplorer.mapViewComingSoon">
-                            Interactive map view coming soon
-                          </I18nText>
-                        </h3>
-                        <p className="text-slate-500 mt-2 max-w-md">
-                          <I18nText translationKey="symbolExplorer.mapViewDescription">
-                            Explore symbols based on their geographical origin and distribution
-                          </I18nText>
-                        </p>
-                      </div>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
-              </>
-            )}
-          </div>
+        <div className="flex items-center gap-2">
+          <Tabs value={view} onValueChange={(v) => setView(v as any)}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="grid" className="flex gap-1 items-center">
+                <Grid className="w-4 h-4" />
+                <I18nText translationKey="symbolExplorer.gridView">Grid</I18nText>
+              </TabsTrigger>
+              <TabsTrigger value="list" className="flex gap-1 items-center">
+                <LayoutIcon className="w-4 h-4" />
+                <I18nText translationKey="symbolExplorer.listView">List</I18nText>
+              </TabsTrigger>
+              <TabsTrigger value="map" className="flex gap-1 items-center">
+                <Map className="w-4 h-4" />
+                <I18nText translationKey="symbolExplorer.mapView">Map</I18nText>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
-    </Layout>
+      
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Left sidebar with filters */}
+        <div className="md:col-span-1">
+          <Card className="p-4">
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium text-slate-900">
+                  <I18nText translationKey="symbolExplorer.filters">Filters</I18nText>
+                </h3>
+                {hasActiveFilters && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={clearFilters}
+                    className="h-8 text-xs flex items-center gap-1 text-slate-500"
+                  >
+                    <FilterX className="w-3 h-3" />
+                    <I18nText translationKey="symbolExplorer.clearFilters">Clear all</I18nText>
+                  </Button>
+                )}
+              </div>
+              
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder={t('symbolExplorer.searchPlaceholder', 'Search symbols...')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            
+            <SearchFilters 
+              availableFilters={availableFilters}
+              selectedFilters={filters}
+              onFilterChange={handleFilterChange}
+              translatedFilters={translatedFilters}
+            />
+          </Card>
+          
+          <Card className="p-4 mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium text-slate-900">
+                <I18nText translationKey="symbolExplorer.activeFilters">Active Filters</I18nText>
+              </h3>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(filters).map(([category, values]) => 
+                values.map(value => {
+                  // Get translated filter display value
+                  const translatedValue = translatedFilters?.[category as FilterCategory]?.[value] || value;
+                  
+                  return (
+                    <Badge 
+                      key={`${category}-${value}`} 
+                      variant="secondary" 
+                      className="flex gap-1"
+                    >
+                      <span className="text-xs text-slate-500 mr-1">
+                        <I18nText translationKey={`searchFilters.${category}`}>
+                          {category === 'cultures' ? 'Culture' : 
+                           category === 'periods' ? 'Period' :
+                           category === 'medium' ? 'Medium' :
+                           category === 'technique' ? 'Technique' :
+                           category === 'function' ? 'Function' : ''}:
+                        </I18nText>
+                      </span>
+                      {translatedValue}
+                      <button 
+                        onClick={() => handleFilterChange(
+                          category as FilterCategory, 
+                          filters[category as FilterCategory].filter(v => v !== value)
+                        )}
+                        className="ml-1 text-xs"
+                      >
+                        ×
+                      </button>
+                    </Badge>
+                  );
+                })
+              )}
+              
+              {!hasActiveFilters && (
+                <span className="text-sm text-slate-500">
+                  <I18nText translationKey="symbolExplorer.noFilters">No active filters</I18nText>
+                </span>
+              )}
+            </div>
+          </Card>
+        </div>
+        
+        {/* Main content area */}
+        <div className="md:col-span-3">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-4 px-2 flex justify-between items-center">
+                <div className="text-slate-600">
+                  <I18nText 
+                    translationKey="symbolExplorer.resultsCount" 
+                    params={{ count: filteredSymbols?.length || 0 }}
+                  >
+                    {filteredSymbols?.length || 0} symbols found
+                  </I18nText>
+                </div>
+              </div>
+              
+              <Tabs value={view}>
+                <TabsContent value="grid" className="m-0">
+                  <SymbolGrid symbols={filteredSymbols || []} />
+                </TabsContent>
+                
+                <TabsContent value="list" className="m-0">
+                  <Card className="p-4">
+                    <div className="space-y-4">
+                      {filteredSymbols?.map(symbol => {
+                        // Use translations if available
+                        const translations = symbol.translations || {};
+                        const langData = translations[currentLanguage];
+                        const displayName = langData?.name || symbol.name;
+                        const displayCulture = langData?.culture || symbol.culture;
+                        const displayPeriod = langData?.period || symbol.period;
+                        const displayDescription = langData?.description || symbol.description;
+                        
+                        return (
+                          <div key={symbol.id} className="flex items-center gap-4 p-2 border-b last:border-0">
+                            <div className="w-16 h-16 bg-amber-100 rounded-lg"></div>
+                            <div>
+                              <h3 className="font-medium">{displayName}</h3>
+                              <div className="flex gap-2 mt-1">
+                                <span className="text-xs text-slate-600">{displayCulture}</span>
+                                <span className="text-xs text-slate-500">{displayPeriod}</span>
+                              </div>
+                              {displayDescription && (
+                                <p className="text-sm text-slate-700 mt-1 line-clamp-2">{displayDescription}</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      
+                      {(filteredSymbols?.length || 0) === 0 && (
+                        <div className="py-8 text-center text-slate-500">
+                          <I18nText translationKey="symbolExplorer.noResults">
+                            No symbols match your filter criteria
+                          </I18nText>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="map" className="m-0">
+                  <Card className="p-8 flex items-center justify-center h-96 bg-slate-50">
+                    <div className="text-center">
+                      <Map className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                      <h3 className="font-medium text-slate-700">
+                        <I18nText translationKey="symbolExplorer.mapViewComingSoon">
+                          Interactive map view coming soon
+                        </I18nText>
+                      </h3>
+                      <p className="text-slate-500 mt-2 max-w-md">
+                        <I18nText translationKey="symbolExplorer.mapViewDescription">
+                          Explore symbols based on their geographical origin and distribution
+                        </I18nText>
+                      </p>
+                    </div>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
