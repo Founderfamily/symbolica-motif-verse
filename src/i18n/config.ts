@@ -77,39 +77,8 @@ if (process.env.NODE_ENV === 'development') {
       i18n.reloadResources().then(() => {
         console.log(`Translations reloaded for: ${currentLang}`);
       });
-    },
-    
-    // Check missing translations
-    checkMissingTranslations: () => {
-      const event = new CustomEvent('validate-translations');
-      window.dispatchEvent(event);
-    },
-    
-    // Get all missing keys
-    getMissingKeys: () => {
-      // This is a simple check, not exhaustive
-      const components = document.querySelectorAll('[data-i18n-missing="true"]');
-      const missingKeys = Array.from(components).map(el => 
-        (el as HTMLElement).getAttribute('data-i18n-key') || ''
-      );
-      console.log(`Found ${missingKeys.length} missing translation keys:`, missingKeys);
-      return missingKeys;
     }
   };
-  
-  // Add keyboard shortcut to toggle language (Ctrl+Alt+L)
-  document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.altKey && e.code === 'KeyL') {
-      (window as any).i18nTools.toggleLanguage();
-    }
-  });
-  
-  // Add keyboard shortcut to check translations (Ctrl+Alt+T)
-  document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.altKey && e.code === 'KeyT') {
-      (window as any).i18nTools.checkMissingTranslations();
-    }
-  });
 }
 
 // Export the i18n instance for direct access to language

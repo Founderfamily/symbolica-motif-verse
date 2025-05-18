@@ -1,7 +1,6 @@
 
 import React, { ReactNode, useState } from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { keyExistsInBothLanguages } from '@/i18n/translationUtils';
 
 type I18nTextProps = {
   /** The translation key to be used */
@@ -46,9 +45,6 @@ export const I18nText = ({
   // or if we're dealing with a known generic key
   const isMissing = !keyExists || translatedText === translationKey || isGenericKey;
   
-  // Check if translation exists in both languages
-  const existsInBothLanguages = keyExistsInBothLanguages(translationKey);
-  
   // Add visual styling for missing translations in development
   const warningStyle = process.env.NODE_ENV === 'development' && highlightMissing && isMissing
     ? { 
@@ -65,9 +61,7 @@ export const I18nText = ({
   const devAttributes = process.env.NODE_ENV === 'development' 
     ? { 
         'data-i18n-key': translationKey,
-        'data-i18n-missing': isMissing ? 'true' : 'false',
-        'data-i18n-exists-both': existsInBothLanguages ? 'true' : 'false',
-        'data-i18n-is-generic': isGenericKey ? 'true' : 'false'
+        'data-i18n-missing': isMissing ? 'true' : 'false'
       } 
     : {};
     
@@ -94,31 +88,8 @@ export const I18nText = ({
             fontWeight: 'bold'
           }}
         >
-          {isGenericKey ? 'Generic key:' : (!existsInBothLanguages ? 'Missing translation:' : 'Possibly incorrect:')} {translationKey}
+          {isGenericKey ? 'Generic key:' : 'Missing translation:'} {translationKey}
         </div>
-      )
-    : null;
-    
-  // Add indicator for language that's missing translation
-  const missingLanguageIndicator = process.env.NODE_ENV === 'development' && highlightMissing && isMissing && !existsInBothLanguages
-    ? (
-        <span 
-          style={{
-            fontSize: '9px',
-            backgroundColor: '#ef4444',
-            color: 'white',
-            padding: '0px 2px',
-            borderRadius: '2px',
-            position: 'absolute',
-            top: '-7px',
-            right: '-7px',
-            lineHeight: '1.2',
-            fontWeight: 'bold'
-          }}
-        >
-          {i18n.exists(translationKey, { lng: 'en' }) ? 'FR' : 
-           i18n.exists(translationKey, { lng: 'fr' }) ? 'EN' : 'ALL'}
-        </span>
       )
     : null;
     
@@ -138,7 +109,6 @@ export const I18nText = ({
       onMouseLeave={isMissing ? () => setShowTooltip(false) : undefined}
     >
       {warningTooltip}
-      {missingLanguageIndicator}
       {displayText}
     </Component>
   );

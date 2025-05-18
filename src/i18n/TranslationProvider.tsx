@@ -13,8 +13,9 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
   useEffect(() => {
     // Make sure i18n is initialized
     if (!i18n.isInitialized) {
-      console.warn('i18n was not initialized; attempting to initialize now');
-      i18n.init().catch(err => console.error('i18n initialization error:', err));
+      i18n.init()
+        .then(() => console.log('i18n successfully initialized'))
+        .catch(err => console.error('i18n initialization error:', err));
     }
     
     // Add language toggle shortcut (Ctrl+Alt+L) in development
