@@ -23,6 +23,7 @@ const suggestBetterKey = (genericKey, filePath, lineNumber) => {
   const pathParts = filePath.split(path.sep);
   const isPagesDir = pathParts.includes('pages');
   const isComponentsDir = pathParts.includes('components');
+  const isSectionsDir = pathParts.includes('sections');
   
   let namespace = 'common';
   let section = 'general';
@@ -35,6 +36,31 @@ const suggestBetterKey = (genericKey, filePath, lineNumber) => {
     const componentType = pathParts[pathParts.indexOf('components') + 1];
     namespace = componentType || 'components';
     section = fileName.toLowerCase();
+  } else if (isSectionsDir) {
+    namespace = 'sections';
+    section = fileName.toLowerCase();
+  }
+  
+  // Try to infer a better section name from the component context
+  // Look for React component or function names near the key
+  const componentPattern = /function\s+([A-Z][a-zA-Z0-9]*)|class\s+([A-Z][a-zA-Z0-9]*)|const\s+([A-Z][a-zA-Z0-9]*)\s+=\s+(React\.)?function|const\s+([A-Z][a-zA-Z0-9]*)\s+=\s+\(/g;
+  let match;
+  let componentName = '';
+  
+  // Search nearby lines for component names
+  const contextRange = 5; // Lines to check before the occurrence
+  const startLine = Math.max(0, lineNumber - contextRange - 1);
+  const contextLines = fileContent.slice(startLine, lineNumber);
+  
+  const contextContent = contextLines.join('\n');
+  while ((match = componentPattern.exec(contextContent)) !== null) {
+    // Extract the component name from the matched groups
+    componentName = match[1] || match[2] || match[3] || match[5] || '';
+  }
+  
+  if (componentName) {
+    // Convert component name to kebab case for section
+    section = componentName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
   }
   
   // Convert genericKey to lowercase for consistency
