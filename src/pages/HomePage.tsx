@@ -21,6 +21,11 @@ import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   const { t } = useTranslation();
+  
+  // Create translation variables for texts used in attributes
+  const exploreGroupsText = t('groups.exploreBanner.title');
+  const groupsBannerDesc = t('groups.exploreBanner.description');
+  const groupsBannerAction = t('groups.exploreBanner.action');
 
   return (
     <div className="bg-white">
@@ -42,10 +47,10 @@ const HomePage = () => {
       <div className="bg-gradient-to-r from-amber-50 to-amber-100 py-12 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-900">
-            {t('groups.exploreBanner.title')}
+            <I18nText translationKey="groups.exploreBanner.title" />
           </h2>
           <p className="mb-6 max-w-3xl mx-auto text-amber-800">
-            {t('groups.exploreBanner.description')}
+            <I18nText translationKey="groups.exploreBanner.description" />
           </p>
           <Link to="/groups">
             <Button 
@@ -53,7 +58,7 @@ const HomePage = () => {
               className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
             >
               <Users className="mr-2 h-5 w-5" />
-              {t('groups.exploreBanner.action')}
+              <I18nText translationKey="groups.exploreBanner.action" />
             </Button>
           </Link>
         </div>
