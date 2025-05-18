@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SymbolData } from '@/types/supabase';
@@ -13,17 +14,13 @@ import { SearchFilters } from '@/components/search/SearchFilters';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Search, Grid, Layout, Map, FilterX } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { FilterCategory, FilterOptions } from '@/types/filters';
 
 const SymbolExplorer: React.FC = () => {
-  const { t, currentLanguage } = useTranslation();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState<FilterOptions>({
-    cultures: [],
-    periods: [],
-    medium: [],
-    technique: [],
-    function: [],
+  const [filters, setFilters] = useState({
+    cultures: [] as string[],
+    periods: [] as string[],
   });
   const [view, setView] = useState<'grid' | 'list' | 'map'>('grid');
   
@@ -40,139 +37,40 @@ const SymbolExplorer: React.FC = () => {
     }
   });
   
-  // Create translated filter values from symbols data
-  const translatedFilters = useMemo(() => {
-    if (!symbols) {
-      // Initialize with the correct structure even when symbols is not loaded yet
-      return {
-        cultures: {},
-        periods: {},
-        medium: {},
-        technique: {},
-        function: {}
-      } as Record<FilterCategory, Record<string, string>>;
-    }
-    
-    const result: Record<FilterCategory, Record<string, string>> = {
-      cultures: {},
-      periods: {},
-      medium: {},
-      technique: {},
-      function: {},
-    };
-    
-    symbols.forEach(symbol => {
-      // Get translations or fallback to original values
-      const translations = symbol.translations || {};
-      const langData = translations[currentLanguage];
-      
-      // Handle culture translations
-      if (symbol.culture) {
-        const translatedCulture = langData?.culture || symbol.culture;
-        result.cultures[symbol.culture] = translatedCulture;
-      }
-      
-      // Handle period translations
-      if (symbol.period) {
-        const translatedPeriod = langData?.period || symbol.period;
-        result.periods[symbol.period] = translatedPeriod;
-      }
-      
-      // Handle medium translations (array)
-      symbol.medium?.forEach(m => {
-        const translatedMedium = langData?.medium?.find(tm => tm === m) || m;
-        result.medium[m] = translatedMedium;
-      });
-      
-      // Handle technique translations (array)
-      symbol.technique?.forEach(t => {
-        const translatedTechnique = langData?.technique?.find(tt => tt === t) || t;
-        result.technique[t] = translatedTechnique;
-      });
-      
-      // Handle function translations (array)
-      symbol.function?.forEach(f => {
-        const translatedFunction = langData?.function?.find(tf => tf === f) || f;
-        result.function[f] = translatedFunction;
-      });
-    });
-    
-    return result;
-  }, [symbols, currentLanguage]);
-  
-  // Extract unique filter values for each category
-  const availableFilters: FilterOptions = useMemo(() => ({
-    cultures: [...new Set(symbols?.map(s => s.culture) || [])],
-    periods: [...new Set(symbols?.map(s => s.period) || [])],
-    medium: [...new Set(symbols?.flatMap(s => s.medium || []) || [])],
-    technique: [...new Set(symbols?.flatMap(s => s.technique || []) || [])],
-    function: [...new Set(symbols?.flatMap(s => s.function || []) || [])],
-  }), [symbols]);
+  // Extract unique cultures and periods for filters
+  const cultures = [...new Set(symbols?.map(s => s.culture) || [])];
+  const periods = [...new Set(symbols?.map(s => s.period) || [])];
   
   // Filter symbols based on search term and filters
-  const filteredSymbols = useMemo(() => {
-    return symbols?.filter(symbol => {
-      // Get translations for current language
-      const translations = symbol.translations || {};
-      const langData = translations[currentLanguage];
+  const filteredSymbols = symbols?.filter(symbol => {
+    // Text search
+    const matchesSearch = searchTerm === '' || 
+      symbol.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      symbol.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      symbol.culture.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      symbol.period.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Get translated values or original values as fallback
-      const symbolName = langData?.name || symbol.name;
-      const symbolDesc = langData?.description || symbol.description;
-      const symbolCulture = langData?.culture || symbol.culture;
-      const symbolPeriod = langData?.period || symbol.period;
+    // Filter by culture
+    const matchesCulture = filters.cultures.length === 0 || 
+      filters.cultures.includes(symbol.culture);
       
-      // Text search using translated values when available
-      const matchesSearch = searchTerm === '' || 
-        symbolName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (symbolDesc?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-        symbolCulture.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        symbolPeriod.toLowerCase().includes(searchTerm.toLowerCase());
-        
-      // Filter by culture
-      const matchesCulture = filters.cultures.length === 0 || 
-        filters.cultures.includes(symbol.culture);
-        
-      // Filter by period
-      const matchesPeriod = filters.periods.length === 0 || 
-        filters.periods.includes(symbol.period);
-        
-      // Filter by medium
-      const matchesMedium = filters.medium.length === 0 ||
-        filters.medium.some(m => symbol.medium?.includes(m));
+    // Filter by period
+    const matchesPeriod = filters.periods.length === 0 || 
+      filters.periods.includes(symbol.period);
       
-      // Filter by technique
-      const matchesTechnique = filters.technique.length === 0 ||
-        filters.technique.some(t => symbol.technique?.includes(t));
-      
-      // Filter by function
-      const matchesFunction = filters.function.length === 0 ||
-        filters.function.some(f => symbol.function?.includes(f));
-        
-      return matchesSearch && matchesCulture && matchesPeriod && 
-             matchesMedium && matchesTechnique && matchesFunction;
-    });
-  }, [symbols, searchTerm, filters, currentLanguage]);
+    return matchesSearch && matchesCulture && matchesPeriod;
+  });
   
   // Handle filter changes
-  const handleFilterChange = (type: FilterCategory, value: string[]) => {
+  const handleFilterChange = (type: 'cultures' | 'periods', value: string[]) => {
     setFilters(prev => ({ ...prev, [type]: value }));
   };
   
   // Clear all filters
   const clearFilters = () => {
-    setFilters({
-      cultures: [],
-      periods: [],
-      medium: [],
-      technique: [],
-      function: [],
-    });
+    setFilters({ cultures: [], periods: [] });
     setSearchTerm('');
   };
-
-  // Check if any filters are active
-  const hasActiveFilters = Object.values(filters).some(filterArray => filterArray.length > 0) || searchTerm !== '';
   
   return (
     <div className="container mx-auto p-4 pt-12 pb-20">
@@ -220,7 +118,7 @@ const SymbolExplorer: React.FC = () => {
                 <h3 className="font-medium text-slate-900">
                   <I18nText translationKey="symbolExplorer.filters">Filters</I18nText>
                 </h3>
-                {hasActiveFilters && (
+                {(filters.cultures.length > 0 || filters.periods.length > 0) && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -245,10 +143,10 @@ const SymbolExplorer: React.FC = () => {
             </div>
             
             <SearchFilters 
-              availableFilters={availableFilters}
+              cultures={cultures}
+              periods={periods}
               selectedFilters={filters}
               onFilterChange={handleFilterChange}
-              translatedFilters={translatedFilters}
             />
           </Card>
           
@@ -260,42 +158,31 @@ const SymbolExplorer: React.FC = () => {
             </div>
             
             <div className="flex flex-wrap gap-2">
-              {Object.entries(filters).map(([category, values]) => 
-                values.map(value => {
-                  // Get translated filter display value
-                  const translatedValue = translatedFilters?.[category as FilterCategory]?.[value] || value;
-                  
-                  return (
-                    <Badge 
-                      key={`${category}-${value}`} 
-                      variant="secondary" 
-                      className="flex gap-1"
-                    >
-                      <span className="text-xs text-slate-500 mr-1">
-                        <I18nText translationKey={`searchFilters.${category}`}>
-                          {category === 'cultures' ? 'Culture' : 
-                           category === 'periods' ? 'Period' :
-                           category === 'medium' ? 'Medium' :
-                           category === 'technique' ? 'Technique' :
-                           category === 'function' ? 'Function' : ''}:
-                        </I18nText>
-                      </span>
-                      {translatedValue}
-                      <button 
-                        onClick={() => handleFilterChange(
-                          category as FilterCategory, 
-                          filters[category as FilterCategory].filter(v => v !== value)
-                        )}
-                        className="ml-1 text-xs"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  );
-                })
-              )}
+              {filters.cultures.map(culture => (
+                <Badge key={`culture-${culture}`} variant="secondary" className="flex gap-1">
+                  {culture}
+                  <button 
+                    onClick={() => handleFilterChange('cultures', filters.cultures.filter(c => c !== culture))}
+                    className="ml-1 text-xs"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
               
-              {!hasActiveFilters && (
+              {filters.periods.map(period => (
+                <Badge key={`period-${period}`} variant="secondary" className="flex gap-1">
+                  {period}
+                  <button 
+                    onClick={() => handleFilterChange('periods', filters.periods.filter(p => p !== period))}
+                    className="ml-1 text-xs"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+              
+              {filters.cultures.length === 0 && filters.periods.length === 0 && (
                 <span className="text-sm text-slate-500">
                   <I18nText translationKey="symbolExplorer.noFilters">No active filters</I18nText>
                 </span>
@@ -331,31 +218,21 @@ const SymbolExplorer: React.FC = () => {
                 <TabsContent value="list" className="m-0">
                   <Card className="p-4">
                     <div className="space-y-4">
-                      {filteredSymbols?.map(symbol => {
-                        // Use translations if available
-                        const translations = symbol.translations || {};
-                        const langData = translations[currentLanguage];
-                        const displayName = langData?.name || symbol.name;
-                        const displayCulture = langData?.culture || symbol.culture;
-                        const displayPeriod = langData?.period || symbol.period;
-                        const displayDescription = langData?.description || symbol.description;
-                        
-                        return (
-                          <div key={symbol.id} className="flex items-center gap-4 p-2 border-b last:border-0">
-                            <div className="w-16 h-16 bg-amber-100 rounded-lg"></div>
-                            <div>
-                              <h3 className="font-medium">{displayName}</h3>
-                              <div className="flex gap-2 mt-1">
-                                <span className="text-xs text-slate-600">{displayCulture}</span>
-                                <span className="text-xs text-slate-500">{displayPeriod}</span>
-                              </div>
-                              {displayDescription && (
-                                <p className="text-sm text-slate-700 mt-1 line-clamp-2">{displayDescription}</p>
-                              )}
+                      {filteredSymbols?.map(symbol => (
+                        <div key={symbol.id} className="flex items-center gap-4 p-2 border-b last:border-0">
+                          <div className="w-16 h-16 bg-amber-100 rounded-lg"></div>
+                          <div>
+                            <h3 className="font-medium">{symbol.name}</h3>
+                            <div className="flex gap-2 mt-1">
+                              <span className="text-xs text-slate-600">{symbol.culture}</span>
+                              <span className="text-xs text-slate-500">{symbol.period}</span>
                             </div>
+                            {symbol.description && (
+                              <p className="text-sm text-slate-700 mt-1 line-clamp-2">{symbol.description}</p>
+                            )}
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                       
                       {(filteredSymbols?.length || 0) === 0 && (
                         <div className="py-8 text-center text-slate-500">

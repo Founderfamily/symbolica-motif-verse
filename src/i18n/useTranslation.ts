@@ -128,17 +128,7 @@ export const switchLanguage = (lang: 'fr' | 'en') => {
   if (typeof window !== 'undefined') {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
     
-    // Instead of reloading, just change the language
-    // This provides a smoother experience
-    if (window.i18next) {
-      window.i18next.changeLanguage(lang);
-    }
+    // Reload the page to ensure all components pick up the new language
+    window.location.reload();
   }
 };
-
-// Add type declaration for the i18next property on the window object
-declare global {
-  interface Window {
-    i18next: any;
-  }
-}
