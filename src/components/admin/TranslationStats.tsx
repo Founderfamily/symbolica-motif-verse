@@ -7,7 +7,7 @@ import { I18nText } from "@/components/ui/i18n-text";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { ValidationResultEntry } from '@/i18n/services/translationDatabaseService';
-import { ReloadIcon, CheckCircleIcon, AlertCircleIcon } from "lucide-react";
+import { RefreshCw, CheckCircle as CheckCircleIcon, AlertCircle as AlertCircleIcon } from "lucide-react";
 
 const TranslationStats: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -48,24 +48,24 @@ const TranslationStats: React.FC = () => {
       }
       
       // Fetch total count of translations
-      const { data: enCount, error: enError } = await supabase
+      const { count: enCount, error: enError } = await supabase
         .from('translations')
-        .select('id', { count: 'exact', head: true })
+        .select('*', { count: 'exact', head: true })
         .eq('language', 'en');
       
       if (enError) throw enError;
       
-      const { data: frCount, error: frError } = await supabase
+      const { count: frCount, error: frError } = await supabase
         .from('translations')
-        .select('id', { count: 'exact', head: true })
+        .select('*', { count: 'exact', head: true })
         .eq('language', 'fr');
       
       if (frError) throw frError;
       
       setTranslationStats(prev => ({
         ...prev,
-        totalEn: enCount?.count || 0,
-        totalFr: frCount?.count || 0
+        totalEn: enCount || 0,
+        totalFr: frCount || 0
       }));
       
     } catch (error: any) {
@@ -107,7 +107,7 @@ const TranslationStats: React.FC = () => {
       <CardContent>
         {isLoading ? (
           <div className="flex justify-center py-6">
-            <ReloadIcon className="h-8 w-8 animate-spin text-muted-foreground" />
+            <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <>
@@ -212,9 +212,9 @@ const TranslationStats: React.FC = () => {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <ReloadIcon className="mr-2 h-4 w-4" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                 )}
                 Refresh Stats
               </Button>
