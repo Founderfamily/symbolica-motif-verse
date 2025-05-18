@@ -73,7 +73,7 @@ const runValidation = async () => {
     console.error('❌ Failed to save validation results to database:', error);
   }
   
-  return totalIssues === 0;
+  return diagnosis.summary.missingCount === 0 && diagnosis.summary.formatIssuesCount === 0;
 };
 
 /**

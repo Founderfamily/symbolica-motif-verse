@@ -1,5 +1,159 @@
 
 /**
+ * Utilities for handling translations and validation
+ */
+import { ValidationReport, FormatIssue } from './types/validationTypes';
+import { findMissingKeys as findMissingKeysOriginal } from './validators/validatorUtils';
+import { extractPlaceholders } from './validators/validatorUtils';
+
+// Re-export the findMissingKeys function for external use
+export const findMissingKeys = (source?: any, target?: any, prefix?: string) => {
+  // If no parameters are provided, perform a default diagnosis
+  if (!source && !target) {
+    try {
+      // Import translation files dynamically
+      const enTranslations = require('./locales/en.json');
+      const frTranslations = require('./locales/fr.json');
+      
+      // Find keys missing in each language
+      const missingInFr = findMissingKeysOriginal(enTranslations, frTranslations);
+      const missingInEn = findMissingKeysOriginal(frTranslations, enTranslations);
+      
+      return {
+        missingInFr,
+        missingInEn,
+        total: {
+          en: countKeys(enTranslations),
+          fr: countKeys(frTranslations)
+        }
+      };
+    } catch (error) {
+      console.error('Error performing translation diagnosis:', error);
+      return { 
+        missingInFr: [], 
+        missingInEn: [],
+        total: { en: 0, fr: 0 } 
+      };
+    }
+  }
+  
+  // Use the original function if parameters are provided
+  return findMissingKeysOriginal(source, target, prefix);
+};
+
+/**
+ * Count the total number of keys in a nested object
+ */
+const countKeys = (obj: any, prefix = ''): number => {
+  let count = 0;
+  
+  for (const key in obj) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    
+    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+      // Count keys in nested objects
+      count += countKeys(obj[key], fullKey);
+    } else {
+      count += 1;
+    }
+  }
+  
+  return count;
+};
+
+/**
+ * Generate a diagnostic report for translations
+ */
+export const diagnoseTranslations = (): ValidationReport => {
+  try {
+    const result = findMissingKeys();
+    const formatIssues: FormatIssue[] = findFormatIssues();
+    
+    return {
+      missingKeys: result,
+      formatIssues,
+      invalidKeyFormat: [],
+      summary: {
+        missingCount: result.missingInFr.length + result.missingInEn.length,
+        formatIssuesCount: formatIssues.length,
+        invalidKeyFormatCount: 0,
+        isValid: result.missingInFr.length === 0 && result.missingInEn.length === 0 && formatIssues.length === 0
+      }
+    };
+  } catch (error) {
+    console.error('Error diagnosing translations:', error);
+    return {
+      missingKeys: { missingInFr: [], missingInEn: [], total: { en: 0, fr: 0 } },
+      formatIssues: [],
+      invalidKeyFormat: [],
+      summary: {
+        missingCount: 0,
+        formatIssuesCount: 0,
+        invalidKeyFormatCount: 0,
+        isValid: false
+      }
+    };
+  }
+};
+
+/**
+ * Find format inconsistencies between translations
+ */
+export const findFormatIssues = (): FormatIssue[] => {
+  try {
+    const enTranslations = require('./locales/en.json');
+    const frTranslations = require('./locales/fr.json');
+    const issues: FormatIssue[] = [];
+    
+    // Helper function to check nested objects
+    const checkFormat = (enObj: any, frObj: any, prefix = '') => {
+      for (const key in enObj) {
+        const fullKey = prefix ? `${prefix}.${key}` : key;
+        
+        if (typeof enObj[key] === 'object' && enObj[key] !== null && !Array.isArray(enObj[key])) {
+          if (frObj[key] && typeof frObj[key] === 'object') {
+            checkFormat(enObj[key], frObj[key], fullKey);
+          }
+        } else if (frObj[key] !== undefined) {
+          // Check for placeholder consistency
+          const enPlaceholders = extractPlaceholders(enObj[key]);
+          const frPlaceholders = extractPlaceholders(frObj[key]);
+          
+          // Find placeholders in one language but not the other
+          const missingInFr = enPlaceholders.filter(p => !frPlaceholders.includes(p));
+          const missingInEn = frPlaceholders.filter(p => !enPlaceholders.includes(p));
+          
+          if (missingInFr.length > 0 || missingInEn.length > 0) {
+            issues.push({
+              key: fullKey,
+              issue: `Placeholder mismatch: ${missingInFr.length > 0 ? `Missing in FR: ${missingInFr.join(', ')}` : ''}${missingInEn.length > 0 ? `Missing in EN: ${missingInEn.join(', ')}` : ''}`
+            });
+          }
+        }
+      }
+    };
+    
+    checkFormat(enTranslations, frTranslations);
+    return issues;
+  } catch (error) {
+    console.error('Error finding format issues:', error);
+    return [];
+  }
+};
+
+/**
+ * Generate a fix report for translation issues
+ */
+export const generateFixReport = (report: ValidationReport) => {
+  const fixes = {
+    addMissingKeys: [...report.missingKeys.missingInEn, ...report.missingKeys.missingInFr],
+    fixFormatIssues: report.formatIssues.map(issue => issue.key)
+  };
+  
+  return fixes;
+};
+
+/**
  * Check if a translation key exists in both English and French
  * Helps identify keys that need attention
  * 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -204,7 +203,7 @@ const TranslationStats: React.FC = () => {
         toast({
           title: "Sync Complete",
           description: "Translations exported from database to local files successfully",
-          variant: "success"
+          variant: "default"
         });
       } else {
         toast({
@@ -234,7 +233,7 @@ const TranslationStats: React.FC = () => {
         toast({
           title: "Sync Complete",
           description: "Translations imported from local files to database successfully",
-          variant: "success"
+          variant: "default"
         });
         // Refresh stats after sync
         fetchValidationHistory();
