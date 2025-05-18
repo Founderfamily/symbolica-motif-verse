@@ -13,8 +13,19 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, currentLanguage, refreshLanguage } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  
+  // Log current location for debugging
+  useEffect(() => {
+    console.log(`Layout: Rendering page at path: ${location.pathname} with language: ${currentLanguage}`);
+  }, [location.pathname, currentLanguage]);
+  
+  // Make sure language is consistent when changing routes
+  useEffect(() => {
+    // Ensure the language is correctly set when the route changes
+    refreshLanguage();
+  }, [location.pathname, refreshLanguage]);
   
   useEffect(() => {
     // Check authentication status

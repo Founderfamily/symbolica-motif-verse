@@ -14,11 +14,17 @@ export const useTranslation = () => {
     const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     
     if (savedLang && ['fr', 'en'].includes(savedLang)) {
-      i18n.changeLanguage(savedLang);
+      // If the current language doesn't match the saved one, update it
+      if (i18n.language !== savedLang) {
+        console.log(`Language mismatch detected. Setting language from ${i18n.language} to saved preference: ${savedLang}`);
+        i18n.changeLanguage(savedLang);
+      }
     } else if (i18n.language !== 'fr' && i18n.language !== 'en') {
       // Detect browser language or default to French if current language is invalid
       const browserLang = navigator.language.split('-')[0];
       const detectedLang = ['fr', 'en'].includes(browserLang) ? browserLang : 'fr';
+      
+      console.log(`No language preference found. Detecting from browser: ${detectedLang}`);
       
       // Save and set the language
       localStorage.setItem(LANGUAGE_STORAGE_KEY, detectedLang);
@@ -55,8 +61,18 @@ export const useTranslation = () => {
   
   // Change language and save preference
   const changeLanguage = (lng: string) => {
+    console.log(`Changing language to: ${lng}`);
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
     i18n.changeLanguage(lng);
+  };
+  
+  // Force refresh of the language from localStorage
+  const refreshLanguage = () => {
+    const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (savedLang && ['fr', 'en'].includes(savedLang) && i18n.language !== savedLang) {
+      console.log(`Refreshing language from localStorage: ${savedLang}`);
+      i18n.changeLanguage(savedLang);
+    }
   };
   
   // Validate translations on the current page
@@ -113,13 +129,7 @@ export const useTranslation = () => {
     changeLanguage, 
     currentLanguage: i18n.language, 
     i18n,
-    // Utility for debugging
-    refreshLanguage: () => {
-      const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-      if (savedLang && ['fr', 'en'].includes(savedLang)) {
-        i18n.changeLanguage(savedLang);
-      }
-    },
+    refreshLanguage,
     validateCurrentPageTranslations
   };
 };
