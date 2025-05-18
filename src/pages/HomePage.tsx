@@ -18,77 +18,74 @@ import OpenSourceBadge from '@/components/ui/open-source-badge';
 import { Button } from '@/components/ui/button';
 import { Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 
 const HomePage = () => {
   const { t } = useTranslation();
 
   return (
-    <Layout>
-      <div className="bg-white">
-        {/* Hero Section */}
-        <Hero />
-        
-        {/* SymbolTriptych Section with OpenSourceBadge */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="absolute right-4 sm:right-6 top-0 z-10">
-            <OpenSourceBadge />
-          </div>
-          <SymbolTriptychSection />
+    <div className="bg-white">
+      {/* Hero Section */}
+      <Hero />
+      
+      {/* SymbolTriptych Section with OpenSourceBadge */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="absolute right-4 sm:right-6 top-0 z-10">
+          <OpenSourceBadge />
         </div>
-        
-        {/* Community Section */}
-        <Community />
-        
-        {/* Groups Banner */}
-        <div className="bg-gradient-to-r from-amber-50 to-amber-100 py-12 px-4">
-          <div className="max-w-6xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-900">
-              {t('groups.exploreBanner.title')}
-            </h2>
-            <p className="mb-6 max-w-3xl mx-auto text-amber-800">
-              {t('groups.exploreBanner.description')}
-            </p>
-            <Link to="/groups">
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
-              >
-                <Users className="mr-2 h-5 w-5" />
-                {t('groups.exploreBanner.action')}
-              </Button>
-            </Link>
-          </div>
-        </div>
-        
-        {/* Features Section */}
-        <Features />
-        
-        {/* How It Works */}
-        <HowItWorks />
-        
-        {/* Gamification Section */}
-        <Gamification />
-        
-        {/* Testimonials */}
-        <Testimonials />
-        
-        {/* Timeline/Roadmap */}
-        <TimelineRoadmap />
-        
-        {/* Upload Tools */}
-        <UploadTools />
-        
-        {/* Partners */}
-        <Partners />
-        
-        {/* Call to Action */}
-        <CallToAction />
-        
-        {/* Newsletter */}
-        <NewsletterSignup />
+        <SymbolTriptychSection />
       </div>
-    </Layout>
+      
+      {/* Community Section */}
+      <Community />
+      
+      {/* Groups Banner */}
+      <div className="bg-gradient-to-r from-amber-50 to-amber-100 py-12 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-900">
+            {t('groups.exploreBanner.title')}
+          </h2>
+          <p className="mb-6 max-w-3xl mx-auto text-amber-800">
+            {t('groups.exploreBanner.description')}
+          </p>
+          <Link to="/groups">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+            >
+              <Users className="mr-2 h-5 w-5" />
+              {t('groups.exploreBanner.action')}
+            </Button>
+          </Link>
+        </div>
+      </div>
+      
+      {/* Features Section */}
+      <Features />
+      
+      {/* How It Works */}
+      <HowItWorks />
+      
+      {/* Gamification Section */}
+      <Gamification />
+      
+      {/* Testimonials */}
+      <Testimonials />
+      
+      {/* Timeline/Roadmap */}
+      <TimelineRoadmap />
+      
+      {/* Upload Tools */}
+      <UploadTools />
+      
+      {/* Partners */}
+      <Partners />
+      
+      {/* Call to Action */}
+      <CallToAction />
+      
+      {/* Newsletter */}
+      <NewsletterSignup />
+    </div>
   );
 };
 
