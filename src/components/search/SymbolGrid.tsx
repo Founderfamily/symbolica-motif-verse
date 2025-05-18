@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { SymbolData } from '@/types/supabase';
 import { Card } from '@/components/ui/card';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 
 interface SymbolGridProps {
   symbols: SymbolData[];
@@ -15,7 +16,9 @@ export const SymbolGrid: React.FC<SymbolGridProps> = ({ symbols }) => {
   if (symbols.length === 0) {
     return (
       <div className="text-center py-12 bg-slate-50 rounded-lg">
-        <p className="text-slate-500">No symbols found matching your criteria</p>
+        <p className="text-slate-500">
+          <I18nText translationKey="symbols.noResults" />
+        </p>
       </div>
     );
   }

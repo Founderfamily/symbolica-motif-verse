@@ -17,6 +17,11 @@ const GamificationItem = ({
   descriptionKey: string;
   points?: number;
 }) => {
+  const { t } = useTranslation();
+  
+  // Créer une variable de traduction pour "points"
+  const pointsText = t('gamification.points');
+  
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-amber-100 hover:shadow-lg transition-all hover:border-amber-200">
       <div className="bg-amber-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
@@ -37,7 +42,7 @@ const GamificationItem = ({
         <div className="flex items-center text-amber-700 font-medium">
           <Star className="h-4 w-4 mr-1 fill-amber-500 stroke-amber-700" />
           <span>
-            {points} <I18nText translationKey="gamification.points">points</I18nText>
+            {points} <I18nText translationKey="gamification.points" />
           </span>
         </div>
       )}
@@ -80,14 +85,10 @@ const Gamification = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">
-            <I18nText translationKey="gamification.title">
-              Earn Rewards for Contributions
-            </I18nText>
+            <I18nText translationKey="gamification.title" />
           </h2>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            <I18nText translationKey="gamification.subtitle">
-              Join our community and earn points, badges and recognition
-            </I18nText>
+            <I18nText translationKey="gamification.subtitle" />
           </p>
         </div>
         
@@ -106,9 +107,7 @@ const Gamification = () => {
         <div className="mt-12 text-center">
           <Button asChild className="gap-2 bg-amber-600 hover:bg-amber-700">
             <Link to="/profile">
-              <I18nText translationKey="gamification.viewYourProgress">
-                View Your Progress
-              </I18nText>
+              <I18nText translationKey="gamification.viewYourProgress" />
               <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>

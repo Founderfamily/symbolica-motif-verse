@@ -6,6 +6,8 @@ import { Symbol } from '@/data/symbols';
 import { culturalGradient } from '@/lib/utils';
 import { Info, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 
 // Image de remplacement locale en cas d'erreur
 const PLACEHOLDER = "/placeholder.svg";
@@ -34,6 +36,7 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [useFallback, setUseFallback] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Réinitialiser l'état d'erreur si le motif change
   useEffect(() => {
@@ -53,8 +56,8 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
     // Notifier l'utilisateur de l'erreur uniquement si c'est une image externe
     if (motif.isExternal) {
       toast({
-        title: "Problème de chargement d'image",
-        description: `L'image pour "${motif.name}" n'a pas pu être chargée. Une image alternative sera utilisée.`,
+        title: t("symbols.imageError.title"),
+        description: t("symbols.imageError.description", { name: motif.name }),
         variant: "default",
       });
     }
@@ -75,6 +78,11 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
       
   // Déterminer si l'image est locale ou distante
   const isLocalImage = imageSource.startsWith('/');
+
+  // Créer des variables traduites pour les écrans de chargement
+  const loadingImageText = t("symbols.loading");
+  const imageErrorText = t("symbols.error");
+  const infoText = t("symbols.info");
 
   return (
     <div 
@@ -115,7 +123,7 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
         <h4 className="text-sm font-serif text-slate-900 font-medium">{motif.name}</h4>
         <div className="flex justify-between items-center mt-1">
           <span className="text-xs text-slate-600">{motif.culture}</span>
-          <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 cursor-pointer hover:bg-amber-200 transition-colors">
+          <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 cursor-pointer hover:bg-amber-200 transition-colors" title={infoText}>
             <Info className="w-3 h-3" />
           </div>
         </div>
@@ -125,4 +133,3 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
 };
 
 export default SymbolCard;
-

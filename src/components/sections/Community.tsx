@@ -83,185 +83,117 @@ const Community = () => {
   // Use real groups if available, otherwise use fallback
   const groupsToDisplay = featuredGroups.length > 0 ? featuredGroups : fallbackGroups;
   
+  // Créer des variables de traduction pour les textes utilisés en attributs
+  const membersText = t('community.members');
+  const discoveriesText = t('community.discoveries');
+  const showAllGroupsText = t('community.showAllGroups');
+  
   return (
-    <section className="py-12 sm:py-16 px-4 md:px-8 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
-      {/* Background patterns */}
-      <div className="absolute inset-0 opacity-5 pattern-grid-lg"></div>
-      
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-8 sm:mb-12">
-          <span className="px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
-            <I18nText translationKey="sections.community" />
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+    <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-white to-amber-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-4">
             <I18nText translationKey="community.title" />
           </h2>
-          <p className="text-center text-slate-600 mb-6 sm:mb-10 max-w-2xl mx-auto text-sm sm:text-base">
+          <p className="text-lg text-slate-600 max-w-3xl mx-auto">
             <I18nText translationKey="community.description" />
           </p>
         </div>
         
-        {isSmallScreen ? (
-          <ScrollArea className="w-full pb-6">
-            <div className="flex gap-4 pb-2 px-1">
-              {groupsToDisplay.map((group, i) => (
-                <GroupCard 
-                  key={group.id} 
-                  group={group} 
-                  isRealGroup={featuredGroups.length > 0}
-                />
-              ))}
-            </div>
-          </ScrollArea>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {groupsToDisplay.map((group, i) => (
-              <GroupCard 
-                key={group.id} 
-                group={group}
-                isRealGroup={featuredGroups.length > 0}
-              />
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="overflow-hidden h-72 bg-slate-50/50 animate-pulse">
+                <div className="h-full flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-slate-200"></div>
+                </div>
+              </Card>
             ))}
           </div>
+        ) : (
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {groupsToDisplay.map((group) => (
+                <Link 
+                  to={`/groups/${group.id}`} 
+                  key={group.id}
+                  className="block"
+                >
+                  <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow border border-amber-100/50 hover:border-amber-200">
+                    <div className={`h-24 ${group.bgColor || 'bg-amber-50'} relative`}>
+                      <div className={`absolute inset-0 bg-gradient-to-r ${group.color || 'from-amber-500 to-amber-600'} opacity-10`}></div>
+                      <div className="absolute -bottom-8 left-6">
+                        <Avatar className="h-16 w-16 border-4 border-white shadow-lg">
+                          <AvatarImage src={group.icon} />
+                          <AvatarFallback className="bg-amber-100 text-amber-800">{group.name[0]}</AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </div>
+                    
+                    <CardContent className="pt-10 pb-6">
+                      <h3 className="font-semibold text-lg mb-1">{group.name}</h3>
+                      <p className="text-sm text-slate-600 flex items-center">
+                        <MapPin className="h-3 w-3 mr-1 inline text-amber-600" />
+                        {group.culture}
+                      </p>
+                      
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                        <div className="bg-slate-50 p-2 rounded-lg">
+                          <div className="flex items-center text-slate-600">
+                            <Users className="h-3 w-3 mr-1" />
+                            <span className="text-xs">{membersText}</span>
+                          </div>
+                          <p className="font-medium text-slate-800">{group.members_count.toLocaleString()}</p>
+                        </div>
+                        
+                        <div className="bg-slate-50 p-2 rounded-lg">
+                          <div className="flex items-center text-slate-600">
+                            <Search className="h-3 w-3 mr-1" />
+                            <span className="text-xs">{discoveriesText}</span>
+                          </div>
+                          <p className="font-medium text-slate-800">{group.discoveries_count.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+            
+            <div className="text-center mt-8">
+              <Link 
+                to="/groups" 
+                className="inline-flex items-center space-x-2 text-amber-600 hover:text-amber-700 font-medium"
+              >
+                <span>{showAllGroupsText}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </Link>
+            </div>
+          </>
         )}
         
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <div className="w-10 sm:w-12 h-10 sm:h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-200">
-              <Users className="h-5 sm:h-6 w-5 sm:w-6" />
+        <div className="mt-12 bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-slate-100">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">
+                <I18nText translationKey="community.createGroup.title" />
+              </h3>
+              <p className="text-slate-600 max-w-2xl">
+                <I18nText translationKey="community.createGroup.description" />
+              </p>
             </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-2">
-              <I18nText translationKey="community.features.thematicCommunities.title" />
-            </h3>
-            <p className="text-sm text-slate-600">
-              <I18nText translationKey="community.features.thematicCommunities.description" />
-            </p>
+            <Link 
+              to="/groups/create"
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 shadow hover:shadow-lg transition-all whitespace-nowrap"
+            >
+              <I18nText translationKey="community.createGroup.button" />
+            </Link>
           </div>
-          
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <div className="w-10 sm:w-12 h-10 sm:h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-200">
-              <Book className="h-5 sm:h-6 w-5 sm:w-6" />
-            </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-2">
-              <I18nText translationKey="community.features.personalSpace.title" />
-            </h3>
-            <p className="text-sm text-slate-600">
-              <I18nText translationKey="community.features.personalSpace.description" />
-            </p>
-          </div>
-          
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all sm:col-span-2 md:col-span-1">
-            <div className="w-10 sm:w-12 h-10 sm:h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-200">
-              <Search className="h-5 sm:h-6 w-5 sm:w-6" />
-            </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-2">
-              <I18nText translationKey="community.features.intuitiveNavigation.title" />
-            </h3>
-            <p className="text-sm text-slate-600">
-              <I18nText translationKey="community.features.intuitiveNavigation.description" />
-            </p>
-          </div>
-        </div>
-        
-        <div className="text-center mt-8">
-          <Link to="/groups">
-            <button className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-md font-medium shadow-md hover:shadow-lg transition-all">
-              {t('community.exploreGroups')}
-            </button>
-          </Link>
         </div>
       </div>
     </section>
-  );
-};
-
-const GroupCard = ({ 
-  group, 
-  isRealGroup 
-}: { 
-  group: InterestGroup | any; 
-  isRealGroup: boolean;
-}) => {
-  const { t } = useTranslation();
-  
-  // For real groups from Supabase
-  if (isRealGroup) {
-    return (
-      <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden symbol-card min-w-[260px]">
-        <div className="h-2 w-full bg-gradient-to-r" style={{ 
-          backgroundImage: group.theme_color ? 
-            `linear-gradient(to right, ${group.theme_color}, ${group.theme_color})` : 
-            'linear-gradient(to right, #f59e0b, #d97706)'
-        }}></div>
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
-              <AvatarImage src={group.icon} alt={group.name} />
-              <AvatarFallback className="bg-amber-100 text-amber-800 text-lg">
-                {group.name.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold text-base sm:text-lg text-slate-800">
-                {group.name}
-              </p>
-              <p className="text-xs sm:text-sm text-slate-500 flex items-center">
-                <Users className="h-3 w-3 mr-1 text-slate-400" /> 
-                {group.members_count} {t('community.stats.members')}
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-between text-xs sm:text-sm items-center">
-            <span className="flex items-center gap-1 text-slate-600">
-              <MapPin className="h-3 sm:h-4 w-3 sm:w-4 text-slate-500" />
-              {group.discoveries_count} {t('community.stats.discoveries')}
-            </span>
-            <Link to={`/groups/${group.slug}`}>
-              <span className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
-                {t('community.stats.view')}
-              </span>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  // For fallback static groups
-  return (
-    <Card className={`border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden symbol-card min-w-[260px] ${culturalGradient(group.culture)}`}>
-      <div className={`h-2 w-full bg-gradient-to-r ${group.color}`}></div>
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex items-center gap-4 mb-4">
-          <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
-            <AvatarImage src={group.icon} alt={group.name} />
-            <AvatarFallback className={`bg-gradient-to-br ${group.color} text-white text-lg`}>
-              {group.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-semibold text-base sm:text-lg text-slate-800">
-              {group.name}
-            </p>
-            <p className="text-xs sm:text-sm text-slate-500 flex items-center">
-              <Users className="h-3 w-3 mr-1 text-slate-400" /> 
-              {group.members_count.toLocaleString()} {t('community.stats.members')}
-            </p>
-          </div>
-        </div>
-        <div className="flex justify-between text-xs sm:text-sm items-center">
-          <span className="flex items-center gap-1 text-slate-600">
-            <MapPin className="h-3 sm:h-4 w-3 sm:w-4 text-slate-500" />
-            {group.discoveries_count.toLocaleString()} {t('community.stats.discoveries')}
-          </span>
-          <Link to="/groups">
-            <span className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
-              {t('community.stats.join')}
-            </span>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 

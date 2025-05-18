@@ -19,6 +19,7 @@ const MapExplorerPage = () => {
   const [locationsCount, setLocationsCount] = useState(0);
   const [regions, setRegions] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false); // Ajout de l'état loading manquant
   const [selectedFilters, setSelectedFilters] = useState<{
     regions: string[];
     verified: boolean;
