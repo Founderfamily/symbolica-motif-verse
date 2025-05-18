@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 import { findMissingKeys } from './translationUtils';
+import en from './locales/en.json';
+import fr from './locales/fr.json';
 
 /**
  * A component that provides a translation debugger panel
@@ -31,7 +33,20 @@ export const LanguageDebugger = () => {
     // Listen for custom event from useTranslation hook
     const handleValidationEvent = () => {
       setIsOpen(true);
-      const result = findMissingKeys();
+      // Call findMissingKeys with the required parameters
+      const missingInFr = findMissingKeys(en, fr);
+      const missingInEn = findMissingKeys(fr, en);
+      
+      // Prepare the result in the expected format
+      const result = {
+        missingInFr,
+        missingInEn,
+        total: {
+          en: countKeys(en),
+          fr: countKeys(fr)
+        }
+      };
+      
       setMissingKeys(result);
     };
     
@@ -43,6 +58,24 @@ export const LanguageDebugger = () => {
       window.removeEventListener('validate-translations', handleValidationEvent);
     };
   }, []);
+  
+  // Helper function to count total keys in a translation object
+  const countKeys = (obj: any, prefix = ''): number => {
+    let count = 0;
+    
+    for (const key in obj) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+      
+      if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+        // Count keys in nested objects
+        count += countKeys(obj[key], fullKey);
+      } else {
+        count += 1;
+      }
+    }
+    
+    return count;
+  };
   
   // Don't render in production
   if (process.env.NODE_ENV !== 'development') return null;
@@ -67,7 +100,20 @@ export const LanguageDebugger = () => {
             <button 
               className="py-1 px-3 bg-blue-600 rounded hover:bg-blue-700"
               onClick={() => {
-                const result = findMissingKeys();
+                // Call findMissingKeys with the required parameters
+                const missingInFr = findMissingKeys(en, fr);
+                const missingInEn = findMissingKeys(fr, en);
+                
+                // Prepare the result in the expected format
+                const result = {
+                  missingInFr,
+                  missingInEn,
+                  total: {
+                    en: countKeys(en),
+                    fr: countKeys(fr)
+                  }
+                };
+                
                 setMissingKeys(result);
               }}
             >
