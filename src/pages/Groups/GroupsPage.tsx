@@ -124,10 +124,10 @@ const GroupCard: React.FC<{ group: InterestGroup }> = ({ group }) => {
     navigate(`/groups/${group.slug}`);
   };
   
-  // Translate needed texts
-  const noDescriptionText = t('groups.noDescription');
+  // Create translation variables for needed texts
   const membersText = t('community.stats.members');
   const discoveriesText = t('community.stats.discoveries');
+  const noDescriptionText = t('groups.noDescription');
   
   return (
     <Card 

@@ -21,16 +21,14 @@ const NotFound = () => {
       <div className="text-center max-w-md mx-auto px-4">
         <h1 className="text-7xl font-bold text-slate-800 mb-6">404</h1>
         <p className="text-xl text-slate-600 mb-6">
-          <I18nText translationKey="error.pageNotFound">Oops! Page non trouvée</I18nText>
+          <I18nText translationKey="error.pageNotFound" />
         </p>
         <p className="text-slate-500 mb-8">
-          <I18nText translationKey="error.routeNotExist">
-            La page que vous cherchez n'existe pas ou a été déplacée.
-          </I18nText>
+          <I18nText translationKey="error.routeNotExist" />
         </p>
         <Button asChild variant="default" className="bg-amber-500 hover:bg-amber-600">
           <Link to="/">
-            <I18nText translationKey="error.returnHome">Retourner à l'accueil</I18nText>
+            <I18nText translationKey="error.returnHome" />
           </Link>
         </Button>
       </div>
