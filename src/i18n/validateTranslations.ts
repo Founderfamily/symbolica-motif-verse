@@ -1,4 +1,6 @@
+
 import { diagnoseTranslations, generateFixReport } from './translationUtils';
+import { LegacyValidationReport } from './types/validationTypes';
 
 /**
  * Simple command-line tool to validate translations
@@ -10,7 +12,7 @@ const runValidation = () => {
   console.log('Translation Validation Tool');
   console.log('======================================\n');
   
-  const diagnosis = diagnoseTranslations();
+  const diagnosis = diagnoseTranslations() as LegacyValidationReport;
   
   console.log('DIAGNOSIS RESULTS:');
   console.log('----------------');
