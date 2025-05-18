@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Info, AlertCircle } from 'lucide-react';
 import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { Link } from 'react-router-dom';
+import { I18nText } from '@/components/ui/i18n-text';
 
 interface SymbolGridProps {
   symbols: SymbolData[];
@@ -16,7 +17,7 @@ export const SymbolGrid: React.FC<SymbolGridProps> = ({ symbols }) => {
   if (symbols.length === 0) {
     return (
       <Card className="p-8 text-center text-slate-500">
-        No symbols found matching your criteria.
+        <I18nText translationKey="symbols.grid.noSymbolsFound" />
       </Card>
     );
   }
