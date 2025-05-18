@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
+import { getTranslatedField } from '@/utils/translationUtils';
 
 interface SymbolCardProps {
   id: string;

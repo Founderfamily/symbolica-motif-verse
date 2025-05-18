@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
+import { getTranslatedField, getTranslatedArray } from '@/utils/translationUtils';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -44,23 +45,14 @@ const SymbolDetail: React.FC = () => {
     enabled: !!symbol
   });
   
-  // Get translated value or original fallback
+  // Get translated value using our new utility function
   const getTranslatedValue = (field: 'name' | 'description' | 'culture' | 'period') => {
-    if (symbol?.translations && symbol.translations[currentLanguage]?.[field]) {
-      return symbol.translations[currentLanguage][field];
-    }
-    return symbol?.[field] || '';
+    return getTranslatedField(symbol, field, 'en');
   };
   
   // For arrays like medium, technique, function
-  const getTranslatedArray = (field: 'medium' | 'technique' | 'function') => {
-    if (!symbol?.[field]) return [];
-    
-    if (symbol.translations && symbol.translations[currentLanguage]?.[field]) {
-      return symbol.translations[currentLanguage][field] || symbol[field];
-    }
-    
-    return symbol[field] || [];
+  const getTranslatedArrayValue = (field: 'medium' | 'technique' | 'function') => {
+    return getTranslatedArray(symbol, field, 'en');
   };
   
   if (loading) {
@@ -90,7 +82,7 @@ const SymbolDetail: React.FC = () => {
     );
   }
   
-  // Get symbol name in current language
+  // Get symbol name using the translation utility
   const symbolName = getTranslatedValue('name');
   
   return (
@@ -174,13 +166,13 @@ const SymbolDetail: React.FC = () => {
       {/* Symbol metadata */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {/* Medium */}
-        {getTranslatedArray('medium')?.length > 0 && (
+        {getTranslatedArrayValue('medium')?.length > 0 && (
           <div className="p-4 border rounded-lg bg-slate-50">
             <h3 className="text-sm font-medium text-slate-700 mb-2">
               <I18nText translationKey="symbolDetail.medium" />
             </h3>
             <div className="flex flex-wrap gap-2">
-              {getTranslatedArray('medium').map((item, index) => (
+              {getTranslatedArrayValue('medium').map((item, index) => (
                 <Badge key={index} variant="secondary" className="bg-white">
                   {item}
                 </Badge>
@@ -190,13 +182,13 @@ const SymbolDetail: React.FC = () => {
         )}
         
         {/* Technique */}
-        {getTranslatedArray('technique')?.length > 0 && (
+        {getTranslatedArrayValue('technique')?.length > 0 && (
           <div className="p-4 border rounded-lg bg-slate-50">
             <h3 className="text-sm font-medium text-slate-700 mb-2">
               <I18nText translationKey="symbolDetail.technique" />
             </h3>
             <div className="flex flex-wrap gap-2">
-              {getTranslatedArray('technique').map((item, index) => (
+              {getTranslatedArrayValue('technique').map((item, index) => (
                 <Badge key={index} variant="secondary" className="bg-white">
                   {item}
                 </Badge>
@@ -206,13 +198,13 @@ const SymbolDetail: React.FC = () => {
         )}
         
         {/* Function */}
-        {getTranslatedArray('function')?.length > 0 && (
+        {getTranslatedArrayValue('function')?.length > 0 && (
           <div className="p-4 border rounded-lg bg-slate-50">
             <h3 className="text-sm font-medium text-slate-700 mb-2">
               <I18nText translationKey="symbolDetail.function" />
             </h3>
             <div className="flex flex-wrap gap-2">
-              {getTranslatedArray('function').map((item, index) => (
+              {getTranslatedArrayValue('function').map((item, index) => (
                 <Badge key={index} variant="secondary" className="bg-white">
                   {item}
                 </Badge>
@@ -238,16 +230,10 @@ const SymbolDetail: React.FC = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             {relatedSymbols.map(relatedSymbol => {
-              // Get translated name for related symbol
-              const translatedName = 
-                relatedSymbol.translations?.[currentLanguage]?.name || 
-                relatedSymbol.name;
-                
-              // Get translated culture for related symbol  
-              const translatedCulture =
-                relatedSymbol.translations?.[currentLanguage]?.culture || 
-                relatedSymbol.culture;
-                
+              // Get translated name using the utility function
+              const translatedName = getTranslatedField(relatedSymbol, 'name');
+              const translatedCulture = getTranslatedField(relatedSymbol, 'culture');
+              
               return (
                 <Link 
                   key={relatedSymbol.id} 

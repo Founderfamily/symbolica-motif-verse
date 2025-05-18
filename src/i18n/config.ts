@@ -90,4 +90,6 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
+// Export the i18n instance for direct access to language
+export { i18n };
 export default i18n;
