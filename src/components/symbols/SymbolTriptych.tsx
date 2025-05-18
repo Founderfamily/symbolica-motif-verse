@@ -8,6 +8,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useBreakpoint } from '@/hooks/use-breakpoints';
+import { I18nText } from '@/components/ui/i18n-text';
 
 interface SymbolTriptychProps {
   symbolId: string | null;
@@ -23,7 +24,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
     handleImageError 
   } = useSymbolImages(symbolId);
   
-  const { t, currentLanguage } = useTranslation();
+  const { currentLanguage } = useTranslation();
   const isMobile = useBreakpoint('md');
   
   if (!symbolId) {
@@ -50,19 +51,21 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   };
   
   const renderImage = (type: ImageType) => {
-    // Translate image titles based on image type
-    const titleKey = 
-      type === 'original' ? 'symbolTriptych.original' :
-      type === 'pattern' ? 'symbolTriptych.pattern' : 'symbolTriptych.reuse';
+    // Map image types to translation keys
+    const titleKeyMap: Record<ImageType, string> = {
+      'original': 'symbolTriptych.original',
+      'pattern': 'symbolTriptych.pattern',
+      'reuse': 'symbolTriptych.reuse'
+    };
     
-    // Get translated title
-    const translatedTitle = t(titleKey);
+    // Get the appropriate translation key for this image type
+    const titleKey = titleKeyMap[type];
     
     return (
       <SymbolImage
         image={images[type]}
         type={type}
-        title={translatedTitle}
+        title={<I18nText translationKey={titleKey} />}
         hasError={imageErrors[type]}
         symbolName={getSymbolTranslation('name') || ''}
         onError={() => handleImageError(type)}
@@ -94,9 +97,9 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
       {totalErrors > 0 && (
         <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
           <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertTitle>{t('symbolTriptych.imageError')}</AlertTitle>
+          <AlertTitle><I18nText translationKey="symbolTriptych.imageError" /></AlertTitle>
           <AlertDescription>
-            {t('symbolTriptych.imageErrorDesc')}
+            <I18nText translationKey="symbolTriptych.imageErrorDesc" />
           </AlertDescription>
         </Alert>
       )}

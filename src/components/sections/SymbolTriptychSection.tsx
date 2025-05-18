@@ -4,7 +4,6 @@ import SymbolList from '@/components/symbols/SymbolList';
 import SymbolTriptych from '@/components/symbols/SymbolTriptych';
 import { useAuth } from '@/hooks/useAuth';
 import { Sparkles, Database, ChevronRight, ChevronLeft } from 'lucide-react';
-import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useBreakpoint } from '@/hooks/use-breakpoints';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,6 @@ const SymbolTriptychSection: React.FC = () => {
   const [selectedSymbolId, setSelectedSymbolId] = useState<string | null>(null);
   const [showSymbolList, setShowSymbolList] = useState(true);
   const { isAdmin } = useAuth();
-  const { t } = useTranslation();
   const isMobile = useBreakpoint('md');
 
   // Toggle symbol list visibility on mobile
