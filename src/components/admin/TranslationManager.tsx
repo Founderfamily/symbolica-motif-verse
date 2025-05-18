@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { I18nText } from "@/components/ui/i18n-text";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useTranslationDatabase } from '@/i18n/hooks/useTranslationDatabase';
-import { Download, Upload, RefreshCw, AlertTriangle, CheckCircle, Database, FileText } from 'lucide-react';
+import { Download, Upload, RefreshCw, AlertTriangle, CheckCircle, Database } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const TranslationManager: React.FC = () => {

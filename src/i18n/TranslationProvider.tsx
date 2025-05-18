@@ -21,6 +21,9 @@ export const TranslationProvider = ({ children }: TranslationProviderProps) => {
   useEffect(() => {
     const checkAndInitializeTranslations = async () => {
       try {
+        setIsInitializingTranslations(true);
+        console.log('TranslationProvider: Checking for translations in database...');
+        
         // Check if translations exist in the database
         const { count, error } = await supabase
           .from('translations')
@@ -29,7 +32,6 @@ export const TranslationProvider = ({ children }: TranslationProviderProps) => {
         // If no translations found or error occurred, initialize from local files
         if (error || count === 0) {
           console.log('No translations found in database, initializing from local files...');
-          setIsInitializingTranslations(true);
           
           const success = await translationDatabaseService.initializeFromLocalFiles();
           
@@ -40,13 +42,12 @@ export const TranslationProvider = ({ children }: TranslationProviderProps) => {
             console.error('Failed to initialize translations database');
             toast.error('Failed to initialize translations');
           }
-          
-          setIsInitializingTranslations(false);
         } else {
           console.log(`Found ${count} translations in database.`);
         }
       } catch (error) {
         console.error('Error checking translations:', error);
+      } finally {
         setIsInitializingTranslations(false);
       }
     };

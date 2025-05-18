@@ -1,5 +1,6 @@
 
-#!/usr/bin/env node
+// Script to identify and fix generic translation keys
+// This is adapted for the browser environment from a Node.js script
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -135,44 +136,9 @@ function replaceGenericKeys(files: string[], dryRun: boolean = true): Map<string
   return replacements;
 }
 
-/**
- * Main execution
- */
-function main() {
-  console.log('Scanning for files with generic translation keys...');
-  const files = findFilesWithGenericKeys();
-  
-  if (files.length === 0) {
-    console.log('No files found with generic keys.');
-    return;
-  }
-  
-  console.log(`Found ${files.length} files with generic keys.`);
-  
-  // Check for --fix flag
-  const fixMode = process.argv.includes('--fix');
-  
-  const replacements = replaceGenericKeys(files, !fixMode);
-  
-  // Print report
-  console.log('\nREPORT:');
-  console.log('-------');
-  
-  if (replacements.size === 0) {
-    console.log('No replacements needed or found.');
-  } else {
-    replacements.forEach((reps, file) => {
-      console.log(`\nFile: ${path.relative(rootDir, file)}`);
-      reps.forEach(rep => console.log(`- ${rep}`));
-    });
-    
-    if (fixMode) {
-      console.log('\nChanges have been applied to files.');
-    } else {
-      console.log('\nThis was a dry run. Use --fix flag to apply changes.');
-    }
-  }
-}
-
-// Run the script
-main();
+// Export functions for potential use in the browser environment
+export {
+  findFilesWithGenericKeys,
+  suggestBetterKey,
+  replaceGenericKeys
+};
