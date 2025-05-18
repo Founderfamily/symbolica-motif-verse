@@ -1,4 +1,3 @@
-
 {
   "navigation": {
     "home": "Accueil",
@@ -12,6 +11,13 @@
     "admin": "Admin",
     "symbols": "Symboles",
     "groups": "Groupes"
+  },
+  "hero": {
+    "heading": "Découvrez des Symboles Culturels du Monde Entier",
+    "subheading": "Explorez, comprenez et connectez-vous avec le riche patrimoine symbolique à travers diverses cultures et traditions",
+    "community": "Rejoindre la Communauté",
+    "explore": "Explorer les Symboles",
+    "version": "Version Bêta 0.9.5"
   },
   "groups": {
     "title": "Espaces Thématiques & Groupes d'Intérêt",
@@ -260,5 +266,8 @@
     "pageNotFound": "Oups ! Page non trouvée",
     "routeNotExist": "La page que vous recherchez n'existe pas ou a été déplacée.",
     "returnHome": "Retour à l'accueil"
+  },
+  "app": {
+    "version": "Version Bêta 0.9.5"
   }
 }

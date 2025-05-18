@@ -1,4 +1,3 @@
-
 {
   "navigation": {
     "home": "Home",
@@ -12,6 +11,13 @@
     "admin": "Admin",
     "symbols": "Symbols",
     "groups": "Groups"
+  },
+  "hero": {
+    "heading": "Discover Cultural Symbols from Around the World",
+    "subheading": "Explore, understand, and connect with the rich symbolic heritage across diverse cultures and traditions",
+    "community": "Join Community",
+    "explore": "Explore Symbols",
+    "version": "Beta Version 0.9.5"
   },
   "groups": {
     "title": "Thematic Spaces & Interest Groups",
@@ -260,5 +266,8 @@
   "symbolList": {
     "empty": "No symbols available",
     "select": "Select a symbol to view details"
+  },
+  "app": {
+    "version": "Beta Version 0.9.5"
   }
 }

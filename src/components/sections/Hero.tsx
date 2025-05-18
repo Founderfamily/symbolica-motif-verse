@@ -8,7 +8,7 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { useBreakpoint } from '@/hooks/use-breakpoints';
 
 const Hero = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [heroContent, setHeroContent] = useState<ContentSection | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -22,6 +22,7 @@ const Hero = () => {
       try {
         const content = await getContentSectionByKey('hero');
         setHeroContent(content);
+        console.log("Fetched hero content:", content);
       } catch (error) {
         console.error('Error fetching hero content:', error);
         setError(error as Error);
@@ -56,7 +57,7 @@ const Hero = () => {
             <div className="h-8 sm:h-12 w-3/4 mx-auto bg-slate-200 animate-pulse rounded"></div>
             <div className="h-4 sm:h-6 w-2/3 mx-auto bg-slate-200 animate-pulse rounded"></div>
           </div>
-        ) : error ? (
+        ) : error || !heroContent?.title?.[lang] ? (
           <div className="space-y-4">
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
               <I18nText translationKey="hero.heading" />
@@ -68,10 +69,10 @@ const Hero = () => {
         ) : (
           <div className="space-y-4">
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
-              {heroContent?.title?.[lang] || <I18nText translationKey="hero.heading" />}
+              {heroContent.title[lang] || <I18nText translationKey="hero.heading" />}
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-6 sm:mb-8">
-              {heroContent?.subtitle?.[lang] || <I18nText translationKey="hero.subheading" />}
+              {heroContent.subtitle?.[lang] || <I18nText translationKey="hero.subheading" />}
             </p>
           </div>
         )}
