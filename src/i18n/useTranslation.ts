@@ -1,4 +1,3 @@
-
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 import { validateKeyFormat, formatKeyAsReadableText, keyExistsInBothLanguages } from './translationUtils';
 import { useEffect, useCallback, useMemo } from 'react';

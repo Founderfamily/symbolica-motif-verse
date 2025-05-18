@@ -1,51 +1,111 @@
 
 #!/usr/bin/env node
 
-/**
- * Initialize Translation Database
- * 
- * This script initializes the translation database with data from local JSON files.
- * It's useful for first-time setup or when resetting the database.
- * 
- * Usage: npm run initialize-translation-db
- */
+import { createClient } from '@supabase/supabase-js';
+import * as fs from 'fs';
+import * as path from 'path';
 
-import { translationDatabaseService } from '../services/translationDatabaseService';
+// Load environment variables from .env
+const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 
-async function initializeDatabase() {
-  console.log('=== Translation Database Initialization ===\n');
-  console.log('Loading translations from local files...');
-  
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Error: Supabase URL or key not found in environment variables.');
+  console.error('Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+  process.exit(1);
+}
+
+// Create Supabase client
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Path to translation files
+const localesDir = path.resolve(__dirname, '../locales');
+const englishFile = path.join(localesDir, 'en.json');
+const frenchFile = path.join(localesDir, 'fr.json');
+
+// Function to read and parse translation files
+async function readTranslationFiles() {
   try {
-    const success = await translationDatabaseService.initializeFromLocalFiles();
+    const englishContent = fs.readFileSync(englishFile, 'utf-8');
+    const frenchContent = fs.readFileSync(frenchFile, 'utf-8');
     
-    if (success) {
-      console.log('✅ Successfully initialized translation database from local files');
-    } else {
-      console.error('❌ Failed to initialize translation database');
-      return false;
-    }
-    
-    console.log('\nAll translations have been imported to the database.');
-    console.log('\nYou can now use the database as the source of truth for translations.');
-    console.log('Run the sync utility to keep the database and files in sync:');
-    console.log('  npm run sync-translations -- --direction=db-to-file');
-    
-    return true;
+    return {
+      en: JSON.parse(englishContent),
+      fr: JSON.parse(frenchContent)
+    };
   } catch (error) {
-    console.error('Error during database initialization:', error);
-    return false;
+    console.error('Error reading translation files:', error);
+    process.exit(1);
   }
 }
 
-// Run the initialization if this file is executed directly
-if (require.main === module) {
-  initializeDatabase()
-    .then(success => {
-      process.exit(success ? 0 : 1);
-    })
-    .catch(error => {
-      console.error('Unexpected error:', error);
-      process.exit(1);
-    });
+// Function to flatten nested objects into dot notation
+function flattenObject(obj: any, prefix = '') {
+  return Object.keys(obj).reduce((acc: Record<string, string>, key) => {
+    const prefixKey = prefix ? `${prefix}.${key}` : key;
+    
+    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+      Object.assign(acc, flattenObject(obj[key], prefixKey));
+    } else {
+      acc[prefixKey] = obj[key];
+    }
+    
+    return acc;
+  }, {});
 }
+
+// Function to insert translations into Supabase
+async function insertTranslations(translations: { en: any, fr: any }) {
+  // Flatten nested objects
+  const flattenedEn = flattenObject(translations.en);
+  const flattenedFr = flattenObject(translations.fr);
+  
+  // Combine into a single array of keys
+  const allKeys = new Set([...Object.keys(flattenedEn), ...Object.keys(flattenedFr)]);
+  
+  // Prepare data for insertion
+  const translationRows = Array.from(allKeys).map(key => ({
+    key,
+    en: flattenedEn[key] || '',
+    fr: flattenedFr[key] || '',
+    last_updated: new Date().toISOString(),
+    status: 'active'
+  }));
+  
+  // Insert data in batches to prevent request size limits
+  const batchSize = 100;
+  for (let i = 0; i < translationRows.length; i += batchSize) {
+    const batch = translationRows.slice(i, i + batchSize);
+    
+    console.log(`Inserting batch ${Math.floor(i / batchSize) + 1} of ${Math.ceil(translationRows.length / batchSize)}`);
+    
+    const { data, error } = await supabase
+      .from('translations')
+      .upsert(batch, { onConflict: 'key' });
+    
+    if (error) {
+      console.error('Error inserting translations:', error);
+    } else {
+      console.log(`Successfully inserted/updated ${batch.length} translations`);
+    }
+  }
+}
+
+// Main function
+async function main() {
+  console.log('Initializing translation database...');
+  
+  // Read translation files
+  const translations = await readTranslationFiles();
+  
+  // Insert translations into Supabase
+  await insertTranslations(translations);
+  
+  console.log('Translation database initialization complete!');
+}
+
+// Run the script
+main().catch(error => {
+  console.error('Error:', error);
+  process.exit(1);
+});

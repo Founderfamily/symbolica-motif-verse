@@ -1,270 +1,178 @@
 
 #!/usr/bin/env node
 
-/**
- * Fix Generic Translation Keys
- * 
- * This script identifies and replaces generic translation keys with hierarchical ones
- * based on their location in the component hierarchy.
- * 
- * Usage: 
- *   npm run fix-generic-keys -- [--dry-run] [--verbose]
- * 
- * Options:
- *   --dry-run   Only show what would be changed without modifying files
- *   --verbose   Show detailed information about each change
- */
-
-import fs from 'fs';
-import path from 'path';
-import glob from 'glob';
-
-// Parse command line arguments
-const args = process.argv.slice(2);
-const isDryRun = args.includes('--dry-run');
-const isVerbose = args.includes('--verbose');
-const mode = isDryRun ? 'DRY RUN' : 'UPDATE';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as glob from 'glob';
 
 // Configuration
-const GENERIC_KEYS = [
-  'title', 'Title',
-  'subtitle', 'Subtitle',
-  'description', 'Description',
-  'label', 'Label',
-  'button', 'Button',
-  'text', 'Text',
-  'name', 'Name',
-  'header', 'Header',
-  'content', 'Content'
+const rootDir = path.resolve(__dirname, '../../');
+const srcDir = path.join(rootDir, 'src');
+
+// Generic keys to search for and replace
+const genericKeys = ['Title', 'Description', 'Subtitle', 'Empty', 'NoResults'];
+
+// File extensions to search
+const fileExtensions = ['tsx', 'jsx', 'ts', 'js'];
+
+// Translation component patterns
+const translationPatterns = [
+  /<I18nText\s+[^>]*translationKey=["']([^"']+)["'][^>]*>/g,
+  /translationKey=["']([^"']+)["']/g,
+  /t\(["']([^"']+)["']\)/g
 ];
 
-interface KeyOccurrence {
-  file: string;
-  line: number;
-  key: string;
-  context: string;
-  suggestedKey: string;
-  lineContent: string;
+/**
+ * Find files with generic translation keys
+ */
+function findFilesWithGenericKeys(): string[] {
+  const files: string[] = [];
+  
+  // Get all files with the specified extensions
+  fileExtensions.forEach(ext => {
+    const pattern = path.join(srcDir, `**/*.${ext}`);
+    const matches = glob.sync(pattern);
+    files.push(...matches);
+  });
+  
+  // Filter files that contain generic keys
+  return files.filter(file => {
+    const content = fs.readFileSync(file, 'utf-8');
+    return genericKeys.some(key => {
+      return translationPatterns.some(pattern => {
+        const regex = new RegExp(pattern.source.replace('([^"\']+)', `(${key})`), 'g');
+        return regex.test(content);
+      });
+    });
+  });
 }
 
-// Generate a better key based on file path and component context
-function suggestBetterKey(key: string, filePath: string, lineContent: string, lineNumber: number): string {
-  // Extract component name from file path
-  const fileName = path.basename(filePath, path.extname(filePath));
-  const fileContent = fs.readFileSync(filePath, 'utf8').split('\n');
+/**
+ * Suggest a better key based on file path and component context
+ */
+function suggestBetterKey(file: string, genericKey: string): string {
+  const relativePath = path.relative(srcDir, file);
+  const componentPath = relativePath.replace(/\.[^/.]+$/, ''); // Remove extension
+  const parts = componentPath.split(path.sep);
   
-  // Try to determine context from file structure
-  const pathParts = filePath.split(path.sep);
-  const isPagesDir = pathParts.includes('pages');
-  const isComponentsDir = pathParts.includes('components');
-  const isSectionsDir = pathParts.includes('sections');
-  
-  let namespace = 'common';
-  let section = 'general';
-  
-  // Extract namespace from directory structure
-  if (isPagesDir) {
-    namespace = pathParts[pathParts.indexOf('pages') + 1] || 'pages';
-    section = fileName.toLowerCase();
-  } else if (isComponentsDir) {
-    const componentType = pathParts[pathParts.indexOf('components') + 1];
-    namespace = componentType || 'components';
-    section = fileName.toLowerCase();
-  } else if (isSectionsDir) {
-    namespace = 'sections';
-    section = fileName.toLowerCase();
-  }
-  
-  // Try to extract component name from nearby context
-  const startLine = Math.max(0, lineNumber - 10);
-  const contextLines = fileContent.slice(startLine, lineNumber);
-  
-  // Look for React component or function declarations
-  const componentMatches = contextLines.join('\n').match(
-    /function\s+([A-Z][a-zA-Z0-9]*)|const\s+([A-Z][a-zA-Z0-9]*)\s*=/
-  );
-  
-  if (componentMatches) {
-    const componentName = componentMatches[1] || componentMatches[2];
-    if (componentName) {
-      section = componentName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  // Use the path to construct a meaningful key
+  // Example: src/components/sections/Hero.tsx -> sections.hero.title
+  if (parts.length >= 2) {
+    // Try to create a meaningful section name
+    let section: string;
+    if (parts.includes('sections')) {
+      const sectionIndex = parts.indexOf('sections');
+      if (sectionIndex < parts.length - 1) {
+        section = parts[sectionIndex + 1].toLowerCase();
+      } else {
+        section = parts[parts.length - 1].toLowerCase();
+      }
+    } else if (parts.includes('components')) {
+      const compIndex = parts.indexOf('components');
+      if (compIndex < parts.length - 1) {
+        section = parts[compIndex + 1].toLowerCase();
+      } else {
+        section = parts[parts.length - 1].toLowerCase();
+      }
+    } else {
+      section = parts[parts.length - 1].toLowerCase();
     }
+    
+    return `${section}.${genericKey.toLowerCase()}`;
   }
   
-  // For UI element-specific context
-  if (lineContent.includes('<Button') || lineContent.includes('button')) {
-    key = 'button.' + key.toLowerCase();
-  } else if (lineContent.includes('<h1') || lineContent.includes('<h2') || 
-             lineContent.includes('title') || key.toLowerCase() === 'title') {
-    key = 'title';
-  } else if (lineContent.includes('subtitle') || key.toLowerCase() === 'subtitle') {
-    key = 'subtitle';
-  } else if (key.toLowerCase() === 'description') {
-    key = 'description';
-  }
-  
-  return `${namespace}.${section}.${key.toLowerCase()}`;
+  // Fallback
+  return `common.${genericKey.toLowerCase()}`;
 }
 
-// Find all occurrences of generic keys
-function findGenericKeys(): KeyOccurrence[] {
-  console.log(`\n🔍 Scanning for generic translation keys... (${mode})`);
-  
-  const files = glob.sync('src/**/*.{ts,tsx,js,jsx}', { nodir: true });
-  const results: KeyOccurrence[] = [];
+/**
+ * Replace generic keys in files with suggested better keys
+ */
+function replaceGenericKeys(files: string[], dryRun: boolean = true): Map<string, string[]> {
+  const replacements = new Map<string, string[]>();
   
   files.forEach(file => {
-    const content = fs.readFileSync(file, 'utf-8');
-    const lines = content.split('\n');
+    let content = fs.readFileSync(file, 'utf-8');
+    const fileReplacements: string[] = [];
     
-    lines.forEach((line, lineIndex) => {
-      // Check for translationKey="..." pattern
-      const matches = line.match(/translationKey=["']([^"']+)["']/g);
-      
-      if (matches) {
-        for (const match of matches) {
-          // Extract the key value
-          const keyMatch = match.match(/translationKey=["']([^"']+)["']/);
-          const key = keyMatch ? keyMatch[1] : null;
+    // Check each generic key pattern
+    genericKeys.forEach(genericKey => {
+      translationPatterns.forEach(pattern => {
+        const regex = new RegExp(pattern.source.replace('([^"\']+)', `(${genericKey})`), 'g');
+        
+        // Find matches
+        let match;
+        while ((match = regex.exec(content)) !== null) {
+          const fullMatch = match[0];
+          const matchedKey = match[1];
           
-          if (key && GENERIC_KEYS.includes(key)) {
-            const suggestedKey = suggestBetterKey(key, file, line, lineIndex);
+          if (matchedKey === genericKey) {
+            // Suggest better key
+            const betterKey = suggestBetterKey(file, genericKey);
             
-            results.push({
-              file,
-              line: lineIndex + 1,
-              key,
-              context: line.trim(),
-              suggestedKey,
-              lineContent: line
-            });
+            // Replace in content if not a dry run
+            if (!dryRun) {
+              const replacement = fullMatch.replace(genericKey, betterKey);
+              content = content.replace(fullMatch, replacement);
+            }
+            
+            fileReplacements.push(`${genericKey} -> ${betterKey}`);
           }
         }
-      }
-    });
-  });
-  
-  return results;
-}
-
-// Replace generic keys in files
-function replaceGenericKeys(occurrences: KeyOccurrence[]): void {
-  if (isDryRun) {
-    console.log('\n🔍 Changes that would be made:');
-  } else {
-    console.log('\n✏️ Making changes:');
-  }
-  
-  // Group by file to process file-by-file
-  const fileMap = new Map<string, KeyOccurrence[]>();
-  
-  occurrences.forEach(occurrence => {
-    if (!fileMap.has(occurrence.file)) {
-      fileMap.set(occurrence.file, []);
-    }
-    fileMap.get(occurrence.file)!.push(occurrence);
-  });
-  
-  let totalChanges = 0;
-  
-  // Process each file
-  fileMap.forEach((occurrences, file) => {
-    let content = fs.readFileSync(file, 'utf-8');
-    let fileChanges = 0;
-    
-    // Sort in reverse order to avoid position shifts
-    occurrences.sort((a, b) => b.line - a.line);
-    
-    occurrences.forEach(occurrence => {
-      const oldPattern = `translationKey="${occurrence.key}"`;
-      const newPattern = `translationKey="${occurrence.suggestedKey}"`;
-      
-      if (content.includes(oldPattern)) {
-        if (isVerbose) {
-          console.log(`  ${file}:${occurrence.line}`);
-          console.log(`    - ${oldPattern}`);
-          console.log(`    + ${newPattern}`);
-        }
-        
-        if (!isDryRun) {
-          content = content.replace(oldPattern, newPattern);
-        }
-        
-        fileChanges++;
-        totalChanges++;
-      }
+      });
     });
     
-    if (!isDryRun && fileChanges > 0) {
+    // Save changes if not a dry run and there were replacements
+    if (!dryRun && fileReplacements.length > 0) {
       fs.writeFileSync(file, content, 'utf-8');
     }
     
-    console.log(`  ${file}: ${fileChanges} changes${isDryRun ? ' would be made' : ' made'}`);
+    if (fileReplacements.length > 0) {
+      replacements.set(file, fileReplacements);
+    }
   });
   
-  console.log(`\n${isDryRun ? 'Would change' : 'Changed'} ${totalChanges} generic keys in ${fileMap.size} files.`);
+  return replacements;
 }
 
-// Generate a CSV export of all generic keys
-function generateCsv(occurrences: KeyOccurrence[]): void {
-  const csvRows = [['File', 'Line', 'Original Key', 'Suggested Key', 'Context']];
+/**
+ * Main execution
+ */
+function main() {
+  console.log('Scanning for files with generic translation keys...');
+  const files = findFilesWithGenericKeys();
   
-  occurrences.forEach(occurrence => {
-    csvRows.push([
-      occurrence.file,
-      occurrence.line.toString(),
-      occurrence.key,
-      occurrence.suggestedKey,
-      occurrence.context.replace(/"/g, '""') // Escape quotes for CSV
-    ]);
-  });
-  
-  const csvContent = csvRows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-  const outputFile = path.join(process.cwd(), 'generic-keys-report.csv');
-  
-  if (!isDryRun) {
-    fs.writeFileSync(outputFile, csvContent, 'utf-8');
-    console.log(`\n📊 CSV report generated: ${outputFile}`);
-  } else {
-    console.log('\n📊 CSV report would be generated (use without --dry-run to create file)');
-  }
-}
-
-// Main function
-function main(): void {
-  console.log(`\n🔧 Fix Generic Translation Keys (${mode})`);
-  console.log('=========================================');
-  
-  // Find all occurrences of generic keys
-  const occurrences = findGenericKeys();
-  
-  if (occurrences.length === 0) {
-    console.log('\n✅ Great job! No generic keys found.');
+  if (files.length === 0) {
+    console.log('No files found with generic keys.');
     return;
   }
   
-  console.log(`\nFound ${occurrences.length} generic keys in ${new Set(occurrences.map(o => o.file)).size} files.`);
+  console.log(`Found ${files.length} files with generic keys.`);
   
-  // Replace generic keys
-  replaceGenericKeys(occurrences);
+  // Check for --fix flag
+  const fixMode = process.argv.includes('--fix');
   
-  // Generate CSV report
-  generateCsv(occurrences);
+  const replacements = replaceGenericKeys(files, !fixMode);
   
-  if (isDryRun) {
-    console.log('\n⚠️ This was a dry run. No files were modified.');
-    console.log('Run without --dry-run to apply changes.');
+  // Print report
+  console.log('\nREPORT:');
+  console.log('-------');
+  
+  if (replacements.size === 0) {
+    console.log('No replacements needed or found.');
+  } else {
+    replacements.forEach((reps, file) => {
+      console.log(`\nFile: ${path.relative(rootDir, file)}`);
+      reps.forEach(rep => console.log(`- ${rep}`));
+    });
+    
+    if (fixMode) {
+      console.log('\nChanges have been applied to files.');
+    } else {
+      console.log('\nThis was a dry run. Use --fix flag to apply changes.');
+    }
   }
 }
 
 // Run the script
-if (require.main === module) {
-  try {
-    main();
-  } catch (error) {
-    console.error('❌ Error:', error);
-    process.exit(1);
-  }
-}
-
-export { main, findGenericKeys };
+main();
