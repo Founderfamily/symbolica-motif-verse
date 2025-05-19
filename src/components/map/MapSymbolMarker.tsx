@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/hover-card';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAuth } from '@/hooks/useAuth';
-import { gamificationService } from '@/services/gamificationService';
+import { gamificationService } from '@/services/gamification';
 import { I18nText } from '@/components/ui/i18n-text';
 import { SymbolLocation } from '@/services/symbolGeolocationService';
 

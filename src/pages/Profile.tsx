@@ -14,7 +14,7 @@ import { Loader, MapPin, Award, Trophy, Users, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getUserContributions } from '@/services/contributionService';
 import { CompleteContribution } from '@/types/contributions';
-import { gamificationService } from '@/services/gamificationService';
+import { gamificationService } from '@/services/gamification';
 import { UserAchievement, Achievement, UserPoints, UserActivity, UserLevel } from '@/types/gamification';
 import AchievementsList from '@/components/gamification/AchievementsList';
 import ActivityFeed from '@/components/gamification/ActivityFeed';
