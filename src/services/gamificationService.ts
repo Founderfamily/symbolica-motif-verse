@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { UserAchievement, Achievement, UserPoints, UserActivity, UserLevel } from '@/types/gamification';
+import { UserAchievement, Achievement, UserPoints, UserActivity, UserLevel, AchievementType, AchievementLevel } from '@/types/gamification';
 
 /**
  * Service for gamification-related operations, such as awarding points
@@ -95,7 +95,13 @@ export const gamificationService = {
         .order('requirement', { ascending: true });
         
       if (error) throw error;
-      return data || [];
+      
+      // Cast the database string values to our enum types
+      return (data || []).map(achievement => ({
+        ...achievement,
+        type: achievement.type as AchievementType,
+        level: achievement.level as AchievementLevel
+      }));
     } catch (error) {
       console.error("Error fetching achievements:", error);
       return [];
@@ -113,7 +119,16 @@ export const gamificationService = {
         .eq('user_id', userId);
         
       if (error) throw error;
-      return data || [];
+      
+      // Transform the data to match our types, casting string values to enums
+      return (data || []).map(ua => ({
+        ...ua,
+        achievement: ua.achievement ? {
+          ...ua.achievement,
+          type: ua.achievement.type as AchievementType,
+          level: ua.achievement.level as AchievementLevel
+        } : undefined
+      }));
     } catch (error) {
       console.error("Error fetching user achievements:", error);
       return [];
