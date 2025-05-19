@@ -12,6 +12,9 @@ import MapExplorer from './pages/MapExplorer';
 import '@/i18n/config';
 import LanguageDebugger from './i18n/LanguageDebugger';
 import Auth from './pages/Auth';
+import ProfileEditor from './components/user/ProfileEditor';
+import PasswordReset from './components/auth/PasswordReset';
+import PasswordResetConfirmation from './components/auth/PasswordResetConfirmation';
 
 // Import admin components
 import AdminLayout from './pages/Admin/AdminLayout';
@@ -31,14 +34,17 @@ const App = () => {
         <Route path="/map" element={<Layout><MapExplorer /></Layout>} />
         <Route path="/contributions" element={<Layout><ContributionsPage /></Layout>} />
         <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
+        <Route path="/profile/edit" element={<Layout><ProfileEditor /></Layout>} />
         <Route path="/auth" element={<Layout><Auth /></Layout>} />
+        <Route path="/auth/reset-password" element={<Layout><PasswordReset /></Layout>} />
+        <Route path="/auth/reset-password-confirmation" element={<Layout><PasswordResetConfirmation /></Layout>} />
         
         {/* Admin routes with AdminLayout wrapper */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="content" element={<ContentManagement />} />
           <Route path="symbols" element={<SymbolsManagement />} />
-          <Route path="symbols/:id" element={<SymbolEditor />} /> {/* Route for SymbolEditor */}
+          <Route path="symbols/:id" element={<SymbolEditor />} />
           <Route path="contributions" element={<ContributionsManagement />} />
         </Route>
         

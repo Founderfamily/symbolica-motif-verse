@@ -118,31 +118,40 @@ const ProfilePage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <Card className="shadow-md">
             <CardHeader className="pb-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="w-24 h-24 border-4 border-white shadow-md">
-                  <AvatarImage src={user?.avatar_url || undefined} />
-                  <AvatarFallback className="text-2xl bg-amber-600 text-white">
-                    {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-1">
-                  <CardTitle className="text-2xl">{user?.full_name || user?.username}</CardTitle>
-                  <CardDescription>
-                    {user?.username && <span className="font-medium">@{user.username}</span>}
-                    <span className="text-sm ml-2">
-                      {t('profile.memberSince', { date: new Date(user?.created_at || '').toLocaleDateString() })}
-                    </span>
-                  </CardDescription>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                      {t('profile.level', { level: userLevel?.level || 1 })}
-                    </Badge>
-                    <Badge variant="outline" className="flex items-center gap-1 bg-amber-50 text-amber-700 border-amber-200">
-                      <Star className="h-3 w-3 fill-amber-500" />
-                      {userPoints?.total || 0} {t('profile.points')}
-                    </Badge>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-24 h-24 border-4 border-white shadow-md">
+                    <AvatarImage src={user?.avatar_url || undefined} />
+                    <AvatarFallback className="text-2xl bg-amber-600 text-white">
+                      {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <CardTitle className="text-2xl">{user?.full_name || user?.username}</CardTitle>
+                    <CardDescription>
+                      {user?.username && <span className="font-medium">@{user.username}</span>}
+                      <span className="text-sm ml-2">
+                        {t('profile.memberSince', { date: new Date(user?.created_at || '').toLocaleDateString() })}
+                      </span>
+                    </CardDescription>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                        {t('profile.level', { level: userLevel?.level || 1 })}
+                      </Badge>
+                      <Badge variant="outline" className="flex items-center gap-1 bg-amber-50 text-amber-700 border-amber-200">
+                        <Star className="h-3 w-3 fill-amber-500" />
+                        {userPoints?.total || 0} {t('profile.points')}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
+                <Button variant="outline" asChild>
+                  <Link to="/profile/edit" className="flex items-center gap-1">
+                    <I18nText translationKey="profile.editProfile">
+                      Modifier le profil
+                    </I18nText>
+                  </Link>
+                </Button>
               </div>
             </CardHeader>
             

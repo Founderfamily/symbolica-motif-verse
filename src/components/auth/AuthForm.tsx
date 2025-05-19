@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from '@/i18n/useTranslation';
 import { UserProfile } from '@/types/auth';
 import { I18nText } from '@/components/ui/i18n-text';
+import { Link } from 'react-router-dom';
 
 // Validation schema for login
 const loginSchema = z.object({
@@ -122,9 +123,19 @@ export default function AuthForm() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        <I18nText translationKey="auth.labels.password" />
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>
+                          <I18nText translationKey="auth.labels.password" />
+                        </FormLabel>
+                        <Link
+                          to="/auth/reset-password"
+                          className="text-xs text-amber-600 hover:text-amber-700"
+                        >
+                          <I18nText translationKey="auth.buttons.forgotPassword">
+                            Mot de passe oublié ?
+                          </I18nText>
+                        </Link>
+                      </div>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>

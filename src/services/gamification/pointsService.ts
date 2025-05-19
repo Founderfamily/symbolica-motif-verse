@@ -1,6 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { UserPoints } from '@/types/gamification';
+import { achievementService } from './achievementService';
+import { levelService } from './levelService';
 
 /**
  * Service for points-related gamification operations
@@ -17,7 +19,8 @@ export const pointsService = {
     details?: Record<string, any>
   ): Promise<boolean> => {
     try {
-      const { error } = await supabase
+      // Create activity record with more detailed tracking
+      const { error: activityError, data: activityData } = await supabase
         .from('user_activities')
         .insert({
           user_id: userId,
@@ -25,9 +28,11 @@ export const pointsService = {
           points_earned: points,
           entity_id: entityId || null,
           details: details || {}
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (activityError) throw activityError;
       
       // Update user points
       const pointsField = `${activityType}_points` as keyof typeof initialPointsTemplate;
@@ -43,6 +48,8 @@ export const pointsService = {
         throw pointsError;
       }
       
+      let updatedPoints: UserPoints;
+      
       if (!currentPoints) {
         // Create new points record with initial values
         const initialPoints = {
@@ -56,11 +63,14 @@ export const pointsService = {
         
         initialPoints[pointsField] = points;
         
-        const { error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await supabase
           .from('user_points')
-          .insert(initialPoints);
+          .insert(initialPoints)
+          .select()
+          .single();
           
         if (insertError) throw insertError;
+        updatedPoints = insertData;
       } else {
         // Update existing points record
         const updateData = {
@@ -69,12 +79,27 @@ export const pointsService = {
           updated_at: new Date().toISOString()
         };
         
-        const { error: updateError } = await supabase
+        const { data: updatedData, error: updateError } = await supabase
           .from('user_points')
           .update(updateData)
-          .eq('id', currentPoints.id);
+          .eq('id', currentPoints.id)
+          .select()
+          .single();
           
         if (updateError) throw updateError;
+        updatedPoints = updatedData;
+      }
+
+      // Update user level based on new points
+      await levelService.updateUserLevel(userId, points);
+      
+      // Check if user has earned any new achievements
+      const newAchievements = await achievementService.checkAchievements(userId);
+      
+      // If achievements were earned, notify (implementation depends on your app's notification system)
+      if (newAchievements.length > 0) {
+        console.log(`User ${userId} earned ${newAchievements.length} new achievements`);
+        // Could implement notifications here
       }
 
       return true;
@@ -110,12 +135,36 @@ export const pointsService = {
     try {
       const { data, error } = await supabase
         .from('user_points')
-        .select('*, profiles:user_id(*)')
+        .select(`
+          *,
+          profiles:user_id (
+            id,
+            username,
+            full_name,
+            avatar_url
+          ),
+          user_levels:user_id (
+            level
+          )
+        `)
         .order('total', { ascending: false })
         .limit(limit);
         
       if (error) throw error;
-      return data || [];
+      
+      // Format data for easier consumption
+      return (data || []).map(item => ({
+        userId: item.user_id,
+        username: item.profiles?.username,
+        fullName: item.profiles?.full_name,
+        avatarUrl: item.profiles?.avatar_url,
+        level: item.user_levels?.level || 1,
+        totalPoints: item.total,
+        contributionPoints: item.contribution_points,
+        explorationPoints: item.exploration_points,
+        validationPoints: item.validation_points,
+        communityPoints: item.community_points,
+      }));
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
       return [];

@@ -11,6 +11,10 @@ export interface UserProfile {
   symbols_count?: number;
   verified_uploads?: number;
   favorite_cultures?: string[] | null;
+  bio?: string | null;
+  location?: string | null;
+  website?: string | null;
+  email_verified?: boolean | null;
 }
 
 export interface AuthState {

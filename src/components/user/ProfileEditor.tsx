@@ -1,0 +1,412 @@
+
+import React, { useState, useEffect } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
+import { toast } from '@/components/ui/use-toast';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAuth } from '@/hooks/useAuth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+
+// Validation schema for profile edit
+const profileSchema = z.object({
+  username: z.string().min(3, {
+    message: "Le nom d'utilisateur doit comporter au moins 3 caractères"
+  }).max(50),
+  full_name: z.string().min(2, {
+    message: "Le nom complet doit comporter au moins 2 caractères"
+  }).max(100),
+  bio: z.string().max(500, {
+    message: "La biographie ne peut pas dépasser 500 caractères"
+  }).optional(),
+  location: z.string().max(100).optional(),
+  website: z.string().url({
+    message: "Veuillez entrer une URL valide"
+  }).optional().or(z.string().length(0)),
+  avatar_url: z.string().optional(),
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
+
+export default function ProfileEditor() {
+  const { t } = useTranslation();
+  const { user, updateProfile } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Initialize form with current user data
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      username: user?.username || '',
+      full_name: user?.full_name || '',
+      bio: user?.bio || '',
+      location: user?.location || '',
+      website: user?.website || '',
+      avatar_url: user?.avatar_url || '',
+    },
+  });
+
+  useEffect(() => {
+    // Update form values when user data changes
+    if (user) {
+      form.reset({
+        username: user.username || '',
+        full_name: user.full_name || '',
+        bio: user.bio || '',
+        location: user.location || '',
+        website: user.website || '',
+        avatar_url: user.avatar_url || '',
+      });
+    }
+  }, [user, form]);
+
+  // Handle avatar file selection
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validate file type and size
+      if (!file.type.startsWith('image/')) {
+        toast({
+          variant: "destructive",
+          title: t('error.title'),
+          description: t('profile.editor.notAnImage'),
+        });
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          variant: "destructive",
+          title: t('error.title'),
+          description: t('profile.editor.fileTooLarge'),
+        });
+        return;
+      }
+      
+      setAvatarFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+    }
+  };
+
+  // Handle avatar upload to storage
+  const uploadAvatar = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}-avatar.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('user_content')
+        .upload(filePath, file, { upsert: true });
+        
+      if (uploadError) throw uploadError;
+      
+      const { data: urlData } = await supabase.storage
+        .from('user_content')
+        .getPublicUrl(filePath);
+        
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      return null;
+    }
+  };
+  
+  const onSubmit = async (data: ProfileFormValues) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      let avatarUrl = data.avatar_url || null;
+      
+      // Upload new avatar if selected
+      if (avatarFile) {
+        const uploadedUrl = await uploadAvatar(avatarFile);
+        if (uploadedUrl) {
+          avatarUrl = uploadedUrl;
+        } else {
+          throw new Error(t('profile.editor.avatarUploadFailed'));
+        }
+      }
+      
+      // Update profile with new data
+      await updateProfile({
+        ...data,
+        avatar_url: avatarUrl,
+      });
+      
+      toast({
+        title: t('profile.editor.success'),
+        description: t('profile.editor.profileUpdated'),
+      });
+      
+      // Clean up avatar preview URL
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+        setAvatarPreview(null);
+        setAvatarFile(null);
+      }
+      
+    } catch (err: any) {
+      setError(err.message || t('profile.editor.updateError'));
+      toast({
+        variant: "destructive",
+        title: t('error.title'),
+        description: err.message || t('profile.editor.updateError'),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>
+          <I18nText translationKey="profile.editor.title">
+            Modifier votre profil
+          </I18nText>
+        </CardTitle>
+        <CardDescription>
+          <I18nText translationKey="profile.editor.description">
+            Mettez à jour vos informations personnelles
+          </I18nText>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>
+              <I18nText translationKey="error.title">Erreur</I18nText>
+            </AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Avatar upload section */}
+          <div className="flex flex-col items-center space-y-4 pb-4 md:pb-0 md:pr-6 md:border-r border-slate-200">
+            <Avatar className="w-24 h-24">
+              <AvatarImage 
+                src={avatarPreview || user?.avatar_url || undefined} 
+                alt={user?.full_name || user?.username || "Avatar"} 
+              />
+              <AvatarFallback className="text-2xl bg-amber-100 text-amber-700">
+                {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
+            
+            <Button 
+              variant="outline" 
+              onClick={() => fileInputRef.current?.click()}
+              size="sm"
+              className="text-sm"
+            >
+              <I18nText translationKey="profile.editor.changeAvatar">
+                Changer d'avatar
+              </I18nText>
+            </Button>
+            
+            <p className="text-xs text-slate-500 text-center max-w-[200px]">
+              <I18nText translationKey="profile.editor.avatarRequirements">
+                JPG, PNG ou GIF. 5 MB maximum.
+              </I18nText>
+            </p>
+          </div>
+          
+          {/* Profile form */}
+          <div className="flex-grow">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.username" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="full_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="auth.labels.fullName" />
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="bio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <I18nText translationKey="profile.editor.bio" />
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          value={field.value || ''}
+                          placeholder={t('profile.editor.bioPlaceholder')}
+                          className="resize-none"
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          <I18nText translationKey="profile.editor.location" />
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder={t('profile.editor.locationPlaceholder')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="website"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          <I18nText translationKey="profile.editor.website" />
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder="https://example.com"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="pt-4">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="mr-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <I18nText translationKey="profile.editor.saving">
+                          Sauvegarde en cours...
+                        </I18nText>
+                      </>
+                    ) : (
+                      <I18nText translationKey="profile.editor.saveChanges">
+                        Sauvegarder les modifications
+                      </I18nText>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => form.reset()}
+                    disabled={loading}
+                  >
+                    <I18nText translationKey="common.cancel">
+                      Annuler
+                    </I18nText>
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </div>
+        
+        <Separator className="my-6" />
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">
+            <I18nText translationKey="profile.editor.emailSection">
+              Email et Mot de passe
+            </I18nText>
+          </h3>
+          <p className="text-sm text-slate-500 mb-4">
+            <I18nText translationKey="profile.editor.emailDescription">
+              Gérez votre email et votre mot de passe
+            </I18nText>
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" asChild>
+              <a href="/auth/reset-password">
+                <I18nText translationKey="auth.buttons.changePassword">
+                  Changer de mot de passe
+                </I18nText>
+              </a>
+            </Button>
+            
+            <Button variant="outline" asChild>
+              <a href="/auth/update-email">
+                <I18nText translationKey="auth.buttons.updateEmail">
+                  Mettre à jour l'email
+                </I18nText>
+              </a>
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
