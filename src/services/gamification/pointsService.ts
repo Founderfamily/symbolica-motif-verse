@@ -1,14 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { UserAchievement, Achievement, UserPoints, UserActivity, UserLevel, AchievementType, AchievementLevel } from '@/types/gamification';
-import { Database } from '@/integrations/supabase/types';
-
-type Json = Database['public']['Tables']['achievements']['Row']['translations'];
+import { UserPoints } from '@/types/gamification';
 
 /**
- * Service for gamification-related operations, such as awarding points
+ * Service for points-related gamification operations
  */
-export const gamificationService = {
+export const pointsService = {
   /**
    * Award points to a user for a specific activity
    */
@@ -88,59 +85,6 @@ export const gamificationService = {
   },
   
   /**
-   * Get all available achievements
-   */
-  getAchievements: async (): Promise<Achievement[]> => {
-    try {
-      const { data, error } = await supabase
-        .from('achievements')
-        .select('*')
-        .order('requirement', { ascending: true });
-        
-      if (error) throw error;
-      
-      // Cast the database string values to our enum types and properly type the translations
-      return (data || []).map(achievement => ({
-        ...achievement,
-        type: achievement.type as AchievementType,
-        level: achievement.level as AchievementLevel,
-        translations: (achievement.translations as any || {}) as { [language: string]: { name: string; description: string } }
-      }));
-    } catch (error) {
-      console.error("Error fetching achievements:", error);
-      return [];
-    }
-  },
-  
-  /**
-   * Get achievements for a specific user
-   */
-  getUserAchievements: async (userId: string): Promise<UserAchievement[]> => {
-    try {
-      const { data, error } = await supabase
-        .from('user_achievements')
-        .select('*, achievement:achievement_id(*)')
-        .eq('user_id', userId);
-        
-      if (error) throw error;
-      
-      // Transform the data to match our types, casting string values to enums and properly casting translations
-      return (data || []).map(ua => ({
-        ...ua,
-        achievement: ua.achievement ? {
-          ...ua.achievement,
-          type: ua.achievement.type as AchievementType,
-          level: ua.achievement.level as AchievementLevel,
-          translations: (ua.achievement.translations as any || {}) as { [language: string]: { name: string; description: string } }
-        } : undefined
-      }));
-    } catch (error) {
-      console.error("Error fetching user achievements:", error);
-      return [];
-    }
-  },
-  
-  /**
    * Get points for a specific user
    */
   getUserPoints: async (userId: string): Promise<UserPoints | null> => {
@@ -156,45 +100,6 @@ export const gamificationService = {
     } catch (error) {
       console.error("Error fetching user points:", error);
       return null;
-    }
-  },
-  
-  /**
-   * Get level information for a specific user
-   */
-  getUserLevel: async (userId: string): Promise<UserLevel | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('user_levels')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-        
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
-    } catch (error) {
-      console.error("Error fetching user level:", error);
-      return null;
-    }
-  },
-  
-  /**
-   * Get recent activities for a specific user
-   */
-  getUserActivities: async (userId: string, limit: number = 10): Promise<UserActivity[]> => {
-    try {
-      const { data, error } = await supabase
-        .from('user_activities')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-        
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error("Error fetching user activities:", error);
-      return [];
     }
   },
   
