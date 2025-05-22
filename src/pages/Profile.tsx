@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +18,7 @@ import { UserAchievement, Achievement, UserPoints, UserActivity, UserLevel } fro
 import AchievementsList from '@/components/gamification/AchievementsList';
 import ActivityFeed from '@/components/gamification/ActivityFeed';
 import UserRanking from '@/components/gamification/UserRanking';
+import { I18nText } from '@/components/ui/i18n-text'; // Ajout de l'import manquant
 
 const ProfilePage: React.FC = () => {
   const { t } = useTranslation();

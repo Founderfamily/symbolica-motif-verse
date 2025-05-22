@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AdminStats {
@@ -47,13 +46,18 @@ export const adminStatsService = {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
-      const { count: activeUsers, error: activeUsersError } = await supabase
+      // Utiliser une approche différente pour récupérer les utilisateurs actifs
+      const { data: activeUsersData, error: activeUsersError } = await supabase
         .from('user_activities')
-        .select('user_id', { count: 'exact', head: true })
+        .select('user_id')
         .gt('created_at', thirtyDaysAgo.toISOString())
-        .is('user_id', 'not.null');
+        .is('user_id', 'not.null') as any;
       
       if (activeUsersError) throw activeUsersError;
+      
+      // Compter les utilisateurs uniques actifs
+      const activeUserIds = new Set(activeUsersData.map((item: any) => item.user_id));
+      const activeUsers = activeUserIds.size;
       
       // Get contributions counts
       const { data: contributionsData, error: contribError } = await supabase
@@ -111,22 +115,36 @@ export const adminStatsService = {
       const contributionsOverTime = processTimeSeriesData(contribTimeData, 'created_at');
       
       // Get top contributors
+      // Utiliser une méthode alternative pour récupérer les données des utilisateurs
       const { data: topContribData, error: topContribError } = await supabase
         .from('user_points')
         .select(`
           user_id,
           total,
-          contribution_points,
-          profiles:user_id (
-            username,
-            full_name
-          )
+          contribution_points
         `)
         .order('total', { ascending: false })
-        .limit(10);
+        .limit(10) as any;
         
       if (topContribError) throw topContribError;
       
+      // Récupérer les informations des profils séparément
+      const userIds = topContribData.map((item: any) => item.user_id);
+      
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username, full_name')
+        .in('id', userIds);
+        
+      if (profilesError) throw profilesError;
+      
+      // Créer un dictionnaire pour accéder facilement aux données de profil
+      const profilesDict: Record<string, any> = {};
+      profilesData.forEach((profile: any) => {
+        profilesDict[profile.id] = profile;
+      });
+      
+      // Process contribution counts by user
       const { data: contributionCounts, error: contribCountsError } = await supabase
         .from('user_contributions')
         .select('user_id, id')
@@ -140,13 +158,16 @@ export const adminStatsService = {
         contributionsByUser[item.user_id] = (contributionsByUser[item.user_id] || 0) + 1;
       });
       
-      const topContributors = topContribData.map(contributor => ({
-        userId: contributor.user_id,
-        username: contributor.profiles?.username,
-        fullName: contributor.profiles?.full_name,
-        contributionsCount: contributionsByUser[contributor.user_id] || 0,
-        pointsTotal: contributor.total
-      }));
+      const topContributors = topContribData.map((contributor: any) => {
+        const profile = profilesDict[contributor.user_id] || {};
+        return {
+          userId: contributor.user_id,
+          username: profile.username,
+          fullName: profile.full_name,
+          contributionsCount: contributionsByUser[contributor.user_id] || 0,
+          pointsTotal: contributor.total
+        };
+      });
       
       return {
         totalUsers: totalUsers || 0,

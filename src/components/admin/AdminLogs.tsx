@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -63,7 +62,7 @@ export default function AdminLogs() {
       case 'delete':
         return 'destructive';
       case 'approve':
-        return 'success';
+        return 'secondary';
       case 'reject':
         return 'destructive';
       default:

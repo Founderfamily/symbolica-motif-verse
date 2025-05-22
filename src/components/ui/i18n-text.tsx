@@ -8,6 +8,8 @@ type I18nTextProps = {
   translationKey: string;
   /** Optional parameters for the translation */
   params?: Record<string, string | number>;
+  /** Optional values for the translation (alias for params) */
+  values?: Record<string, string | number>;
   /** Optional className for styling */
   className?: string;
   /** Optional element type to render (default: span) */
@@ -24,6 +26,7 @@ type I18nTextProps = {
 export const I18nText = ({
   translationKey,
   params,
+  values, // Add support for 'values' as an alias for 'params'
   className = '',
   as: Component = 'span',
   children,
@@ -31,8 +34,11 @@ export const I18nText = ({
 }: I18nTextProps) => {
   const { t, i18n } = useTranslation();
   
+  // Use values if provided, otherwise use params
+  const translationParams = values || params;
+  
   // Get the translated text
-  const translatedText = t(translationKey, params);
+  const translatedText = t(translationKey, translationParams);
   const keyExists = i18n.exists(translationKey);
   const isMissing = !keyExists || translatedText === translationKey;
   
