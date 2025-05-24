@@ -59,20 +59,31 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
     return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
   };
   
+  // Safe access with default values
+  const totalUsers = stats?.totalUsers || 0;
+  const activeUsersLast30Days = stats?.activeUsersLast30Days || 0;
+  const totalContributions = stats?.totalContributions || 0;
+  const pendingContributions = stats?.pendingContributions || 0;
+  const totalSymbols = stats?.totalSymbols || 0;
+  const verifiedSymbols = stats?.verifiedSymbols || 0;
+  const totalSymbolLocations = stats?.totalSymbolLocations || 0;
+  const topContributors = stats?.topContributors || [];
+  const contributionsOverTime = stats?.contributionsOverTime || [];
+  
   // Calculate activity rate (active users / total users)
-  const activityRate = stats.totalUsers > 0 
-    ? `${((stats.activeUsersLast30Days / stats.totalUsers) * 100).toFixed(1)}%` 
+  const activityRate = totalUsers > 0 
+    ? `${((activeUsersLast30Days / totalUsers) * 100).toFixed(1)}%` 
     : '0%';
   
   // Calculate approval rate for contributions
-  const approvedContributions = stats.totalContributions - stats.pendingContributions;
-  const approvalRate = stats.totalContributions > 0 
-    ? `${((approvedContributions / stats.totalContributions) * 100).toFixed(1)}%` 
+  const approvedContributions = totalContributions - pendingContributions;
+  const approvalRate = totalContributions > 0 
+    ? `${((approvedContributions / totalContributions) * 100).toFixed(1)}%` 
     : '0%';
   
   // Calculate verification rate for symbols
-  const verificationRate = stats.totalSymbolLocations > 0 
-    ? `${((stats.verifiedSymbols / stats.totalSymbolLocations) * 100).toFixed(1)}%` 
+  const verificationRate = totalSymbolLocations > 0 
+    ? `${((verifiedSymbols / totalSymbolLocations) * 100).toFixed(1)}%` 
     : '0%';
   
   return (
@@ -80,8 +91,8 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
       <StatCard
         icon={Users}
         title={t('admin.stats.totalUsers')}
-        value={loading ? '' : formatNumber(stats.totalUsers)}
-        description={t('admin.stats.activeUsers', { count: stats.activeUsersLast30Days, rate: activityRate })}
+        value={loading ? '' : formatNumber(totalUsers)}
+        description={t('admin.stats.activeUsers', { count: activeUsersLast30Days, rate: activityRate })}
         loading={loading}
         color="bg-blue-500"
       />
@@ -89,8 +100,8 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
       <StatCard
         icon={FileText}
         title={t('admin.stats.totalContributions')}
-        value={loading ? '' : formatNumber(stats.totalContributions)}
-        description={t('admin.stats.pendingContributions', { count: stats.pendingContributions, rate: approvalRate })}
+        value={loading ? '' : formatNumber(totalContributions)}
+        description={t('admin.stats.pendingContributions', { count: pendingContributions, rate: approvalRate })}
         loading={loading}
         color="bg-amber-500"
       />
@@ -98,7 +109,7 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
       <StatCard
         icon={Bookmark}
         title={t('admin.stats.totalSymbols')}
-        value={loading ? '' : formatNumber(stats.totalSymbols)}
+        value={loading ? '' : formatNumber(totalSymbols)}
         loading={loading}
         color="bg-emerald-500"
       />
@@ -106,8 +117,8 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
       <StatCard
         icon={Map}
         title={t('admin.stats.symbolLocations')}
-        value={loading ? '' : formatNumber(stats.totalSymbolLocations)}
-        description={t('admin.stats.verifiedLocations', { count: stats.verifiedSymbols, rate: verificationRate })}
+        value={loading ? '' : formatNumber(totalSymbolLocations)}
+        description={t('admin.stats.verifiedLocations', { count: verifiedSymbols, rate: verificationRate })}
         loading={loading}
         color="bg-violet-500"
       />
@@ -115,12 +126,12 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
       <StatCard
         icon={Award}
         title={t('admin.stats.topContributor')}
-        value={loading || !stats.topContributors.length ? '' : 
-          (stats.topContributors[0].fullName || stats.topContributors[0].username || 'Unknown')}
-        description={stats.topContributors.length > 0 ? 
+        value={loading || topContributors.length === 0 ? '' : 
+          (topContributors[0].fullName || topContributors[0].username || 'Unknown')}
+        description={topContributors.length > 0 ? 
           t('admin.stats.contributorStats', { 
-            contributions: stats.topContributors[0].contributionsCount, 
-            points: stats.topContributors[0].pointsTotal 
+            contributions: topContributors[0].contributionsCount, 
+            points: topContributors[0].pointsTotal 
           }) : ''}
         loading={loading}
         color="bg-pink-500"
@@ -130,10 +141,10 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
         icon={Clock}
         title={t('admin.stats.lastContribution')}
         value={loading ? '' : (
-          stats.contributionsOverTime.length > 0 && 
-          stats.contributionsOverTime.some(p => p.count > 0) ? 
+          contributionsOverTime.length > 0 && 
+          contributionsOverTime.some(p => p.count > 0) ? 
             new Date(
-              stats.contributionsOverTime
+              contributionsOverTime
                 .slice()
                 .reverse()
                 .find(p => p.count > 0)?.date || ''
