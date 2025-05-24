@@ -2,31 +2,33 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCollection } from '@/hooks/useCollections';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Calendar, Sparkles } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, Map, Grid, Share2, BookOpen } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
-import CollectionHero from '@/components/collections/CollectionHero';
+import { I18nText } from '@/components/ui/i18n-text';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SymbolGrid } from '@/components/search/SymbolGrid';
 
 const CollectionDetailPage = () => {
-  const { slug } = useParams();
-  const { data: collection, isLoading } = useCollection(slug || '');
+  const { slug } = useParams<{ slug: string }>();
   const { currentLanguage } = useTranslation();
-
-  const getTranslation = (field: string) => {
-    const translation = collection?.collection_translations?.find(
-      (t: any) => t.language === currentLanguage
-    );
-    return translation?.[field] || '';
-  };
+  const { data: collection, isLoading } = useCollection(slug || '');
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50">
         <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+          <div className="space-y-6">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-24 w-full" />
+            <div className="grid md:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-64 w-full" />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -35,25 +37,30 @@ const CollectionDetailPage = () => {
 
   if (!collection) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <h1 className="text-2xl font-bold mb-4">Collection non trouvée</h1>
-            <Link to="/collections">
-              <Button>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Retour aux collections
-              </Button>
-            </Link>
-          </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-slate-900 mb-4">
+            <I18nText translationKey="collections.notFound">Collection non trouvée</I18nText>
+          </h1>
+          <Link to="/collections">
+            <Button variant="outline">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              <I18nText translationKey="collections.backToCollections">Retour aux collections</I18nText>
+            </Button>
+          </Link>
         </div>
       </div>
     );
   }
 
-  const symbols = collection.collection_symbols
-    ?.sort((a, b) => a.position - b.position)
-    ?.map(cs => cs.symbols) || [];
+  const getTranslation = (field: string) => {
+    const translation = collection.collection_translations?.find(
+      (t: any) => t.language === currentLanguage
+    );
+    return translation?.[field] || '';
+  };
+
+  const symbols = collection.collection_symbols?.map(cs => cs.symbols) || [];
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -61,119 +68,114 @@ const CollectionDetailPage = () => {
         {/* Navigation */}
         <div className="mb-6">
           <Link to="/collections">
-            <Button variant="outline" className="mb-4">
+            <Button variant="ghost" className="mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Retour aux collections
+              <I18nText translationKey="collections.backToCollections">Retour aux collections</I18nText>
             </Button>
           </Link>
         </div>
 
-        {/* Hero Section */}
-        <CollectionHero collection={collection} />
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm border p-8 mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
+                  {getTranslation('title')}
+                </h1>
+                {collection.is_featured && (
+                  <Badge className="bg-amber-600">
+                    <I18nText translationKey="collections.featured">En vedette</I18nText>
+                  </Badge>
+                )}
+              </div>
+              
+              <p className="text-lg text-slate-600 mb-6 max-w-3xl">
+                {getTranslation('description')}
+              </p>
+              
+              <div className="flex items-center gap-4 text-sm text-slate-500">
+                <span className="flex items-center gap-1">
+                  <BookOpen className="w-4 h-4" />
+                  {symbols.length} symboles
+                </span>
+                <span>•</span>
+                <span>Créée le {new Date(collection.created_at).toLocaleDateString('fr-FR')}</span>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <Button variant="outline" size="sm">
+                <Share2 className="w-4 h-4 mr-2" />
+                <I18nText translationKey="collections.share">Partager</I18nText>
+              </Button>
+              <Button variant="outline" size="sm">
+                <Map className="w-4 h-4 mr-2" />
+                <I18nText translationKey="collections.viewOnMap">Voir sur la carte</I18nText>
+              </Button>
+            </div>
+          </div>
+        </div>
 
-        {/* Collection Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-amber-600 mb-2">
-                {symbols.length}
-              </div>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-slate-900">{symbols.length}</div>
               <div className="text-sm text-slate-600">
-                Symboles dans cette collection
+                <I18nText translationKey="collections.symbolsCount">Symboles</I18nText>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                {symbols.length > 0 ? symbols.map(s => s.culture).filter((v, i, a) => a.indexOf(v) === i).length : 0}
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-slate-900">
+                {[...new Set(symbols.map(s => s.culture))].length}
               </div>
               <div className="text-sm text-slate-600">
-                Cultures représentées
+                <I18nText translationKey="collections.culturesCount">Cultures</I18nText>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-center gap-2">
-                <Sparkles className="w-5 h-5 text-purple-600" />
-                <div className="text-3xl font-bold text-purple-600">
-                  25
-                </div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-slate-900">
+                {[...new Set(symbols.map(s => s.period))].length}
               </div>
               <div className="text-sm text-slate-600">
-                Points de réalisation
+                <I18nText translationKey="collections.periodsCount">Périodes</I18nText>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Symbols Timeline */}
+        <Separator className="my-8" />
+
+        {/* Symbols Section */}
         <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-slate-900">
-              Parcours de la Collection
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-slate-900">
+              <I18nText translationKey="collections.symbolsInCollection">Symboles de la collection</I18nText>
             </h2>
-            <Badge variant="outline" className="text-slate-600">
-              {symbols.length} étapes
-            </Badge>
-          </div>
-          
-          {symbols.length > 0 ? (
-            <div className="space-y-6">
-              {symbols.map((symbol, index) => (
-                <Card key={symbol.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-amber-500">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
-                            Étape {index + 1}
-                          </Badge>
-                          <CardTitle className="text-xl">{symbol.name}</CardTitle>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-slate-600">
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {symbol.culture}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            {symbol.period}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-700 line-clamp-3 mb-4">
-                      {symbol.description}
-                    </p>
-                    <Link
-                      to={`/symbols/${symbol.id}`}
-                      className="inline-flex items-center gap-1 text-amber-600 hover:text-amber-700 font-medium transition-colors"
-                    >
-                      Découvrir ce symbole
-                      <ArrowLeft className="w-4 h-4 rotate-180" />
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Grid className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" size="sm">
+                <Map className="w-4 h-4" />
+              </Button>
             </div>
+          </div>
+
+          {symbols.length > 0 ? (
+            <SymbolGrid symbols={symbols} />
           ) : (
-            <Card className="border-dashed border-2 border-slate-300">
-              <CardContent className="text-center py-16">
-                <div className="text-6xl mb-4">🚧</div>
-                <h3 className="text-lg font-medium mb-2 text-slate-700">
-                  Collection en cours de création
-                </h3>
-                <p className="text-slate-600">
-                  Cette collection sera bientôt enrichie avec des symboles fascinants.
-                  Revenez plus tard pour découvrir ce parcours thématique !
-                </p>
-              </CardContent>
+            <Card className="p-8 text-center">
+              <p className="text-slate-500">
+                <I18nText translationKey="collections.noSymbols">Aucun symbole dans cette collection</I18nText>
+              </p>
             </Card>
           )}
         </section>

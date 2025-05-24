@@ -3,10 +3,13 @@ import React from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import FeaturedCollectionsGrid from '@/components/collections/FeaturedCollectionsGrid';
 import CollectionGrid from '@/components/collections/CollectionGrid';
+import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
 
 const CollectionsPage = () => {
   const { currentLanguage } = useTranslation();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -26,7 +29,7 @@ const CollectionsPage = () => {
             Découvrez les connexions fascinantes entre cultures et époques.
           </p>
           
-          <div className="flex items-center justify-center gap-6 text-sm text-slate-600">
+          <div className="flex items-center justify-center gap-6 text-sm text-slate-600 mb-8">
             <span className="flex items-center gap-2">
               🏛️ Mystères & Secrets
             </span>
@@ -40,6 +43,12 @@ const CollectionsPage = () => {
               💻 Ère Numérique
             </span>
           </div>
+
+          {user && (
+            <div className="flex justify-center">
+              <CreateCollectionDialog />
+            </div>
+          )}
         </section>
 
         {/* Featured Collections */}
