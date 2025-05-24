@@ -31,27 +31,31 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 
 // Helper to prepare data for charts combining multiple data sources
 const prepareChartData = (
-  userRegistrations: TimeSeriesPoint[], 
-  contributions: TimeSeriesPoint[]
+  userRegistrations: TimeSeriesPoint[] = [], 
+  contributions: TimeSeriesPoint[] = []
 ): any[] => {
   const combinedData = new Map<string, any>();
   
-  // Add user registrations data
-  userRegistrations.forEach(point => {
-    combinedData.set(point.date, {
-      date: point.date,
-      registrations: point.count
+  // Add user registrations data - with null check
+  if (userRegistrations && Array.isArray(userRegistrations)) {
+    userRegistrations.forEach(point => {
+      combinedData.set(point.date, {
+        date: point.date,
+        registrations: point.count
+      });
     });
-  });
+  }
   
-  // Add contributions data
-  contributions.forEach(point => {
-    const existing = combinedData.get(point.date) || { date: point.date, registrations: 0 };
-    combinedData.set(point.date, {
-      ...existing,
-      contributions: point.count
+  // Add contributions data - with null check
+  if (contributions && Array.isArray(contributions)) {
+    contributions.forEach(point => {
+      const existing = combinedData.get(point.date) || { date: point.date, registrations: 0 };
+      combinedData.set(point.date, {
+        ...existing,
+        contributions: point.count
+      });
     });
-  });
+  }
   
   // Convert map to array and sort by date
   return Array.from(combinedData.values())
@@ -61,11 +65,14 @@ const prepareChartData = (
 export default function AnalyticsCharts({ stats, loading }: AnalyticsChartsProps) {
   const { t } = useTranslation();
   
-  // Prepare data for the combination chart
-  const activityData = prepareChartData(stats.userRegistrationsOverTime, stats.contributionsOverTime);
+  // Prepare data for the combination chart with safe defaults
+  const activityData = prepareChartData(
+    stats?.userRegistrationsOverTime || [], 
+    stats?.contributionsOverTime || []
+  );
   
-  // Prepare data for the top contributors chart
-  const contributorsData = stats.topContributors
+  // Prepare data for the top contributors chart with safe defaults
+  const contributorsData = (stats?.topContributors || [])
     .slice(0, 5)
     .map(contributor => ({
       name: contributor.fullName || contributor.username || 'Anonymous',
