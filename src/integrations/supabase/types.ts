@@ -1465,6 +1465,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       image_type: "original" | "pattern" | "reuse"

@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -25,10 +26,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
 import { getAnalysisExamples, createAnalysisExample, deleteAnalysisExample, type AnalysisExample } from '@/services/analysisExampleService';
+import { toast } from 'sonner';
 
 export default function AnalysisExamplesManagement() {
   const { t } = useTranslation();
+  const { isAdmin } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newExample, setNewExample] = useState({
@@ -37,10 +41,26 @@ export default function AnalysisExamplesManagement() {
     tags: [] as string[]
   });
 
-  const { data: examples = [], isLoading, refetch } = useQuery({
+  const { data: examples = [], isLoading, error, refetch } = useQuery({
     queryKey: ['analysis-examples'],
     queryFn: getAnalysisExamples
   });
+
+  // Show access denied message if user is not admin
+  if (!isAdmin) {
+    return (
+      <div className="p-6 space-y-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <I18nText translationKey="admin.access.denied">
+              Accès refusé. Vous devez être administrateur pour accéder à cette section.
+            </I18nText>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   const filteredExamples = examples.filter(example =>
     example.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -53,8 +73,10 @@ export default function AnalysisExamplesManagement() {
       setNewExample({ title: '', description: '', tags: [] });
       setIsCreateDialogOpen(false);
       refetch();
-    } catch (error) {
+      toast.success('Exemple créé avec succès');
+    } catch (error: any) {
       console.error('Error creating analysis example:', error);
+      toast.error(error.message || 'Erreur lors de la création de l\'exemple');
     }
   };
 
@@ -63,8 +85,10 @@ export default function AnalysisExamplesManagement() {
       try {
         await deleteAnalysisExample(id);
         refetch();
-      } catch (error) {
+        toast.success('Exemple supprimé avec succès');
+      } catch (error: any) {
         console.error('Error deleting analysis example:', error);
+        toast.error(error.message || 'Erreur lors de la suppression de l\'exemple');
       }
     }
   };
@@ -153,6 +177,16 @@ export default function AnalysisExamplesManagement() {
         </Dialog>
       </div>
 
+      {/* Error display */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Erreur lors du chargement des exemples: {error.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Search */}
       <Card>
         <CardContent className="pt-6">
@@ -173,6 +207,14 @@ export default function AnalysisExamplesManagement() {
         <CardContent>
           {isLoading ? (
             <div className="p-8 text-center">Chargement...</div>
+          ) : filteredExamples.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              {examples.length === 0 ? (
+                searchQuery ? 'Aucun exemple trouvé pour cette recherche.' : 'Aucun exemple trouvé.'
+              ) : (
+                'Aucun exemple ne correspond à votre recherche.'
+              )}
+            </div>
           ) : (
             <Table>
               <TableHeader>
