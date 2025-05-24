@@ -42,11 +42,11 @@ const Header = () => {
                 isActive('/collections') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <I18nText keyPath="navigation.collections" />
+              <I18nText translationKey="navigation.collections" />
             </Link>
             <div className="relative group">
               <button className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                <I18nText keyPath="navigation.explore" />
+                <I18nText translationKey="navigation.explore" />
               </button>
               <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="py-1">
@@ -54,13 +54,13 @@ const Header = () => {
                     to="/symbols"
                     className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
                   >
-                    <I18nText keyPath="navigation.allSymbols" />
+                    <I18nText translationKey="navigation.allSymbols" />
                   </Link>
                   <Link
                     to="/map"
                     className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
                   >
-                    <I18nText keyPath="navigation.map" />
+                    <I18nText translationKey="navigation.map" />
                   </Link>
                 </div>
               </div>
@@ -71,7 +71,7 @@ const Header = () => {
                 isActive('/contributions') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <I18nText keyPath="navigation.contributions" />
+              <I18nText translationKey="navigation.contributions" />
             </Link>
             <Link
               to="/about"
@@ -79,7 +79,7 @@ const Header = () => {
                 isActive('/about') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <I18nText keyPath="navigation.about" />
+              <I18nText translationKey="navigation.about" />
             </Link>
           </nav>
 
@@ -91,17 +91,17 @@ const Header = () => {
               <div className="flex items-center space-x-4">
                 <Link to="/profile">
                   <Button variant="ghost" size="sm">
-                    <I18nText keyPath="navigation.profile" />
+                    <I18nText translationKey="navigation.profile" />
                   </Button>
                 </Link>
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  <I18nText keyPath="navigation.signOut" />
+                  <I18nText translationKey="navigation.signOut" />
                 </Button>
               </div>
             ) : (
               <Link to="/auth">
                 <Button size="sm">
-                  <I18nText keyPath="navigation.signIn" />
+                  <I18nText translationKey="navigation.signIn" />
                 </Button>
               </Link>
             )}
@@ -125,35 +125,35 @@ const Header = () => {
                 className="block py-2 text-base font-medium text-slate-900"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <I18nText keyPath="navigation.collections" />
+                <I18nText translationKey="navigation.collections" />
               </Link>
               <Link
                 to="/symbols"
                 className="block py-2 text-base font-medium text-slate-900"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <I18nText keyPath="navigation.allSymbols" />
+                <I18nText translationKey="navigation.allSymbols" />
               </Link>
               <Link
                 to="/map"
                 className="block py-2 text-base font-medium text-slate-900"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <I18nText keyPath="navigation.map" />
+                <I18nText translationKey="navigation.map" />
               </Link>
               <Link
                 to="/contributions"
                 className="block py-2 text-base font-medium text-slate-900"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <I18nText keyPath="navigation.contributions" />
+                <I18nText translationKey="navigation.contributions" />
               </Link>
               <Link
                 to="/about"
                 className="block py-2 text-base font-medium text-slate-900"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <I18nText keyPath="navigation.about" />
+                <I18nText translationKey="navigation.about" />
               </Link>
               
               <div className="pt-4 border-t border-slate-200">
@@ -164,7 +164,7 @@ const Header = () => {
                       className="block py-2 text-base font-medium text-slate-900"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <I18nText keyPath="navigation.profile" />
+                      <I18nText translationKey="navigation.profile" />
                     </Link>
                     <button
                       onClick={() => {
@@ -173,7 +173,7 @@ const Header = () => {
                       }}
                       className="block w-full text-left py-2 text-base font-medium text-slate-900"
                     >
-                      <I18nText keyPath="navigation.signOut" />
+                      <I18nText translationKey="navigation.signOut" />
                     </button>
                   </div>
                 ) : (
@@ -182,7 +182,7 @@ const Header = () => {
                     className="block py-2 text-base font-medium text-slate-900"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <I18nText keyPath="navigation.signIn" />
+                    <I18nText translationKey="navigation.signIn" />
                   </Link>
                 )}
               </div>

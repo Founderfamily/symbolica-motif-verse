@@ -27,7 +27,9 @@ export interface CollectionWithTranslations extends Collection {
 }
 
 export interface CollectionDetails extends CollectionWithTranslations {
-  collection_symbols: (CollectionSymbol & {
+  collection_symbols: {
+    position: number;
+    symbol_id: string;
     symbols: {
       id: string;
       name: string;
@@ -35,7 +37,7 @@ export interface CollectionDetails extends CollectionWithTranslations {
       period: string;
       description?: string;
     };
-  })[];
+  }[];
 }
 
 export interface CreateCollectionData {

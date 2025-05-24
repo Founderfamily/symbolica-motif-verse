@@ -11,11 +11,11 @@ import { useTranslation } from '@/i18n/useTranslation';
 const CollectionDetailPage = () => {
   const { slug } = useParams();
   const { data: collection, isLoading } = useCollection(slug || '');
-  const { language } = useTranslation();
+  const { currentLanguage } = useTranslation();
 
   const getTranslation = (field: string) => {
     const translation = collection?.collection_translations?.find(
-      (t: any) => t.language === language
+      (t: any) => t.language === currentLanguage
     );
     return translation?.[field] || '';
   };

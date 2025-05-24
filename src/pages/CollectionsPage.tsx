@@ -8,11 +8,11 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 const CollectionsPage = () => {
   const { data: collections, isLoading } = useFeaturedCollections();
-  const { language } = useTranslation();
+  const { currentLanguage } = useTranslation();
 
   const getTranslation = (collection: any, field: string) => {
     const translation = collection.collection_translations?.find(
-      (t: any) => t.language === language
+      (t: any) => t.language === currentLanguage
     );
     return translation?.[field] || '';
   };

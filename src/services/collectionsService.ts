@@ -73,7 +73,7 @@ export const collectionsService = {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as CollectionDetails;
     } catch (error) {
       console.error('Error fetching collection by slug:', error);
       return null;

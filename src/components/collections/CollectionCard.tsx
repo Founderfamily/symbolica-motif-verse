@@ -11,11 +11,11 @@ interface CollectionCardProps {
 }
 
 const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
-  const { language } = useTranslation();
+  const { currentLanguage } = useTranslation();
 
   const getTranslation = (field: string) => {
     const translation = collection.collection_translations?.find(
-      (t: any) => t.language === language
+      (t: any) => t.language === currentLanguage
     );
     return translation?.[field] || '';
   };
