@@ -77,8 +77,8 @@ function App() {
           {/* 404 route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Toaster />
       </Router>
-      <Toaster />
     </QueryClientProvider>
   );
 }
