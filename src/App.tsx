@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
+import { AuthProvider } from '@/hooks/useAuth';
 import Layout from '@/components/layout/Layout';
 import AdminLayout from '@/pages/Admin/AdminLayout';
 
@@ -43,41 +44,43 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <Routes>
-          {/* Public routes with layout */}
-          <Route path="/" element={<Layout><Outlet /></Layout>}>
-            <Route index element={<HomePage />} />
-            <Route path="symbols" element={<SymbolExplorer />} />
-            <Route path="map" element={<MapExplorer />} />
-            <Route path="collections" element={<CollectionsPage />} />
-            <Route path="collections/:slug" element={<CollectionDetailPage />} />
-            <Route path="contributions" element={<ContributionsPage />} />
-            <Route path="contributions/new" element={<NewContribution />} />
-            <Route path="contributions/:id" element={<ContributionDetail />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="about" element={<AboutPage />} />
-          </Route>
+        <AuthProvider>
+          <Routes>
+            {/* Public routes with layout */}
+            <Route path="/" element={<Layout><Outlet /></Layout>}>
+              <Route index element={<HomePage />} />
+              <Route path="symbols" element={<SymbolExplorer />} />
+              <Route path="map" element={<MapExplorer />} />
+              <Route path="collections" element={<CollectionsPage />} />
+              <Route path="collections/:slug" element={<CollectionDetailPage />} />
+              <Route path="contributions" element={<ContributionsPage />} />
+              <Route path="contributions/new" element={<NewContribution />} />
+              <Route path="contributions/:id" element={<ContributionDetail />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="about" element={<AboutPage />} />
+            </Route>
 
-          {/* Auth routes without layout */}
-          <Route path="/auth" element={<Auth />} />
+            {/* Auth routes without layout */}
+            <Route path="/auth" element={<Auth />} />
 
-          {/* Admin routes with admin layout */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="symbols" element={<SymbolsManagement />} />
-            <Route path="symbols/new" element={<SymbolEditor />} />
-            <Route path="symbols/:id" element={<SymbolEditor />} />
-            <Route path="collections" element={<CollectionsManagement />} />
-            <Route path="collections/new" element={<CollectionEditor />} />
-            <Route path="collections/:id" element={<CollectionEditor />} />
-            <Route path="contributions" element={<ContributionsManagement />} />
-            <Route path="content" element={<ContentManagement />} />
-          </Route>
+            {/* Admin routes with admin layout */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="symbols" element={<SymbolsManagement />} />
+              <Route path="symbols/new" element={<SymbolEditor />} />
+              <Route path="symbols/:id" element={<SymbolEditor />} />
+              <Route path="collections" element={<CollectionsManagement />} />
+              <Route path="collections/new" element={<CollectionEditor />} />
+              <Route path="collections/:id" element={<CollectionEditor />} />
+              <Route path="contributions" element={<ContributionsManagement />} />
+              <Route path="content" element={<ContentManagement />} />
+            </Route>
 
-          {/* 404 route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
+            {/* 404 route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </AuthProvider>
       </Router>
     </QueryClientProvider>
   );
