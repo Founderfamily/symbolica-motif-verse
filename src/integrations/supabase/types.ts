@@ -1274,7 +1274,97 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_achievement_points: {
+        Args: { p_user_id: string; p_achievement_id: string; p_points: number }
+        Returns: undefined
+      }
+      award_user_points: {
+        Args: {
+          p_user_id: string
+          p_activity_type: string
+          p_points: number
+          p_entity_id?: string
+          p_details?: Json
+        }
+        Returns: undefined
+      }
+      check_user_achievements: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          icon: string
+          points: number
+          type: string
+          level: string
+          requirement: number
+          created_at: string
+          updated_at: string
+          translations: Json
+        }[]
+      }
+      get_admin_logs_with_profiles: {
+        Args: { p_limit?: number }
+        Returns: {
+          id: string
+          admin_id: string
+          action: string
+          entity_type: string
+          entity_id: string
+          details: Json
+          created_at: string
+          admin_name: string
+        }[]
+      }
+      get_entity_admin_logs: {
+        Args: { p_entity_type: string; p_entity_id: string }
+        Returns: {
+          id: string
+          admin_id: string
+          action: string
+          entity_type: string
+          entity_id: string
+          details: Json
+          created_at: string
+          admin_name: string
+        }[]
+      }
+      get_leaderboard: {
+        Args: { p_limit?: number }
+        Returns: {
+          user_id: string
+          username: string
+          full_name: string
+          avatar_url: string
+          level: number
+          total_points: number
+          contribution_points: number
+          exploration_points: number
+          validation_points: number
+          community_points: number
+        }[]
+      }
+      get_top_contributors: {
+        Args: { p_limit?: number }
+        Returns: {
+          user_id: string
+          username: string
+          full_name: string
+          contributions_count: number
+          total_points: number
+        }[]
+      }
+      insert_admin_log: {
+        Args: {
+          p_admin_id: string
+          p_action: string
+          p_entity_type: string
+          p_entity_id?: string
+          p_details?: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       image_type: "original" | "pattern" | "reuse"

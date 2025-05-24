@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Achievement, UserAchievement, AchievementType, AchievementLevel } from '@/types/gamification';
+import { Json } from '@/integrations/supabase/types';
 
 /**
  * Service pour gérer les réalisations (achievements)
@@ -30,7 +31,7 @@ export const achievementService = {
         requirement: item.requirement,
         created_at: item.created_at,
         updated_at: item.updated_at,
-        translations: item.translations
+        translations: item.translations as Achievement['translations']
       }));
     } catch (error) {
       console.error("Error fetching achievements:", error);
@@ -73,7 +74,7 @@ export const achievementService = {
           requirement: item.achievements.requirement,
           created_at: item.achievements.created_at,
           updated_at: item.achievements.updated_at,
-          translations: item.achievements.translations
+          translations: item.achievements.translations as Achievement['translations']
         } : undefined
       }));
     } catch (error) {
@@ -104,7 +105,7 @@ export const achievementService = {
         requirement: item.requirement,
         created_at: item.created_at,
         updated_at: item.updated_at,
-        translations: item.translations
+        translations: item.translations as Achievement['translations']
       }));
     } catch (error) {
       console.error("Error checking achievements:", error);
