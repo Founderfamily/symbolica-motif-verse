@@ -36,7 +36,13 @@
     "about": "À propos",
     "profile": "Profil",
     "contributions": "Contributions",
-    "symbols": "Symboles"
+    "symbols": "Symboles",
+    "collections": "Collections",
+    "allSymbols": "Tous les symboles",
+    "map": "Carte",
+    "explore": "Explorer",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter"
   },
   "header": {
     "signIn": "Se connecter",
@@ -217,7 +223,120 @@
     "clearAll": "Effacer tout"
   },
   "admin": {
-    "dashboard": "Tableau de bord",
+    "dashboard": {
+      "title": "Tableau de bord administratif",
+      "welcome": "Bienvenue, ",
+      "welcomeMessage": "Gérez votre plateforme Symbolica depuis ce tableau de bord.",
+      "overview": "Aperçu général",
+      "analytics": "Analyses et tendances",
+      "recentActivity": "Activité récente"
+    },
+    "stats": {
+      "totalUsers": "Utilisateurs totaux",
+      "activeUsers": "{{count}} actifs derniers 30j ({{rate}})",
+      "totalContributions": "Contributions totales",
+      "pendingContributions": "{{count}} en attente ({{rate}} approuvées)",
+      "totalSymbols": "Symboles totaux",
+      "symbolLocations": "Localisations de symboles",
+      "verifiedLocations": "{{count}} vérifiées ({{rate}})",
+      "topContributor": "Meilleur contributeur",
+      "contributorStats": "{{contributions}} contributions, {{points}} points",
+      "lastContribution": "Dernière contribution",
+      "noRecentActivity": "Aucune activité récente"
+    },
+    "charts": {
+      "activityOverTime": "Activité au cours des 60 derniers jours",
+      "topContributors": "Top 5 des contributeurs",
+      "newUsers": "Nouveaux utilisateurs",
+      "newContributions": "Nouvelles contributions",
+      "points": "Points",
+      "contributions": "Contributions"
+    },
+    "actions": {
+      "refresh": "Actualiser",
+      "export": "Exporter",
+      "view": "Voir",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "ban": "Bannir",
+      "unban": "Débannir",
+      "makeAdmin": "Rendre admin",
+      "removeAdmin": "Retirer admin"
+    },
+    "access": {
+      "denied": "Accès refusé",
+      "notAuthorized": "Vous n'êtes pas autorisé à accéder au tableau de bord administratif."
+    },
+    "logs": {
+      "title": "Journaux d'administration",
+      "action": "Action",
+      "entity": "Entité",
+      "admin": "Administrateur",
+      "date": "Date",
+      "details": "Détails",
+      "noLogs": "Aucun journal disponible",
+      "filter": "Filtrer les journaux"
+    },
+    "users": {
+      "title": "Gestion des utilisateurs",
+      "totalUsers": "Utilisateurs totaux",
+      "activeUsers": "Utilisateurs actifs",
+      "bannedUsers": "Utilisateurs bannis",
+      "admins": "Administrateurs",
+      "search": "Rechercher des utilisateurs...",
+      "filters": "Filtres",
+      "status": "Statut",
+      "role": "Rôle",
+      "joinDate": "Date d'inscription",
+      "lastActive": "Dernière activité",
+      "actions": "Actions",
+      "viewProfile": "Voir le profil",
+      "banUser": "Bannir l'utilisateur",
+      "unbanUser": "Débannir l'utilisateur",
+      "makeAdmin": "Rendre administrateur",
+      "removeAdmin": "Retirer les droits admin"
+    },
+    "analysis": {
+      "title": "Gestion des exemples d'analyse",
+      "create": "Créer un exemple",
+      "edit": "Modifier l'exemple",
+      "delete": "Supprimer l'exemple",
+      "upload": "Télécharger des images",
+      "preview": "Aperçu",
+      "save": "Sauvegarder",
+      "cancel": "Annuler"
+    },
+    "moderation": {
+      "title": "Modération des commentaires",
+      "pending": "En attente",
+      "approved": "Approuvés",
+      "rejected": "Rejetés",
+      "flagged": "Signalés",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "flag": "Signaler",
+      "unflag": "Désignaler"
+    },
+    "settings": {
+      "title": "Paramètres système",
+      "general": "Général",
+      "security": "Sécurité",
+      "notifications": "Notifications",
+      "maintenance": "Maintenance",
+      "backup": "Sauvegarde",
+      "logs": "Journaux",
+      "performance": "Performance"
+    },
+    "notifications": {
+      "title": "Notifications administrateur",
+      "unread": "Non lues",
+      "all": "Toutes",
+      "markAsRead": "Marquer comme lu",
+      "markAllAsRead": "Tout marquer comme lu",
+      "noNotifications": "Aucune notification"
+    },
     "symbolsManagement": "Gestion des symboles",
     "contentManagement": "Gestion du contenu",
     "contributionsManagement": "Gestion des contributions",

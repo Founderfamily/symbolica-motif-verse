@@ -31,6 +31,10 @@ import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
 import ContentManagement from '@/pages/Admin/ContentManagement';
 import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
 import CollectionEditor from '@/pages/Admin/CollectionEditor';
+import UsersManagement from '@/pages/Admin/UsersManagement';
+import AnalysisExamplesManagement from '@/pages/Admin/AnalysisExamplesManagement';
+import CommentModeration from '@/pages/Admin/CommentModeration';
+import SystemSettings from '@/pages/Admin/SystemSettings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,6 +70,7 @@ function App() {
             {/* Admin routes with admin layout */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
+              <Route path="users" element={<UsersManagement />} />
               <Route path="symbols" element={<SymbolsManagement />} />
               <Route path="symbols/new" element={<SymbolEditor />} />
               <Route path="symbols/:id" element={<SymbolEditor />} />
@@ -73,6 +78,9 @@ function App() {
               <Route path="collections/new" element={<CollectionEditor />} />
               <Route path="collections/:id" element={<CollectionEditor />} />
               <Route path="contributions" element={<ContributionsManagement />} />
+              <Route path="analysis" element={<AnalysisExamplesManagement />} />
+              <Route path="moderation" element={<CommentModeration />} />
+              <Route path="settings" element={<SystemSettings />} />
               <Route path="content" element={<ContentManagement />} />
             </Route>
 

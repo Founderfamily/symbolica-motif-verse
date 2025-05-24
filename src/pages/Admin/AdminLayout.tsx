@@ -6,6 +6,7 @@ import { logger } from '@/services/logService';
 import { ErrorHandler } from '@/utils/errorHandler';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import AdminNotifications from '@/components/admin/AdminNotifications';
 
 const AdminLayout = () => {
   const { isAdmin, isLoading, user } = useAuth();
@@ -98,50 +99,85 @@ const AdminLayout = () => {
           <div>
             <h1 className="text-2xl font-serif font-bold text-slate-900">Administration Symbolica</h1>
           </div>
-          <nav>
-            <ul className="flex space-x-6">
-              <li>
-                <Link 
-                  to="/admin" 
-                  className="text-slate-600 hover:text-amber-600 transition"
-                >
-                  Tableau de bord
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/admin/collections" 
-                  className="text-slate-600 hover:text-amber-600 transition"
-                >
-                  Collections
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/admin/symbols" 
-                  className="text-slate-600 hover:text-amber-600 transition"
-                >
-                  Symboles
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/admin/content" 
-                  className="text-slate-600 hover:text-amber-600 transition"
-                >
-                  Contenu du site
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/" 
-                  className="text-slate-600 hover:text-amber-600 transition"
-                >
-                  Retour au site
-                </Link>
-              </li>
-            </ul>
-          </nav>
+          <div className="flex items-center space-x-4">
+            <AdminNotifications />
+            <nav>
+              <ul className="flex space-x-6">
+                <li>
+                  <Link 
+                    to="/admin" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Tableau de bord
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/admin/users" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Utilisateurs
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/admin/collections" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Collections
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/admin/symbols" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Symboles
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/admin/contributions" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Contributions
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/admin/moderation" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Modération
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/admin/analysis" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Analyses
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/admin/settings" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Paramètres
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/" 
+                    className="text-slate-600 hover:text-amber-600 transition"
+                  >
+                    Retour au site
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
       </header>
       <main>
