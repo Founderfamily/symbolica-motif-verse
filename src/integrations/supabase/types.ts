@@ -165,6 +165,106 @@ export type Database = {
           },
         ]
       }
+      collection_symbols: {
+        Row: {
+          collection_id: string
+          position: number | null
+          symbol_id: string
+        }
+        Insert: {
+          collection_id: string
+          position?: number | null
+          symbol_id: string
+        }
+        Update: {
+          collection_id?: string
+          position?: number | null
+          symbol_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_symbols_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_symbols_symbol_id_fkey"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collection_translations: {
+        Row: {
+          collection_id: string | null
+          description: string | null
+          id: number
+          language: string
+          title: string
+        }
+        Insert: {
+          collection_id?: string | null
+          description?: string | null
+          id?: number
+          language: string
+          title: string
+        }
+        Update: {
+          collection_id?: string | null
+          description?: string | null
+          id?: number
+          language?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_translations_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_featured: boolean | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_featured?: boolean | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_featured?: boolean | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_sections: {
         Row: {
           content: Json | null

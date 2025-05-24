@@ -110,6 +110,14 @@ const AdminLayout = () => {
               </li>
               <li>
                 <Link 
+                  to="/admin/collections" 
+                  className="text-slate-600 hover:text-amber-600 transition"
+                >
+                  Collections
+                </Link>
+              </li>
+              <li>
+                <Link 
                   to="/admin/symbols" 
                   className="text-slate-600 hover:text-amber-600 transition"
                 >

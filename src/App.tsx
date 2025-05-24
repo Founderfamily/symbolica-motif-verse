@@ -1,60 +1,85 @@
-
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Layout from './components/layout/Layout';
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import SymbolExplorer from './pages/SymbolExplorer';
-import NotFoundPage from './pages/NotFound';
-import ContributionsPage from './pages/ContributionsPage';
-import ProfilePage from './pages/Profile';
-import MapExplorer from './pages/MapExplorer';
-import '@/i18n/config';
-import LanguageDebugger from './i18n/LanguageDebugger';
-import Auth from './pages/Auth';
-import ProfileEditor from './components/user/ProfileEditor';
-import PasswordReset from './components/auth/PasswordReset';
-import PasswordResetConfirmation from './components/auth/PasswordResetConfirmation';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/sonner';
+import Layout from '@/components/layout/Layout';
+import AdminLayout from '@/pages/Admin/AdminLayout';
 
-// Import admin components
-import AdminLayout from './pages/Admin/AdminLayout';
-import Dashboard from './pages/Admin/Dashboard';
-import ContentManagement from './pages/Admin/ContentManagement';
-import SymbolsManagement from './pages/Admin/SymbolsManagement';
-import ContributionsManagement from './pages/Admin/ContributionsManagement';
-import SymbolEditor from './pages/Admin/SymbolEditor'; // Import the SymbolEditor component
+// Pages
+import HomePage from '@/pages/HomePage';
+import SymbolExplorer from '@/pages/SymbolExplorer';
+import MapExplorer from '@/pages/MapExplorer';
+import ContributionsPage from '@/pages/ContributionsPage';
+import NewContribution from '@/pages/NewContribution';
+import ContributionDetail from '@/pages/ContributionDetail';
+import Profile from '@/pages/Profile';
+import Auth from '@/pages/Auth';
+import AboutPage from '@/pages/AboutPage';
+import NotFound from '@/pages/NotFound';
 
-const App = () => {
+// Collections Pages
+import CollectionsPage from '@/pages/CollectionsPage';
+import CollectionDetailPage from '@/pages/CollectionDetailPage';
+
+// Admin Pages
+import Dashboard from '@/pages/Admin/Dashboard';
+import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
+import SymbolEditor from '@/pages/Admin/SymbolEditor';
+import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
+import ContentManagement from '@/pages/Admin/ContentManagement';
+import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
+import CollectionEditor from '@/pages/Admin/CollectionEditor';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+function App() {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Layout><HomePage /></Layout>} />
-        <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-        <Route path="/explore" element={<Layout><SymbolExplorer /></Layout>} />
-        <Route path="/map" element={<Layout><MapExplorer /></Layout>} />
-        <Route path="/contributions" element={<Layout><ContributionsPage /></Layout>} />
-        <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
-        <Route path="/profile/edit" element={<Layout><ProfileEditor /></Layout>} />
-        <Route path="/auth" element={<Layout><Auth /></Layout>} />
-        <Route path="/auth/reset-password" element={<Layout><PasswordReset /></Layout>} />
-        <Route path="/auth/reset-password-confirmation" element={<Layout><PasswordResetConfirmation /></Layout>} />
-        
-        {/* Admin routes with AdminLayout wrapper */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="content" element={<ContentManagement />} />
-          <Route path="symbols" element={<SymbolsManagement />} />
-          <Route path="symbols/:id" element={<SymbolEditor />} />
-          <Route path="contributions" element={<ContributionsManagement />} />
-        </Route>
-        
-        <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
-      </Routes>
-      
-      {/* Language debugger tool (only visible in development) - placed outside Routes */}
-      <LanguageDebugger />
-    </>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Routes>
+          {/* Public routes with layout */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route path="symbols" element={<SymbolExplorer />} />
+            <Route path="map" element={<MapExplorer />} />
+            <Route path="collections" element={<CollectionsPage />} />
+            <Route path="collections/:slug" element={<CollectionDetailPage />} />
+            <Route path="contributions" element={<ContributionsPage />} />
+            <Route path="contributions/new" element={<NewContribution />} />
+            <Route path="contributions/:id" element={<ContributionDetail />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="about" element={<AboutPage />} />
+          </Route>
+
+          {/* Auth routes without layout */}
+          <Route path="/auth" element={<Auth />} />
+
+          {/* Admin routes with admin layout */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="symbols" element={<SymbolsManagement />} />
+            <Route path="symbols/new" element={<SymbolEditor />} />
+            <Route path="symbols/:id" element={<SymbolEditor />} />
+            <Route path="collections" element={<CollectionsManagement />} />
+            <Route path="collections/new" element={<CollectionEditor />} />
+            <Route path="collections/:id" element={<CollectionEditor />} />
+            <Route path="contributions" element={<ContributionsManagement />} />
+            <Route path="content" element={<ContentManagement />} />
+          </Route>
+
+          {/* 404 route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+      <Toaster />
+    </QueryClientProvider>
   );
-};
+}
 
 export default App;

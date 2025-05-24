@@ -1,157 +1,195 @@
 
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
-import { useAuth } from '@/hooks/useAuth';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, Search, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '@/hooks/useTheme';
+import { useAuth } from '@/hooks/useAuth';
+import { I18nText } from '@/components/ui/i18n-text';
 import LanguageSelector from '@/components/ui/language-selector';
 
 const Header = () => {
-  const { i18n } = useTranslation();
-  const auth = useAuth();
-  const user = auth?.user || null;
-  const signOut = auth?.signOut || (() => console.warn('Auth provider not available'));
-  const isAdmin = auth?.isAdmin || false;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
+  const location = useLocation();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
-  // Update your navigation menu items array to include the map
-  const menuItems = [
-    { text: 'header.home', route: '/' },
-    { text: 'header.explore', route: '/explore' },
-    { text: 'header.map', route: '/map' },
-    { text: 'header.about', route: '/about' },
-    { text: 'header.contribute', route: '/contributions' },
-  ];
-
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <div className="flex items-center">
-            <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
-            <span className="ml-2"><I18nText translationKey="app.name" /></span>
-          </div>
-        </Link>
+    <header className="bg-white shadow-sm border-b border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">S</span>
+            </div>
+            <span className="text-xl font-serif font-bold text-slate-900">Symbolica</span>
+          </Link>
 
-        <nav className="hidden md:flex items-center space-x-6">
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.route}
-              to={item.route}
-              className={({ isActive }) =>
-                `text-slate-700 hover:text-slate-900 transition-colors ${isActive ? 'font-medium' : ''}`
-              }
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link
+              to="/collections"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/collections') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <I18nText translationKey={item.text} />
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="hidden md:flex items-center space-x-4">
-          <LanguageSelector />
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.avatar_url || undefined} alt={user?.full_name || user?.username || 'Profile'} />
-                    <AvatarFallback className="bg-amber-600 text-white">{user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel><I18nText translationKey="profile.profile" /></DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Link to="/profile"><I18nText translationKey="profile.viewProfile" /></Link>
-                </DropdownMenuItem>
-                {isAdmin && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin"><I18nText translationKey="admin.dashboard" /></Link>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}><I18nText translationKey="profile.signOut" /></DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link to="/auth">
-              <Button><I18nText translationKey="auth.login" /></Button>
+              <I18nText keyPath="navigation.collections" />
             </Link>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          >
-            {theme === "light" ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
-            <span className="sr-only">Toggle theme</span>
-          </Button>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center gap-2">
-          <LanguageSelector />
-          <Button variant="outline" onClick={toggleMenu}>
-            <I18nText translationKey={isMenuOpen ? 'header.close' : 'header.menu'} />
-          </Button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-slate-50 py-2 border-b border-slate-200">
-          <nav className="flex flex-col items-center space-y-3">
-            {menuItems.map((item) => (
-              <NavLink
-                key={item.route}
-                to={item.route}
-                className={({ isActive }) =>
-                  `text-slate-700 hover:text-slate-900 transition-colors ${isActive ? 'font-medium' : ''}`
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <I18nText translationKey={item.text} />
-              </NavLink>
-            ))}
-            {user ? (
-              <>
-                <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="text-slate-700 hover:text-slate-900 transition-colors">
-                  <I18nText translationKey="profile.profile" />
-                </Link>
-                {isAdmin && (
-                  <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="text-slate-700 hover:text-slate-900 transition-colors">
-                    <I18nText translationKey="admin.dashboard" />
+            <div className="relative group">
+              <button className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                <I18nText keyPath="navigation.explore" />
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="py-1">
+                  <Link
+                    to="/symbols"
+                    className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    <I18nText keyPath="navigation.allSymbols" />
                   </Link>
-                )}
-                <Button variant="ghost" onClick={() => { signOut(); setIsMenuOpen(false); }}>
-                  <I18nText translationKey="profile.signOut" />
+                  <Link
+                    to="/map"
+                    className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    <I18nText keyPath="navigation.map" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+            <Link
+              to="/contributions"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/contributions') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <I18nText keyPath="navigation.contributions" />
+            </Link>
+            <Link
+              to="/about"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/about') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <I18nText keyPath="navigation.about" />
+            </Link>
+          </nav>
+
+          {/* Right side */}
+          <div className="hidden md:flex items-center space-x-4">
+            <LanguageSelector />
+            
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm">
+                    <I18nText keyPath="navigation.profile" />
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <I18nText keyPath="navigation.signOut" />
                 </Button>
-              </>
+              </div>
             ) : (
-              <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                <Button><I18nText translationKey="auth.login" /></Button>
+              <Link to="/auth">
+                <Button size="sm">
+                  <I18nText keyPath="navigation.signIn" />
+                </Button>
               </Link>
             )}
-          </nav>
+          </div>
+
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden p-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
-      )}
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-slate-200">
+            <div className="space-y-2">
+              <Link
+                to="/collections"
+                className="block py-2 text-base font-medium text-slate-900"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <I18nText keyPath="navigation.collections" />
+              </Link>
+              <Link
+                to="/symbols"
+                className="block py-2 text-base font-medium text-slate-900"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <I18nText keyPath="navigation.allSymbols" />
+              </Link>
+              <Link
+                to="/map"
+                className="block py-2 text-base font-medium text-slate-900"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <I18nText keyPath="navigation.map" />
+              </Link>
+              <Link
+                to="/contributions"
+                className="block py-2 text-base font-medium text-slate-900"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <I18nText keyPath="navigation.contributions" />
+              </Link>
+              <Link
+                to="/about"
+                className="block py-2 text-base font-medium text-slate-900"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <I18nText keyPath="navigation.about" />
+              </Link>
+              
+              <div className="pt-4 border-t border-slate-200">
+                {user ? (
+                  <div className="space-y-2">
+                    <Link
+                      to="/profile"
+                      className="block py-2 text-base font-medium text-slate-900"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <I18nText keyPath="navigation.profile" />
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left py-2 text-base font-medium text-slate-900"
+                    >
+                      <I18nText keyPath="navigation.signOut" />
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    to="/auth"
+                    className="block py-2 text-base font-medium text-slate-900"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <I18nText keyPath="navigation.signIn" />
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </header>
   );
 };
