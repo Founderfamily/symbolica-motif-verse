@@ -11,6 +11,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
+import { SymbolData } from '@/types/supabase';
 
 const CollectionDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -60,7 +61,20 @@ const CollectionDetailPage = () => {
     return translation?.[field] || '';
   };
 
-  const symbols = collection.collection_symbols?.map(cs => cs.symbols) || [];
+  // Convert collection symbols to SymbolData format
+  const symbols: SymbolData[] = collection.collection_symbols?.map(cs => ({
+    id: cs.symbols.id,
+    name: cs.symbols.name,
+    culture: cs.symbols.culture,
+    period: cs.symbols.period,
+    description: cs.symbols.description,
+    created_at: cs.symbols.created_at || new Date().toISOString(),
+    updated_at: cs.symbols.updated_at || new Date().toISOString(),
+    medium: cs.symbols.medium,
+    technique: cs.symbols.technique,
+    function: cs.symbols.function,
+    translations: cs.symbols.translations
+  })) || [];
 
   return (
     <div className="min-h-screen bg-slate-50">

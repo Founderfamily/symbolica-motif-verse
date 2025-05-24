@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
-import { TrendingUp, Clock, Fire, Star } from 'lucide-react';
+import { TrendingUp, Clock, Flame, Star } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 
 const TrendingPage = () => {
@@ -55,7 +55,7 @@ const TrendingPage = () => {
       title: 'Collections actives',
       value: '8',
       change: '+2',
-      icon: Fire,
+      icon: Flame,
       color: 'text-orange-600'
     }
   ];
