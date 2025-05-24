@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { I18nText } from '@/components/ui/i18n-text';
 import { CollectionWithTranslations } from '@/types/collections';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -32,7 +33,9 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
               {getTranslation('title')}
             </CardTitle>
             {collection.is_featured && (
-              <Badge variant="default">Featured</Badge>
+              <Badge variant="default">
+                <I18nText translationKey="collections.featured" />
+              </Badge>
             )}
           </div>
         </CardHeader>
@@ -41,7 +44,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
             {getTranslation('description')}
           </p>
           <div className="mt-4 text-sm text-amber-600 font-medium">
-            Explorer cette collection →
+            <I18nText translationKey="collections.explore" />
           </div>
         </CardContent>
       </Card>

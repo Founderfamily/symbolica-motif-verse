@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Globe, Languages } from 'lucide-react';
+import { Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -9,11 +9,11 @@ export const LanguageSelector = () => {
   const { changeLanguage, currentLanguage } = useTranslation();
   
   const languages = [
-    { code: 'fr', label: 'Français' },
-    { code: 'en', label: 'English' }
+    { code: 'fr', label: 'Français', flag: '🇫🇷' },
+    { code: 'en', label: 'English', flag: '🇬🇧' }
   ];
   
-  const currentLanguageDisplay = currentLanguage === 'fr' ? 'FR' : 'EN';
+  const currentLang = languages.find(lang => lang.code === currentLanguage);
   
   return (
     <DropdownMenu>
@@ -21,10 +21,11 @@ export const LanguageSelector = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="flex items-center gap-1 px-2 py-1 text-sm"
+          className="flex items-center gap-2 px-3 py-2"
         >
           <Languages className="h-4 w-4" />
-          <span>{currentLanguageDisplay}</span>
+          <span>{currentLang?.flag}</span>
+          <span className="hidden sm:inline">{currentLang?.label}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -34,6 +35,7 @@ export const LanguageSelector = () => {
             onClick={() => changeLanguage(lang.code)}
             className={currentLanguage === lang.code ? "bg-slate-100" : ""}
           >
+            <span className="mr-2">{lang.flag}</span>
             {lang.label}
           </DropdownMenuItem>
         ))}
