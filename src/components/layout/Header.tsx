@@ -37,6 +37,14 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link
+              to="/"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <I18nText translationKey="navigation.home" />
+            </Link>
+            <Link
               to="/collections"
               className={`text-sm font-medium transition-colors ${
                 isActive('/collections') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
@@ -120,6 +128,13 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-slate-200">
             <div className="space-y-2">
+              <Link
+                to="/"
+                className="block py-2 text-base font-medium text-slate-900"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <I18nText translationKey="navigation.home" />
+              </Link>
               <Link
                 to="/collections"
                 className="block py-2 text-base font-medium text-slate-900"
