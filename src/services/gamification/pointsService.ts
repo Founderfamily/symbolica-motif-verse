@@ -19,76 +19,17 @@ export const pointsService = {
     details?: Record<string, any>
   ): Promise<boolean> => {
     try {
-      // Create activity record with more detailed tracking
-      const { error: activityError, data: activityData } = await supabase
-        .from('user_activities')
-        .insert({
-          user_id: userId,
-          activity_type: activityType,
-          points_earned: points,
-          entity_id: entityId || null,
-          details: details || {}
-        })
-        .select()
-        .single();
+      // Use RPC function for awarding points
+      const { error } = await supabase
+        .rpc('award_user_points', {
+          p_user_id: userId,
+          p_activity_type: activityType,
+          p_points: points,
+          p_entity_id: entityId || null,
+          p_details: details || {}
+        });
 
-      if (activityError) throw activityError;
-      
-      // Update user points
-      const pointsField = `${activityType}_points` as keyof typeof initialPointsTemplate;
-      
-      // Get current points
-      const { data: currentPoints, error: pointsError } = await supabase
-        .from('user_points')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-      
-      if (pointsError && pointsError.code !== 'PGRST116') {
-        throw pointsError;
-      }
-      
-      let updatedPoints: UserPoints;
-      
-      if (!currentPoints) {
-        // Create new points record with initial values
-        const initialPoints = {
-          user_id: userId,
-          total: points,
-          contribution_points: 0,
-          exploration_points: 0,
-          validation_points: 0,
-          community_points: 0,
-        };
-        
-        initialPoints[pointsField] = points;
-        
-        const { data: insertData, error: insertError } = await supabase
-          .from('user_points')
-          .insert(initialPoints)
-          .select()
-          .single();
-          
-        if (insertError) throw insertError;
-        updatedPoints = insertData;
-      } else {
-        // Update existing points record
-        const updateData = {
-          total: currentPoints.total + points,
-          [pointsField]: currentPoints[pointsField] + points,
-          updated_at: new Date().toISOString()
-        };
-        
-        const { data: updatedData, error: updateError } = await supabase
-          .from('user_points')
-          .update(updateData)
-          .eq('id', currentPoints.id)
-          .select()
-          .single();
-          
-        if (updateError) throw updateError;
-        updatedPoints = updatedData;
-      }
+      if (error) throw error;
 
       // Update user level based on new points
       await levelService.updateUserLevel(userId, points);
@@ -133,33 +74,20 @@ export const pointsService = {
    */
   getLeaderboard: async (limit: number = 10): Promise<any[]> => {
     try {
+      // Use RPC function for leaderboard
       const { data, error } = await supabase
-        .from('user_points')
-        .select(`
-          *,
-          profiles:user_id (
-            id,
-            username,
-            full_name,
-            avatar_url
-          ),
-          user_levels:user_id (
-            level
-          )
-        `)
-        .order('total', { ascending: false })
-        .limit(limit);
+        .rpc('get_leaderboard', { p_limit: limit });
         
       if (error) throw error;
       
       // Format data for easier consumption
-      return (data || []).map(item => ({
+      return (data || []).map((item: any) => ({
         userId: item.user_id,
-        username: item.profiles?.username,
-        fullName: item.profiles?.full_name,
-        avatarUrl: item.profiles?.avatar_url,
-        level: item.user_levels?.level || 1,
-        totalPoints: item.total,
+        username: item.username,
+        fullName: item.full_name,
+        avatarUrl: item.avatar_url,
+        level: item.level || 1,
+        totalPoints: item.total_points,
         contributionPoints: item.contribution_points,
         explorationPoints: item.exploration_points,
         validationPoints: item.validation_points,
@@ -170,13 +98,4 @@ export const pointsService = {
       return [];
     }
   }
-};
-
-// Template for initial points when creating a new user_points record
-const initialPointsTemplate = {
-  total: 0,
-  contribution_points: 0,
-  exploration_points: 0,
-  validation_points: 0,
-  community_points: 0,
 };

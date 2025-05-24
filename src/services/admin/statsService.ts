@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AdminStats {
@@ -46,29 +47,26 @@ export const adminStatsService = {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
-      // Utiliser une approche différente pour récupérer les utilisateurs actifs
       const { data: activeUsersData, error: activeUsersError } = await supabase
         .from('user_activities')
         .select('user_id')
-        .gt('created_at', thirtyDaysAgo.toISOString())
-        .is('user_id', 'not.null') as any;
+        .gte('created_at', thirtyDaysAgo.toISOString());
       
       if (activeUsersError) throw activeUsersError;
       
-      // Compter les utilisateurs uniques actifs
-      const activeUserIds = new Set(activeUsersData.map((item: any) => item.user_id));
+      // Count unique active users
+      const activeUserIds = new Set((activeUsersData || []).map(item => item.user_id));
       const activeUsers = activeUserIds.size;
       
       // Get contributions counts
       const { data: contributionsData, error: contribError } = await supabase
         .from('user_contributions')
-        .select('status')
-        .in('status', ['pending', 'approved', 'rejected']);
+        .select('status');
         
       if (contribError) throw contribError;
       
-      const totalContributions = contributionsData.length;
-      const pendingContributions = contributionsData.filter(c => c.status === 'pending').length;
+      const totalContributions = contributionsData?.length || 0;
+      const pendingContributions = contributionsData?.filter(c => c.status === 'pending').length || 0;
       
       // Get symbols counts
       const { count: totalSymbols, error: symbolsError } = await supabase
@@ -77,7 +75,7 @@ export const adminStatsService = {
         
       if (symbolsError) throw symbolsError;
       
-      // Get verified symbols count (this is a placeholder, adjust the query based on actual data model)
+      // Get verified symbols count
       const { count: verifiedSymbols, error: verifiedError } = await supabase
         .from('symbol_locations')
         .select('*', { count: 'exact', head: true })
@@ -96,78 +94,37 @@ export const adminStatsService = {
       const { data: registrationsData, error: regTimeError } = await supabase
         .from('profiles')
         .select('created_at')
-        .gt('created_at', new Date(new Date().setDate(new Date().getDate() - 60)).toISOString())
+        .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 60)).toISOString())
         .order('created_at', { ascending: true });
         
       if (regTimeError) throw regTimeError;
       
-      const userRegistrationsOverTime = processTimeSeriesData(registrationsData, 'created_at');
+      const userRegistrationsOverTime = processTimeSeriesData(registrationsData || [], 'created_at');
       
       // Get time series data for contributions
       const { data: contribTimeData, error: contribTimeError } = await supabase
         .from('user_contributions')
         .select('created_at')
-        .gt('created_at', new Date(new Date().setDate(new Date().getDate() - 60)).toISOString())
+        .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 60)).toISOString())
         .order('created_at', { ascending: true });
         
       if (contribTimeError) throw contribTimeError;
       
-      const contributionsOverTime = processTimeSeriesData(contribTimeData, 'created_at');
+      const contributionsOverTime = processTimeSeriesData(contribTimeData || [], 'created_at');
       
-      // Get top contributors
-      // Utiliser une méthode alternative pour récupérer les données des utilisateurs
+      // Get top contributors using RPC function
       const { data: topContribData, error: topContribError } = await supabase
-        .from('user_points')
-        .select(`
-          user_id,
-          total,
-          contribution_points
-        `)
-        .order('total', { ascending: false })
-        .limit(10) as any;
+        .rpc('get_top_contributors', { p_limit: 10 });
         
       if (topContribError) throw topContribError;
       
-      // Récupérer les informations des profils séparément
-      const userIds = topContribData.map((item: any) => item.user_id);
-      
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, username, full_name')
-        .in('id', userIds);
-        
-      if (profilesError) throw profilesError;
-      
-      // Créer un dictionnaire pour accéder facilement aux données de profil
-      const profilesDict: Record<string, any> = {};
-      profilesData.forEach((profile: any) => {
-        profilesDict[profile.id] = profile;
-      });
-      
-      // Process contribution counts by user
-      const { data: contributionCounts, error: contribCountsError } = await supabase
-        .from('user_contributions')
-        .select('user_id, id')
-        .in('user_id', topContribData.map(c => c.user_id));
-        
-      if (contribCountsError) throw contribCountsError;
-      
-      // Process contribution counts by user
-      const contributionsByUser: Record<string, number> = {};
-      contributionCounts.forEach(item => {
-        contributionsByUser[item.user_id] = (contributionsByUser[item.user_id] || 0) + 1;
-      });
-      
-      const topContributors = topContribData.map((contributor: any) => {
-        const profile = profilesDict[contributor.user_id] || {};
-        return {
-          userId: contributor.user_id,
-          username: profile.username,
-          fullName: profile.full_name,
-          contributionsCount: contributionsByUser[contributor.user_id] || 0,
-          pointsTotal: contributor.total
-        };
-      });
+      const topContributors = (topContribData || []).map((contributor: any) => ({
+        userId: contributor.user_id,
+        username: contributor.username,
+        fullName: contributor.full_name,
+        contributionsCount: contributor.contributions_count || 0,
+        pointsTotal: contributor.total_points || 0
+      }));
       
       return {
         totalUsers: totalUsers || 0,
@@ -208,9 +165,11 @@ function processTimeSeriesData(data: any[], dateField: string): TimeSeriesPoint[
   
   // Group entries by day
   data.forEach(item => {
-    const date = new Date(item[dateField]);
-    const dayStr = date.toISOString().split('T')[0];
-    groupedByDay[dayStr] = (groupedByDay[dayStr] || 0) + 1;
+    if (item[dateField]) {
+      const date = new Date(item[dateField]);
+      const dayStr = date.toISOString().split('T')[0];
+      groupedByDay[dayStr] = (groupedByDay[dayStr] || 0) + 1;
+    }
   });
   
   // Fill in missing days in the last 60 days
