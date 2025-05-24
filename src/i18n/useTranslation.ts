@@ -10,8 +10,11 @@ export const useTranslation = () => {
   const t = (key: string, options?: any): string => {
     const translated = originalT(key, options);
     
+    // Ensure we always return a string
+    const translatedString = typeof translated === 'string' ? translated : String(translated);
+    
     // If translation is missing (returns key), provide readable fallback
-    if (translated === key) {
+    if (translatedString === key) {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Missing translation: ${key}`);
       }
@@ -20,7 +23,7 @@ export const useTranslation = () => {
       return parts[parts.length - 1].replace(/([A-Z])/g, ' $1').trim();
     }
     
-    return translated;
+    return translatedString;
   };
   
   // Change language with localStorage persistence

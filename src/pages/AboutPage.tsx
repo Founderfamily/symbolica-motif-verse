@@ -1,23 +1,12 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 const AboutPage = () => {
-  const { t, validateCurrentPageTranslations } = useTranslation();
-
-  // In development mode, automatically validate translations on this page
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      // Small delay to ensure all components are rendered
-      const timer = setTimeout(() => {
-        validateCurrentPageTranslations();
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [validateCurrentPageTranslations]);
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
