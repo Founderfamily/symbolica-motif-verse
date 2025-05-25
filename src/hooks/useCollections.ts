@@ -7,6 +7,8 @@ export const useCollections = () => {
   return useQuery({
     queryKey: ['collections'],
     queryFn: collectionsService.getCollections,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 };
 
@@ -14,6 +16,8 @@ export const useFeaturedCollections = () => {
   return useQuery({
     queryKey: ['collections', 'featured'],
     queryFn: collectionsService.getFeaturedCollections,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 };
 
@@ -22,6 +26,8 @@ export const useCollection = (slug: string) => {
     queryKey: ['collections', slug],
     queryFn: () => collectionsService.getCollectionBySlug(slug),
     enabled: !!slug,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
 
@@ -31,7 +37,8 @@ export const useCreateCollection = () => {
   return useMutation({
     mutationFn: (data: CreateCollectionData) => collectionsService.createCollection(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      // Invalidation sélective pour éviter les recharges inutiles
+      queryClient.invalidateQueries({ queryKey: ['collections'], exact: false });
     },
   });
 };
@@ -42,8 +49,10 @@ export const useUpdateCollection = () => {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<CreateCollectionData> }) =>
       collectionsService.updateCollection(id, updates),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
+      // Invalidation ciblée
       queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections', id] });
     },
   });
 };
@@ -65,8 +74,10 @@ export const useUpdateSymbolsOrder = () => {
   return useMutation({
     mutationFn: ({ collectionId, symbolIds }: { collectionId: string; symbolIds: string[] }) =>
       collectionsService.updateSymbolsOrder(collectionId, symbolIds),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+    onSuccess: (_, { collectionId }) => {
+      // Invalidation ciblée pour la collection spécifique
+      queryClient.invalidateQueries({ queryKey: ['collections', collectionId] });
+      queryClient.invalidateQueries({ queryKey: ['collections', 'featured'] });
     },
   });
 };

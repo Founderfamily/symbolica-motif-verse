@@ -1,4 +1,3 @@
-
 {
   "common": {
     "viewMore": "View more",
@@ -232,6 +231,19 @@
     "totalUsers": "Total Users",
     "recentActivity": "Recent Activity",
     "newSymbol": "New Symbol"
+  },
+  "collections": {
+    "title": "Collections",
+    "featured": "Featured",
+    "backToCollections": "Back to collections",
+    "notFound": "Collection not found",
+    "share": "Share",
+    "viewOnMap": "View on map",
+    "symbolsCount": "Symbols",
+    "culturesCount": "Cultures",
+    "periodsCount": "Periods", 
+    "symbolsInCollection": "Symbols in collection",
+    "noSymbols": "No symbols in this collection"
   },
   "callToAction": {
     "joinUs": "Join our global community of heritage enthusiasts",

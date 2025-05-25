@@ -1,4 +1,3 @@
-
 {
   "common": {
     "viewMore": "Voir plus",
@@ -351,6 +350,19 @@
     "totalUsers": "Utilisateurs totaux",
     "recentActivity": "Activité récente",
     "newSymbol": "Nouveau symbole"
+  },
+  "collections": {
+    "title": "Collections",
+    "featured": "En vedette",
+    "backToCollections": "Retour aux collections",
+    "notFound": "Collection non trouvée",
+    "share": "Partager",
+    "viewOnMap": "Voir sur la carte",
+    "symbolsCount": "Symboles",
+    "culturesCount": "Cultures", 
+    "periodsCount": "Périodes",
+    "symbolsInCollection": "Symboles de la collection",
+    "noSymbols": "Aucun symbole dans cette collection"
   },
   "callToAction": {
     "joinUs": "Rejoignez notre communauté mondiale d'amateurs de patrimoine",
