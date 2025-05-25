@@ -17,9 +17,11 @@ import { useNavigate } from 'react-router-dom';
 import { I18nText } from '@/components/ui/i18n-text';
 
 const Header = () => {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, isLoading } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  console.log('Header render - user:', user, 'isLoading:', isLoading, 'isAdmin:', isAdmin);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -65,7 +67,11 @@ const Header = () => {
         </nav>
 
         <div className="ml-auto flex items-center space-x-2">
-          {user ? (
+          {isLoading ? (
+            <Button variant="ghost" disabled>
+              Chargement...
+            </Button>
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">

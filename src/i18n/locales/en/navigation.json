@@ -21,7 +21,9 @@
     "map": "Map",
     "explore": "Explore",
     "signIn": "Sign In",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "gallery": "Gallery",
+    "admin": "Admin"
   },
   "header": {
     "signIn": "Sign In",
