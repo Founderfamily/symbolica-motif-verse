@@ -65,7 +65,13 @@ export const collectionsService = {
               name,
               culture,
               period,
-              description
+              description,
+              created_at,
+              updated_at,
+              medium,
+              technique,
+              function,
+              translations
             )
           )
         `)

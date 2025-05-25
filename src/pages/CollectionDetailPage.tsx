@@ -61,19 +61,19 @@ const CollectionDetailPage = () => {
     return translation?.[field] || '';
   };
 
-  // Convert collection symbols to SymbolData format with default values
+  // Convert collection symbols to SymbolData format
   const symbols: SymbolData[] = collection.collection_symbols?.map(cs => ({
     id: cs.symbols.id,
     name: cs.symbols.name,
     culture: cs.symbols.culture,
     period: cs.symbols.period,
-    description: cs.symbols.description || '',
-    created_at: cs.symbols.created_at || new Date().toISOString(),
-    updated_at: cs.symbols.updated_at || new Date().toISOString(),
-    medium: cs.symbols.medium || '',
-    technique: cs.symbols.technique || '',
-    function: cs.symbols.function || '',
-    translations: cs.symbols.translations || []
+    description: cs.symbols.description || null,
+    created_at: cs.symbols.created_at || null,
+    updated_at: cs.symbols.updated_at || null,
+    medium: cs.symbols.medium || null,
+    technique: cs.symbols.technique || null,
+    function: cs.symbols.function || null,
+    translations: cs.symbols.translations || null
   })) || [];
 
   return (
