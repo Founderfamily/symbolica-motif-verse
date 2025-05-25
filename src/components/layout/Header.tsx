@@ -70,13 +70,13 @@ const Header = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name} />
-                    <AvatarFallback>{user?.user_metadata?.full_name?.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={user?.avatar_url || ''} alt={user?.full_name || ''} />
+                    <AvatarFallback>{user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{user?.user_metadata?.full_name}</DropdownMenuLabel>
+                <DropdownMenuLabel>{user?.full_name || user?.username}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate('/contributions')}>
                   <I18nText translationKey="navigation.contributions" />
