@@ -32,10 +32,17 @@ export const useTranslation = () => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
     i18n.changeLanguage(lng);
   };
+
+  // Reset to default language (English)
+  const resetToDefaultLanguage = () => {
+    localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+    i18n.changeLanguage('en');
+  };
   
   return { 
     t, 
-    changeLanguage, 
+    changeLanguage,
+    resetToDefaultLanguage,
     currentLanguage: i18n.language, 
     i18n
   };

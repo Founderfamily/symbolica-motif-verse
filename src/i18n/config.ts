@@ -15,13 +15,14 @@ i18n
       fr: { translation: fr },
       en: { translation: en },
     },
-    fallbackLng: false, // Disable automatic fallback to prevent language jumping
+    lng: 'en', // Langue par défaut : anglais
+    fallbackLng: 'en', // Fallback vers l'anglais
     supportedLngs: ['fr', 'en'],
     interpolation: {
       escapeValue: false,
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
       lookupLocalStorage: LANGUAGE_STORAGE_KEY
     },
