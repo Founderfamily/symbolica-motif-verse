@@ -36,6 +36,12 @@ export interface CollectionDetails extends CollectionWithTranslations {
       culture: string;
       period: string;
       description?: string;
+      created_at?: string;
+      updated_at?: string;
+      medium?: string[] | null;
+      technique?: string[] | null;
+      function?: string[] | null;
+      translations?: any;
     };
   }[];
 }
