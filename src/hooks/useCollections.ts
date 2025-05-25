@@ -37,8 +37,8 @@ export const useCreateCollection = () => {
   return useMutation({
     mutationFn: (data: CreateCollectionData) => collectionsService.createCollection(data),
     onSuccess: () => {
-      // Invalidation sélective pour éviter les recharges inutiles
-      queryClient.invalidateQueries({ queryKey: ['collections'], exact: false });
+      // More conservative invalidation to avoid conflicts
+      queryClient.invalidateQueries({ queryKey: ['collections'], exact: true });
     },
   });
 };
@@ -50,9 +50,9 @@ export const useUpdateCollection = () => {
     mutationFn: ({ id, updates }: { id: string; updates: Partial<CreateCollectionData> }) =>
       collectionsService.updateCollection(id, updates),
     onSuccess: (_, { id }) => {
-      // Invalidation ciblée
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
-      queryClient.invalidateQueries({ queryKey: ['collections', id] });
+      // More targeted invalidation
+      queryClient.invalidateQueries({ queryKey: ['collections'], exact: true });
+      queryClient.invalidateQueries({ queryKey: ['collections', id], exact: true });
     },
   });
 };
@@ -63,7 +63,7 @@ export const useDeleteCollection = () => {
   return useMutation({
     mutationFn: (id: string) => collectionsService.deleteCollection(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'], exact: true });
     },
   });
 };
@@ -75,9 +75,8 @@ export const useUpdateSymbolsOrder = () => {
     mutationFn: ({ collectionId, symbolIds }: { collectionId: string; symbolIds: string[] }) =>
       collectionsService.updateSymbolsOrder(collectionId, symbolIds),
     onSuccess: (_, { collectionId }) => {
-      // Invalidation ciblée pour la collection spécifique
-      queryClient.invalidateQueries({ queryKey: ['collections', collectionId] });
-      queryClient.invalidateQueries({ queryKey: ['collections', 'featured'] });
+      // Conservative invalidation for specific collection only
+      queryClient.invalidateQueries({ queryKey: ['collections', collectionId], exact: true });
     },
   });
 };

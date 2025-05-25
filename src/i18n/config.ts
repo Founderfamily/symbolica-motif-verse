@@ -15,7 +15,7 @@ i18n
       fr: { translation: fr },
       en: { translation: en },
     },
-    fallbackLng: 'fr',
+    fallbackLng: false, // Disable automatic fallback to prevent language jumping
     supportedLngs: ['fr', 'en'],
     interpolation: {
       escapeValue: false,
@@ -28,14 +28,19 @@ i18n
     load: 'languageOnly',
     returnNull: false,
     returnEmptyString: false,
-    // Simplified missing key handling
+    // Simplified missing key handling that stays in current language
     parseMissingKeyHandler: (key) => {
       const parts = key.split('.');
       return parts[parts.length - 1].replace(/([A-Z])/g, ' $1').trim();
     },
-    // Only log warnings in development
-    debug: false,
-    saveMissing: false
+    // Enhanced development settings
+    debug: process.env.NODE_ENV === 'development',
+    saveMissing: false,
+    // Prevent cache issues during development
+    initImmediate: false,
+    react: {
+      useSuspense: false
+    }
   });
 
 export default i18n;

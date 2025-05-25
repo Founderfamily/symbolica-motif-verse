@@ -15,12 +15,13 @@ export const TranslationFallback = ({
   className = '', 
   as: Component = 'span' 
 }: TranslationFallbackProps) => {
-  const { t, currentLanguage } = useTranslation();
+  const { t } = useTranslation();
   
-  // Utiliser la traduction avec fallback personnalisé si fourni
-  const text = t(translationKey) === translationKey && fallback 
+  // Get translation and use fallback only if translation is truly missing
+  const translatedText = t(translationKey);
+  const text = translatedText === translationKey && fallback 
     ? fallback 
-    : t(translationKey);
+    : translatedText;
   
   return (
     <Component className={className} data-translation-key={translationKey}>

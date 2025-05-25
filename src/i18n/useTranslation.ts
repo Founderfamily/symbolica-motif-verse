@@ -3,26 +3,17 @@ import { useTranslation as useI18nTranslation } from 'react-i18next';
 
 const LANGUAGE_STORAGE_KEY = 'app_language';
 
-// Cache pour éviter les recalculs de fallbacks
-const fallbackCache = new Map<string, string>();
-
 export const useTranslation = () => {
   const { t: originalT, i18n } = useI18nTranslation();
   
-  // Simple t function with improved fallback handling
+  // Simplified t function that relies on i18next's native behavior
   const t = (key: string, options?: any): string => {
-    // Vérifier le cache d'abord
-    const cacheKey = `${key}-${i18n.language}`;
-    if (fallbackCache.has(cacheKey)) {
-      return fallbackCache.get(cacheKey)!;
-    }
-
     const translated = originalT(key, options);
     
     // Ensure we always return a string
     const translatedString = typeof translated === 'string' ? translated : String(translated);
     
-    // If translation is missing (returns key), provide readable fallback
+    // If translation is missing (returns key), provide readable fallback in same language
     if (translatedString === key) {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Missing translation: ${key} for language: ${i18n.language}`);
@@ -30,22 +21,14 @@ export const useTranslation = () => {
       
       // Convert key to readable text
       const parts = key.split('.');
-      const fallback = parts[parts.length - 1].replace(/([A-Z])/g, ' $1').trim();
-      
-      // Mettre en cache le fallback
-      fallbackCache.set(cacheKey, fallback);
-      return fallback;
+      return parts[parts.length - 1].replace(/([A-Z])/g, ' $1').trim();
     }
     
-    // Mettre en cache la traduction réussie
-    fallbackCache.set(cacheKey, translatedString);
     return translatedString;
   };
   
-  // Change language with localStorage persistence and cache clearing
+  // Change language with localStorage persistence
   const changeLanguage = (lng: string) => {
-    // Vider le cache lors du changement de langue
-    fallbackCache.clear();
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
     i18n.changeLanguage(lng);
   };
