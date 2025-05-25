@@ -1,6 +1,7 @@
 
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '@/hooks/useAuth';
 import Layout from '@/components/layout/Layout';
 import HomePage from '@/pages/HomePage';
 import SymbolExplorer from '@/pages/SymbolExplorer';
@@ -43,45 +44,47 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Layout><Outlet /></Layout>}>
-            <Route index element={<HomePage />} />
-            <Route path="symbols" element={<SymbolExplorer />} />
-            <Route path="symbols/:id" element={<SymbolExplorer />} />
-            <Route path="map" element={<MapExplorer />} />
-            <Route path="collections" element={<CollectionsPage />} />
-            <Route path="collections/:slug" element={<CollectionDetailPage />} />
-            <Route path="trending" element={<TrendingPage />} />
-            <Route path="contributions" element={<ContributionsPage />} />
-            <Route path="contribute" element={<NewContribution />} />
-            <Route path="contributions/:id" element={<ContributionDetail />} />
-            <Route path="auth" element={<Auth />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="about" element={<AboutPage />} />
-          </Route>
+        <AuthProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Layout><Outlet /></Layout>}>
+              <Route index element={<HomePage />} />
+              <Route path="symbols" element={<SymbolExplorer />} />
+              <Route path="symbols/:id" element={<SymbolExplorer />} />
+              <Route path="map" element={<MapExplorer />} />
+              <Route path="collections" element={<CollectionsPage />} />
+              <Route path="collections/:slug" element={<CollectionDetailPage />} />
+              <Route path="trending" element={<TrendingPage />} />
+              <Route path="contributions" element={<ContributionsPage />} />
+              <Route path="contribute" element={<NewContribution />} />
+              <Route path="contributions/:id" element={<ContributionDetail />} />
+              <Route path="auth" element={<Auth />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="about" element={<AboutPage />} />
+            </Route>
 
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="symbols" element={<SymbolsManagement />} />
-            <Route path="symbols/new" element={<SymbolEditor />} />
-            <Route path="symbols/:id/edit" element={<SymbolEditor />} />
-            <Route path="collections" element={<CollectionsManagement />} />
-            <Route path="collections/new" element={<CollectionEditor />} />
-            <Route path="collections/:id/edit" element={<CollectionEditor />} />
-            <Route path="contributions" element={<ContributionsManagement />} />
-            <Route path="users" element={<UsersManagement />} />
-            <Route path="content" element={<ContentManagement />} />
-            <Route path="analysis" element={<AnalysisExamplesManagement />} />
-            <Route path="moderation" element={<CommentModeration />} />
-            <Route path="settings" element={<SystemSettings />} />
-          </Route>
+            {/* Admin routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="symbols" element={<SymbolsManagement />} />
+              <Route path="symbols/new" element={<SymbolEditor />} />
+              <Route path="symbols/:id/edit" element={<SymbolEditor />} />
+              <Route path="collections" element={<CollectionsManagement />} />
+              <Route path="collections/new" element={<CollectionEditor />} />
+              <Route path="collections/:id/edit" element={<CollectionEditor />} />
+              <Route path="contributions" element={<ContributionsManagement />} />
+              <Route path="users" element={<UsersManagement />} />
+              <Route path="content" element={<ContentManagement />} />
+              <Route path="analysis" element={<AnalysisExamplesManagement />} />
+              <Route path="moderation" element={<CommentModeration />} />
+              <Route path="settings" element={<SystemSettings />} />
+            </Route>
 
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </AuthProvider>
       </Router>
     </QueryClientProvider>
   );
