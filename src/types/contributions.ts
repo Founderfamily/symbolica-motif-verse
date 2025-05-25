@@ -82,5 +82,6 @@ export interface ContributionFormData {
   longitude: number | null;
   cultural_context: string;
   period: string;
+  contribution_type?: string;
   tags: string[];
 }

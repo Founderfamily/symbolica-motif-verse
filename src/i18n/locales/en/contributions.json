@@ -129,14 +129,27 @@
         "description": "Description",
         "descriptionPlaceholder": "Provide a detailed description of the symbol, its meaning, and significance",
         "culture": "Cultural Context",
-        "culturePlaceholder": "e.g., Celtic, Greek, Egyptian, Japanese",
+        "culturePlaceholder": "Select a cultural context or choose 'Other'",
+        "cultureOther": "Other (specify)",
+        "cultureOtherPlaceholder": "Specify the cultural context",
         "period": "Historical Period",
-        "periodPlaceholder": "e.g., Medieval, Renaissance, Ancient Times",
+        "periodPlaceholder": "Select a historical period or choose 'Other'",
+        "periodOther": "Other (specify)",
+        "periodOtherPlaceholder": "Specify the historical period",
+        "contributionType": "Contribution Type",
+        "contributionTypePlaceholder": "What type of cultural element is this?",
         "location": "Location",
         "locationPlaceholder": "Location will be set when you search on the map",
         "tagsPlaceholder": "Enter a tag and press Enter or click Add",
         "addTag": "Add",
-        "noTags": "No tags added yet. Add some keywords to help categorize your contribution."
+        "noTags": "No tags added yet. Add some keywords to help categorize your contribution.",
+        "commonTags": "Common Tags",
+        "commonTagsDescription": "Click to add common tags quickly"
+      },
+      "options": {
+        "selectPlaceholder": "Select an option...",
+        "other": "Other",
+        "searchPlaceholder": "Search options..."
       },
       "validation": {
         "required": "This field is required",

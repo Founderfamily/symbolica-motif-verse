@@ -19,12 +19,14 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Tags, Upload, Calendar, Info, Globe } from 'lucide-react';
+import { MapPin, Tags, Upload, Calendar, Info, Globe, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import MapSelector from '@/components/contributions/MapSelector';
 import ImageDropzone from '@/components/contributions/ImageDropzone';
+import { CULTURAL_CONTEXTS, HISTORICAL_PERIODS, CONTRIBUTION_TYPES, COMMON_TAGS } from '@/data/contributionOptions';
 
 const NewContribution = () => {
   const { user } = useAuth();
@@ -33,6 +35,8 @@ const NewContribution = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [currentTag, setCurrentTag] = useState('');
+  const [showCultureOther, setShowCultureOther] = useState(false);
+  const [showPeriodOther, setShowPeriodOther] = useState(false);
 
   const formSchema = z.object({
     title: z.string().min(5, t('contributions.form.validation.minLength', { count: 5 })),
@@ -40,6 +44,7 @@ const NewContribution = () => {
     location_name: z.string().optional(),
     cultural_context: z.string().min(3, t('contributions.form.validation.required')),
     period: z.string().min(3, t('contributions.form.validation.required')),
+    contribution_type: z.string().optional(),
     tags: z.array(z.string()).min(1, t('contributions.form.validation.minTags')),
     latitude: z.number().nullable().optional(),
     longitude: z.number().nullable().optional(),
@@ -53,6 +58,7 @@ const NewContribution = () => {
       location_name: '',
       cultural_context: '',
       period: '',
+      contribution_type: '',
       tags: [],
       latitude: null,
       longitude: null,
@@ -79,10 +85,11 @@ const NewContribution = () => {
     }
   };
 
-  const handleAddTag = () => {
-    if (currentTag.trim() && !form.getValues().tags.includes(currentTag)) {
-      form.setValue('tags', [...form.getValues().tags, currentTag]);
-      setCurrentTag('');
+  const handleAddTag = (tag?: string) => {
+    const tagToAdd = tag || currentTag;
+    if (tagToAdd.trim() && !form.getValues().tags.includes(tagToAdd)) {
+      form.setValue('tags', [...form.getValues().tags, tagToAdd]);
+      if (!tag) setCurrentTag('');
     }
   };
 
@@ -97,6 +104,26 @@ const NewContribution = () => {
     form.setValue('latitude', lat);
     form.setValue('longitude', lng);
     form.setValue('location_name', name);
+  };
+
+  const handleCultureChange = (value: string) => {
+    if (value === 'other') {
+      setShowCultureOther(true);
+      form.setValue('cultural_context', '');
+    } else {
+      setShowCultureOther(false);
+      form.setValue('cultural_context', value);
+    }
+  };
+
+  const handlePeriodChange = (value: string) => {
+    if (value === 'other') {
+      setShowPeriodOther(true);
+      form.setValue('period', '');
+    } else {
+      setShowPeriodOther(false);
+      form.setValue('period', value);
+    }
   };
 
   if (!user) {
@@ -162,6 +189,31 @@ const NewContribution = () => {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="contribution_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('contributions.form.fields.contributionType')}</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('contributions.form.fields.contributionTypePlaceholder')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {CONTRIBUTION_TYPES.map(type => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
 
@@ -182,9 +234,45 @@ const NewContribution = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t('contributions.form.fields.culture')}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t('contributions.form.fields.culturePlaceholder')} {...field} />
-                        </FormControl>
+                        {!showCultureOther ? (
+                          <Select onValueChange={handleCultureChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={t('contributions.form.fields.culturePlaceholder')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {CULTURAL_CONTEXTS.map(culture => (
+                                <SelectItem key={culture} value={culture}>
+                                  {culture}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="other">
+                                {t('contributions.form.fields.cultureOther')}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="space-y-2">
+                            <FormControl>
+                              <Input
+                                placeholder={t('contributions.form.fields.cultureOtherPlaceholder')}
+                                {...field}
+                              />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setShowCultureOther(false);
+                                form.setValue('cultural_context', '');
+                              }}
+                            >
+                              Back to selection
+                            </Button>
+                          </div>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -196,12 +284,49 @@ const NewContribution = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t('contributions.form.fields.period')}</FormLabel>
-                        <FormControl>
-                          <div className="flex items-center">
-                            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder={t('contributions.form.fields.periodPlaceholder')} {...field} />
+                        {!showPeriodOther ? (
+                          <Select onValueChange={handlePeriodChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <Calendar className="mr-2 h-4 w-4" />
+                                <SelectValue placeholder={t('contributions.form.fields.periodPlaceholder')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {HISTORICAL_PERIODS.map(period => (
+                                <SelectItem key={period} value={period}>
+                                  {period}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="other">
+                                {t('contributions.form.fields.periodOther')}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="space-y-2">
+                            <FormControl>
+                              <div className="flex items-center">
+                                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder={t('contributions.form.fields.periodOtherPlaceholder')}
+                                  {...field}
+                                />
+                              </div>
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setShowPeriodOther(false);
+                                form.setValue('period', '');
+                              }}
+                            >
+                              Back to selection
+                            </Button>
                           </div>
-                        </FormControl>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -234,9 +359,29 @@ const NewContribution = () => {
                           }
                         }}
                       />
-                      <Button type="button" onClick={handleAddTag}>
+                      <Button type="button" onClick={() => handleAddTag()}>
                         {t('contributions.form.fields.addTag')}
                       </Button>
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium mb-2">{t('contributions.form.fields.commonTags')}</p>
+                      <p className="text-xs text-muted-foreground mb-3">{t('contributions.form.fields.commonTagsDescription')}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {COMMON_TAGS.filter(tag => !form.getValues().tags.includes(tag)).map(tag => (
+                          <Button
+                            key={tag}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddTag(tag)}
+                            className="h-7 text-xs"
+                          >
+                            <Plus className="mr-1 h-3 w-3" />
+                            {tag}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="flex flex-wrap gap-2 pt-2">
