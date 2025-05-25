@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -73,7 +74,7 @@ const Header = () => {
                     <AvatarFallback>{user?.user_metadata?.full_name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </Button>
-              </DropdownMenu>
+              </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{user?.user_metadata?.full_name}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
