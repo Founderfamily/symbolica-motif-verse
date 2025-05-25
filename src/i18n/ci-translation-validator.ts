@@ -17,17 +17,17 @@ const validateForCI = () => {
   let exitCode = 0;
   
   // Report missing keys (critical issue)
-  if (report.missingKeys.en.length > 0 || report.missingKeys.fr.length > 0) {
+  if (report.missingInEn.length > 0 || report.missingInFr.length > 0) {
     console.error('❌ CRITICAL: Missing translation keys detected');
     
-    if (report.missingKeys.en.length > 0) {
-      console.error(`\n🇺🇸 Missing ${report.missingKeys.en.length} keys in English:`);
-      report.missingKeys.en.forEach(key => console.error(`  - ${key}`));
+    if (report.missingInEn.length > 0) {
+      console.error(`\n🇺🇸 Missing ${report.missingInEn.length} keys in English:`);
+      report.missingInEn.forEach(key => console.error(`  - ${key}`));
     }
     
-    if (report.missingKeys.fr.length > 0) {
-      console.error(`\n🇫🇷 Missing ${report.missingKeys.fr.length} keys in French:`);
-      report.missingKeys.fr.forEach(key => console.error(`  - ${key}`));
+    if (report.missingInFr.length > 0) {
+      console.error(`\n🇫🇷 Missing ${report.missingInFr.length} keys in French:`);
+      report.missingInFr.forEach(key => console.error(`  - ${key}`));
     }
     
     exitCode = 1;
@@ -49,10 +49,10 @@ const validateForCI = () => {
   }
   
   // Report key format issues (warning)
-  if (report.invalidKeyFormat.length > 0) {
+  if (report.invalidFormatKeys.length > 0) {
     console.warn('⚠️ WARNING: Keys not following the naming convention');
-    console.warn(`\nFound ${report.invalidKeyFormat.length} keys with non-standard format:`);
-    report.invalidKeyFormat.forEach(key => console.warn(`  - ${key}`));
+    console.warn(`\nFound ${report.invalidFormatKeys.length} keys with non-standard format:`);
+    report.invalidFormatKeys.forEach(key => console.warn(`  - ${key}`));
     
     // Don't fail the build for format warnings, just report them
     console.warn('\nPlease update these keys to follow the established format convention.');

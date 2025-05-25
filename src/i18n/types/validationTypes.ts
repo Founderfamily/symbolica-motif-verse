@@ -3,13 +3,14 @@
  * Types for translation validation
  */
 export interface ValidationReport {
-  valid: boolean;
-  missingKeys: {
-    en: string[];
-    fr: string[];
-  };
+  isValid: boolean;
+  missingInFr: string[];
+  missingInEn: string[];
   formatIssues: FormatIssue[];
-  invalidKeyFormat: string[];
+  invalidFormatKeys: string[];
+  completionRate: number;
+  timestamp: string;
+  error?: string;
 }
 
 export interface FormatIssue {

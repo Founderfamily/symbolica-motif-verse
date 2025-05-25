@@ -38,3 +38,62 @@ export const hasTranslationKey = (key: string, lng?: string): boolean => {
   const language = lng || i18n.language;
   return i18n.exists(key, { lng: language });
 };
+
+// Diagnose translation issues
+export const diagnoseTranslations = () => {
+  const enTranslations = getFlattenedTranslations('en');
+  const frTranslations = getFlattenedTranslations('fr');
+  
+  const enKeys = Object.keys(enTranslations);
+  const frKeys = Object.keys(frTranslations);
+  
+  const missingInFr = enKeys.filter(key => !frKeys.includes(key));
+  const missingInEn = frKeys.filter(key => !enKeys.includes(key));
+  
+  // Check for format issues
+  const formatIssues: Array<{ key: string; issue: string }> = [];
+  
+  enKeys.forEach(key => {
+    if (frTranslations[key]) {
+      const enValue = enTranslations[key];
+      const frValue = frTranslations[key];
+      
+      // Check for placeholder consistency
+      const enPlaceholders = (enValue.match(/\{[^}]+\}/g) || []);
+      const frPlaceholders = (frValue.match(/\{[^}]+\}/g) || []);
+      
+      if (enPlaceholders.length !== frPlaceholders.length) {
+        formatIssues.push({
+          key,
+          issue: `Placeholder mismatch: EN has ${enPlaceholders.length}, FR has ${frPlaceholders.length}`
+        });
+      }
+    }
+  });
+  
+  return {
+    missingKeys: {
+      total: { en: enKeys.length, fr: frKeys.length },
+      missingInFr,
+      missingInEn
+    },
+    formatIssues,
+    summary: {
+      missingCount: missingInFr.length + missingInEn.length,
+      formatIssuesCount: formatIssues.length
+    }
+  };
+};
+
+// Generate fix report
+export const generateFixReport = () => {
+  const diagnosis = diagnoseTranslations();
+  return {
+    ...diagnosis,
+    recommendations: [
+      'Add missing translations to both language files',
+      'Fix format inconsistencies',
+      'Run validator again to verify fixes'
+    ]
+  };
+};
