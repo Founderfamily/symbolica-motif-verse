@@ -58,7 +58,7 @@ const ContributionsPage = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = contributions;
+    let filtered = [...contributions];
 
     // Filter by search query
     if (searchQuery) {
@@ -106,7 +106,7 @@ const ContributionsPage = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Card key={i}>
+            <Card key={`skeleton-${i}`}>
               <CardHeader>
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
@@ -159,11 +159,11 @@ const ContributionsPage = () => {
             <SelectValue placeholder={t('contributions.filters.culture')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">
+            <SelectItem key="culture-all" value="all">
               <I18nText translationKey="contributions.filters.allCultures" />
             </SelectItem>
             {uniqueCultures.map(culture => (
-              <SelectItem key={culture} value={culture}>
+              <SelectItem key={`culture-${culture}`} value={culture}>
                 {culture}
               </SelectItem>
             ))}
@@ -174,11 +174,11 @@ const ContributionsPage = () => {
             <SelectValue placeholder={t('contributions.filters.period')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">
+            <SelectItem key="period-all" value="all">
               <I18nText translationKey="contributions.filters.allPeriods" />
             </SelectItem>
             {uniquePeriods.map(period => (
-              <SelectItem key={period} value={period}>
+              <SelectItem key={`period-${period}`} value={period}>
                 {period}
               </SelectItem>
             ))}
@@ -263,12 +263,12 @@ const ContributionsPage = () => {
 
                   <div className="flex flex-wrap gap-1 mb-4">
                     {contribution.tags.slice(0, 3).map((tag) => (
-                      <Badge key={tag.id} variant="secondary" className="text-xs">
+                      <Badge key={`${contribution.id}-tag-${tag.id}`} variant="secondary" className="text-xs">
                         {tag.tag}
                       </Badge>
                     ))}
                     {contribution.tags.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge key={`${contribution.id}-more-tags`} variant="secondary" className="text-xs">
                         +{contribution.tags.length - 3}
                       </Badge>
                     )}
@@ -302,7 +302,7 @@ const ContributionsPage = () => {
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const page = i + 1;
                   return (
-                    <PaginationItem key={page}>
+                    <PaginationItem key={`page-${page}`}>
                       <PaginationLink
                         onClick={() => setCurrentPage(page)}
                         isActive={currentPage === page}
@@ -315,7 +315,7 @@ const ContributionsPage = () => {
                 })}
                 
                 {totalPages > 5 && (
-                  <PaginationItem>
+                  <PaginationItem key="ellipsis">
                     <PaginationEllipsis />
                   </PaginationItem>
                 )}
