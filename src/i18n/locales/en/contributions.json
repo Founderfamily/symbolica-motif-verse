@@ -68,7 +68,8 @@
       "placeholder": "Interactive Map Coming Soon",
       "placeholderSub": "We're working on integrating a map for precise location selection",
       "search": "Search for a location...",
-      "searchButton": "Search"
+      "searchButton": "Search",
+      "loading": "Loading map..."
     },
     "image": {
       "errors": {
@@ -106,6 +107,48 @@
       "errorCreating": "Error Creating Contribution",
       "statusUpdateSuccess": "Status Updated Successfully",
       "errorUpdating": "Error Updating Status"
+    },
+    "form": {
+      "title": "Submit a New Contribution",
+      "subtitle": "Share your knowledge about symbols and help preserve our cultural heritage",
+      "sections": {
+        "general": "General Information",
+        "generalDescription": "Basic details about your contribution",
+        "cultural": "Cultural Context",
+        "culturalDescription": "Historical and cultural background information",
+        "tags": "Tags & Keywords",
+        "tagsDescription": "Add keywords to help others discover your contribution",
+        "image": "Image Upload",
+        "imageDescription": "Upload a clear image of the symbol or artifact",
+        "location": "Location Information",
+        "locationDescription": "Where this symbol or artifact can be found"
+      },
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "Enter a descriptive title for your contribution",
+        "description": "Description",
+        "descriptionPlaceholder": "Provide a detailed description of the symbol, its meaning, and significance",
+        "culture": "Cultural Context",
+        "culturePlaceholder": "e.g., Celtic, Greek, Egyptian, Japanese",
+        "period": "Historical Period",
+        "periodPlaceholder": "e.g., Medieval, Renaissance, Ancient Times",
+        "location": "Location",
+        "locationPlaceholder": "Location will be set when you search on the map",
+        "tagsPlaceholder": "Enter a tag and press Enter or click Add",
+        "addTag": "Add",
+        "noTags": "No tags added yet. Add some keywords to help categorize your contribution."
+      },
+      "validation": {
+        "required": "This field is required",
+        "minLength": "Must be at least {count} characters long",
+        "minTags": "Please add at least one tag",
+        "imageRequired": "Please upload an image for your contribution"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "submit": "Submit Contribution",
+        "submitting": "Submitting..."
+      }
     }
   }
 }
