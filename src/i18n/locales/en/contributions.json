@@ -143,9 +143,16 @@
         "tagsPlaceholder": "Enter a tag and press Enter or click Add",
         "addTag": "Add",
         "noTags": "No tags added yet. Add some keywords to help categorize your contribution.",
+        "selectedTags": "Selected Tags",
         "commonTags": "Common Tags",
         "commonTagsDescription": "Click to add common tags quickly",
         "backToSelection": "Back to selection"
+      },
+      "tagCategories": {
+        "art": "Art & Design",
+        "spiritual": "Spiritual & Religious",
+        "cultural": "Cultural Heritage",
+        "nature": "Nature & Protection"
       },
       "contributionTypes": {
         "symbole": "Symbol",
