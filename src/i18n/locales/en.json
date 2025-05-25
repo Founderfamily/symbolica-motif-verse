@@ -1,3 +1,4 @@
+
 {
   "common": {
     "viewMore": "View more",
@@ -35,7 +36,13 @@
     "about": "About",
     "profile": "Profile",
     "contributions": "Contributions",
-    "symbols": "Symbols"
+    "symbols": "Symbols",
+    "collections": "Collections",
+    "allSymbols": "All symbols",
+    "map": "Map",
+    "explore": "Explore",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
   },
   "header": {
     "signIn": "Sign In",
@@ -96,7 +103,8 @@
     "forum": "Forum",
     "legal": "Legal",
     "license": "License",
-    "copyright": "© 2025 Symbolica Museum"
+    "copyright": "© 2025 Symbolica Museum",
+    "map": "Map"
   },
   "homepage": {
     "title": "Discover the world's symbolic heritage",
@@ -117,7 +125,19 @@
     "newsletter": "Stay Updated",
     "newsletterSub": "Get the latest updates on new symbols and features",
     "subscribe": "Subscribe",
-    "openSource": "Open Source Project"
+    "openSource": "Open Source Project",
+    "howItWorks": "How It Works"
+  },
+  "quickAccess": {
+    "title": "Quick Access",
+    "explore": "Explore Symbols",
+    "exploreDesc": "Discover our collection of cultural symbols",
+    "contribute": "Contribute",
+    "contributeDesc": "Share symbols from your culture",
+    "map": "Interactive Map",
+    "mapDesc": "Explore symbols geographically",
+    "collections": "Collections", 
+    "collectionsDesc": "Browse curated symbol collections"
   },
   "contributions": {
     "title": "Contributions",
@@ -216,7 +236,120 @@
     "clearAll": "Clear all"
   },
   "admin": {
-    "dashboard": "Dashboard",
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "welcome": "Welcome, ",
+      "welcomeMessage": "Manage your Symbolica platform from this dashboard.",
+      "overview": "General Overview",
+      "analytics": "Analytics and Trends",
+      "recentActivity": "Recent Activity"
+    },
+    "stats": {
+      "totalUsers": "Total Users",
+      "activeUsers": "{{count}} active last 30d ({{rate}})",
+      "totalContributions": "Total Contributions",
+      "pendingContributions": "{{count}} pending ({{rate}} approved)",
+      "totalSymbols": "Total Symbols",
+      "symbolLocations": "Symbol Locations",
+      "verifiedLocations": "{{count}} verified ({{rate}})",
+      "topContributor": "Top Contributor",
+      "contributorStats": "{{contributions}} contributions, {{points}} points",
+      "lastContribution": "Last contribution",
+      "noRecentActivity": "No recent activity"
+    },
+    "charts": {
+      "activityOverTime": "Activity over the last 60 days",
+      "topContributors": "Top 5 Contributors",
+      "newUsers": "New Users",
+      "newContributions": "New Contributions",
+      "points": "Points",
+      "contributions": "Contributions"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "export": "Export",
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "approve": "Approve",
+      "reject": "Reject",
+      "ban": "Ban",
+      "unban": "Unban",
+      "makeAdmin": "Make Admin",
+      "removeAdmin": "Remove Admin"
+    },
+    "access": {
+      "denied": "Access Denied",
+      "notAuthorized": "You are not authorized to access the admin dashboard."
+    },
+    "logs": {
+      "title": "Admin Logs",
+      "action": "Action",
+      "entity": "Entity",
+      "admin": "Administrator",
+      "date": "Date",
+      "details": "Details",
+      "noLogs": "No logs available",
+      "filter": "Filter logs"
+    },
+    "users": {
+      "title": "User Management",
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "bannedUsers": "Banned Users",
+      "admins": "Administrators",
+      "search": "Search users...",
+      "filters": "Filters",
+      "status": "Status",
+      "role": "Role",
+      "joinDate": "Join Date",
+      "lastActive": "Last Active",
+      "actions": "Actions",
+      "viewProfile": "View Profile",
+      "banUser": "Ban User",
+      "unbanUser": "Unban User",
+      "makeAdmin": "Make Admin",
+      "removeAdmin": "Remove Admin Rights"
+    },
+    "analysis": {
+      "title": "Analysis Examples Management",
+      "create": "Create Example",
+      "edit": "Edit Example",
+      "delete": "Delete Example",
+      "upload": "Upload Images",
+      "preview": "Preview",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "moderation": {
+      "title": "Comment Moderation",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "flagged": "Flagged",
+      "approve": "Approve",
+      "reject": "Reject",
+      "flag": "Flag",
+      "unflag": "Unflag"
+    },
+    "settings": {
+      "title": "System Settings",
+      "general": "General",
+      "security": "Security",
+      "notifications": "Notifications",
+      "maintenance": "Maintenance",
+      "backup": "Backup",
+      "logs": "Logs",
+      "performance": "Performance"
+    },
+    "notifications": {
+      "title": "Admin Notifications",
+      "unread": "Unread",
+      "all": "All",
+      "markAsRead": "Mark as Read",
+      "markAllAsRead": "Mark All as Read",
+      "noNotifications": "No notifications"
+    },
     "symbolsManagement": "Symbols Management",
     "contentManagement": "Content Management",
     "contributionsManagement": "Contributions Management",
