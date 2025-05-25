@@ -1,0 +1,61 @@
+
+{
+  "contributions": {
+    "title": "Contributions",
+    "myContributions": "My Contributions",
+    "communityContributions": "Community Contributions",
+    "newContribution": "New Contribution",
+    "contributionTitle": "Title",
+    "culturalContext": "Cultural Context",
+    "period": "Period",
+    "description": "Description",
+    "location": "Location",
+    "submitted": "Submitted",
+    "status": "Status",
+    "pendingReview": "Pending Review",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "unknown": "Unknown",
+    "viewContribution": "View Contribution",
+    "editContribution": "Edit Contribution",
+    "deleteContribution": "Delete Contribution",
+    "confirmDelete": "Are you sure you want to delete this contribution?",
+    "uploadImages": "Upload Images",
+    "dragImages": "Drag and drop your images here",
+    "browseFiles": "Browse Files",
+    "acceptedFormats": "Accepted formats: .jpg, .jpeg, .png",
+    "maxFileSize": "Max file size: 5MB",
+    "thanksForContribution": "Thank you for your contribution!",
+    "contributionSubmitted": "Your contribution has been successfully submitted and will be reviewed by our team.",
+    "errorSubmitting": "Error submitting your contribution. Please try again.",
+    "empty": "No contributions yet",
+    "emptyDescription": "Be the first to contribute to our symbolic heritage database",
+    "create": "Create a contribution",
+    "new": "New contribution",
+    "loading": "Loading contributions...",
+    "list": "Contributions list",
+    "tableHeaders": {
+      "title": "Title",
+      "submissionDate": "Submission Date",
+      "status": "Status",
+      "tags": "Tags",
+      "actions": "Actions"
+    },
+    "map": {
+      "placeholder": "Interactive Map Coming Soon",
+      "placeholderSub": "We're working on integrating a map for precise location selection",
+      "search": "Search for a location...",
+      "searchButton": "Search"
+    },
+    "image": {
+      "errors": {
+        "format": "Invalid file format. Only images are accepted.",
+        "size": "File is too large. Maximum size is 5MB."
+      },
+      "dropActive": "Drop the image here...",
+      "drop": "Drop your image here or click to browse",
+      "formats": "Accepted formats: JPEG, PNG, WebP",
+      "remove": "Remove image"
+    }
+  }
+}

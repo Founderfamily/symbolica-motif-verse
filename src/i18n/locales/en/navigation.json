@@ -1,0 +1,60 @@
+
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "profile": "Profile",
+    "contributions": "Contributions",
+    "symbols": "Symbols",
+    "login": "Log in",
+    "logout": "Log out",
+    "menu": "Menu"
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "profile": "Profile",
+    "contributions": "Contributions",
+    "symbols": "Symbols",
+    "collections": "Collections",
+    "allSymbols": "All symbols",
+    "map": "Map",
+    "explore": "Explore",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  },
+  "header": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "profile": "Profile",
+    "admin": "Admin",
+    "email": "Email",
+    "home": "Home",
+    "explore": "Explore",
+    "map": "Map",
+    "about": "About Us",
+    "contact": "Contact",
+    "menu": "Menu",
+    "close": "Close",
+    "contribute": "Contribute"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy",
+    "tagline": "Preserving and celebrating the world's symbolic heritage",
+    "platform": "Platform",
+    "home": "Home",
+    "explore": "Explore",
+    "contribute": "Contribute",
+    "about": "About",
+    "community": "Community",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "legal": "Legal",
+    "license": "License",
+    "copyright": "© 2025 Symbolica Museum",
+    "map": "Map"
+  }
+}

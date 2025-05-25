@@ -1,0 +1,32 @@
+
+{
+  "common": {
+    "viewMore": "View more",
+    "readMore": "Read more",
+    "loadMore": "Load more",
+    "showAll": "Show all",
+    "hide": "Hide",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "uploadImage": "Upload image",
+    "submit": "Submit",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "fieldRequired": "This field is required",
+    "version": "Alpha Release 0.1"
+  },
+  "app": {
+    "name": "Symbolica",
+    "version": "Version 0.1.0"
+  },
+  "map": {
+    "placeholder": "Interactive Map Coming Soon",
+    "comingSoon": "We're working on an interactive map to explore symbols around the world"
+  }
+}

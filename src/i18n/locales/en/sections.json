@@ -1,0 +1,247 @@
+
+{
+  "homepage": {
+    "title": "Discover the world's symbolic heritage",
+    "subtitle": "Explore, contribute and learn about cultural patterns across ages",
+    "ctaButton": "Start exploring",
+    "featuresTitle": "A collaborative museum dedicated to symbols",
+    "howItWorksTitle": "How it works"
+  },
+  "sections": {
+    "museumPortal": "Symbolica Museum",
+    "communityPortal": "Collaborative symbolic heritage portal",
+    "joinCommunity": "Join a community",
+    "partners": "Our Partners",
+    "contactUs": "Contact Us",
+    "community": "Community",
+    "roadmap": "Our Roadmap",
+    "testimonials": "What people are saying",
+    "newsletter": "Stay Updated",
+    "newsletterSub": "Get the latest updates on new symbols and features",
+    "subscribe": "Subscribe",
+    "openSource": "Open Source Project",
+    "howItWorks": "How It Works"
+  },
+  "quickAccess": {
+    "title": "Quick Access",
+    "explore": "Explore Symbols",
+    "exploreDesc": "Discover our collection of cultural symbols",
+    "contribute": "Contribute",
+    "contributeDesc": "Share symbols from your culture",
+    "map": "Interactive Map",
+    "mapDesc": "Explore symbols geographically",
+    "collections": "Collections", 
+    "collectionsDesc": "Browse curated symbol collections"
+  },
+  "callToAction": {
+    "joinUs": "Join our global community of heritage enthusiasts",
+    "description": "Help us preserve and celebrate cultural symbols from around the world through collaborative documentation and sharing.",
+    "join": "Join the community",
+    "explore": "Explore symbols",
+    "support": "Your contributions help preserve global symbolic heritage for future generations."
+  },
+  "hero": {
+    "heading": "Discover the world's symbolic heritage",
+    "subheading": "Explore, contribute and learn about cultural patterns across ages",
+    "community": "Join a community of cultural enthusiasts",
+    "explore": "Start exploring"
+  },
+  "about": {
+    "title": "About Symbolica Museum",
+    "subtitle": "Preserving and exploring our global symbolic heritage",
+    "mission": {
+      "title": "Our Mission",
+      "description1": "At Symbolica Museum, we're dedicated to preserving and showcasing the rich tapestry of symbolic expressions across all human cultures.",
+      "description2": "Through collaborative efforts, we aim to document, analyze, and celebrate the visual language that connects us across time and geography."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "We envision a world where cultural motifs are preserved, understood, and continually inspire new creations.",
+      "value1": "Preservation of cultural heritage through digital documentation",
+      "value2": "Cross-cultural understanding through visual symbolism",
+      "value3": "Democratizing access to symbolic knowledge"
+    },
+    "analysisProcess": {
+      "title": "Our Analysis Process",
+      "subtitle": "How we transform cultural artifacts into catalogued symbolic patterns"
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "member1": {
+        "name": "Sarah Johnson",
+        "role": "Founder & Cultural Anthropologist",
+        "bio": "With over 15 years in cultural anthropology, Sarah founded Symbolica to preserve endangered symbolic traditions."
+      },
+      "member2": {
+        "name": "David Chen",
+        "role": "Technical Director",
+        "bio": "David leads our technical efforts, developing AI systems that help identify and classify symbolic patterns."
+      },
+      "member3": {
+        "name": "Maria Rodriguez",
+        "role": "Community Director",
+        "bio": "Maria builds partnerships with cultural institutions and coordinates our global community of contributors."
+      }
+    }
+  },
+  "uploadTools": {
+    "title": "Upload & Analysis Tools",
+    "subtitle": "Contribute to our growing database of symbols",
+    "capture": {
+      "title": "Capture & Upload",
+      "desc": "Take photos of patterns from artifacts, architecture, or textiles and upload them directly to our platform"
+    },
+    "analyze": {
+      "title": "Automated Analysis",
+      "desc": "Our AI system examines your submissions to identify patterns, match them with our database, and suggest cultural contexts"
+    },
+    "share": {
+      "title": "Share & Collaborate",
+      "desc": "Once analyzed, your contributions become part of our global repository, and can be studied by the community"
+    },
+    "process": {
+      "title": "Analysis Process",
+      "subtitle": "See how we transform artifacts into cataloged patterns",
+      "original": "Original Artifact Image",
+      "detection": "Pattern Detection",
+      "extraction": "Pattern Extraction",
+      "classification": "AI Classification",
+      "result": "Processing Result",
+      "example": "Our system identifies recurring patterns, extracts them, and matches them against our database."
+    }
+  },
+  "features": {
+    "tagline": "Discover Our Features",
+    "title": "Tools for Symbol Exploration",
+    "mapping": {
+      "title": "Global Mapping",
+      "description": "Visualize symbolic connections across cultures and time periods through our interactive map interface."
+    },
+    "identification": {
+      "title": "Symbol Identification",
+      "description": "Upload images to identify symbols and discover their cultural context, history and significance."
+    },
+    "documentation": {
+      "title": "Collaborative Documentation",
+      "description": "Contribute to our database by adding symbols, historical context and cultural significance."
+    }
+  },
+  "howItWorks": {
+    "process": "Our Process",
+    "intro": "From discovery to digitization, we make symbolic heritage accessible",
+    "steps": {
+      "1": {
+        "title": "Capture",
+        "desc": "Upload images of patterns from artifacts, architecture, or textiles"
+      },
+      "2": {
+        "title": "Identify",
+        "desc": "Our AI helps identify the pattern and find similar examples"
+      },
+      "3": {
+        "title": "Explore",
+        "desc": "Discover the cultural context and historical significance"
+      },
+      "4": {
+        "title": "Participate",
+        "desc": "Contribute to the global repository of symbolic knowledge"
+      }
+    }
+  },
+  "community": {
+    "title": "Join a Global Community of Symbol Enthusiasts",
+    "description": "Connect with people passionate about cultural symbols and heritage from around the world.",
+    "stats": {
+      "members": "members",
+      "discoveries": "discoveries",
+      "join": "Join"
+    },
+    "groups": {
+      "artDeco": {
+        "name": "Art Deco Patterns",
+        "culture": "Global"
+      },
+      "celticSymbolism": {
+        "name": "Celtic Symbolism",
+        "culture": "Celtic"
+      },
+      "japanesePatterns": {
+        "name": "Japanese Patterns",
+        "culture": "Japanese"
+      },
+      "islamicArt": {
+        "name": "Islamic Art Patterns",
+        "culture": "Islamic" 
+      }
+    },
+    "features": {
+      "thematicCommunities": {
+        "title": "Thematic Communities",
+        "description": "Join specialized communities focused on particular symbol traditions, regions, or time periods."
+      },
+      "personalSpace": {
+        "title": "Personal Collections",
+        "description": "Build and organize your own library of symbolic patterns that resonate with you."
+      },
+      "intuitiveNavigation": {
+        "title": "Advanced Discovery",
+        "description": "Explore connections between symbols across cultures and time periods with our intuitive navigation."
+      }
+    }
+  },
+  "testimonials": {
+    "subtitle": "What our community members have to say",
+    "fallback": {
+      "name": "John Doe",
+      "role": "Heritage Enthusiast",
+      "quote": "Symbolica has transformed the way I explore cultural patterns and motifs. The community is incredibly knowledgeable and supportive."
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "questions": {
+      "whatIs": {
+        "question": "What exactly is Symbolica?",
+        "answer": "Symbolica is an open-source collaborative platform dedicated to discovering, analyzing, and creating around cultural symbols and patterns from around the world."
+      },
+      "howContribute": {
+        "question": "How can I contribute to Symbolica?",
+        "answer": "You can contribute by uploading photos of patterns, annotating existing images, enriching the knowledge base, or participating in community challenges."
+      },
+      "rights": {
+        "question": "Are Symbolica contents copyright-free?",
+        "answer": "Symbolica contents are generally under Creative Commons license. The exact details vary by contribution type, but we promote open data and knowledge sharing."
+      },
+      "aiRecognition": {
+        "question": "How does the AI pattern recognition work?",
+        "answer": "Our artificial intelligence system analyzes uploaded images to identify known patterns. It constantly improves through user feedback validating or correcting its suggestions."
+      },
+      "commercial": {
+        "question": "Is Symbolica a commercial project?",
+        "answer": "No, Symbolica is a non-profit project supported by an association. Our mission is cultural and educational, in the spirit of digital commons."
+      }
+    }
+  },
+  "roadmap": {
+    "subtitle": "Symbolica is being built progressively with your participation",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "fallback": {
+      "phase0": {
+        "phase": "Phase 0 - Completed",
+        "title": "Design & Research",
+        "description": "Project definition, preliminary studies, and identification of enthusiast community needs"
+      },
+      "phase1": {
+        "phase": "Phase 1 - In Progress",
+        "title": "Community Platform",
+        "description": "Launch of basic tools enabling sharing, analysis, and collaborative documentation of heritage symbols"
+      },
+      "phase2": {
+        "phase": "Phase 2 - Coming Soon",
+        "title": "Cultural Intelligence",
+        "description": "Deployment of advanced algorithms for identification, comparison, and contextual analysis of patterns"
+      }
+    }
+  }
+}

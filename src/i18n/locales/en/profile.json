@@ -1,0 +1,15 @@
+
+{
+  "profile": {
+    "title": "Profile",
+    "username": "Username",
+    "email": "Email",
+    "fullName": "Full Name",
+    "contributions": "My Contributions",
+    "changePassword": "Change Password",
+    "deleteAccount": "Delete Account",
+    "profile": "Profile",
+    "viewProfile": "View Profile",
+    "signOut": "Sign Out"
+  }
+}
