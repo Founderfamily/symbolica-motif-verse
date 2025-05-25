@@ -77,7 +77,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({ control }) => {
                 <SelectContent>
                   {CONTRIBUTION_TYPES.map(type => (
                     <SelectItem key={type} value={type}>
-                      {type}
+                      {t(`contributions.form.contributionTypes.${type.toLowerCase().replace(/\s+/g, '')}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>

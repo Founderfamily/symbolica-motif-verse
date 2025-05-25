@@ -44,7 +44,7 @@ const NewContribution = () => {
       cultural_context: '',
       period: '',
       contribution_type: '',
-      tags: [],
+      tags: [], // Ensure tags is always initialized as an empty array
       latitude: null,
       longitude: null,
     },

@@ -23,18 +23,22 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
 
   const handleAddTag = (tag?: string) => {
     const tagToAdd = tag || currentTag;
-    if (tagToAdd.trim() && !getValues().tags.includes(tagToAdd)) {
-      setValue('tags', [...getValues().tags, tagToAdd]);
+    const currentTags = getValues().tags || []; // Fix: ensure tags is never undefined
+    if (tagToAdd.trim() && !currentTags.includes(tagToAdd)) {
+      setValue('tags', [...currentTags, tagToAdd]);
       if (!tag) setCurrentTag('');
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
+    const currentTags = getValues().tags || []; // Fix: ensure tags is never undefined
     setValue(
       'tags',
-      getValues().tags.filter(tag => tag !== tagToRemove)
+      currentTags.filter(tag => tag !== tagToRemove)
     );
   };
+
+  const currentTags = getValues().tags || []; // Fix: ensure tags is never undefined
 
   return (
     <Card>
@@ -71,24 +75,24 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
             <p className="text-sm font-medium mb-2">{t('contributions.form.fields.commonTags')}</p>
             <p className="text-xs text-muted-foreground mb-3">{t('contributions.form.fields.commonTagsDescription')}</p>
             <div className="flex flex-wrap gap-2">
-              {COMMON_TAGS.filter(tag => !getValues().tags.includes(tag)).map(tag => (
+              {COMMON_TAGS.filter(tag => !currentTags.includes(tag)).map(tag => (
                 <Button
                   key={tag}
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => handleAddTag(tag)}
+                  onClick={() => handleAddTag(t(`contributions.form.tags.${tag}`))}
                   className="h-7 text-xs"
                 >
                   <Plus className="mr-1 h-3 w-3" />
-                  {tag}
+                  {t(`contributions.form.tags.${tag}`)}
                 </Button>
               ))}
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2 pt-2">
-            {getValues().tags.map((tag, index) => (
+            {currentTags.map((tag, index) => (
               <Badge
                 key={index}
                 variant="secondary"
@@ -98,7 +102,7 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
                 {tag} ×
               </Badge>
             ))}
-            {getValues().tags.length === 0 && (
+            {currentTags.length === 0 && (
               <p className="text-sm text-muted-foreground italic">
                 {t('contributions.form.fields.noTags')}
               </p>

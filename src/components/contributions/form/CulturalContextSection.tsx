@@ -69,7 +69,7 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
                   <SelectContent>
                     {CULTURAL_CONTEXTS.map(culture => (
                       <SelectItem key={culture} value={culture}>
-                        {culture}
+                        {t(`contributions.form.cultures.${culture.toLowerCase().replace(/\s+/g, '')}`)}
                       </SelectItem>
                     ))}
                     <SelectItem value="other">
@@ -94,7 +94,7 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
                       setValue('cultural_context', '');
                     }}
                   >
-                    Back to selection
+                    {t('contributions.form.fields.backToSelection')}
                   </Button>
                 </div>
               )}
@@ -120,7 +120,7 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
                   <SelectContent>
                     {HISTORICAL_PERIODS.map(period => (
                       <SelectItem key={period} value={period}>
-                        {period}
+                        {t(`contributions.form.periods.${period.toLowerCase().replace(/\s+/g, '').replace(/-/g, '').replace(/è/g, 'e').replace(/é/g, 'e')}`)}
                       </SelectItem>
                     ))}
                     <SelectItem value="other">
@@ -148,7 +148,7 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
                       setValue('period', '');
                     }}
                   >
-                    Back to selection
+                    {t('contributions.form.fields.backToSelection')}
                   </Button>
                 </div>
               )}
