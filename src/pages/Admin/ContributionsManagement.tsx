@@ -5,6 +5,15 @@ import { getPendingContributions } from '@/services/contributionService';
 import { CompleteContribution } from '@/types/contributions';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
 import {
   Card,
   CardContent,
@@ -12,9 +21,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
-import ContributionModerationCard from '@/components/admin/ContributionModerationCard';
+import { Eye, AlertTriangle } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const ContributionsManagement = () => {
   const [pendingContributions, setPendingContributions] = useState<CompleteContribution[]>([]);
@@ -23,22 +34,21 @@ const ContributionsManagement = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const loadContributions = async () => {
-    setLoading(true);
-    const data = await getPendingContributions();
-    setPendingContributions(data);
-    setLoading(false);
-  };
-
   useEffect(() => {
+    const loadContributions = async () => {
+      setLoading(true);
+      const data = await getPendingContributions();
+      setPendingContributions(data);
+      setLoading(false);
+    };
+
     if (isAdmin) {
       loadContributions();
     }
   }, [isAdmin]);
 
-  const handleStatusUpdate = () => {
-    // Recharger la liste après une mise à jour de statut
-    loadContributions();
+  const handleViewContribution = (id: string) => {
+    navigate(`/contributions/${id}`);
   };
 
   if (!isAdmin) {
@@ -65,18 +75,12 @@ const ContributionsManagement = () => {
             {t('contributions.admin.subtitle')}
           </p>
         </div>
-        <Button onClick={loadContributions} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Actualiser
-        </Button>
       </div>
 
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">
-              {t('contributions.admin.pending')} ({pendingContributions.length})
-            </CardTitle>
+            <CardTitle className="text-xl">{t('contributions.admin.pending')} ({pendingContributions.length})</CardTitle>
             <CardDescription>
               {t('contributions.admin.pendingDescription')}
             </CardDescription>
@@ -84,7 +88,6 @@ const ContributionsManagement = () => {
           <CardContent>
             {loading ? (
               <div className="py-10 text-center">
-                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground">{t('contributions.loading')}</p>
               </div>
             ) : pendingContributions.length === 0 ? (
@@ -95,14 +98,49 @@ const ContributionsManagement = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-6">
-                {pendingContributions.map((contribution) => (
-                  <ContributionModerationCard
-                    key={contribution.id}
-                    contribution={contribution}
-                    onStatusUpdate={handleStatusUpdate}
-                  />
-                ))}
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableCaption>{t('contributions.admin.table.caption')}</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('contributions.admin.table.title')}</TableHead>
+                      <TableHead>{t('contributions.admin.table.submittedBy')}</TableHead>
+                      <TableHead>{t('contributions.admin.table.date')}</TableHead>
+                      <TableHead>{t('contributions.admin.table.type')}</TableHead>
+                      <TableHead className="text-right">{t('contributions.admin.table.actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingContributions.map((contribution) => (
+                      <TableRow key={contribution.id}>
+                        <TableCell className="font-medium max-w-[200px] truncate">
+                          {contribution.title}
+                        </TableCell>
+                        <TableCell>
+                          {contribution.user_profile?.username || contribution.user_id.substring(0, 8)}
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(contribution.created_at), 'dd/MM/yyyy', { locale: fr })}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {contribution.cultural_context || "Non spécifié"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewContribution(contribution.id)}
+                          >
+                            <Eye className="h-4 w-4" />
+                            <span className="ml-1">{t('contributions.admin.table.view')}</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </CardContent>

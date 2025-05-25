@@ -1,37 +1,41 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getContributionById } from '@/services/contributionService';
-import { CompleteContribution } from '@/types/contributions';
 import { useAuth } from '@/hooks/useAuth';
+import { getContributionById, updateContributionStatus } from '@/services/contributionService';
+import { CompleteContribution } from '@/types/contributions';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { 
-  ArrowLeft, 
-  MapPin, 
   Calendar, 
+  MapPin, 
   User, 
-  Tags,
-  Eye,
-  Download,
-  Share2,
-  Heart
+  Clock, 
+  Tag, 
+  MessageCircle, 
+  CheckCircle2, 
+  XCircle, 
+  ArrowLeft,
+  Eye
 } from 'lucide-react';
-import { I18nText } from '@/components/ui/i18n-text';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const ContributionDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
+  const { t } = useTranslation();
   const [contribution, setContribution] = useState<CompleteContribution | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const { user } = useAuth();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const loadContribution = async () => {
@@ -46,11 +50,69 @@ const ContributionDetail = () => {
     loadContribution();
   }, [id]);
 
+  const handleApprove = async () => {
+    if (!user || !contribution) return;
+    
+    setSubmitting(true);
+    const success = await updateContributionStatus(contribution.id, 'approved', user.id);
+    setSubmitting(false);
+    
+    if (success) {
+      // Recharger la contribution
+      const updatedContribution = await getContributionById(id!);
+      setContribution(updatedContribution);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!user || !contribution || !rejectionReason.trim()) return;
+    
+    setSubmitting(true);
+    const success = await updateContributionStatus(
+      contribution.id, 
+      'rejected', 
+      user.id, 
+      rejectionReason
+    );
+    setSubmitting(false);
+    
+    if (success) {
+      // Recharger la contribution
+      const updatedContribution = await getContributionById(id!);
+      setContribution(updatedContribution);
+      setRejectionReason('');
+    }
+  };
+
+  const canView = () => {
+    if (!user || !contribution) return false;
+    return isAdmin || contribution.status === 'approved' || contribution.user_id === user.id;
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">{t('contributions.status.pending')}</Badge>;
+      case 'approved':
+        return <Badge className="bg-green-100 text-green-800 border-green-300">{t('contributions.status.approved')}</Badge>;
+      case 'rejected':
+        return <Badge className="bg-red-100 text-red-800 border-red-300">{t('contributions.status.rejected')}</Badge>;
+      default:
+        return <Badge>{t('contributions.status.unknown')}</Badge>;
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-pulse">
+          <div className="h-8 bg-slate-200 rounded w-1/3 mb-6"></div>
+          <div className="h-64 bg-slate-200 rounded-lg mb-6"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-slate-200 rounded w-2/3"></div>
+            <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+            <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+          </div>
         </div>
       </div>
     );
@@ -59,211 +121,263 @@ const ContributionDetail = () => {
   if (!contribution) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <h2 className="text-xl font-semibold mb-2">Contribution introuvable</h2>
-            <p className="text-muted-foreground mb-4">
-              Cette contribution n'existe pas ou a été supprimée.
-            </p>
-            <Button onClick={() => navigate('/contributions')}>
-              Retour aux contributions
-            </Button>
-          </CardContent>
-        </Card>
+        <h1 className="text-2xl font-bold mb-4">{t('contributions.detail.notFound')}</h1>
+        <p className="mb-6">{t('contributions.detail.notFoundDescription')}</p>
+        <Button onClick={() => navigate('/contributions')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          {t('contributions.detail.back')}
+        </Button>
       </div>
     );
   }
 
-  const images = contribution.images.filter(img => img.image_type === 'original');
-  const currentImage = images[selectedImageIndex];
+  if (!canView()) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <h1 className="text-2xl font-bold mb-4">{t('contributions.detail.accessDenied')}</h1>
+        <p className="mb-6">{t('contributions.detail.accessDeniedDescription')}</p>
+        <Button onClick={() => navigate('/contributions')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          {t('contributions.detail.back')}
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto py-8 px-4 space-y-6">
-      {/* Navigation */}
+    <div className="container mx-auto py-8 px-4">
       <Button
         variant="ghost"
-        onClick={() => navigate('/contributions')}
         className="mb-4"
+        onClick={() => navigate('/contributions')}
       >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Retour aux contributions
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        {t('contributions.detail.back')}
       </Button>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Galerie d'images */}
-        <div className="space-y-4">
-          {currentImage && (
-            <Card className="overflow-hidden">
-              <div className="relative">
-                <img
-                  src={currentImage.image_url}
-                  alt={contribution.title}
-                  className="w-full h-96 object-contain bg-secondary/20"
-                />
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <Button size="sm" variant="secondary">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="secondary">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="secondary">
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Miniatures */}
-          {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto">
-              {images.map((image, index) => (
-                <button
-                  key={image.id}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    index === selectedImageIndex ? 'border-primary' : 'border-transparent'
-                  }`}
-                >
-                  <img
-                    src={image.image_url}
-                    alt={`Vue ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+      
+      <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+        {/* Colonne principale */}
+        <div className="w-full md:w-2/3 space-y-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              {getStatusBadge(contribution.status)}
+              <h1 className="text-2xl md:text-3xl font-bold">{contribution.title}</h1>
             </div>
-          )}
-        </div>
-
-        {/* Informations */}
-        <div className="space-y-6">
-          {/* En-tête */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold">{contribution.title}</h1>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    {contribution.user_profile?.username || 'Utilisateur inconnu'}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {format(new Date(contribution.created_at), 'dd MMMM yyyy', { locale: fr })}
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Badge 
-                  variant={contribution.status === 'approved' ? 'default' : 'secondary'}
-                  className={contribution.status === 'approved' ? 'bg-green-100 text-green-800' : ''}
-                >
-                  {contribution.status === 'approved' ? 'Approuvé' : 'En attente'}
-                </Badge>
-                <Button size="sm" variant="outline">
-                  <Heart className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {contribution.description && (
-              <div>
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {contribution.description}
-                </p>
+            
+            {contribution.user_profile && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="h-3 w-3" />
+                <span>{contribution.user_profile.username || contribution.user_profile.full_name}</span>
+                <Clock className="h-3 w-3 ml-2" />
+                <span>
+                  {format(new Date(contribution.created_at), 'dd MMMM yyyy', { locale: fr })}
+                </span>
               </div>
             )}
           </div>
-
-          <Separator />
-
-          {/* Détails culturels */}
+          
+          {/* Images de la contribution */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Informations culturelles</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {contribution.cultural_context && (
-                <div>
-                  <span className="text-sm font-medium text-muted-foreground">Contexte culturel</span>
-                  <p className="mt-1">{contribution.cultural_context}</p>
-                </div>
-              )}
-              {contribution.period && (
-                <div>
-                  <span className="text-sm font-medium text-muted-foreground">Période</span>
-                  <p className="mt-1">{contribution.period}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Localisation */}
-          {contribution.location_name && (
-            <>
-              <Separator />
-              <div className="space-y-2">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Localisation
-                </h3>
-                <p className="text-muted-foreground">{contribution.location_name}</p>
-                {contribution.latitude && contribution.longitude && (
-                  <p className="text-xs text-muted-foreground">
-                    Coordonnées: {contribution.latitude.toFixed(6)}, {contribution.longitude.toFixed(6)}
-                  </p>
+            {contribution.images.length > 0 && (
+              <div>
+                <img
+                  src={contribution.images[0].image_url}
+                  alt={contribution.title}
+                  className="w-full rounded-lg border object-cover max-h-[500px]"
+                />
+                {contribution.images[0].extracted_pattern_url && (
+                  <div className="mt-4">
+                    <h3 className="text-lg font-medium mb-2">{t('contributions.detail.extractedPattern')}</h3>
+                    <img
+                      src={contribution.images[0].extracted_pattern_url}
+                      alt={t('contributions.detail.extractedPattern')}
+                      className="max-w-full h-auto rounded-lg border"
+                    />
+                  </div>
                 )}
               </div>
-            </>
-          )}
-
+            )}
+          </div>
+          
+          <div>
+            <h2 className="text-xl font-semibold mb-2">{t('contributions.detail.description')}</h2>
+            <p className="text-slate-700 whitespace-pre-line">
+              {contribution.description || t('contributions.detail.noDescription')}
+            </p>
+          </div>
+          
+          {/* Section commentaires */}
+          <div className="pt-4">
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <MessageCircle className="mr-2 h-5 w-5" />
+              {t('contributions.detail.comments')} ({contribution.comments.length})
+            </h2>
+            
+            {contribution.comments.length === 0 ? (
+              <p className="text-muted-foreground italic">
+                {t('contributions.detail.noComments')}
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {contribution.comments.map(comment => (
+                  <div key={comment.id} className="border rounded-lg p-4 bg-slate-50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {comment.profiles?.username?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">
+                          {comment.profiles?.username || t('contributions.detail.admin.administrator')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(comment.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="ml-10">{comment.comment}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Section admin pour approuver/rejeter */}
+            {isAdmin && contribution.status === 'pending' && (
+              <div className="mt-6 border-t pt-6">
+                <h3 className="text-lg font-semibold mb-4">{t('contributions.detail.admin.title')}</h3>
+                
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <Button
+                      className="w-full"
+                      onClick={handleApprove}
+                      disabled={submitting}
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      {t('contributions.detail.admin.approve')}
+                    </Button>
+                  </div>
+                  
+                  <div className="flex-1 space-y-2">
+                    <Textarea
+                      placeholder={t('contributions.detail.admin.rejectReason')}
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      rows={2}
+                    />
+                    <Button
+                      variant="destructive"
+                      className="w-full"
+                      onClick={handleReject}
+                      disabled={submitting || !rejectionReason.trim()}
+                    >
+                      <XCircle className="mr-2 h-4 w-4" />
+                      {t('contributions.detail.admin.reject')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Barre latérale */}
+        <div className="w-full md:w-1/3 space-y-4">
+          {/* Informations */}
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="font-semibold mb-4">{t('contributions.detail.information')}</h3>
+              
+              <div className="space-y-3">
+                {contribution.cultural_context && (
+                  <div className="flex items-start gap-3">
+                    <div className="bg-slate-100 p-2 rounded-full">
+                      <Eye className="h-4 w-4 text-slate-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{t('contributions.detail.fields.culture')}</p>
+                      <p className="text-sm text-slate-600">{contribution.cultural_context}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {contribution.period && (
+                  <div className="flex items-start gap-3">
+                    <div className="bg-slate-100 p-2 rounded-full">
+                      <Calendar className="h-4 w-4 text-slate-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{t('contributions.detail.fields.period')}</p>
+                      <p className="text-sm text-slate-600">{contribution.period}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {contribution.location_name && (
+                  <div className="flex items-start gap-3">
+                    <div className="bg-slate-100 p-2 rounded-full">
+                      <MapPin className="h-4 w-4 text-slate-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{t('contributions.detail.fields.location')}</p>
+                      <p className="text-sm text-slate-600">{contribution.location_name}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
           {/* Tags */}
           {contribution.tags.length > 0 && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Tags className="h-4 w-4" />
-                  Tags ({contribution.tags.length})
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-4 flex items-center">
+                  <Tag className="mr-2 h-4 w-4" />
+                  Tags
                 </h3>
+                
                 <div className="flex flex-wrap gap-2">
-                  {contribution.tags.map((tag) => (
+                  {contribution.tags.map(tag => (
                     <Badge key={tag.id} variant="secondary">
                       {tag.tag}
                     </Badge>
                   ))}
                 </div>
-              </div>
-            </>
+              </CardContent>
+            </Card>
           )}
-
-          {/* Commentaires */}
-          {contribution.comments.length > 0 && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <h3 className="font-semibold">
-                  Commentaires ({contribution.comments.length})
-                </h3>
-                <div className="space-y-4">
-                  {contribution.comments.map((comment) => (
-                    <div key={comment.id} className="bg-muted/50 rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-medium text-sm">
-                          {comment.profiles?.username || 'Modérateur'}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(comment.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
-                        </span>
-                      </div>
-                      <p className="text-sm">{comment.comment}</p>
-                    </div>
-                  ))}
+          
+          {/* Statut de modération */}
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="font-semibold mb-4">{t('contributions.detail.moderation')}</h3>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">{t('contributions.table.status')}:</span>
+                  {getStatusBadge(contribution.status)}
                 </div>
+                
+                {contribution.reviewed_at && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span>{t('contributions.detail.reviewedOn')}</span>
+                    <span>{format(new Date(contribution.reviewed_at), 'dd/MM/yyyy', { locale: fr })}</span>
+                  </div>
+                )}
+                
+                {contribution.status === 'pending' && (
+                  <Alert className="mt-4 bg-yellow-50 text-yellow-800 border-yellow-300">
+                    <AlertTitle className="text-yellow-800">{t('contributions.detail.pendingReview')}</AlertTitle>
+                    <AlertDescription className="text-yellow-700">
+                      {t('contributions.detail.pendingReviewDescription')}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
-            </>
-          )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
