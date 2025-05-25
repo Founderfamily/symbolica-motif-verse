@@ -36,8 +36,8 @@ const ContributionsPage = () => {
   const [filteredContributions, setFilteredContributions] = useState<CompleteContribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [cultureFilter, setCultureFilter] = useState('');
-  const [periodFilter, setPeriodFilter] = useState('');
+  const [cultureFilter, setCultureFilter] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -69,12 +69,12 @@ const ContributionsPage = () => {
     }
 
     // Filter by culture
-    if (cultureFilter) {
+    if (cultureFilter && cultureFilter !== 'all') {
       filtered = filtered.filter(contribution => contribution.cultural_context === cultureFilter);
     }
 
     // Filter by period
-    if (periodFilter) {
+    if (periodFilter && periodFilter !== 'all') {
       filtered = filtered.filter(contribution => contribution.period === periodFilter);
     }
 
@@ -159,7 +159,7 @@ const ContributionsPage = () => {
             <SelectValue placeholder={t('contributions.filters.culture')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">
+            <SelectItem value="all">
               <I18nText translationKey="contributions.filters.allCultures" />
             </SelectItem>
             {uniqueCultures.map(culture => (
@@ -174,7 +174,7 @@ const ContributionsPage = () => {
             <SelectValue placeholder={t('contributions.filters.period')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">
+            <SelectItem value="all">
               <I18nText translationKey="contributions.filters.allPeriods" />
             </SelectItem>
             {uniquePeriods.map(period => (
