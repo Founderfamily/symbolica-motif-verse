@@ -125,6 +125,72 @@
     "subscribe": "S'abonner",
     "openSource": "Projet Open Source"
   },
+  "quickAccess": {
+    "title": "Accès Rapide",
+    "description": "Explorez, découvrez et contribuez à notre collection mondiale de symboles culturels",
+    "explore": "Explorer →",
+    "exploreSymbols": {
+      "title": "Explorer les Symboles",
+      "description": "Découvrez notre collection complète avec filtres avancés"
+    },
+    "interactiveMap": {
+      "title": "Carte Interactive",
+      "description": "Explorez les symboles par localisation géographique"
+    },
+    "thematicCollections": {
+      "title": "Collections Thématiques",
+      "description": "Parcourez nos collections organisées par thème"
+    },
+    "contribute": {
+      "title": "Contribuer",
+      "description": "Partagez vos découvertes avec la communauté"
+    },
+    "community": {
+      "title": "Communauté",
+      "description": "Rejoignez groupes d'intérêt et discussions"
+    },
+    "trends": {
+      "title": "Tendances",
+      "description": "Découvrez les symboles populaires et récents"
+    }
+  },
+  "collections": {
+    "title": "Collections",
+    "featured": {
+      "title": "Collections Thématiques",
+      "description": "Explorez des parcours culturels fascinants à travers les symboles du monde entier. Chaque collection raconte une histoire unique.",
+      "discoverAll": "Découvrir toutes les collections"
+    },
+    "explore": "Explorer",
+    "backToCollections": "Retour aux collections",
+    "notFound": "Collection non trouvée",
+    "share": "Partager",
+    "viewOnMap": "Voir sur la carte",
+    "symbolsCount": "Symboles",
+    "culturesCount": "Cultures", 
+    "periodsCount": "Périodes",
+    "symbolsInCollection": "Symboles de la collection",
+    "noSymbols": "Aucun symbole dans cette collection"
+  },
+  "symbolTriptych": {
+    "original": "Image originale",
+    "pattern": "Motif extrait",
+    "reuse": "Réutilisation",
+    "selectSymbol": "Sélectionnez un symbole",
+    "noSymbolSelected": "Aucun symbole sélectionné",
+    "detailsTitle": "Détails du symbole",
+    "culture": "Culture",
+    "period": "Période",
+    "description": "Description",
+    "noDescription": "Aucune description disponible pour ce symbole.",
+    "relatedPatterns": "Motifs associés",
+    "noRelatedPatterns": "Pas de motifs associés.",
+    "imageErrorDesc": "L'image n'a pas pu être chargée correctement. Une image alternative est affichée.",
+    "empty": "Sélectionnez un symbole à explorer",
+    "error": "Erreur de chargement du symbole",
+    "errorDesc": "L'image du symbole n'a pas pu être chargée correctement. Une image alternative est affichée.",
+    "loading": "Chargement du symbole..."
+  },
   "contributions": {
     "title": "Contributions",
     "myContributions": "Mes contributions",
@@ -182,21 +248,6 @@
       "formats": "Formats acceptés : JPEG, PNG, WebP",
       "remove": "Supprimer l'image"
     }
-  },
-  "symbolTriptych": {
-    "original": "Image originale",
-    "pattern": "Motif extrait",
-    "reuse": "Réutilisation",
-    "selectSymbol": "Sélectionnez un symbole",
-    "noSymbolSelected": "Aucun symbole sélectionné",
-    "detailsTitle": "Détails du symbole",
-    "culture": "Culture",
-    "period": "Période",
-    "description": "Description",
-    "noDescription": "Aucune description disponible pour ce symbole.",
-    "relatedPatterns": "Motifs associés",
-    "noRelatedPatterns": "Pas de motifs associés.",
-    "imageErrorDesc": "L'image n'a pas pu être chargée correctement. Une image alternative est affichée."
   },
   "symbolExplorer": {
     "title": "Explorateur de Symboles",
@@ -350,19 +401,6 @@
     "totalUsers": "Utilisateurs totaux",
     "recentActivity": "Activité récente",
     "newSymbol": "Nouveau symbole"
-  },
-  "collections": {
-    "title": "Collections",
-    "featured": "En vedette",
-    "backToCollections": "Retour aux collections",
-    "notFound": "Collection non trouvée",
-    "share": "Partager",
-    "viewOnMap": "Voir sur la carte",
-    "symbolsCount": "Symboles",
-    "culturesCount": "Cultures", 
-    "periodsCount": "Périodes",
-    "symbolsInCollection": "Symboles de la collection",
-    "noSymbols": "Aucun symbole dans cette collection"
   },
   "callToAction": {
     "joinUs": "Rejoignez notre communauté mondiale d'amateurs de patrimoine",

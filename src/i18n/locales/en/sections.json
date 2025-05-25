@@ -24,14 +24,40 @@
   },
   "quickAccess": {
     "title": "Quick Access",
-    "explore": "Explore Symbols",
-    "exploreDesc": "Discover our collection of cultural symbols",
-    "contribute": "Contribute",
-    "contributeDesc": "Share symbols from your culture",
-    "map": "Interactive Map",
-    "mapDesc": "Explore symbols geographically",
-    "collections": "Collections", 
-    "collectionsDesc": "Browse curated symbol collections"
+    "description": "Explore, discover and contribute to our global collection of cultural symbols",
+    "explore": "Explore →",
+    "exploreSymbols": {
+      "title": "Explore Symbols",
+      "description": "Discover our complete collection with advanced filters"
+    },
+    "interactiveMap": {
+      "title": "Interactive Map",
+      "description": "Explore symbols by geographical location"
+    },
+    "thematicCollections": {
+      "title": "Thematic Collections",
+      "description": "Browse our collections organized by theme"
+    },
+    "contribute": {
+      "title": "Contribute",
+      "description": "Share your discoveries with the community"
+    },
+    "community": {
+      "title": "Community",
+      "description": "Join interest groups and discussions"
+    },
+    "trends": {
+      "title": "Trends",
+      "description": "Discover popular and recent symbols"
+    }
+  },
+  "collections": {
+    "featured": {
+      "title": "Thematic Collections",
+      "description": "Explore fascinating cultural journeys through symbols from around the world. Each collection tells a unique story.",
+      "discoverAll": "Discover all collections"
+    },
+    "explore": "Explore"
   },
   "callToAction": {
     "joinUs": "Join our global community of heritage enthusiasts",
@@ -242,6 +268,18 @@
         "title": "Cultural Intelligence",
         "description": "Deployment of advanced algorithms for identification, comparison, and contextual analysis of patterns"
       }
+    }
+  },
+  "symbolTriptych": {
+    "empty": "Select a symbol to explore",
+    "error": "Error loading symbol",
+    "errorDesc": "The symbol image could not be loaded correctly. An alternative image is displayed.",
+    "loading": "Loading symbol..."
+  },
+  "gamification": {
+    "points": {
+      "title": "Earn Points",
+      "description": "Get points for every contribution, comment and validation you make"
     }
   }
 }
