@@ -1,12 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Search, Users, UserCheck, UserX, Shield, MoreHorizontal } from 'lucide-react';
+import { Search, Users, UserCheck, UserX, Shield, MoreHorizontal, AlertTriangle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/components/ui/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,110 +27,129 @@ import {
 
 interface User {
   id: string;
-  username: string;
-  email: string;
-  fullName: string;
-  isAdmin: boolean;
-  isBanned: boolean;
-  joinDate: string;
-  lastActive: string;
-  contributionsCount: number;
-  pointsTotal: number;
+  username: string | null;
+  full_name: string | null;
+  email?: string;
+  is_admin: boolean;
+  created_at: string;
+  contributions_count: number;
+  verified_uploads: number;
+  bio?: string;
+  location?: string;
+  website?: string;
+  favorite_cultures?: string[];
 }
-
-// Mock data for demonstration
-const mockUsers: User[] = [
-  {
-    id: '1',
-    username: 'sarah_symbols',
-    email: 'sarah@example.com',
-    fullName: 'Sarah Johnson',
-    isAdmin: true,
-    isBanned: false,
-    joinDate: '2024-01-15',
-    lastActive: '2024-01-20',
-    contributionsCount: 45,
-    pointsTotal: 1250
-  },
-  {
-    id: '2',
-    username: 'cultural_explorer',
-    email: 'explorer@example.com',
-    fullName: 'David Chen',
-    isAdmin: false,
-    isBanned: false,
-    joinDate: '2024-02-01',
-    lastActive: '2024-01-19',
-    contributionsCount: 23,
-    pointsTotal: 670
-  },
-  {
-    id: '3',
-    username: 'pattern_hunter',
-    email: 'hunter@example.com',
-    fullName: 'Maria Rodriguez',
-    isAdmin: false,
-    isBanned: true,
-    joinDate: '2024-01-20',
-    lastActive: '2024-01-18',
-    contributionsCount: 8,
-    pointsTotal: 120
-  }
-];
 
 export default function UsersManagement() {
   const { t } = useTranslation();
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const { user, isAdmin } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'banned' | 'admin'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'admin'>('all');
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadUsers();
+    }
+  }, [isAdmin]);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleAdmin = async (userId: string, currentIsAdmin: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_admin: !currentIsAdmin })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      setUsers(prev => prev.map(user => 
+        user.id === userId 
+          ? { ...user, is_admin: !currentIsAdmin }
+          : user
+      ));
+
+      toast({
+        title: "Statut mis à jour",
+        description: `L'utilisateur a été ${!currentIsAdmin ? 'promu administrateur' : 'retiré des administrateurs'}.`,
+      });
+    } catch (error) {
+      console.error('Error updating admin status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de modifier le statut administrateur.",
+      });
+    }
+  };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = 
+      (user.username?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.email?.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    const matchesFilter = filterStatus === 'all' || 
-                         (filterStatus === 'active' && !user.isBanned && !user.isAdmin) ||
-                         (filterStatus === 'banned' && user.isBanned) ||
-                         (filterStatus === 'admin' && user.isAdmin);
+    const matchesFilter = 
+      filterStatus === 'all' || 
+      (filterStatus === 'active' && !user.is_admin) ||
+      (filterStatus === 'admin' && user.is_admin);
     
     return matchesSearch && matchesFilter;
   });
 
-  const handleUserAction = (userId: string, action: 'ban' | 'unban' | 'makeAdmin' | 'removeAdmin') => {
-    setUsers(prev => prev.map(user => {
-      if (user.id === userId) {
-        switch (action) {
-          case 'ban':
-            return { ...user, isBanned: true };
-          case 'unban':
-            return { ...user, isBanned: false };
-          case 'makeAdmin':
-            return { ...user, isAdmin: true };
-          case 'removeAdmin':
-            return { ...user, isAdmin: false };
-          default:
-            return user;
-        }
-      }
-      return user;
-    }));
-  };
-
   const getStatusBadge = (user: User) => {
-    if (user.isBanned) {
-      return <Badge variant="destructive">Banni</Badge>;
-    }
-    if (user.isAdmin) {
+    if (user.is_admin) {
       return <Badge variant="default">Admin</Badge>;
     }
-    return <Badge variant="outline">Actif</Badge>;
+    return <Badge variant="outline">Utilisateur</Badge>;
   };
 
   const totalUsers = users.length;
-  const activeUsers = users.filter(u => !u.isBanned && !u.isAdmin).length;
-  const bannedUsers = users.filter(u => u.isBanned).length;
-  const adminUsers = users.filter(u => u.isAdmin).length;
+  const activeUsers = users.filter(u => !u.is_admin).length;
+  const adminUsers = users.filter(u => u.is_admin).length;
+
+  if (!isAdmin) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center p-4">
+        <AlertTriangle className="h-10 w-10 text-yellow-500 mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Accès restreint</h1>
+        <p className="text-muted-foreground">
+          Vous devez être administrateur pour accéder à cette page.
+        </p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -137,10 +159,13 @@ export default function UsersManagement() {
             Gestion des utilisateurs
           </I18nText>
         </h1>
+        <Button onClick={loadUsers} variant="outline">
+          Actualiser
+        </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
@@ -168,22 +193,6 @@ export default function UsersManagement() {
                   </I18nText>
                 </p>
                 <p className="text-2xl font-bold">{activeUsers}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <UserX className="h-4 w-4 text-red-600" />
-              <div>
-                <p className="text-sm font-medium text-slate-500">
-                  <I18nText translationKey="admin.users.bannedUsers">
-                    Utilisateurs bannis
-                  </I18nText>
-                </p>
-                <p className="text-2xl font-bold">{bannedUsers}</p>
               </div>
             </div>
           </CardContent>
@@ -221,7 +230,7 @@ export default function UsersManagement() {
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder={t('admin.users.search')}
+                  placeholder="Rechercher un utilisateur..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8"
@@ -241,14 +250,7 @@ export default function UsersManagement() {
                 onClick={() => setFilterStatus('active')}
                 size="sm"
               >
-                Actifs
-              </Button>
-              <Button
-                variant={filterStatus === 'banned' ? 'default' : 'outline'}
-                onClick={() => setFilterStatus('banned')}
-                size="sm"
-              >
-                Bannis
+                Utilisateurs
               </Button>
               <Button
                 variant={filterStatus === 'admin' ? 'default' : 'outline'}
@@ -265,101 +267,101 @@ export default function UsersManagement() {
       {/* Users Table */}
       <Card>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Utilisateur</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>
-                  <I18nText translationKey="admin.users.status">
-                    Statut
-                  </I18nText>
-                </TableHead>
-                <TableHead>
-                  <I18nText translationKey="admin.users.joinDate">
-                    Date d'inscription
-                  </I18nText>
-                </TableHead>
-                <TableHead>Contributions</TableHead>
-                <TableHead>Points</TableHead>
-                <TableHead>
-                  <I18nText translationKey="admin.users.actions">
-                    Actions
-                  </I18nText>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{user.fullName}</div>
-                      <div className="text-sm text-muted-foreground">@{user.username}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{getStatusBadge(user)}</TableCell>
-                  <TableCell>{new Date(user.joinDate).toLocaleDateString('fr-FR')}</TableCell>
-                  <TableCell>{user.contributionsCount}</TableCell>
-                  <TableCell>{user.pointsTotal}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <I18nText translationKey="admin.users.viewProfile">
-                            Voir le profil
-                          </I18nText>
-                        </DropdownMenuItem>
-                        {!user.isBanned ? (
-                          <DropdownMenuItem
-                            onClick={() => handleUserAction(user.id, 'ban')}
-                            className="text-red-600"
-                          >
-                            <I18nText translationKey="admin.users.banUser">
-                              Bannir l'utilisateur
-                            </I18nText>
-                          </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem
-                            onClick={() => handleUserAction(user.id, 'unban')}
-                            className="text-green-600"
-                          >
-                            <I18nText translationKey="admin.users.unbanUser">
-                              Débannir l'utilisateur
-                            </I18nText>
-                          </DropdownMenuItem>
-                        )}
-                        {!user.isAdmin ? (
-                          <DropdownMenuItem
-                            onClick={() => handleUserAction(user.id, 'makeAdmin')}
-                          >
-                            <I18nText translationKey="admin.users.makeAdmin">
-                              Rendre administrateur
-                            </I18nText>
-                          </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem
-                            onClick={() => handleUserAction(user.id, 'removeAdmin')}
-                            className="text-orange-600"
-                          >
-                            <I18nText translationKey="admin.users.removeAdmin">
-                              Retirer les droits admin
-                            </I18nText>
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          {filteredUsers.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500">Aucun utilisateur trouvé</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Utilisateur</TableHead>
+                  <TableHead>
+                    <I18nText translationKey="admin.users.status">
+                      Statut
+                    </I18nText>
+                  </TableHead>
+                  <TableHead>
+                    <I18nText translationKey="admin.users.joinDate">
+                      Date d'inscription
+                    </I18nText>
+                  </TableHead>
+                  <TableHead>Contributions</TableHead>
+                  <TableHead>Localization</TableHead>
+                  <TableHead>
+                    <I18nText translationKey="admin.users.actions">
+                      Actions
+                    </I18nText>
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{user.full_name || 'Nom non défini'}</div>
+                        <div className="text-sm text-muted-foreground">
+                          @{user.username || 'username non défini'}
+                        </div>
+                        {user.bio && (
+                          <div className="text-xs text-slate-400 max-w-xs truncate mt-1">
+                            {user.bio}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(user)}</TableCell>
+                    <TableCell>{new Date(user.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div>{user.contributions_count} contributions</div>
+                        <div className="text-slate-500">{user.verified_uploads} vérifiées</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-slate-500">
+                        {user.location || 'Non renseigné'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <I18nText translationKey="admin.users.viewProfile">
+                              Voir le profil
+                            </I18nText>
+                          </DropdownMenuItem>
+                          {user.id !== user?.id && (
+                            <DropdownMenuItem
+                              onClick={() => handleToggleAdmin(user.id, user.is_admin)}
+                              className={user.is_admin ? "text-orange-600" : "text-blue-600"}
+                            >
+                              {user.is_admin ? (
+                                <I18nText translationKey="admin.users.removeAdmin">
+                                  Retirer les droits admin
+                                </I18nText>
+                              ) : (
+                                <I18nText translationKey="admin.users.makeAdmin">
+                                  Rendre administrateur
+                                </I18nText>
+                              )}
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
