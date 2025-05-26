@@ -19,11 +19,11 @@
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "fieldRequired": "This field is required",
-    "version": "Alpha Release 0.1"
+    "version": "Version 1.0.0"
   },
   "app": {
     "name": "Symbolica",
-    "version": "Version 0.1.0"
+    "version": "Version 1.0.0"
   },
   "map": {
     "placeholder": "Interactive Map Coming Soon",

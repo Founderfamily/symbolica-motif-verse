@@ -11,19 +11,33 @@ export interface AppVersion {
   fullVersion: string;
 }
 
-// Current application version - Should be updated with each release
+// Current application version - Updated to reflect project maturity (300+ commits)
 export const APP_VERSION: AppVersion = {
   major: 1,
   minor: 0,
   patch: 0,
-  build: 'alpha',
+  build: 'stable',
   get fullVersion() {
-    return `${this.major}.${this.minor}.${this.patch}-${this.build}`;
+    return `${this.major}.${this.minor}.${this.patch}`;
   }
 };
 
 // Version history with changelog entries
 export const VERSION_HISTORY = [
+  {
+    version: '1.0.0',
+    date: '2025-05-26',
+    changes: [
+      'Version stable de Symbolica',
+      'Système de contributions complet',
+      'Interface multilingue (FR/EN)',
+      'Gestion avancée des utilisateurs',
+      'Système de gamification',
+      'Dashboard administrateur complet',
+      'Intégration Supabase',
+      'Plus de 300 commits de développement'
+    ]
+  },
   {
     version: '1.0.0-alpha',
     date: '2025-05-14',
@@ -52,4 +66,24 @@ export const isNewerVersion = (targetVersion: string): boolean => {
 export const getChangelogForVersion = (version: string): string[] => {
   const entry = VERSION_HISTORY.find(entry => entry.version === version);
   return entry?.changes || [];
+};
+
+/**
+ * Get formatted version string for display
+ */
+export const getDisplayVersion = (): string => {
+  return `Version ${APP_VERSION.fullVersion}`;
+};
+
+/**
+ * Get full version info with build details
+ */
+export const getFullVersionInfo = () => {
+  return {
+    version: APP_VERSION.fullVersion,
+    build: APP_VERSION.build,
+    displayVersion: getDisplayVersion(),
+    releaseDate: VERSION_HISTORY[0]?.date,
+    changelog: VERSION_HISTORY[0]?.changes || []
+  };
 };
