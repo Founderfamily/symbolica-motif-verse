@@ -40,8 +40,8 @@ i18n
       fr: { translation: frTranslation },
       en: { translation: enTranslation },
     },
-    lng: 'en', // Langue par défaut : anglais
-    fallbackLng: 'en', // Fallback vers l'anglais
+    lng: 'fr', // Langue par défaut : français
+    fallbackLng: 'fr', // Fallback vers le français
     supportedLngs: ['fr', 'en'],
     interpolation: {
       escapeValue: false,

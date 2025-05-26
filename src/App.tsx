@@ -57,6 +57,7 @@ function App() {
               <Route path="trending" element={<TrendingPage />} />
               <Route path="contributions" element={<ContributionsPage />} />
               <Route path="contribute" element={<NewContribution />} />
+              <Route path="contributions/new" element={<NewContribution />} />
               <Route path="contributions/:id" element={<ContributionDetail />} />
               <Route path="auth" element={<Auth />} />
               <Route path="profile" element={<Profile />} />
