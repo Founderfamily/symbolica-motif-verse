@@ -81,6 +81,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_pattern_suggestions: {
+        Row: {
+          ai_model_version: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          image_id: string
+          image_type: string
+          processed_at: string | null
+          processing_status: string
+          processing_time_ms: number | null
+          suggested_patterns: Json
+        }
+        Insert: {
+          ai_model_version?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_id: string
+          image_type?: string
+          processed_at?: string | null
+          processing_status?: string
+          processing_time_ms?: number | null
+          suggested_patterns: Json
+        }
+        Update: {
+          ai_model_version?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_id?: string
+          image_type?: string
+          processed_at?: string | null
+          processing_status?: string
+          processing_time_ms?: number | null
+          suggested_patterns?: Json
+        }
+        Relationships: []
+      }
       analysis_examples: {
         Row: {
           classification_image_url: string | null
@@ -544,6 +583,62 @@ export type Database = {
           },
         ]
       }
+      image_annotations: {
+        Row: {
+          annotation_data: Json
+          confidence_score: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          image_id: string
+          image_type: string
+          notes: string | null
+          pattern_id: string | null
+          translations: Json | null
+          updated_at: string
+          validated_by: string | null
+          validation_status: string
+        }
+        Insert: {
+          annotation_data: Json
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_id: string
+          image_type?: string
+          notes?: string | null
+          pattern_id?: string | null
+          translations?: Json | null
+          updated_at?: string
+          validated_by?: string | null
+          validation_status?: string
+        }
+        Update: {
+          annotation_data?: Json
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_id?: string
+          image_type?: string
+          notes?: string | null
+          pattern_id?: string | null
+          translations?: Json | null
+          updated_at?: string
+          validated_by?: string | null
+          validation_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_annotations_pattern_id_fkey"
+            columns: ["pattern_id"]
+            isOneToOne: false
+            referencedRelation: "patterns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interest_groups: {
         Row: {
           banner_image: string | null
@@ -657,6 +752,59 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      patterns: {
+        Row: {
+          complexity_level: string
+          created_at: string
+          created_by: string | null
+          cultural_significance: string | null
+          description: string | null
+          historical_context: string | null
+          id: string
+          name: string
+          pattern_type: string
+          symbol_id: string | null
+          translations: Json | null
+          updated_at: string
+        }
+        Insert: {
+          complexity_level?: string
+          created_at?: string
+          created_by?: string | null
+          cultural_significance?: string | null
+          description?: string | null
+          historical_context?: string | null
+          id?: string
+          name: string
+          pattern_type?: string
+          symbol_id?: string | null
+          translations?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          complexity_level?: string
+          created_at?: string
+          created_by?: string | null
+          cultural_significance?: string | null
+          description?: string | null
+          historical_context?: string | null
+          id?: string
+          name?: string
+          pattern_type?: string
+          symbol_id?: string | null
+          translations?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patterns_symbol_id_fkey"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_comments: {
         Row: {
@@ -1369,6 +1517,41 @@ export type Database = {
         }
         Relationships: []
       }
+      validation_votes: {
+        Row: {
+          annotation_id: string | null
+          comment: string | null
+          created_at: string
+          id: string
+          user_id: string | null
+          vote_type: string
+        }
+        Insert: {
+          annotation_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          vote_type: string
+        }
+        Update: {
+          annotation_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validation_votes_annotation_id_fkey"
+            columns: ["annotation_id"]
+            isOneToOne: false
+            referencedRelation: "image_annotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1387,6 +1570,10 @@ export type Database = {
           p_details?: Json
         }
         Returns: undefined
+      }
+      calculate_annotation_validation_score: {
+        Args: { p_annotation_id: string }
+        Returns: number
       }
       check_user_achievements: {
         Args: { p_user_id: string }
@@ -1468,6 +1655,10 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      process_ai_pattern_suggestions: {
+        Args: { p_image_id: string; p_image_type?: string }
+        Returns: string
       }
     }
     Enums: {
