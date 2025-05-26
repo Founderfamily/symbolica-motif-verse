@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
-import { SearchFilters } from '@/components/search/SearchFilters';
+import { AdvancedFilters } from '@/components/search/AdvancedFilters';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Search, Grid, Layout, Map, FilterX } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -21,6 +21,9 @@ const SymbolExplorer: React.FC = () => {
   const [filters, setFilters] = useState({
     cultures: [] as string[],
     periods: [] as string[],
+    functions: [] as string[],
+    techniques: [] as string[],
+    mediums: [] as string[],
   });
   const [view, setView] = useState<'grid' | 'list' | 'map'>('grid');
   
@@ -33,14 +36,16 @@ const SymbolExplorer: React.FC = () => {
         .select('*');
         
       if (error) throw error;
-      // Cast the data to SymbolData[] with a type assertion
       return (data as unknown) as SymbolData[];
     }
   });
   
-  // Extract unique cultures and periods for filters
+  // Extract unique values for filters
   const cultures = [...new Set(symbols?.map(s => s.culture) || [])];
   const periods = [...new Set(symbols?.map(s => s.period) || [])];
+  const functions = [...new Set(symbols?.flatMap(s => s.function || []) || [])];
+  const techniques = [...new Set(symbols?.flatMap(s => s.technique || []) || [])];
+  const mediums = [...new Set(symbols?.flatMap(s => s.medium || []) || [])];
   
   // Filter symbols based on search term and filters
   const filteredSymbols = symbols?.filter(symbol => {
@@ -58,24 +63,41 @@ const SymbolExplorer: React.FC = () => {
     // Filter by period
     const matchesPeriod = filters.periods.length === 0 || 
       filters.periods.includes(symbol.period);
+
+    // Filter by function
+    const matchesFunction = filters.functions.length === 0 ||
+      (symbol.function && symbol.function.some(f => filters.functions.includes(f)));
+
+    // Filter by technique
+    const matchesTechnique = filters.techniques.length === 0 ||
+      (symbol.technique && symbol.technique.some(t => filters.techniques.includes(t)));
+
+    // Filter by medium
+    const matchesMedium = filters.mediums.length === 0 ||
+      (symbol.medium && symbol.medium.some(m => filters.mediums.includes(m)));
       
-    return matchesSearch && matchesCulture && matchesPeriod;
+    return matchesSearch && matchesCulture && matchesPeriod && matchesFunction && matchesTechnique && matchesMedium;
   });
   
   // Handle filter changes
-  const handleFilterChange = (type: 'cultures' | 'periods', value: string[]) => {
+  const handleFilterChange = (type: keyof typeof filters, value: string[]) => {
     setFilters(prev => ({ ...prev, [type]: value }));
   };
   
   // Clear all filters
   const clearFilters = () => {
-    setFilters({ cultures: [], periods: [] });
+    setFilters({ 
+      cultures: [], 
+      periods: [], 
+      functions: [], 
+      techniques: [], 
+      mediums: [] 
+    });
     setSearchTerm('');
   };
   
   return (
     <div className="container mx-auto p-4 pt-12 pb-20">
-      {/* Enhanced visual separator between header and content */}
       <Separator className="mb-8 mt-2" />
       
       <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
@@ -119,7 +141,7 @@ const SymbolExplorer: React.FC = () => {
                 <h3 className="font-medium text-slate-900">
                   <I18nText translationKey="symbolExplorer.filters">Filters</I18nText>
                 </h3>
-                {(filters.cultures.length > 0 || filters.periods.length > 0) && (
+                {(Object.values(filters).some(arr => arr.length > 0)) && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -143,9 +165,12 @@ const SymbolExplorer: React.FC = () => {
               </div>
             </div>
             
-            <SearchFilters 
+            <AdvancedFilters 
               cultures={cultures}
               periods={periods}
+              functions={functions}
+              techniques={techniques}
+              mediums={mediums}
               selectedFilters={filters}
               onFilterChange={handleFilterChange}
             />
@@ -159,31 +184,21 @@ const SymbolExplorer: React.FC = () => {
             </div>
             
             <div className="flex flex-wrap gap-2">
-              {filters.cultures.map(culture => (
-                <Badge key={`culture-${culture}`} variant="secondary" className="flex gap-1">
-                  {culture}
-                  <button 
-                    onClick={() => handleFilterChange('cultures', filters.cultures.filter(c => c !== culture))}
-                    className="ml-1 text-xs"
-                  >
-                    ×
-                  </button>
-                </Badge>
-              ))}
+              {Object.entries(filters).map(([type, values]) =>
+                values.map(value => (
+                  <Badge key={`${type}-${value}`} variant="secondary" className="flex gap-1">
+                    {value}
+                    <button 
+                      onClick={() => handleFilterChange(type as keyof typeof filters, values.filter(v => v !== value))}
+                      className="ml-1 text-xs"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))
+              )}
               
-              {filters.periods.map(period => (
-                <Badge key={`period-${period}`} variant="secondary" className="flex gap-1">
-                  {period}
-                  <button 
-                    onClick={() => handleFilterChange('periods', filters.periods.filter(p => p !== period))}
-                    className="ml-1 text-xs"
-                  >
-                    ×
-                  </button>
-                </Badge>
-              ))}
-              
-              {filters.cultures.length === 0 && filters.periods.length === 0 && (
+              {Object.values(filters).every(arr => arr.length === 0) && (
                 <span className="text-sm text-slate-500">
                   <I18nText translationKey="symbolExplorer.noFilters">No active filters</I18nText>
                 </span>

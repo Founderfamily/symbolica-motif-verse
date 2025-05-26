@@ -16,6 +16,8 @@ import enContributions from './locales/en/contributions.json';
 import enSymbols from './locales/en/symbols.json';
 import enGamification from './locales/en/gamification.json';
 import enAdmin from './locales/en/admin.json';
+import enCollections from './locales/en/collections.json';
+import enSearchFilters from './locales/en/searchFilters.json';
 
 const LANGUAGE_STORAGE_KEY = 'app_language';
 
@@ -29,7 +31,9 @@ const enTranslation = {
   ...enContributions,
   ...enSymbols,
   ...enGamification,
-  ...enAdmin
+  ...enAdmin,
+  ...enCollections,
+  ...enSearchFilters
 };
 
 i18n
@@ -40,8 +44,8 @@ i18n
       fr: { translation: frTranslation },
       en: { translation: enTranslation },
     },
-    lng: 'fr', // Langue par défaut : français
-    fallbackLng: 'fr', // Fallback vers le français
+    lng: 'fr',
+    fallbackLng: 'fr',
     supportedLngs: ['fr', 'en'],
     interpolation: {
       escapeValue: false,
