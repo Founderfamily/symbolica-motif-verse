@@ -1,6 +1,5 @@
 
-import React, { useState } from 'react';
-import { useTranslation } from '@/i18n/useTranslation';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,16 +11,27 @@ import { toast } from '@/components/ui/use-toast';
 import { AlertTriangle, Save, Database, Mail, Shield, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface SystemSettings {
+  maintenanceMode: boolean;
+  userRegistration: boolean;
+  emailNotifications: boolean;
+  autoApproveContributions: boolean;
+  maxFileSize: string;
+  systemMessage: string;
+  smtpHost: string;
+  smtpPort: string;
+  smtpUser: string;
+  smtpPassword: string;
+}
+
 const SystemSettings = () => {
-  const { t } = useTranslation();
   const { user, isAdmin } = useAuth();
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<SystemSettings>({
     maintenanceMode: false,
     userRegistration: true,
     emailNotifications: true,
     autoApproveContributions: false,
     maxFileSize: '5',
-    backupFrequency: 'daily',
     systemMessage: '',
     smtpHost: '',
     smtpPort: '587',
@@ -29,6 +39,39 @@ const SystemSettings = () => {
     smtpPassword: '',
   });
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('content_sections')
+        .select('content')
+        .eq('section_key', 'system_settings')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (data?.content) {
+        const savedSettings = JSON.parse(data.content.fr || '{}');
+        setSettings(prev => ({ ...prev, ...savedSettings }));
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de charger les paramètres.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!isAdmin) {
@@ -43,7 +86,6 @@ const SystemSettings = () => {
     setSaving(true);
 
     try {
-      // Save settings to database
       const { error } = await supabase
         .from('content_sections')
         .upsert({
@@ -83,19 +125,41 @@ const SystemSettings = () => {
     }
 
     try {
-      // Simulate backup process
-      toast({
-        title: "Sauvegarde lancée",
-        description: "La sauvegarde de la base de données a été lancée.",
-      });
-      
-      // Here you would typically call a backup function or API
-      setTimeout(() => {
-        toast({
-          title: "Sauvegarde terminée",
-          description: "La sauvegarde a été créée avec succès.",
+      // Créer une sauvegarde des données importantes
+      const tables = ['symbols', 'collections', 'user_contributions', 'profiles'];
+      const backup: any = {};
+
+      for (const table of tables) {
+        const { data, error } = await supabase
+          .from(table)
+          .select('*');
+        
+        if (error) throw error;
+        backup[table] = data;
+      }
+
+      // Stocker la sauvegarde
+      const backupData = {
+        timestamp: new Date().toISOString(),
+        data: backup
+      };
+
+      const { error } = await supabase
+        .from('content_sections')
+        .upsert({
+          section_key: `backup_${Date.now()}`,
+          content: {
+            fr: JSON.stringify(backupData),
+            en: JSON.stringify(backupData)
+          }
         });
-      }, 3000);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sauvegarde créée",
+        description: "La sauvegarde a été créée avec succès.",
+      });
     } catch (error) {
       console.error('Error creating backup:', error);
       toast({
@@ -116,20 +180,15 @@ const SystemSettings = () => {
       return;
     }
 
-    try {
-      // Simulate email test
-      toast({
-        title: "Test d'email envoyé",
-        description: "Un email de test a été envoyé à votre adresse.",
-      });
-    } catch (error) {
-      console.error('Error sending test email:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur d'email",
-        description: "Impossible d'envoyer l'email de test.",
-      });
-    }
+    // Simuler un test d'email pour le moment
+    toast({
+      title: "Test d'email",
+      description: "Fonctionnalité de test d'email à implémenter avec un service d'email.",
+    });
+  };
+
+  const updateSetting = (key: keyof SystemSettings, value: any) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
   };
 
   if (!isAdmin) {
@@ -144,6 +203,14 @@ const SystemSettings = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6">
       <div>
@@ -154,7 +221,6 @@ const SystemSettings = () => {
       </div>
 
       <div className="grid gap-6">
-        {/* Paramètres généraux */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -170,9 +236,7 @@ const SystemSettings = () => {
               <Switch
                 id="maintenance"
                 checked={settings.maintenanceMode}
-                onCheckedChange={(checked) =>
-                  setSettings(prev => ({ ...prev, maintenanceMode: checked }))
-                }
+                onCheckedChange={(checked) => updateSetting('maintenanceMode', checked)}
               />
               <Label htmlFor="maintenance">Mode maintenance</Label>
             </div>
@@ -181,9 +245,7 @@ const SystemSettings = () => {
               <Switch
                 id="registration"
                 checked={settings.userRegistration}
-                onCheckedChange={(checked) =>
-                  setSettings(prev => ({ ...prev, userRegistration: checked }))
-                }
+                onCheckedChange={(checked) => updateSetting('userRegistration', checked)}
               />
               <Label htmlFor="registration">Autoriser les nouvelles inscriptions</Label>
             </div>
@@ -192,9 +254,7 @@ const SystemSettings = () => {
               <Switch
                 id="auto-approve"
                 checked={settings.autoApproveContributions}
-                onCheckedChange={(checked) =>
-                  setSettings(prev => ({ ...prev, autoApproveContributions: checked }))
-                }
+                onCheckedChange={(checked) => updateSetting('autoApproveContributions', checked)}
               />
               <Label htmlFor="auto-approve">Approuver automatiquement les contributions</Label>
             </div>
@@ -205,9 +265,7 @@ const SystemSettings = () => {
                 id="max-file-size"
                 type="number"
                 value={settings.maxFileSize}
-                onChange={(e) =>
-                  setSettings(prev => ({ ...prev, maxFileSize: e.target.value }))
-                }
+                onChange={(e) => updateSetting('maxFileSize', e.target.value)}
               />
             </div>
             
@@ -217,15 +275,12 @@ const SystemSettings = () => {
                 id="system-message"
                 placeholder="Message à afficher aux utilisateurs"
                 value={settings.systemMessage}
-                onChange={(e) =>
-                  setSettings(prev => ({ ...prev, systemMessage: e.target.value }))
-                }
+                onChange={(e) => updateSetting('systemMessage', e.target.value)}
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Paramètres de sauvegarde */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -239,9 +294,9 @@ const SystemSettings = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label>Fréquence des sauvegardes</Label>
+                <Label>Créer une sauvegarde</Label>
                 <p className="text-sm text-muted-foreground">
-                  Sauvegarde automatique : {settings.backupFrequency}
+                  Sauvegarde manuelle des données importantes
                 </p>
               </div>
               <Button onClick={handleBackup} variant="outline">
@@ -252,7 +307,6 @@ const SystemSettings = () => {
           </CardContent>
         </Card>
 
-        {/* Paramètres email */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -268,9 +322,7 @@ const SystemSettings = () => {
               <Switch
                 id="email-notifications"
                 checked={settings.emailNotifications}
-                onCheckedChange={(checked) =>
-                  setSettings(prev => ({ ...prev, emailNotifications: checked }))
-                }
+                onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
               />
               <Label htmlFor="email-notifications">Activer les notifications email</Label>
             </div>
@@ -281,9 +333,7 @@ const SystemSettings = () => {
                 <Input
                   id="smtp-host"
                   value={settings.smtpHost}
-                  onChange={(e) =>
-                    setSettings(prev => ({ ...prev, smtpHost: e.target.value }))
-                  }
+                  onChange={(e) => updateSetting('smtpHost', e.target.value)}
                 />
               </div>
               
@@ -292,9 +342,7 @@ const SystemSettings = () => {
                 <Input
                   id="smtp-port"
                   value={settings.smtpPort}
-                  onChange={(e) =>
-                    setSettings(prev => ({ ...prev, smtpPort: e.target.value }))
-                  }
+                  onChange={(e) => updateSetting('smtpPort', e.target.value)}
                 />
               </div>
             </div>
@@ -305,9 +353,7 @@ const SystemSettings = () => {
                 <Input
                   id="smtp-user"
                   value={settings.smtpUser}
-                  onChange={(e) =>
-                    setSettings(prev => ({ ...prev, smtpUser: e.target.value }))
-                  }
+                  onChange={(e) => updateSetting('smtpUser', e.target.value)}
                 />
               </div>
               
@@ -317,9 +363,7 @@ const SystemSettings = () => {
                   id="smtp-password"
                   type="password"
                   value={settings.smtpPassword}
-                  onChange={(e) =>
-                    setSettings(prev => ({ ...prev, smtpPassword: e.target.value }))
-                  }
+                  onChange={(e) => updateSetting('smtpPassword', e.target.value)}
                 />
               </div>
             </div>
@@ -331,7 +375,6 @@ const SystemSettings = () => {
           </CardContent>
         </Card>
 
-        {/* Bouton de sauvegarde */}
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={saving}>
             <Save className="h-4 w-4 mr-2" />

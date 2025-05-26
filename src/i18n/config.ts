@@ -54,15 +54,12 @@ i18n
     load: 'languageOnly',
     returnNull: false,
     returnEmptyString: false,
-    // Simplified missing key handling that stays in current language
     parseMissingKeyHandler: (key) => {
       const parts = key.split('.');
       return parts[parts.length - 1].replace(/([A-Z])/g, ' $1').trim();
     },
-    // Enhanced development settings
     debug: process.env.NODE_ENV === 'development',
     saveMissing: false,
-    // Prevent cache issues during development
     initImmediate: false,
     react: {
       useSuspense: false

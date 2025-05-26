@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save, Upload, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -23,7 +25,26 @@ const SymbolEditor = () => {
     culture: '',
     period: '',
     description: '',
+    medium: [] as string[],
+    technique: [] as string[],
+    function: [] as string[],
   });
+
+  // Options pour les nouveaux champs
+  const mediumOptions = [
+    'Pierre', 'Bois', 'Métal', 'Textile', 'Céramique', 'Verre', 
+    'Papier', 'Parchemin', 'Os', 'Ivoire', 'Coquillage', 'Cuir'
+  ];
+
+  const techniqueOptions = [
+    'Sculpture', 'Gravure', 'Peinture', 'Tissage', 'Broderie', 
+    'Forge', 'Moulage', 'Incision', 'Relief', 'Dorure', 'Émaillage'
+  ];
+
+  const functionOptions = [
+    'Religieux', 'Décoratif', 'Protecteur', 'Rituel', 'Commercial', 
+    'Identitaire', 'Narratif', 'Politique', 'Funéraire', 'Thérapeutique'
+  ];
 
   useEffect(() => {
     if (isNewSymbol) {
@@ -33,7 +54,6 @@ const SymbolEditor = () => {
 
     const fetchSymbolData = async () => {
       try {
-        // Fetch symbol data
         const { data: symbolData, error: symbolError } = await supabase
           .from('symbols')
           .select('*')
@@ -48,16 +68,17 @@ const SymbolEditor = () => {
           culture: symbolData.culture,
           period: symbolData.period,
           description: symbolData.description || '',
+          medium: symbolData.medium || [],
+          technique: symbolData.technique || [],
+          function: symbolData.function || [],
         });
 
-        // Fetch symbol images
         const { data: imagesData, error: imagesError } = await supabase
           .from('symbol_images')
           .select('*')
           .eq('symbol_id', id);
 
         if (imagesError) throw imagesError;
-
         setImages(imagesData || []);
       } catch (error) {
         console.error('Error fetching symbol data:', error);
@@ -74,6 +95,15 @@ const SymbolEditor = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleArrayFieldChange = (field: 'medium' | 'technique' | 'function', value: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: checked 
+        ? [...prev[field], value]
+        : prev[field].filter(item => item !== value)
+    }));
   };
 
   const handleSave = async () => {
@@ -137,7 +167,6 @@ const SymbolEditor = () => {
 
       if (insertError) throw insertError;
 
-      // Refresh images
       const { data: imagesData } = await supabase
         .from('symbol_images')
         .select('*')
@@ -189,110 +218,188 @@ const SymbolEditor = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Informations du symbole</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="name">Nom</Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="culture">Culture</Label>
-              <Input
-                id="culture"
-                name="culture"
-                value={formData.culture}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="period">Période</Label>
-              <Input
-                id="period"
-                name="period"
-                value={formData.period}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={4}
-              />
-            </div>
-
-            <Button onClick={handleSave} className="w-full">
-              <Save className="w-4 h-4 mr-2" />
-              {isNewSymbol ? 'Créer le symbole' : 'Sauvegarder'}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {!isNewSymbol && (
+        <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Images du symbole</CardTitle>
+              <CardTitle>Informations générales</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="image-upload">Ajouter une image</Label>
-                  <Input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="mt-1"
-                  />
-                </div>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nom</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {images.map((image) => (
-                    <div key={image.id} className="relative group">
-                      <img
-                        src={image.image_url}
-                        alt={image.title || 'Symbol image'}
-                        className="w-full h-32 object-cover rounded-md border"
-                      />
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleDeleteImage(image.id)}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+              <div>
+                <Label htmlFor="culture">Culture</Label>
+                <Input
+                  id="culture"
+                  name="culture"
+                  value={formData.culture}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-                {images.length === 0 && (
-                  <div className="text-center py-8 text-slate-500">
-                    <Upload className="w-8 h-8 mx-auto mb-2" />
-                    <p>Aucune image pour ce symbole</p>
-                  </div>
-                )}
+              <div>
+                <Label htmlFor="period">Période</Label>
+                <Input
+                  id="period"
+                  name="period"
+                  value={formData.period}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows={4}
+                />
               </div>
             </CardContent>
           </Card>
-        )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Caractéristiques techniques</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label>Matériaux</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {mediumOptions.map((option) => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`medium-${option}`}
+                        checked={formData.medium.includes(option)}
+                        onCheckedChange={(checked) => 
+                          handleArrayFieldChange('medium', option, checked as boolean)
+                        }
+                      />
+                      <Label htmlFor={`medium-${option}`} className="text-sm">
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label>Techniques</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {techniqueOptions.map((option) => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`technique-${option}`}
+                        checked={formData.technique.includes(option)}
+                        onCheckedChange={(checked) => 
+                          handleArrayFieldChange('technique', option, checked as boolean)
+                        }
+                      />
+                      <Label htmlFor={`technique-${option}`} className="text-sm">
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label>Fonctions</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {functionOptions.map((option) => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`function-${option}`}
+                        checked={formData.function.includes(option)}
+                        onCheckedChange={(checked) => 
+                          handleArrayFieldChange('function', option, checked as boolean)
+                        }
+                      />
+                      <Label htmlFor={`function-${option}`} className="text-sm">
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleSave} className="w-full">
+                <Save className="w-4 h-4 mr-2" />
+                {isNewSymbol ? 'Créer le symbole' : 'Sauvegarder'}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {!isNewSymbol && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Images du symbole</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="image-upload">Ajouter une image</Label>
+                    <Input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {images.map((image) => (
+                      <div key={image.id} className="relative group">
+                        <img
+                          src={image.image_url}
+                          alt={image.title || 'Symbol image'}
+                          className="w-full h-32 object-cover rounded-md border"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleDeleteImage(image.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {images.length === 0 && (
+                    <div className="text-center py-8 text-slate-500">
+                      <Upload className="w-8 h-8 mx-auto mb-2" />
+                      <p>Aucune image pour ce symbole</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
