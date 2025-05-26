@@ -28,7 +28,14 @@ export const usePatterns = (symbolId?: string) => {
 
       if (fetchError) throw fetchError;
 
-      setPatterns(data || []);
+      // Type conversion to ensure proper types
+      const typedPatterns: Pattern[] = (data || []).map(item => ({
+        ...item,
+        pattern_type: item.pattern_type as Pattern['pattern_type'],
+        complexity_level: item.complexity_level as Pattern['complexity_level']
+      }));
+
+      setPatterns(typedPatterns);
     } catch (err) {
       console.error('Error fetching patterns:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
@@ -52,8 +59,14 @@ export const usePatterns = (symbolId?: string) => {
 
       if (error) throw error;
 
-      setPatterns(prev => [data, ...prev]);
-      return data;
+      const typedPattern: Pattern = {
+        ...data,
+        pattern_type: data.pattern_type as Pattern['pattern_type'],
+        complexity_level: data.complexity_level as Pattern['complexity_level']
+      };
+
+      setPatterns(prev => [typedPattern, ...prev]);
+      return typedPattern;
     } catch (err) {
       console.error('Error creating pattern:', err);
       throw err;
@@ -71,11 +84,17 @@ export const usePatterns = (symbolId?: string) => {
 
       if (error) throw error;
 
+      const typedPattern: Pattern = {
+        ...data,
+        pattern_type: data.pattern_type as Pattern['pattern_type'],
+        complexity_level: data.complexity_level as Pattern['complexity_level']
+      };
+
       setPatterns(prev => prev.map(pattern => 
-        pattern.id === id ? { ...pattern, ...data } : pattern
+        pattern.id === id ? { ...pattern, ...typedPattern } : pattern
       ));
 
-      return data;
+      return typedPattern;
     } catch (err) {
       console.error('Error updating pattern:', err);
       throw err;

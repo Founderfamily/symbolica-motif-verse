@@ -21,7 +21,7 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
   const { images, loading: imagesLoading } = useSymbolImages(symbol.id);
 
   const handleAIAnalysis = async () => {
-    if (!images[selectedImageIndex]) return;
+    if (!images || images.length === 0 || !images[selectedImageIndex]) return;
 
     setIsAnalyzing(true);
     try {
@@ -48,7 +48,7 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
     return <div>Chargement des détails du symbole...</div>;
   }
 
-  const currentImage = images[selectedImageIndex];
+  const currentImage = images && images.length > 0 ? images[selectedImageIndex] : null;
 
   return (
     <div className="space-y-6">
@@ -108,7 +108,7 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
         </TabsList>
 
         <TabsContent value="images" className="space-y-4">
-          {images.length > 0 && (
+          {images && images.length > 0 && (
             <>
               <div className="flex gap-2 overflow-x-auto">
                 {images.map((image, index) => (

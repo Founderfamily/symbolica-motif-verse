@@ -42,9 +42,7 @@ export const PatternManager: React.FC<PatternManagerProps> = ({
       } else {
         const newPattern = await createPattern({
           ...formData,
-          symbol_id: symbolId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          symbol_id: symbolId
         });
         
         if (onPatternCreated) {

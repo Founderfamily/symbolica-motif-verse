@@ -31,7 +31,19 @@ export const useImageAnnotations = (imageId?: string, imageType: 'symbol' | 'con
 
       if (fetchError) throw fetchError;
 
-      setAnnotations(data || []);
+      // Type conversion to ensure proper types
+      const typedAnnotations: ImageAnnotation[] = (data || []).map(item => ({
+        ...item,
+        image_type: item.image_type as ImageAnnotation['image_type'],
+        validation_status: item.validation_status as ImageAnnotation['validation_status'],
+        pattern: item.pattern ? {
+          ...item.pattern,
+          pattern_type: item.pattern.pattern_type as any,
+          complexity_level: item.pattern.complexity_level as any
+        } : undefined
+      }));
+
+      setAnnotations(typedAnnotations);
     } catch (err) {
       console.error('Error fetching annotations:', err);
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
@@ -58,8 +70,19 @@ export const useImageAnnotations = (imageId?: string, imageType: 'symbol' | 'con
 
       if (error) throw error;
 
-      setAnnotations(prev => [data, ...prev]);
-      return data;
+      const typedAnnotation: ImageAnnotation = {
+        ...data,
+        image_type: data.image_type as ImageAnnotation['image_type'],
+        validation_status: data.validation_status as ImageAnnotation['validation_status'],
+        pattern: data.pattern ? {
+          ...data.pattern,
+          pattern_type: data.pattern.pattern_type as any,
+          complexity_level: data.pattern.complexity_level as any
+        } : undefined
+      };
+
+      setAnnotations(prev => [typedAnnotation, ...prev]);
+      return typedAnnotation;
     } catch (err) {
       console.error('Error creating annotation:', err);
       throw err;
@@ -80,11 +103,22 @@ export const useImageAnnotations = (imageId?: string, imageType: 'symbol' | 'con
 
       if (error) throw error;
 
+      const typedAnnotation: ImageAnnotation = {
+        ...data,
+        image_type: data.image_type as ImageAnnotation['image_type'],
+        validation_status: data.validation_status as ImageAnnotation['validation_status'],
+        pattern: data.pattern ? {
+          ...data.pattern,
+          pattern_type: data.pattern.pattern_type as any,
+          complexity_level: data.pattern.complexity_level as any
+        } : undefined
+      };
+
       setAnnotations(prev => prev.map(annotation => 
-        annotation.id === id ? { ...annotation, ...data } : annotation
+        annotation.id === id ? { ...annotation, ...typedAnnotation } : annotation
       ));
 
-      return data;
+      return typedAnnotation;
     } catch (err) {
       console.error('Error updating annotation:', err);
       throw err;
