@@ -5,11 +5,12 @@ import { useCollections, useDeleteCollection } from '@/hooks/useCollections';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Ban, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const CollectionsManagement = () => {
-  const { data: collections, isLoading } = useCollections();
+  const { data: collections, isLoading, refetch } = useCollections();
   const deleteCollection = useDeleteCollection();
 
   const handleDelete = async (id: string, title: string) => {
@@ -20,6 +21,28 @@ const CollectionsManagement = () => {
       } else {
         toast.error('Erreur lors de la suppression');
       }
+    }
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: boolean, title: string) => {
+    try {
+      const newStatus = !currentStatus;
+      const { error } = await supabase
+        .from('collections')
+        .update({ is_featured: newStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success(
+        newStatus 
+          ? `Collection "${title}" activée`
+          : `Collection "${title}" suspendue`
+      );
+      refetch();
+    } catch (error) {
+      console.error('Error toggling collection status:', error);
+      toast.error('Erreur lors de la modification du statut');
     }
   };
 
@@ -65,8 +88,16 @@ const CollectionsManagement = () => {
                     <CardTitle className="text-xl">
                       {getTranslation(collection, 'fr', 'title')}
                     </CardTitle>
-                    {collection.is_featured && (
-                      <Badge variant="secondary">En vedette</Badge>
+                    {collection.is_featured ? (
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-red-100 text-red-800">
+                        <Ban className="w-3 h-3 mr-1" />
+                        Suspendue
+                      </Badge>
                     )}
                   </div>
                   <p className="text-slate-600">
@@ -77,7 +108,23 @@ const CollectionsManagement = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Link to={`/admin/collections/${collection.id}`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleToggleStatus(
+                      collection.id, 
+                      collection.is_featured, 
+                      getTranslation(collection, 'fr', 'title')
+                    )}
+                    className={collection.is_featured ? "text-red-600 hover:text-red-700" : "text-green-600 hover:text-green-700"}
+                  >
+                    {collection.is_featured ? (
+                      <Ban className="w-4 h-4" />
+                    ) : (
+                      <CheckCircle className="w-4 h-4" />
+                    )}
+                  </Button>
+                  <Link to={`/admin/collections/${collection.id}/edit`}>
                     <Button variant="outline" size="sm">
                       <Edit className="w-4 h-4" />
                     </Button>

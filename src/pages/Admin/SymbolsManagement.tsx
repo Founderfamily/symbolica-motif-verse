@@ -38,7 +38,6 @@ const SymbolsManagement = () => {
 
       if (error) throw error;
       
-      // Cast the data to ensure type compatibility
       const typedData: SymbolData[] = data.map(symbol => ({
         ...symbol,
         translations: symbol.translations as SymbolData['translations']
@@ -88,7 +87,6 @@ const SymbolsManagement = () => {
     e.preventDefault();
     try {
       if (selectedSymbol) {
-        // Mise à jour
         const { error } = await supabase
           .from('symbols')
           .update({
@@ -106,7 +104,6 @@ const SymbolsManagement = () => {
           description: 'Symbole mis à jour avec succès',
         });
       } else {
-        // Création
         const { error } = await supabase.from('symbols').insert([
           {
             name: formData.name,
@@ -124,7 +121,6 @@ const SymbolsManagement = () => {
         });
       }
 
-      // Rafraîchir la liste
       fetchSymbols();
       setIsEditing(false);
     } catch (error: any) {
@@ -181,7 +177,7 @@ const SymbolsManagement = () => {
   };
 
   const handleEditImages = (symbolId: string) => {
-    navigate(`/admin/symbols/${symbolId}`);
+    navigate(`/admin/symbols/${symbolId}/edit`);
   };
 
   return (
