@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -59,12 +58,31 @@ export default function UsersManagement() {
       setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          id,
+          username,
+          full_name,
+          is_admin,
+          created_at,
+          bio,
+          location,
+          website,
+          contributions_count,
+          verified_uploads,
+          favorite_cultures
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      setUsers(data || []);
+      // Assurer que tous les champs requis sont présents avec des valeurs par défaut
+      const usersWithDefaults = (data || []).map(user => ({
+        ...user,
+        contributions_count: user.contributions_count || 0,
+        verified_uploads: user.verified_uploads || 0
+      }));
+
+      setUsers(usersWithDefaults);
     } catch (error) {
       console.error('Error loading users:', error);
       toast({
@@ -109,8 +127,7 @@ export default function UsersManagement() {
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
       (user.username?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.email?.toLowerCase().includes(searchQuery.toLowerCase()));
+      (user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesFilter = 
       filterStatus === 'all' || 

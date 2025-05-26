@@ -20,18 +20,48 @@ export const userService = {
   async getAllUsers(): Promise<UserProfile[]> {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(`
+        id,
+        username,
+        full_name,
+        is_admin,
+        created_at,
+        bio,
+        location,
+        website,
+        contributions_count,
+        verified_uploads,
+        favorite_cultures
+      `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Assurer que tous les champs requis sont présents
+    return (data || []).map(user => ({
+      ...user,
+      contributions_count: user.contributions_count || 0,
+      verified_uploads: user.verified_uploads || 0
+    }));
   },
 
   // Récupérer un utilisateur par ID
   async getUserById(id: string): Promise<UserProfile | null> {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(`
+        id,
+        username,
+        full_name,
+        is_admin,
+        created_at,
+        bio,
+        location,
+        website,
+        contributions_count,
+        verified_uploads,
+        favorite_cultures
+      `)
       .eq('id', id)
       .single();
 
@@ -39,7 +69,13 @@ export const userService = {
       if (error.code === 'PGRST116') return null; // Not found
       throw error;
     }
-    return data;
+    
+    // Assurer que tous les champs requis sont présents
+    return {
+      ...data,
+      contributions_count: data.contributions_count || 0,
+      verified_uploads: data.verified_uploads || 0
+    };
   },
 
   // Mettre à jour le statut admin d'un utilisateur
@@ -66,12 +102,29 @@ export const userService = {
   async searchUsers(query: string): Promise<UserProfile[]> {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(`
+        id,
+        username,
+        full_name,
+        is_admin,
+        created_at,
+        bio,
+        location,
+        website,
+        contributions_count,
+        verified_uploads,
+        favorite_cultures
+      `)
       .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    return (data || []).map(user => ({
+      ...user,
+      contributions_count: user.contributions_count || 0,
+      verified_uploads: user.verified_uploads || 0
+    }));
   },
 
   // Obtenir les statistiques des utilisateurs
