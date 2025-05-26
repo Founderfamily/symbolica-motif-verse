@@ -41,13 +41,7 @@ export const useUsers = () => {
           username,
           full_name,
           is_admin,
-          created_at,
-          contributions_count,
-          verified_uploads,
-          bio,
-          location,
-          website,
-          favorite_cultures
+          created_at
         `)
         .order('created_at', { ascending: false });
 
@@ -56,12 +50,12 @@ export const useUsers = () => {
       // Assurer que tous les champs requis sont présents avec des valeurs par défaut
       const usersWithDefaults = (data || []).map(user => ({
         ...user,
-        contributions_count: user.contributions_count || 0,
-        verified_uploads: user.verified_uploads || 0,
-        bio: user.bio || undefined,
-        location: user.location || undefined,
-        website: user.website || undefined,
-        favorite_cultures: user.favorite_cultures || undefined
+        contributions_count: 0, // Valeur par défaut
+        verified_uploads: 0, // Valeur par défaut
+        bio: undefined,
+        location: undefined,
+        website: undefined,
+        favorite_cultures: undefined
       }));
 
       setUsers(usersWithDefaults);

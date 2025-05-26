@@ -25,13 +25,7 @@ export const userService = {
         username,
         full_name,
         is_admin,
-        created_at,
-        bio,
-        location,
-        website,
-        contributions_count,
-        verified_uploads,
-        favorite_cultures
+        created_at
       `)
       .order('created_at', { ascending: false });
 
@@ -40,8 +34,12 @@ export const userService = {
     // Assurer que tous les champs requis sont présents
     return (data || []).map(user => ({
       ...user,
-      contributions_count: user.contributions_count || 0,
-      verified_uploads: user.verified_uploads || 0
+      contributions_count: 0,
+      verified_uploads: 0,
+      bio: undefined,
+      location: undefined,
+      website: undefined,
+      favorite_cultures: undefined
     }));
   },
 
@@ -54,13 +52,7 @@ export const userService = {
         username,
         full_name,
         is_admin,
-        created_at,
-        bio,
-        location,
-        website,
-        contributions_count,
-        verified_uploads,
-        favorite_cultures
+        created_at
       `)
       .eq('id', id)
       .single();
@@ -73,8 +65,12 @@ export const userService = {
     // Assurer que tous les champs requis sont présents
     return {
       ...data,
-      contributions_count: data.contributions_count || 0,
-      verified_uploads: data.verified_uploads || 0
+      contributions_count: 0,
+      verified_uploads: 0,
+      bio: undefined,
+      location: undefined,
+      website: undefined,
+      favorite_cultures: undefined
     };
   },
 
@@ -107,13 +103,7 @@ export const userService = {
         username,
         full_name,
         is_admin,
-        created_at,
-        bio,
-        location,
-        website,
-        contributions_count,
-        verified_uploads,
-        favorite_cultures
+        created_at
       `)
       .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
       .order('created_at', { ascending: false });
@@ -122,8 +112,12 @@ export const userService = {
     
     return (data || []).map(user => ({
       ...user,
-      contributions_count: user.contributions_count || 0,
-      verified_uploads: user.verified_uploads || 0
+      contributions_count: 0,
+      verified_uploads: 0,
+      bio: undefined,
+      location: undefined,
+      website: undefined,
+      favorite_cultures: undefined
     }));
   },
 

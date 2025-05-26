@@ -63,13 +63,7 @@ export default function UsersManagement() {
           username,
           full_name,
           is_admin,
-          created_at,
-          bio,
-          location,
-          website,
-          contributions_count,
-          verified_uploads,
-          favorite_cultures
+          created_at
         `)
         .order('created_at', { ascending: false });
 
@@ -78,8 +72,12 @@ export default function UsersManagement() {
       // Assurer que tous les champs requis sont présents avec des valeurs par défaut
       const usersWithDefaults = (data || []).map(user => ({
         ...user,
-        contributions_count: user.contributions_count || 0,
-        verified_uploads: user.verified_uploads || 0
+        contributions_count: 0,
+        verified_uploads: 0,
+        bio: undefined,
+        location: undefined,
+        website: undefined,
+        favorite_cultures: undefined
       }));
 
       setUsers(usersWithDefaults);
