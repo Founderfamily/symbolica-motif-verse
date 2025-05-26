@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { AlertTriangle, Save, Database, Mail, Shield, Globe } from 'lucide-react';
+import { AlertTriangle, Save, Database, Mail, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SystemSettings {
@@ -58,8 +58,16 @@ const SystemSettings = () => {
       }
 
       if (data?.content) {
-        const savedSettings = JSON.parse(data.content.fr || '{}');
-        setSettings(prev => ({ ...prev, ...savedSettings }));
+        // Correction de la vérification de type pour éviter l'erreur TypeScript
+        const content = data.content as { fr?: string };
+        if (content.fr) {
+          try {
+            const savedSettings = JSON.parse(content.fr);
+            setSettings(prev => ({ ...prev, ...savedSettings }));
+          } catch (parseError) {
+            console.error('Error parsing settings:', parseError);
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -125,18 +133,19 @@ const SystemSettings = () => {
     }
 
     try {
-      // Créer une sauvegarde des données importantes
-      const tables = ['symbols', 'collections', 'user_contributions', 'profiles'];
+      // Correction: utiliser des appels séparés au lieu d'une boucle dynamique
       const backup: any = {};
 
-      for (const table of tables) {
-        const { data, error } = await supabase
-          .from(table)
-          .select('*');
-        
-        if (error) throw error;
-        backup[table] = data;
-      }
+      // Récupérer les données des tables importantes
+      const { data: symbolsData } = await supabase.from('symbols').select('*');
+      const { data: collectionsData } = await supabase.from('collections').select('*');
+      const { data: contributionsData } = await supabase.from('user_contributions').select('*');
+      const { data: profilesData } = await supabase.from('profiles').select('*');
+
+      backup.symbols = symbolsData;
+      backup.collections = collectionsData;
+      backup.user_contributions = contributionsData;
+      backup.profiles = profilesData;
 
       // Stocker la sauvegarde
       const backupData = {
