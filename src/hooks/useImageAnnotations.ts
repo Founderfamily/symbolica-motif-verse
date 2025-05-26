@@ -36,10 +36,12 @@ export const useImageAnnotations = (imageId?: string, imageType: 'symbol' | 'con
         ...item,
         image_type: item.image_type as ImageAnnotation['image_type'],
         validation_status: item.validation_status as ImageAnnotation['validation_status'],
+        annotation_data: (item.annotation_data as any) || { type: 'rectangle', coordinates: [] },
         pattern: item.pattern ? {
           ...item.pattern,
           pattern_type: item.pattern.pattern_type as any,
-          complexity_level: item.pattern.complexity_level as any
+          complexity_level: item.pattern.complexity_level as any,
+          translations: (item.pattern.translations as any) || {}
         } : undefined
       }));
 
@@ -74,10 +76,12 @@ export const useImageAnnotations = (imageId?: string, imageType: 'symbol' | 'con
         ...data,
         image_type: data.image_type as ImageAnnotation['image_type'],
         validation_status: data.validation_status as ImageAnnotation['validation_status'],
+        annotation_data: (data.annotation_data as any) || { type: 'rectangle', coordinates: [] },
         pattern: data.pattern ? {
           ...data.pattern,
           pattern_type: data.pattern.pattern_type as any,
-          complexity_level: data.pattern.complexity_level as any
+          complexity_level: data.pattern.complexity_level as any,
+          translations: (data.pattern.translations as any) || {}
         } : undefined
       };
 
@@ -107,10 +111,12 @@ export const useImageAnnotations = (imageId?: string, imageType: 'symbol' | 'con
         ...data,
         image_type: data.image_type as ImageAnnotation['image_type'],
         validation_status: data.validation_status as ImageAnnotation['validation_status'],
+        annotation_data: (data.annotation_data as any) || { type: 'rectangle', coordinates: [] },
         pattern: data.pattern ? {
           ...data.pattern,
           pattern_type: data.pattern.pattern_type as any,
-          complexity_level: data.pattern.complexity_level as any
+          complexity_level: data.pattern.complexity_level as any,
+          translations: (data.pattern.translations as any) || {}
         } : undefined
       };
 

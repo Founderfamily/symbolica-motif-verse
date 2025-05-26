@@ -32,7 +32,8 @@ export const usePatterns = (symbolId?: string) => {
       const typedPatterns: Pattern[] = (data || []).map(item => ({
         ...item,
         pattern_type: item.pattern_type as Pattern['pattern_type'],
-        complexity_level: item.complexity_level as Pattern['complexity_level']
+        complexity_level: item.complexity_level as Pattern['complexity_level'],
+        translations: (item.translations as any) || {}
       }));
 
       setPatterns(typedPatterns);
@@ -62,7 +63,8 @@ export const usePatterns = (symbolId?: string) => {
       const typedPattern: Pattern = {
         ...data,
         pattern_type: data.pattern_type as Pattern['pattern_type'],
-        complexity_level: data.complexity_level as Pattern['complexity_level']
+        complexity_level: data.complexity_level as Pattern['complexity_level'],
+        translations: (data.translations as any) || {}
       };
 
       setPatterns(prev => [typedPattern, ...prev]);
@@ -87,7 +89,8 @@ export const usePatterns = (symbolId?: string) => {
       const typedPattern: Pattern = {
         ...data,
         pattern_type: data.pattern_type as Pattern['pattern_type'],
-        complexity_level: data.complexity_level as Pattern['complexity_level']
+        complexity_level: data.complexity_level as Pattern['complexity_level'],
+        translations: (data.translations as any) || {}
       };
 
       setPatterns(prev => prev.map(pattern => 
