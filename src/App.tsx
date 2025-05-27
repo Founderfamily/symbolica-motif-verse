@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
@@ -32,6 +31,7 @@ import CommentModeration from '@/pages/Admin/CommentModeration';
 import SystemSettings from '@/pages/Admin/SystemSettings';
 import SymbolEditor from '@/pages/Admin/SymbolEditor';
 import CollectionEditor from '@/pages/Admin/CollectionEditor';
+import EnterprisePage from '@/pages/EnterprisePage';
 import { Toaster } from '@/components/ui/toaster';
 import './App.css';
 
@@ -88,6 +88,9 @@ function App() {
               <Route path="moderation" element={<CommentModeration />} />
               <Route path="settings" element={<SystemSettings />} />
             </Route>
+
+            {/* Enterprise routes */}
+            <Route path="/enterprise" element={<EnterprisePage />} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

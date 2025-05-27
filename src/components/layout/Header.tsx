@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Search, User, Settings, HelpCircle, Users } from 'lucide-react';
+import { Search, User, Settings, HelpCircle, Users, Building } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
 import { LanguageSelector } from '@/components/ui/language-selector';
@@ -22,10 +21,50 @@ interface HeaderProps {
   onAuthClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onAuthClick }) => {
+const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const auth = useAuth();
   const { t } = useTranslation();
+
+  const navigationItems = [
+    { 
+      name: 'Symbols', 
+      href: '/symbols',
+      icon: <I18nText translationKey="navigation.symbols">Symbols</I18nText>
+    },
+    { 
+      name: 'Map', 
+      href: '/map',
+      icon: <I18nText translationKey="navigation.map">Map</I18nText>
+    },
+    { 
+      name: 'Collections', 
+      href: '/collections',
+      icon: <I18nText translationKey="navigation.collections">Collections</I18nText>
+    },
+    { 
+      name: 'Analysis', 
+      href: '/analysis',
+      icon: <I18nText translationKey="navigation.analysis">Analysis</I18nText>
+    },
+    { 
+      name: 'Community', 
+      href: '/community',
+      icon: <Users className="h-4 w-4 inline mr-1" />,
+      badge: 'New'
+    },
+    { 
+      name: 'Contributions', 
+      href: '/contributions',
+      icon: <I18nText translationKey="navigation.contributions">Contributions</I18nText>
+    },
+    { 
+      name: 'Enterprise', 
+      href: '/enterprise',
+      icon: <Building className="h-4 w-4" />,
+      badge: 'New'
+    }
+  ];
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
@@ -47,43 +86,15 @@ const Header: React.FC<HeaderProps> = ({ onAuthClick }) => {
             
             {/* Main Navigation */}
             <nav className="hidden md:flex space-x-6">
-              <Link 
-                to="/symbols" 
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <I18nText translationKey="navigation.symbols">Symbols</I18nText>
-              </Link>
-              <Link 
-                to="/map" 
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <I18nText translationKey="navigation.map">Map</I18nText>
-              </Link>
-              <Link 
-                to="/collections" 
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <I18nText translationKey="navigation.collections">Collections</I18nText>
-              </Link>
-              <Link 
-                to="/analysis" 
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <I18nText translationKey="navigation.analysis">Analysis</I18nText>
-              </Link>
-              <Link 
-                to="/community" 
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <Users className="h-4 w-4 inline mr-1" />
-                <I18nText translationKey="navigation.community">Community</I18nText>
-              </Link>
-              <Link 
-                to="/contributions" 
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <I18nText translationKey="navigation.contributions">Contributions</I18nText>
-              </Link>
+              {navigationItems.map((item) => (
+                <Link 
+                  key={item.name} 
+                  to={item.href} 
+                  className="text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  {item.icon}
+                </Link>
+              ))}
             </nav>
           </div>
 
