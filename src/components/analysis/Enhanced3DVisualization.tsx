@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { 
   Play, Pause, RotateCcw, Maximize2, Minimize2,
-  Settings, Download, Share2, Zap, Globe, VrHeadset,
+  Settings, Download, Share2, Zap, Globe, Headset,
   Smartphone, Monitor, Volume2
 } from 'lucide-react';
 
@@ -175,7 +174,7 @@ const Enhanced3DVisualization: React.FC<Enhanced3DVisualizationProps> = ({
                 onClick={enableVRMode}
                 disabled={viewMode === 'vr'}
               >
-                <VrHeadset className="h-4 w-4 mr-1" />
+                <Headset className="h-4 w-4 mr-1" />
                 VR Immersif
               </Button>
               <Button

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CollaborativeSession {
@@ -83,7 +82,7 @@ export const collaborativeAnalysisService = {
       });
 
       if (error) throw error;
-      return data.session_id;
+      return data?.session_id || `session_${Date.now()}`;
     } catch (error) {
       console.error('Error creating research session:', error);
       throw error;
@@ -101,7 +100,7 @@ export const collaborativeAnalysisService = {
           console.log('Synced presence state');
         })
         .on('broadcast', { event: 'real_time_edit' }, (payload) => {
-          this.handleRealTimeEdit(payload);
+          collaborativeAnalysisService.handleRealTimeEdit(payload);
         })
         .subscribe();
 
@@ -167,11 +166,11 @@ export const collaborativeAnalysisService = {
       };
 
       // Detect conflicts
-      const conflicts = await this.detectEditConflicts(editData);
+      const conflicts = await collaborativeAnalysisService.detectEditConflicts(editData);
       if (conflicts.length > 0) {
         editData.conflicts = conflicts;
         // Apply conflict resolution
-        await this.resolveEditConflicts(editData);
+        await collaborativeAnalysisService.resolveEditConflicts(editData);
       }
 
       // Broadcast edit to all participants
