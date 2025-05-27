@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -101,10 +100,11 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
       const location = await capacitorService.getCurrentLocation();
       if (location) {
         // Convert from latitude/longitude to lat/lng format
-        onLocationSearch({
+        const searchLocation = {
           lat: location.latitude,
           lng: location.longitude
-        });
+        };
+        onLocationSearch(searchLocation);
       }
     } catch (error) {
       console.error('Location search error:', error);

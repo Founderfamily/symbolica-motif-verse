@@ -5,6 +5,53 @@ declare global {
     SpeechRecognition: any;
     webkitSpeechRecognition: any;
   }
+  
+  interface SpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    start(): void;
+    stop(): void;
+    onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
+    onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+    onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
+  }
+
+  interface SpeechRecognitionEvent extends Event {
+    resultIndex: number;
+    results: SpeechRecognitionResultList;
+  }
+
+  interface SpeechRecognitionErrorEvent extends Event {
+    error: string;
+  }
+
+  interface SpeechRecognitionResult {
+    0: SpeechRecognitionAlternative;
+    isFinal: boolean;
+    length: number;
+  }
+
+  interface SpeechRecognitionAlternative {
+    transcript: string;
+    confidence: number;
+  }
+
+  interface SpeechRecognitionResultList {
+    length: number;
+    [index: number]: SpeechRecognitionResult;
+  }
+
+  var SpeechRecognition: {
+    prototype: SpeechRecognition;
+    new(): SpeechRecognition;
+  };
+
+  var webkitSpeechRecognition: {
+    prototype: SpeechRecognition;
+    new(): SpeechRecognition;
+  };
 }
 
 export interface VoiceSearchResult {
@@ -14,7 +61,7 @@ export interface VoiceSearchResult {
 }
 
 class VoiceSearchService {
-  private recognition: any = null;
+  private recognition: SpeechRecognition | null = null;
   private isSupported = false;
 
   constructor() {
@@ -23,21 +70,20 @@ class VoiceSearchService {
 
   private checkSupport() {
     if (typeof window !== 'undefined') {
-      if ('webkitSpeechRecognition' in window) {
-        this.recognition = new window.webkitSpeechRecognition();
+      const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      
+      if (SpeechRecognitionConstructor) {
+        this.recognition = new SpeechRecognitionConstructor();
         this.isSupported = true;
-      } else if ('SpeechRecognition' in window) {
-        this.recognition = new window.SpeechRecognition();
-        this.isSupported = true;
+        
+        if (this.recognition) {
+          this.recognition.continuous = false;
+          this.recognition.interimResults = true;
+          this.recognition.lang = 'fr-FR';
+        }
       } else {
         console.warn('Speech recognition not supported');
         this.isSupported = false;
-      }
-
-      if (this.recognition) {
-        this.recognition.continuous = false;
-        this.recognition.interimResults = true;
-        this.recognition.lang = 'fr-FR';
       }
     }
   }
@@ -66,7 +112,7 @@ class VoiceSearchService {
         console.log('Voice recognition started');
       };
 
-      this.recognition.onresult = (event: any) => {
+      this.recognition.onresult = (event: SpeechRecognitionEvent) => {
         let interimTranscript = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -100,7 +146,7 @@ class VoiceSearchService {
         }
       };
 
-      this.recognition.onerror = (event: any) => {
+      this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         reject(new Error(`Voice recognition error: ${event.error}`));
       };
 
