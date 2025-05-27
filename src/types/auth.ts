@@ -15,6 +15,9 @@ export interface UserProfile {
   location?: string | null;
   website?: string | null;
   email_verified?: boolean | null;
+  // Add missing properties for compatibility
+  email?: string | null;
+  user_metadata?: Record<string, any> | null;
 }
 
 export interface AuthState {

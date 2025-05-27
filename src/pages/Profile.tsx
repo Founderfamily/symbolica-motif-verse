@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useGamification } from '@/hooks/useGamification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { User, Settings, Award, Activity, BarChart3 } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { ProfileEditor } from '@/components/user/ProfileEditor';
+import ProfileEditor from '@/components/user/ProfileEditor';
 import { 
   UserStatsCard, 
   AchievementsList, 
@@ -18,6 +19,7 @@ import {
 
 const Profile = () => {
   const { user } = useAuth();
+  const { recentActivities, loading } = useGamification();
   
   // Enable gamification notifications
   useGamificationNotifications();
@@ -60,13 +62,13 @@ const Profile = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold">
-                {user.user_metadata?.full_name || user.email}
+                {user.full_name || user.username || 'User'}
               </h1>
               <p className="text-slate-600">
                 <I18nText translationKey="profile.memberSince">
                   Member since
                 </I18nText>{' '}
-                {new Date(user.created_at).toLocaleDateString()}
+                {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
               </p>
             </div>
           </div>
@@ -102,7 +104,16 @@ const Profile = () => {
                 <UserStatsCard />
               </div>
               <div className="lg:col-span-2 space-y-6">
-                <ActivityFeed />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      <I18nText translationKey="profile.recentActivity">Recent Activity</I18nText>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ActivityFeed activities={recentActivities} loading={loading} />
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </TabsContent>
@@ -112,7 +123,16 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="activity">
-            <ActivityFeed showHeader={true} />
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <I18nText translationKey="profile.activityHistory">Activity History</I18nText>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ActivityFeed activities={recentActivities} loading={loading} />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="leaderboard">
