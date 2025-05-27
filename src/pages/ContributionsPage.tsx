@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -17,13 +16,17 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Eye, Grid, List, BarChart3 } from 'lucide-react';
+import { Plus, Eye, Grid, List, BarChart3, Search, Download, Settings } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import ContributionStats from '@/components/contributions/ContributionStats';
 import ContributionFilters, { ContributionFiltersState } from '@/components/contributions/ContributionFilters';
 import ContributionGridView from '@/components/contributions/ContributionGridView';
+import RealTimeAnalytics from '@/components/contributions/RealTimeAnalytics';
+import BulkOperations from '@/components/contributions/BulkOperations';
+import AdvancedSearch from '@/components/contributions/AdvancedSearch';
+import EnhancedReporting from '@/components/contributions/EnhancedReporting';
 
 const ContributionsPage = () => {
   const { user, isAdmin } = useAuth();
@@ -33,6 +36,8 @@ const ContributionsPage = () => {
   const [filteredContributions, setFilteredContributions] = useState<CompleteContribution[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
 
   useEffect(() => {
     const loadContributions = async () => {
@@ -102,6 +107,23 @@ const ContributionsPage = () => {
     }
 
     setFilteredContributions(filtered);
+    setSelectedIds([]); // Clear selection when filters change
+  };
+
+  const handleAdvancedSearchResults = (results: CompleteContribution[]) => {
+    setFilteredContributions(results);
+    setSelectedIds([]);
+  };
+
+  const handleBulkAction = (action: string, data?: any) => {
+    console.log('Bulk action:', action, data);
+    // Handle bulk actions here
+    if (action === 'export') {
+      // Already handled in component
+    } else if (action === 'statusUpdate') {
+      // Refresh contributions after status update
+      loadContributions();
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -144,12 +166,22 @@ const ContributionsPage = () => {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">{t('contributions.title')}</h1>
           <p className="text-muted-foreground mt-1">
-            Gérez et suivez toutes vos contributions
+            Gérez et suivez toutes vos contributions avec des outils avancés
           </p>
         </div>
-        <Button onClick={handleCreateNew} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" /> {t('contributions.new')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+            className="flex items-center gap-2"
+          >
+            <Search className="h-4 w-4" /> 
+            Recherche avancée
+          </Button>
+          <Button onClick={handleCreateNew} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> {t('contributions.new')}
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -159,7 +191,7 @@ const ContributionsPage = () => {
         </div>
       ) : (
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Vue d'ensemble
@@ -170,7 +202,15 @@ const ContributionsPage = () => {
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Statistiques
+              Analytics temps réel
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Rapports avancés
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Paramètres
             </TabsTrigger>
           </TabsList>
 
@@ -199,15 +239,36 @@ const ContributionsPage = () => {
           </TabsContent>
 
           <TabsContent value="contributions" className="space-y-6">
-            <ContributionFilters
-              onFiltersChange={handleFiltersChange}
-              cultures={cultures}
-              periods={periods}
+            {showAdvancedSearch && (
+              <AdvancedSearch
+                contributions={contributions}
+                onSearchResults={handleAdvancedSearchResults}
+                cultures={cultures}
+                periods={periods}
+              />
+            )}
+
+            {!showAdvancedSearch && (
+              <ContributionFilters
+                onFiltersChange={handleFiltersChange}
+                cultures={cultures}
+                periods={periods}
+              />
+            )}
+
+            <BulkOperations
+              contributions={filteredContributions}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+              onBulkAction={handleBulkAction}
             />
 
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
                 {filteredContributions.length} {t('contributions.results')}
+                {selectedIds.length > 0 && (
+                  <span className="ml-2">({selectedIds.length} sélectionnées)</span>
+                )}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -238,6 +299,19 @@ const ContributionsPage = () => {
                   <TableCaption>{t('contributions.list')}</TableCaption>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.length === filteredContributions.length && filteredContributions.length > 0}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds(filteredContributions.map(c => c.id));
+                            } else {
+                              setSelectedIds([]);
+                            }
+                          }}
+                        />
+                      </TableHead>
                       <TableHead>{t('contributions.table.title')}</TableHead>
                       <TableHead>{t('contributions.table.submissionDate')}</TableHead>
                       <TableHead>{t('contributions.table.status')}</TableHead>
@@ -248,6 +322,19 @@ const ContributionsPage = () => {
                   <TableBody>
                     {filteredContributions.map((contribution) => (
                       <TableRow key={contribution.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(contribution.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedIds([...selectedIds, contribution.id]);
+                              } else {
+                                setSelectedIds(selectedIds.filter(id => id !== contribution.id));
+                              }
+                            }}
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">{contribution.title}</TableCell>
                         <TableCell>
                           {formatDistanceToNow(new Date(contribution.created_at), {
@@ -288,8 +375,23 @@ const ContributionsPage = () => {
           </TabsContent>
 
           <TabsContent value="analytics">
-            <ContributionStats contributions={contributions} />
-            {/* Additional analytics components can be added here */}
+            <RealTimeAnalytics contributions={contributions} />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <EnhancedReporting contributions={contributions} />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium mb-2">Paramètres de contribution</h3>
+              <p className="text-muted-foreground mb-4">
+                Configurez vos préférences et notifications
+              </p>
+              <Button variant="outline">
+                Bientôt disponible
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
       )}
