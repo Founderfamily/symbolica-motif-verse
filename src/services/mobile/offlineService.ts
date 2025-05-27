@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 interface MobileFieldNote {
   id: string;
@@ -17,6 +18,20 @@ interface CacheEntry {
   timestamp: number;
 }
 
+// Type guards for data validation
+function isValidLocation(location: Json): location is { lat: number; lng: number } | null {
+  if (location === null) return true;
+  if (typeof location === 'object' && location !== null && !Array.isArray(location)) {
+    const loc = location as any;
+    return typeof loc.lat === 'number' && typeof loc.lng === 'number';
+  }
+  return false;
+}
+
+function isValidImages(images: Json): images is string[] {
+  return Array.isArray(images) && images.every(item => typeof item === 'string');
+}
+
 class OfflineService {
   private userId: string | null = null;
 
@@ -27,6 +42,13 @@ class OfflineService {
   private async initializeUser() {
     const { data: { user } } = await supabase.auth.getUser();
     this.userId = user?.id || null;
+  }
+
+  /**
+   * Initialize the service (alias for initializeUser for compatibility)
+   */
+  async initialize() {
+    await this.initializeUser();
   }
 
   private async ensureUser() {
@@ -84,15 +106,20 @@ class OfflineService {
       return [];
     }
 
-    return data.map(note => ({
-      id: note.id,
-      content: note.content,
-      location: note.location,
-      timestamp: note.timestamp,
-      audioUrl: note.audio_url,
-      images: note.images || [],
-      synced: note.synced
-    }));
+    return data.map(note => {
+      const location = isValidLocation(note.location) ? note.location : null;
+      const images = isValidImages(note.images) ? note.images : [];
+      
+      return {
+        id: note.id,
+        content: note.content,
+        location,
+        timestamp: note.timestamp,
+        audioUrl: note.audio_url,
+        images,
+        synced: note.synced
+      };
+    });
   }
 
   /**
@@ -145,7 +172,12 @@ class OfflineService {
       return null;
     }
 
-    return data.data;
+    // Validate that data is an array
+    if (Array.isArray(data.data)) {
+      return data.data;
+    }
+    
+    return null;
   }
 
   /**

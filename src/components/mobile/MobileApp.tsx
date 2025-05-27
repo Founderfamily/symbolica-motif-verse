@@ -29,10 +29,9 @@ const MobileApp: React.FC = () => {
     filesystem: false
   });
   const [storageStats, setStorageStats] = useState({
-    symbols: 0,
-    contributions: 0,
-    searches: 0,
-    fieldNotes: 0
+    fieldNotes: 0,
+    cacheEntries: 0,
+    pendingSync: 0
   });
 
   useEffect(() => {
@@ -117,7 +116,7 @@ const MobileApp: React.FC = () => {
       {!isOnline && (
         <Alert className="m-4 border-amber-200 bg-amber-50">
           <AlertDescription className="text-amber-800">
-            Mode hors ligne actif - {storageStats.symbols} symboles, {storageStats.fieldNotes} notes sauvegardées
+            Mode hors ligne actif - {storageStats.fieldNotes} notes, {storageStats.cacheEntries} éléments en cache
           </AlertDescription>
         </Alert>
       )}
