@@ -9,12 +9,12 @@ import { Search, Filter, X, Calendar, Tag, Globe } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface ContributionFiltersProps {
-  onFiltersChange: (filters: ContributionFilters) => void;
+  onFiltersChange: (filters: ContributionFiltersState) => void;
   cultures: string[];
   periods: string[];
 }
 
-export interface ContributionFilters {
+export interface ContributionFiltersState {
   search: string;
   status: string;
   culture: string;
@@ -29,7 +29,7 @@ const ContributionFilters: React.FC<ContributionFiltersProps> = ({
   periods
 }) => {
   const { t } = useTranslation();
-  const [filters, setFilters] = useState<ContributionFilters>({
+  const [filters, setFilters] = useState<ContributionFiltersState>({
     search: '',
     status: 'all',
     culture: 'all',
@@ -40,14 +40,14 @@ const ContributionFilters: React.FC<ContributionFiltersProps> = ({
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const updateFilters = (newFilters: Partial<ContributionFilters>) => {
+  const updateFilters = (newFilters: Partial<ContributionFiltersState>) => {
     const updatedFilters = { ...filters, ...newFilters };
     setFilters(updatedFilters);
     onFiltersChange(updatedFilters);
   };
 
   const clearFilters = () => {
-    const clearedFilters: ContributionFilters = {
+    const clearedFilters: ContributionFiltersState = {
       search: '',
       status: 'all',
       culture: 'all',

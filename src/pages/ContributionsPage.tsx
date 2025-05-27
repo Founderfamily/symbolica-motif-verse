@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import ContributionStats from '@/components/contributions/ContributionStats';
-import ContributionFilters, { ContributionFilters } from '@/components/contributions/ContributionFilters';
+import ContributionFilters, { ContributionFiltersState } from '@/components/contributions/ContributionFilters';
 import ContributionGridView from '@/components/contributions/ContributionGridView';
 
 const ContributionsPage = () => {
@@ -48,7 +48,7 @@ const ContributionsPage = () => {
     loadContributions();
   }, [user]);
 
-  const handleFiltersChange = (filters: ContributionFilters) => {
+  const handleFiltersChange = (filters: ContributionFiltersState) => {
     let filtered = [...contributions];
 
     // Search filter
