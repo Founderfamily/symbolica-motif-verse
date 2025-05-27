@@ -1,218 +1,358 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeftRight, Plus, X, Sparkles, Download } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  ArrowLeftRight, 
+  Globe, 
+  Clock, 
+  Palette, 
+  Target,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle
+} from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { useAuth } from '@/hooks/useAuth';
-import { useGamification } from '@/hooks/useGamification';
-import { SymbolData } from '@/types/supabase';
 import SymbolSelector from './SymbolSelector';
-
-interface ComparisonResult {
-  similarity: number;
-  sharedCultures: string[];
-  commonPatterns: string[];
-  differences: string[];
-}
+import { compareSymbols, ComparisonResult } from '@/services/advancedAnalysisService';
 
 const SymbolComparator: React.FC = () => {
-  const { user } = useAuth();
-  const { awardPoints } = useGamification();
-  const [selectedSymbols, setSelectedSymbols] = useState<SymbolData[]>([]);
+  const [selectedSymbol1, setSelectedSymbol1] = useState<string | null>(null);
+  const [selectedSymbol2, setSelectedSymbol2] = useState<string | null>(null);
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [showSelector, setShowSelector] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('similarities');
 
-  const handleAddSymbol = (symbol: SymbolData) => {
-    if (selectedSymbols.length < 4 && !selectedSymbols.find(s => s.id === symbol.id)) {
-      setSelectedSymbols([...selectedSymbols, symbol]);
-      setShowSelector(false);
+  useEffect(() => {
+    if (selectedSymbol1 && selectedSymbol2) {
+      performComparison();
     }
-  };
+  }, [selectedSymbol1, selectedSymbol2]);
 
-  const handleRemoveSymbol = (symbolId: string) => {
-    setSelectedSymbols(selectedSymbols.filter(s => s.id !== symbolId));
-    setComparisonResult(null);
-  };
-
-  const handleCompare = async () => {
-    if (selectedSymbols.length < 2) return;
+  const performComparison = async () => {
+    if (!selectedSymbol1 || !selectedSymbol2) return;
     
-    setIsAnalyzing(true);
+    setLoading(true);
     try {
-      // Simulation d'analyse comparative
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockResult: ComparisonResult = {
-        similarity: Math.random() * 100,
-        sharedCultures: selectedSymbols
-          .flatMap(s => [s.culture])
-          .filter((culture, index, arr) => arr.indexOf(culture) !== index),
-        commonPatterns: ['Geometric patterns', 'Circular motifs', 'Symmetrical design'],
-        differences: ['Color usage', 'Line thickness', 'Cultural context']
-      };
-      
-      setComparisonResult(mockResult);
-      
-      // Award points for comparison
-      if (user) {
-        await awardPoints(
-          'analysis',
-          15,
-          selectedSymbols[0].id,
-          { 
-            analysisType: 'symbol_comparison',
-            symbolsCompared: selectedSymbols.length 
-          }
-        );
-      }
+      const result = await compareSymbols(selectedSymbol1, selectedSymbol2);
+      setComparisonResult(result);
     } catch (error) {
-      console.error('Comparison failed:', error);
+      console.error('Error comparing symbols:', error);
     } finally {
-      setIsAnalyzing(false);
+      setLoading(false);
     }
   };
 
-  const handleExport = () => {
-    const exportData = {
-      symbols: selectedSymbols,
-      comparison: comparisonResult,
-      timestamp: new Date().toISOString(),
-      analyst: user?.username || 'Anonymous'
-    };
-    
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `symbol-comparison-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const getRelationshipColor = (type: string) => {
+    switch (type) {
+      case 'derivative': return 'bg-blue-100 text-blue-800';
+      case 'parallel_evolution': return 'bg-green-100 text-green-800';
+      case 'cultural_exchange': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-slate-100 text-slate-800';
+    }
+  };
+
+  const getConfidenceLevel = (score: number) => {
+    if (score >= 0.8) return { level: 'High', color: 'text-green-600' };
+    if (score >= 0.6) return { level: 'Medium', color: 'text-yellow-600' };
+    return { level: 'Low', color: 'text-red-600' };
   };
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center space-x-2">
             <ArrowLeftRight className="h-5 w-5" />
-            <I18nText translationKey="analysis.symbolComparator">Symbol Comparator</I18nText>
+            <span>Symbol Comparison Tool</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {/* Symbol Selection Area */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {selectedSymbols.map((symbol) => (
-                <div key={symbol.id} className="relative border border-slate-200 rounded-lg p-3">
-                  <button
-                    onClick={() => handleRemoveSymbol(symbol.id)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                  <h4 className="font-medium text-sm mb-1">{symbol.name}</h4>
-                  <Badge variant="outline" className="text-xs">{symbol.culture}</Badge>
-                </div>
-              ))}
-              
-              {selectedSymbols.length < 4 && (
-                <button
-                  onClick={() => setShowSelector(true)}
-                  className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center text-slate-500 hover:border-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <Plus className="h-6 w-6 mb-2" />
-                  <span className="text-sm">
-                    <I18nText translationKey="analysis.addSymbol">Add Symbol</I18nText>
-                  </span>
-                </button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Symbol 1 Selection */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Symbol 1</h3>
+              <SymbolSelector
+                onSymbolSelect={setSelectedSymbol1}
+                selectedSymbol={selectedSymbol1}
+                placeholder="Select first symbol for comparison"
+              />
+              {comparisonResult?.symbol1 && (
+                <Card className="border-blue-200">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium">{comparisonResult.symbol1.name}</h4>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="secondary">{comparisonResult.symbol1.culture}</Badge>
+                      <Badge variant="outline">{comparisonResult.symbol1.period}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Button 
-                onClick={handleCompare}
-                disabled={selectedSymbols.length < 2 || isAnalyzing}
-                className="flex items-center gap-2"
-              >
-                <Sparkles className="h-4 w-4" />
-                {isAnalyzing ? (
-                  <I18nText translationKey="analysis.analyzing">Analyzing...</I18nText>
-                ) : (
-                  <I18nText translationKey="analysis.compare">Compare</I18nText>
-                )}
-              </Button>
-              
-              {comparisonResult && (
-                <Button variant="outline" onClick={handleExport} className="flex items-center gap-2">
-                  <Download className="h-4 w-4" />
-                  <I18nText translationKey="analysis.export">Export</I18nText>
-                </Button>
+            {/* Symbol 2 Selection */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Symbol 2</h3>
+              <SymbolSelector
+                onSymbolSelect={setSelectedSymbol2}
+                selectedSymbol={selectedSymbol2}
+                placeholder="Select second symbol for comparison"
+              />
+              {comparisonResult?.symbol2 && (
+                <Card className="border-green-200">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium">{comparisonResult.symbol2.name}</h4>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="secondary">{comparisonResult.symbol2.culture}</Badge>
+                      <Badge variant="outline">{comparisonResult.symbol2.period}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </div>
           </div>
+
+          {loading && (
+            <div className="text-center py-8">
+              <div className="w-8 h-8 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-slate-600">Analyzing symbol relationships...</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Comparison Results */}
-      {comparisonResult && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <I18nText translationKey="analysis.comparisonResults">Comparison Results</I18nText>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="space-y-3">
-                <h4 className="font-medium text-slate-700">
-                  <I18nText translationKey="analysis.similarity">Similarity Score</I18nText>
-                </h4>
-                <div className="text-2xl font-bold text-blue-600">
-                  {comparisonResult.similarity.toFixed(1)}%
+      {comparisonResult && !loading && (
+        <div className="space-y-6">
+          {/* Comparison Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Comparison Results</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getRelationshipColor(comparisonResult.relationship_type)}`}>
+                    {comparisonResult.relationship_type.replace('_', ' ').toUpperCase()}
+                  </div>
+                  <p className="text-sm text-slate-600 mt-2">Relationship Type</p>
                 </div>
-              </div>
-              
-              <div className="space-y-3">
-                <h4 className="font-medium text-slate-700">
-                  <I18nText translationKey="analysis.commonPatterns">Common Patterns</I18nText>
-                </h4>
-                <div className="space-y-1">
-                  {comparisonResult.commonPatterns.map((pattern, index) => (
-                    <Badge key={index} variant="secondary" className="mr-1">
-                      {pattern}
-                    </Badge>
-                  ))}
+                
+                <div className="text-center">
+                  <div className="flex items-center justify-center space-x-2">
+                    <span className={`text-2xl font-bold ${getConfidenceLevel(comparisonResult.confidence_score).color}`}>
+                      {Math.round(comparisonResult.confidence_score * 100)}%
+                    </span>
+                    {comparisonResult.confidence_score >= 0.7 ? (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-600 mt-2">Confidence Score</p>
+                  <Progress value={comparisonResult.confidence_score * 100} className="mt-2" />
                 </div>
-              </div>
-              
-              <div className="space-y-3">
-                <h4 className="font-medium text-slate-700">
-                  <I18nText translationKey="analysis.differences">Key Differences</I18nText>
-                </h4>
-                <div className="space-y-1">
-                  {comparisonResult.differences.map((diff, index) => (
-                    <Badge key={index} variant="outline" className="mr-1">
-                      {diff}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Symbol Selector Modal */}
-      {showSelector && (
-        <SymbolSelector
-          onSelect={handleAddSymbol}
-          onClose={() => setShowSelector(false)}
-          excludeIds={selectedSymbols.map(s => s.id)}
-        />
+                <div className="text-center">
+                  <TrendingUp className="h-8 w-8 text-blue-500 mx-auto" />
+                  <p className="text-sm text-slate-600 mt-2">Analysis Complete</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Detailed Comparison */}
+          <Card>
+            <CardContent className="p-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="similarities">Similarities</TabsTrigger>
+                  <TabsTrigger value="differences">Differences</TabsTrigger>
+                  <TabsTrigger value="cultural">Cultural</TabsTrigger>
+                  <TabsTrigger value="temporal">Temporal</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="similarities" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center space-x-2">
+                          <Globe className="h-4 w-4" />
+                          <span>Cultural Similarities</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {comparisonResult.similarities.cultural.length > 0 ? (
+                          <ul className="space-y-2">
+                            {comparisonResult.similarities.cultural.map((similarity, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm">{similarity}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-slate-500">No cultural similarities found</p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center space-x-2">
+                          <Clock className="h-4 w-4" />
+                          <span>Temporal Similarities</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {comparisonResult.similarities.temporal.length > 0 ? (
+                          <ul className="space-y-2">
+                            {comparisonResult.similarities.temporal.map((similarity, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm">{similarity}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-slate-500">No temporal similarities found</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="differences" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center space-x-2">
+                          <Globe className="h-4 w-4" />
+                          <span>Cultural Differences</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {comparisonResult.differences.cultural.length > 0 ? (
+                          <ul className="space-y-2">
+                            {comparisonResult.differences.cultural.map((difference, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <AlertCircle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm">{difference}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-slate-500">No cultural differences identified</p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center space-x-2">
+                          <Clock className="h-4 w-4" />
+                          <span>Temporal Differences</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {comparisonResult.differences.temporal.length > 0 ? (
+                          <ul className="space-y-2">
+                            {comparisonResult.differences.temporal.map((difference, index) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <AlertCircle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm">{difference}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-slate-500">No temporal differences identified</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="cultural">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Cultural Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-medium mb-3">{comparisonResult.symbol1.name}</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-slate-600">Culture:</span>
+                              <Badge>{comparisonResult.symbol1.culture}</Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-slate-600">Regions:</span>
+                              <span className="text-sm">{comparisonResult.symbol1.geographic_distribution.regions.length}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-3">{comparisonResult.symbol2.name}</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-slate-600">Culture:</span>
+                              <Badge>{comparisonResult.symbol2.culture}</Badge>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-slate-600">Regions:</span>
+                              <span className="text-sm">{comparisonResult.symbol2.geographic_distribution.regions.length}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="temporal">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Temporal Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-medium mb-3">{comparisonResult.symbol1.name}</h4>
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-sm text-slate-600">Period:</span>
+                              <p className="font-medium">{comparisonResult.symbol1.period}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm text-slate-600">Earliest Occurrence:</span>
+                              <p className="text-sm">{comparisonResult.symbol1.temporal_analysis.earliest_occurrence}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-3">{comparisonResult.symbol2.name}</h4>
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-sm text-slate-600">Period:</span>
+                              <p className="font-medium">{comparisonResult.symbol2.period}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm text-slate-600">Earliest Occurrence:</span>
+                              <p className="text-sm">{comparisonResult.symbol2.temporal_analysis.earliest_occurrence}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
