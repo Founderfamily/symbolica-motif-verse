@@ -10,7 +10,9 @@ import { Users, MessageCircle, Settings, UserPlus, UserMinus } from 'lucide-reac
 import { I18nText } from '@/components/ui/i18n-text';
 import { InterestGroup, GroupPost } from '@/types/interest-groups';
 import GroupDiscussion from '@/components/community/GroupDiscussion';
+import GroupMembersList from '@/components/community/GroupMembersList';
 import { getGroupById } from '@/services/interestGroupService';
+import { joinGroup, leaveGroup, checkGroupMembership, getGroupPosts, createGroupPost, likePost } from '@/services/communityService';
 import { useAuth } from '@/hooks/useAuth';
 
 const GroupDetailPage: React.FC = () => {
@@ -19,43 +21,100 @@ const GroupDetailPage: React.FC = () => {
   const [posts, setPosts] = useState<GroupPost[]>([]);
   const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const auth = useAuth();
 
   useEffect(() => {
     if (slug) {
       loadGroupData();
     }
-  }, [slug]);
+  }, [slug, auth?.user]);
 
   const loadGroupData = async () => {
     try {
-      // Since we don't have getGroupBySlug, we'll need to modify this
-      // For now, we'll use a placeholder
-      setLoading(false);
+      // For now, we'll find the group by slug in the groups we fetch
+      // In a real app, you'd have a getGroupBySlug function
+      const allGroups = await import('@/services/interestGroupService').then(m => m.getAllGroups());
+      const foundGroup = (await allGroups()).find(g => g.slug === slug);
+      
+      if (foundGroup) {
+        setGroup(foundGroup);
+        
+        if (auth?.user) {
+          const membershipStatus = await checkGroupMembership(foundGroup.id, auth.user.id);
+          setIsMember(membershipStatus);
+          
+          if (membershipStatus) {
+            const groupPosts = await getGroupPosts(foundGroup.id);
+            setPosts(groupPosts);
+          }
+        }
+      }
     } catch (error) {
       console.error('Error loading group:', error);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleJoinGroup = async () => {
-    // TODO: Implement join group functionality
-    setIsMember(true);
+    if (!auth?.user || !group || actionLoading) return;
+    
+    setActionLoading(true);
+    try {
+      await joinGroup(group.id, auth.user.id);
+      setIsMember(true);
+      // Reload posts now that user is a member
+      const groupPosts = await getGroupPosts(group.id);
+      setPosts(groupPosts);
+    } catch (error) {
+      console.error('Error joining group:', error);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleLeaveGroup = async () => {
-    // TODO: Implement leave group functionality
-    setIsMember(false);
+    if (!auth?.user || !group || actionLoading) return;
+    
+    setActionLoading(true);
+    try {
+      await leaveGroup(group.id, auth.user.id);
+      setIsMember(false);
+      setPosts([]); // Clear posts since user is no longer a member
+    } catch (error) {
+      console.error('Error leaving group:', error);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleCreatePost = async (content: string) => {
-    // TODO: Implement create post functionality
-    console.log('Creating post:', content);
+    if (!auth?.user || !group) return;
+    
+    try {
+      await createGroupPost(group.id, auth.user.id, content);
+      // Reload posts
+      const groupPosts = await getGroupPosts(group.id);
+      setPosts(groupPosts);
+    } catch (error) {
+      console.error('Error creating post:', error);
+    }
   };
 
   const handleLikePost = async (postId: string) => {
-    // TODO: Implement like post functionality
-    console.log('Liking post:', postId);
+    if (!auth?.user) return;
+    
+    try {
+      await likePost(postId, auth.user.id);
+      // Reload posts to update like counts
+      if (group) {
+        const groupPosts = await getGroupPosts(group.id);
+        setPosts(groupPosts);
+      }
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
   };
 
   if (loading) {
@@ -76,24 +135,26 @@ const GroupDetailPage: React.FC = () => {
     );
   }
 
-  // Placeholder group data for demonstration
-  const placeholderGroup: InterestGroup = {
-    id: '1',
-    name: 'Ancient Egyptian Symbols',
-    slug: slug || '',
-    description: 'Explore the rich symbolism of ancient Egypt',
-    icon: null,
-    banner_image: null,
-    theme_color: '#3B82F6',
-    is_public: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    created_by: '1',
-    members_count: 156,
-    discoveries_count: 23
-  };
-
-  const displayGroup = group || placeholderGroup;
+  if (!group) {
+    return (
+      <div className="min-h-screen bg-slate-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <Card>
+            <CardContent className="text-center py-12">
+              <h3 className="text-lg font-medium text-slate-900 mb-2">
+                <I18nText translationKey="community.groupNotFound">Group not found</I18nText>
+              </h3>
+              <p className="text-slate-600">
+                <I18nText translationKey="community.groupNotFoundDescription">
+                  The group you're looking for doesn't exist or has been removed.
+                </I18nText>
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -104,24 +165,24 @@ const GroupDetailPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={displayGroup.icon || ''} alt={displayGroup.name} />
-                  <AvatarFallback style={{ backgroundColor: displayGroup.theme_color }}>
-                    {displayGroup.name.charAt(0).toUpperCase()}
+                  <AvatarImage src={group.icon || ''} alt={group.name} />
+                  <AvatarFallback style={{ backgroundColor: group.theme_color }}>
+                    {group.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <CardTitle className="text-2xl">{displayGroup.name}</CardTitle>
+                  <CardTitle className="text-2xl">{group.name}</CardTitle>
                   <div className="flex items-center space-x-4 text-slate-600 mt-1">
                     <div className="flex items-center space-x-1">
                       <Users className="h-4 w-4" />
-                      <span>{displayGroup.members_count} <I18nText translationKey="community.members">members</I18nText></span>
+                      <span>{group.members_count} <I18nText translationKey="community.members">members</I18nText></span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <MessageCircle className="h-4 w-4" />
-                      <span>{displayGroup.discoveries_count} <I18nText translationKey="community.discoveries">discoveries</I18nText></span>
+                      <span>{group.discoveries_count} <I18nText translationKey="community.discoveries">discoveries</I18nText></span>
                     </div>
-                    <Badge variant={displayGroup.is_public ? "secondary" : "outline"}>
-                      {displayGroup.is_public ? 
+                    <Badge variant={group.is_public ? "secondary" : "outline"}>
+                      {group.is_public ? 
                         <I18nText translationKey="community.public">Public</I18nText> : 
                         <I18nText translationKey="community.private">Private</I18nText>
                       }
@@ -133,12 +194,12 @@ const GroupDetailPage: React.FC = () => {
               {auth?.user && (
                 <div className="flex space-x-2">
                   {isMember ? (
-                    <Button variant="outline" onClick={handleLeaveGroup}>
+                    <Button variant="outline" onClick={handleLeaveGroup} disabled={actionLoading}>
                       <UserMinus className="h-4 w-4 mr-2" />
                       <I18nText translationKey="community.leave">Leave</I18nText>
                     </Button>
                   ) : (
-                    <Button onClick={handleJoinGroup}>
+                    <Button onClick={handleJoinGroup} disabled={actionLoading}>
                       <UserPlus className="h-4 w-4 mr-2" />
                       <I18nText translationKey="community.join">Join</I18nText>
                     </Button>
@@ -151,7 +212,7 @@ const GroupDetailPage: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-slate-700">{displayGroup.description}</p>
+            <p className="text-slate-700">{group.description}</p>
           </CardContent>
         </Card>
 
@@ -170,29 +231,38 @@ const GroupDetailPage: React.FC = () => {
           </TabsList>
 
           <TabsContent value="discussion">
-            <GroupDiscussion
-              groupId={displayGroup.id}
-              posts={posts}
-              onCreatePost={handleCreatePost}
-              onLikePost={handleLikePost}
-            />
+            {isMember ? (
+              <GroupDiscussion
+                groupId={group.id}
+                posts={posts}
+                onCreatePost={handleCreatePost}
+                onLikePost={handleLikePost}
+              />
+            ) : (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <MessageCircle className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">
+                    <I18nText translationKey="community.joinToSeeDiscussions">Join to see discussions</I18nText>
+                  </h3>
+                  <p className="text-slate-600 mb-4">
+                    <I18nText translationKey="community.joinToParticipate">
+                      Join this group to participate in discussions and see posts from other members
+                    </I18nText>
+                  </p>
+                  {auth?.user && (
+                    <Button onClick={handleJoinGroup} disabled={actionLoading}>
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      <I18nText translationKey="community.join">Join</I18nText>
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="members">
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  <I18nText translationKey="community.groupMembers">Group Members</I18nText>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">
-                  <I18nText translationKey="community.membersComingSoon">
-                    Member list functionality coming soon
-                  </I18nText>
-                </p>
-              </CardContent>
-            </Card>
+            <GroupMembersList groupId={group.id} />
           </TabsContent>
 
           <TabsContent value="discoveries">

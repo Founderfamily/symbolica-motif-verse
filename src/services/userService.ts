@@ -3,141 +3,103 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface UserProfile {
   id: string;
-  username: string | null;
-  full_name: string | null;
-  is_admin: boolean;
-  created_at: string;
+  username: string;
+  full_name: string;
   bio?: string;
   location?: string;
   website?: string;
+  followers_count: number;
+  following_count: number;
   contributions_count: number;
-  verified_uploads: number;
-  favorite_cultures?: string[];
+  created_at: string;
 }
 
-export const userService = {
-  // Récupérer tous les utilisateurs (admin seulement)
-  async getAllUsers(): Promise<UserProfile[]> {
+export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  try {
     const { data, error } = await supabase
       .from('profiles')
-      .select(`
-        id,
-        username,
-        full_name,
-        is_admin,
-        created_at
-      `)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    
-    // Assurer que tous les champs requis sont présents
-    return (data || []).map(user => ({
-      ...user,
-      contributions_count: 0,
-      verified_uploads: 0,
-      bio: undefined,
-      location: undefined,
-      website: undefined,
-      favorite_cultures: undefined
-    }));
-  },
-
-  // Récupérer un utilisateur par ID
-  async getUserById(id: string): Promise<UserProfile | null> {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select(`
-        id,
-        username,
-        full_name,
-        is_admin,
-        created_at
-      `)
-      .eq('id', id)
+      .select('*')
+      .eq('id', userId)
       .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') return null; // Not found
-      throw error;
-    }
-    
-    // Assurer que tous les champs requis sont présents
+    if (error) throw error;
+
+    // Get additional stats
+    const [followersResult, followingResult, contributionsResult] = await Promise.all([
+      supabase.from('user_follows').select('id').eq('followed_id', userId),
+      supabase.from('user_follows').select('id').eq('follower_id', userId),
+      supabase.from('user_contributions').select('id').eq('user_id', userId)
+    ]);
+
     return {
       ...data,
-      contributions_count: 0,
-      verified_uploads: 0,
-      bio: undefined,
-      location: undefined,
-      website: undefined,
-      favorite_cultures: undefined
+      followers_count: followersResult.data?.length || 0,
+      following_count: followingResult.data?.length || 0,
+      contributions_count: contributionsResult.data?.length || 0
     };
-  },
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
+  }
+};
 
-  // Mettre à jour le statut admin d'un utilisateur
-  async updateAdminStatus(userId: string, isAdmin: boolean): Promise<void> {
+export const followUser = async (followerId: string, followedId: string) => {
+  try {
     const { error } = await supabase
-      .from('profiles')
-      .update({ is_admin: isAdmin })
-      .eq('id', userId);
+      .from('user_follows')
+      .insert({
+        follower_id: followerId,
+        followed_id: followedId
+      });
 
     if (error) throw error;
-  },
+  } catch (error) {
+    console.error('Error following user:', error);
+    throw error;
+  }
+};
 
-  // Mettre à jour le profil d'un utilisateur
-  async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
+export const unfollowUser = async (followerId: string, followedId: string) => {
+  try {
     const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', userId);
+      .from('user_follows')
+      .delete()
+      .eq('follower_id', followerId)
+      .eq('followed_id', followedId);
 
     if (error) throw error;
-  },
+  } catch (error) {
+    console.error('Error unfollowing user:', error);
+    throw error;
+  }
+};
 
-  // Rechercher des utilisateurs par nom/username
-  async searchUsers(query: string): Promise<UserProfile[]> {
+export const checkFollowStatus = async (followerId: string, followedId: string) => {
+  try {
     const { data, error } = await supabase
-      .from('profiles')
-      .select(`
-        id,
-        username,
-        full_name,
-        is_admin,
-        created_at
-      `)
-      .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
-      .order('created_at', { ascending: false });
+      .from('user_follows')
+      .select('id')
+      .eq('follower_id', followerId)
+      .eq('followed_id', followedId)
+      .single();
 
-    if (error) throw error;
-    
-    return (data || []).map(user => ({
-      ...user,
-      contributions_count: 0,
-      verified_uploads: 0,
-      bio: undefined,
-      location: undefined,
-      website: undefined,
-      favorite_cultures: undefined
-    }));
-  },
+    if (error && error.code !== 'PGRST116') throw error;
+    return !!data;
+  } catch (error) {
+    console.error('Error checking follow status:', error);
+    return false;
+  }
+};
 
-  // Obtenir les statistiques des utilisateurs
-  async getUserStats() {
+export const getTopContributors = async (limit: number = 10) => {
+  try {
     const { data, error } = await supabase
-      .from('profiles')
-      .select('is_admin, created_at');
+      .rpc('get_top_contributors', { p_limit: limit });
 
     if (error) throw error;
-
-    const total = data?.length || 0;
-    const admins = data?.filter(u => u.is_admin).length || 0;
-    const regular = total - admins;
-
-    return {
-      total,
-      admins,
-      regular,
-      data
-    };
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching top contributors:', error);
+    return [];
   }
 };

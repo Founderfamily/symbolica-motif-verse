@@ -15,6 +15,7 @@ import ContributionDetail from '@/pages/ContributionDetail';
 import AnalysisPage from '@/pages/AnalysisPage';
 import CommunityPage from '@/pages/CommunityPage';
 import GroupDetailPage from '@/pages/GroupDetailPage';
+import UserProfilePage from '@/pages/UserProfilePage';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import AboutPage from '@/pages/AboutPage';
@@ -65,6 +66,7 @@ function App() {
               <Route path="analysis" element={<AnalysisPage />} />
               <Route path="community" element={<CommunityPage />} />
               <Route path="groups/:slug" element={<GroupDetailPage />} />
+              <Route path="users/:userId" element={<UserProfilePage />} />
               <Route path="auth" element={<Auth />} />
               <Route path="profile" element={<Profile />} />
               <Route path="about" element={<AboutPage />} />
