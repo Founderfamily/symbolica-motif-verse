@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/sonner";
@@ -15,6 +14,7 @@ import EnterprisePage from '@/pages/EnterprisePage';
 import NotFound from '@/pages/NotFound';
 import CollectionsPage from '@/pages/CollectionsPage';
 import MobileAppPage from '@/pages/MobileApp';
+import MapExplorer from '@/pages/MapExplorer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +49,7 @@ function App() {
                 <Route path="/analysis" element={<AnalysisPage />} />
                 <Route path="/contributions" element={<ContributionsPage />} />
                 <Route path="/symbols/:id" element={<SymbolExplorer />} />
+                <Route path="/map" element={<MapExplorer />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/profile/:username" element={<UserProfilePage />} />
                 <Route path="/profile/:username/edit" element={<Profile />} />
