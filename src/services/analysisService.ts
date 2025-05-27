@@ -35,7 +35,17 @@ export const analysisService = {
         .single();
 
       if (error) throw error;
-      return result;
+      
+      // Transform the database result to match AnalysisResult interface
+      const analysisResult: AnalysisResult = {
+        id: result.id,
+        type: (result.details as any)?.analysis_type || 'comparison',
+        data: (result.details as any)?.data || {},
+        created_at: result.created_at,
+        user_id: result.user_id
+      };
+      
+      return analysisResult;
     } catch (error) {
       console.error('Error saving analysis:', error);
       return null;
@@ -55,7 +65,15 @@ export const analysisService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Transform the database results to match AnalysisResult interface
+      return (data || []).map(item => ({
+        id: item.id,
+        type: (item.details as any)?.analysis_type || 'comparison',
+        data: (item.details as any)?.data || {},
+        created_at: item.created_at,
+        user_id: item.user_id
+      }));
     } catch (error) {
       console.error('Error fetching user analyses:', error);
       return [];
@@ -125,8 +143,8 @@ export const analysisService = {
 
       const stats = {
         total_analyses: data?.length || 0,
-        comparisons: data?.filter(a => a.details?.analysis_type === 'comparison').length || 0,
-        temporal_analyses: data?.filter(a => a.details?.analysis_type === 'temporal').length || 0,
+        comparisons: data?.filter(a => (a.details as any)?.analysis_type === 'comparison').length || 0,
+        temporal_analyses: data?.filter(a => (a.details as any)?.analysis_type === 'temporal').length || 0,
         recent_activity: data?.slice(0, 10) || []
       };
 

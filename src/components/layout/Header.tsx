@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ import {
 import { Search, User, Settings, HelpCircle, Languages } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
-import LanguageSelector from './LanguageSelector';
+import { LanguageSelector } from '@/components/ui/language-selector';
 import { I18nText } from '@/components/ui/i18n-text';
 
 interface HeaderProps {
