@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { ImageAnnotator } from '@/components/patterns/ImageAnnotator';
 import { PatternManager } from '@/components/patterns/PatternManager';
 import { useSymbolImages } from '@/hooks/useSymbolImages';
+import { useAuth } from '@/hooks/useAuth';
+import { useGamification } from '@/hooks/useGamification';
 import { supabase } from '@/integrations/supabase/client';
 import { Sparkles } from 'lucide-react';
 import type { SymbolData } from '@/types/supabase';
@@ -16,9 +17,41 @@ interface SymbolDetailViewProps {
 }
 
 export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) => {
+  const { user } = useAuth();
+  const { awardPoints } = useGamification();
   const [selectedImageType, setSelectedImageType] = useState<'original' | 'pattern' | 'reuse'>('original');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasAwardedExplorationPoints, setHasAwardedExplorationPoints] = useState(false);
   const { loading: imagesLoading, images } = useSymbolImages(symbol.id);
+
+  // Award exploration points when user views symbol details
+  useEffect(() => {
+    if (user && !hasAwardedExplorationPoints) {
+      const awardExplorationPoints = async () => {
+        try {
+          const success = await awardPoints(
+            'exploration',
+            10, // 10 points for exploring a symbol
+            symbol.id,
+            { 
+              symbolName: symbol.name, 
+              symbolCulture: symbol.culture 
+            }
+          );
+          
+          if (success) {
+            setHasAwardedExplorationPoints(true);
+          }
+        } catch (error) {
+          console.error('Error awarding exploration points:', error);
+        }
+      };
+      
+      // Delay to avoid awarding points immediately on page load
+      const timer = setTimeout(awardExplorationPoints, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, symbol.id, symbol.name, symbol.culture, awardPoints, hasAwardedExplorationPoints]);
 
   const handleAIAnalysis = async () => {
     const currentImage = images[selectedImageType];
@@ -37,7 +70,19 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
       if (error) throw error;
 
       console.log('AI analysis completed:', data);
-      // Les suggestions seront visibles dans l'interface d'annotation
+      
+      // Award points for using AI analysis
+      if (user) {
+        await awardPoints(
+          'validation',
+          15, // 15 points for AI analysis
+          currentImage.id,
+          { 
+            analysisType: 'ai_pattern_recognition',
+            symbolName: symbol.name 
+          }
+        );
+      }
     } catch (error) {
       console.error('Error during AI analysis:', error);
     } finally {
@@ -165,6 +210,18 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
             symbolId={symbol.id}
             onPatternCreated={(pattern) => {
               console.log('Nouveau motif créé:', pattern);
+              // Award points for pattern creation
+              if (user) {
+                awardPoints(
+                  'contribution',
+                  20, // 20 points for creating a pattern
+                  pattern.id,
+                  { 
+                    patternName: pattern.name,
+                    symbolName: symbol.name 
+                  }
+                );
+              }
             }}
           />
         </TabsContent>
