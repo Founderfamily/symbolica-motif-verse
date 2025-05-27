@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,7 +63,16 @@ const RealTimeCollaboration: React.FC<RealTimeCollaborationProps> = ({
     const channel = supabase.channel('analysis_collaboration')
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        const users = Object.values(state).flat() as CollaborationUser[];
+        // Properly transform presence state to CollaborationUser objects
+        const users: CollaborationUser[] = Object.values(state).flat().map((presence: any) => ({
+          id: presence.id || 'unknown',
+          name: presence.name || 'Unknown User',
+          avatar: presence.avatar,
+          role: presence.role || 'researcher',
+          status: presence.status || 'active',
+          cursor_position: presence.cursor_position,
+          current_action: presence.current_action
+        }));
         setActiveUsers(users);
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {

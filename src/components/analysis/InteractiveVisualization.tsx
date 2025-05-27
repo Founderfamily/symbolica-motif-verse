@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   LineChart, Line, ScatterChart, Scatter, ResponsiveContainer,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   Treemap, Cell, PieChart, Pie
 } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -216,7 +216,6 @@ const InteractiveVisualization: React.FC<InteractiveVisualizationProps> = ({ dat
                   <Treemap
                     data={clusterData}
                     dataKey="value"
-                    ratio={4/3}
                     stroke="#fff"
                     fill="#8884d8"
                   >
