@@ -36,8 +36,8 @@ const ContactPage = () => <div className="p-8"><h1>Contact Page</h1></div>;
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <div className="min-h-screen bg-background">
             <Routes>
               {/* Mobile app route - accessible without layout for full mobile experience */}
@@ -65,8 +65,8 @@ function App() {
             </Routes>
             <Toaster />
           </div>
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 }
