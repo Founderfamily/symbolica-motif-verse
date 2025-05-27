@@ -1,209 +1,150 @@
-
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Search, Globe } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Search, User, Settings, HelpCircle, Languages } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/i18n/useTranslation';
+import LanguageSelector from './LanguageSelector';
 import { I18nText } from '@/components/ui/i18n-text';
-import LanguageSelector from '@/components/ui/language-selector';
 
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
-  const location = useLocation();
+interface HeaderProps {
+  onAuthClick: () => void;
+}
 
-  const isActive = (path: string) => location.pathname === path;
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+const Header: React.FC<HeaderProps> = ({ onAuthClick }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const auth = useAuth();
+  const { t } = useTranslation();
 
   return (
-    <header className="bg-white shadow-sm border-b border-slate-200">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
-            </div>
-            <span className="text-xl font-serif font-bold text-slate-900">Symbolica</span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <I18nText translationKey="navigation.home" />
+          {/* Logo and main navigation */}
+          <div className="flex items-center space-x-8">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <img 
+                src="/logo.svg" 
+                alt="Cultural Symbols" 
+                className="h-8 w-8"
+              />
+              <span className="font-bold text-xl text-slate-900 hidden sm:block">
+                Cultural Symbols
+              </span>
             </Link>
-            <Link
-              to="/collections"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/collections') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <I18nText translationKey="navigation.collections" />
-            </Link>
-            <div className="relative group">
-              <button className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                <I18nText translationKey="navigation.explore" />
-              </button>
-              <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                <div className="py-1">
-                  <Link
-                    to="/symbols"
-                    className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                  >
-                    <I18nText translationKey="navigation.allSymbols" />
-                  </Link>
-                  <Link
-                    to="/map"
-                    className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                  >
-                    <I18nText translationKey="navigation.map" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <Link
-              to="/contributions"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/contributions') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <I18nText translationKey="navigation.contributions" />
-            </Link>
-            <Link
-              to="/about"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/about') ? 'text-amber-600' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <I18nText translationKey="navigation.about" />
-            </Link>
-          </nav>
-
-          {/* Right side */}
-          <div className="hidden md:flex items-center space-x-4">
-            <LanguageSelector />
             
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <Link to="/profile">
-                  <Button variant="ghost" size="sm">
-                    <I18nText translationKey="navigation.profile" />
-                  </Button>
-                </Link>
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  <I18nText translationKey="navigation.signOut" />
-                </Button>
-              </div>
-            ) : (
-              <Link to="/auth">
-                <Button size="sm">
-                  <I18nText translationKey="navigation.signIn" />
-                </Button>
+            {/* Main Navigation */}
+            <nav className="hidden md:flex space-x-6">
+              <Link 
+                to="/symbols" 
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <I18nText translationKey="navigation.symbols">Symbols</I18nText>
               </Link>
+              <Link 
+                to="/map" 
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <I18nText translationKey="navigation.map">Map</I18nText>
+              </Link>
+              <Link 
+                to="/collections" 
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <I18nText translationKey="navigation.collections">Collections</I18nText>
+              </Link>
+              <Link 
+                to="/analysis" 
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <I18nText translationKey="navigation.analysis">Analysis</I18nText>
+              </Link>
+              <Link 
+                to="/contributions" 
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <I18nText translationKey="navigation.contributions">Contributions</I18nText>
+              </Link>
+            </nav>
+          </div>
+
+          {/* Search, Language Selector, and User Menu */}
+          <div className="flex items-center space-x-4">
+            {/* Search Bar */}
+            <div className="relative hidden md:block">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Search className="h-5 w-5 text-slate-400" />
+              </div>
+              <Input
+                type="search"
+                placeholder={t('header.search')}
+                className="pl-10 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring focus:ring-blue-200 text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {/* Language Selector */}
+            <LanguageSelector />
+
+            {/* User Menu */}
+            {auth?.user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={auth.user.avatar_url || `https://avatar.vercel.sh/${auth.user.username}.png`} alt={auth.user.username || 'Avatar'} />
+                      <AvatarFallback>{auth.user.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel>
+                    <I18nText translationKey="header.myAccount">My Account</I18nText>
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">
+                      <User className="mr-2 h-4 w-4" />
+                      <I18nText translationKey="header.profile">Profile</I18nText>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/contribute">
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      <I18nText translationKey="header.contribute">Contribute</I18nText>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <I18nText translationKey="header.adminDashboard">Admin Dashboard</I18nText>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => auth.signOut()}>
+                    <I18nText translationKey="header.logout">Log out</I18nText>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="outline" onClick={onAuthClick}>
+                <I18nText translationKey="header.login">Log In</I18nText>
+              </Button>
             )}
           </div>
-
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-slate-200">
-            <div className="space-y-2">
-              <Link
-                to="/"
-                className="block py-2 text-base font-medium text-slate-900"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <I18nText translationKey="navigation.home" />
-              </Link>
-              <Link
-                to="/collections"
-                className="block py-2 text-base font-medium text-slate-900"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <I18nText translationKey="navigation.collections" />
-              </Link>
-              <Link
-                to="/symbols"
-                className="block py-2 text-base font-medium text-slate-900"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <I18nText translationKey="navigation.allSymbols" />
-              </Link>
-              <Link
-                to="/map"
-                className="block py-2 text-base font-medium text-slate-900"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <I18nText translationKey="navigation.map" />
-              </Link>
-              <Link
-                to="/contributions"
-                className="block py-2 text-base font-medium text-slate-900"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <I18nText translationKey="navigation.contributions" />
-              </Link>
-              <Link
-                to="/about"
-                className="block py-2 text-base font-medium text-slate-900"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <I18nText translationKey="navigation.about" />
-              </Link>
-              
-              <div className="pt-4 border-t border-slate-200">
-                {user ? (
-                  <div className="space-y-2">
-                    <Link
-                      to="/profile"
-                      className="block py-2 text-base font-medium text-slate-900"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <I18nText translationKey="navigation.profile" />
-                    </Link>
-                    <button
-                      onClick={() => {
-                        handleSignOut();
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full text-left py-2 text-base font-medium text-slate-900"
-                    >
-                      <I18nText translationKey="navigation.signOut" />
-                    </button>
-                  </div>
-                ) : (
-                  <Link
-                    to="/auth"
-                    className="block py-2 text-base font-medium text-slate-900"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <I18nText translationKey="navigation.signIn" />
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </header>
   );

@@ -12,6 +12,7 @@ import TrendingPage from '@/pages/TrendingPage';
 import ContributionsPage from '@/pages/ContributionsPage';
 import NewContribution from '@/pages/NewContribution';
 import ContributionDetail from '@/pages/ContributionDetail';
+import AnalysisPage from '@/pages/AnalysisPage';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import AboutPage from '@/pages/AboutPage';
@@ -59,6 +60,7 @@ function App() {
               <Route path="contribute" element={<NewContribution />} />
               <Route path="contributions/new" element={<NewContribution />} />
               <Route path="contributions/:id" element={<ContributionDetail />} />
+              <Route path="analysis" element={<AnalysisPage />} />
               <Route path="auth" element={<Auth />} />
               <Route path="profile" element={<Profile />} />
               <Route path="about" element={<AboutPage />} />
