@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,33 +27,36 @@ const ActivityFeed: React.FC = () => {
 
   const loadActivities = async () => {
     try {
-      // Fetch recent group posts as activities
+      // Fetch recent group posts
       const { data: posts, error } = await supabase
         .from('group_posts')
-        .select(`
-          id,
-          content,
-          created_at,
-          profiles!user_id (
-            username,
-            full_name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
 
-      const activityItems: ActivityItem[] = (posts || []).map(post => ({
-        id: post.id,
-        type: 'post',
-        user: {
-          username: post.profiles?.username || 'unknown',
-          full_name: post.profiles?.full_name || 'Unknown User'
-        },
-        content: post.content,
-        created_at: post.created_at
-      }));
+      // Get profiles for each post
+      const activityItems: ActivityItem[] = [];
+      
+      for (const post of posts || []) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, full_name')
+          .eq('id', post.user_id)
+          .single();
+
+        activityItems.push({
+          id: post.id,
+          type: 'post',
+          user: {
+            username: profile?.username || 'unknown',
+            full_name: profile?.full_name || 'Unknown User'
+          },
+          content: post.content,
+          created_at: post.created_at
+        });
+      }
 
       setActivities(activityItems);
     } catch (error) {

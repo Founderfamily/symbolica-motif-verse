@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,17 +7,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Users, MessageCircle, Settings, UserPlus, UserMinus } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { InterestGroup, GroupPost } from '@/types/interest-groups';
+import { InterestGroup } from '@/types/interest-groups';
 import GroupDiscussion from '@/components/community/GroupDiscussion';
 import GroupMembersList from '@/components/community/GroupMembersList';
-import { getGroupById } from '@/services/interestGroupService';
+import { getAllGroups } from '@/services/interestGroupService';
 import { joinGroup, leaveGroup, checkGroupMembership, getGroupPosts, createGroupPost, likePost } from '@/services/communityService';
 import { useAuth } from '@/hooks/useAuth';
+
+interface GroupPostWithProfile {
+  id: string;
+  group_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  likes_count: number;
+  comments_count: number;
+  user_profile?: {
+    username: string;
+    full_name: string;
+  };
+}
 
 const GroupDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [group, setGroup] = useState<InterestGroup | null>(null);
-  const [posts, setPosts] = useState<GroupPost[]>([]);
+  const [posts, setPosts] = useState<GroupPostWithProfile[]>([]);
   const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -32,10 +46,9 @@ const GroupDetailPage: React.FC = () => {
 
   const loadGroupData = async () => {
     try {
-      // For now, we'll find the group by slug in the groups we fetch
-      // In a real app, you'd have a getGroupBySlug function
-      const allGroups = await import('@/services/interestGroupService').then(m => m.getAllGroups());
-      const foundGroup = (await allGroups()).find(g => g.slug === slug);
+      // Get all groups and find the one with matching slug
+      const allGroups = await getAllGroups();
+      const foundGroup = allGroups.find(g => g.slug === slug);
       
       if (foundGroup) {
         setGroup(foundGroup);

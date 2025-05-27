@@ -56,20 +56,32 @@ export const checkGroupMembership = async (groupId: string, userId: string) => {
 
 export const getGroupPosts = async (groupId: string) => {
   try {
-    const { data, error } = await supabase
+    // First get posts
+    const { data: posts, error } = await supabase
       .from('group_posts')
-      .select(`
-        *,
-        profiles!user_id (
-          username,
-          full_name
-        )
-      `)
+      .select('*')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+
+    // Then get user profiles separately for each post
+    const postsWithProfiles = await Promise.all(
+      (posts || []).map(async (post) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, full_name')
+          .eq('id', post.user_id)
+          .single();
+
+        return {
+          ...post,
+          user_profile: profile || { username: 'unknown', full_name: 'Unknown User' }
+        };
+      })
+    );
+
+    return postsWithProfiles || [];
   } catch (error) {
     console.error('Error fetching group posts:', error);
     return [];
@@ -134,20 +146,32 @@ export const likePost = async (postId: string, userId: string) => {
 
 export const getGroupMembers = async (groupId: string) => {
   try {
-    const { data, error } = await supabase
+    // First get group members
+    const { data: members, error } = await supabase
       .from('group_members')
-      .select(`
-        *,
-        profiles!user_id (
-          username,
-          full_name
-        )
-      `)
+      .select('*')
       .eq('group_id', groupId)
       .order('joined_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+
+    // Then get profiles separately
+    const membersWithProfiles = await Promise.all(
+      (members || []).map(async (member) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, full_name')
+          .eq('id', member.user_id)
+          .single();
+
+        return {
+          ...member,
+          profiles: profile || { username: 'unknown', full_name: 'Unknown User' }
+        };
+      })
+    );
+
+    return membersWithProfiles || [];
   } catch (error) {
     console.error('Error fetching group members:', error);
     return [];

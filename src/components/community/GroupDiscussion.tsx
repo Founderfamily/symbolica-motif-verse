@@ -7,12 +7,26 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, Share2, Send } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { GroupPost } from '@/types/interest-groups';
 import { useAuth } from '@/hooks/useAuth';
+
+interface GroupPostWithProfile {
+  id: string;
+  group_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  likes_count: number;
+  comments_count: number;
+  user_profile?: {
+    username: string;
+    full_name: string;
+  };
+}
 
 interface GroupDiscussionProps {
   groupId: string;
-  posts: GroupPost[];
+  posts: GroupPostWithProfile[];
   onCreatePost: (content: string) => void;
   onLikePost: (postId: string) => void;
 }
@@ -67,13 +81,19 @@ const GroupDiscussion: React.FC<GroupDiscussionProps> = ({
             <CardContent className="p-6">
               <div className="flex space-x-3">
                 <Avatar className="h-10 w-10">
+                  <AvatarImage 
+                    src={`https://avatar.vercel.sh/${post.user_profile?.username || 'user'}.png`} 
+                    alt={post.user_profile?.username || 'User'} 
+                  />
                   <AvatarFallback>
-                    {post.user_id.charAt(0).toUpperCase()}
+                    {post.user_profile?.username?.charAt(0).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-2">
-                    <p className="font-medium">User {post.user_id.slice(0, 8)}</p>
+                    <p className="font-medium">
+                      {post.user_profile?.full_name || post.user_profile?.username || 'Unknown User'}
+                    </p>
                     <Badge variant="outline" className="text-xs">
                       <I18nText translationKey="community.member">Member</I18nText>
                     </Badge>

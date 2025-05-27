@@ -42,7 +42,7 @@ export interface GroupMember {
   };
 }
 
-// Interface for group posts
+// Interface for group posts - updated to match actual data structure
 export interface GroupPost {
   id: string;
   group_id: string;
@@ -52,13 +52,9 @@ export interface GroupPost {
   updated_at: string;
   likes_count: number;
   comments_count: number;
-  translations?: {
-    en?: {
-      content?: string;
-    };
-    fr?: {
-      content?: string;
-    };
+  user_profile?: {
+    username: string;
+    full_name: string;
   };
 }
 
