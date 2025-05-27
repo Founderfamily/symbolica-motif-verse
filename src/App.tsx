@@ -15,6 +15,7 @@ import NotFound from '@/pages/NotFound';
 import CollectionsPage from '@/pages/CollectionsPage';
 import MobileAppPage from '@/pages/MobileApp';
 import MapExplorer from '@/pages/MapExplorer';
+import SymbolsPage from '@/pages/SymbolsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,7 @@ function App() {
                 <Route index element={<HomePage />} />
                 <Route path="/analysis" element={<AnalysisPage />} />
                 <Route path="/contributions" element={<ContributionsPage />} />
+                <Route path="/symbols" element={<SymbolsPage />} />
                 <Route path="/symbols/:id" element={<SymbolExplorer />} />
                 <Route path="/map" element={<MapExplorer />} />
                 <Route path="/search" element={<SearchPage />} />
