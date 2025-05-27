@@ -690,6 +690,123 @@ export type Database = {
         }
         Relationships: []
       }
+      mobile_cache_data: {
+        Row: {
+          cache_key: string
+          cache_type: string
+          created_at: string | null
+          data: Json
+          expires_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cache_key: string
+          cache_type: string
+          created_at?: string | null
+          data: Json
+          expires_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cache_key?: string
+          cache_type?: string
+          created_at?: string | null
+          data?: Json
+          expires_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      mobile_field_notes: {
+        Row: {
+          audio_url: string | null
+          content: string
+          created_at: string | null
+          id: string
+          images: Json
+          location: Json | null
+          synced: boolean
+          timestamp: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          audio_url?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          images?: Json
+          location?: Json | null
+          synced?: boolean
+          timestamp: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          audio_url?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          images?: Json
+          location?: Json | null
+          synced?: boolean
+          timestamp?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mobile_sync_queue: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          entity_data: Json
+          entity_type: string
+          error_message: string | null
+          id: string
+          local_id: string | null
+          processed: boolean
+          processed_at: string | null
+          retry_count: number
+          server_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          entity_data: Json
+          entity_type: string
+          error_message?: string | null
+          id?: string
+          local_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          retry_count?: number
+          server_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          entity_data?: Json
+          entity_type?: string
+          error_message?: string | null
+          id?: string
+          local_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          retry_count?: number
+          server_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           content: Json

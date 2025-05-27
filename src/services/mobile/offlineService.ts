@@ -1,228 +1,269 @@
 
-import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { supabase } from '@/integrations/supabase/client';
 
-interface SymbolicaDB extends DBSchema {
-  symbols: {
-    key: string;
-    value: {
-      id: string;
-      data: any;
-      lastSync: number;
-      offline: boolean;
-    };
-  };
-  contributions: {
-    key: string;
-    value: {
-      id: string;
-      data: any;
-      images: string[];
-      lastSync: number;
-      pending: boolean;
-    };
-  };
-  searches: {
-    key: string;
-    value: {
-      query: string;
-      results: any[];
-      timestamp: number;
-    };
-  };
-  fieldNotes: {
-    key: string;
-    value: {
-      id: string;
-      content: string;
-      location: { lat: number; lng: number } | null;
-      timestamp: number;
-      audioUrl?: string;
-      images: string[];
-      synced: boolean;
-    };
-  };
+interface MobileFieldNote {
+  id: string;
+  content: string;
+  location: { lat: number; lng: number } | null;
+  timestamp: number;
+  audioUrl?: string;
+  images: string[];
+  synced: boolean;
+}
+
+interface CacheEntry {
+  query: string;
+  results: any[];
+  timestamp: number;
 }
 
 class OfflineService {
-  private db: IDBPDatabase<SymbolicaDB> | null = null;
+  private userId: string | null = null;
 
-  async initialize() {
-    this.db = await openDB<SymbolicaDB>('symbolica-offline', 1, {
-      upgrade(db) {
-        // Symbols store
-        if (!db.objectStoreNames.contains('symbols')) {
-          db.createObjectStore('symbols', { keyPath: 'id' });
-        }
+  constructor() {
+    this.initializeUser();
+  }
 
-        // Contributions store
-        if (!db.objectStoreNames.contains('contributions')) {
-          db.createObjectStore('contributions', { keyPath: 'id' });
-        }
+  private async initializeUser() {
+    const { data: { user } } = await supabase.auth.getUser();
+    this.userId = user?.id || null;
+  }
 
-        // Search cache
-        if (!db.objectStoreNames.contains('searches')) {
-          const searchStore = db.createObjectStore('searches', { keyPath: 'query' });
-          searchStore.createIndex('timestamp', 'timestamp');
-        }
-
-        // Field notes
-        if (!db.objectStoreNames.contains('fieldNotes')) {
-          const notesStore = db.createObjectStore('fieldNotes', { keyPath: 'id' });
-          notesStore.createIndex('timestamp', 'timestamp');
-        }
-      }
-    });
+  private async ensureUser() {
+    if (!this.userId) {
+      await this.initializeUser();
+    }
+    return this.userId;
   }
 
   /**
-   * Cache symbol data for offline access
+   * Save field note to database
    */
-  async cacheSymbol(symbolData: any) {
-    if (!this.db) await this.initialize();
-    
-    await this.db!.put('symbols', {
-      id: symbolData.id,
-      data: symbolData,
-      lastSync: Date.now(),
-      offline: false
-    });
+  async saveFieldNote(
+    content: string, 
+    location: { lat: number; lng: number } | null, 
+    audioUrl?: string, 
+    images: string[] = []
+  ): Promise<string> {
+    const userId = await this.ensureUser();
+    if (!userId) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('mobile_field_notes')
+      .insert({
+        user_id: userId,
+        content,
+        location,
+        timestamp: Date.now(),
+        audio_url: audioUrl,
+        images,
+        synced: true
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    return data.id;
   }
 
   /**
-   * Get cached symbol
+   * Get all field notes
    */
-  async getCachedSymbol(symbolId: string) {
-    if (!this.db) await this.initialize();
-    return this.db!.get('symbols', symbolId);
-  }
+  async getFieldNotes(): Promise<MobileFieldNote[]> {
+    const userId = await this.ensureUser();
+    if (!userId) return [];
 
-  /**
-   * Save contribution for later sync
-   */
-  async saveContributionOffline(contribution: any, images: string[] = []) {
-    if (!this.db) await this.initialize();
-    
-    const id = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    await this.db!.put('contributions', {
-      id,
-      data: contribution,
-      images,
-      lastSync: 0,
-      pending: true
-    });
+    const { data, error } = await supabase
+      .from('mobile_field_notes')
+      .select('*')
+      .eq('user_id', userId)
+      .order('timestamp', { ascending: false });
 
-    return id;
-  }
+    if (error) {
+      console.error('Error fetching field notes:', error);
+      return [];
+    }
 
-  /**
-   * Get pending contributions for sync
-   */
-  async getPendingContributions() {
-    if (!this.db) await this.initialize();
-    
-    const tx = this.db!.transaction('contributions', 'readonly');
-    const contributions = await tx.store.getAll();
-    
-    return contributions.filter(c => c.pending);
+    return data.map(note => ({
+      id: note.id,
+      content: note.content,
+      location: note.location,
+      timestamp: note.timestamp,
+      audioUrl: note.audio_url,
+      images: note.images || [],
+      synced: note.synced
+    }));
   }
 
   /**
    * Cache search results
    */
-  async cacheSearchResults(query: string, results: any[]) {
-    if (!this.db) await this.initialize();
+  async cacheSearchResults(query: string, results: any[]): Promise<void> {
+    const userId = await this.ensureUser();
     
-    await this.db!.put('searches', {
-      query,
-      results,
-      timestamp: Date.now()
-    });
+    const { error } = await supabase
+      .from('mobile_cache_data')
+      .upsert({
+        user_id: userId,
+        cache_type: 'search_results',
+        cache_key: query,
+        data: results,
+        expires_at: new Date(Date.now() + 3600000).toISOString() // 1 hour
+      });
+
+    if (error) {
+      console.error('Error caching search results:', error);
+    }
   }
 
   /**
    * Get cached search results
    */
   async getCachedSearchResults(query: string): Promise<any[] | null> {
-    if (!this.db) await this.initialize();
+    const userId = await this.ensureUser();
     
-    const cached = await this.db!.get('searches', query);
-    
-    // Return results if cached within last hour
-    if (cached && (Date.now() - cached.timestamp) < 3600000) {
-      return cached.results;
+    const { data, error } = await supabase
+      .from('mobile_cache_data')
+      .select('data, expires_at')
+      .eq('cache_type', 'search_results')
+      .eq('cache_key', query)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    // Check if cache is expired
+    if (data.expires_at && new Date(data.expires_at) < new Date()) {
+      // Clean up expired cache
+      await supabase
+        .from('mobile_cache_data')
+        .delete()
+        .eq('cache_type', 'search_results')
+        .eq('cache_key', query)
+        .eq('user_id', userId);
+      
+      return null;
     }
-    
-    return null;
+
+    return data.data;
   }
 
   /**
-   * Save field note
+   * Cache symbol data
    */
-  async saveFieldNote(content: string, location: { lat: number; lng: number } | null, audioUrl?: string, images: string[] = []) {
-    if (!this.db) await this.initialize();
-    
-    const id = `note_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    await this.db!.put('fieldNotes', {
-      id,
-      content,
-      location,
-      timestamp: Date.now(),
-      audioUrl,
-      images,
-      synced: false
-    });
+  async cacheSymbol(symbolData: any): Promise<void> {
+    const { error } = await supabase
+      .from('mobile_cache_data')
+      .upsert({
+        user_id: null, // Public cache for symbols
+        cache_type: 'symbol_data',
+        cache_key: symbolData.id,
+        data: symbolData,
+        expires_at: new Date(Date.now() + 24 * 3600000).toISOString() // 24 hours
+      });
 
-    return id;
+    if (error) {
+      console.error('Error caching symbol:', error);
+    }
   }
 
   /**
-   * Get all field notes
+   * Get cached symbol
    */
-  async getFieldNotes() {
-    if (!this.db) await this.initialize();
-    
-    const tx = this.db!.transaction('fieldNotes', 'readonly');
-    const notes = await tx.store.getAll();
-    
-    return notes.sort((a, b) => b.timestamp - a.timestamp);
+  async getCachedSymbol(symbolId: string): Promise<any | null> {
+    const { data, error } = await supabase
+      .from('mobile_cache_data')
+      .select('data')
+      .eq('cache_type', 'symbol_data')
+      .eq('cache_key', symbolId)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data.data;
+  }
+
+  /**
+   * Save contribution for later sync
+   */
+  async saveContributionOffline(contribution: any, images: string[] = []): Promise<string> {
+    const userId = await this.ensureUser();
+    if (!userId) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('mobile_sync_queue')
+      .insert({
+        user_id: userId,
+        action_type: 'create',
+        entity_type: 'contribution',
+        entity_data: { ...contribution, images },
+        local_id: `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    return data.id;
+  }
+
+  /**
+   * Get pending contributions for sync
+   */
+  async getPendingContributions(): Promise<any[]> {
+    const userId = await this.ensureUser();
+    if (!userId) return [];
+
+    const { data, error } = await supabase
+      .from('mobile_sync_queue')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('processed', false)
+      .eq('entity_type', 'contribution');
+
+    if (error) {
+      console.error('Error fetching pending contributions:', error);
+      return [];
+    }
+
+    return data;
   }
 
   /**
    * Clear old cached data
    */
-  async clearOldCache(maxAge: number = 7 * 24 * 60 * 60 * 1000) { // 7 days
-    if (!this.db) await this.initialize();
+  async clearOldCache(maxAge: number = 7 * 24 * 60 * 60 * 1000): Promise<void> {
+    const cutoff = new Date(Date.now() - maxAge).toISOString();
     
-    const cutoff = Date.now() - maxAge;
-    
-    // Clear old searches
-    const tx = this.db!.transaction('searches', 'readwrite');
-    const cursor = await tx.store.index('timestamp').openCursor(IDBKeyRange.upperBound(cutoff));
-    
-    while (cursor) {
-      await cursor.delete();
-      await cursor.continue();
+    const { error } = await supabase
+      .from('mobile_cache_data')
+      .delete()
+      .lt('created_at', cutoff);
+
+    if (error) {
+      console.error('Error clearing old cache:', error);
     }
   }
 
   /**
    * Get storage usage stats
    */
-  async getStorageStats() {
-    if (!this.db) await this.initialize();
-    
-    const symbolsCount = await this.db!.count('symbols');
-    const contributionsCount = await this.db!.count('contributions');
-    const searchesCount = await this.db!.count('searches');
-    const notesCount = await this.db!.count('fieldNotes');
-    
+  async getStorageStats(): Promise<{
+    fieldNotes: number;
+    cacheEntries: number;
+    pendingSync: number;
+  }> {
+    const userId = await this.ensureUser();
+    if (!userId) return { fieldNotes: 0, cacheEntries: 0, pendingSync: 0 };
+
+    const [fieldNotesResult, cacheResult, syncResult] = await Promise.all([
+      supabase.from('mobile_field_notes').select('id', { count: 'exact' }).eq('user_id', userId),
+      supabase.from('mobile_cache_data').select('id', { count: 'exact' }).eq('user_id', userId),
+      supabase.from('mobile_sync_queue').select('id', { count: 'exact' }).eq('user_id', userId).eq('processed', false)
+    ]);
+
     return {
-      symbols: symbolsCount,
-      contributions: contributionsCount,
-      searches: searchesCount,
-      fieldNotes: notesCount
+      fieldNotes: fieldNotesResult.count || 0,
+      cacheEntries: cacheResult.count || 0,
+      pendingSync: syncResult.count || 0
     };
   }
 }
