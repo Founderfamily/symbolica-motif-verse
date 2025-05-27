@@ -16,19 +16,20 @@ interface SymbolDetailViewProps {
 }
 
 export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) => {
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedImageType, setSelectedImageType] = useState<'original' | 'pattern' | 'reuse'>('original');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const { images, loading: imagesLoading } = useSymbolImages(symbol.id);
+  const { loading: imagesLoading, images } = useSymbolImages(symbol.id);
 
   const handleAIAnalysis = async () => {
-    if (!images || images.length === 0 || !images[selectedImageIndex]) return;
+    const currentImage = images[selectedImageType];
+    if (!currentImage) return;
 
     setIsAnalyzing(true);
     try {
       const { data, error } = await supabase.functions.invoke('ai-pattern-recognition', {
         body: {
-          imageUrl: images[selectedImageIndex].image_url,
-          imageId: images[selectedImageIndex].id,
+          imageUrl: currentImage.image_url,
+          imageId: currentImage.id,
           imageType: 'symbol'
         }
       });
@@ -48,7 +49,8 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
     return <div>Chargement des détails du symbole...</div>;
   }
 
-  const currentImage = images && images.length > 0 ? images[selectedImageIndex] : null;
+  const currentImage = images[selectedImageType];
+  const availableImages = Object.entries(images).filter(([_, image]) => image !== null);
 
   return (
     <div className="space-y-6">
@@ -108,20 +110,20 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
         </TabsList>
 
         <TabsContent value="images" className="space-y-4">
-          {images && images.length > 0 && (
+          {availableImages.length > 0 && (
             <>
               <div className="flex gap-2 overflow-x-auto">
-                {images.map((image, index) => (
+                {availableImages.map(([type, image]) => (
                   <button
-                    key={image.id}
-                    onClick={() => setSelectedImageIndex(index)}
+                    key={type}
+                    onClick={() => setSelectedImageType(type as 'original' | 'pattern' | 'reuse')}
                     className={`flex-shrink-0 w-20 h-20 rounded border-2 overflow-hidden ${
-                      selectedImageIndex === index ? 'border-blue-500' : 'border-gray-200'
+                      selectedImageType === type ? 'border-blue-500' : 'border-gray-200'
                     }`}
                   >
                     <img
-                      src={image.image_url}
-                      alt={image.title || 'Image'}
+                      src={image!.image_url}
+                      alt={image!.title || 'Image'}
                       className="w-full h-full object-cover"
                     />
                   </button>
