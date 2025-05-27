@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Search, User, Settings, HelpCircle, Languages } from 'lucide-react';
+import { Search, User, Settings, HelpCircle, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
 import { LanguageSelector } from '@/components/ui/language-selector';
@@ -70,6 +70,13 @@ const Header: React.FC<HeaderProps> = ({ onAuthClick }) => {
                 className="text-slate-600 hover:text-slate-900 transition-colors"
               >
                 <I18nText translationKey="navigation.analysis">Analysis</I18nText>
+              </Link>
+              <Link 
+                to="/community" 
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <Users className="h-4 w-4 inline mr-1" />
+                <I18nText translationKey="navigation.community">Community</I18nText>
               </Link>
               <Link 
                 to="/contributions" 
