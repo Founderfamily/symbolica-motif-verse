@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -556,7 +555,7 @@ const batchResults = await client.batch.analyze({
                   event: "symbol.created",
                   timestamp: "2024-01-15T10:30:00Z",
                   data: {
-                    id: "abc123-def456",
+                    symbol_id: "abc123-def456",
                     name: "Celtic Knotwork Pattern",
                     culture: "Celtic",
                     created_by: "user_789",
@@ -593,7 +592,7 @@ const batchResults = await client.batch.analyze({
                   <label className="block text-sm font-medium mb-2">Endpoint</label>
                   <select className="w-full p-2 border rounded">
                     <option value="/api/v1/symbols">GET /api/v1/symbols</option>
-                    <option value="/api/v1/symbols/{id}">GET /api/v1/symbols/{id}</option>
+                    <option value="/api/v1/symbols/example-id">GET /api/v1/symbols/example-id</option>
                     <option value="/api/v1/analysis/compare">POST /api/v1/analysis/compare</option>
                   </select>
                 </div>

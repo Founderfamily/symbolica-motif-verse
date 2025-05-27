@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -16,10 +17,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { I18nText } from '@/components/ui/i18n-text';
-
-interface HeaderProps {
-  onAuthClick: () => void;
-}
 
 const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -158,8 +155,10 @@ const Header: React.FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button variant="outline" onClick={onAuthClick}>
-                <I18nText translationKey="header.login">Log In</I18nText>
+              <Button variant="outline" asChild>
+                <Link to="/auth">
+                  <I18nText translationKey="header.login">Log In</I18nText>
+                </Link>
               </Button>
             )}
           </div>
