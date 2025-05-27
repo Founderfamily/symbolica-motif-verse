@@ -1,341 +1,174 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { 
-  BarChart3, Brain, TrendingUp, Zap, Database,
-  FileText, Download, Settings, RefreshCw
+  BarChart3, Brain, Monitor, Users, Zap, Globe, 
+  Activity, Settings, Database, Shield
 } from 'lucide-react';
-import { aiPatternRecognitionService } from '@/services/aiPatternRecognitionService';
+import AnalysisDashboard from './AnalysisDashboard';
 import InteractiveVisualization from './InteractiveVisualization';
 import RealTimeCollaboration from './RealTimeCollaboration';
-
-interface AnalyticsMetrics {
-  total_symbols_analyzed: number;
-  ai_accuracy_score: number;
-  cultural_connections_found: number;
-  research_projects_active: number;
-  collaboration_sessions: number;
-  data_processing_speed: number;
-}
-
-interface ResearchInsight {
-  id: string;
-  type: 'discovery' | 'pattern' | 'correlation' | 'prediction';
-  title: string;
-  description: string;
-  confidence: number;
-  impact_score: number;
-  data_points: number;
-  created_at: Date;
-}
+import MasterControlDashboard from './MasterControlDashboard';
+import Advanced3DVisualization from './Advanced3DVisualization';
+import RealTimeAnalytics from './RealTimeAnalytics';
 
 const AdvancedAnalyticsDashboard: React.FC = () => {
-  const [metrics, setMetrics] = useState<AnalyticsMetrics>({
-    total_symbols_analyzed: 0,
-    ai_accuracy_score: 0,
-    cultural_connections_found: 0,
-    research_projects_active: 0,
-    collaboration_sessions: 0,
-    data_processing_speed: 0
-  });
-  
-  const [insights, setInsights] = useState<ResearchInsight[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeModule, setActiveModule] = useState<string>('control');
 
-  useEffect(() => {
-    loadAnalyticsData();
-  }, []);
-
-  const loadAnalyticsData = async () => {
-    setLoading(true);
-    
-    // Simulate loading advanced analytics
-    setTimeout(() => {
-      setMetrics({
-        total_symbols_analyzed: 15847,
-        ai_accuracy_score: 94.7,
-        cultural_connections_found: 2834,
-        research_projects_active: 127,
-        collaboration_sessions: 45,
-        data_processing_speed: 1.2
-      });
-
-      setInsights([
-        {
-          id: '1',
-          type: 'discovery',
-          title: 'Celtic-Norse Pattern Convergence',
-          description: 'AI identified previously unknown connections between Celtic knotwork and Norse interlacing patterns, suggesting 9th century cultural exchange.',
-          confidence: 87.3,
-          impact_score: 9.2,
-          data_points: 234,
-          created_at: new Date(Date.now() - 86400000)
-        },
-        {
-          id: '2',
-          type: 'pattern',
-          title: 'Geometric Evolution Sequence',
-          description: 'Mathematical analysis reveals spiral patterns follow Fibonacci sequences across multiple ancient cultures.',
-          confidence: 92.1,
-          impact_score: 8.7,
-          data_points: 567,
-          created_at: new Date(Date.now() - 172800000)
-        },
-        {
-          id: '3',
-          type: 'prediction',
-          title: 'Cultural Symbol Revival Trend',
-          description: 'Machine learning models predict resurgence of ancient Slavic symbols in modern digital art within next 5 years.',
-          confidence: 76.4,
-          impact_score: 7.3,
-          data_points: 1205,
-          created_at: new Date(Date.now() - 259200000)
-        }
-      ]);
-
-      setLoading(false);
-    }, 2000);
-  };
-
-  const mockVisualizationData = {
-    temporal_evolution: [],
-    cultural_networks: [],
-    pattern_clusters: [],
-    geographic_spread: [],
-    similarity_matrix: [[1, 0.8, 0.6], [0.8, 1, 0.7], [0.6, 0.7, 1]]
-  };
-
-  const getInsightIcon = (type: ResearchInsight['type']) => {
-    switch (type) {
-      case 'discovery': return <Zap className="h-4 w-4 text-yellow-600" />;
-      case 'pattern': return <BarChart3 className="h-4 w-4 text-blue-600" />;
-      case 'correlation': return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'prediction': return <Brain className="h-4 w-4 text-purple-600" />;
+  const modules = [
+    {
+      id: 'control',
+      name: 'Centre de Contrôle',
+      icon: <Monitor className="h-5 w-5" />,
+      description: 'Supervision générale et contrôle du système',
+      component: <MasterControlDashboard />
+    },
+    {
+      id: 'ai',
+      name: 'IA Avancée',
+      icon: <Brain className="h-5 w-5" />,
+      description: 'Intelligence artificielle et reconnaissance de motifs',
+      component: <AnalysisDashboard />
+    },
+    {
+      id: '3d',
+      name: 'Visualisation 3D',
+      icon: <Globe className="h-5 w-5" />,
+      description: 'Environnement 3D interactif et VR/AR',
+      component: <Advanced3DVisualization symbols={[]} analysisMode="3d_clustering" />
+    },
+    {
+      id: 'interactive',
+      name: 'Visualisations',
+      icon: <BarChart3 className="h-5 w-5" />,
+      description: 'Graphiques interactifs et animations',
+      component: <InteractiveVisualization data={{
+        temporal_evolution: [],
+        cultural_networks: [],
+        pattern_clusters: [],
+        geographic_spread: [],
+        similarity_matrix: []
+      }} symbols={[]} />
+    },
+    {
+      id: 'collaboration',
+      name: 'Collaboration',
+      icon: <Users className="h-5 w-5" />,
+      description: 'Travail collaboratif en temps réel',
+      component: <RealTimeCollaboration symbolIds={[]} currentUserId="user_1" />
+    },
+    {
+      id: 'analytics',
+      name: 'Analytics Live',
+      icon: <Activity className="h-5 w-5" />,
+      description: 'Métriques et monitoring en temps réel',
+      component: <RealTimeAnalytics />
     }
-  };
+  ];
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 90) return 'text-green-600';
-    if (confidence >= 80) return 'text-yellow-600';
-    if (confidence >= 70) return 'text-orange-600';
-    return 'text-red-600';
+  const getCurrentModule = () => {
+    return modules.find(m => m.id === activeModule) || modules[0];
   };
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto p-6">
-        <Card>
-          <CardContent className="p-8">
-            <div className="text-center">
-              <RefreshCw className="h-12 w-12 mx-auto mb-4 animate-spin text-blue-600" />
-              <h3 className="text-lg font-medium mb-2">Loading Advanced Analytics</h3>
-              <p className="text-muted-foreground mb-4">
-                Processing symbol data and generating insights...
-              </p>
-              <Progress value={65} className="w-64 mx-auto" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Advanced Analytics Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            AI-powered insights and real-time research collaboration
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            Plateforme d'Analyse Culturelle Avancée
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Système d'analyse de patrimoine culturel de niveau recherche mondiale avec IA, 
+            visualisation 3D, collaboration temps réel et analytics avancés
           </p>
+          <div className="flex justify-center gap-2 mt-4">
+            <Badge variant="default" className="animate-pulse">
+              <Zap className="h-3 w-3 mr-1" />
+              IA Avancée
+            </Badge>
+            <Badge variant="secondary">
+              <Globe className="h-3 w-3 mr-1" />
+              3D/VR/AR
+            </Badge>
+            <Badge variant="outline">
+              <Users className="h-3 w-3 mr-1" />
+              Collaboration
+            </Badge>
+            <Badge variant="outline">
+              <Activity className="h-3 w-3 mr-1" />
+              Temps Réel
+            </Badge>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={loadAnalyticsData}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh Data
-          </Button>
-          <Button variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
-            Configure
-          </Button>
-          <Button>
-            <FileText className="h-4 w-4 mr-2" />
-            Generate Report
-          </Button>
-        </div>
-      </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* Module Navigation */}
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-blue-500" />
-              <div>
-                <p className="text-2xl font-bold">{metrics.total_symbols_analyzed.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Symbols Analyzed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-purple-500" />
-              <div>
-                <p className="text-2xl font-bold">{metrics.ai_accuracy_score}%</p>
-                <p className="text-xs text-muted-foreground">AI Accuracy</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-500" />
-              <div>
-                <p className="text-2xl font-bold">{metrics.cultural_connections_found.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Connections Found</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-orange-500" />
-              <div>
-                <p className="text-2xl font-bold">{metrics.research_projects_active}</p>
-                <p className="text-xs text-muted-foreground">Active Projects</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
-              <div>
-                <p className="text-2xl font-bold">{metrics.collaboration_sessions}</p>
-                <p className="text-xs text-muted-foreground">Live Sessions</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-red-500" />
-              <div>
-                <p className="text-2xl font-bold">{metrics.data_processing_speed}s</p>
-                <p className="text-xs text-muted-foreground">Processing Speed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="visualizations">Visualizations</TabsTrigger>
-          <TabsTrigger value="collaboration">Collaboration</TabsTrigger>
-          <TabsTrigger value="research">Research Hub</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          {/* Research Insights */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Latest Research Insights</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {insights.map(insight => (
-                  <div key={insight.id} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        {getInsightIcon(insight.type)}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold">{insight.title}</h3>
-                            <Badge variant="outline" className="text-xs">
-                              {insight.type}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {insight.description}
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span className={`font-medium ${getConfidenceColor(insight.confidence)}`}>
-                              {insight.confidence}% confidence
-                            </span>
-                            <span>Impact: {insight.impact_score}/10</span>
-                            <span>{insight.data_points} data points</span>
-                            <span>{insight.created_at.toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Export
-                      </Button>
+          <CardHeader>
+            <CardTitle className="text-center">Modules Disponibles</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {modules.map((module) => (
+                <div
+                  key={module.id}
+                  className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                    activeModule === module.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-muted hover:border-blue-300 hover:bg-blue-25'
+                  }`}
+                  onClick={() => setActiveModule(module.id)}
+                >
+                  <div className="text-center">
+                    <div className="flex justify-center mb-2">
+                      {module.icon}
                     </div>
+                    <h3 className="font-semibold text-sm mb-1">{module.name}</h3>
+                    <p className="text-xs text-muted-foreground">{module.description}</p>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="visualizations">
-          <InteractiveVisualization 
-            data={mockVisualizationData}
-            symbols={['celtic-knot', 'norse-rune', 'slavic-symbol']}
-          />
-        </TabsContent>
+        {/* Active Module Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {getCurrentModule().icon}
+              {getCurrentModule().name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {getCurrentModule().component}
+          </CardContent>
+        </Card>
 
-        <TabsContent value="collaboration">
-          <RealTimeCollaboration 
-            symbolIds={['symbol1', 'symbol2']}
-            currentUserId="current_user"
-          />
-        </TabsContent>
-
-        <TabsContent value="research" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Research Project Hub</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-xl font-semibold mb-2">Research Management System</h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Comprehensive research project management, hypothesis testing, 
-                  and collaborative academic workspace coming soon.
-                </p>
-                <Button>
-                  <Zap className="h-4 w-4 mr-2" />
-                  Create Research Project
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        {/* System Status Footer */}
+        <div className="text-center text-sm text-muted-foreground">
+          <div className="flex justify-center items-center gap-4">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Système Opérationnel</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Database className="h-3 w-3" />
+              <span>Base de Données: Active</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Shield className="h-3 w-3" />
+              <span>Sécurité: Optimale</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Brain className="h-3 w-3" />
+              <span>IA: 94.7% Précision</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
