@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { BarChart, LineChart, PieChart, Download, TrendingUp, Calendar, FileText } from 'lucide-react';
 import { CompleteContribution } from '@/types/contributions';
-import { format, startOfMonth, endOfMonth, subMonths, parseISO } from 'date-fns';
+import { format as formatDate, startOfMonth, endOfMonth, subMonths, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface EnhancedReportingProps {
@@ -53,7 +53,7 @@ const EnhancedReporting: React.FC<EnhancedReportingProps> = ({ contributions }) 
     // Submission trends (monthly)
     const monthlyData: Record<string, number> = {};
     filteredContributions.forEach(c => {
-      const month = format(parseISO(c.created_at), 'yyyy-MM');
+      const month = formatDate(parseISO(c.created_at), 'yyyy-MM');
       monthlyData[month] = (monthlyData[month] || 0) + 1;
     });
 
@@ -175,7 +175,7 @@ const EnhancedReporting: React.FC<EnhancedReportingProps> = ({ contributions }) 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `rapport-contributions-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+      a.download = `rapport-contributions-${formatDate(new Date(), 'yyyy-MM-dd')}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
     }
@@ -358,7 +358,7 @@ const EnhancedReporting: React.FC<EnhancedReportingProps> = ({ contributions }) 
               {reportData.submissionTrends.map(item => (
                 <div key={item.date} className="flex items-center justify-between">
                   <span className="text-sm font-medium">
-                    {format(parseISO(item.date + '-01'), 'MMMM yyyy', { locale: fr })}
+                    {formatDate(parseISO(item.date + '-01'), 'MMMM yyyy', { locale: fr })}
                   </span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 bg-gray-200 rounded-full h-2">

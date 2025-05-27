@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -134,9 +133,6 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
           <div className="flex items-center gap-3">
             <Checkbox
               checked={allSelected}
-              ref={(el) => {
-                if (el) el.indeterminate = someSelected;
-              }}
               onCheckedChange={handleSelectAll}
             />
             <span className="text-sm text-muted-foreground">
@@ -162,9 +158,6 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
         <div className="flex items-center gap-3">
           <Checkbox
             checked={allSelected}
-            ref={(el) => {
-              if (el) el.indeterminate = someSelected;
-            }}
             onCheckedChange={handleSelectAll}
           />
           <span className="text-sm">
@@ -244,58 +237,56 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
 
           {/* Admin Actions */}
           {isAdmin && (
-            <>
-              <Dialog open={isDialogOpen && bulkActionType !== 'tag'} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => {setBulkActionType('status'); setIsDialogOpen(true);}}
-                    className="flex items-center gap-1"
-                  >
-                    <Users className="h-4 w-4" />
-                    Changer le statut
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Mise à jour en lot du statut</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium">Nouveau statut</label>
-                      <Select value={bulkActionType} onValueChange={setBulkActionType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un statut" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="approved">Approuvé</SelectItem>
-                          <SelectItem value="rejected">Rejeté</SelectItem>
-                          <SelectItem value="pending">En attente</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Commentaire (optionnel)</label>
-                      <Textarea
-                        placeholder="Raison de la modification..."
-                        value={bulkComment}
-                        onChange={(e) => setBulkComment(e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Annuler
-                      </Button>
-                      <Button onClick={handleBulkStatusUpdate}>
-                        Mettre à jour
-                      </Button>
-                    </div>
+            <Dialog open={isDialogOpen && bulkActionType !== 'tag'} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {setBulkActionType('status'); setIsDialogOpen(true);}}
+                  className="flex items-center gap-1"
+                >
+                  <Users className="h-4 w-4" />
+                  Changer le statut
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Mise à jour en lot du statut</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Nouveau statut</label>
+                    <Select value={bulkActionType} onValueChange={setBulkActionType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="approved">Approuvé</SelectItem>
+                        <SelectItem value="rejected">Rejeté</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </DialogContent>
-              </Dialog>
-            </>
+                  <div>
+                    <label className="text-sm font-medium">Commentaire (optionnel)</label>
+                    <Textarea
+                      placeholder="Raison de la modification..."
+                      value={bulkComment}
+                      onChange={(e) => setBulkComment(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Annuler
+                    </Button>
+                    <Button onClick={handleBulkStatusUpdate}>
+                      Mettre à jour
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
 

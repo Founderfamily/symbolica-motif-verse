@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -39,17 +40,17 @@ const ContributionsPage = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
 
-  useEffect(() => {
-    const loadContributions = async () => {
-      if (!user) return;
-      
-      setLoading(true);
-      const data = await getUserContributions(user.id);
-      setContributions(data);
-      setFilteredContributions(data);
-      setLoading(false);
-    };
+  const loadContributions = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    const data = await getUserContributions(user.id);
+    setContributions(data);
+    setFilteredContributions(data);
+    setLoading(false);
+  };
 
+  useEffect(() => {
     loadContributions();
   }, [user]);
 
