@@ -143,7 +143,7 @@ class OfflineService {
   /**
    * Get cached search results
    */
-  async getCachedSearchResults(query: string) {
+  async getCachedSearchResults(query: string): Promise<any[] | null> {
     if (!this.db) await this.initialize();
     
     const cached = await this.db!.get('searches', query);

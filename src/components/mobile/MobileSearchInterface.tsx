@@ -100,7 +100,11 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
     try {
       const location = await capacitorService.getCurrentLocation();
       if (location) {
-        onLocationSearch(location);
+        // Convert from latitude/longitude to lat/lng format
+        onLocationSearch({
+          lat: location.latitude,
+          lng: location.longitude
+        });
       }
     } catch (error) {
       console.error('Location search error:', error);
@@ -136,7 +140,7 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Search className="h-5 w-5" />
-          {t('search.intelligentSearch')}
+          Recherche intelligente
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -144,7 +148,7 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <Input
-              placeholder={t('search.searchPlaceholder')}
+              placeholder="Rechercher des symboles..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -184,7 +188,7 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
             <div className="animate-pulse">
               <Mic className="h-4 w-4" />
             </div>
-            {t('search.listening')}
+            Écoute en cours...
           </div>
         )}
 
@@ -197,7 +201,7 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
             className="flex items-center gap-2"
           >
             <Camera className="h-4 w-4" />
-            {t('search.imageSearch')}
+            Recherche par image
           </Button>
           <Button
             variant="outline"
@@ -206,7 +210,7 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
             className="flex items-center gap-2"
           >
             <MapPin className="h-4 w-4" />
-            {t('search.nearbySearch')}
+            Recherche locale
           </Button>
         </div>
 
@@ -215,7 +219,7 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Sparkles className="h-3 w-3" />
-              {t('search.suggestions')}
+              Suggestions
             </div>
             <div className="flex gap-2 flex-wrap">
               {suggestions.map((suggestion, index) => (
@@ -240,7 +244,7 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <History className="h-3 w-3" />
-              {t('search.recentSearches')}
+              Recherches récentes
             </div>
             <ScrollArea className="h-20">
               <div className="flex gap-2 flex-wrap">
@@ -265,10 +269,10 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
         {/* Quick filters */}
         {showFilters && (
           <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
-            <div className="text-sm font-medium">{t('search.quickFilters')}</div>
+            <div className="text-sm font-medium">Filtres rapides</div>
             
             <div className="space-y-2">
-              <div className="text-xs text-muted-foreground">{t('search.periods')}</div>
+              <div className="text-xs text-muted-foreground">Périodes</div>
               <div className="flex gap-2 flex-wrap">
                 {['Préhistoire', 'Antiquité', 'Moyen Âge', 'Renaissance', 'Moderne'].map(period => (
                   <Badge
@@ -290,7 +294,7 @@ const MobileSearchInterface: React.FC<MobileSearchInterfaceProps> = ({
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs text-muted-foreground">{t('search.cultures')}</div>
+              <div className="text-xs text-muted-foreground">Cultures</div>
               <div className="flex gap-2 flex-wrap">
                 {['Celte', 'Romain', 'Germanique', 'Viking', 'Byzantin'].map(culture => (
                   <Badge

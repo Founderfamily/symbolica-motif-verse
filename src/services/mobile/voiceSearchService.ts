@@ -1,4 +1,12 @@
 
+// Add type declarations for SpeechRecognition
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 export interface VoiceSearchResult {
   transcript: string;
   confidence: number;
@@ -6,7 +14,7 @@ export interface VoiceSearchResult {
 }
 
 class VoiceSearchService {
-  private recognition: SpeechRecognition | null = null;
+  private recognition: any = null;
   private isSupported = false;
 
   constructor() {
@@ -14,21 +22,23 @@ class VoiceSearchService {
   }
 
   private checkSupport() {
-    if ('webkitSpeechRecognition' in window) {
-      this.recognition = new (window as any).webkitSpeechRecognition();
-      this.isSupported = true;
-    } else if ('SpeechRecognition' in window) {
-      this.recognition = new (window as any).SpeechRecognition();
-      this.isSupported = true;
-    } else {
-      console.warn('Speech recognition not supported');
-      this.isSupported = false;
-    }
+    if (typeof window !== 'undefined') {
+      if ('webkitSpeechRecognition' in window) {
+        this.recognition = new window.webkitSpeechRecognition();
+        this.isSupported = true;
+      } else if ('SpeechRecognition' in window) {
+        this.recognition = new window.SpeechRecognition();
+        this.isSupported = true;
+      } else {
+        console.warn('Speech recognition not supported');
+        this.isSupported = false;
+      }
 
-    if (this.recognition) {
-      this.recognition.continuous = false;
-      this.recognition.interimResults = true;
-      this.recognition.lang = 'fr-FR';
+      if (this.recognition) {
+        this.recognition.continuous = false;
+        this.recognition.interimResults = true;
+        this.recognition.lang = 'fr-FR';
+      }
     }
   }
 
@@ -56,7 +66,7 @@ class VoiceSearchService {
         console.log('Voice recognition started');
       };
 
-      this.recognition.onresult = (event) => {
+      this.recognition.onresult = (event: any) => {
         let interimTranscript = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -90,7 +100,7 @@ class VoiceSearchService {
         }
       };
 
-      this.recognition.onerror = (event) => {
+      this.recognition.onerror = (event: any) => {
         reject(new Error(`Voice recognition error: ${event.error}`));
       };
 

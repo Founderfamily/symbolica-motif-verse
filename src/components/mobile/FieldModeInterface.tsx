@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,7 +67,13 @@ const FieldModeInterface: React.FC = () => {
 
   const getCurrentLocation = async () => {
     const location = await capacitorService.getCurrentLocation();
-    setCurrentLocation(location);
+    if (location) {
+      // Convert from latitude/longitude to lat/lng format
+      setCurrentLocation({
+        lat: location.latitude,
+        lng: location.longitude
+      });
+    }
   };
 
   const capturePhoto = async () => {
@@ -169,7 +174,7 @@ const FieldModeInterface: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            {t('fieldMode.newNote')}
+            Nouvelle note de terrain
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -247,7 +252,7 @@ const FieldModeInterface: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            {t('fieldMode.savedNotes')} ({fieldNotes.length})
+            Notes sauvegardées ({fieldNotes.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
