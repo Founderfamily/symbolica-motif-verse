@@ -1,337 +1,926 @@
-Parfait. Je vais mettre à jour le cahier des charges de Symbolica pour qu’il reflète à la fois l’état actuel visible sur [https://symbolica-motif-verse.lovable.app](https://symbolica-motif-verse.lovable.app) et la vision cible du projet à 50 000 utilisateurs : un portail culturel communautaire complet.
 
-Je vais inclure toutes les sections à jour : vision, fonctionnalités, phasage, parcours utilisateurs, architecture, données, gouvernance, charte graphique, scénarios et roadmap. Le document sera aussi structuré que votre version précédente, avec un équilibre entre état actuel (MVP) et extensions futures.
+# Cahier des Charges - Symbolica
+## Plateforme collaborative de découverte et d'analyse des symboles culturels
 
-Je vous tiens informé dès que la nouvelle version est prête.
-
-
-# Symbolica – Cahier des charges fonctionnel et technique (Mise à jour)
-
-## Contexte & Nom
-
-**Contexte du projet :** Symbolica est une initiative open-source née du constat que les symboles et motifs culturels du monde entier méritent une plateforme dédiée à leur découverte et à leur partage. À l’heure où les musées numérisent massivement leurs collections et où des communautés en ligne documentent le patrimoine immatériel, il manque un portail collaboratif unique pour unifier ces efforts. Symbolica ambitionne de combler ce besoin en offrant un espace communautaire où chacun peut contribuer à la préservation et à l’étude des motifs culturels. La France, riche de son patrimoine et de son écosystème culturel, sert de point de départ du projet, avant une ouverture rapide à l’international.
-
-**Justification du nom "Symbolica" :** Ce nom a été choisi stratégiquement pour sa portée évocatrice et universelle :
-
-* *Évocateur & universel* – “Symbolica” évoque immédiatement l’univers des symboles et de la **symbolique**. Le terme est compréhensible dans de nombreuses langues (proche de *symbol*, *symbolique*, etc.), ce qui facilite l’internationalisation du projet.
-* *Dimension culturelle et imaginaire* – Le suffixe *-ica* rappelle des mots comme *encyclopædia* ou *musica*, conférant au nom une tonalité à la fois encyclopédique (base de connaissances) et ludique (monde imaginaire). Symbolica suggère ainsi un **« royaume des symboles »** propice à la découverte créative.
-* *Stratégie de marque* – Le nom est court, mémorable et harmonieux à l’oreille. Il pourra aisément être décliné en un logo puissant visuellement. Sa neutralité culturelle (il n’appartient à aucune langue en particulier) reflète l’objectif du projet de rassembler des cultures diverses sans parti pris.
-
-En résumé, Symbolica se positionne comme la première plateforme **open-source dédiée aux motifs et symboles culturels**, où la technologie (IA, géolocalisation, open data…) est mise au service d’une communauté mondiale passionnée de patrimoine. Le présent cahier des charges détaille la vision, les fonctionnalités et l’architecture prévues pour concrétiser ce projet ambitieux.
-
-**État actuel du pilote :** Une première version simplifiée de Symbolica est consultable en ligne (prototype MVP accessible publiquement). Elle présente d’ores et déjà une **interface épurée** permettant la **consultation libre de motifs** : la page d’accueil accueille un bandeau visuel type muséal en en-tête, et une grille de vignettes de symboles à explorer. Cet aperçu donne une idée de l’orientation visuelle et fonctionnelle de base du projet, en attendant l’activation des fonctionnalités interactives à venir.
-
-## Vision & Mission
-
-**Vision à long terme :** Symbolica aspire à devenir **la référence mondiale** en matière de collection, d’interprétation et de partage des symboles et motifs culturels. À long terme, la plateforme prendra la forme d’un **musée numérique collaboratif planétaire** : chaque motif – qu’il s’agisse d’une frise architecturale antique, d’un symbole religieux, d’un motif textile traditionnel ou d’un graffiti contemporain – pourra y être découvert, **contextualisé** et même réinventé. La vision consiste à abolir les frontières entre les cultures à travers leurs symboles, en offrant un espace où, par exemple, un motif celtique peut côtoyer un symbole africain ou un mandala asiatique, créant ainsi un **dialogue interculturel vivant et évolutif**. Symbolica se veut un lieu où le patrimoine iconographique mondial est connecté et accessible à tous, formant un pont entre le passé et le futur des motifs.
-
-**Mission (court/moyen terme) :** La mission de Symbolica est d’**outiller et fédérer une communauté** de passionnés, d’experts et de curieux autour des symboles. Concrètement, cela se décline en plusieurs objectifs opérationnels :
-
-* **Documenter les motifs culturels** – Permettre aux utilisateurs de **téléverser des photos** de motifs, de les annoter et d’y associer des récits ou informations historiques, afin de préserver cette richesse collective en la consignant dans une base accessible à tous.
-* **Apprendre & échanger** – Faciliter le partage de connaissances entre membres. Un utilisateur novice doit pouvoir enrichir ses connaissances au contact d’un spécialiste, et vice versa (exemple : un étudiant apprend d’un historien, un artiste s’inspire d’un motif ancien pour créer du neuf). La plateforme encouragera les échanges bienveillants autour des symboles.
-* **Innover dans la création** – Tirer parti de l’IA et des outils numériques pour **faciliter la création de nouveaux designs** inspirés du patrimoine. Symbolica veut ainsi encourager une transmission vivante des motifs vers les nouvelles générations : les symboles anciens peuvent inspirer des œuvres modernes, perpétuant et réinventant le patrimoine visuel.
-* **Rayonner mondialement dès le départ** – Même si le pilote démarre en France, le projet a une vocation **internationale immédiate**. L’interface se veut bilingue français/anglais dès le lancement, et d’autres langues seront ajoutées rapidement. Des partenariats avec des communautés à l’étranger seront recherchés pour refléter la dimension universelle du projet. Symbolica envisage dès ses débuts une communauté globale, afin de connecter des passionnés aux quatre coins du monde.
-
-En somme, Symbolica se donne pour mission de **connecter le passé et le futur, la tradition et l’innovation**, via une plateforme où la communauté construit un patrimoine commun et le fait vivre au quotidien.
-
-## Valeurs & Gouvernance
-
-Symbolica est guidé par des valeurs fortes qui orientent tant le développement logiciel que la gestion de la communauté. Ces valeurs s’accompagnent d’une **gouvernance ouverte** assurant la pérennité et l’éthique du projet.
-
-### Valeurs fondamentales du projet
-
-* **Open Source & Open Data :** Le projet sera développé de manière ouverte, avec un code source publié sous licence libre, et adoptera les principes d’**open data** pour les contenus. Cette philosophie de partage garantit transparence, pérennité et collaboration. Chacun pourra auditer le code, proposer des améliorations, ou réutiliser les données collectées (par exemple via des API publiques ou des exports sous licence libre). Symbolica ambitionne d’être un **commun numérique** appartenant à tous – à l’image d’autres initiatives patrimoniales ouvertes. L’ouverture du code et des données permettra également l’interopérabilité avec d’autres bases (ex : liens vers Wikidata, etc.).
-* **Collaboration & Communauté :** Au cœur de Symbolica se trouve l’idée de **co-création communautaire**. Chaque utilisateur, du néophyte au spécialiste, peut apporter sa pierre à l’édifice. L’entraide et la bienveillance seront encouragées. Les contributions (annotations, descriptions, identifications de motifs…) seront modérées et enrichies par les pairs, suivant un modèle proche de Wikipédia. La communauté sera impliquée dans l’évolution du produit selon une approche *“community-driven”* : les utilisateurs pourront influencer les prochaines fonctionnalités via leurs retours. Symbolica mise sur l’intelligence collective et le pouvoir du collaboratif pour grandir.
-* **Culture partagée & Diversité :** Le projet célèbre la **diversité culturelle**. Chaque symbole est porteur d’une histoire et d’une identité, et Symbolica valorisera toutes les cultures de manière équitable. L’idée de *culture partagée* signifie que le patrimoine culturel est envisagé comme un bien commun de l’humanité : chacun est invité à découvrir et respecter le patrimoine de l’autre. Aucune appropriation culturelle abusive ne sera tolérée. Au contraire, une attention particulière sera portée aux motifs sensibles ou sacrés, en concertation avec les communautés concernées, afin de toujours les présenter avec le respect et le contexte appropriés.
-* **Éducation & Transmission :** Symbolica a une vocation pédagogique affirmée. Le savoir libre et la transmission intergénérationnelle sont valorisés. La plateforme pourra servir d’**outil éducatif** aussi bien dans un cadre formel (cours d’histoire de l’art, ateliers en écoles de design, etc.) que pour le grand public curieux. Des contenus vulgarisés cohabiteront avec des ressources pointues pour chercheurs. L’objectif est de **rendre accessible** un domaine parfois réservé aux experts (symbologie, iconographie), et de stimuler la curiosité du plus grand nombre.
-* **Innovation & Créativité :** Symbolica marie tradition et innovation. Être open-source n’implique pas d’être figé dans le passé : le projet prône l’**innovation ouverte**. L’utilisation de l’IA pour reconnaître des motifs ou en générer de nouveaux sera mise au service de la **créativité humaine**. L’innovation technologique (IA, AR, visualisations interactives, etc.) est perçue comme un levier pour amplifier l’impact de la culture. Par exemple, l’essor des IA génératives open-source (telles que Stable Diffusion) ouvre de nouvelles voies créatives pour réinterpréter le patrimoine. Symbolica souhaite exploiter ces opportunités de manière éthique, afin de faire rayonner le patrimoine symbolique dans le monde moderne.
-
-En synthèse, ces valeurs d’ouverture, de collaboration, de partage culturel, d’éducation et d’innovation formeront la **charte éthique** de Symbolica. Elles devront transparaître dans l’expérience utilisateur, mais aussi dans la façon dont le projet est piloté.
-
-### Gouvernance ouverte & communautaire
-
-Pour garantir l’alignement avec les valeurs ci-dessus, Symbolica adoptera une **gouvernance ouverte de type associatif** (création d’une association Loi 1901 en France). Le projet sera géré comme un bien commun, de façon transparente et participative. Les grands principes de cette gouvernance incluent :
-
-* **Structure associative et pilotage collectif :** Une association à but non lucratif portera le projet, avec un Conseil d’Administration élu par les membres. Idéalement, ce CA inclura des profils variés (ex. un historien d’art, un développeur open-source, un représentant des utilisateurs grand public, un partenaire musée, etc.) afin de représenter les divers enjeux. Ce conseil prendra les décisions stratégiques de manière collégiale. Des comptes rendus seront publiés et les finances de l’association seront transparentes, assurant la **confiance** de la communauté.
-* **Implication de la communauté :** Les contributeurs volontaires seront invités à participer aux décisions. Symbolica mettra en place des consultations en ligne, des votes sur les fonctionnalités souhaitées et des groupes de travail ouverts. Par exemple, une assemblée générale annuelle pourrait être organisée où chaque membre de la communauté (adhérent de l’asso) dispose d’une voix pour voter les grandes orientations ou élire des représentants. Même hors du cadre formel de l’association, la voix de la communauté sera écoutée via des mécanismes comme un conseil consultatif d’utilisateurs actifs.
-* **Modération participative des contenus :** À l’instar de Wikipédia, tout le monde pourra contribuer du contenu, mais chacun sera également relecteur potentiel des autres. En cas de désaccord sur une identification ou une description, la discussion et le consensus seront recherchés. Un système de **vote et de karma** permettra de signaler les contributions de qualité ou au contraire les erreurs à corriger. Des utilisateurs de confiance pourront être promus modérateurs bénévoles : ils disposeront d’outils pour éditer ou masquer un contenu problématique. Ce modèle de modération distribuée garantit une **qualité de contenu** maintenue par les pairs. Le mécanisme de karma servira à identifier les contributeurs fiables (dont les apports sont souvent validés par la communauté) et ceux nécessitant plus de relecture, ce qui aidera à orienter les efforts de modération.
-* **Licences ouvertes & éthique des données :** Fidèle à l’esprit open-source, l’intégralité du code sera publiée sous licence libre (MIT, GPL ou équivalent). De même, les contenus produits par la communauté seront placés sous licences ouvertes : par exemple, on privilégiera CC BY-SA pour les textes (libre partage avec attribution) et CC0 ou CC BY pour les données structurées, afin de maximiser la réutilisation. Cette politique de licences ouvertes garantit que Symbolica n’enfermera pas les connaissances produites : elles resteront réutilisables dans d’autres contextes (recherche, éducation, etc.). Les contributions des institutions (photos d’œuvres, etc.) seront encouragées sous licence libre également, conformément aux mouvements *Open Content* des musées.
-* **Partenariats et ancrage dans l’écosystème :** Le projet cherchera à s’insérer dans l’écosystème culturel existant en travaillant de concert avec des partenaires. Cela inclut des partenariats avec des musées, bibliothèques ou associations patrimoniales qui pourraient utiliser Symbolica comme relais (par ex. organiser des concours liés à leurs collections, ou intégrer du contenu Symbolica sur leurs sites). Symbolica tentera aussi de fédérer des **communautés déjà actives** sur des thématiques connexes : forums d’héraldique (blasons), groupes de passionnés d’architecture, communautés OpenStreetMap (expérimentées en cartographie et en gouvernance ouverte), etc. En les invitant à rejoindre la plateforme, Symbolica peut bénéficier de leur expertise tout en leur offrant un cadre global pour prolonger leur passion.
-* *(Le modèle économique du projet, en cohérence avec cette gouvernance associative, repose sur des financements indirects – voir section **Modèle économique indirect** plus loin.)*
-
-En somme, Symbolica mise sur une gouvernance **ouverte, transparente et collective**. Ce mode de fonctionnement doit assurer que la communauté se sente investie et propriétaire du projet, tout en maintenant une ligne éthique forte (respect des cultures, partage du savoir, indépendance financière vis-à-vis d’intérêts privés). La gouvernance ouverte sera le socle garantissant la pérennité et la confiance autour de Symbolica.
-
-## Fonctionnalités clés (MVP et évolutions futures)
-
-Symbolica combinera des fonctionnalités de réseau collaboratif classique (profils, contributions, fil d’actualité) avec des outils spécialisés pour le patrimoine visuel (annotation d’images, navigation cartographique, etc.). Cette section décrit les **fonctionnalités phares**, en distinguant ce qui est **déjà présent** dans le prototype actuel (MVP) et ce qui est **prévu à moyen terme** dans les prochaines phases d’évolution. Chaque fonctionnalité majeure est associée à une phase d’implémentation indicative : **(P0)** pour le MVP de base, **(P1)** pour les ajouts à court terme, **(P2)** pour les modules à moyen terme, etc.
-
-### Fonctionnalités présentes dans le MVP actuel (Phase P0)
-
-* **Consultation publique des motifs (galerie)** *(P0)* – Le MVP offre une **navigation en grille** des motifs disponibles. Les visiteurs peuvent parcourir les motifs sous forme de vignettes d’images. Chaque vignette représente un motif ou une photo de motif, avec éventuellement un titre ou une brève info. En cliquant, l’utilisateur accède à une page simplifiée présentant le motif ou la photo en plus grand, avec les informations disponibles (description sommaire, lieu, etc.). Cette galerie est le cœur de l’interface publique actuelle, permettant une première découverte visuelle du contenu.
-* **Bandeau “muséal” et interface épurée** *(P0)* – L’identité visuelle du prototype se manifeste par un **bandeau d’en-tête illustré** évoquant l’ambiance d’un musée ou d’une bibliothèque patrimoniale. Ce bandeau donne le ton culturel dès l’accueil. L’interface est par ailleurs volontairement **simplifiée et épurée** pour le MVP : menu réduit, peu de filtres avancés, juste l’essentiel pour consulter le contenu. Cela permet de tester l’attrait du concept auprès des premiers utilisateurs sans les noyer sous les options.
-* **Internationalisation de base** *(P0)* – Dès le MVP, l’interface supporte au moins deux langues (français et anglais). Les textes de l’UI sont disponibles en bilingue pour toucher un public dès le départ au-delà de la francophonie. Les contributions (titres, descriptions) peuvent quant à elles être saisies en plusieurs langues également. L’architecture prévoit l’extension facile à d’autres langues à l’avenir.
-* **Infrastructure technique initiale** *(P0)* – En coulisses, le MVP s’appuie sur une architecture minimale mais fonctionnelle : base de données opérationnelle, serveur web déployé et stockage des images configuré. L’ensemble est hébergé sur un serveur de test. Cela permet déjà à l’équipe de recueillir les premiers retours des bêta-testeurs sur les performances de chargement, l’ergonomie de base, etc. (Ces aspects techniques sont détaillés dans la section *Architecture & Stack*.)
-
-*NB : D’autres fonctionnalités basiques sont en place côté serveur, bien qu’encore peu visibles pour l’utilisateur non inscrit du MVP.* Par exemple, la structure pour gérer des comptes utilisateurs, l’upload d’images et l’annotation existe déjà partiellement en back-end, mais l’interface publique MVP n’expose pas encore toutes ces possibilités au grand public (réservées aux testeurs pour l’instant). Le MVP en ligne se concentre donc sur la **consultation** plutôt que la **contribution**, en attendant d’ouvrir progressivement les fonctionnalités interactives.
-
-### Fonctionnalités clés prévues à moyen terme (Phases P1, P2, …)
-
-Dans les prochaines phases de développement, Symbolica va s’enrichir de modules communautaires et d’outils avancés pour atteindre sa vision. Voici les **fonctionnalités à venir** les plus importantes, avec leur phase prévue d’introduction :
-
-* **Inscription, profils utilisateurs et réseau social patrimonial** – *(Phase P1)* – Ouverture des **comptes utilisateurs** à tous. Chaque membre disposera d’un **profil personnel** présentant sa bio, ses contributions (photos uploadées, annotations réalisées, collections de motifs préférés, etc.) et ses badges. La plateforme prendra des atours de **réseau social thématique** : possibilité de suivre d’autres utilisateurs aux intérêts similaires, de voir un fil d’actualité des nouvelles contributions, et d’échanger via des commentaires ou messagerie privée. Ces interactions sociales renforceront la dimension communauté de Symbolica. (En P1 on déploiera les profils de base et commentaires publics simples, la messagerie et les fonctionnalités sociales poussées pourront venir légèrement plus tard en P2.)
-* **Upload d’images & pipeline d’analyse** – *(P1)* – Déploiement complet du pipeline de contribution d’images par les utilisateurs. **Téléverser une photo** de motif depuis l’interface deviendra possible pour tout membre : il pourra joindre une image, la géolocaliser (soit en sélectionnant sur une carte, soit via métadonnées GPS de la photo), et renseigner un titre/légende. Une fois l’image uploadée, l’utilisateur aura accès à un outil d’**annotation graphique** intégré : il pourra **découper ou encadrer** la zone exacte du motif sur la photo (par ex. tracer un rectangle autour d’un motif particulier s’il y a plusieurs éléments sur la photo) et y associer une **description** ou identifier le motif. Ce pipeline complet (*upload -> localisation -> découpe -> annotation -> publication*) est central dans Symbolica, car il permet de **documenter chaque motif en contexte**. En P1, l’annotation sera manuelle par l’utilisateur (outil de sélection de zone et champ texte), possiblement enrichie plus tard par une aide IA (voir plus loin).
-* **Base de connaissances des motifs (encyclopédie partagée)** – *(P1)* – Introduction de la notion de **“Motif”** en tant qu’entité à part entière. Au-delà des photos individuelles, Symbolica offrira une base de données structurée de **fiches de motifs**. Lorsqu’une annotation est créée sur une photo, l’utilisateur pourra soit l’**associer à un motif existant** de la base (s’il pense reconnaître un motif déjà documenté), soit **créer une nouvelle fiche motif** si c’est un symbole inédit sur la plateforme. Chaque fiche de motif fonctionnera comme une petite page encyclopédique : un nom (en plusieurs langues si besoin), une description historique et culturelle, des catégories (culture d’origine, époque, style…), des liens externes (identifiant Wikidata, page Wikipedia, etc.), et bien sûr la **liste des photos** du motif en question. Par exemple, une fiche “Triskèle” regroupera toutes les photos/annotations de triskèles ajoutées par la communauté, avec un texte explicatif sur ce symbole celtique. Cette **base de connaissances partagée** donnera toute sa valeur culturelle à Symbolica, en centralisant la documentation patrimoniale produite de manière collaborative. (Techniquement, cela introduit la table `Motif` reliée aux annotations – cf. section Base de données.)
-* **Recherche multicritère et navigation exploratoire** – *(P1)* – Mise en place d’outils de **recherche** pour naviguer efficacement parmi les motifs. L’utilisateur pourra rechercher par mots-clés (titre, description, tags) ou filtrer selon différents **critères thématiques** : par exemple, filtrer les motifs par aire culturelle (ex : *“motifs traditionnels maoris”*), par période historique (ex : *“Renaissance italienne”*), par type visuel (géométrique, floral, animalier, religieux…). Des filtres combinés seront possibles (ex : *“motifs géométriques d’Asie centrale”*). Une **navigation par facettes** aidera à explorer la collection de façon non linéaire, un peu à la manière d’une encyclopédie en ligne. De plus, un **classement par popularité** ou par date d’ajout pourra être proposé pour voir les dernières contributions ou les motifs les plus documentés. À terme, on envisage aussi une frise chronologique interactive pour parcourir les motifs par époque (timeline), ainsi qu’une **navigation en mind-map** (*carte mentale*) reliant les motifs liés entre eux par des thèmes symboliques communs. Par exemple, un motif d’**ouroboros** (serpent qui se mord la queue) pourrait être relié sur une carte conceptuelle à d’autres motifs de *“cycle de vie”* comme le phénix, permettant une exploration ludique des correspondances symboliques à travers les cultures.
-* **Carte interactive mondiale** – *(P1)* – Une fonctionnalité phare en préparation est la **carte du monde interactive** affichant tous les motifs géolocalisés. Chaque photo ou motif apparaîtra comme un point sur la carte à l’endroit où il a été observé (avec un système de clustering visuel si de nombreux points sont proches, pour garder l’ergonomie). L’utilisateur pourra zoomer/dézoomer et appliquer les filtres culturels/chronologiques évoqués plus haut directement sur la carte, pour par exemple n’afficher que les motifs du Moyen-Âge en Europe, ou les motifs traditionnels en Asie du Sud-Est, etc. Une fonctionnalité *“autour de moi”* est envisagée : via la géolocalisation du navigateur, l’utilisateur pourrait découvrir les motifs documentés près de sa position actuelle. Cette carte offrira une dimension **géographique** passionnante à l’exploration des symboles, transformant Symbolica en véritable atlas culturel vivant. *(Note: la carte peut ne pas être dans le tout premier MVP public selon les priorités, mais elle est planifiée dès les premières versions publiques car très attractive.)*
-* **Votes et validation collaborative** – *(P1)* – Pour assurer la qualité des données, un **système de vote** sera introduit sur certaines actions. Par exemple, les utilisateurs pourront voter sur l’identification d’un motif : *“Oui, ce motif est bien un lotus sacré”* ou *“Non, ce n’est pas un lotus mais un nénuphar”*. Ces votes permettront de **valider les annotations** de manière communautaire. Une annotation ayant reçu suffisamment de votes positifs (ou aucun désaccord) sera marquée comme “validée par la communauté”. Au contraire, des votes négatifs inciteront à revoir l’identification. Ce mécanisme s’accompagnera d’un **karma** utilisateur : quelqu’un dont les contributions sont régulièrement validées gagnera en réputation, tandis que des contributions souvent rejetées signaleront peut-être un besoin d’aide ou de modération. Outre la validation des motifs, le vote pourra servir dans d’autres contextes : par exemple pour **prioriser les prochaines fonctionnalités** (vote sur des suggestions d’évolution du site), ou pour les prises de décision de gouvernance interne. L’objectif est de doter la communauté d’outils simples pour s’auto-réguler et orienter le projet (on parle parfois de *gouvernance outillée*).
-* **Commentaires et discussions** – *(P1)* – En complément du vote, des **commentaires** pourront être postés sur les contenus. Chaque photo, chaque motif, voire chaque annotation pourra avoir un fil de discussion attaché, où les membres échangent sources, interprétations ou anecdotes. Par exemple, sous la photo d’un motif sculpté, un utilisateur peut raconter la légende associée à ce motif, un autre partager un lien vers un article, etc. Les commentaires permettront un **échange riche** autour de chaque symbole. Pour le MVP, on prévoira simplement les commentaires publics basiques (similaires à ceux d’un blog ou d’un réseau social), puis on envisagera d’étendre vers une **messagerie privée** ou un forum intégré pour les discussions générales hors contexte d’une image spécifique (éventuellement interfacé avec un Discord pour la communauté technique, etc.). L’accent sera mis sur la courtoisie et la bienveillance dans ces échanges, conformément à la charte communautaire.
-* **Gamification : points, badges et défis** – *(P1/P2)* – Afin de stimuler la participation, Symbolica intégrera progressivement un **système de gamification**. Chaque contribution rapportera des **points** à l’utilisateur (upload de photo, ajout d’annotation, validation d’une suggestion d’IA, traduction d’une fiche motif, etc.). Un tableau de bord de profil affichera le score cumulé et éventuellement un classement des contributeurs les plus actifs (par semaine ou mois). Des **badges** pourront être obtenus en atteignant certains jalons : par exemple *“Explorateur”* pour avoir géolocalisé des motifs dans au moins 5 pays différents, *“Annotateur aguerri”* pour 100 annotations réalisées, *“Détective”* pour des contributions ayant reçu 50 upvotes de validation, etc.  On prévoit aussi des **badges experts par domaine** : par exemple un badge *“Art Déco”* attribué à un utilisateur dont de nombreuses contributions de qualité concernent des motifs Art Déco, indiquant son expertise thématique. Les badges auront possiblement des niveaux (bronze, argent, or) à la manière de StackOverflow pour inciter à diversifier et poursuivre les contributions. L’obtention de badges sera affichée sur le profil et donnera lieu à des notifications, renforçant l’aspect ludique. En outre, des **défis symboliques** seront organisés régulièrement pour mobiliser la communauté (voir point suivant).
-* **Défis thématiques & concours** – *(P2)* – Symbolica proposera des **défis périodiques** pour animer la communauté et enrichir la base de données dans une direction donnée. Par exemple : *“Défi de la semaine : motifs d’animaux mythiques”* où l’objectif est d’uploader ou d’annoter un maximum de motifs liés aux créatures légendaires. Un compteur collectif affiche la progression et les participants gagnent un badge spécial à l’issue du défi. De même, des **concours créatifs** pourront être lancés (ex: meilleur remix moderne d’un motif ancien, via l’outil de génération, ou plus belle photo de motif géométrique) avec un vote de la communauté pour élire le gagnant. Ces événements offriront des **rendez-vous ludiques** et fédérateurs. Ils peuvent être organisés en partenariat avec des institutions : par exemple, un musée pourrait sponsoriser un concours en lien avec une de ses expositions (*“Motifs du monde”* où les visiteurs du musée contribuent en parallèle sur Symbolica). Les défis/concours renforcent l’engagement, donnent de la visibilité (partage sur les réseaux, etc.) et positionnent Symbolica non seulement comme un site encyclopédique, mais aussi comme un espace **dynamique et événementiel**.
-* **Espaces thématiques & équipes (Teams)** – *(P2)* – À mesure que la communauté grandit, il sera utile de permettre la création d’**espaces de travail collaboratifs** au sein de la plateforme. L’idée est de former des **groupes par centre d’intérêt** (par région, par période, par type de motifs, ou même par projet). Par exemple, une équipe *“Motifs médiévaux européens”* ou *“Fans d’Art Nouveau”* pourrait voir le jour, ou encore un groupe local comme *“Communauté Symbolica – Lyon”*. Ces espaces thématiques permettront aux membres de se regrouper pour **collaborer** sur des collections spécifiques, mener des mini-projets ensemble, ou simplement discuter entre passionnés d’un sujet. Concrètement, un espace équipe offrirait un fil de discussion interne, un agrégateur des contributions du thème, peut-être un tableau de bord de progression (ex: “notre groupe a documenté 120 motifs art nouveau”). C’est un peu l’équivalent de “sous-communautés” au sein de Symbolica. Cela répond au cas d’usage où, par exemple, des membres comme Jean et Maria (voir scénario d’usage) veulent organiser un projet commun sur les gargouilles européennes – ils pourraient créer un espace dédié pour centraliser leurs trouvailles. En P2 on pourrait introduire la fonctionnalité basique de création de groupes d’intérêt sur invitation, puis l’étoffer (système de modération propre au groupe, pages thématiques publiques présentées comme des *“collections collaboratives”*, etc.). Cette modularité renforcera l’aspect **portail communautaire** de référence, capable d’accueillir 50 000 passionnés en permettant des micro-communautés actives.
-* **Navigation “mind-map” symbolique** – *(P2)* – Une fois la base de motifs bien étoffée, une **navigation par carte mentale** des symboles sera explorée pour mettre en valeur les liens sémantiques entre motifs. Il s’agira d’une visualisation sous forme de **graphe** où chaque nœud est un motif et chaque lien une relation (par exemple “est un type de…”, “appartient à la même famille que…”, “symbolique similaire à…”). L’utilisateur pourra ainsi naviguer de concept en concept de manière intuitive. Par exemple, du motif *Ouroboros* il pourra sauter vers le motif *Phoenix* via le lien *“cycle de renaissance”*, puis vers le motif *Dragon* via *“créatures mythiques”*, etc., construisant son propre parcours de découverte. Cette fonctionnalité exploitera la structure sémantique des données (catégories, tags, liens Wikidata) et possiblement de l’**IA d’analyse sémantique** qui pourrait suggérer des connexions entre motifs. L’affichage type mind-map serait une manière ludique et éducative de parcourir la symbolique comparée à travers les cultures. C’est une fonctionnalité innovante prévue plutôt à moyen terme (post V1), car elle nécessite beaucoup de données et une UI spécifique, mais qui incarnera bien l’esprit d’exploration de Symbolica.
-* **Intelligence artificielle de reconnaissance & classification** – *(P2)* – Symbolica intègrera des **outils d’IA** pour assister les contributeurs dans l’analyse des images et l’enrichissement des données. Un premier volet sera la **reconnaissance visuelle automatique** : lorsqu’un utilisateur uploadera une photo, un algorithme de vision par ordinateur (réseau de neurones entraîné sur un corpus de motifs) tentera de **identifier le motif** présent ou de proposer des correspondances avec des motifs existants dans la base. Par exemple, l’IA pourra suggérer *“Ce motif ressemble à un Ouroboros”* avec un score de confiance. L’utilisateur restera décisionnaire en validant ou invalidant la suggestion (apprentissage collaboratif : chaque confirmation ou infirmation permettra d’améliorer progressivement le modèle). Au début (P1/P2), cette reconnaissance automatique sera limitée à quelques catégories de motifs simples pour tests bêta, puis étendue en précision. Un deuxième volet sera l’**analyse sémantique** des contenus textuels et contextuels : utiliser l’IA pour **classer les motifs par similarité symbolique** ou regrouper des motifs proches. Par exemple, via des techniques de NLP ou d’embeddings, l’IA pourrait suggérer que le motif X et le motif Y partagent un thème commun (ce qui pourrait alimenter la navigation par mind-map). Enfin, un troisième volet déjà évoqué est la **recherche d’images similaires** : en utilisant des vecteurs d’images (type modèle CLIP), l’outil pourra retrouver dans la base des images proches visuellement d’une image donnée, aidant ainsi à identifier un motif inconnu en le comparant à des motifs connus. L’IA sera donc mise à contribution à la fois pour la **classification culturelle** (identifier la culture probable d’un motif, son style) et pour la **reconnaissance automatique** de motifs récurrents. Tous ces usages de l’IA seront introduits progressivement et avec prudence (tests en beta, validation humaine obligatoire, etc.), afin de soutenir la communauté sans jamais remplacer l’expertise humaine.
-* **Génération de motifs par IA créative** – *(P2)* – En complément de l’IA analytique, Symbolica proposera un module d’**IA générative** pour explorer la créativité. Grâce à un modèle de génération d’images (de type **Stable Diffusion**, modèle open-source), les utilisateurs pourront **générer de nouveaux motifs** en se basant sur ceux de la base. Par exemple, en entrant une description texte *“motif floral style Art Nouveau avec des éléments celtiques”*, l’IA pourra produire une image inédite correspondant, mêlant ces influences. De même, il sera possible de partir d’une image existante dans la base et de demander à l’IA de créer des variantes (via des techniques *image-to-image* ou *ControlNet*). Ce générateur sera comme un **atelier virtuel** pour designers et artistes, qui pourront s’inspirer du patrimoine tout en créant du neuf. L’objectif est triple : **stimuler la créativité** (les graphistes et créateurs trouveront un outil ludique et inspirant), **attirer un public créatif** sur la plateforme (ceux intéressés par l’outil de création plus que par l’aspect encyclopédique pur), et **enrichir la base de motifs** éventuellement (les plus belles créations, si leurs auteurs le souhaitent, pourront être intégrées à la collection Symbolica sous licence libre, créant un pont entre tradition et création contemporaine). Cette fonctionnalité, bien qu’avancée, pourrait être testée dès la phase de bêta publique (de façon limitée à certains utilisateurs) pour voir son impact.
-* **Documentation patrimoniale enrichie** – *(P2)* – Symbolica vise à devenir une référence documentaire, elle intégrera donc des **ressources patrimoniales** autour des motifs. En pratique, cela signifie étoffer chaque fiche motif avec des **informations de qualité** : textes explicatifs rédigés par les contributeurs experts, bibliographie et sources (ouvrages, articles) sur le motif, liens vers des ressources externes (articles scientifiques, pages Wikipedia, base Joconde du Ministère de la Culture, etc.). Une section **“Documentation”** ou blog pourrait être ouverte pour publier des articles plus longs sur l’histoire de certains symboles, des interviews d’experts, ou des retours sur des projets menés via Symbolica. De plus, une **intégration Wikidata** est prévue : chaque motif pourra être lié à un identifiant Wikidata, ce qui permettrait d’importer des données déjà existantes (descriptions multilingues, images d’archives libres) et de **contribuer en retour** en ajoutant sur Wikidata les nouvelles connaissances issues de Symbolica. L’idée est de ne pas créer un silo mais bien de s’insérer dans l’écosystème du savoir libre. Enfin, tous les contenus de Symbolica (textes, données structurées, images sous licence libre) seront **exportables** via API ou dumps, afin que chercheurs ou institutions puissent les réutiliser pour des études, des expositions virtuelles, etc. Cette ouverture des données renforce le rôle de portail **culturel de référence** de Symbolica.
-* **Badges “Experts” et rôles utilisateurs avancés** – *(P2)* – En lien avec la gamification et la gouvernance, Symbolica mettra en place des **distinctions pour experts**. Par exemple, un historien de l’art reconnu qui contribue régulièrement sur sa spécialité pourrait recevoir un statut *“Expert vérifié – Arts de la Renaissance”*. De même, des badges spécifiques “Expert Art déco” ou “Spécialiste calligraphie arabe” distingueront les membres dont les contributions sur ces thèmes sont particulièrement qualitatives. Ces badges experts serviront à la fois de **reconnaissance** (valoriser les spécialistes dans la communauté) et d’**indicateur de fiabilité** pour les autres utilisateurs (les contributions marquées par un badge expert auront plus de poids de confiance). Les critères d’obtention seront définis en concertation avec la communauté et le comité scientifique/associatif du projet. Par ailleurs, des rôles plus formels existeront : administrateurs (gérants techniques de la plateforme), modérateurs (utilisateurs avec pouvoirs de modération attribués par l’association, en général corrélés à un haut karma), etc. L’ensemble de ces rôles et badges structurera la communauté de 50 000 passionnés en permettant d’identifier les compétences de chacun et en encourageant l’investissement sur le long terme (via la gratification symbolique que représentent ces statuts).
-* **Améliorations multi-plateformes** – *(P2 et au-delà)* – Enfin, de nombreuses améliorations viendront affiner l’expérience utilisateur à mesure que Symbolica grandit. Citons par exemple : une **application mobile native** (iOS/Android) ou une Progressive Web App renforcée pour utiliser l’appareil photo du smartphone et faciliter les uploads sur le terrain, des fonctionnalités de **réalité augmentée** (pointer son téléphone sur un monument pour voir apparaître les informations Symbolica en surimpression, ou suivre un parcours de *chasse aux motifs* en ville), l’extension du **multilinguisme** à davantage de langues grâce à la communauté (espagnol, arabe, japonais, etc.), ou encore une **intégration sur les sites de musées** (fournir un widget exportable présentant les motifs d’une institution qui sont aussi sur Symbolica, afin de connecter nos bases de données). Ces fonctionnalités plus lointaines sont détaillées en partie dans la roadmap, mais elles s’inscrivent déjà dans la vision globale : faire de Symbolica un écosystème riche, accessible depuis n’importe où et interconnecté avec le monde culturel.
-
-Comme on le voit, les chantiers fonctionnels à venir sont nombreux. La priorité sera d’**itérer** par étapes successives (MVP puis améliorations progressives P1, P2, etc.), en s’assurant à chaque phase que l’essentiel est **cohérent et stable** avant d’ajouter la couche suivante. L’objectif est qu’à l’horizon moyen terme, toutes les fonctionnalités clés soient en place pour faire de Symbolica un véritable **portail communautaire culturel de référence**, attractif pour des dizaines de milliers d’utilisateurs.
-
-## Architecture & Stack technologique
-
-Pour réaliser ces fonctionnalités variées, Symbolica s’appuie sur une **architecture technique modulaire et scalable**, construite avec des technologies modernes. L’objectif est d’assurer performance, évolutivité et maintenabilité du système, tout en restant aligné avec l’esprit open-source (utilisation de frameworks et outils libres). Voici un aperçu de l’architecture et du stack technologique préconisé :
-
-* **Architecture générale :** Symbolica est conçu comme une application web à architecture **API-first**. Le front-end (interface utilisateur) est découplé autant que possible de la logique métier, laquelle est exposée via une API REST (et à terme GraphQL possiblement). Cette séparation permet une flexibilité (ex: clients mobiles utilisant la même API). Le déploiement est conteneurisé : chaque composant (front, backend, base de données, service d’IA…) tourne dans un **Docker container**. Pour le MVP et les phases initiales, un simple docker-compose ou un déploiement sur un serveur unique suffira. Mais l’architecture est pensée pour pouvoir migrer vers du **microservices** orchestré (Kubernetes) en cas de montée en charge importante, avec par exemple des services séparés pour la gestion des images, pour l’IA, etc.
-* **Front-end :** Le choix recommandé est **Next.js (React)** pour développer l’interface utilisateur web. Next.js offre les avantages de React (interface dynamique, composants réutilisables) tout en permettant du **Server-Side Rendering (SSR)** et du **Static Site Generation**, utiles pour le SEO (référencement des pages de motifs sur les moteurs de recherche) et la performance initiale. L’UI sera construite comme une **Single Page Application** progressive : l’essentiel de l’application peut se charger sur le client pour fluidifier la navigation, tout en ayant la possibilité de servir des pages pré-rendues (pour les fiches motifs publiques par ex.). Le front-end consommera l’API pour les opérations (chercher des motifs, envoyer une nouvelle photo…). On utilisera des technologies web standard modernes : HTML5/CSS3, avec un framework CSS (possiblement TailwindCSS ou Bootstrap/Material au début pour accélérer le prototypage), et des librairies pour la carte (ex: Mapbox GL ou Leaflet pour la map interactive) et la visualisation de graphes (D3.js ou Three.js pour la mind-map).
-* **Back-end / API :** Côté serveur applicatif, on s’oriente vers **Node.js** avec un framework type **Express** ou idéalement **NestJS** (framework Node structuré) pour implémenter l’API RESTful. Node.js, basé sur JavaScript/TypeScript, s’intègre bien avec le front React et offre un I/O non bloquant, ce qui est utile pour supporter de nombreuses requêtes simultanées (scalabilité). L’API gèrera l’authentification, les validations, la logique métier (création d’annotation, calcul de points, agrégation des votes, etc.) et servira de passerelle vers la base de données. On adoptera une architecture MVC ou hexagonale bien organisée en modules (module Utilisateurs, module Photos/Motifs, module Commentaires, etc.) pour faciliter la maintenance. Des tests unitaires seront écrits (par ex. avec Jest) pour s’assurer de la fiabilité des endpoints au fur et à mesure. Si le besoin s’en fait sentir, on pourra introduire un système de **cache** (par ex. Redis) pour stocker temporairement les résultats des requêtes fréquentes (comme la page d’accueil ou les tuiles de carte) et soulager la charge sur la DB.
-* **Base de données :** Le cœur des données de Symbolica repose sur une base **relationnelle PostgreSQL**. PostgreSQL est robuste, open-source, et supporte bien les volumétries importantes (des millions d’enregistrements) avec les index appropriés. De plus, grâce à l’extension **PostGIS**, il gère nativement les données géospatiales – indispensable pour stocker les coordonnées des photos/motifs et effectuer des requêtes spatiales (rechercher ce qui est “autour de telle position”, etc.). Le schéma relationnel de la base est décrit en détail dans la section suivante, mais pour résumer : on aura des tables pour les Utilisateurs, Photos, Annotations, Motifs, etc., avec des relations bien normalisées. On ajoutera aussi une couche **sémantique** en incluant des identifiants externes (Wikidata) dans les tables pertinentes. À terme, si la recherche plein texte devient trop exigeante, on pourrait coupler PostgreSQL avec un moteur spécialisé (type Elasticsearch) pour accélérer les recherches sémantiques, mais dans un premier temps Postgres propose déjà la fonction **Full Text Search** qui devrait suffire pour indexer descriptions et tags.
-* **Stockage de fichiers :** Les images uploadées (photos haute résolution) seront stockées de préférence sur un système de stockage objet type **Amazon S3** ou équivalent (MinIO, etc.). Cela pour des raisons de scalabilité et de coût : S3 sait gérer un très grand volume de fichiers de façon économique, avec des backups intégrés. Le backend ne conservera alors que l’URL d’accès (ou chemin) de l’image dans la base de données. On prévoira également de générer automatiquement des **vignettes** (thumbnails) de différentes tailles lors de l’upload, afin d’optimiser l’affichage web (ne pas charger l’original HD quand une petite vignette suffit). Un service d’image (ou simplement un batch process) pourra créer ces différentes résolutions. Les contenus statiques du site (icônes, scripts) pourront aussi être servis via un CDN pour accélérer leur distribution aux utilisateurs dans le monde.
-* **Intégration de l’IA :** Les fonctionnalités d’IA (reconnaissance et génération de motifs) seront implémentées via des modules Python dédiés. On utilisera **PyTorch** comme framework de deep learning, étant donné la richesse de son écosystème et modèles disponibles. Un script ou micro-service Python sera en charge de la **détection de motifs** : par exemple, utiliser OpenCV pour pré-traiter l’image (détection de contours, etc.), puis un réseau neuronal (CNN, peut-être fine-tuné sur ImageNet ou un modèle type ResNet/CLIP) pour suggérer des correspondances. Ce service IA pourra être déclenché à l’upload d’une photo, de manière asynchrone (via une file de tâches et un worker Python) pour ne pas ralentir l’API principale. L’utilisateur recevra la suggestion de l’IA quelques secondes plus tard (notification ou simplement affichage sur la page d’annotation). Pour l’IA générative, on dédiera éventuellement un conteneur à part avec un GPU pour faire tourner Stable Diffusion ou un modèle équivalent. Là aussi, les requêtes seront traitées **asynchronement** : l’utilisateur soumet une demande de génération, et l’image résultante est fournie une fois calculée, évitant de faire attendre le client sur une connexion longue.
-* **Scalabilité & performances :** La stack choisie est conçue pour pouvoir **monter en charge** jusqu’à des dizaines de milliers d’utilisateurs actifs. Node.js supporte de nombreuses connexions simultanées de manière non bloquante. PostgreSQL, bien tuné, peut gérer un grand nombre de transactions et d’enregistrements (on ajoutera des index GIN/GIST pour la recherche textuelle et géospatiale). S3 peut absorber un volume massif de fichiers sans broncher. En cas de succès au-delà de \~50k utilisateurs, des évolutions d’architecture seront prêtes : par exemple, migrer vers une architecture **microservices** plus poussée (séparer le service de gestion utilisateur, le service de contenu, le service de recherche, etc.), déployer sur un cluster **Kubernetes** pour auto-scaler les instances de chaque service selon la charge, et utiliser un CDN (CloudFront, Cloudflare) pour mettre en cache les pages ou images les plus sollicitées. Dès la bêta, on mettra en place du **caching** applicatif et un système de **queue** (ex: Redis + BullMQ ou RabbitMQ) pour les tâches lourdes (IA, génération de thumbnails). Des tests de charge seront effectués pour identifier les goulots d’étranglement. L’application web sera optimisée (minification des JS/CSS, utilisation de techniques de *lazy loading* pour les images, etc.) afin d’offrir une expérience fluide même lors d’un afflux important de visiteurs.
-* **Sécurité & confidentialité :** Divers mécanismes garantiront la sécurité des données et des utilisateurs. L’authentification utilisera des **tokens JWT** pour les appels API depuis le front, ou des sessions sécurisées si on opte pour du SSR. Les mots de passe des utilisateurs seront stockés **hachés** (bcrypt ou argon2). On mettra en place des protections contre les attaques classiques : ORM pour éviter les injections SQL, limite de débit (*rate limiting*) sur les endpoints sensibles pour prévenir le spam, captcha pour la création de comptes si on constate des bots, filtrage à l’upload pour éviter les fichiers dangereux ou les images inappropriées (un premier tri automatique, et la modération fera le reste). Étant donné que le code est open-source, il sera audité par la communauté ce qui aidera à repérer rapidement d’éventuelles failles et à les corriger. Les backups de la base de données seront automatisés (fréquence quotidienne par ex.) et chiffrés. Sur la question des données personnelles, Symbolica collectera peu de PII (principalement email et pseudo), et celles-ci seront traitées dans le respect du RGPD (droits d’export/suppression sur demande, etc.).
-* **Déploiement, tests et CI/CD :** Le projet adoptant les bonnes pratiques DevOps, on mettra en place une **pipeline d’intégration continue** dès que possible. Par exemple, via GitHub Actions ou GitLab CI, chaque modification du code pourra déclencher les **tests automatisés** (tests unitaires JavaScript avec Jest, tests Python avec PyTest, tests d’intégration sur l’API) afin de s’assurer qu’on ne casse rien. Avant la production, un environnement de **staging** sera utilisé pour valider les nouvelles fonctionnalités par les testeurs. Le déploiement en production sera automatisé dès que stable (envoi des nouveaux conteneurs Docker sur le serveur ou le cluster). Cette approche CI/CD permettra des itérations rapides et fiables, nécessaires à une évolution agile du produit.
-* **Ouvrabilité du code :** En parallèle du lancement public, on préparera le dépôt GitHub officiel du projet. Un soin particulier sera apporté à la documentation du code, à la rédaction d’un README clair, de guides de contribution, etc., afin d’accueillir les développeurs open-source qui voudraient participer. Le code étant modulaire, il sera facile pour des contributeurs de travailler sur un sous-ensemble (ex: améliorer le module carte, ou ajouter une fonctionnalité dans le module de génération IA) sans tout connaître du projet. L’utilisation de technologies courantes (React/Node/Postgres) vise aussi à maximiser la **communauté de développeurs** potentiels autour de Symbolica.
-
-En résumé, le **stack technique** retenu s’articule autour de **Next.js (React)** pour le front-end, **Node.js/NestJS** pour l’API back-end, **Python (PyTorch, OpenCV)** pour les services d’IA, **PostgreSQL/PostGIS** pour la base de données relationnelle et géospatiale, **S3** (ou équivalent) pour le stockage des images, le tout orchestré via des **API REST** et des conteneurs Docker. Cette architecture, moderne et modulable, est prête à monter en charge pour servir efficacement une communauté de 50 000 utilisateurs et plus, tout en restant maintenable par une équipe bénévole évolutive.
-
-## Modèle économique indirect
-
-Symbolica est pensé avant tout comme un projet communautaire d’intérêt général, et non comme une startup commerciale classique. Le **modèle économique** privilégié est donc **indirect** et fondé sur des financements alternatifs, afin de garder la plateforme gratuite d’accès, ouverte et indépendante de pressions commerciales. Voici les grandes lignes de cette approche :
-
-* **Gratuité pour les utilisateurs & absence de publicité :** L’utilisation de Symbolica sera entièrement gratuite pour tous les types d’utilisateurs (contributeurs, visiteurs, chercheurs…). Aucune fonctionnalité essentielle ne sera payante, conformément à la philosophie de partage du savoir. De même, il n’est pas prévu d’intégrer de la publicité en ligne classique, qui serait intrusive et en décalage avec le caractère culturel du site. Le choix de l’indirect signifie que l’on ne cherche pas de rentrées d’argent via les utilisateurs ou leurs données.
-* **Association à but non lucratif & subventions publiques :** Comme évoqué en gouvernance, Symbolica sera porté par une association loi 1901. Cette association pourra candidater à des **appels à projets et subventions** pour financer le développement et la maintenance. Il existe de nombreux fonds et programmes soutenant la transformation numérique culturelle, la préservation du patrimoine ou l’innovation open-source. Par exemple, on pourra solliciter des aides auprès d’organismes comme la BnF (Bibliothèque Nationale de France) pour le patrimoine, la Commission Européenne (programmes type Europe Créative, Horizon Europe pour l’innovation), des fondations culturelles, ou des collectivités locales. Ces financements publics ou parapublics permettront de couvrir les frais serveurs, le petit matériel, ou ponctuellement des missions de développement spécifique, sans compromettre l’indépendance du projet.
-* **Mécénat, sponsoring et partenariats :** Outre les subventions, l’association cherchera des partenariats avec des **institutions culturelles** (musées, fondations, universités) et des **entreprises** partageant les valeurs du projet. Par exemple, un musée pourrait devenir partenaire en finançant une partie du projet en échange de l’intégration de certaines de ses collections et d’une visibilité (*“avec le soutien de …”*). Des entreprises du numérique ou du secteur culturel pourraient fournir du mécénat (compétences, hébergement cloud gratuit la première année, etc.). Ces sponsors seront choisis de manière à préserver l’éthique (pas de marque en conflit avec l’ouverture des données ou risquant de s’approprier les contenus). L’idée est de **diversifier les sources de financement** pour ne dépendre d’aucun acteur unique, et d’inscrire Symbolica dans un réseau d’acteurs bienveillants.
-* **Dons de la communauté :** On pourra mettre en place un système de **dons volontaires** (par exemple via OpenCollective, Patreon ou autre) pour permettre aux utilisateurs qui le souhaitent de soutenir financièrement le projet. Cela resterait marginal mais peut aider à couvrir certains frais (nom de domaine, petits équipements, etc.) tout en renforçant le sentiment communautaire. L’association pourrait aussi proposer des adhésions symboliques (cotisation annuelle modeste) pour ceux qui veulent s’impliquer formellement, mais sans obligation aucune pour utiliser la plateforme.
-* **Événements et contributions en nature :** Symbolica pourra organiser des **hackathons** ou ateliers en partenariat avec des écoles, universités ou événements culturels. Ces occasions peuvent apporter des contributions en nature : par exemple, un hackathon dans une école d’informatique mobilise pendant 2 jours des étudiants à développer des features, ce qui équivaut à une contribution de travail valorisable économiquement. De même, des ateliers de contribution dans des musées ou médiathèques, même s’ils ne rapportent pas d’argent, enrichissent la plateforme en contenus et créent du lien avec des partenaires, ce qui a une valeur.
-* **Monétisation potentielle (long terme, prudente) :** Si, à très long terme, les financements bénévoles ne suffisaient pas, l’association pourra explorer des modèles de revenus **complémentaires et cohérents** avec sa mission. Par exemple, imaginer un **module de marketplace** où des designers vendraient des objets ou motifs dérivés des collections (impressions d’art, textiles, etc.) – Symbolica pourrait alors prélever une commission modeste sur ces ventes pour se financer. Ou proposer à des institutions un **service premium d’analyse de leurs collections** via l’IA Symbolica moyennant contribution financière. **Cependant**, ces pistes seront mûrement réfléchies car il faut éviter de compromettre l’esprit open et collaboratif. Toute forme de transaction commerciale sera transparente et encadrée par l’association, en s’assurant qu’elle serve l’intérêt général (par ex., privilégier la vente de produits dont les bénéfices sont réinvestis dans le projet, etc.). Actuellement, aucune de ces options n’est nécessaire ni prévue dans le moyen terme – c’est uniquement une porte de secours si besoin.
-* **Réduction des coûts par l’open-source :** Enfin, il convient de noter que le choix open-source et communautaire réduit les besoins financiers directs : une grande partie du développement est réalisée par des bénévoles, les infrastructures peuvent s’appuyer sur des solutions gratuites ou à faible coût pour l’open-source (hébergement offert la première année, crédits cloud, etc.), et la mutualisation avec d’autres projets est possible. Symbolica profitera de cette dynamique pour minimiser ses charges.
-
-En conclusion, le modèle économique de Symbolica repose sur un **équilibre fragile mais vertueux** : financement par l’écosystème culturel et les communs, **sans faire payer les utilisateurs ni vendre leurs données**. Cette approche indirecte garantit l’**indépendance** du projet (pas de pression pour générer du profit à court terme), ce qui permet de rester fidèle aux valeurs initiales. Le succès de Symbolica se mesurera davantage à son impact culturel et communautaire qu’à des revenus financiers – l’argent n’étant qu’un moyen au service de la mission patrimoniale.
-
-## Base de données & schéma
-
-La base de données relationnelle est le **cœur du système Symbolica**, car elle stocke et relie toutes les informations : utilisateurs, contenus, métadonnées culturelles, etc. Le schéma a été conçu pour refléter les besoins fonctionnels (décrits plus haut) tout en restant normalisé, évolutif et interopérable avec l’extérieur. Voici un aperçu des **principales entités (tables)** de la base de données et de leurs relations :
-
-* **Utilisateur** (`utilisateur`) – Représente un membre inscrit sur la plateforme.
-  *Champs principaux :* id (clé primaire), pseudo, email, mot\_de\_passe\_hash, bio, langue\_principale, date\_inscription, etc.
-  *Relations :* Un utilisateur peut avoir à son actif plusieurs photos, annotations, commentaires, etc. (liens 1-n vers ces tables). On stocke aussi son **rôle** ou statut (par ex. utilisateur standard, modérateur, admin) pour la gouvernance.
-
-* **Photo** (`photo`) – Représente une **image téléversée** par un utilisateur, contenant un ou plusieurs motifs.
-  *Champs :* id, utilisateur\_id (FK vers *Utilisateur*, l’auteur de l’upload), url (chemin de stockage du fichier, ex. sur S3), titre, description, date\_upload, latitude, longitude, lieu\_nom (intitulé du lieu, ville/pays si connu), validation\_status (statut de modération de la photo : en attente, approuvée…).
-  *Relations :* chaque photo est liée à son auteur (utilisateur) et peut donner lieu à plusieurs annotations (relation 1-n vers *Annotation*). Les coordonnées `(latitude, longitude)` sont stockées sous forme de point géographique (PostGIS) pour permettre des requêtes spatiales.
-  *Remarque :* on distingue bien la photo brute de l’objet motif. Une photo peut couvrir plusieurs motifs (par ex. une image d’un temple avec divers ornements) – d’où la nécessité de la table *Annotation* pour détailler chaque motif dans l’image.
-
-* **Annotation** (`annotation`) – Représente une **annotation réalisée sur une photo**, c’est-à-dire la délimitation d’un motif précis dans l’image et les informations associées.
-  *Champs :* id, photo\_id (FK vers *Photo* annotée), utilisateur\_id (FK vers *Utilisateur* ayant fait l’annotation), motif\_id (FK optionnelle vers *Motif* – si l’annotateur a identifié le motif comme étant un concept de la base de connaissances), texte (contenu descriptif saisi, pouvant contenir une description ou des tags libres), shape (coordonnées de la zone sur l’image – typiquement on stocke un rectangle ou un polygone en format JSON ou autre), date\_annotation.
-  *Relations :* une annotation appartient à une photo (plusieurs annotations par photo), et peut référencer un motif (lorsqu’elle identifie formellement un motif connu). Si l’annotation ne correspond à aucun motif connu, motif\_id reste null en attendant potentiellement de créer une nouvelle entrée Motif.
-  *Remarque :* Cette table enregistre le contenu utilisateur lié aux zones d’images. On pourra ajouter une table dédiée aux tags libres pour structurer le champ texte si besoin, mais initialement on permet de saisir dans le texte aussi bien une description qu’éventuellement des hashtags.
-
-* **Motif** (`motif`) – C’est la table au cœur de la **base de connaissances** : chaque enregistrement représente un **motif ou symbole** en tant que concept culturel distinct des images individuelles.
-  *Champs :* id, nom (du motif – possiblement géré en multilingue via une table à part ou un champ JSON), description (texte explicatif, multilingue également), culture\_principale (FK vers *Culture*, ex. *culture\_id* indiquant l’aire culturelle d’origine), periode (FK vers *Période* ou champ texte indiquant l’époque historique du motif), wikidata\_id (identifiant externe pour lier le motif à Wikidata ou autre référentiel, ex: *Q12345*), image\_exemple (FK optionnelle vers une *Photo* qui pourrait illustrer le motif comme visuel principal), etc.
-  *Relations :* un motif peut être relié à de nombreuses annotations (chaque fois qu’il est identifié sur une photo). Via les annotations, on retrouve donc toutes les photos associées à ce motif. De plus, un motif peut être lié à zéro, une ou plusieurs cultures (table de jointure motif\_culture si un motif est présent dans différentes aires culturelles), de même pour les périodes s’il traverse le temps. Un motif peut aussi avoir plusieurs tags descriptifs (table de jointure motif\_tag vers *Tag*).
-  *Remarque :* la table Motif est cruciale pour tout le volet “navigation thématique” : on y stocke les attributs nécessaires aux filtres (style, époque, culture…). Il faudra la normaliser avec des tables dédiées pour les listes de cultures, périodes, etc., afin d’assurer la cohérence sémantique (plutôt que du texte libre qui pourrait diverger).
-
-* **Culture** (`culture`) – Liste les **cultures ou aires culturelles** utilisées pour classer les motifs.
-  *Champs :* id, nom (intitulé de la culture, ex. “Égypte antique”, “Polynésienne”, … – géré en multilingue si besoin), region\_geo (optionnel, pour regrouper les cultures par grande région du monde), wikidata\_id (identifiant Wikidata de la culture le cas échéant).
-  *Relations :* Un motif peut être associé à une ou plusieurs cultures (beaucoup-à-beaucoup via *motif\_culture* : motif\_id, culture\_id). Pour simplifier initialement, on pourra n’assigner qu’une culture principale par motif, puis étendre en multi plus tard. Les cultures servent aux filtres et statistiques.
-
-* **Période** (`periode`) – Répertorie les **périodes historiques ou mouvements artistiques** pour situer temporellement les motifs.
-  *Champs :* id, nom (ex. “Antiquité”, “Moyen Âge”, “Renaissance”, ou “Art Nouveau” selon le cas), annee\_debut, annee\_fin (bornes approximatives si applicable), type (pour distinguer par ex. une période historique générale d’un mouvement artistique plus précis).
-  *Relations :* Un motif peut avoir une période d’origine (FK ou table de liaison *motif\_periode*). Là encore, on peut limiter à une période principale par motif pour commencer, quitte à en associer plusieurs plus tard si nécessaire (par ex. un motif utilisé du Moyen-Âge à nos jours pourrait avoir plusieurs périodes d’influence). Les périodes serviront aux filtres chronologiques.
-
-* **Tag** (`tag`) – Mots-clés libres pour caractériser les motifs par thèmes, formes, couleurs, etc. (ex. “floral”, “géométrique”, “animal”, “spirale”…).
-  *Champs :* id, label (nom du tag).
-  *Relations :* **motif\_tag** (table de liaison motif\_id, tag\_id) permet d’associer plusieurs tags à un motif. On pourra aussi taguer directement les photos si besoin via *photo\_tag* (photo\_id, tag\_id), mais idéalement on tague au niveau motif pour mutualiser (par ex. toutes les photos d’un motif “lotus” héritent du tag “floral” via le motif). Les tags permettront une navigation transversale par caractéristiques visuelles ou symboliques. On pourra éventuellement ajouter une catégorisation des tags (par ex. type=forme, type=thème) pour distinguer nature des tags.
-
-* **Contribution** (`contribution`) – Journalise **toutes les actions** effectuées par les utilisateurs, afin de calculer les points de gamification et de disposer d’un historique.
-  *Champs :* id, utilisateur\_id (FK vers *Utilisateur*), type (enum définissant l’action : “upload\_photo”, “ajout\_annotation”, “validation\_annotation”, “commentaire\_posté”, etc.), cible\_type et cible\_id (permettent de lier l’action à l’entité concernée, ex. cible\_type=photo, cible\_id=42 si c’était un upload de photo d’id 42), points (nombre de points gagnés pour cette action), date.
-  *Utilité :* Cette table sert à **calculer le score** de chaque utilisateur facilement (somme des points), à afficher l’historique de ses contributions sur son profil, et d’une manière générale à avoir un **audit log** transparent de qui a fait quoi. Elle peut aussi aider pour le debug ou la modération (tracer les actions d’un utilisateur problématique).
-
-* **Badge** (`badge`) – Contient la liste des **badges disponibles** et leurs critères d’attribution.
-  *Champs :* id, nom, description, niveau (si les badges ont des rangs bronze/argent/or par exemple), critere (définition de la règle d’obtention – potentiellement sous forme d’une expression ou de texte explicatif).
-  *Relations :* Table de jointure **user\_badge** (utilisateur\_id, badge\_id, date\_obtention) pour associer les badges gagnés à chaque utilisateur, avec la date où le badge a été obtenu. Chaque fois qu’une contribution est ajoutée, on pourra vérifier si cela fait débloquer un badge et alors insérer l’entry correspondante.
-
-* **Événement/Défi** (`evenement`) – Enregistre les **événements communautaires** type défis, concours, hackathons.
-  *Champs :* id, type (par ex. “défi”, “concours”, “hackathon”), titre, description, date\_debut, date\_fin, parametres (champ libre ou JSON pour stocker des paramètres spécifiques, ex. le thème du défi, l’objectif chiffré, etc.), statut (en cours, terminé, à venir).
-  *Relations :* les contributions faites pendant un événement pourront être marquées de l’id de l’événement (par exemple via une colonne *evenement\_id* dans Contribution ou Annotation). Sinon, on peut filtrer par date pour savoir quelles contributions entrent dans la période. La table sert surtout à afficher l’historique des événements passés et à préparer ceux à venir.
-
-* **Commentaire/Message** (`commentaire`) – Stocke les **commentaires** postés par les utilisateurs soit sur une photo, sur une annotation, sur une collection, etc. (toute entité “commentable”).
-  *Champs :* id, auteur\_id (FK vers *Utilisateur*), cible\_type (ex. “photo”, “motif”, “profil”, etc.), cible\_id (identifiant de l’entité visée), texte (contenu du commentaire), date.
-  *Relations :* chaque commentaire est lié à son auteur et à l’entité (photo, motif…) qu’il concerne. Un utilisateur peut bien sûr poster plusieurs commentaires.
-  *Remarque :* La structure est simplifiée, sans threads imbriqués (on part sur des discussions linéaires). Pour MVP les commentaires peuvent être limités ou réservés à certains contextes, mais on a dès le début la table prête pour étendre cette fonctionnalité.
-
-Les tables ci-dessus couvrent l’essentiel du modèle. Pour le déploiement initial, on peut démarrer avec le **noyau minimal** : Utilisateur, Photo, Annotation, Motif (et les tables liées Culture, Tag pour bien structurer), puis ajouter les autres (Commentaire, Contribution, Badge, Evenement) lorsque les fonctionnalités correspondantes sont implémentées. On veillera à ajouter les index nécessaires (index texte sur le nom/description des motifs pour la recherche, index géospatiaux sur les coordonnées, etc.).
-
-**Schéma relationnel simplifié :** Pour visualiser les relations entre entités, voici un schéma conceptuel (cardinalités principales indiquées) :
-
-```
-Utilisateur (1) --- (N) Photo --- (N) Annotation --- (1) Motif --- (N) motif_tag --- (1) Tag
-                    |             |
-                    |             -- (N) AnnotationValide (table optionnelle de votes de validation)
-                    |
-                    -- (N) photo_tag --- (1) Tag  (si on tague aussi les photos)
-                    
-Motif --- (N) motif_culture --- (1) Culture
-
-Motif --- (N) motif_periode --- (1) Periode
-
-Utilisateur --- (N) Contribution --- (liée à Photo/Annotation/etc via cible_id)
-
-Utilisateur --- (N) user_badge --- (1) Badge
-
-(1)-(N) indique une relation un-à-plusieurs, (N)-(N) une relation many-to-many via table de jointure.
-```
-
-*(Légende : par exemple, un Utilisateur peut avoir plusieurs Photos. Chaque Photo peut avoir plusieurs Annotations. Chaque Annotation peut référencer un Motif. Un Motif peut avoir plusieurs Tags via motif\_tag, etc.)*
-
-On notera aussi l’importance des **liens sémantiques externes** : le champ `wikidata_id` dans la table *Motif* permettra de relier un motif Symbolica à l’élément Wikidata correspondant si existant (ex: le motif “Triskèle” lié à l’item Q123456). Ainsi, Symbolica pourra éventuellement **importer** des données externes (pour pré-remplir une description multilingue, récupérer des images d’archive libres…) et **exporter** ses propres données validées vers Wikidata pour en faire profiter la communauté globale. Cette interopérabilité avec Wikidata et possiblement d’autres référentiels (ex: Getty Iconography, etc.) fait partie de l’ADN open data du projet.
-
-En somme, la base de données de Symbolica est **structurée mais flexible** : elle normalise les informations (utilisation de tables dédiées pour les catégories culturelles, etc.) tout en laissant de la place à l’évolution (ajout de tables de logs, de nouvelles relations si besoin). L’accent est mis sur la traçabilité (journal des contributions), la qualité (validation par votes) et l’ouverture (liens externes), ce qui correspond aux objectifs fonctionnels de la plateforme.
-
-## Charte graphique & UI
-
-L’identité visuelle de Symbolica doit refléter ses valeurs : un projet à la fois **culturel, collaboratif et moderne**. La charte graphique sert de guide pour concevoir l’interface utilisateur (UI) et l’ensemble des communications visuelles (site web, éventuels supports imprimés, réseaux sociaux, etc.). Voici les axes directeurs proposés pour la charte graphique et l’UI :
-
-* **Logo :** On envisage un logo qui symbolise le concept de **“symbole”** de manière stylisée et universelle. Par exemple, un logotype combinant une forme géométrique emblématique et le nom *Symbolica*. Une idée est de jouer avec la lettre **S** pour en faire un entrelacs ou un motif celtique simplifié, évoquant ainsi un symbole culturel dès le premier regard. Une autre piste est de créer un motif circulaire rappelant un **mandala** ou une rosace, représentant la pluralité des cultures qui convergent. Le logo devra être suffisamment épuré pour être reconnaissable en petite taille (favicon) et en monochrome. L’objectif est d’avoir un symbole graphique mémorable, qui puisse éventuellement servir d’icône seule, accompagné du nom “Symbolica” dans une typographie choisie. Ce logo incarnera le “royaume des symboles” que constitue la plateforme.
-* **Palette de couleurs :** La palette devra évoquer la richesse culturelle tout en restant dans un ton actuel. On préconise une combinaison de **couleurs chaudes et froides complémentaires** :
-
-  * Une **couleur principale** chaude et accueillante, par exemple un **orange ambré / ocre** rappelant les pigments anciens et la chaleur humaine, tout en portant une énergie créative. Cela peut évoquer les teintes des parchemins, du bois vernis des musées, ou des terres cuites.
-  * Une **couleur secondaire** plus froide et contrastante, par exemple un **bleu nuit** ou un **turquoise profond**, symbolisant le numérique, l’exploration (le ciel nocturne des cartes anciennes, les océans sur un planisphère) et apportant du contraste visuel.
-  * Des **couleurs d’accent** pourront être attribuées à certaines catégories ou usages : par exemple, on pourrait définir une couleur par grande aire culturelle (en restant prudent pour éviter les stéréotypes, mais pour donner un code visuel clair : ex. violet pour l’Orient, vert pour l’Europe, rouge pour l’Amérique latine, etc.). Ces touches de couleur pourraient être utilisées dans la carte interactive (points de telle couleur selon la culture) ou pour marquer les tags/catégories dans l’UI.
-  * On veillera à l’**accessibilité** : les contrastes de couleur seront suffisamment élevés pour assurer la lisibilité (texte blanc sur fond orange, etc.). Le fond global du site sera sans doute clair (blanc cassé ou gris très pâle) pour une ambiance aérée, évoquant les pages d’un livre ou les murs lumineux d’une galerie, avec les couleurs choisies utilisées par touches pour les éléments interactifs importants.
-* **Typographie :** Choisir deux polices complémentaires :
-
-  * Pour les textes courants de l’interface (menus, paragraphes, boutons), opter pour une **police sans-serif moderne** et lisible. Par exemple, des fontes libres comme **Nunito Sans** (aux formes légèrement arrondies et conviviales), **Open Sans** ou **Source Sans Pro**. L’accent est sur la lisibilité à l’écran et la neutralité, afin que l’UI ne gêne pas la consultation du contenu.
-  * Pour les titres, le logo ou certains éléments mis en avant, on peut introduire une **police avec plus de caractère**, éventuellement avec une touche historique. Par exemple, une fonte serif élégante rappelant les inscriptions anciennes, ou une police d’affichage avec des ornements subtils évoquant l’art décoratif. L’idée n’est pas d’être trop “vieux jeu” mais d’ajouter une pointe d’authenticité culturelle. Il faudra tester pour ne pas sacrifier la lisibilité, surtout que le site sera multilingue (la police choisie doit supporter les caractères spéciaux, accents, voire des scripts non latins si on veut afficher du japonais, de l’arabe…).
-  * Bien sûr, on privilégiera des **typos libres** (Google Fonts ou autres) pour rester dans l’esprit open-source et pour faciliter le déploiement.
-* **Style général de l’UI :** Le design doit être **sobre, épuré et élégant**, mettant en valeur les images de motifs qui sont elles-mêmes souvent très détaillées et colorées. On évitera donc de surcharger l’interface avec des fioritures graphiques. Des fonds unis, des espaces bien aérés, des grilles alignées, contribueront à une impression de clarté. On peut s’inspirer de sites culturels modernes ou de plateformes collaboratives pour trouver cet équilibre. Par exemple, **Google Arts & Culture** propose une interface épurée qui laisse la place aux œuvres. Symbolica pourrait suivre cet exemple pour ses motifs.
-
-  * On définira dès le départ un **design system** de composants UI communs : styles de boutons (par exemple boutons arrondis aux couleurs principales pour les actions importantes), cartes (pour afficher un motif avec image + texte), menus déroulants, badges, icônes, etc. Cela garantira la cohérence visuelle de l’ensemble et facilitera l’ajout de nouvelles pages. Un système de grille sera utilisé pour organiser les pages (par ex. grille Bootstrap ou CSS Grid).
-  * Quelques **touches graphiques thématiques** pourront personnaliser l’UI : par exemple, utiliser en filigrane de fond un motif vectoriel discret dérivé du logo (une trame géométrique légère dans l’en-tête, rappelant des motifs ornementaux). Ou avoir des séparateurs de sections inspirés de formes symboliques. L’important est de rester subtil pour ne pas distraire de la lecture des contenus, tout en donnant du caractère au site.
-  * **Icônes :** On utilisera une bibliothèque d’icônes cohérente et open-source (par ex. **Feather Icons**, **FontAwesome** ou les Material Icons) pour les actions usuelles : une icône d’appareil photo pour l’upload, un crayon pour l’annotation, un cœur ou pouce pour les votes, un marqueur de carte pour la géolocalisation, etc. Éventuellement, des icônes custom pourront être dessinées pour certaines catégories de motifs ou pour le logo, afin d’accentuer l’identité (par ex. une petite rosace stylisée comme favicon).
-* **Inspiration visuelle & ton :** La charte graphique devra inviter **tous les publics** : autant le professeur d’université que l’ado curieux féru de mythologie. Il faut trouver un ton à mi-chemin entre le sérieux académique (gage de fiabilité du contenu) et la dimension fun/creative (pour le côté participatif et ludique). Par exemple, on peut adopter un ton rédactionnel accessible et passionné (ni trop technique, ni trop familier) et cela doit aller de pair avec le design : une interface accueillante, colorée sans être criarde, sérieuse sans être austère. On pourra piocher des idées dans les chartes de projets existants :
-
-  * Des sites de musées ou d’institutions culturelles (qui savent mélanger patrimoine et modernité dans leur design).
-  * Des plateformes collaboratives créatives comme **DeviantArt** ou **Behance** (pour voir comment elles présentent des images de façon attractive tout en gérant des interactions communautaires).
-  * Des projets open-source culturels comme **Wikimedia Commons** ou **Arches Project** (système open-source pour le patrimoine) pour la structuration de l’information, même si visuellement on cherchera à être plus chaleureux.
-  * Globalement, Symbolica devra se démarquer par une identité plus **colorée et vivante** qu’un site institutionnel pur, grâce notamment à sa composante jeu (gamification) et communauté jeune.
-* **Actuels et évolutions UI :** Actuellement, le MVP utilise un design minimal (probablement s’appuyant sur un thème standard Bootstrap/Material pour aller vite) avec les éléments mentionnés (bandeau, galerie). Cette UI est **fonctionnelle mais pas définitive**. À l’étape P1/P2, un travail plus poussé de design sera mené, possiblement avec l’aide d’un **designer professionnel** bénévole ou recruté, afin d’affiner l’ergonomie et l’esthétique selon la charte. L’onboarding des nouveaux utilisateurs, par exemple, fera l’objet d’attention (présence de tutoriels intégrés, de pop-ups d’aide contextuelle, etc. en V1). Les retours des utilisateurs bêta aideront à ajuster les choix graphiques (par ex. augmenter telle taille de police, améliorer la visibilité de tel bouton…).
-* **Identité déclinable :** La charte graphique finalisée servira à créer tous les éléments dérivés : le logo en différentes variantes (couleur, monochrome inversé pour fond sombre, version icône seule), un **favicon** pour le site web, une icône d’application mobile (si PWA installable), des bannières pour les réseaux sociaux, etc. On s’assurera que ces déclinaisons restent lisibles et reconnaissables.
-* **Accessibilité et responsive design :** Bien sûr, l’UI sera **responsive** pour être utilisable sur mobile, tablette, écran large. Les contrastes, tailles de police et alternatives textuelles aux images seront pensés pour respecter autant que possible les bonnes pratiques d’**accessibilité (WCAG)**, afin de ne pas exclure les personnes en situation de handicap visuel ou autre.
-
-En suivant ces lignes directrices, l’interface de Symbolica se dotera d’une personnalité forte et cohérente. Elle devra, en un coup d’œil, évoquer la **passion du patrimoine et l’esprit communautaire**, tout en étant assez universelle pour parler à une audience mondiale. Une fois la charte validée, elle orientera toutes les créations visuelles de manière à faire de Symbolica un environnement immédiatement reconnaissable et agréable, renforçant l’attractivité du projet dès ses premières itérations.
-
-## Roadmap de développement (jalons clés)
-
-Le développement de Symbolica sera découpé en **phases itératives** avec des jalons concrets, afin de livrer progressivement les modules tout en impliquant la communauté à chaque étape. Ci-dessous la feuille de route prévisionnelle, avec la correspondance aux phases P0, P1, P2… évoquées précédemment. Les durées sont indicatives et pourront évoluer en fonction des ressources, mais donnent un ordre d’idée :
-
-* **Phase P0 : Prototype initial / Pré-MVP (bêta privée)** – *Durée : 1-2 mois*
-  **Objectif :** Valider le concept de base en interne et avec quelques testeurs de confiance.
-  **Contenu :** Cette phase a déjà eu lieu en partie. Elle correspond au développement du **noyau fonctionnel minimal** : mise en place de l’architecture (backend, base de données, déploiement), et d’une interface minimale de démonstration (le fameux bandeau + galerie de motifs). Les fonctionnalités de contribution (upload, annotation) sont codées mais encore réservées à l’équipe projet pour tests. Aucune IA intégrée à ce stade, si ce n’est éventuellement un petit script de démo hors-ligne pour prouver qu’on peut détecter un motif simple. Ce prototype permet de montrer rapidement quelque chose de fonctionnel à des partenaires potentiels et de récolter un premier feedback. *(État : accompli, c’est l’actuel site de démonstration.)*
-
-* **Phase P1 : **Minimum Viable Product** (MVP complet)** – *Durée : \~4 à 6 mois*
-  **Objectif :** Lancer une version utilisable par un cercle restreint d’utilisateurs pilotes, couvrant les **fonctionnalités de base** de Symbolica. (On peut envisager une bêta fermée ou un lancement discret auprès d’une communauté ciblée.)
-  **Périmètre fonctionnel :**
-
-  * **Upload d’images** ouvert aux bêta-testeurs, avec **géolocalisation** des photos.
-  * **Annotation manuelle** sur les images opérationnelle (outil pour tracer des rectangles de sélection et ajouter du texte).
-  * **Base Utilisateurs** : inscription/connexion, profil basique listant les contributions de l’utilisateur.
-  * **Consultation** : galerie des photos en ligne, pages individuelles pour chaque photo et (début de) fiches motifs.
-  * **Internationalisation bilingue** (FR/EN) de l’UI prête.
-  * **Gamification légère** : décompte des contributions et affichage d’un score global sur le profil. Intégration de 2-3 badges simples pour tester (ex. premier upload, 10 annotations…).
-  * **Pas d’IA** ou IA très expérimentale (on peut éventuellement brancher une API externe juste pour démonstration sur 1-2 motifs, mais rien de plus).
-  * **Design/charte** : utilisation d’un thème visuel correct (Bootstrap par ex.) avec logo et palette de couleurs de base, en attendant d’affiner plus tard.
-  * **Déploiement** : instance hébergée sur un serveur accessible aux testeurs, base de données initialisée.
-    **Jalon :** À la fin de P1, Symbolica est utilisable de bout en bout dans son concept principal (de l’upload à la consultation). On pourra alors inviter un petit groupe (quelques dizaines de personnes maximum, triées sur le volet – ex: étudiants en histoire de l’art, amis développeurs, etc.) à essayer la plateforme, contribuer et donner leurs retours.
-
-* **Phase P2 : Alpha publique** – *Durée : \~3 mois*
-  **Objectif :** Ouvrir la plateforme à un public plus large tout en la considérant comme **“alpha”** (c’est-à-dire potentiellement instable, avec des features encore incomplètes). L’idée est d’engager la communauté early adopters et les premiers partenaires, tout en continuant à enrichir et stabiliser le produit.
-  **Périmètre fonctionnel :**
-
-  * **Stabilisation** : correction des bugs majeurs identifiés durant le MVP (problèmes d’upload, de connexion, etc.), optimisation des performances initiales.
-  * **Enrichissement majeur** : introduction de la base de connaissances **Motifs** et du lien Annotation<->Motif. En pratique, cela signifie que durant cette phase on déploie la possibilité de créer et consulter les fiches motifs détaillées. Chaque nouvelle annotation peut générer un motif ou en référencer un existant. Une page dédiée par motif présente les infos consolidées (nom, description, images associées…). C’est un gros morceau fonctionnel qui transforme Symbolica de simple album photo en véritable encyclopédie collaborative.
-  * \*\*Reconnaissance **IA (bêta)** : intégrer un premier **modèle de reconnaissance automatique** de motifs pour test. Par exemple, entraîner un petit modèle sur 10 motifs simples et proposer ses suggestions dans l’UI d’annotation (avec mention “beta”). Les utilisateurs testeurs pourront valider/invalider les propositions, ce qui permettra de voir la réaction de la communauté à l’IA et d’améliorer l’algorithme. Ce n’est pas encore fiable ni large, mais c’est une preuve de concept réelle en conditions production.
-  * **Gamification étendue** : ajouter le calcul de **points** pour chaque action et afficher un **leaderboard** (même basique, top 10 contributeurs de la semaine). Ajouter quelques **badges additionnels** faciles à calculer (par ex. badge “5 jours d’affilée actif”, etc.) pour commencer à jouer avec la mécanique d’engagement.
-  * **Charte graphique & UX** : commencer à affiner l’UI selon la charte définie. Si le MVP utilisait un thème générique, ici on applique les **couleurs et styles** propres à Symbolica. Peut-être faire intervenir un designer pour revoir certaines pages clefs (page d’accueil, page de motif) et améliorer l’ergonomie globale (par ex. rendre plus intuitif le bouton d’upload, améliorer la lisibilité des textes sur mobile, etc.).
-  * **Documentation & aide** : mettre en place une **FAQ utilisateur** et un **guide de contribution** en ligne. Aussi, clarifier les informations sur les licences (expliquer que les contenus sont sous CC BY-SA, etc.). C’est important en alpha d’accompagner les nouveaux venus, même si tout n’est pas finalisé.
-    **Jalon :** À la fin de P2 (Alpha publique), on devrait avoir une plateforme robuste sur ses fondamentaux, avec déjà un petit corpus de motifs bien renseignés grâce aux \~100 premiers utilisateurs actifs qu’on aura conviés. Ce sera le moment de vérifier que tous les flux fonctionnent (upload -> annotation -> création motif -> recherche) et de peaufiner avant d’élargir à tout le monde.
-
-* **Phase P3 : Bêta publique** – *Durée : \~3 mois*
-  **Objectif :** Lancement **public officiel** en version bêta ouverte à tous. C’est la phase où l’on commence à communiquer plus largement, à accepter potentiellement des milliers de nouveaux inscrits. L’accent est mis sur l’**évolutivité** (supporter la montée en charge) et l’**engagement communautaire** (fournir les outils pour que la sauce prenne entre utilisateurs).
-  **Périmètre fonctionnel :**
-
-  * **Optimisations & scalabilité** : mise en place de solutions pour encaisser l’afflux attendu. Par exemple, déployer un CDN pour les images statiques, ajouter des index en base là où la latence a été observée, améliorer les requêtes lentes, éventuellement répartir sur 2 serveurs (un pour la DB, un pour l’app) si nécessaire. L’objectif est d’être à l’aise pour monter vers l’objectif de 50k utilisateurs actifs.
-  * **Modération & qualité** : introduction des **outils de modération communautaire**. Ex : un bouton “signaler ce contenu” sur chaque photo/description, un workflow pour que les modérateurs (ou admins) puissent cacher ou éditer du contenu inapproprié. Mise en place également du système de **vote/karma** complet sur les annotations (si ce n’était pas déjà fait) afin que la qualité du contenu soit auto-régulée. Cette phase verra possiblement la nomination des premiers modérateurs volontaires parmi la communauté (ceux qui ont un haut karma et se portent volontaires).
-  * **Multilingue++** : grâce aux efforts de quelques bénévoles, ajouter au moins **1 ou 2 langues supplémentaires** sur l’interface (espagnol, allemand, arabe… selon opportunités). Ou à minima, traduire davantage de contenu (par ex. les fiches de motifs populaires traduites en anglais/français). L’idée est de rendre l’expérience des non-francophones plus accueillante, étant donné qu’en bêta publique on communiquera peut-être à l’international.
-  * **Événements de lancement** : c’est le bon moment pour organiser le **premier défi officiel ou concours** sur la plateforme. Par exemple, annoncer un concours photo de motifs locaux en partenariat avec un musée, qui durerait un mois et dont les meilleurs contributeurs seraient récompensés symboliquement. Cela créera de l’animation et incitera les nouveaux à participer. On peut aussi tenir un petit événement en présentiel (lors d’un salon du patrimoine, etc.) pour présenter Symbolica. Tout cela pour amorcer la **dynamique communautaire**.
-  * **Module IA créative (beta)** : intégrer de façon expérimentale l’**outil de génération d’images IA** (Stable Diffusion) pour les utilisateurs curieux. Peut-être d’abord le réserver aux utilisateurs avancés (ceux avec un certain niveau) pour limiter la charge serveur. L’objectif est de voir si cette fonctionnalité est utilisée, quels résultats elle donne, et ajuster en conséquence.
-  * **Feedback loop** : mettre en place un moyen de **recueillir facilement les retours** pendant la bêta. Par exemple, un petit sondage intégré demandant “Qu’aimeriez-vous améliorer ?”, ou l’ouverture d’un forum/Discord officiel où les beta-testeurs peuvent échanger avec l’équipe. Cela permettra de prioriser les correctifs et améliorations avant la version finale.
-    **Jalon :** La fin de P3 correspond à un état où Symbolica a prouvé sa capacité technique (supporter du trafic et des données) et rassemblé une **communauté initiale engagée**. On vise idéalement quelques milliers d’inscriptions en bêta, dont quelques centaines actives. On aura identifié, grâce à leurs usages, ce qui marche bien et ce qui est à revoir pour la suite.
-
-* **Phase P4 : Version 1.0 (Lancement officiel stable)** – *Durée : \~1 à 2 mois (après la bêta)*
-  **Objectif :** Déclarer le produit suffisamment abouti pour sortir de “bêta” et le lancer officiellement en tant que version 1.0 stable auprès du grand public et des partenaires.
-  **Périmètre fonctionnel :**
-
-  * **Corrections finales** : corriger tous les bugs bloquants ou irritants remontés pendant la bêta. S’assurer de la stabilité générale (plus de crashs serveur, etc.).
-  * **Polish UI/UX** : appliquer finement la charte graphique sur l’ensemble du site, uniformiser les composants, ajouter les dernières aides à l’usage (par ex. un tutoriel de démarrage pour guider les nouveaux utilisateurs dans leur première contribution, des infobulles explicatives sur les boutons, etc.). L’expérience utilisateur doit être la plus fluide possible.
-  * **Fonctionnalités de base complètes** : s’assurer que **tous les modules de base** envisagés sont en place en V1. Cela inclut : l’upload + annotation, la carte, les profils, la gamification (points & badges essentiels), l’IA de reconnaissance (même si limitée), l’IA de génération (même en option), les événements, la recherche, etc. S’il en manque (par exemple si la mind-map symbolique n’est pas prête à temps), décider s’ils sont bloquants pour l’expérience ou s’ils peuvent être reportés en amélioration ultérieure sans problème. L’idée est que la V1 offre bien tout le spectre fonctionnel promis, pour tenir la **positionnement de “portail de référence”** dès l’annonce officielle.
-  * **Scalabilité de prod** : déployer l’infrastructure définitive pour la production live (par ex. migrer sur un hébergement cloud plus costaud, avec auto-scaling si on était sur un petit VPS pendant la bêta). On doit pouvoir accueillir sans encombre un afflux plus massif si jamais le lancement fait parler de lui.
-  * **Communication & marketing** : préparer le plan de comm pour le lancement : un communiqué de presse, des posts sur les réseaux sociaux, peut-être un événement en ligne de lancement en partenariat avec des institutions (musées, etc.), en mettant en avant les fonctionnalités phares et la dimension communautaire/open-source du projet. Également, si possible, solliciter des médias spécialisés (presse patrimoine, blogs culturels, etc.) pour qu’ils relaient la sortie. L’objectif est de faire connaître Symbolica au maximum de passionnés potentiels.
-  * **Publication open-source** : même si le code était déjà sur GitHub, profiter du label 1.0 pour faire une communication dans les cercles open-source (annonce sur des forums, Hacker News, etc.), incitant les développeurs à venir contribuer. S’assurer que le dépôt est accueillant (documentation prête, licences en ordre).
-    **Jalon :** La version 1.0 est officiellement lancée ! Symbolica sort de sa phase de test et se présente comme une plateforme stable. Le succès de cette étape se mesurera au nombre d’utilisateurs qui continuent à l’utiliser régulièrement, aux premiers retours de la presse/partenaires, et à la qualité du contenu accumulé.
-
-* **Phase P5 : Extensions futures et maintenance** – *Phase continue (long terme)*
-  **Objectif :** Poursuivre sur la lancée en améliorant sans cesse la plateforme, en fonction des retours de la communauté et des opportunités technologiques. Après la V1, on passe en mode **amélioration continue** (méthodologie agile, sprints, etc.), sans nécessairement de gros resets de version, mais avec des ajouts incrémentaux réguliers (V1.1, 1.2, etc.).
-  **Chantiers d’extensions identifiés :** (certains ont déjà été évoqués en P2, d’autres sont plus lointains)
-
-  * **Application mobile native** : développer une app iOS/Android dédiée, optimisée pour la capture photo en mobilité et la consultation offline de certaines données. Ou transformer la PWA en une expérience quasi-native (accès appareil photo, notifications push…).
-  * **Réalité augmentée (AR)** : proposer une app ou un mode AR où, en pointant son smartphone sur un monument, l’utilisateur voit apparaître en surimpression les motifs référencés par Symbolica sur ce monument avec leurs explications. Ou imaginer un jeu type *chasse aux symboles* en ville (trouver des motifs grâce à des indices géolocalisés). Ce sont des idées à prototyper lors de hackathons par exemple, pour garder Symbolica à la pointe de l’innovation.
-  * **Intégration muséale** : fournir aux **musées/archives** un moyen d’intégrer Symbolica. Par exemple, un **widget exportable** à mettre sur leur site officiel, affichant une galerie de motifs de leurs collections présents sur Symbolica, ou une carte des motifs de leur ville. Cela augmenterait la visibilité du projet et rendrait service aux institutions (une façon pour eux d’impliquer leurs publics avec un outil participatif sans avoir à tout développer en interne).
-  * **Outils d’analyse de données** : une fois des milliers de données accumulées, développer des **tableaux de bord et visualisations** statistiques. Par ex. une carte thermique des régions du monde les plus contributrices, des graphes montrant la répartition des types de motifs, l’évolution des contributions dans le temps, etc. Ces outils intéresseront la recherche scientifique (ethnologie, histoire de l’art quantifiée…) et permettront à l’équipe de piloter la communauté (voir quels domaines manquent de contributions).
-  * **Marketplace ou impression 3D** : réflexion sur un module **éventuel** de valorisation commerciale si besoin de fonds. Par exemple, une place de marché où des designers proposent des créations inspirées des motifs (t-shirts, décors, bijoux imprimés en 3D, etc.). Ou la possibilité pour un utilisateur de commander une impression haute qualité d’une image ou d’un poster combinant plusieurs motifs. **Attention** : ce genre d’idée doit être maniée avec précaution pour rester éthique vis-à-vis du partage libre. C’est en tout cas une piste lointaine en cas de recherche de modèle économique supplémentaire.
-  * **Plus de langues & d’aires culturelles** : continuer l’**internationalisation**. Atteindre 5, puis 10 langues d’interface selon les communautés volontaires. Nouer des liens avec des communautés à l’étranger pour qu’elles s’approprient Symbolica (par ex. une branche Symbolica India, etc.). Idéalement, avoir des modérateurs multilingues et des contenus représentatifs des 5 continents.
-  * **Réseau social enrichi** : ajouter les fonctionnalités sociales manquantes qui auront été repérées comme utiles. Par ex, le **chat entre membres**, la formation de **groupes d’intérêt** (si pas fait en P2, ce serait fait à ce stade), l’organisation d’**événements locaux** via la plateforme (rencontres IRL entre membres proches géographiquement, visites de sites ensemble…). Tout ce qui peut renforcer la communauté et la faire vivre en dehors de l’écran également.
-  * **Outils de gouvernance interne** : développer un module interne de **vote** pour les décisions de l’association (ex: quand l’asso doit élire son CA, ou consulter les membres sur une orientation). Cela pourrait prendre la forme d’un espace “Agora” dans l’interface, réservé aux membres, pour voter des motions, commenter les propositions de statuts, etc. L’utopie étant d’utiliser Symbolica elle-même comme outil de sa propre gouvernance (transparence totale).
-  * **Maintenance & évolutions techniques** : pendant cette phase longue, l’équipe devra aussi assurer la maintenance (correction de bugs, mises à jour de sécurité, adaptation aux nouvelles versions de dépendances). La documentation technique sera enrichie pour faciliter l’arrivée de nouveaux développeurs bénévoles. On surveillera les nouvelles technologies pertinentes (par ex, si de nouveaux modèles d’IA révolutionnent la reconnaissance d’images patrimoniales, on essayera de les intégrer).
-
-**Jalons et méthodologie :** Chaque phase se termine idéalement par une **validation** avec les parties prenantes (utilisateurs clés, partenaires). Par exemple, après le MVP, recueillir l’avis des premiers testeurs ; après l’Alpha, faire un point avec d’éventuels partenaires musées ; après la Beta, peut-être organiser une réunion communautaire pour prioriser les derniers chantiers avant la V1. La roadmap ci-dessus reste **adaptable** en fonction des retours : si on constate en bêta que l’IA de génération passionne les utilisateurs, on pourrait la prioriser davantage ; si au contraire l’annotation manuelle est trop complexe pour les novices, on la simplifiera en priorité. On adoptera une gestion **agile** du projet, avec des sprints, backlog et priorisation continue. L’équipe technique et l’association travailleront main dans la main pour ajuster la route.
-
-En résumé, cette feuille de route trace le chemin de Symbolica depuis ses balbutiements jusqu’à sa maturité, en gardant toujours en ligne de mire la **satisfaction de la communauté** et la **mission culturelle** du projet. Chaque jalon rapproche un peu plus Symbolica de sa vision : devenir un incontournable pour tous les amoureux de motifs et de symboles à travers le monde.
-
-## Scénarios utilisateurs
-
-Pour illustrer concrètement l’utilisation de Symbolica par différents profils de public, voici quelques **scénarios d’usage** représentatifs. Ces histoires montrent comment la plateforme peut servir aussi bien la recherche scientifique, la curiosité du grand public, les besoins des étudiants, les initiatives des musées ou la créativité des designers.
-
-**Historien d’art (Jean, 45 ans)** : Jean est chercheur en histoire de l’art, spécialiste des motifs médiévaux. Il utilise Symbolica pour documenter finement un motif de gargouille qu’il a repéré sur plusieurs cathédrales. Après avoir uploadé ses propres photos de gargouilles depuis Notre-Dame de Paris et la cathédrale de Chartres, il annote chaque créature sur les images et les lie au motif “Gargouille” dans la base de connaissances (motif qu’il crée s’il n’existe pas encore). Sur la fiche du motif *Gargouille*, il ajoute une description détaillée avec des informations historiques (la symbolique de la gargouille, son évolution du Moyen Âge à la Renaissance) en citant ses sources académiques. Grâce à la plateforme, Jean découvre via la **carte interactive** qu’en dehors de la France, il existe des gargouilles similaires en Espagne et en Angleterre, ce qui l’intéresse pour sa recherche comparative. Il entre en contact sur Symbolica avec une autre membre, Maria, historienne de l’art en Catalogne, qui avait justement contribué des photos de gargouilles de Barcelone. Ensemble, ils créent un **espace de travail thématique** “Gargouilles européennes” où ils rassemblent un corpus d’images et de connaissances sur ce motif à travers l’Europe. Symbolica leur facilite la tâche en centralisant ces contributions et en leur offrant cet espace collaboratif. À terme, Jean publie un article scientifique s’appuyant sur les données collectées (qu’il a pu exporter facilement puisque tout est en open data) et mentionne Symbolica comme l’outil collaboratif ayant permis cette recherche internationale. Sa hiérarchie et ses collègues sont impressionnés par ce mode de travail innovant.
-
-**Curieuse passionnée (Alice, 28 ans)** : Alice n’est pas une experte d’un domaine particulier, le jour elle est développeuse web, mais elle est fascinée par les symboles ésotériques et l’histoire des religions. En voyage à Prague, elle remarque sur la façade d’une vieille maison une étrange marque alchimique qu’elle ne connaît pas. Elle prend la marque en photo. Le soir-même, elle la poste sur Symbolica via l’application mobile (qu’elle a installée pour l’occasion), en quelques clics. Immédiatement, le système **d’IA de reconnaissance** lui suggère : *“Symbole probable : Ouroboros (serpent se mordant la queue)”*. Elle ne connaissait pas ce terme ; intriguée, elle consulte la fiche du motif *Ouroboros* sur Symbolica et apprend qu’il symbolise le cycle infini de la vie et qu’il apparaît dans de nombreuses cultures (Égypte antique, Europe médiévale, traditions hindoues…). Fascinée, Alice valide l’identification proposée par l’IA (qui gagne ainsi en confiance) et complète même la fiche en ajoutant un paragraphe qu’elle rédige à partir de ce qu’elle vient d’apprendre. Cette contribution lui fait gagner des **points** sur son profil. En explorant plus loin, de fil en aiguille, Alice tombe sur d’autres motifs liés par la symbolique du cycle de la vie : via les liens suggérés (un peu comme une carte mentale), elle découvre le **Phoenix** et le **Dragon** dans la mythologie chinoise, puis le symbole mathématique ∞ (infini) utilisé en ésotérisme moderne. La navigation thématique la passionne. Pour s’amuser, elle teste l’**outil de génération IA** : elle demande *“fusionner un ouroboros avec un style Art Déco”*. L’IA lui génère une image d’un serpent géométrisé entouré de motifs des Années folles. Elle trouve le résultat chouette et le publie dans une **collection personnelle** intitulée “Inspirations ésotériques” sur son profil. Quelques semaines plus tard, elle reçoit une notification : une autre utilisatrice a commenté sa photo de Prague en ajoutant qu’on retrouve ce même symbole sur une autre maison de la ville, avec une explication historique. La discussion qui s’ensuit est enrichissante et motive Alice à chercher d’autres traces d’ouroboros lors de ses voyages. Au fil du temps, elle obtient le badge **“Globe-trotter”** pour avoir uploadé des motifs de 5 pays différents. Alice apprécie comment Symbolica lui permet de **satisfaire sa curiosité**, d’apprendre plein d’anecdotes culturelles, et de contribuer sans être une scientifique – le tout de manière ludique grâce aux interactions et aux récompenses.
-
-**Étudiant en design (Léo, 21 ans)** : Léo étudie le design graphique et doit créer un motif original pour un projet d’école, en s’inspirant d’un style traditionnel de son choix. Il a entendu parler de Symbolica via son professeur. Il se rend sur la plateforme à la recherche de **références visuelles** de motifs japonais **Seigaiha** (motif de vagues bleues stylisées). En tapant dans la recherche “motif vague Japon”, il tombe sur la fiche du motif *Seigaiha* avec plusieurs images correspondantes. Il utilise le filtre par époque pour voir uniquement les motifs japonais de l’époque Edo dans la base. Grâce à Symbolica, il découvre également des motifs de vagues dans d’autres cultures maritimes (par ex. un motif de vague grec antique) qu’il n’aurait pas connus autrement, ce qui enrichit sa perspective. Il enregistre ses trouvailles dans une **collection privée** “Inspirations mer/vagues” où il épingle 8 motifs qui l’inspirent le plus. Ensuite, avec l’outil de **génération IA**, il tente de fusionner le motif Seigaiha traditionnel avec une palette de couleurs pop-art moderne. Le résultat lui donne des idées audacieuses qu’il exporte et retravaille dans Photoshop pour son projet. Reconnaissant de l’aide apportée par la plateforme, Léo décide de contribuer en retour : comme il parle japonais, il propose une **traduction** en japonais de la fiche du motif Seigaiha et y ajoute une anecdote historique qu’il a apprise en cours (concernant l’usage de ce motif sur les kimonos de nobles à l’ère Edo). Sa traduction est relue et validée par d’autres bilingues sur Symbolica, ce qui lui vaut des upvotes et lui fait gagner un badge de **Contributeur multilingue**. Ses professeurs, intrigués par ce nouvel outil, voient d’un bon œil l’utilisation de Symbolica pour ses recherches, et envisagent même de faire contribuer toute la classe lors d’un workshop : chaque étudiant choisira un motif de sa culture d’origine à documenter sur la plateforme. Ainsi, Léo utilise Symbolica à la fois comme **banque d’inspiration visuelle** pour sa création et comme **espace de partage de connaissances** dans son milieu académique. Le projet qu’il rend intègre en annexe les références Symbolica utilisées, et il crédite la communauté pour son aide.
-
-**Professionnelle de musée (Camille, 50 ans)** : Camille est chargée des publics dans un musée ethnographique régional. Elle cherche des moyens innovants d’**impliquer le public** et de faire vivre les collections en dehors du musée. En explorant Symbolica, elle y voit une opportunité de partenariat. Son musée prépare une exposition intitulée *“Motifs du monde”*. Camille contacte l’équipe Symbolica et organise ensemble un **concours de contributions** lié à l’expo : pendant les 2 mois d’exposition, les visiteurs (et la communauté en ligne) sont invités à photographier des motifs de leur quotidien qui résonnent avec les œuvres présentées au musée, puis à les poster sur Symbolica avec un **tag** spécial du nom de l’expo. Camille crée pour l’occasion un compte “Musée” vérifié sur Symbolica et y **upload** quelques images issues des collections permanentes (par exemple un tissu kente ghanéen à motif géométrique, un toit de pagode asiatique sculpté) pour enrichir la base – ces images étant placées sous licence ouverte conformément à la politique *Open Content* du musée. Tout au long de l’expo, un **écran interactif** dans une salle du musée affiche la **carte Symbolica filtrée** sur les motifs en lien avec l’exposition, montrant en quasi temps réel les contributions du monde entier sur ce thème. Les visiteurs sont ravis de voir leurs photos apparaître sur la carte aux côtés de celles du musée. Le concours est un succès : des dizaines de motifs sont ajoutés par le public, créant une sorte de prolongement numérique de l’expo. À la fin, Camille co-organise avec Symbolica un événement en ligne où des experts (conservateurs, ethnologues) commentent quelques contributions marquantes, félicitent les participants et désignent un “coup de cœur” (qui reçoit un badge spécial et un abonnement au musée). Ce **partenariat** pilote s’avère gagnant-gagnant : le musée a impliqué son public d’une manière nouvelle et reçoit des données (qu’il peut réutiliser dans sa médiation), Symbolica gagne en visibilité et en contenu, et d’autres institutions s’y intéressent après avoir vu ce cas d’usage. Symbolica commence à être reconnu comme un **outil participatif pour les musées** souhaitant connecter leurs collections avec le terrain et le numérique. Camille, de son côté, est heureuse d’avoir innové pour toucher un public plus jeune et connecté, et prévoit de continuer à utiliser Symbolica pour de futures expositions.
-
-**Designer textile (Sofia, 34 ans)** : Sofia est designer textile freelance, toujours en quête d’inspiration pour ses motifs de tissus. Elle utilise Symbolica comme une sorte de **bibliothèque vivante de motifs**. Ce matin, elle cherche des idées dans le style Art Nouveau floral. Sur Symbolica, elle filtre par **tags** “floral” et “Art Nouveau” et obtient un panorama d’ornements végétaux du monde entier datant de la fin du 19ᵉ siècle. En quelques clics, elle découvre des motifs de grilles en fer forgé de Gaudi à Barcelone, des affiches de Mucha avec des fleurs stylisées, ou des motifs de céramique de l’architecte Hector Guimard. Elle enregistre ses coups de cœur dans une collection *“Inspiration Art Nouveau”*. Certaines images sont indiquées comme **libres de droit** (domaine public), elle peut donc les télécharger directement pour les étudier de près dans son logiciel de dessin. Pour d’autres qui ne le sont pas, elle suit les **liens Wikidata** fournis vers les archives numériques correspondantes ou les fiches Wikipedia pour en savoir plus sur leur contexte. Après cette phase de recherche, Sofia dessine un nouveau motif floral original pour une collection de mode contemporaine, inspiré de plusieurs éléments vus sur Symbolica. Une fois son projet finalisé, elle décide de le **partager sur Symbolica** : elle crée un motif “Création originale – Fleurs néo-art-nouveau”, uploade une image de son motif avec mention qu’il est inspiré de motifs traditionnels Maori et Art Nouveau tout en incorporant des formes modernes. La communauté accueille très positivement cette contribution un peu différente : ses images reçoivent des commentaires admiratifs, et un débat intéressant se lance sur comment respecter l’héritage culturel dans la création moderne (une discussion saine qu’elle modère avec l’aide d’un modérateur de Symbolica). Grâce à cette visibilité, une marque de design repère le travail de Sofia sur Symbolica et la contacte pour une **collaboration professionnelle** – preuve que sa participation lui a aussi servi de vitrine. Pour Sofia, Symbolica est à la fois une source inépuisable d’inspiration **artistique**, un lieu d’**échange** avec d’autres passionnés d’arts décoratifs, et une plateforme qui lui permet de se faire connaître tout en respectant et célébrant les cultures qui l’inspirent.
+### Version 2.0 - Document complet
+### Date : Décembre 2024
 
 ---
 
-Ces scénarios ne couvrent qu’une partie des possibilités, mais ils montrent déjà la **polyvalence** de Symbolica : outil de recherche scientifique, de médiation culturelle, de loisirs éducatifs ou de création artistique. La plateforme est pensée pour que chaque profil d’utilisateur y trouve son compte et puisse contribuer à sa manière. En connectant ces personnes et ces usages variés, Symbolica **tisse un réseau vivant autour du patrimoine symbolique mondial**.
+## Table des matières
+
+1. [Contexte et Vision](#contexte-et-vision)
+2. [Objectifs du Projet](#objectifs-du-projet)
+3. [Public Cible](#public-cible)
+4. [Fonctionnalités Principales](#fonctionnalités-principales)
+5. [Parcours Utilisateurs](#parcours-utilisateurs)
+6. [Architecture Technique](#architecture-technique)
+7. [Base de Données](#base-de-données)
+8. [Interface Utilisateur](#interface-utilisateur)
+9. [Stratégie Communautaire](#stratégie-communautaire)
+10. [Modèle Économique](#modèle-économique)
+11. [Roadmap Détaillée](#roadmap-détaillée)
+12. [Analyse des Risques](#analyse-des-risques)
+13. [Métriques de Succès](#métriques-de-succès)
+14. [Aspects Légaux et Conformité](#aspects-légaux-et-conformité)
+15. [Stratégie de Partenariats](#stratégie-de-partenariats)
+16. [Annexes Techniques](#annexes-techniques)
+
+---
+
+## 1. Contexte et Vision
+
+### 1.1 Problématique
+Les symboles culturels sont dispersés dans de nombreuses institutions, publications et collections privées, rendant difficile leur étude comparative et leur compréhension globale. Les chercheurs, étudiants et passionnés manquent d'outils pour :
+- Identifier et analyser les motifs récurrents
+- Comprendre les connexions entre cultures
+- Contribuer à la préservation du patrimoine symbolique
+- Accéder à des analyses automatisées par IA
+
+### 1.2 Vision
+Créer la première plateforme mondiale collaborative pour la découverte, l'analyse et la préservation des symboles culturels, en démocratisant l'accès à ce patrimoine grâce à l'intelligence artificielle et la participation communautaire.
+
+### 1.3 Mission
+- **Préserver** : Sauvegarder le patrimoine symbolique mondial
+- **Analyser** : Utiliser l'IA pour révéler des patterns cachés
+- **Connecter** : Relier les communautés autour des symboles
+- **Éduquer** : Transmettre les connaissances culturelles
+
+---
+
+## 2. Objectifs du Projet
+
+### 2.1 Objectifs à Court Terme (6 mois)
+- Lancer la plateforme avec 1000+ symboles documentés
+- Atteindre 500 utilisateurs actifs mensuels
+- Développer les fonctionnalités d'annotation IA
+- Établir 5 partenariats institutionnels
+
+### 2.2 Objectifs à Moyen Terme (1-2 ans)
+- 10 000+ symboles dans la base de données
+- 5 000 utilisateurs actifs mensuels
+- 20 partenariats avec musées et universités
+- Modèle économique viable
+
+### 2.3 Objectifs à Long Terme (3-5 ans)
+- 100 000+ symboles documentés
+- 50 000 utilisateurs dans 50 pays
+- Reconnaissance comme référence académique
+- Impact mesurable sur la recherche culturelle
+
+---
+
+## 3. Public Cible
+
+### 3.1 Utilisateurs Primaires
+
+#### 3.1.1 Chercheurs et Académiques
+- **Profil** : Historiens, anthropologues, archéologues
+- **Besoins** : Analyse comparative, publication, citation
+- **Comportement** : Recherche approfondie, contribution experte
+
+#### 3.1.2 Étudiants
+- **Profil** : Étudiants en sciences humaines, arts, histoire
+- **Besoins** : Ressources pédagogiques, projets académiques
+- **Comportement** : Exploration, apprentissage, partage
+
+#### 3.1.3 Passionnés et Curieux
+- **Profil** : Amateurs d'histoire, voyageurs, artistes
+- **Besoins** : Découverte, compréhension, inspiration
+- **Comportement** : Navigation intuitive, partage social
+
+### 3.2 Utilisateurs Secondaires
+
+#### 3.2.1 Institutions Culturelles
+- **Profil** : Musées, bibliothèques, centres culturels
+- **Besoins** : Valorisation des collections, collaboration
+- **Comportement** : Contribution institutionnelle, partenariats
+
+#### 3.2.2 Éducateurs
+- **Profil** : Professeurs, guides, médiateurs culturels
+- **Besoins** : Ressources pédagogiques, outils d'enseignement
+- **Comportement** : Création de contenu éducatif
+
+---
+
+## 4. Fonctionnalités Principales
+
+### 4.1 Phase 1 (MVP - Complétée)
+✅ **Exploration de symboles**
+- Base de données de symboles avec métadonnées culturelles
+- Interface de recherche et filtrage avancé
+- Visualisation sur carte interactive
+- Système de collections personnalisées
+
+✅ **Contribution communautaire**
+- Upload et documentation de nouveaux symboles
+- Système de tags et catégorisation
+- Géolocalisation des découvertes
+- Validation par modération
+
+✅ **Analyse par IA**
+- Reconnaissance automatique de motifs
+- Annotation intelligente des images
+- Suggestions de patterns similaires
+- Extraction de caractéristiques visuelles
+
+### 4.2 Phase 2 (En cours)
+🔄 **Fonctionnalités sociales avancées**
+- Profils utilisateurs enrichis
+- Système de réputation et badges
+- Groupes d'intérêt thématiques
+- Forums de discussion par symbole
+
+🔄 **Outils d'analyse avancés**
+- Comparaison visuelle de symboles
+- Analyse des évolutions temporelles
+- Détection de connexions culturelles
+- Exportation de données pour recherche
+
+🔄 **Amélioration de l'IA**
+- Modèles de reconnaissance plus précis
+- Classification automatique des styles
+- Détection de variantes régionales
+- Prédiction de significations
+
+### 4.3 Phase 3 (Prévue)
+📋 **Plateforme académique**
+- Système de peer-review
+- Publication d'articles de recherche
+- Citations et références académiques
+- API pour intégrations externes
+
+📋 **Fonctionnalités avancées**
+- Réalité augmentée pour exploration
+- Recommandations personnalisées
+- Analyse de sentiment communautaire
+- Traduction automatique multilingue
+
+---
+
+## 5. Parcours Utilisateurs
+
+### 5.1 Parcours du Visiteur Découvreur
+
+#### Objectif : Découvrir et comprendre les symboles culturels
+
+**Étapes :**
+1. **Arrivée** : Page d'accueil avec symboles mis en avant
+2. **Exploration** : Navigation par culture, période ou carte
+3. **Découverte** : Consultation détaillée d'un symbole
+4. **Approfondissement** : Exploration de symboles similaires
+5. **Engagement** : Inscription pour sauvegarder des favoris
+
+**Points de friction à éviter :**
+- Interface trop complexe dès l'arrivée
+- Manque d'explications sur les symboles
+- Navigation confuse entre les sections
+
+### 5.2 Parcours du Contributeur Passionné
+
+#### Objectif : Partager ses découvertes et enrichir la base
+
+**Étapes :**
+1. **Inscription** : Création de compte avec validation email
+2. **Orientation** : Tutorial des fonctionnalités de contribution
+3. **Première contribution** : Upload d'un symbole avec guidage
+4. **Validation** : Processus de modération et feedback
+5. **Évolution** : Montée en niveau et obtention de badges
+6. **Expertise** : Accès aux fonctionnalités de modération
+
+**Motivations à maintenir :**
+- Reconnaissance de la contribution
+- Feedback constructif rapide
+- Gamification et progression visible
+
+### 5.3 Parcours du Chercheur Expert
+
+#### Objectif : Mener des recherches approfondies et publier
+
+**Étapes :**
+1. **Recherche avancée** : Utilisation des filtres complexes
+2. **Analyse comparative** : Outils de comparaison de symboles
+3. **Export de données** : Téléchargement pour analyse externe
+4. **Collaboration** : Échange avec autres chercheurs
+5. **Publication** : Partage des résultats de recherche
+6. **Citation** : Référencement académique des découvertes
+
+**Besoins spécifiques :**
+- Accès API pour intégrations
+- Formats d'export standardisés
+- Système de citation robuste
+
+---
+
+## 6. Architecture Technique
+
+### 6.1 Stack Technologique
+
+#### Frontend
+- **Framework** : React 18 avec TypeScript
+- **Styling** : Tailwind CSS + Shadcn/ui
+- **État** : Tanstack React Query pour le cache
+- **Routing** : React Router v6
+- **Cartes** : Mapbox GL JS
+- **Annotations** : Canvas API pour annotations d'images
+
+#### Backend
+- **Database** : Supabase (PostgreSQL)
+- **Authentication** : Supabase Auth
+- **Storage** : Supabase Storage pour images
+- **Edge Functions** : Deno pour logique métier
+- **AI/ML** : Intégration OpenAI pour analyse d'images
+
+#### Infrastructure
+- **Hosting** : Vercel/Netlify pour le frontend
+- **CDN** : Cloudflare pour optimisation
+- **Monitoring** : Sentry pour error tracking
+- **Analytics** : Mixpanel pour usage tracking
+
+### 6.2 Architecture Système
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Supabase      │    │   Services      │
+│   React App     │◄──►│   PostgreSQL    │◄──►│   OpenAI API    │
+│                 │    │   Auth & Storage│    │   Mapbox API    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │              ┌─────────────────┐             │
+         └─────────────►│  Edge Functions │◄────────────┘
+                        │  AI Processing  │
+                        └─────────────────┘
+```
+
+### 6.3 Sécurité
+
+#### Authentification et Autorisation
+- JWT tokens avec rotation automatique
+- Row Level Security (RLS) sur toutes les tables
+- Rôles utilisateurs : visiteur, contributeur, modérateur, admin
+
+#### Protection des Données
+- Chiffrement en transit (HTTPS/TLS)
+- Chiffrement au repos pour données sensibles
+- Sauvegarde automatique quotidienne
+- Conformité RGPD
+
+#### Sécurité API
+- Rate limiting par utilisateur
+- Validation stricte des inputs
+- Sanitization des uploads d'images
+- Monitoring des accès suspects
+
+---
+
+## 7. Base de Données
+
+### 7.1 Modèle de Données Principal
+
+#### Tables Core
+- **symbols** : Métadonnées des symboles
+- **symbol_images** : Images et variantes
+- **patterns** : Motifs identifiés
+- **image_annotations** : Annotations sur images
+
+#### Tables Utilisateurs
+- **profiles** : Profils utilisateurs étendus
+- **user_contributions** : Contributions des utilisateurs
+- **user_activities** : Historique d'activité
+- **user_achievements** : Système de gamification
+
+#### Tables Communautaires
+- **collections** : Collections de symboles
+- **interest_groups** : Groupes thématiques
+- **group_posts** : Publications dans les groupes
+- **post_comments** : Commentaires et discussions
+
+### 7.2 Relations Clés
+
+```sql
+symbols 1:N symbol_images
+symbols 1:N patterns
+symbol_images 1:N image_annotations
+patterns 1:N image_annotations
+symbols N:M collections (via collection_symbols)
+users 1:N user_contributions
+users N:M interest_groups (via group_members)
+```
+
+### 7.3 Optimisations
+
+#### Index et Performance
+- Index GiST pour recherche géographique
+- Index GIN pour recherche full-text
+- Index composites pour requêtes complexes
+- Partitioning pour tables volumineuses
+
+#### Évolutivité
+- Séparation lecture/écriture
+- Cache Redis pour requêtes fréquentes
+- CDN pour assets statiques
+- Archive automatique des données anciennes
+
+---
+
+## 8. Interface Utilisateur
+
+### 8.1 Principes de Design
+
+#### Accessibilité
+- Conformité WCAG 2.1 AA
+- Support des lecteurs d'écran
+- Navigation au clavier
+- Contraste suffisant pour malvoyants
+
+#### Responsive Design
+- Mobile-first approach
+- Breakpoints : 320px, 768px, 1024px, 1440px
+- Touch-friendly sur mobile
+- Optimisation des images par taille d'écran
+
+#### Performance UX
+- Lazy loading des images
+- Skeleton loaders pendant chargement
+- Pagination infinie pour listes
+- Préchargement intelligent
+
+### 8.2 Composants Clés
+
+#### Navigation
+- Header persistant avec recherche
+- Menu burger responsive
+- Breadcrumbs pour orientation
+- Sidebar contextuelle
+
+#### Exploration
+- Grille de symboles avec filtres
+- Carte interactive avec clusters
+- Visualisation en timeline
+- Comparateur de symboles
+
+#### Contribution
+- Formulaire multi-étapes
+- Upload drag-and-drop
+- Prévisualisation en temps réel
+- Validation progressive
+
+---
+
+## 9. Stratégie Communautaire
+
+### 9.1 Animation Communautaire
+
+#### Programme d'Ambassadeurs
+- **Objectif** : 50 ambassadeurs actifs dans 20 pays
+- **Profil** : Experts reconnus, influenceurs culturels
+- **Avantages** : Accès anticipé, badge spécial, événements
+- **Responsabilités** : Modération, animation, promotion
+
+#### Événements Communautaires
+- **Challenges mensuels** : Thèmes de contribution
+- **Webinaires experts** : Conférences avec chercheurs
+- **Concours photo** : Meilleurs symboles découverts
+- **Hackathons** : Développement de nouvelles fonctionnalités
+
+### 9.2 Gamification
+
+#### Système de Points
+- **Contribution** : 100 points par symbole validé
+- **Validation** : 50 points par annotation correcte
+- **Social** : 25 points par commentaire constructif
+- **Exploration** : 10 points par découverte quotidienne
+
+#### Niveaux et Badges
+- **Novice** (0-500 pts) : Découvreur, Curieux
+- **Contributeur** (500-2000 pts) : Explorateur, Collectionneur
+- **Expert** (2000-5000 pts) : Analyste, Mentor
+- **Maître** (5000+ pts) : Sage, Ambassadeur
+
+#### Récompenses
+- **Badges visuels** sur profil et contributions
+- **Accès anticipé** aux nouvelles fonctionnalités
+- **Mentions** dans newsletter et réseaux sociaux
+- **Cadeaux physiques** pour top contributeurs
+
+### 9.3 Modération
+
+#### Processus de Validation
+1. **Auto-modération IA** : Détection contenu inapproprié
+2. **Peer-review** : Validation par contributeurs expérimentés
+3. **Modération experte** : Validation finale par équipe
+4. **Feedback utilisateur** : Signalement communautaire
+
+#### Critères de Qualité
+- **Exactitude** : Métadonnées correctes et vérifiables
+- **Originalité** : Pas de doublons
+- **Qualité image** : Résolution et netteté suffisantes
+- **Respect** : Pas de contenu offensant ou inapproprié
+
+---
+
+## 10. Modèle Économique
+
+### 10.1 Sources de Revenus
+
+#### Freemium (70% des revenus prévus)
+- **Gratuit** : Accès consultation, contribution limitée
+- **Premium** (€9.99/mois) : 
+  - Contributions illimitées
+  - Outils d'analyse avancés
+  - Export de données
+  - Support prioritaire
+
+#### Partenariats Institutionnels (20% des revenus)
+- **Musées** : Licence pour intégration collections
+- **Universités** : Accès API et données pour recherche
+- **Éditeurs** : Contenu pour publications
+- **Tourisme** : Intégration applications de voyage
+
+#### Services Professionnels (10% des revenus)
+- **Consulting** : Analyse de collections privées
+- **Formation** : Workshops pour institutions
+- **Développement** : Solutions sur mesure
+- **Certification** : Validation expertise utilisateurs
+
+### 10.2 Projections Financières
+
+#### Année 1
+- **Utilisateurs** : 5 000 (5% premium)
+- **Revenus** : €30 000
+- **Coûts** : €80 000 (développement, infrastructure)
+- **Résultat** : -€50 000 (phase d'investissement)
+
+#### Année 3
+- **Utilisateurs** : 25 000 (10% premium)
+- **Revenus** : €400 000
+- **Coûts** : €250 000 (équipe 8 personnes)
+- **Résultat** : +€150 000 (seuil de rentabilité)
+
+#### Année 5
+- **Utilisateurs** : 75 000 (15% premium)
+- **Revenus** : €1 500 000
+- **Coûts** : €800 000 (équipe 15 personnes)
+- **Résultat** : +€700 000 (croissance stable)
+
+---
+
+## 11. Roadmap Détaillée
+
+### 11.1 Phase 1 : Fondations (Complétée - Mois 1-6)
+
+#### Développement Core ✅
+- Architecture technique et base de données
+- Interface utilisateur responsive
+- Système d'authentification
+- Upload et gestion des symboles
+
+#### Fonctionnalités IA ✅
+- Reconnaissance de patterns basique
+- Annotation semi-automatique
+- Suggestions de tags
+- Détection de doublons
+
+#### Communauté ✅
+- Système de contribution
+- Modération basique
+- Profils utilisateurs
+- Collections personnelles
+
+### 11.2 Phase 2 : Enrichissement (Mois 7-12)
+
+#### T1 2025 - Fonctionnalités Sociales
+- **Semaine 1-4** : Groupes d'intérêt thématiques
+- **Semaine 5-8** : Système de messagerie
+- **Semaine 9-12** : Forums et discussions
+
+#### T2 2025 - Outils d'Analyse
+- **Semaine 13-16** : Comparateur de symboles
+- **Semaine 17-20** : Analyse temporelle
+- **Semaine 21-24** : Export données recherche
+
+#### T3 2025 - IA Avancée
+- **Semaine 25-28** : Modèles de reconnaissance améliorés
+- **Semaine 29-32** : Classification automatique styles
+- **Semaine 33-36** : Détection connexions culturelles
+
+#### T4 2025 - Partenariats
+- **Semaine 37-40** : API pour intégrations externes
+- **Semaine 41-44** : Interface partenaires institutionnels
+- **Semaine 45-48** : Lancement programme ambassadeurs
+
+### 11.3 Phase 3 : Expansion (Année 2-3)
+
+#### Fonctionnalités Avancées
+- Réalité augmentée pour exploration
+- Recommandations personnalisées par IA
+- Traduction automatique multilingue
+- Système de peer-review académique
+
+#### Expansion Géographique
+- Localisation en 10 langues
+- Partenariats régionaux (Asie, Afrique, Amériques)
+- Événements physiques dans grandes villes
+- Collaboration avec UNESCO
+
+#### Monétisation
+- Lancement abonnements premium
+- Partenariats commerciaux
+- Services consulting
+- Marketplace pour ressources pédagogiques
+
+---
+
+## 12. Analyse des Risques
+
+### 12.1 Risques Techniques
+
+#### Risque : Scalabilité de la base de données
+- **Probabilité** : Moyenne
+- **Impact** : Élevé
+- **Mitigation** : 
+  - Architecture microservices
+  - Sharding horizontal prévu
+  - Monitoring proactif des performances
+  - Plan de migration cloud
+
+#### Risque : Qualité des modèles IA
+- **Probabilité** : Moyenne
+- **Impact** : Moyen
+- **Mitigation** :
+  - Dataset d'entraînement diversifié
+  - Validation humaine systématique
+  - Amélioration continue des modèles
+  - Fallback sur modération humaine
+
+### 12.2 Risques Communautaires
+
+#### Risque : Contenu inapproprié ou biaisé
+- **Probabilité** : Élevée
+- **Impact** : Élevé
+- **Mitigation** :
+  - Modération proactive multiculturelle
+  - Guidelines communautaires claires
+  - Formation des modérateurs
+  - Système de signalement efficace
+
+#### Risque : Manque d'engagement communautaire
+- **Probabilité** : Moyenne
+- **Impact** : Élevé
+- **Mitigation** :
+  - Programme de gamification robuste
+  - Animation communautaire régulière
+  - Partenariats avec influenceurs
+  - Valeur ajoutée claire pour utilisateurs
+
+### 12.3 Risques Légaux et Éthiques
+
+#### Risque : Droits d'auteur et propriété intellectuelle
+- **Probabilité** : Élevée
+- **Impact** : Élevé
+- **Mitigation** :
+  - Politique claire de licences
+  - Vérification systématique des droits
+  - Partenariats avec détenteurs de droits
+  - Procédure DMCA établie
+
+#### Risque : Appropriation culturelle
+- **Probabilité** : Moyenne
+- **Impact** : Élevé
+- **Mitigation** :
+  - Comité consultatif multiculturel
+  - Guidelines de respect culturel
+  - Collaboration avec communautés d'origine
+  - Formation équipe sur sensibilité culturelle
+
+### 12.4 Risques Financiers
+
+#### Risque : Difficultés de financement
+- **Probabilité** : Moyenne
+- **Impact** : Élevé
+- **Mitigation** :
+  - Diversification sources de financement
+  - Partenariats institutionnels solides
+  - Modèle économique flexible
+  - Réserves de trésorerie suffisantes
+
+---
+
+## 13. Métriques de Succès
+
+### 13.1 KPIs Techniques
+
+#### Performance Plateforme
+- **Uptime** : >99.5%
+- **Temps de chargement** : <2 secondes
+- **Taux d'erreur** : <0.1%
+- **Score PageSpeed** : >90
+
+#### Qualité Données
+- **Symboles validés** : Croissance 20% mensuelle
+- **Taux de validation** : >85%
+- **Qualité annotations IA** : >90% de précision
+- **Doublons détectés** : <5% de la base
+
+### 13.2 KPIs Communautaires
+
+#### Engagement Utilisateurs
+- **Utilisateurs actifs mensuels** : Objectif 50K en an 3
+- **Taux de rétention** : >60% à 30 jours
+- **Contributions par utilisateur** : >5 par mois (actifs)
+- **Temps de session moyen** : >10 minutes
+
+#### Croissance Communauté
+- **Nouveaux utilisateurs** : Croissance 15% mensuelle
+- **Contributeurs actifs** : 10% de la base utilisateurs
+- **Modérateurs communautaires** : 1 pour 500 utilisateurs
+- **Groupes d'intérêt** : >100 groupes actifs
+
+### 13.3 KPIs Business
+
+#### Revenus et Conversion
+- **Taux de conversion premium** : >12%
+- **Churn rate** : <5% mensuel
+- **LTV/CAC ratio** : >3:1
+- **ARR (Annual Recurring Revenue)** : €1M en an 3
+
+#### Partenariats
+- **Institutions partenaires** : >50 en an 3
+- **API calls externes** : >1M par mois
+- **Revenus partenariats** : 30% du total
+- **Satisfaction partenaires** : >8/10
+
+### 13.4 KPIs Impact
+
+#### Rayonnement Académique
+- **Publications citant Symbolica** : >100 en an 3
+- **Chercheurs utilisant la plateforme** : >1000
+- **Universités partenaires** : >20
+- **Conférences présentations** : >10 par an
+
+#### Impact Culturel
+- **Cultures représentées** : >100
+- **Langues supportées** : >15
+- **Pays d'origine des symboles** : >50
+- **Couverture médiatique** : >50 articles par an
+
+---
+
+## 14. Aspects Légaux et Conformité
+
+### 14.1 Protection des Données (RGPD)
+
+#### Principes Appliqués
+- **Minimisation** : Collecte uniquement des données nécessaires
+- **Transparence** : Information claire sur l'usage des données
+- **Consentement** : Opt-in explicite pour tous les traitements
+- **Portabilité** : Export des données utilisateur en format standard
+
+#### Mesures Techniques
+- **Pseudonymisation** : Données personnelles protégées
+- **Chiffrement** : En transit et au repos
+- **Audit logs** : Traçabilité des accès aux données
+- **Droit à l'oubli** : Suppression automatisée possible
+
+#### Procédures
+- **DPO désigné** : Data Protection Officer certifié
+- **DPIA** : Analyse d'impact vie privée documentée
+- **Registre des traitements** : Maintenu à jour
+- **Formation équipe** : Sensibilisation RGPD régulière
+
+### 14.2 Propriété Intellectuelle
+
+#### Politique de Licences
+- **Contenu utilisateur** : Licence Creative Commons BY-SA
+- **Contributions institutionnelles** : Accords spécifiques
+- **Données générées par IA** : Domaine public avec attribution
+- **Code source** : Open source sous licence MIT
+
+#### Protection des Droits
+- **Vérification uploads** : Système de détection duplicatas
+- **Procédure DMCA** : Réponse sous 24h aux réclamations
+- **Comité éthique** : Validation des contenus sensibles
+- **Assurance responsabilité** : Couverture €2M
+
+### 14.3 Modération et Sécurité
+
+#### Règles Communautaires
+- **Respect culturel** : Interdiction appropriation
+- **Exactitude scientifique** : Validation par pairs
+- **Civilité** : Tolérance zéro harcèlement
+- **Transparence** : Sources et méthodologie
+
+#### Outils de Modération
+- **IA de détection** : Contenu inapproprié automatique
+- **Signalement utilisateur** : Interface simple et rapide
+- **Escalade** : Processus de résolution structuré
+- **Sanctions** : Graduées selon gravité
+
+---
+
+## 15. Stratégie de Partenariats
+
+### 15.1 Partenaires Institutionnels
+
+#### Musées et Centres Culturels
+- **Objectif** : 20 partenariats majeurs en 2 ans
+- **Proposition de valeur** :
+  - Numérisation et valorisation collections
+  - Nouvelle audience digitale
+  - Outils d'analyse pour conservateurs
+  - Revenus partagés sur premium
+
+**Partenaires cibles prioritaires :**
+- Musée du Louvre (Paris)
+- British Museum (Londres)
+- Metropolitan Museum (New York)
+- Musée National de Tokyo
+- Smithsonian Institution (Washington)
+
+#### Universités et Centres de Recherche
+- **Objectif** : 30 partenariats académiques
+- **Proposition de valeur** :
+  - Accès API pour recherche
+  - Dataset pour projets étudiants
+  - Publication conjointe résultats
+  - Formation équipes recherche
+
+**Programmes spécifiques :**
+- Bourses de recherche Symbolica
+- Concours étudiants meilleure analyse
+- Workshops méthodologie IA culturelle
+- Certification expertise symboles
+
+### 15.2 Partenaires Technologiques
+
+#### Fournisseurs IA
+- **OpenAI** : Modèles vision et traitement langage
+- **Google Cloud** : Services ML et infrastructure
+- **Hugging Face** : Modèles open source spécialisés
+- **Anthropic** : Analyse sémantique avancée
+
+#### Plateformes Éducatives
+- **Coursera** : Cours sur analyse symboles
+- **edX** : MOOC patrimoine culturel digital
+- **Khan Academy** : Modules grand public
+- **UNESCO Learning** : Programmes officiels
+
+### 15.3 Partenaires Commerciaux
+
+#### Tourisme et Culture
+- **GetYourGuide** : Intégration visites guidées
+- **Airbnb Experiences** : Ateliers découverte symboles
+- **National Geographic** : Contenus éditoriaux
+- **Lonely Planet** : Guides enrichis symboles
+
+#### Médias et Édition
+- **Arte** : Documentaires collaboratifs
+- **France Culture** : Podcasts découvertes
+- **Flammarion** : Édition livres spécialisés
+- **Taschen** : Beaux livres symboles
+
+---
+
+## 16. Annexes Techniques
+
+### 16.1 Architecture API
+
+#### Endpoints Principaux
+
+```
+# Symboles
+GET /api/v1/symbols - Liste avec filtres
+GET /api/v1/symbols/{id} - Détail symbole
+POST /api/v1/symbols - Création (auth requise)
+PUT /api/v1/symbols/{id} - Modification (auth requise)
+
+# Recherche
+GET /api/v1/search?q={query}&filters={filters}
+GET /api/v1/search/similar?imageUrl={url}
+POST /api/v1/search/ai-analysis
+
+# Collections
+GET /api/v1/collections - Collections publiques
+GET /api/v1/users/{id}/collections - Collections utilisateur
+POST /api/v1/collections - Création collection
+
+# Utilisateurs
+GET /api/v1/users/{id}/profile
+PUT /api/v1/users/{id}/profile (auth requise)
+GET /api/v1/users/{id}/contributions
+```
+
+#### Authentification
+- **Type** : Bearer Token (JWT)
+- **Durée** : 24h avec refresh automatique
+- **Scopes** : read, write, moderate, admin
+
+### 16.2 Schéma de Base de Données
+
+#### Table symbols
+```sql
+CREATE TABLE symbols (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  culture TEXT NOT NULL,
+  period TEXT NOT NULL,
+  description TEXT,
+  medium TEXT[],
+  technique TEXT[],
+  function TEXT[],
+  translations JSONB DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+#### Table patterns
+```sql
+CREATE TABLE patterns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  symbol_id UUID REFERENCES symbols(id),
+  name TEXT NOT NULL,
+  pattern_type TEXT CHECK (pattern_type IN ('geometric', 'figurative', 'abstract', 'decorative')),
+  complexity_level TEXT CHECK (complexity_level IN ('simple', 'medium', 'complex')),
+  cultural_significance TEXT,
+  historical_context TEXT,
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### 16.3 Spécifications IA
+
+#### Modèles de Reconnaissance
+
+**Pattern Detection Model**
+- **Architecture** : ResNet-50 + Custom CNN layers
+- **Dataset** : 50K images annotées manuellement
+- **Précision** : 92% sur dataset test
+- **Latence** : <2s par image
+
+**Style Classification Model**
+- **Architecture** : Vision Transformer (ViT-B/16)
+- **Classes** : 25 styles culturels principaux
+- **Précision** : 88% classification fine-grained
+- **Update** : Ré-entraînement mensuel
+
+#### Pipeline de Traitement
+
+```mermaid
+graph LR
+    A[Upload Image] --> B[Preprocessing]
+    B --> C[Pattern Detection]
+    B --> D[Style Classification]
+    C --> E[Confidence Scoring]
+    D --> E
+    E --> F[Human Validation]
+    F --> G[Database Storage]
+```
+
+### 16.4 Guides de Contribution
+
+#### Standards de Qualité Images
+- **Résolution minimum** : 800x600 pixels
+- **Formats acceptés** : JPEG, PNG, WebP
+- **Taille maximum** : 10MB
+- **Qualité requise** : Netteté suffisante pour analyse
+
+#### Métadonnées Obligatoires
+- **Nom du symbole** : Appellation courante
+- **Culture d'origine** : Peuple/civilisation
+- **Période historique** : Siècle ou ère
+- **Localisation** : Région géographique
+- **Source** : Origine de l'information
+
+#### Processus de Validation
+1. **Upload** : Vérification technique automatique
+2. **Pré-modération** : IA détection contenu inapproprié
+3. **Peer-review** : Validation par contributeurs expérimentés
+4. **Validation experte** : Contrôle final par équipe
+5. **Publication** : Mise en ligne avec crédit
+
+---
+
+## Conclusion
+
+Ce cahier des charges détaille la vision complète de Symbolica, plateforme collaborative dédiée à la découverte et l'analyse des symboles culturels mondiaux. Le projet combine technologie avancée (IA, machine learning) et engagement communautaire pour créer un outil unique au service de la préservation du patrimoine symbolique.
+
+### Prochaines Étapes Immédiates
+
+1. **Validation stakeholders** : Présentation aux partenaires potentiels
+2. **Finalisation technique** : Complétion des fonctionnalités Phase 2
+3. **Lancement programme bêta** : Onboarding des premiers ambassadeurs
+4. **Recherche financement** : Levée de fonds pour accélération
+5. **Recrutement équipe** : Développeurs, community managers, chercheurs
+
+### Vision 2030
+
+Symbolica ambitionne de devenir la référence mondiale pour l'étude des symboles culturels, contribuant à une meilleure compréhension des connexions entre civilisations et à la préservation du patrimoine symbolique de l'humanité.
+
+---
+
+**Document Version** : 2.0  
+**Dernière mise à jour** : Décembre 2024  
+**Équipe Projet** : Symbolica Core Team  
+**Contact** : contact@symbolica.org
