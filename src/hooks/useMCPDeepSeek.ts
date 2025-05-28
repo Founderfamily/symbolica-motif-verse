@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,7 +12,9 @@ export interface MCPSearchResponse {
   success: boolean;
   response: any;
   mcpTools: any[];
+  mcpToolResults?: any[];
   timestamp: string;
+  processingTime?: number;
   error?: string;
 }
 
@@ -28,35 +31,61 @@ export const useMCPDeepSeek = () => {
   const [error, setError] = useState<string | null>(null);
 
   const searchWithMCP = useCallback(async (request: MCPSearchRequest): Promise<MCPSearchResponse> => {
+    console.log('🚀 Starting MCP search with request:', request);
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('Calling MCP DeepSeek Search:', request);
+      // Validation côté client
+      if (!request.query || request.query.trim().length === 0) {
+        throw new Error('La requête ne peut pas être vide');
+      }
+
+      if (request.query.length > 5000) {
+        throw new Error('La requête est trop longue (maximum 5000 caractères)');
+      }
+
+      console.log('📡 Calling MCP DeepSeek Search function...');
 
       const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
         body: request
       });
 
       if (functionError) {
-        throw new Error(functionError.message);
+        console.error('❌ Function error:', functionError);
+        throw new Error(`Erreur de la fonction: ${functionError.message}`);
       }
+
+      if (!data) {
+        throw new Error('Aucune donnée reçue du serveur');
+      }
+
+      console.log('✅ MCP search completed:', { 
+        success: data.success, 
+        hasResponse: !!data.response,
+        toolResults: data.mcpToolResults?.length || 0,
+        processingTime: data.processingTime 
+      });
 
       setLastResponse(data);
       return data;
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      console.error('❌ MCP DeepSeek Search Error:', err);
       setError(errorMessage);
-      console.error('MCP DeepSeek Search Error:', err);
       
-      return {
+      const errorResponse: MCPSearchResponse = {
         success: false,
         response: null,
         mcpTools: [],
+        mcpToolResults: [],
         timestamp: new Date().toISOString(),
         error: errorMessage
       };
+
+      setLastResponse(errorResponse);
+      return errorResponse;
     } finally {
       setIsLoading(false);
     }
