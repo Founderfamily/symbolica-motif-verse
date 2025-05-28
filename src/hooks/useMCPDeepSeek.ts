@@ -35,6 +35,14 @@ export const useMCPDeepSeek = () => {
     setIsLoading(true);
     setError(null);
 
+    const startTime = Date.now();
+    
+    // Timeout de 20 secondes au lieu de plus
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false);
+      setError('Timeout: La recherche a pris trop de temps');
+    }, 20000);
+
     try {
       // Validation côté client
       if (!request.query || request.query.trim().length === 0) {
@@ -51,6 +59,8 @@ export const useMCPDeepSeek = () => {
         body: request
       });
 
+      clearTimeout(timeoutId);
+
       if (functionError) {
         console.error('❌ Function error:', functionError);
         throw new Error(`Erreur de la fonction: ${functionError.message}`);
@@ -60,17 +70,24 @@ export const useMCPDeepSeek = () => {
         throw new Error('Aucune donnée reçue du serveur');
       }
 
+      const processingTime = Date.now() - startTime;
       console.log('✅ MCP search completed:', { 
         success: data.success, 
         hasResponse: !!data.response,
         toolResults: data.mcpToolResults?.length || 0,
-        processingTime: data.processingTime 
+        processingTime 
       });
 
-      setLastResponse(data);
-      return data;
+      const response = {
+        ...data,
+        processingTime
+      };
+
+      setLastResponse(response);
+      return response;
 
     } catch (err) {
+      clearTimeout(timeoutId);
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       console.error('❌ MCP DeepSeek Search Error:', err);
       setError(errorMessage);
@@ -81,7 +98,8 @@ export const useMCPDeepSeek = () => {
         mcpTools: [],
         mcpToolResults: [],
         timestamp: new Date().toISOString(),
-        error: errorMessage
+        error: errorMessage,
+        processingTime: Date.now() - startTime
       };
 
       setLastResponse(errorResponse);
@@ -152,9 +170,20 @@ export const useMCPDeepSeek = () => {
     }
   }, []);
 
+  // Fonction de test simple
+  const testConnection = useCallback(async () => {
+    console.log('🔍 Testing MCP connection...');
+    return searchWithMCP({
+      query: 'Test simple: que signifie le symbole du lotus?',
+      toolRequests: [],
+      contextData: { test: true }
+    });
+  }, [searchWithMCP]);
+
   return {
     // Core functions
     searchWithMCP,
+    testConnection,
     
     // Specialized functions
     analyzeSymbol,

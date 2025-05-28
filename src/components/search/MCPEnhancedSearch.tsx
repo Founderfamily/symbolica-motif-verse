@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Brain, Sparkles, History, GitCompare, BookOpen, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Search, Brain, Sparkles, History, GitCompare, BookOpen, Loader2, AlertCircle, CheckCircle, Bug } from 'lucide-react';
 import { useMCPDeepSeek } from '@/hooks/useMCPDeepSeek';
 import { toast } from 'sonner';
 
@@ -24,6 +24,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
 
   const {
     searchWithMCP,
+    testConnection,
     analyzeSymbol,
     getCulturalContext,
     compareSymbols,
@@ -32,6 +33,27 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
     error,
     clearError
   } = useMCPDeepSeek();
+
+  const handleTestConnection = useCallback(async () => {
+    console.log('🧪 Testing connection...');
+    clearError();
+    
+    try {
+      const testResult = await testConnection();
+      console.log('🧪 Test result:', testResult);
+      
+      if (testResult.success) {
+        toast.success('✅ Connexion MCP fonctionnelle!');
+        setResults(testResult);
+      } else {
+        toast.error(`❌ Test échoué: ${testResult.error}`);
+        setResults(testResult);
+      }
+    } catch (err) {
+      console.error('❌ Test error:', err);
+      toast.error(`❌ Erreur de test: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+    }
+  }, [testConnection, clearError]);
 
   const handleSearch = useCallback(async () => {
     const trimmedQuery = query.trim();
@@ -75,7 +97,8 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
         success: searchResults.success,
         hasResponse: !!searchResults.response,
         toolResults: searchResults.mcpToolResults?.length || 0,
-        error: searchResults.error
+        error: searchResults.error,
+        processingTime: searchResults.processingTime
       });
 
       setResults(searchResults);
@@ -153,6 +176,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
                   <ul className="list-disc list-inside mt-1 space-y-1">
                     <li>Vérifiez que votre requête n'est pas trop longue</li>
                     <li>Essayez avec une requête plus simple</li>
+                    <li>Testez la connexion avec le bouton de test</li>
                     <li>Attendez quelques secondes avant de réessayer</li>
                   </ul>
                 </div>
@@ -280,6 +304,17 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
                 <SelectItem value="research">Synthèse recherche</SelectItem>
               </SelectContent>
             </Select>
+            
+            {/* Bouton de test de connexion */}
+            <Button 
+              variant="outline" 
+              onClick={handleTestConnection}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              <Bug className="h-4 w-4" />
+              Test Connexion
+            </Button>
           </div>
 
           {/* Interface de recherche */}

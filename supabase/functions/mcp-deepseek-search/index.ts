@@ -14,8 +14,8 @@ const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Timeout pour les requêtes API
-const API_TIMEOUT = 30000; // 30 secondes
+// Timeout réduit pour éviter les boucles
+const API_TIMEOUT = 15000; // 15 secondes
 
 interface MCPTool {
   name: string;
@@ -94,49 +94,62 @@ const mcpTools: MCPTool[] = [
 
 async function callDeepSeekAPI(prompt: string, tools?: MCPTool[]) {
   if (!deepseekApiKey) {
-    throw new Error('DeepSeek API key not configured');
+    throw new Error('DEEPSEEK_API_KEY not configured in Supabase secrets');
   }
 
   console.log('🤖 Calling DeepSeek API with prompt:', prompt.substring(0, 100) + '...');
+  console.log('🔑 API Key présent:', !!deepseekApiKey);
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+  const timeoutId = setTimeout(() => {
+    console.log('⏰ DeepSeek API timeout après 15s');
+    controller.abort();
+  }, API_TIMEOUT);
 
   try {
+    const requestBody = {
+      model: 'deepseek-chat',
+      messages: [
+        {
+          role: 'system',
+          content: `You are an expert in cultural symbols, anthropology, and historical analysis. You have access to specialized MCP tools for cultural research. Available tools: ${tools?.map(t => `${t.name}: ${t.description}`).join(', ')}`
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    };
+
+    if (tools && tools.length > 0) {
+      requestBody.tools = tools.map(tool => ({
+        type: 'function',
+        function: {
+          name: tool.name,
+          description: tool.description,
+          parameters: tool.inputSchema
+        }
+      }));
+      requestBody.tool_choice = 'auto';
+    }
+
+    console.log('📡 Request body:', JSON.stringify(requestBody).substring(0, 200) + '...');
+
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${deepseekApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert in cultural symbols, anthropology, and historical analysis. You have access to specialized MCP tools for cultural research. Available tools: ${tools?.map(t => `${t.name}: ${t.description}`).join(', ')}`
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        tools: tools?.map(tool => ({
-          type: 'function',
-          function: {
-            name: tool.name,
-            description: tool.description,
-            parameters: tool.inputSchema
-          }
-        })),
-        tool_choice: 'auto',
-        temperature: 0.7,
-        max_tokens: 2000
-      }),
+      body: JSON.stringify(requestBody),
       signal: controller.signal
     });
 
     clearTimeout(timeoutId);
+
+    console.log('📡 DeepSeek response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -145,14 +158,15 @@ async function callDeepSeekAPI(prompt: string, tools?: MCPTool[]) {
     }
 
     const result = await response.json();
-    console.log('✅ DeepSeek API Success:', result?.choices?.[0]?.message?.content?.substring(0, 100) + '...');
+    console.log('✅ DeepSeek API Success - Content length:', result?.choices?.[0]?.message?.content?.length || 0);
     return result;
 
   } catch (error) {
     clearTimeout(timeoutId);
     if (error.name === 'AbortError') {
-      throw new Error('DeepSeek API request timed out');
+      throw new Error('DeepSeek API request timed out after 15 seconds');
     }
+    console.error('❌ DeepSeek API call failed:', error);
     throw error;
   }
 }
@@ -187,12 +201,17 @@ async function analyzeSymbol(args: any) {
   console.log(`🔍 Analyzing symbol: ${symbolName}`);
   
   try {
-    // Rechercher le symbole dans la base de données avec timeout
+    // Timeout pour la base de données aussi
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     const { data: symbols, error } = await supabase
       .from('symbols')
       .select('*')
       .ilike('name', `%${symbolName}%`)
       .limit(5);
+
+    clearTimeout(timeoutId);
 
     if (error) {
       console.error('Database error in analyzeSymbol:', error);
@@ -343,16 +362,22 @@ serve(async (req) => {
     console.log('📝 Request details:', { 
       query: query?.substring(0, 100) + '...',
       toolRequests,
-      contextData: Object.keys(contextData || {})
+      contextData: Object.keys(contextData || {}),
+      timestamp: new Date().toISOString()
     });
 
-    // Validation des entrées
+    // Validation des entrées stricte
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
       throw new Error('Query is required and must be a non-empty string');
     }
 
     if (query.length > 5000) {
       throw new Error('Query is too long (max 5000 characters)');
+    }
+
+    // Vérification de la clé API
+    if (!deepseekApiKey) {
+      throw new Error('DEEPSEEK_API_KEY not configured. Please add it in Supabase secrets.');
     }
 
     // Étape 1: Appel initial à DeepSeek avec les outils MCP
@@ -388,7 +413,7 @@ serve(async (req) => {
         }
       }
 
-      // Étape 3: Appel final à DeepSeek avec les résultats des outils
+      // Étape 3: Appel final à DeepSeek avec les résultats des outils (avec timeout réduit)
       if (mcpToolResults.length > 0) {
         console.log('🤖 Step 3: Final DeepSeek call with tool results');
         const enrichedPrompt = `
@@ -403,22 +428,22 @@ serve(async (req) => {
         try {
           finalResponse = await callDeepSeekAPI(enrichedPrompt);
         } catch (error) {
-          console.error('Final DeepSeek call failed:', error);
-          // Continue with original response if final call fails
+          console.error('Final DeepSeek call failed, using original response:', error);
+          // Continue avec la réponse originale si l'appel final échoue
         }
       }
     }
 
-    // Mise en cache des résultats pour optimisation
+    // Mise en cache des résultats (non-bloquant)
     try {
       if (finalResponse.choices?.[0]?.message?.content) {
         await supabase
           .from('mobile_cache_data')
           .insert({
             cache_type: 'mcp_deepseek_search',
-            cache_key: query.substring(0, 100), // Limiter la clé de cache
+            cache_key: query.substring(0, 100),
             data: { ...finalResponse, mcpToolResults },
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24h
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
           });
         console.log('💾 Results cached successfully');
       }
@@ -427,7 +452,7 @@ serve(async (req) => {
     }
 
     const duration = Date.now() - startTime;
-    console.log(`✅ MCP DeepSeek Search completed in ${duration}ms`);
+    console.log(`✅ MCP DeepSeek Search completed successfully in ${duration}ms`);
 
     return new Response(JSON.stringify({
       success: true,
@@ -444,11 +469,24 @@ serve(async (req) => {
     const duration = Date.now() - startTime;
     console.error('❌ MCP DeepSeek Search Error:', error);
     
+    // Détails d'erreur spécifiques
+    let errorMessage = error.message || 'Unknown error occurred';
+    if (errorMessage.includes('DEEPSEEK_API_KEY')) {
+      errorMessage = 'Configuration manquante: Clé API DeepSeek non configurée dans les secrets Supabase';
+    } else if (errorMessage.includes('timeout')) {
+      errorMessage = 'Timeout: La requête a pris trop de temps à traiter';
+    }
+    
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Unknown error occurred',
+      error: errorMessage,
       timestamp: new Date().toISOString(),
-      processingTime: duration
+      processingTime: duration,
+      debug: {
+        hasApiKey: !!deepseekApiKey,
+        errorType: error.name,
+        originalError: error.message
+      }
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
