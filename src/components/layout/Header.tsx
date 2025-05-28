@@ -45,6 +45,15 @@ const Header: React.FC = () => {
       icon: <I18nText translationKey="navigation.analysis">Analysis</I18nText>
     },
     { 
+      name: 'MCP Search', 
+      href: '/mcp-search',
+      icon: <span className="flex items-center gap-1">
+        <span className="text-purple-600">🧠</span>
+        <span>MCP Search</span>
+      </span>,
+      badge: 'AI'
+    },
+    { 
       name: 'Community', 
       href: '/community',
       icon: <Users className="h-4 w-4 inline mr-1" />,
@@ -87,9 +96,16 @@ const Header: React.FC = () => {
                 <Link 
                   key={item.name} 
                   to={item.href} 
-                  className="text-slate-600 hover:text-slate-900 transition-colors"
+                  className="text-slate-600 hover:text-slate-900 transition-colors relative"
                 >
                   {item.icon}
+                  {item.badge && (
+                    <span className={`absolute -top-2 -right-2 px-1 py-0.5 text-xs rounded-full text-white ${
+                      item.badge === 'AI' ? 'bg-purple-500' : 'bg-amber-500'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               ))}
             </nav>

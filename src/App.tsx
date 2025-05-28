@@ -17,6 +17,7 @@ import CollectionsPage from '@/pages/CollectionsPage';
 import MobileAppPage from '@/pages/MobileApp';
 import MapExplorer from '@/pages/MapExplorer';
 import SymbolsPage from '@/pages/SymbolsPage';
+import MCPSearchPage from '@/pages/MCPSearchPage';
 
 // Admin pages
 import AdminLayout from '@/pages/Admin/AdminLayout';
@@ -74,6 +75,7 @@ function App() {
                 <Route path="/symbols/:id" element={<SymbolExplorer />} />
                 <Route path="/map" element={<MapExplorer />} />
                 <Route path="/search" element={<SearchPage />} />
+                <Route path="/mcp-search" element={<MCPSearchPage />} />
                 <Route path="/profile/:username" element={<UserProfilePage />} />
                 <Route path="/profile/:username/edit" element={<Profile />} />
                 <Route path="/enterprise" element={<EnterprisePage />} />
