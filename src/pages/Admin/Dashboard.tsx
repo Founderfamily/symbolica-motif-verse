@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const { t } = useTranslation();
-  const { user, isAdmin } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -109,7 +109,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">
-                Bienvenue, {user?.full_name || user?.username || 'Administrateur'}
+                Bienvenue, {profile?.full_name || profile?.username || 'Administrateur'}
               </h2>
               <p className="text-slate-500 mt-1">
                 <I18nText translationKey="admin.dashboard.welcomeMessage">

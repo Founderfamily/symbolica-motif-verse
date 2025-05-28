@@ -40,39 +40,39 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfileEditor() {
   const { t } = useTranslation();
-  const { user, updateProfile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Initialize form with current user data
+  // Initialize form with current profile data
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      username: user?.username || '',
-      full_name: user?.full_name || '',
-      bio: user?.bio || '',
-      location: user?.location || '',
-      website: user?.website || '',
-      avatar_url: user?.avatar_url || '',
+      username: profile?.username || '',
+      full_name: profile?.full_name || '',
+      bio: profile?.bio || '',
+      location: profile?.location || '',
+      website: profile?.website || '',
+      avatar_url: profile?.avatar_url || '',
     },
   });
 
   useEffect(() => {
-    // Update form values when user data changes
-    if (user) {
+    // Update form values when profile data changes
+    if (profile) {
       form.reset({
-        username: user.username || '',
-        full_name: user.full_name || '',
-        bio: user.bio || '',
-        location: user.location || '',
-        website: user.website || '',
-        avatar_url: user.avatar_url || '',
+        username: profile.username || '',
+        full_name: profile.full_name || '',
+        bio: profile.bio || '',
+        location: profile.location || '',
+        website: profile.website || '',
+        avatar_url: profile.avatar_url || '',
       });
     }
-  }, [user, form]);
+  }, [profile, form]);
 
   // Handle avatar file selection
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,11 +205,11 @@ export default function ProfileEditor() {
           <div className="flex flex-col items-center space-y-4 pb-4 md:pb-0 md:pr-6 md:border-r border-slate-200">
             <Avatar className="w-24 h-24">
               <AvatarImage 
-                src={avatarPreview || user?.avatar_url || undefined} 
-                alt={user?.full_name || user?.username || "Avatar"} 
+                src={avatarPreview || profile?.avatar_url || undefined} 
+                alt={profile?.full_name || profile?.username || "Avatar"} 
               />
               <AvatarFallback className="text-2xl bg-amber-100 text-amber-700">
-                {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                {profile?.full_name?.charAt(0) || profile?.username?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
             

@@ -115,13 +115,13 @@ const Header: React.FC = () => {
             <LanguageSelector />
 
             {/* User Menu */}
-            {auth?.user ? (
+            {auth?.user && auth?.profile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={auth.user.avatar_url || `https://avatar.vercel.sh/${auth.user.username}.png`} alt={auth.user.username || 'Avatar'} />
-                      <AvatarFallback>{auth.user.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                      <AvatarImage src={auth.profile.avatar_url || `https://avatar.vercel.sh/${auth.profile.username}.png`} alt={auth.profile.username || 'Avatar'} />
+                      <AvatarFallback>{auth.profile.username?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>

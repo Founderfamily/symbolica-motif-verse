@@ -12,6 +12,9 @@ export interface UserProfile {
   is_banned?: boolean;
   created_at?: string;
   updated_at?: string;
+  bio?: string | null;
+  location?: string | null;
+  website?: string | null;
 }
 
 interface AuthContextType {
@@ -22,6 +25,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, userData?: any) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -68,10 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error fetching profile:', error);
         setProfile(null);
       } else {
-        setProfile({
-          ...data,
-          avatar_url: data.avatar_url || null
-        } as UserProfile);
+        setProfile(data as UserProfile);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -79,6 +80,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
+    if (!user) throw new Error('User not authenticated');
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('id', user.id);
+
+    if (error) throw error;
+
+    // Refresh profile data
+    await fetchProfile(user.id);
   };
 
   const signUp = async (email: string, password: string, userData?: any) => {
@@ -115,7 +130,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAdmin,
       signUp,
       signIn,
-      signOut
+      signOut,
+      updateProfile
     }}>
       {children}
     </AuthContext.Provider>

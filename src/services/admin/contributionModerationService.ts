@@ -35,7 +35,7 @@ export const contributionModerationService = {
         .from('user_contributions')
         .select(`
           *,
-          user_profile:profiles(username, full_name)
+          user_profile:profiles!user_contributions_user_id_fkey(username, full_name)
         `)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
@@ -43,7 +43,8 @@ export const contributionModerationService = {
       if (error) throw error;
       return (data || []).map(item => ({
         ...item,
-        status: item.status as 'pending' | 'approved' | 'rejected'
+        status: item.status as 'pending' | 'approved' | 'rejected',
+        user_profile: Array.isArray(item.user_profile) ? item.user_profile[0] : item.user_profile
       }));
     } catch (error) {
       console.error('Error fetching pending contributions:', error);
@@ -60,7 +61,7 @@ export const contributionModerationService = {
         .from('user_contributions')
         .select(`
           *,
-          user_profile:profiles(username, full_name)
+          user_profile:profiles!user_contributions_user_id_fkey(username, full_name)
         `)
         .order('created_at', { ascending: false });
 
@@ -72,7 +73,8 @@ export const contributionModerationService = {
       if (error) throw error;
       return (data || []).map(item => ({
         ...item,
-        status: item.status as 'pending' | 'approved' | 'rejected'
+        status: item.status as 'pending' | 'approved' | 'rejected',
+        user_profile: Array.isArray(item.user_profile) ? item.user_profile[0] : item.user_profile
       }));
     } catch (error) {
       console.error('Error fetching contributions:', error);
