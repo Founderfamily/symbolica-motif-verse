@@ -41,7 +41,7 @@ export const useMCPDeepSeek = () => {
     try {
       // Test de la configuration Supabase
       console.log('🔧 DEBUG: Supabase client config:', {
-        url: supabase.supabaseUrl,
+        url: 'https://djczgpmhrbirbqrycodq.supabase.co',
         hasClient: !!supabase,
         clientKeys: Object.keys(supabase)
       });
@@ -110,7 +110,7 @@ export const useMCPDeepSeek = () => {
       console.log('🔧 DEBUG: Client state before call:', {
         isLoading,
         hasError: !!error,
-        supabaseUrl: supabase.supabaseUrl,
+        supabaseUrl: 'https://djczgpmhrbirbqrycodq.supabase.co',
         timestamp: new Date().toISOString()
       });
 
