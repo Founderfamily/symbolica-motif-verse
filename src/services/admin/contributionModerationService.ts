@@ -41,7 +41,10 @@ export const contributionModerationService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(item => ({
+        ...item,
+        status: item.status as 'pending' | 'approved' | 'rejected'
+      }));
     } catch (error) {
       console.error('Error fetching pending contributions:', error);
       throw error;
@@ -67,7 +70,10 @@ export const contributionModerationService = {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data || [];
+      return (data || []).map(item => ({
+        ...item,
+        status: item.status as 'pending' | 'approved' | 'rejected'
+      }));
     } catch (error) {
       console.error('Error fetching contributions:', error);
       throw error;

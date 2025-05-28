@@ -32,7 +32,7 @@ export default function UsersManagement() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'admin' | 'banned'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'user' | 'admin' | 'banned'>('all');
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -274,11 +274,11 @@ export default function UsersManagement() {
                 Tous
               </Button>
               <Button
-                variant={filterStatus === 'active' ? 'default' : 'outline'}
-                onClick={() => setFilterStatus('active')}
+                variant={filterStatus === 'user' ? 'default' : 'outline'}
+                onClick={() => setFilterStatus('user')}
                 size="sm"
               >
-                Actifs
+                Utilisateurs
               </Button>
               <Button
                 variant={filterStatus === 'admin' ? 'default' : 'outline'}

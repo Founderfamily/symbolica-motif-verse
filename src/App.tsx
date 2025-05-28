@@ -23,6 +23,7 @@ import AdminLayout from '@/pages/Admin/AdminLayout';
 import Dashboard from '@/pages/Admin/Dashboard';
 import UsersManagement from '@/pages/Admin/UsersManagement';
 import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
+import ContributionsModerationPage from '@/pages/Admin/ContributionsModerationPage';
 import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
 import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
 import SystemSettings from '@/pages/Admin/SystemSettings';
@@ -54,10 +55,11 @@ function App() {
               <Route path="/mobile" element={<MobileAppPage />} />
               
               {/* Admin routes with AdminLayout */}
-              <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
+              <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="users" element={<UsersManagement />} />
                 <Route path="contributions" element={<ContributionsManagement />} />
+                <Route path="moderation" element={<ContributionsModerationPage />} />
                 <Route path="symbols" element={<SymbolsManagement />} />
                 <Route path="collections" element={<CollectionsManagement />} />
                 <Route path="settings" element={<SystemSettings />} />
