@@ -53,7 +53,7 @@ const mcpTools: MCPTool[] = [
   }
 ];
 
-// NOUVEAU: Mode debug simple qui ne fait AUCUN appel externe
+// Mode debug simple qui ne fait AUCUN appel externe
 async function simpleDebugCheck() {
   console.log('🔍 SIMPLE DEBUG: Checking configuration only');
   
