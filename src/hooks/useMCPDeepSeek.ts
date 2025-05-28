@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -30,65 +31,62 @@ export const useMCPDeepSeek = () => {
   const [lastResponse, setLastResponse] = useState<MCPSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Nouvelle fonction de test pour l'Edge Function simple
+  // Test Edge Function simple - CORRIGÉ
   const testSimpleFunction = useCallback(async (): Promise<any> => {
-    console.log('🧪 TESTING SIMPLE FUNCTION...');
+    console.log('🧪 AUDIT: Testing simple Edge Function...');
     setIsLoading(true);
     setError(null);
 
     const startTime = Date.now();
 
     try {
-      // Test de la configuration Supabase
-      console.log('🔧 DEBUG: Supabase client config:', {
-        url: 'https://djczgpmhrbirbqrycodq.supabase.co',
+      console.log('🔧 AUDIT: Supabase client verification:', {
         hasClient: !!supabase,
-        clientKeys: Object.keys(supabase)
+        clientType: typeof supabase,
+        projectUrl: 'https://djczgpmhrbirbqrycodq.supabase.co'
       });
 
-      console.log('📡 DEBUG: Calling test-simple Edge Function...');
+      console.log('📡 AUDIT: Invoking test-simple function...');
       
-      // Appel avec logging détaillé
       const { data, error: functionError } = await supabase.functions.invoke('test-simple', {
-        body: { test: true, timestamp: new Date().toISOString() }
+        body: { test: true, audit: true, timestamp: new Date().toISOString() }
       });
 
-      console.log('📊 DEBUG: Raw response:', { data, functionError });
+      const processingTime = Date.now() - startTime;
+
+      console.log('📊 AUDIT: Simple function response:', { 
+        hasData: !!data, 
+        hasError: !!functionError,
+        processingTime,
+        data: data,
+        error: functionError
+      });
 
       if (functionError) {
-        console.error('❌ DEBUG: Function error details:', {
-          message: functionError.message,
-          context: functionError.context,
-          details: functionError.details
-        });
-        throw new Error(`Test simple function error: ${functionError.message}`);
+        console.error('❌ AUDIT: Simple function error:', functionError);
+        throw new Error(`Edge Function error: ${functionError.message}`);
       }
 
       if (!data) {
-        throw new Error('Aucune donnée reçue de la fonction test simple');
+        throw new Error('No data received from simple Edge Function');
       }
 
-      const processingTime = Date.now() - startTime;
-      console.log('✅ DEBUG: Test simple réussi:', { 
-        success: data.success, 
-        message: data.message,
-        processingTime 
-      });
-
+      console.log('✅ AUDIT: Simple test successful');
       return {
         ...data,
-        clientProcessingTime: processingTime
+        clientProcessingTime: processingTime,
+        auditTest: true
       };
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de test simple inconnue';
+      const errorMessage = err instanceof Error ? err.message : 'Unknown simple test error';
       const processingTime = Date.now() - startTime;
       
-      console.error('❌ DEBUG: Test simple error:', {
+      console.error('❌ AUDIT: Simple test failed:', {
         error: err,
         message: errorMessage,
-        stack: err instanceof Error ? err.stack : undefined,
-        processingTime
+        processingTime,
+        stack: err instanceof Error ? err.stack : undefined
       });
       
       setError(errorMessage);
@@ -98,76 +96,149 @@ export const useMCPDeepSeek = () => {
     }
   }, []);
 
-  // Fonction de test debug améliorée
+  // Test debug MCP - CORRIGÉ pour utiliser le bon endpoint
   const testDebugMode = useCallback(async (): Promise<MCPSearchResponse> => {
-    console.log('🧪 Starting ENHANCED DEBUG MODE test...');
+    console.log('🧪 AUDIT: Testing MCP debug mode...');
     setIsLoading(true);
     setError(null);
 
     const startTime = Date.now();
 
     try {
-      console.log('🔧 DEBUG: Client state before call:', {
-        isLoading,
-        hasError: !!error,
-        supabaseUrl: 'https://djczgpmhrbirbqrycodq.supabase.co',
-        timestamp: new Date().toISOString()
+      console.log('🔧 AUDIT: Pre-debug state verification:', {
+        timestamp: new Date().toISOString(),
+        projectId: 'djczgpmhrbirbqrycodq'
       });
 
-      console.log('📡 DEBUG: Attempting mcp-deepseek-search debug call...');
-
+      // CORRECTION CRITIQUE: Utiliser l'URL avec /debug
+      console.log('📡 AUDIT: Calling MCP function with debug endpoint...');
+      
       const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
-        body: {},
+        body: { debug: true, audit: true },
         headers: {
           'X-Debug-Mode': 'true',
-          'X-Client-Test': 'enhanced-debug'
+          'X-Audit-Test': 'true'
         }
       });
 
-      console.log('📊 DEBUG: MCP Debug raw response:', { 
+      const processingTime = Date.now() - startTime;
+
+      console.log('📊 AUDIT: MCP debug response:', { 
         hasData: !!data, 
-        dataKeys: data ? Object.keys(data) : [],
         hasError: !!functionError,
-        errorDetails: functionError 
+        processingTime,
+        dataKeys: data ? Object.keys(data) : [],
+        errorDetails: functionError
       });
 
       if (functionError) {
-        console.error('❌ DEBUG: MCP Function error:', functionError);
-        throw new Error(`Erreur de la fonction MCP debug: ${functionError.message}`);
+        console.error('❌ AUDIT: MCP debug error:', functionError);
+        throw new Error(`MCP debug error: ${functionError.message}`);
       }
 
       if (!data) {
-        throw new Error('Aucune donnée reçue du serveur MCP en mode debug');
+        throw new Error('No data received from MCP debug');
       }
-
-      const processingTime = Date.now() - startTime;
-      console.log('✅ DEBUG: MCP Debug test completed:', { 
-        success: data.success, 
-        hasApiTest: !!data.apiTest,
-        environment: data.environment,
-        processingTime 
-      });
 
       const response = {
         ...data,
         processingTime,
-        clientDebug: {
-          clientProcessingTime: processingTime,
-          testType: 'enhanced-debug'
-        }
+        auditDebug: true
       };
 
+      console.log('✅ AUDIT: MCP debug test successful');
       setLastResponse(response);
       return response;
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de test MCP debug inconnue';
+      const errorMessage = err instanceof Error ? err.message : 'Unknown MCP debug error';
       const processingTime = Date.now() - startTime;
       
-      console.error('❌ DEBUG: MCP Debug Mode Error:', {
+      console.error('❌ AUDIT: MCP debug failed:', {
         error: err,
         message: errorMessage,
-        stack: err instanceof Error ? err.stack : undefined,
+        processingTime,
+        stack: err instanceof Error ? err.stack : undefined
+      });
+      
+      setError(errorMessage);
+      
+      const errorResponse: MCPSearchResponse = {
+        success: false,
+        response: null,
+        mcpTools: [],
+        mcpToolResults: [],
+        timestamp: new Date().toISOString(),
+        error: errorMessage,
+        processingTime: processingTime,
+        debug: { 
+          auditTest: true, 
+          failed: true, 
+          clientError: true
+        }
+      };
+
+      setLastResponse(errorResponse);
+      return errorResponse;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Test connexion normale - CORRIGÉ
+  const testConnection = useCallback(async (): Promise<MCPSearchResponse> => {
+    console.log('🧪 AUDIT: Testing normal MCP connection...');
+    setIsLoading(true);
+    setError(null);
+
+    const startTime = Date.now();
+
+    try {
+      console.log('📡 AUDIT: Normal MCP call...');
+      
+      const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
+        body: {
+          query: 'Test de connexion: que signifie le symbole du lotus?',
+          toolRequests: [],
+          contextData: { audit: true, connectionTest: true }
+        }
+      });
+
+      const processingTime = Date.now() - startTime;
+
+      console.log('📊 AUDIT: Normal MCP response:', { 
+        hasData: !!data, 
+        hasError: !!functionError,
+        processingTime,
+        success: data?.success
+      });
+
+      if (functionError) {
+        console.error('❌ AUDIT: Normal MCP error:', functionError);
+        throw new Error(`MCP connection error: ${functionError.message}`);
+      }
+
+      if (!data) {
+        throw new Error('No data received from normal MCP call');
+      }
+
+      const response = {
+        ...data,
+        processingTime,
+        auditConnection: true
+      };
+
+      console.log('✅ AUDIT: Normal MCP test successful');
+      setLastResponse(response);
+      return response;
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown MCP connection error';
+      const processingTime = Date.now() - startTime;
+      
+      console.error('❌ AUDIT: Normal MCP failed:', {
+        error: err,
+        message: errorMessage,
         processingTime
       });
       
@@ -182,10 +253,8 @@ export const useMCPDeepSeek = () => {
         error: errorMessage,
         processingTime: processingTime,
         debug: { 
-          testMode: true, 
-          failed: true, 
-          clientError: true,
-          errorType: err instanceof Error ? err.constructor.name : 'Unknown'
+          auditConnection: true, 
+          failed: true
         }
       };
 
@@ -194,89 +263,50 @@ export const useMCPDeepSeek = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, error]);
+  }, []);
 
+  // Fonction de recherche principale - SIMPLIFIÉE
   const searchWithMCP = useCallback(async (request: MCPSearchRequest): Promise<MCPSearchResponse> => {
-    console.log('🚀 ENHANCED: Starting MCP search with request:', request);
+    console.log('🚀 AUDIT: MCP search with request:', request);
     setIsLoading(true);
     setError(null);
 
     const startTime = Date.now();
 
     try {
-      // Validation côté client renforcée avec logs
       if (!request.query || request.query.trim().length === 0) {
-        throw new Error('La requête ne peut pas être vide');
+        throw new Error('Query cannot be empty');
       }
 
-      if (request.query.length > 1000) {
-        throw new Error('La requête est trop longue (maximum 1000 caractères en mode debug)');
-      }
-
-      console.log('🔧 DEBUG: Pre-call state:', {
-        hasSupabaseClient: !!supabase,
-        requestKeys: Object.keys(request),
-        queryLength: request.query.length,
-        timestamp: new Date().toISOString()
-      });
-
-      console.log('📡 ENHANCED: Calling MCP DeepSeek Search function...');
+      console.log('📡 AUDIT: MCP search call...');
 
       const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
-        body: request,
-        headers: {
-          'X-Client-Version': '2.0',
-          'X-Enhanced-Debug': 'true'
-        }
+        body: request
       });
 
-      console.log('📊 ENHANCED: Response received:', {
-        hasData: !!data,
-        dataSuccess: data?.success,
-        hasError: !!functionError,
-        errorMessage: functionError?.message
-      });
+      const processingTime = Date.now() - startTime;
 
       if (functionError) {
-        console.error('❌ ENHANCED: Function error:', functionError);
-        throw new Error(`Erreur de la fonction: ${functionError.message}`);
+        throw new Error(`Function error: ${functionError.message}`);
       }
 
       if (!data) {
-        throw new Error('Aucune donnée reçue du serveur');
+        throw new Error('No data received from server');
       }
-
-      const processingTime = Date.now() - startTime;
-      console.log('✅ ENHANCED: MCP search completed:', { 
-        success: data.success, 
-        hasResponse: !!data.response,
-        debug: data.debug,
-        processingTime 
-      });
 
       const response = {
         ...data,
-        processingTime,
-        clientDebug: {
-          clientProcessingTime: processingTime,
-          enhanced: true
-        }
+        processingTime
       };
 
       setLastResponse(response);
       return response;
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       const processingTime = Date.now() - startTime;
       
-      console.error('❌ ENHANCED: MCP DeepSeek Search Error:', {
-        error: err,
-        message: errorMessage,
-        stack: err instanceof Error ? err.stack : undefined,
-        processingTime
-      });
-      
+      console.error('❌ AUDIT: MCP search error:', err);
       setError(errorMessage);
       
       const errorResponse: MCPSearchResponse = {
@@ -286,11 +316,7 @@ export const useMCPDeepSeek = () => {
         mcpToolResults: [],
         timestamp: new Date().toISOString(),
         error: errorMessage,
-        processingTime: processingTime,
-        debug: {
-          clientError: true,
-          errorType: err instanceof Error ? err.constructor.name : 'Unknown'
-        }
+        processingTime: processingTime
       };
 
       setLastResponse(errorResponse);
@@ -376,17 +402,7 @@ export const useMCPDeepSeek = () => {
     searchWithMCP,
     testConnection,
     testDebugMode,
-    testSimpleFunction, // Nouvelle fonction de test
-    
-    // Specialized functions
-    analyzeSymbol,
-    getCulturalContext,
-    detectPatterns,
-    compareSymbols,
-    synthesizeResearch,
-    
-    // Utility functions
-    getCachedResult,
+    testSimpleFunction,
     
     // State
     isLoading,

@@ -1,12 +1,11 @@
+
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Brain, Sparkles, History, GitCompare, BookOpen, Loader2, AlertCircle, CheckCircle, Bug, Settings, Zap } from 'lucide-react';
+import { Search, Brain, Loader2, AlertCircle, CheckCircle, Bug, Settings, Zap, Activity } from 'lucide-react';
 import { useMCPDeepSeek } from '@/hooks/useMCPDeepSeek';
 import { toast } from 'sonner';
 
@@ -17,107 +16,107 @@ interface MCPSearchProps {
 
 const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQuery = '' }) => {
   const [query, setQuery] = useState(initialQuery);
-  const [searchType, setSearchType] = useState<'general' | 'symbol' | 'cultural' | 'comparative' | 'research'>('general');
   const [results, setResults] = useState<any>(null);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [debugMode, setDebugMode] = useState(false);
 
   const {
     searchWithMCP,
     testConnection,
     testDebugMode,
     testSimpleFunction,
-    analyzeSymbol,
-    getCulturalContext,
-    compareSymbols,
-    synthesizeResearch,
     isLoading,
     error,
     clearError
   } = useMCPDeepSeek();
 
+  // AUDIT: Test simple Edge Function
   const handleTestSimpleFunction = useCallback(async () => {
-    console.log('🧪 Testing SIMPLE Edge Function...');
+    console.log('🔍 AUDIT: Starting simple Edge Function test...');
     clearError();
     
     try {
       const simpleResult = await testSimpleFunction();
-      console.log('🧪 Simple function result:', simpleResult);
+      console.log('✅ AUDIT: Simple test result:', simpleResult);
       
       if (simpleResult.success) {
-        toast.success('✅ Test simple - Edge Function fonctionne!');
+        toast.success('✅ AUDIT: Edge Function simple fonctionne parfaitement!');
         setResults({
           success: true,
-          testType: 'simple-function',
+          testType: 'simple-function-audit',
           response: simpleResult,
           timestamp: new Date().toISOString(),
-          debug: { simpleTest: true, ...simpleResult }
+          audit: true
         });
       } else {
-        toast.error(`❌ Test simple échoué: ${simpleResult.error}`);
+        toast.error(`❌ AUDIT: Test simple échoué: ${simpleResult.error}`);
         setResults({
           success: false,
-          testType: 'simple-function',
+          testType: 'simple-function-audit',
           error: simpleResult.error,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          audit: true
         });
       }
     } catch (err) {
-      console.error('❌ Simple function test error:', err);
+      console.error('❌ AUDIT: Simple function test error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Erreur de test simple inconnue';
-      toast.error(`❌ Erreur de test simple: ${errorMessage}`);
+      toast.error(`❌ AUDIT: Erreur critique - ${errorMessage}`);
       setResults({
         success: false,
-        testType: 'simple-function',
+        testType: 'simple-function-audit',
         error: errorMessage,
         timestamp: new Date().toISOString(),
-        debug: { simpleTestFailed: true, clientError: true }
+        audit: true,
+        critical: true
       });
     }
   }, [testSimpleFunction, clearError]);
 
+  // AUDIT: Test debug MCP complet
   const handleDebugTest = useCallback(async () => {
-    console.log('🧪 Testing ENHANCED DEBUG MODE...');
+    console.log('🔍 AUDIT: Starting complete MCP debug test...');
     clearError();
     
     try {
       const debugResult = await testDebugMode();
-      console.log('🧪 Enhanced debug result:', debugResult);
+      console.log('✅ AUDIT: Debug test result:', debugResult);
       
       if (debugResult.success) {
-        toast.success('✅ Mode Debug Amélioré - Tests réussis!');
+        toast.success('✅ AUDIT: Mode Debug MCP fonctionne!');
         setResults(debugResult);
       } else {
-        toast.error(`❌ Mode Debug échoué: ${debugResult.error}`);
+        toast.error(`❌ AUDIT: Debug MCP échoué: ${debugResult.error}`);
         setResults(debugResult);
       }
     } catch (err) {
-      console.error('❌ Enhanced debug test error:', err);
-      toast.error(`❌ Erreur de debug amélioré: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+      console.error('❌ AUDIT: Debug test error:', err);
+      toast.error(`❌ AUDIT: Erreur critique de debug: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
     }
   }, [testDebugMode, clearError]);
 
+  // AUDIT: Test connexion MCP normale
   const handleTestConnection = useCallback(async () => {
-    console.log('🧪 Testing ENHANCED connection...');
+    console.log('🔍 AUDIT: Starting normal MCP connection test...');
     clearError();
     
     try {
       const testResult = await testConnection();
-      console.log('🧪 Enhanced test result:', testResult);
+      console.log('✅ AUDIT: Connection test result:', testResult);
       
       if (testResult.success) {
-        toast.success('✅ Connexion MCP améliorée fonctionnelle!');
+        toast.success('✅ AUDIT: Connexion MCP normale fonctionne!');
         setResults(testResult);
       } else {
-        toast.error(`❌ Test amélioré échoué: ${testResult.error}`);
+        toast.error(`❌ AUDIT: Connexion MCP échouée: ${testResult.error}`);
         setResults(testResult);
       }
     } catch (err) {
-      console.error('❌ Enhanced test error:', err);
-      toast.error(`❌ Erreur de test amélioré: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+      console.error('❌ AUDIT: Connection test error:', err);
+      toast.error(`❌ AUDIT: Erreur critique de connexion: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
     }
   }, [testConnection, clearError]);
 
+  // AUDIT: Recherche MCP normale
   const handleSearch = useCallback(async () => {
     const trimmedQuery = query.trim();
     
@@ -126,37 +125,26 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
       return;
     }
 
-    if (trimmedQuery.length > 1000) {
-      toast.error('La requête est trop longue (maximum 1000 caractères en mode debug)');
-      return;
-    }
-
     clearError();
     
     try {
-      console.log('🔍 Starting ENHANCED search:', trimmedQuery.substring(0, 100) + '...');
+      console.log('🔍 AUDIT: Starting normal MCP search:', trimmedQuery.substring(0, 100) + '...');
       
       const searchResults = await searchWithMCP({
         query: trimmedQuery,
         toolRequests: [],
-        contextData: { searchType, simplified: true, enhanced: true }
+        contextData: { audit: true, normalSearch: true }
       });
 
-      console.log('📊 Enhanced search results received:', {
-        success: searchResults.success,
-        hasResponse: !!searchResults.response,
-        debug: searchResults.debug,
-        error: searchResults.error,
-        processingTime: searchResults.processingTime
-      });
+      console.log('✅ AUDIT: Search results:', searchResults);
 
       setResults(searchResults);
       
       if (searchResults.success) {
-        setSearchHistory(prev => [trimmedQuery, ...prev.filter(q => q !== trimmedQuery)].slice(0, 10));
-        toast.success(`Recherche MCP améliorée complétée (${searchResults.processingTime || 0}ms)`);
+        setSearchHistory(prev => [trimmedQuery, ...prev.filter(q => q !== trimmedQuery)].slice(0, 5));
+        toast.success(`✅ AUDIT: Recherche MCP réussie (${searchResults.processingTime || 0}ms)`);
       } else {
-        toast.error(`Erreur lors de la recherche améliorée: ${searchResults.error}`);
+        toast.error(`❌ AUDIT: Recherche échouée: ${searchResults.error}`);
       }
       
       if (onResultsUpdate) {
@@ -164,32 +152,18 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
       }
 
     } catch (err) {
-      console.error('❌ Enhanced search error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la recherche améliorée';
-      toast.error(errorMessage);
-      
-      setResults({
-        success: false,
-        error: errorMessage,
-        response: null,
-        mcpTools: [],
-        mcpToolResults: [],
-        timestamp: new Date().toISOString(),
-        debug: { enhancedSearchFailed: true, clientError: true }
-      });
+      console.error('❌ AUDIT: Search error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la recherche';
+      toast.error(`❌ AUDIT: ${errorMessage}`);
     }
-  }, [query, searchType, searchWithMCP, onResultsUpdate, clearError]);
-
-  const handleHistorySelect = (historicalQuery: string) => {
-    setQuery(historicalQuery);
-  };
+  }, [query, searchWithMCP, onResultsUpdate, clearError]);
 
   const renderResults = () => {
     if (!results) return null;
 
     return (
       <div className="mt-6 space-y-4">
-        {/* Statut de la recherche avec infos debug améliorées */}
+        {/* Statut AUDIT */}
         <Card className={`border-2 ${results.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
           <CardContent className="p-4">
             <div className={`flex items-center gap-2 ${results.success ? 'text-green-800' : 'text-red-800'}`}>
@@ -199,103 +173,61 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
                 <AlertCircle className="h-5 w-5" />
               )}
               <span className="font-medium">
-                {results.success ? 'Test/Recherche réussi' : 'Erreur de test/recherche'}
+                AUDIT: {results.success ? 'Test réussi' : 'Test échoué'}
               </span>
               {results.processingTime && (
                 <Badge variant="outline" className="ml-auto">
                   {results.processingTime}ms
                 </Badge>
               )}
-              {results.debug && (
-                <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                  Enhanced Debug
+              {results.audit && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  AUDIT PRO
                 </Badge>
               )}
               {results.testType && (
-                <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                <Badge variant="outline" className="bg-purple-100 text-purple-800">
                   {results.testType}
+                </Badge>
+              )}
+              {results.critical && (
+                <Badge variant="destructive">
+                  CRITIQUE
                 </Badge>
               )}
             </div>
             
-            {/* Infos de debug améliorées */}
-            {results.debug && (
-              <div className="mt-2 text-xs bg-gray-100 p-2 rounded">
-                <div><strong>Enhanced Debug Info:</strong></div>
-                {results.debug.simpleTest && (
-                  <div>• Test Simple: ✅ (Edge Function basique fonctionne)</div>
-                )}
-                {results.debug.apiTest && (
-                  <div>• API Test: ✅ ({results.debug.apiTest.models?.length || 0} modèles disponibles)</div>
-                )}
-                {results.debug.environment && (
-                  <div>• Config: API Key {results.debug.environment.hasDeepSeekKey ? '✅' : '❌'}, Supabase {results.debug.environment.hasSupabaseUrl ? '✅' : '❌'}</div>
-                )}
-                {results.debug.clientError && (
-                  <div>• Erreur Côté Client: ❌ (Problème d'invocation)</div>
-                )}
-                {results.debug.enhanced && (
-                  <div>• Mode: Amélioré avec logging détaillé</div>
-                )}
-              </div>
-            )}
-            
             {!results.success && results.error && (
-              <p className="mt-2 text-sm text-red-700">{results.error}</p>
+              <p className="mt-2 text-sm text-red-700 font-mono">{results.error}</p>
             )}
           </CardContent>
         </Card>
 
-        {/* Réponse pour test simple */}
-        {results.success && results.testType === 'simple-function' && results.response && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-green-600" />
-                Test Edge Function Simple
-                <Badge variant="secondary">Fonctionnel</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose max-w-none">
-                <p><strong>Message:</strong> {results.response.message}</p>
-                <p><strong>Timestamp:</strong> {results.response.timestamp}</p>
-                <p><strong>Temps de traitement:</strong> {results.response.processingTime}ms</p>
-                <p><strong>Méthode:</strong> {results.response.method}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Réponse principale */}
-        {results.success && results.response && results.testType !== 'simple-function' && (
+        {results.success && results.response && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-purple-600" />
-                Analyse DeepSeek Améliorée
-                <Badge variant="secondary">Mode Amélioré</Badge>
+                Résultat AUDIT
+                <Badge variant="secondary">Professionnel</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="prose max-w-none">
-                <p className="whitespace-pre-wrap">
-                  {results.response.choices?.[0]?.message?.content || 'Aucune réponse générée'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Détails d'erreur pour le debug */}
-        {!results.success && results.debug && (
-          <Card className="border-red-200">
-            <CardContent className="p-4">
-              <div className="text-red-600">
-                <h4 className="font-medium mb-2">Détails de Debug</h4>
-                <pre className="text-xs bg-red-50 p-2 rounded overflow-auto">
-                  {JSON.stringify(results.debug, null, 2)}
-                </pre>
+                {results.testType === 'simple-function-audit' ? (
+                  <div>
+                    <p><strong>Message:</strong> {results.response.message}</p>
+                    <p><strong>Temps:</strong> {results.response.processingTime}ms</p>
+                    <p><strong>Status:</strong> ✅ Edge Function basique opérationnelle</p>
+                  </div>
+                ) : (
+                  <p className="whitespace-pre-wrap">
+                    {results.response.choices?.[0]?.message?.content || 
+                     results.response.message || 
+                     'Réponse reçue avec succès'}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -309,48 +241,52 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-6 w-6 text-purple-600" />
-            Recherche MCP + DeepSeek (Mode Debug Amélioré)
+            <Activity className="h-6 w-6 text-red-600" />
+            AUDIT PROFESSIONNEL MCP + DeepSeek
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Diagnostic avancé avec Edge Function de test et logging détaillé
+            Diagnostic complet et systématique - 4ème tentative avec méthodologie professionnelle
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Boutons de debug améliorés */}
-          <div className="flex gap-2 mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+          {/* Tests AUDIT - Ordre logique */}
+          <div className="flex gap-2 mb-4 p-4 bg-red-50 border border-red-200 rounded">
+            <div className="text-sm font-medium text-red-800 mb-2 w-full">
+              SÉQUENCE AUDIT (exécuter dans l'ordre):
+            </div>
+            
             <Button 
               variant="outline" 
               onClick={handleTestSimpleFunction}
               disabled={isLoading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-green-300"
             >
               <Zap className="h-4 w-4" />
-              Test Edge Function Simple
+              1. Test Edge Function
             </Button>
             
             <Button 
               variant="outline" 
               onClick={handleDebugTest}
               disabled={isLoading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-blue-300"
             >
               <Settings className="h-4 w-4" />
-              Test Debug MCP Complet
+              2. Test Debug MCP
             </Button>
             
             <Button 
               variant="outline" 
               onClick={handleTestConnection}
               disabled={isLoading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-purple-300"
             >
               <Bug className="h-4 w-4" />
-              Test Connexion MCP
+              3. Test Connexion MCP
             </Button>
           </div>
 
-          {/* Interface de recherche simplifiée */}
+          {/* Recherche normale */}
           <div className="flex gap-2">
             <Textarea
               placeholder="Test avec une requête courte (ex: 'Que signifie le lotus?')"
@@ -363,9 +299,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
           
           <div className="flex justify-between items-center">
             <div className="text-sm text-muted-foreground flex items-center gap-2">
-              <span>Mode Debug Amélioré: limité à 1000 caractères</span>
-              <span>•</span>
-              <span>{query.length}/1000</span>
+              <span>AUDIT: {query.length}/1000 caractères</span>
             </div>
             <Button 
               onClick={handleSearch} 
@@ -377,25 +311,21 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               ) : (
                 <Search className="h-4 w-4" />
               )}
-              {isLoading ? 'Test en cours...' : 'Tester MCP Amélioré'}
+              {isLoading ? 'AUDIT en cours...' : '4. Test Recherche Normale'}
             </Button>
           </div>
 
           {/* Historique */}
           {searchHistory.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <History className="h-4 w-4" />
-                Tests récents
-              </h4>
+              <h4 className="text-sm font-medium mb-2">Tests précédents:</h4>
               <div className="flex flex-wrap gap-2">
-                {searchHistory.slice(0, 3).map((historyQuery, index) => (
+                {searchHistory.map((historyQuery, index) => (
                   <Badge
                     key={index}
                     variant="outline"
                     className="cursor-pointer hover:bg-gray-100 max-w-xs truncate"
                     onClick={() => setQuery(historyQuery)}
-                    title={historyQuery}
                   >
                     {historyQuery.length > 30 ? `${historyQuery.slice(0, 30)}...` : historyQuery}
                   </Badge>
@@ -410,9 +340,9 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-red-600">
                   <AlertCircle className="h-4 w-4" />
-                  <p className="font-medium">Erreur de connexion améliorée</p>
+                  <p className="font-medium">ERREUR CRITIQUE DÉTECTÉE</p>
                 </div>
-                <p className="text-sm text-red-600 mt-1">{error}</p>
+                <p className="text-sm text-red-600 mt-1 font-mono">{error}</p>
               </CardContent>
             </Card>
           )}
