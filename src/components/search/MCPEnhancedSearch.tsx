@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Brain, Loader2, AlertCircle, CheckCircle, Bug, Settings, Zap, Activity } from 'lucide-react';
+import { Search, Brain, Loader2, AlertCircle, CheckCircle, Bug, Settings, Zap, Activity, RotateCcw } from 'lucide-react';
 import { useMCPDeepSeek } from '@/hooks/useMCPDeepSeek';
 import { toast } from 'sonner';
 
@@ -26,97 +26,83 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
     testSimpleFunction,
     isLoading,
     error,
-    clearError
+    clearError,
+    forceReset
   } = useMCPDeepSeek();
 
-  // AUDIT: Test simple Edge Function
+  // Force reset en cas de blocage
+  const handleForceReset = useCallback(() => {
+    console.log('🔄 USER: Force reset requested');
+    forceReset();
+    setResults(null);
+    clearError();
+    toast.info('🔄 Interface réinitialisée');
+  }, [forceReset, clearError]);
+
+  // Test simple Edge Function
   const handleTestSimpleFunction = useCallback(async () => {
-    console.log('🔍 AUDIT: Starting simple Edge Function test...');
+    console.log('🔍 USER: Starting simple Edge Function test...');
     clearError();
     
     try {
       const simpleResult = await testSimpleFunction();
-      console.log('✅ AUDIT: Simple test result:', simpleResult);
+      console.log('✅ USER: Simple test completed:', simpleResult);
       
-      if (simpleResult.success) {
-        toast.success('✅ AUDIT: Edge Function simple fonctionne parfaitement!');
-        setResults({
-          success: true,
-          testType: 'simple-function-audit',
-          response: simpleResult,
-          timestamp: new Date().toISOString(),
-          audit: true
-        });
-      } else {
-        toast.error(`❌ AUDIT: Test simple échoué: ${simpleResult.error}`);
-        setResults({
-          success: false,
-          testType: 'simple-function-audit',
-          error: simpleResult.error,
-          timestamp: new Date().toISOString(),
-          audit: true
-        });
-      }
+      toast.success('✅ Edge Function simple fonctionne!');
+      setResults({
+        success: true,
+        testType: 'simple-function',
+        response: simpleResult,
+        timestamp: new Date().toISOString()
+      });
     } catch (err) {
-      console.error('❌ AUDIT: Simple function test error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de test simple inconnue';
-      toast.error(`❌ AUDIT: Erreur critique - ${errorMessage}`);
+      console.error('❌ USER: Simple function test failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de test simple';
+      toast.error(`❌ Test simple échoué: ${errorMessage}`);
       setResults({
         success: false,
-        testType: 'simple-function-audit',
+        testType: 'simple-function',
         error: errorMessage,
-        timestamp: new Date().toISOString(),
-        audit: true,
-        critical: true
+        timestamp: new Date().toISOString()
       });
     }
   }, [testSimpleFunction, clearError]);
 
-  // AUDIT: Test debug MCP complet
+  // Test debug MCP
   const handleDebugTest = useCallback(async () => {
-    console.log('🔍 AUDIT: Starting complete MCP debug test...');
+    console.log('🔍 USER: Starting MCP debug test...');
     clearError();
     
     try {
       const debugResult = await testDebugMode();
-      console.log('✅ AUDIT: Debug test result:', debugResult);
+      console.log('✅ USER: Debug test completed:', debugResult);
       
-      if (debugResult.success) {
-        toast.success('✅ AUDIT: Mode Debug MCP fonctionne!');
-        setResults(debugResult);
-      } else {
-        toast.error(`❌ AUDIT: Debug MCP échoué: ${debugResult.error}`);
-        setResults(debugResult);
-      }
+      toast.success('✅ Mode Debug MCP fonctionne!');
+      setResults(debugResult);
     } catch (err) {
-      console.error('❌ AUDIT: Debug test error:', err);
-      toast.error(`❌ AUDIT: Erreur critique de debug: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+      console.error('❌ USER: Debug test failed:', err);
+      toast.error(`❌ Debug MCP échoué: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
     }
   }, [testDebugMode, clearError]);
 
-  // AUDIT: Test connexion MCP normale
+  // Test connexion MCP normale
   const handleTestConnection = useCallback(async () => {
-    console.log('🔍 AUDIT: Starting normal MCP connection test...');
+    console.log('🔍 USER: Starting normal MCP connection test...');
     clearError();
     
     try {
       const testResult = await testConnection();
-      console.log('✅ AUDIT: Connection test result:', testResult);
+      console.log('✅ USER: Connection test completed:', testResult);
       
-      if (testResult.success) {
-        toast.success('✅ AUDIT: Connexion MCP normale fonctionne!');
-        setResults(testResult);
-      } else {
-        toast.error(`❌ AUDIT: Connexion MCP échouée: ${testResult.error}`);
-        setResults(testResult);
-      }
+      toast.success('✅ Connexion MCP normale fonctionne!');
+      setResults(testResult);
     } catch (err) {
-      console.error('❌ AUDIT: Connection test error:', err);
-      toast.error(`❌ AUDIT: Erreur critique de connexion: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+      console.error('❌ USER: Connection test failed:', err);
+      toast.error(`❌ Connexion MCP échouée: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
     }
   }, [testConnection, clearError]);
 
-  // AUDIT: Recherche MCP normale
+  // Recherche MCP normale
   const handleSearch = useCallback(async () => {
     const trimmedQuery = query.trim();
     
@@ -128,23 +114,23 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
     clearError();
     
     try {
-      console.log('🔍 AUDIT: Starting normal MCP search:', trimmedQuery.substring(0, 100) + '...');
+      console.log('🔍 USER: Starting normal MCP search:', trimmedQuery);
       
       const searchResults = await searchWithMCP({
         query: trimmedQuery,
         toolRequests: [],
-        contextData: { audit: true, normalSearch: true }
+        contextData: { normalSearch: true }
       });
 
-      console.log('✅ AUDIT: Search results:', searchResults);
+      console.log('✅ USER: Search completed:', searchResults);
 
       setResults(searchResults);
       
       if (searchResults.success) {
         setSearchHistory(prev => [trimmedQuery, ...prev.filter(q => q !== trimmedQuery)].slice(0, 5));
-        toast.success(`✅ AUDIT: Recherche MCP réussie (${searchResults.processingTime || 0}ms)`);
+        toast.success(`✅ Recherche MCP réussie`);
       } else {
-        toast.error(`❌ AUDIT: Recherche échouée: ${searchResults.error}`);
+        toast.error(`❌ Recherche échouée: ${searchResults.error}`);
       }
       
       if (onResultsUpdate) {
@@ -152,9 +138,9 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
       }
 
     } catch (err) {
-      console.error('❌ AUDIT: Search error:', err);
+      console.error('❌ USER: Search failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la recherche';
-      toast.error(`❌ AUDIT: ${errorMessage}`);
+      toast.error(`❌ ${errorMessage}`);
     }
   }, [query, searchWithMCP, onResultsUpdate, clearError]);
 
@@ -163,7 +149,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
 
     return (
       <div className="mt-6 space-y-4">
-        {/* Statut AUDIT */}
+        {/* Statut */}
         <Card className={`border-2 ${results.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
           <CardContent className="p-4">
             <div className={`flex items-center gap-2 ${results.success ? 'text-green-800' : 'text-red-800'}`}>
@@ -173,26 +159,16 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
                 <AlertCircle className="h-5 w-5" />
               )}
               <span className="font-medium">
-                AUDIT: {results.success ? 'Test réussi' : 'Test échoué'}
+                {results.success ? 'Test réussi' : 'Test échoué'}
               </span>
               {results.processingTime && (
                 <Badge variant="outline" className="ml-auto">
                   {results.processingTime}ms
                 </Badge>
               )}
-              {results.audit && (
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  AUDIT PRO
-                </Badge>
-              )}
               {results.testType && (
                 <Badge variant="outline" className="bg-purple-100 text-purple-800">
                   {results.testType}
-                </Badge>
-              )}
-              {results.critical && (
-                <Badge variant="destructive">
-                  CRITIQUE
                 </Badge>
               )}
             </div>
@@ -209,17 +185,15 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-purple-600" />
-                Résultat AUDIT
-                <Badge variant="secondary">Professionnel</Badge>
+                Résultat
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="prose max-w-none">
-                {results.testType === 'simple-function-audit' ? (
+                {results.testType === 'simple-function' ? (
                   <div>
                     <p><strong>Message:</strong> {results.response.message}</p>
-                    <p><strong>Temps:</strong> {results.response.processingTime}ms</p>
-                    <p><strong>Status:</strong> ✅ Edge Function basique opérationnelle</p>
+                    <p><strong>Status:</strong> ✅ Edge Function opérationnelle</p>
                   </div>
                 ) : (
                   <p className="whitespace-pre-wrap">
@@ -242,17 +216,26 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-6 w-6 text-red-600" />
-            AUDIT PROFESSIONNEL MCP + DeepSeek
+            MCP + DeepSeek - Version Corrigée
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleForceReset}
+              className="ml-auto"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Diagnostic complet et systématique - 4ème tentative avec méthodologie professionnelle
+            Version avec protection anti-blocage et timeouts de sécurité
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Tests AUDIT - Ordre logique */}
-          <div className="flex gap-2 mb-4 p-4 bg-red-50 border border-red-200 rounded">
-            <div className="text-sm font-medium text-red-800 mb-2 w-full">
-              SÉQUENCE AUDIT (exécuter dans l'ordre):
+          {/* Tests dans l'ordre logique */}
+          <div className="flex gap-2 mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
+            <div className="text-sm font-medium text-blue-800 mb-2 w-full">
+              TESTS (exécuter dans l'ordre):
             </div>
             
             <Button 
@@ -293,13 +276,14 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="flex-1 min-h-[80px]"
-              maxLength={1000}
+              maxLength={500}
             />
           </div>
           
           <div className="flex justify-between items-center">
             <div className="text-sm text-muted-foreground flex items-center gap-2">
-              <span>AUDIT: {query.length}/1000 caractères</span>
+              <span>{query.length}/500 caractères</span>
+              {isLoading && <span className="text-orange-600">⏳ En cours...</span>}
             </div>
             <Button 
               onClick={handleSearch} 
@@ -311,7 +295,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               ) : (
                 <Search className="h-4 w-4" />
               )}
-              {isLoading ? 'AUDIT en cours...' : '4. Test Recherche Normale'}
+              {isLoading ? 'Recherche...' : '4. Test Recherche'}
             </Button>
           </div>
 
@@ -340,7 +324,15 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-red-600">
                   <AlertCircle className="h-4 w-4" />
-                  <p className="font-medium">ERREUR CRITIQUE DÉTECTÉE</p>
+                  <p className="font-medium">ERREUR DÉTECTÉE</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleForceReset}
+                    className="ml-auto"
+                  >
+                    Reset
+                  </Button>
                 </div>
                 <p className="text-sm text-red-600 mt-1 font-mono">{error}</p>
               </CardContent>

@@ -26,113 +26,92 @@ export interface MCPToolResult {
   callId: string;
 }
 
+// Timeout de sécurité pour éviter les blocages
+const FUNCTION_TIMEOUT = 15000; // 15 secondes
+const SAFETY_TIMEOUT = 20000; // 20 secondes pour reset automatique
+
 export const useMCPDeepSeek = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastResponse, setLastResponse] = useState<MCPSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Test Edge Function simple - CORRIGÉ
-  const testSimpleFunction = useCallback(async (): Promise<any> => {
-    console.log('🧪 AUDIT: Testing simple Edge Function...');
-    setIsLoading(true);
+  // Reset automatique de sécurité
+  const safetyReset = useCallback(() => {
+    console.log('🔄 SAFETY: Force reset loading state');
+    setIsLoading(false);
     setError(null);
+  }, []);
 
-    const startTime = Date.now();
+  // Wrapper avec protection anti-blocage
+  const withSafetyWrapper = useCallback(async <T>(
+    operation: () => Promise<T>,
+    operationName: string
+  ): Promise<T> => {
+    console.log(`🛡️ SAFETY: Starting ${operationName} with protection`);
+    
+    // Timeout de sécurité automatique
+    const safetyTimeoutId = setTimeout(() => {
+      console.error(`⏰ SAFETY: ${operationName} exceeded safety timeout, forcing reset`);
+      safetyReset();
+    }, SAFETY_TIMEOUT);
 
     try {
-      console.log('🔧 AUDIT: Supabase client verification:', {
-        hasClient: !!supabase,
-        clientType: typeof supabase,
-        projectUrl: 'https://djczgpmhrbirbqrycodq.supabase.co'
-      });
-
-      console.log('📡 AUDIT: Invoking test-simple function...');
+      setIsLoading(true);
+      setError(null);
       
-      const { data, error: functionError } = await supabase.functions.invoke('test-simple', {
-        body: { test: true, audit: true, timestamp: new Date().toISOString() }
-      });
+      const result = await Promise.race([
+        operation(),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error(`${operationName} timeout after ${FUNCTION_TIMEOUT}ms`)), FUNCTION_TIMEOUT)
+        )
+      ]);
 
-      const processingTime = Date.now() - startTime;
-
-      console.log('📊 AUDIT: Simple function response:', { 
-        hasData: !!data, 
-        hasError: !!functionError,
-        processingTime,
-        data: data,
-        error: functionError
-      });
-
-      if (functionError) {
-        console.error('❌ AUDIT: Simple function error:', functionError);
-        throw new Error(`Edge Function error: ${functionError.message}`);
-      }
-
-      if (!data) {
-        throw new Error('No data received from simple Edge Function');
-      }
-
-      console.log('✅ AUDIT: Simple test successful');
-      return {
-        ...data,
-        clientProcessingTime: processingTime,
-        auditTest: true
-      };
-
+      clearTimeout(safetyTimeoutId);
+      console.log(`✅ SAFETY: ${operationName} completed successfully`);
+      return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown simple test error';
-      const processingTime = Date.now() - startTime;
-      
-      console.error('❌ AUDIT: Simple test failed:', {
-        error: err,
-        message: errorMessage,
-        processingTime,
-        stack: err instanceof Error ? err.stack : undefined
-      });
-      
+      clearTimeout(safetyTimeoutId);
+      const errorMessage = err instanceof Error ? err.message : `Unknown ${operationName} error`;
+      console.error(`❌ SAFETY: ${operationName} failed:`, errorMessage);
       setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [safetyReset]);
 
-  // Test debug MCP - CORRIGÉ pour utiliser le bon endpoint
-  const testDebugMode = useCallback(async (): Promise<MCPSearchResponse> => {
-    console.log('🧪 AUDIT: Testing MCP debug mode...');
-    setIsLoading(true);
-    setError(null);
-
-    const startTime = Date.now();
-
-    try {
-      console.log('🔧 AUDIT: Pre-debug state verification:', {
-        timestamp: new Date().toISOString(),
-        projectId: 'djczgpmhrbirbqrycodq'
-      });
-
-      // CORRECTION CRITIQUE: Utiliser l'URL avec /debug
-      console.log('📡 AUDIT: Calling MCP function with debug endpoint...');
+  // Test Edge Function simple - VERSION SIMPLIFIÉE
+  const testSimpleFunction = useCallback(async (): Promise<any> => {
+    return withSafetyWrapper(async () => {
+      console.log('🧪 SIMPLE: Testing basic Edge Function...');
       
-      const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
-        body: { debug: true, audit: true },
-        headers: {
-          'X-Debug-Mode': 'true',
-          'X-Audit-Test': 'true'
-        }
-      });
-
-      const processingTime = Date.now() - startTime;
-
-      console.log('📊 AUDIT: MCP debug response:', { 
-        hasData: !!data, 
-        hasError: !!functionError,
-        processingTime,
-        dataKeys: data ? Object.keys(data) : [],
-        errorDetails: functionError
+      const { data, error: functionError } = await supabase.functions.invoke('test-simple', {
+        body: { test: true, timestamp: new Date().toISOString() }
       });
 
       if (functionError) {
-        console.error('❌ AUDIT: MCP debug error:', functionError);
+        throw new Error(`Edge Function error: ${functionError.message}`);
+      }
+
+      if (!data) {
+        throw new Error('No data received from Edge Function');
+      }
+
+      console.log('✅ SIMPLE: Edge Function test successful');
+      return data;
+    }, 'Simple Function Test');
+  }, [withSafetyWrapper]);
+
+  // Test debug MCP - VERSION SIMPLIFIÉE
+  const testDebugMode = useCallback(async (): Promise<MCPSearchResponse> => {
+    return withSafetyWrapper(async () => {
+      console.log('🧪 DEBUG: Testing MCP debug mode...');
+      
+      const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
+        body: { debug: true }
+      });
+
+      if (functionError) {
         throw new Error(`MCP debug error: ${functionError.message}`);
       }
 
@@ -142,193 +121,83 @@ export const useMCPDeepSeek = () => {
 
       const response = {
         ...data,
-        processingTime,
-        auditDebug: true
+        timestamp: new Date().toISOString()
       };
 
-      console.log('✅ AUDIT: MCP debug test successful');
+      console.log('✅ DEBUG: MCP debug test successful');
       setLastResponse(response);
       return response;
+    }, 'Debug Mode Test');
+  }, [withSafetyWrapper]);
 
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown MCP debug error';
-      const processingTime = Date.now() - startTime;
-      
-      console.error('❌ AUDIT: MCP debug failed:', {
-        error: err,
-        message: errorMessage,
-        processingTime,
-        stack: err instanceof Error ? err.stack : undefined
-      });
-      
-      setError(errorMessage);
-      
-      const errorResponse: MCPSearchResponse = {
-        success: false,
-        response: null,
-        mcpTools: [],
-        mcpToolResults: [],
-        timestamp: new Date().toISOString(),
-        error: errorMessage,
-        processingTime: processingTime,
-        debug: { 
-          auditTest: true, 
-          failed: true, 
-          clientError: true
-        }
-      };
-
-      setLastResponse(errorResponse);
-      return errorResponse;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Test connexion normale - CORRIGÉ
+  // Test connexion MCP normale - VERSION SIMPLIFIÉE
   const testConnection = useCallback(async (): Promise<MCPSearchResponse> => {
-    console.log('🧪 AUDIT: Testing normal MCP connection...');
-    setIsLoading(true);
-    setError(null);
-
-    const startTime = Date.now();
-
-    try {
-      console.log('📡 AUDIT: Normal MCP call...');
+    return withSafetyWrapper(async () => {
+      console.log('🧪 CONNECTION: Testing normal MCP connection...');
       
       const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
         body: {
-          query: 'Test de connexion: que signifie le symbole du lotus?',
+          query: 'Test simple: que signifie le lotus?',
           toolRequests: [],
-          contextData: { audit: true, connectionTest: true }
+          contextData: { test: true }
         }
       });
 
-      const processingTime = Date.now() - startTime;
-
-      console.log('📊 AUDIT: Normal MCP response:', { 
-        hasData: !!data, 
-        hasError: !!functionError,
-        processingTime,
-        success: data?.success
-      });
-
       if (functionError) {
-        console.error('❌ AUDIT: Normal MCP error:', functionError);
         throw new Error(`MCP connection error: ${functionError.message}`);
       }
 
       if (!data) {
-        throw new Error('No data received from normal MCP call');
+        throw new Error('No data received from MCP');
       }
 
       const response = {
         ...data,
-        processingTime,
-        auditConnection: true
+        timestamp: new Date().toISOString()
       };
 
-      console.log('✅ AUDIT: Normal MCP test successful');
+      console.log('✅ CONNECTION: MCP connection test successful');
       setLastResponse(response);
       return response;
+    }, 'Connection Test');
+  }, [withSafetyWrapper]);
 
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown MCP connection error';
-      const processingTime = Date.now() - startTime;
-      
-      console.error('❌ AUDIT: Normal MCP failed:', {
-        error: err,
-        message: errorMessage,
-        processingTime
-      });
-      
-      setError(errorMessage);
-      
-      const errorResponse: MCPSearchResponse = {
-        success: false,
-        response: null,
-        mcpTools: [],
-        mcpToolResults: [],
-        timestamp: new Date().toISOString(),
-        error: errorMessage,
-        processingTime: processingTime,
-        debug: { 
-          auditConnection: true, 
-          failed: true
-        }
-      };
-
-      setLastResponse(errorResponse);
-      return errorResponse;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Fonction de recherche principale - SIMPLIFIÉE
+  // Recherche MCP principale - VERSION SIMPLIFIÉE
   const searchWithMCP = useCallback(async (request: MCPSearchRequest): Promise<MCPSearchResponse> => {
-    console.log('🚀 AUDIT: MCP search with request:', request);
-    setIsLoading(true);
-    setError(null);
-
-    const startTime = Date.now();
-
-    try {
+    return withSafetyWrapper(async () => {
+      console.log('🚀 SEARCH: MCP search starting...');
+      
       if (!request.query || request.query.trim().length === 0) {
         throw new Error('Query cannot be empty');
       }
-
-      console.log('📡 AUDIT: MCP search call...');
 
       const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
         body: request
       });
 
-      const processingTime = Date.now() - startTime;
-
       if (functionError) {
-        throw new Error(`Function error: ${functionError.message}`);
+        throw new Error(`Search error: ${functionError.message}`);
       }
 
       if (!data) {
-        throw new Error('No data received from server');
+        throw new Error('No data received from search');
       }
 
       const response = {
         ...data,
-        processingTime
+        timestamp: new Date().toISOString()
       };
 
+      console.log('✅ SEARCH: MCP search successful');
       setLastResponse(response);
       return response;
+    }, 'MCP Search');
+  }, [withSafetyWrapper]);
 
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      const processingTime = Date.now() - startTime;
-      
-      console.error('❌ AUDIT: MCP search error:', err);
-      setError(errorMessage);
-      
-      const errorResponse: MCPSearchResponse = {
-        success: false,
-        response: null,
-        mcpTools: [],
-        mcpToolResults: [],
-        timestamp: new Date().toISOString(),
-        error: errorMessage,
-        processingTime: processingTime
-      };
-
-      setLastResponse(errorResponse);
-      return errorResponse;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+  // Fonctions spécialisées simplifiées
   const analyzeSymbol = useCallback(async (symbolName: string, culture?: string, period?: string) => {
     return searchWithMCP({
-      query: `Analyze the symbol "${symbolName}" ${culture ? `from ${culture} culture` : ''} ${period ? `during ${period}` : ''}. Provide deep cultural analysis, historical context, and symbolic significance.`,
+      query: `Analyze the symbol "${symbolName}" ${culture ? `from ${culture} culture` : ''} ${period ? `during ${period}` : ''}`,
       toolRequests: ['symbol_analyzer'],
       contextData: { symbolName, culture, period }
     });
@@ -336,7 +205,7 @@ export const useMCPDeepSeek = () => {
 
   const getCulturalContext = useCallback(async (culture: string, timeframe?: string, region?: string) => {
     return searchWithMCP({
-      query: `Provide rich cultural context for ${culture} ${timeframe ? `during ${timeframe}` : ''} ${region ? `in ${region}` : ''}. Include historical background, cultural characteristics, and symbolic traditions.`,
+      query: `Cultural context for ${culture} ${timeframe ? `during ${timeframe}` : ''} ${region ? `in ${region}` : ''}`,
       toolRequests: ['cultural_context_provider'],
       contextData: { culture, timeframe, region }
     });
@@ -344,7 +213,7 @@ export const useMCPDeepSeek = () => {
 
   const detectPatterns = useCallback(async (symbols: any[], startPeriod?: string, endPeriod?: string) => {
     return searchWithMCP({
-      query: `Detect temporal patterns and evolutionary changes in the following symbols: ${symbols.map(s => s.name).join(', ')} ${startPeriod && endPeriod ? `from ${startPeriod} to ${endPeriod}` : ''}`,
+      query: `Detect patterns in symbols: ${symbols.map(s => s.name).join(', ')}`,
       toolRequests: ['temporal_pattern_detector'],
       contextData: { symbols, startPeriod, endPeriod }
     });
@@ -352,7 +221,7 @@ export const useMCPDeepSeek = () => {
 
   const compareSymbols = useCallback(async (symbol1: any, symbol2: any, comparisonType: 'semantic' | 'visual' | 'functional' | 'historical' = 'semantic') => {
     return searchWithMCP({
-      query: `Compare ${symbol1.name} and ${symbol2.name} using ${comparisonType} analysis. Identify similarities, differences, and cross-cultural influences.`,
+      query: `Compare ${symbol1.name} and ${symbol2.name} using ${comparisonType} analysis`,
       toolRequests: ['cross_cultural_comparator'],
       contextData: { symbol1, symbol2, comparisonType }
     });
@@ -360,7 +229,7 @@ export const useMCPDeepSeek = () => {
 
   const synthesizeResearch = useCallback(async (query: string, sources?: any[], synthesisType: 'comparative' | 'evolutionary' | 'thematic' = 'thematic') => {
     return searchWithMCP({
-      query: `Synthesize research findings for: ${query}. Provide academic insights, key findings, and research recommendations.`,
+      query: `Synthesize research for: ${query}`,
       toolRequests: ['research_synthesizer'],
       contextData: { query, sources, synthesisType }
     });
@@ -407,9 +276,10 @@ export const useMCPDeepSeek = () => {
     lastResponse,
     error,
     
-    // Clear functions
+    // Control functions
     clearError: () => setError(null),
-    clearLastResponse: () => setLastResponse(null)
+    clearLastResponse: () => setLastResponse(null),
+    forceReset: safetyReset
   };
 };
 
