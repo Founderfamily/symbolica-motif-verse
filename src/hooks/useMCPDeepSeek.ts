@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -95,7 +94,7 @@ export const useMCPDeepSeek = () => {
     });
   }, [searchWithMCP]);
 
-  const synthesizeResearch = useCallback(async (query: string, sources?: any[], synthesisType: 'comparative' | 'evolutionary' | 'thematic' = 'comprehensive') => {
+  const synthesizeResearch = useCallback(async (query: string, sources?: any[], synthesisType: 'comparative' | 'evolutionary' | 'thematic' = 'thematic') => {
     return searchWithMCP({
       query: `Synthesize research findings for: ${query}. Provide academic insights, key findings, and research recommendations.`,
       toolRequests: ['research_synthesizer'],
