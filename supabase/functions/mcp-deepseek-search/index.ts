@@ -14,8 +14,8 @@ const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Timeout réduit pour les tests
-const API_TIMEOUT = 10000; // 10 secondes
+// Timeouts réduits pour éviter les blocages
+const API_TIMEOUT = 5000; // 5 secondes
 
 interface MCPTool {
   name: string;
@@ -53,48 +53,89 @@ const mcpTools: MCPTool[] = [
   }
 ];
 
-async function debugApiTest() {
-  console.log('🧪 DEBUG: Testing API connectivity');
-  console.log('🔑 DEBUG: Has DEEPSEEK_API_KEY:', !!deepseekApiKey);
-  console.log('🔑 DEBUG: API Key length:', deepseekApiKey?.length || 0);
-  console.log('🔑 DEBUG: API Key first 8 chars:', deepseekApiKey?.substring(0, 8) || 'NONE');
+// NOUVEAU: Mode debug simple qui ne fait AUCUN appel externe
+async function simpleDebugCheck() {
+  console.log('🔍 SIMPLE DEBUG: Checking configuration only');
+  
+  const environmentCheck = {
+    hasSupabaseUrl: !!supabaseUrl,
+    hasSupabaseKey: !!supabaseKey,
+    hasDeepSeekKey: !!deepseekApiKey,
+    deepSeekKeyLength: deepseekApiKey?.length || 0,
+    timestamp: new Date().toISOString(),
+    environment: Deno.env.get('DENO_DEPLOYMENT_ID') ? 'production' : 'development'
+  };
 
+  console.log('✅ SIMPLE DEBUG: Environment check completed');
+  
+  return {
+    success: true,
+    mode: 'simple_debug',
+    message: 'Configuration vérifiée sans appel externe',
+    environment: environmentCheck,
+    availableTools: mcpTools.map(tool => tool.name),
+    configurationStatus: {
+      supabase: environmentCheck.hasSupabaseUrl && environmentCheck.hasSupabaseKey ? 'OK' : 'MISSING',
+      deepseek: environmentCheck.hasDeepSeekKey ? 'OK' : 'MISSING'
+    }
+  };
+}
+
+// Test de connectivité API sans requête complète
+async function testApiConnectivity() {
+  console.log('🌐 API CONNECTIVITY: Testing basic connection');
+  
   if (!deepseekApiKey) {
-    throw new Error('DEEPSEEK_API_KEY is not configured');
+    throw new Error('DEEPSEEK_API_KEY not configured');
   }
 
   try {
-    console.log('🌐 DEBUG: Testing simple HTTP request to DeepSeek API');
-    const testResponse = await fetch('https://api.deepseek.com/v1/models', {
+    console.log('📡 API CONNECTIVITY: Attempting simple ping to DeepSeek models endpoint');
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout for connectivity test
+
+    const response = await fetch('https://api.deepseek.com/v1/models', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${deepseekApiKey}`,
         'Content-Type': 'application/json',
       },
-      signal: AbortSignal.timeout(5000)
+      signal: controller.signal
     });
 
-    console.log('📡 DEBUG: Models endpoint status:', testResponse.status);
+    clearTimeout(timeoutId);
+
+    console.log('📡 API CONNECTIVITY: Response status:', response.status);
     
-    if (testResponse.ok) {
-      const models = await testResponse.json();
-      console.log('✅ DEBUG: API connectivity OK, models available:', models.data?.length || 0);
-      return { success: true, models: models.data?.slice(0, 3) };
+    if (response.ok) {
+      const models = await response.json();
+      console.log('✅ API CONNECTIVITY: Success, models available:', models.data?.length || 0);
+      return {
+        success: true,
+        status: response.status,
+        modelsCount: models.data?.length || 0,
+        availableModels: models.data?.slice(0, 2).map((m: any) => m.id) || []
+      };
     } else {
-      const errorText = await testResponse.text();
-      console.log('❌ DEBUG: API error:', testResponse.status, errorText);
-      throw new Error(`API Error ${testResponse.status}: ${errorText}`);
+      const errorText = await response.text();
+      console.log('❌ API CONNECTIVITY: Error:', response.status, errorText);
+      throw new Error(`API Error ${response.status}: ${errorText}`);
     }
   } catch (error) {
-    console.error('💥 DEBUG: API test failed:', error);
+    if (error.name === 'AbortError') {
+      console.error('⏰ API CONNECTIVITY: Timeout after 3s');
+      throw new Error('API connectivity timeout');
+    }
+    console.error('💥 API CONNECTIVITY: Failed:', error);
     throw error;
   }
 }
 
-async function callDeepSeekAPI(prompt: string, tools?: MCPTool[]) {
-  console.log('🤖 DEBUG: Starting DeepSeek API call');
-  console.log('📝 DEBUG: Prompt length:', prompt.length);
-  console.log('🔧 DEBUG: Tools count:', tools?.length || 0);
+// Requête DeepSeek simplifiée pour les tests
+async function callDeepSeekAPI(prompt: string) {
+  console.log('🤖 DEEPSEEK: Starting simplified API call');
+  console.log('📝 DEEPSEEK: Prompt length:', prompt.length);
 
   if (!deepseekApiKey) {
     throw new Error('DEEPSEEK_API_KEY not configured');
@@ -102,7 +143,7 @@ async function callDeepSeekAPI(prompt: string, tools?: MCPTool[]) {
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
-    console.log('⏰ DEBUG: API call timeout after 10s');
+    console.log('⏰ DEEPSEEK: API call timeout after 5s');
     controller.abort();
   }, API_TIMEOUT);
 
@@ -112,7 +153,7 @@ async function callDeepSeekAPI(prompt: string, tools?: MCPTool[]) {
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant specialized in cultural symbols and analysis.'
+          content: 'You are a helpful assistant. Give a very brief response.'
         },
         {
           role: 'user',
@@ -120,12 +161,10 @@ async function callDeepSeekAPI(prompt: string, tools?: MCPTool[]) {
         }
       ],
       temperature: 0.7,
-      max_tokens: 1000 // Réduit pour les tests
+      max_tokens: 200 // Très réduit pour les tests
     };
 
-    console.log('📤 DEBUG: Sending request to DeepSeek API');
-    console.log('📋 DEBUG: Request model:', requestBody.model);
-    console.log('📋 DEBUG: Request messages count:', requestBody.messages.length);
+    console.log('📤 DEEPSEEK: Sending simplified request');
 
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
@@ -139,81 +178,91 @@ async function callDeepSeekAPI(prompt: string, tools?: MCPTool[]) {
 
     clearTimeout(timeoutId);
 
-    console.log('📡 DEBUG: DeepSeek response status:', response.status);
-    console.log('📡 DEBUG: DeepSeek response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('📡 DEEPSEEK: Response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ DEBUG: DeepSeek API Error:', response.status, errorText);
+      console.error('❌ DEEPSEEK: API Error:', response.status, errorText);
       throw new Error(`DeepSeek API error (${response.status}): ${errorText}`);
     }
 
     const result = await response.json();
-    console.log('✅ DEBUG: DeepSeek API Success');
-    console.log('📊 DEBUG: Response structure:', {
-      hasChoices: !!result.choices,
-      choicesCount: result.choices?.length || 0,
-      hasMessage: !!result.choices?.[0]?.message,
-      contentLength: result.choices?.[0]?.message?.content?.length || 0,
-      usage: result.usage
-    });
+    console.log('✅ DEEPSEEK: API Success');
+    console.log('📊 DEEPSEEK: Response length:', result.choices?.[0]?.message?.content?.length || 0);
 
     return result;
 
   } catch (error) {
     clearTimeout(timeoutId);
     if (error.name === 'AbortError') {
-      console.error('⏰ DEBUG: DeepSeek API timeout');
-      throw new Error('DeepSeek API request timed out after 10 seconds');
+      console.error('⏰ DEEPSEEK: API timeout');
+      throw new Error('DeepSeek API request timed out after 5 seconds');
     }
-    console.error('💥 DEBUG: DeepSeek API call failed:', error);
+    console.error('💥 DEEPSEEK: API call failed:', error);
     throw error;
   }
 }
 
 serve(async (req) => {
-  console.log('🚀 DEBUG: Edge Function called');
-  console.log('🌐 DEBUG: Request method:', req.method);
-  console.log('🌐 DEBUG: Request URL:', req.url);
+  console.log('🚀 MCP: Edge Function called');
+  console.log('🌐 MCP: Request method:', req.method);
 
   if (req.method === 'OPTIONS') {
-    console.log('✅ DEBUG: Handling CORS preflight');
+    console.log('✅ MCP: Handling CORS preflight');
     return new Response(null, { headers: corsHeaders });
   }
 
   const startTime = Date.now();
-  const url = new URL(req.url);
   
   try {
-    // Mode debug - endpoint de test simple
-    if (url.pathname.includes('debug')) {
-      console.log('🧪 DEBUG: Debug mode activated');
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log('📋 MCP: Request parsed successfully');
+    } catch (error) {
+      console.error('❌ MCP: Failed to parse request body:', error);
+      throw new Error('Invalid JSON in request body');
+    }
+
+    // MODE 1: Debug simple (AUCUN appel externe)
+    if (requestBody.debug === true && !requestBody.query) {
+      console.log('🔍 MCP: Simple debug mode activated');
+      
+      const debugResult = await simpleDebugCheck();
+      console.log('✅ MCP: Simple debug completed');
+      
+      return new Response(JSON.stringify({
+        ...debugResult,
+        timestamp: new Date().toISOString(),
+        processingTime: Date.now() - startTime
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // MODE 2: Test de connectivité API
+    if (requestBody.testConnectivity === true) {
+      console.log('🌐 MCP: API connectivity test mode');
       
       try {
-        const apiTest = await debugApiTest();
-        console.log('✅ DEBUG: All tests passed');
+        const connectivityResult = await testApiConnectivity();
+        console.log('✅ MCP: Connectivity test passed');
         
         return new Response(JSON.stringify({
           success: true,
-          debug: true,
-          message: 'Debug test successful',
-          apiTest,
+          mode: 'connectivity_test',
+          message: 'API connectivity verified',
+          connectivity: connectivityResult,
           timestamp: new Date().toISOString(),
-          processingTime: Date.now() - startTime,
-          environment: {
-            hasSupabaseUrl: !!supabaseUrl,
-            hasSupabaseKey: !!supabaseKey,
-            hasDeepSeekKey: !!deepseekApiKey,
-            nodeEnv: Deno.env.get('NODE_ENV') || 'unknown'
-          }
+          processingTime: Date.now() - startTime
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } catch (error) {
-        console.error('❌ DEBUG: Debug test failed:', error);
+        console.error('❌ MCP: Connectivity test failed:', error);
         return new Response(JSON.stringify({
           success: false,
-          debug: true,
+          mode: 'connectivity_test',
           error: error.message,
           timestamp: new Date().toISOString(),
           processingTime: Date.now() - startTime
@@ -224,85 +273,57 @@ serve(async (req) => {
       }
     }
 
-    // Mode normal - traitement de la requête MCP
-    console.log('📥 DEBUG: Processing normal MCP request');
-    
-    let requestBody;
-    try {
-      requestBody = await req.json();
-      console.log('📋 DEBUG: Request body parsed successfully');
-      console.log('📋 DEBUG: Request keys:', Object.keys(requestBody || {}));
-    } catch (error) {
-      console.error('❌ DEBUG: Failed to parse request body:', error);
-      throw new Error('Invalid JSON in request body');
-    }
+    // MODE 3: Requête normale (avec validation stricte)
+    const { query } = requestBody;
 
-    const { query, toolRequests, contextData } = requestBody;
+    console.log('📝 MCP: Normal request mode');
 
-    console.log('📝 DEBUG: Request details:', { 
-      hasQuery: !!query,
-      queryLength: query?.length || 0,
-      queryPreview: query?.substring(0, 50) + '...',
-      toolRequests,
-      contextDataKeys: Object.keys(contextData || {}),
-      timestamp: new Date().toISOString()
-    });
-
-    // Validation stricte des entrées
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
-      console.error('❌ DEBUG: Invalid query provided');
+      console.error('❌ MCP: Invalid query provided');
       throw new Error('Query is required and must be a non-empty string');
     }
 
-    if (query.length > 1000) { // Limite réduite pour les tests
-      console.error('❌ DEBUG: Query too long:', query.length);
-      throw new Error('Query is too long (max 1000 characters for debug)');
+    if (query.length > 500) { // Limite réduite
+      console.error('❌ MCP: Query too long:', query.length);
+      throw new Error('Query is too long (max 500 characters)');
     }
 
-    // Vérification de la clé API
-    if (!deepseekApiKey) {
-      console.error('❌ DEBUG: DEEPSEEK_API_KEY not configured');
-      throw new Error('DEEPSEEK_API_KEY not configured. Please add it in Supabase secrets.');
-    }
-
-    console.log('🤖 DEBUG: Starting simplified DeepSeek call (no MCP tools for now)');
+    console.log('🤖 MCP: Starting DeepSeek call with simplified mode');
     
-    // Appel simplifié sans outils MCP pour commencer
     const deepseekResponse = await callDeepSeekAPI(query);
     
-    console.log('✅ DEBUG: DeepSeek response received successfully');
+    console.log('✅ MCP: DeepSeek response received successfully');
 
     // Cache simple (non-bloquant)
     try {
-      console.log('💾 DEBUG: Attempting to cache results');
       await supabase
         .from('mobile_cache_data')
         .insert({
-          cache_type: 'mcp_deepseek_search_debug',
-          cache_key: `debug_${query.substring(0, 50)}`,
-          data: { response: deepseekResponse, debug: true },
-          expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 heure
+          cache_type: 'mcp_deepseek_search_v2',
+          cache_key: `v2_${query.substring(0, 30)}_${Date.now()}`,
+          data: { response: deepseekResponse, mode: 'normal' },
+          expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
         });
-      console.log('✅ DEBUG: Results cached successfully');
+      console.log('✅ MCP: Results cached successfully');
     } catch (cacheError) {
-      console.warn('⚠️ DEBUG: Cache insertion failed (non-critical):', cacheError);
+      console.warn('⚠️ MCP: Cache insertion failed (non-critical):', cacheError);
     }
 
     const duration = Date.now() - startTime;
-    console.log(`✅ DEBUG: MCP DeepSeek Search completed in ${duration}ms`);
+    console.log(`✅ MCP: Request completed in ${duration}ms`);
 
     return new Response(JSON.stringify({
       success: true,
       response: deepseekResponse,
-      mcpToolResults: [], // Vide pour les tests simplifiés
+      mcpToolResults: [],
       mcpTools: mcpTools,
       timestamp: new Date().toISOString(),
       processingTime: duration,
+      mode: 'normal_request',
       debug: {
-        simplifiedMode: true,
-        apiKeyConfigured: !!deepseekApiKey,
         queryLength: query.length,
-        responseType: typeof deepseekResponse
+        responseType: typeof deepseekResponse,
+        simplified: true
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -310,21 +331,17 @@ serve(async (req) => {
 
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error('💥 DEBUG: Major error in Edge Function:', error);
-    console.error('💥 DEBUG: Error stack:', error.stack);
+    console.error('💥 MCP: Error in Edge Function:', error);
     
     let errorMessage = error.message || 'Unknown error occurred';
     let errorType = 'UNKNOWN_ERROR';
     
     if (errorMessage.includes('DEEPSEEK_API_KEY')) {
       errorType = 'CONFIG_ERROR';
-      errorMessage = 'Configuration manquante: Clé API DeepSeek non configurée';
     } else if (errorMessage.includes('timeout') || error.name === 'AbortError') {
       errorType = 'TIMEOUT_ERROR';
-      errorMessage = 'Timeout: La requête a pris trop de temps à traiter';
     } else if (errorMessage.includes('JSON')) {
       errorType = 'PARSE_ERROR';
-      errorMessage = 'Erreur de parsing: Format de requête invalide';
     }
     
     return new Response(JSON.stringify({
@@ -333,10 +350,9 @@ serve(async (req) => {
       timestamp: new Date().toISOString(),
       processingTime: duration,
       debug: {
-        hasApiKey: !!deepseekApiKey,
         errorType,
         originalError: error.message,
-        errorStack: error.stack?.split('\n').slice(0, 3) // Premières lignes seulement
+        hasApiKey: !!deepseekApiKey
       }
     }), {
       status: 500,

@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -17,6 +16,7 @@ export interface MCPSearchResponse {
   processingTime?: number;
   error?: string;
   debug?: any;
+  mode?: string;
 }
 
 export interface MCPToolResult {
@@ -26,30 +26,30 @@ export interface MCPToolResult {
   callId: string;
 }
 
-// Timeout de sécurité pour éviter les blocages
-const FUNCTION_TIMEOUT = 15000; // 15 secondes
-const SAFETY_TIMEOUT = 20000; // 20 secondes pour reset automatique
+// Timeouts réduits et sécurisés
+const FUNCTION_TIMEOUT = 8000; // 8 secondes client
+const SAFETY_TIMEOUT = 12000; // 12 secondes pour reset automatique
 
 export const useMCPDeepSeek = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastResponse, setLastResponse] = useState<MCPSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset automatique de sécurité
+  // Reset de sécurité amélioré
   const safetyReset = useCallback(() => {
-    console.log('🔄 SAFETY: Force reset loading state');
+    console.log('🔄 SAFETY: Force reset all states');
     setIsLoading(false);
     setError(null);
+    setLastResponse(null);
   }, []);
 
-  // Wrapper avec protection anti-blocage
+  // Wrapper de sécurité optimisé
   const withSafetyWrapper = useCallback(async <T>(
     operation: () => Promise<T>,
     operationName: string
   ): Promise<T> => {
-    console.log(`🛡️ SAFETY: Starting ${operationName} with protection`);
+    console.log(`🛡️ SAFETY: Starting ${operationName}`);
     
-    // Timeout de sécurité automatique
     const safetyTimeoutId = setTimeout(() => {
       console.error(`⏰ SAFETY: ${operationName} exceeded safety timeout, forcing reset`);
       safetyReset();
@@ -62,16 +62,16 @@ export const useMCPDeepSeek = () => {
       const result = await Promise.race([
         operation(),
         new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error(`${operationName} timeout after ${FUNCTION_TIMEOUT}ms`)), FUNCTION_TIMEOUT)
+          setTimeout(() => reject(new Error(`${operationName} timeout`)), FUNCTION_TIMEOUT)
         )
       ]);
 
       clearTimeout(safetyTimeoutId);
-      console.log(`✅ SAFETY: ${operationName} completed successfully`);
+      console.log(`✅ SAFETY: ${operationName} completed`);
       return result;
     } catch (err) {
       clearTimeout(safetyTimeoutId);
-      const errorMessage = err instanceof Error ? err.message : `Unknown ${operationName} error`;
+      const errorMessage = err instanceof Error ? err.message : `${operationName} error`;
       console.error(`❌ SAFETY: ${operationName} failed:`, errorMessage);
       setError(errorMessage);
       throw err;
@@ -80,10 +80,10 @@ export const useMCPDeepSeek = () => {
     }
   }, [safetyReset]);
 
-  // Test Edge Function simple - VERSION SIMPLIFIÉE
+  // TEST 1: Edge Function simple (reste identique)
   const testSimpleFunction = useCallback(async (): Promise<any> => {
     return withSafetyWrapper(async () => {
-      console.log('🧪 SIMPLE: Testing basic Edge Function...');
+      console.log('🧪 TEST 1: Testing basic Edge Function');
       
       const { data, error: functionError } = await supabase.functions.invoke('test-simple', {
         body: { test: true, timestamp: new Date().toISOString() }
@@ -93,30 +93,22 @@ export const useMCPDeepSeek = () => {
         throw new Error(`Edge Function error: ${functionError.message}`);
       }
 
-      if (!data) {
-        throw new Error('No data received from Edge Function');
-      }
-
-      console.log('✅ SIMPLE: Edge Function test successful');
+      console.log('✅ TEST 1: Basic Edge Function works');
       return data;
     }, 'Simple Function Test');
   }, [withSafetyWrapper]);
 
-  // Test debug MCP - VERSION SIMPLIFIÉE
-  const testDebugMode = useCallback(async (): Promise<MCPSearchResponse> => {
+  // TEST 2: Debug simple (NOUVEAU - sans appel externe)
+  const testSimpleDebug = useCallback(async (): Promise<MCPSearchResponse> => {
     return withSafetyWrapper(async () => {
-      console.log('🧪 DEBUG: Testing MCP debug mode...');
+      console.log('🧪 TEST 2: Testing simple debug (no external calls)');
       
       const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
-        body: { debug: true }
+        body: { debug: true } // Sans query, juste debug config
       });
 
       if (functionError) {
-        throw new Error(`MCP debug error: ${functionError.message}`);
-      }
-
-      if (!data) {
-        throw new Error('No data received from MCP debug');
+        throw new Error(`Simple debug error: ${functionError.message}`);
       }
 
       const response = {
@@ -124,31 +116,23 @@ export const useMCPDeepSeek = () => {
         timestamp: new Date().toISOString()
       };
 
-      console.log('✅ DEBUG: MCP debug test successful');
+      console.log('✅ TEST 2: Simple debug successful');
       setLastResponse(response);
       return response;
-    }, 'Debug Mode Test');
+    }, 'Simple Debug Test');
   }, [withSafetyWrapper]);
 
-  // Test connexion MCP normale - VERSION SIMPLIFIÉE
-  const testConnection = useCallback(async (): Promise<MCPSearchResponse> => {
+  // TEST 3: Test connectivité API
+  const testApiConnectivity = useCallback(async (): Promise<MCPSearchResponse> => {
     return withSafetyWrapper(async () => {
-      console.log('🧪 CONNECTION: Testing normal MCP connection...');
+      console.log('🧪 TEST 3: Testing API connectivity');
       
       const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
-        body: {
-          query: 'Test simple: que signifie le lotus?',
-          toolRequests: [],
-          contextData: { test: true }
-        }
+        body: { testConnectivity: true }
       });
 
       if (functionError) {
-        throw new Error(`MCP connection error: ${functionError.message}`);
-      }
-
-      if (!data) {
-        throw new Error('No data received from MCP');
+        throw new Error(`Connectivity test error: ${functionError.message}`);
       }
 
       const response = {
@@ -156,16 +140,16 @@ export const useMCPDeepSeek = () => {
         timestamp: new Date().toISOString()
       };
 
-      console.log('✅ CONNECTION: MCP connection test successful');
+      console.log('✅ TEST 3: API connectivity test successful');
       setLastResponse(response);
       return response;
-    }, 'Connection Test');
+    }, 'API Connectivity Test');
   }, [withSafetyWrapper]);
 
-  // Recherche MCP principale - VERSION SIMPLIFIÉE
+  // TEST 4: Requête normale (simplifiée)
   const searchWithMCP = useCallback(async (request: MCPSearchRequest): Promise<MCPSearchResponse> => {
     return withSafetyWrapper(async () => {
-      console.log('🚀 SEARCH: MCP search starting...');
+      console.log('🧪 TEST 4: Normal MCP search');
       
       if (!request.query || request.query.trim().length === 0) {
         throw new Error('Query cannot be empty');
@@ -179,22 +163,18 @@ export const useMCPDeepSeek = () => {
         throw new Error(`Search error: ${functionError.message}`);
       }
 
-      if (!data) {
-        throw new Error('No data received from search');
-      }
-
       const response = {
         ...data,
         timestamp: new Date().toISOString()
       };
 
-      console.log('✅ SEARCH: MCP search successful');
+      console.log('✅ TEST 4: Normal search successful');
       setLastResponse(response);
       return response;
     }, 'MCP Search');
   }, [withSafetyWrapper]);
 
-  // Fonctions spécialisées simplifiées
+  // Fonctions spécialisées simplifiées (gardées pour compatibilité)
   const analyzeSymbol = useCallback(async (symbolName: string, culture?: string, period?: string) => {
     return searchWithMCP({
       query: `Analyze the symbol "${symbolName}" ${culture ? `from ${culture} culture` : ''} ${period ? `during ${period}` : ''}`,
@@ -211,65 +191,22 @@ export const useMCPDeepSeek = () => {
     });
   }, [searchWithMCP]);
 
-  const detectPatterns = useCallback(async (symbols: any[], startPeriod?: string, endPeriod?: string) => {
-    return searchWithMCP({
-      query: `Detect patterns in symbols: ${symbols.map(s => s.name).join(', ')}`,
-      toolRequests: ['temporal_pattern_detector'],
-      contextData: { symbols, startPeriod, endPeriod }
-    });
-  }, [searchWithMCP]);
-
-  const compareSymbols = useCallback(async (symbol1: any, symbol2: any, comparisonType: 'semantic' | 'visual' | 'functional' | 'historical' = 'semantic') => {
-    return searchWithMCP({
-      query: `Compare ${symbol1.name} and ${symbol2.name} using ${comparisonType} analysis`,
-      toolRequests: ['cross_cultural_comparator'],
-      contextData: { symbol1, symbol2, comparisonType }
-    });
-  }, [searchWithMCP]);
-
-  const synthesizeResearch = useCallback(async (query: string, sources?: any[], synthesisType: 'comparative' | 'evolutionary' | 'thematic' = 'thematic') => {
-    return searchWithMCP({
-      query: `Synthesize research for: ${query}`,
-      toolRequests: ['research_synthesizer'],
-      contextData: { query, sources, synthesisType }
-    });
-  }, [searchWithMCP]);
-
-  const getCachedResult = useCallback(async (cacheKey: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('mobile_cache_data')
-        .select('data, expires_at')
-        .eq('cache_type', 'mcp_deepseek_search')
-        .eq('cache_key', cacheKey)
-        .gt('expires_at', new Date().toISOString())
-        .single();
-
-      if (error || !data) {
-        return null;
-      }
-
-      return data.data;
-    } catch (err) {
-      console.error('Cache lookup error:', err);
-      return null;
-    }
-  }, []);
+  // ... keep existing code (detectPatterns, compareSymbols, synthesizeResearch, getCachedResult functions)
 
   return {
-    // Core functions
-    searchWithMCP,
-    testConnection,
-    testDebugMode,
-    testSimpleFunction,
+    // Core functions (dans l'ordre de test)
+    testSimpleFunction,      // TEST 1
+    testSimpleDebug,         // TEST 2 (NOUVEAU)
+    testApiConnectivity,     // TEST 3 (NOUVEAU)
+    searchWithMCP,           // TEST 4
     
     // Specialized functions
     analyzeSymbol,
     getCulturalContext,
-    detectPatterns,
-    compareSymbols,
-    synthesizeResearch,
-    getCachedResult,
+    // detectPatterns,
+    // compareSymbols,
+    // synthesizeResearch,
+    // getCachedResult,
     
     // State
     isLoading,

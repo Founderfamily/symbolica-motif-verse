@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Brain, Loader2, AlertCircle, CheckCircle, Bug, Settings, Zap, Activity, RotateCcw } from 'lucide-react';
+import { Search, Brain, Loader2, AlertCircle, CheckCircle, Bug, Settings, Zap, Activity, RotateCcw, Wifi, Database } from 'lucide-react';
 import { useMCPDeepSeek } from '@/hooks/useMCPDeepSeek';
 import { toast } from 'sonner';
 
@@ -20,17 +20,17 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   const {
-    searchWithMCP,
-    testConnection,
-    testDebugMode,
     testSimpleFunction,
+    testSimpleDebug,
+    testApiConnectivity,
+    searchWithMCP,
     isLoading,
     error,
     clearError,
     forceReset
   } = useMCPDeepSeek();
 
-  // Force reset en cas de blocage
+  // Force reset
   const handleForceReset = useCallback(() => {
     console.log('🔄 USER: Force reset requested');
     forceReset();
@@ -39,70 +39,70 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
     toast.info('🔄 Interface réinitialisée');
   }, [forceReset, clearError]);
 
-  // Test simple Edge Function
+  // TEST 1: Edge Function simple
   const handleTestSimpleFunction = useCallback(async () => {
-    console.log('🔍 USER: Starting simple Edge Function test...');
+    console.log('🧪 USER: TEST 1 - Simple Edge Function');
     clearError();
     
     try {
       const simpleResult = await testSimpleFunction();
-      console.log('✅ USER: Simple test completed:', simpleResult);
+      console.log('✅ USER: TEST 1 completed:', simpleResult);
       
-      toast.success('✅ Edge Function simple fonctionne!');
+      toast.success('✅ TEST 1: Edge Function basique OK!');
       setResults({
         success: true,
-        testType: 'simple-function',
+        testType: 'test-1-simple-function',
         response: simpleResult,
         timestamp: new Date().toISOString()
       });
     } catch (err) {
-      console.error('❌ USER: Simple function test failed:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de test simple';
-      toast.error(`❌ Test simple échoué: ${errorMessage}`);
+      console.error('❌ USER: TEST 1 failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Erreur TEST 1';
+      toast.error(`❌ TEST 1 échoué: ${errorMessage}`);
       setResults({
         success: false,
-        testType: 'simple-function',
+        testType: 'test-1-simple-function',
         error: errorMessage,
         timestamp: new Date().toISOString()
       });
     }
   }, [testSimpleFunction, clearError]);
 
-  // Test debug MCP
-  const handleDebugTest = useCallback(async () => {
-    console.log('🔍 USER: Starting MCP debug test...');
+  // TEST 2: Debug simple (NOUVEAU)
+  const handleTestSimpleDebug = useCallback(async () => {
+    console.log('🧪 USER: TEST 2 - Simple Debug (no external calls)');
     clearError();
     
     try {
-      const debugResult = await testDebugMode();
-      console.log('✅ USER: Debug test completed:', debugResult);
+      const debugResult = await testSimpleDebug();
+      console.log('✅ USER: TEST 2 completed:', debugResult);
       
-      toast.success('✅ Mode Debug MCP fonctionne!');
+      toast.success('✅ TEST 2: Debug simple OK!');
       setResults(debugResult);
     } catch (err) {
-      console.error('❌ USER: Debug test failed:', err);
-      toast.error(`❌ Debug MCP échoué: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+      console.error('❌ USER: TEST 2 failed:', err);
+      toast.error(`❌ TEST 2 échoué: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
     }
-  }, [testDebugMode, clearError]);
+  }, [testSimpleDebug, clearError]);
 
-  // Test connexion MCP normale
-  const handleTestConnection = useCallback(async () => {
-    console.log('🔍 USER: Starting normal MCP connection test...');
+  // TEST 3: Connectivité API (NOUVEAU)
+  const handleTestApiConnectivity = useCallback(async () => {
+    console.log('🧪 USER: TEST 3 - API Connectivity');
     clearError();
     
     try {
-      const testResult = await testConnection();
-      console.log('✅ USER: Connection test completed:', testResult);
+      const connectivityResult = await testApiConnectivity();
+      console.log('✅ USER: TEST 3 completed:', connectivityResult);
       
-      toast.success('✅ Connexion MCP normale fonctionne!');
-      setResults(testResult);
+      toast.success('✅ TEST 3: Connectivité API OK!');
+      setResults(connectivityResult);
     } catch (err) {
-      console.error('❌ USER: Connection test failed:', err);
-      toast.error(`❌ Connexion MCP échouée: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+      console.error('❌ USER: TEST 3 failed:', err);
+      toast.error(`❌ TEST 3 échoué: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
     }
-  }, [testConnection, clearError]);
+  }, [testApiConnectivity, clearError]);
 
-  // Recherche MCP normale
+  // TEST 4: Recherche normale
   const handleSearch = useCallback(async () => {
     const trimmedQuery = query.trim();
     
@@ -114,7 +114,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
     clearError();
     
     try {
-      console.log('🔍 USER: Starting normal MCP search:', trimmedQuery);
+      console.log('🧪 USER: TEST 4 - Normal search:', trimmedQuery);
       
       const searchResults = await searchWithMCP({
         query: trimmedQuery,
@@ -122,15 +122,15 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
         contextData: { normalSearch: true }
       });
 
-      console.log('✅ USER: Search completed:', searchResults);
+      console.log('✅ USER: TEST 4 completed:', searchResults);
 
       setResults(searchResults);
       
       if (searchResults.success) {
         setSearchHistory(prev => [trimmedQuery, ...prev.filter(q => q !== trimmedQuery)].slice(0, 5));
-        toast.success(`✅ Recherche MCP réussie`);
+        toast.success(`✅ TEST 4: Recherche réussie`);
       } else {
-        toast.error(`❌ Recherche échouée: ${searchResults.error}`);
+        toast.error(`❌ TEST 4 échoué: ${searchResults.error}`);
       }
       
       if (onResultsUpdate) {
@@ -138,9 +138,9 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
       }
 
     } catch (err) {
-      console.error('❌ USER: Search failed:', err);
+      console.error('❌ USER: TEST 4 failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la recherche';
-      toast.error(`❌ ${errorMessage}`);
+      toast.error(`❌ TEST 4: ${errorMessage}`);
     }
   }, [query, searchWithMCP, onResultsUpdate, clearError]);
 
@@ -171,6 +171,11 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
                   {results.testType}
                 </Badge>
               )}
+              {results.mode && (
+                <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                  {results.mode}
+                </Badge>
+              )}
             </div>
             
             {!results.success && results.error && (
@@ -185,15 +190,28 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-purple-600" />
-                Résultat
+                Résultat {results.mode ? `(${results.mode})` : ''}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="prose max-w-none">
-                {results.testType === 'simple-function' ? (
+                {results.testType?.includes('simple-function') ? (
                   <div>
                     <p><strong>Message:</strong> {results.response.message}</p>
                     <p><strong>Status:</strong> ✅ Edge Function opérationnelle</p>
+                  </div>
+                ) : results.mode === 'simple_debug' ? (
+                  <div>
+                    <p><strong>Configuration:</strong> ✅ Environnement vérifié</p>
+                    <p><strong>Supabase:</strong> {results.response.configurationStatus?.supabase}</p>
+                    <p><strong>DeepSeek:</strong> {results.response.configurationStatus?.deepseek}</p>
+                    <p><strong>Outils disponibles:</strong> {results.response.availableTools?.join(', ')}</p>
+                  </div>
+                ) : results.mode === 'connectivity_test' ? (
+                  <div>
+                    <p><strong>Connectivité API:</strong> ✅ Connexion DeepSeek OK</p>
+                    <p><strong>Modèles disponibles:</strong> {results.response.connectivity?.modelsCount || 0}</p>
+                    <p><strong>Status:</strong> {results.response.connectivity?.status}</p>
                   </div>
                 ) : (
                   <p className="whitespace-pre-wrap">
@@ -216,7 +234,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-6 w-6 text-red-600" />
-            MCP + DeepSeek - Version Corrigée
+            MCP + DeepSeek - Tests Progressifs
             <Button 
               variant="outline" 
               size="sm"
@@ -228,14 +246,14 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
             </Button>
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Version avec protection anti-blocage et timeouts de sécurité
+            Tests progressifs avec timeouts optimisés et debug séparé
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Tests dans l'ordre logique */}
-          <div className="flex gap-2 mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
-            <div className="text-sm font-medium text-blue-800 mb-2 w-full">
-              TESTS (exécuter dans l'ordre):
+          {/* Tests progressifs dans l'ordre LOGIQUE */}
+          <div className="grid grid-cols-2 gap-3 p-4 bg-blue-50 border border-blue-200 rounded">
+            <div className="col-span-2 text-sm font-medium text-blue-800 mb-2">
+              TESTS PROGRESSIFS (exécuter dans l'ordre):
             </div>
             
             <Button 
@@ -245,44 +263,44 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               className="flex items-center gap-2 border-green-300"
             >
               <Zap className="h-4 w-4" />
-              1. Test Edge Function
+              TEST 1: Edge Function
             </Button>
             
             <Button 
               variant="outline" 
-              onClick={handleDebugTest}
+              onClick={handleTestSimpleDebug}
               disabled={isLoading}
               className="flex items-center gap-2 border-blue-300"
             >
-              <Settings className="h-4 w-4" />
-              2. Test Debug MCP
+              <Database className="h-4 w-4" />
+              TEST 2: Debug Simple
             </Button>
             
             <Button 
               variant="outline" 
-              onClick={handleTestConnection}
+              onClick={handleTestApiConnectivity}
               disabled={isLoading}
               className="flex items-center gap-2 border-purple-300"
             >
-              <Bug className="h-4 w-4" />
-              3. Test Connexion MCP
+              <Wifi className="h-4 w-4" />
+              TEST 3: Connectivité API
             </Button>
           </div>
 
           {/* Recherche normale */}
           <div className="flex gap-2">
             <Textarea
-              placeholder="Test avec une requête courte (ex: 'Que signifie le lotus?')"
+              placeholder="TEST 4: Requête courte (ex: 'Que signifie le lotus?')"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="flex-1 min-h-[80px]"
-              maxLength={500}
+              maxLength={300}
             />
           </div>
           
           <div className="flex justify-between items-center">
             <div className="text-sm text-muted-foreground flex items-center gap-2">
-              <span>{query.length}/500 caractères</span>
+              <span>{query.length}/300 caractères</span>
               {isLoading && <span className="text-orange-600">⏳ En cours...</span>}
             </div>
             <Button 
@@ -295,7 +313,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               ) : (
                 <Search className="h-4 w-4" />
               )}
-              {isLoading ? 'Recherche...' : '4. Test Recherche'}
+              {isLoading ? 'Recherche...' : 'TEST 4: Recherche'}
             </Button>
           </div>
 
