@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Brain, Sparkles, History, GitCompare, BookOpen, Loader2, AlertCircle, CheckCircle, Bug } from 'lucide-react';
+import { Search, Brain, Sparkles, History, GitCompare, BookOpen, Loader2, AlertCircle, CheckCircle, Bug, Settings } from 'lucide-react';
 import { useMCPDeepSeek } from '@/hooks/useMCPDeepSeek';
 import { toast } from 'sonner';
 
@@ -21,10 +20,12 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
   const [searchType, setSearchType] = useState<'general' | 'symbol' | 'cultural' | 'comparative' | 'research'>('general');
   const [results, setResults] = useState<any>(null);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [debugMode, setDebugMode] = useState(false);
 
   const {
     searchWithMCP,
     testConnection,
+    testDebugMode,
     analyzeSymbol,
     getCulturalContext,
     compareSymbols,
@@ -33,6 +34,27 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
     error,
     clearError
   } = useMCPDeepSeek();
+
+  const handleDebugTest = useCallback(async () => {
+    console.log('🧪 Testing DEBUG MODE...');
+    clearError();
+    
+    try {
+      const debugResult = await testDebugMode();
+      console.log('🧪 Debug result:', debugResult);
+      
+      if (debugResult.success) {
+        toast.success('✅ Mode Debug - Tests réussis!');
+        setResults(debugResult);
+      } else {
+        toast.error(`❌ Mode Debug échoué: ${debugResult.error}`);
+        setResults(debugResult);
+      }
+    } catch (err) {
+      console.error('❌ Debug test error:', err);
+      toast.error(`❌ Erreur de debug: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+    }
+  }, [testDebugMode, clearError]);
 
   const handleTestConnection = useCallback(async () => {
     console.log('🧪 Testing connection...');
@@ -63,47 +85,32 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
       return;
     }
 
-    if (trimmedQuery.length > 5000) {
-      toast.error('La requête est trop longue (maximum 5000 caractères)');
+    if (trimmedQuery.length > 1000) {
+      toast.error('La requête est trop longue (maximum 1000 caractères en mode debug)');
       return;
     }
 
     clearError();
     
     try {
-      console.log('🔍 Starting search with type:', searchType, 'query:', trimmedQuery.substring(0, 100) + '...');
+      console.log('🔍 Starting search with simplified mode:', trimmedQuery.substring(0, 100) + '...');
       
-      let searchResults;
-
-      switch (searchType) {
-        case 'symbol':
-          searchResults = await analyzeSymbol(trimmedQuery);
-          break;
-        case 'cultural':
-          searchResults = await getCulturalContext(trimmedQuery);
-          break;
-        case 'research':
-          searchResults = await synthesizeResearch(trimmedQuery);
-          break;
-        default:
-          searchResults = await searchWithMCP({
-            query: trimmedQuery,
-            toolRequests: ['symbol_analyzer', 'cultural_context_provider'],
-            contextData: { searchType }
-          });
-      }
+      const searchResults = await searchWithMCP({
+        query: trimmedQuery,
+        toolRequests: [], // Désactivé en mode simplifié
+        contextData: { searchType, simplified: true }
+      });
 
       console.log('📊 Search results received:', {
         success: searchResults.success,
         hasResponse: !!searchResults.response,
-        toolResults: searchResults.mcpToolResults?.length || 0,
+        debug: searchResults.debug,
         error: searchResults.error,
         processingTime: searchResults.processingTime
       });
 
       setResults(searchResults);
       
-      // Ajouter à l'historique seulement si la recherche est réussie
       if (searchResults.success) {
         setSearchHistory(prev => [trimmedQuery, ...prev.filter(q => q !== trimmedQuery)].slice(0, 10));
         toast.success(`Recherche MCP complétée (${searchResults.processingTime || 0}ms)`);
@@ -111,7 +118,6 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
         toast.error(`Erreur lors de la recherche: ${searchResults.error}`);
       }
       
-      // Notifier le parent
       if (onResultsUpdate) {
         onResultsUpdate(searchResults);
       }
@@ -130,7 +136,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
         timestamp: new Date().toISOString()
       });
     }
-  }, [query, searchType, searchWithMCP, analyzeSymbol, getCulturalContext, synthesizeResearch, onResultsUpdate, clearError]);
+  }, [query, searchType, searchWithMCP, onResultsUpdate, clearError]);
 
   const handleHistorySelect = (historicalQuery: string) => {
     setQuery(historicalQuery);
@@ -141,7 +147,7 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
 
     return (
       <div className="mt-6 space-y-4">
-        {/* Statut de la recherche */}
+        {/* Statut de la recherche avec infos debug */}
         <Card className={`border-2 ${results.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
           <CardContent className="p-4">
             <div className={`flex items-center gap-2 ${results.success ? 'text-green-800' : 'text-red-800'}`}>
@@ -158,45 +164,43 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
                   {results.processingTime}ms
                 </Badge>
               )}
+              {results.debug && (
+                <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  Debug Mode
+                </Badge>
+              )}
             </div>
+            
+            {/* Infos de debug */}
+            {results.debug && (
+              <div className="mt-2 text-xs bg-gray-100 p-2 rounded">
+                <div><strong>Debug Info:</strong></div>
+                {results.debug.apiTest && (
+                  <div>• API Test: ✅ ({results.debug.apiTest.models?.length || 0} modèles disponibles)</div>
+                )}
+                {results.debug.environment && (
+                  <div>• Config: API Key {results.debug.environment.hasDeepSeekKey ? '✅' : '❌'}, Supabase {results.debug.environment.hasSupabaseUrl ? '✅' : '❌'}</div>
+                )}
+                {results.debug.simplifiedMode && (
+                  <div>• Mode: Simplifié (outils MCP désactivés)</div>
+                )}
+              </div>
+            )}
+            
             {!results.success && results.error && (
               <p className="mt-2 text-sm text-red-700">{results.error}</p>
             )}
           </CardContent>
         </Card>
 
-        {!results.success && (
-          <Card className="border-red-200">
-            <CardContent className="p-4">
-              <div className="text-red-600">
-                <h4 className="font-medium mb-2">Détails de l'erreur</h4>
-                <p className="text-sm">{results.error}</p>
-                <div className="mt-3 text-xs text-red-500">
-                  <p>Conseils de dépannage :</p>
-                  <ul className="list-disc list-inside mt-1 space-y-1">
-                    <li>Vérifiez que votre requête n'est pas trop longue</li>
-                    <li>Essayez avec une requête plus simple</li>
-                    <li>Testez la connexion avec le bouton de test</li>
-                    <li>Attendez quelques secondes avant de réessayer</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Réponse principale de DeepSeek */}
+        {/* Réponse principale */}
         {results.success && results.response && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-purple-600" />
                 Analyse DeepSeek
-                {results.mcpToolResults && results.mcpToolResults.length > 0 && (
-                  <Badge variant="secondary">
-                    {results.mcpToolResults.length} outil{results.mcpToolResults.length > 1 ? 's' : ''} MCP
-                  </Badge>
-                )}
+                <Badge variant="secondary">Mode Simplifié</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -209,66 +213,15 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
           </Card>
         )}
 
-        {/* Résultats des outils MCP */}
-        {results.success && results.mcpToolResults && results.mcpToolResults.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-amber-600" />
-                Analyses MCP Spécialisées
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {results.mcpToolResults.map((toolResult: any, index: number) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline">{toolResult.toolName}</Badge>
-                      {toolResult.error ? (
-                        <Badge variant="destructive">Erreur</Badge>
-                      ) : (
-                        <Badge variant="secondary">Succès</Badge>
-                      )}
-                    </div>
-                    
-                    {toolResult.error ? (
-                      <p className="text-red-600 text-sm">{toolResult.error}</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {/* Rendu spécialisé selon le type d'outil */}
-                        {toolResult.toolName === 'symbol_analyzer' && toolResult.result.symbolAnalysis && (
-                          <div>
-                            <h4 className="font-medium">Analyse Symbolique</h4>
-                            <p className="text-sm"><strong>Signification culturelle:</strong> {toolResult.result.symbolAnalysis.culturalSignificance}</p>
-                            <p className="text-sm"><strong>Contexte historique:</strong> {toolResult.result.symbolAnalysis.historicalContext}</p>
-                            <p className="text-sm"><strong>Symboles trouvés:</strong> {toolResult.result.symbolAnalysis.foundSymbols?.length || 0}</p>
-                            {toolResult.result.metadata && (
-                              <Badge variant="outline" className="mt-2">
-                                Confiance: {Math.round(toolResult.result.metadata.confidence * 100)}%
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                        
-                        {toolResult.toolName === 'cultural_context_provider' && toolResult.result.culturalContext && (
-                          <div>
-                            <h4 className="font-medium">Contexte Culturel</h4>
-                            <p className="text-sm"><strong>Culture:</strong> {toolResult.result.culturalContext.culture}</p>
-                            <p className="text-sm"><strong>Caractéristiques:</strong> {toolResult.result.culturalContext.culturalCharacteristics}</p>
-                            <p className="text-sm"><strong>Symboles associés:</strong> {toolResult.result.culturalContext.symbolsCount}</p>
-                          </div>
-                        )}
-                        
-                        {/* Rendu générique pour autres outils */}
-                        {!['symbol_analyzer', 'cultural_context_provider'].includes(toolResult.toolName) && (
-                          <pre className="bg-gray-50 p-2 rounded text-sm overflow-auto max-h-40">
-                            {JSON.stringify(toolResult.result, null, 2)}
-                          </pre>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+        {/* Détails d'erreur pour le debug */}
+        {!results.success && results.debug && (
+          <Card className="border-red-200">
+            <CardContent className="p-4">
+              <div className="text-red-600">
+                <h4 className="font-medium mb-2">Détails de Debug</h4>
+                <pre className="text-xs bg-red-50 p-2 rounded overflow-auto">
+                  {JSON.stringify(results.debug, null, 2)}
+                </pre>
               </div>
             </CardContent>
           </Card>
@@ -283,29 +236,25 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-6 w-6 text-purple-600" />
-            Recherche Intelligente MCP + DeepSeek
+            Recherche MCP + DeepSeek (Mode Debug)
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Recherche avancée avec analyse culturelle et symbolique alimentée par l'IA
+            Mode de débogage activé avec logs détaillés et tests simplifiés
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Sélection du type de recherche */}
-          <div className="flex gap-2 mb-4">
-            <Select value={searchType} onValueChange={(value: any) => setSearchType(value)}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="general">Recherche générale</SelectItem>
-                <SelectItem value="symbol">Analyse de symbole</SelectItem>
-                <SelectItem value="cultural">Contexte culturel</SelectItem>
-                <SelectItem value="comparative">Analyse comparative</SelectItem>
-                <SelectItem value="research">Synthèse recherche</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Boutons de debug */}
+          <div className="flex gap-2 mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+            <Button 
+              variant="outline" 
+              onClick={handleDebugTest}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Test Debug Complet
+            </Button>
             
-            {/* Bouton de test de connexion */}
             <Button 
               variant="outline" 
               onClick={handleTestConnection}
@@ -313,32 +262,26 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               className="flex items-center gap-2"
             >
               <Bug className="h-4 w-4" />
-              Test Connexion
+              Test Connexion Simple
             </Button>
           </div>
 
-          {/* Interface de recherche */}
+          {/* Interface de recherche simplifiée */}
           <div className="flex gap-2">
             <Textarea
-              placeholder="Entrez votre requête de recherche (ex: 'Analysez le symbolisme du lotus dans la culture bouddhiste')"
+              placeholder="Test avec une requête courte (ex: 'Que signifie le lotus?')"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="flex-1 min-h-[100px]"
-              maxLength={5000}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.ctrlKey) {
-                  e.preventDefault();
-                  handleSearch();
-                }
-              }}
+              className="flex-1 min-h-[80px]"
+              maxLength={1000}
             />
           </div>
           
           <div className="flex justify-between items-center">
             <div className="text-sm text-muted-foreground flex items-center gap-2">
-              <span>Ctrl+Enter pour rechercher</span>
+              <span>Mode Debug: limité à 1000 caractères</span>
               <span>•</span>
-              <span>{query.length}/5000 caractères</span>
+              <span>{query.length}/1000</span>
             </div>
             <Button 
               onClick={handleSearch} 
@@ -350,27 +293,27 @@ const MCPEnhancedSearch: React.FC<MCPSearchProps> = ({ onResultsUpdate, initialQ
               ) : (
                 <Search className="h-4 w-4" />
               )}
-              {isLoading ? 'Recherche en cours...' : 'Rechercher avec MCP'}
+              {isLoading ? 'Test en cours...' : 'Tester MCP'}
             </Button>
           </div>
 
-          {/* Historique de recherche */}
+          {/* Historique */}
           {searchHistory.length > 0 && (
             <div>
               <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                 <History className="h-4 w-4" />
-                Recherches récentes
+                Tests récents
               </h4>
               <div className="flex flex-wrap gap-2">
-                {searchHistory.slice(0, 5).map((historyQuery, index) => (
+                {searchHistory.slice(0, 3).map((historyQuery, index) => (
                   <Badge
                     key={index}
                     variant="outline"
                     className="cursor-pointer hover:bg-gray-100 max-w-xs truncate"
-                    onClick={() => handleHistorySelect(historyQuery)}
+                    onClick={() => setQuery(historyQuery)}
                     title={historyQuery}
                   >
-                    {historyQuery.length > 50 ? `${historyQuery.slice(0, 50)}...` : historyQuery}
+                    {historyQuery.length > 30 ? `${historyQuery.slice(0, 30)}...` : historyQuery}
                   </Badge>
                 ))}
               </div>
