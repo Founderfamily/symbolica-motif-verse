@@ -387,22 +387,20 @@ export const useMCPDeepSeek = () => {
     }
   }, []);
 
-  // Fonction de test simple modifiée
-  const testConnection = useCallback(async () => {
-    console.log('🔍 ENHANCED: Testing MCP connection...');
-    return searchWithMCP({
-      query: 'Test de connexion: que signifie le symbole du lotus?',
-      toolRequests: [],
-      contextData: { test: true, connectionTest: true }
-    });
-  }, [searchWithMCP]);
-
   return {
     // Core functions
     searchWithMCP,
     testConnection,
     testDebugMode,
     testSimpleFunction,
+    
+    // Specialized functions
+    analyzeSymbol,
+    getCulturalContext,
+    detectPatterns,
+    compareSymbols,
+    synthesizeResearch,
+    getCachedResult,
     
     // State
     isLoading,
