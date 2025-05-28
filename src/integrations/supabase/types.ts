@@ -996,6 +996,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_admin: boolean | null
+          is_banned: boolean | null
           updated_at: string | null
           username: string | null
         }
@@ -1004,6 +1005,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_admin?: boolean | null
+          is_banned?: boolean | null
           updated_at?: string | null
           username?: string | null
         }
@@ -1012,6 +1014,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_admin?: boolean | null
+          is_banned?: boolean | null
           updated_at?: string | null
           username?: string | null
         }
@@ -1721,6 +1724,17 @@ export type Database = {
           admin_name: string
         }[]
       }
+      get_contribution_management_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_contributions: number
+          pending_contributions: number
+          approved_contributions: number
+          rejected_contributions: number
+          contributions_today: number
+          contributions_week: number
+        }[]
+      }
       get_entity_admin_logs: {
         Args: { p_entity_type: string; p_entity_id: string }
         Returns: {
@@ -1759,6 +1773,36 @@ export type Database = {
           total_points: number
         }[]
       }
+      get_user_management_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_users: number
+          active_users_30d: number
+          banned_users: number
+          admin_users: number
+          new_users_today: number
+          new_users_week: number
+        }[]
+      }
+      get_users_for_admin: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_role_filter?: string
+        }
+        Returns: {
+          id: string
+          username: string
+          full_name: string
+          is_admin: boolean
+          is_banned: boolean
+          created_at: string
+          last_activity: string
+          contributions_count: number
+          total_points: number
+        }[]
+      }
       insert_admin_log: {
         Args: {
           p_admin_id: string
@@ -1773,9 +1817,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      moderate_contribution: {
+        Args: {
+          p_contribution_id: string
+          p_admin_id: string
+          p_status: string
+          p_reason?: string
+        }
+        Returns: undefined
+      }
       process_ai_pattern_suggestions: {
         Args: { p_image_id: string; p_image_type?: string }
         Returns: string
+      }
+      toggle_user_ban: {
+        Args: { p_user_id: string; p_admin_id: string; p_banned: boolean }
+        Returns: undefined
       }
     }
     Enums: {

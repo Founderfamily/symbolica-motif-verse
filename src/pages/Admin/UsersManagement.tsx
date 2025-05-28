@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,8 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Search, Users, UserCheck, UserX, Shield, MoreHorizontal, AlertTriangle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Search, Users, UserCheck, UserX, Shield, MoreHorizontal, AlertTriangle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
 import {
@@ -23,64 +23,40 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-interface User {
-  id: string;
-  username: string | null;
-  full_name: string | null;
-  email?: string;
-  is_admin: boolean;
-  created_at: string;
-  contributions_count: number;
-  verified_uploads: number;
-  bio?: string;
-  location?: string;
-  website?: string;
-  favorite_cultures?: string[];
-}
+import { userManagementService, AdminUser } from '@/services/admin/userManagementService';
+import { adminStatsService } from '@/services/admin/statsService';
 
 export default function UsersManagement() {
   const { t } = useTranslation();
   const { user, isAdmin } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'admin'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'admin' | 'banned'>('all');
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    adminUsers: 0,
+    bannedUsers: 0
+  });
 
   useEffect(() => {
     if (isAdmin) {
       loadUsers();
+      loadStats();
     }
-  }, [isAdmin]);
+  }, [isAdmin, searchQuery, filterStatus]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          username,
-          full_name,
-          is_admin,
-          created_at
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Assurer que tous les champs requis sont présents avec des valeurs par défaut
-      const usersWithDefaults = (data || []).map(user => ({
-        ...user,
-        contributions_count: 0,
-        verified_uploads: 0,
-        bio: undefined,
-        location: undefined,
-        website: undefined,
-        favorite_cultures: undefined
-      }));
-
-      setUsers(usersWithDefaults);
+      const userData = await userManagementService.getUsers({
+        search: searchQuery || undefined,
+        roleFilter: filterStatus,
+        limit: 50,
+        offset: 0
+      });
+      setUsers(userData);
     } catch (error) {
       console.error('Error loading users:', error);
       toast({
@@ -93,15 +69,51 @@ export default function UsersManagement() {
     }
   };
 
+  const loadStats = async () => {
+    try {
+      const statsData = await adminStatsService.getUserStats();
+      setStats({
+        totalUsers: Number(statsData.total_users),
+        activeUsers: Number(statsData.active_users_30d),
+        adminUsers: Number(statsData.admin_users),
+        bannedUsers: Number(statsData.banned_users)
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
+  const handleToggleBan = async (userId: string, currentIsBanned: boolean) => {
+    try {
+      await userManagementService.toggleUserBan(userId, !currentIsBanned);
+      
+      setUsers(prev => prev.map(user => 
+        user.id === userId 
+          ? { ...user, is_banned: !currentIsBanned }
+          : user
+      ));
+
+      toast({
+        title: "Statut mis à jour",
+        description: `L'utilisateur a été ${!currentIsBanned ? 'banni' : 'débanni'}.`,
+      });
+      
+      // Recharger les stats
+      loadStats();
+    } catch (error) {
+      console.error('Error toggling ban status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de modifier le statut de bannissement.",
+      });
+    }
+  };
+
   const handleToggleAdmin = async (userId: string, currentIsAdmin: boolean) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_admin: !currentIsAdmin })
-        .eq('id', userId);
-
-      if (error) throw error;
-
+      await userManagementService.toggleUserAdmin(userId, !currentIsAdmin);
+      
       setUsers(prev => prev.map(user => 
         user.id === userId 
           ? { ...user, is_admin: !currentIsAdmin }
@@ -112,6 +124,9 @@ export default function UsersManagement() {
         title: "Statut mis à jour",
         description: `L'utilisateur a été ${!currentIsAdmin ? 'promu administrateur' : 'retiré des administrateurs'}.`,
       });
+      
+      // Recharger les stats
+      loadStats();
     } catch (error) {
       console.error('Error updating admin status:', error);
       toast({
@@ -122,29 +137,15 @@ export default function UsersManagement() {
     }
   };
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      (user.username?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesFilter = 
-      filterStatus === 'all' || 
-      (filterStatus === 'active' && !user.is_admin) ||
-      (filterStatus === 'admin' && user.is_admin);
-    
-    return matchesSearch && matchesFilter;
-  });
-
-  const getStatusBadge = (user: User) => {
+  const getStatusBadge = (user: AdminUser) => {
+    if (user.is_banned) {
+      return <Badge variant="destructive">Banni</Badge>;
+    }
     if (user.is_admin) {
       return <Badge variant="default">Admin</Badge>;
     }
     return <Badge variant="outline">Utilisateur</Badge>;
   };
-
-  const totalUsers = users.length;
-  const activeUsers = users.filter(u => !u.is_admin).length;
-  const adminUsers = users.filter(u => u.is_admin).length;
 
   if (!isAdmin) {
     return (
@@ -158,29 +159,27 @@ export default function UsersManagement() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">
-          <I18nText translationKey="admin.users.title">
-            Gestion des utilisateurs
-          </I18nText>
-        </h1>
-        <Button onClick={loadUsers} variant="outline">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            <I18nText translationKey="admin.users.title">
+              Gestion des utilisateurs
+            </I18nText>
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Gérez les comptes utilisateurs et leurs permissions
+          </p>
+        </div>
+        <Button onClick={loadUsers} variant="outline" disabled={loading}>
+          {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
           Actualiser
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
@@ -191,7 +190,7 @@ export default function UsersManagement() {
                     Utilisateurs totaux
                   </I18nText>
                 </p>
-                <p className="text-2xl font-bold">{totalUsers}</p>
+                <p className="text-2xl font-bold">{stats.totalUsers}</p>
               </div>
             </div>
           </CardContent>
@@ -204,10 +203,10 @@ export default function UsersManagement() {
               <div>
                 <p className="text-sm font-medium text-slate-500">
                   <I18nText translationKey="admin.users.activeUsers">
-                    Utilisateurs actifs
+                    Utilisateurs actifs (30j)
                   </I18nText>
                 </p>
-                <p className="text-2xl font-bold">{activeUsers}</p>
+                <p className="text-2xl font-bold">{stats.activeUsers}</p>
               </div>
             </div>
           </CardContent>
@@ -223,7 +222,21 @@ export default function UsersManagement() {
                     Administrateurs
                   </I18nText>
                 </p>
-                <p className="text-2xl font-bold">{adminUsers}</p>
+                <p className="text-2xl font-bold">{stats.adminUsers}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2">
+              <UserX className="h-4 w-4 text-red-600" />
+              <div>
+                <p className="text-sm font-medium text-slate-500">
+                  Utilisateurs bannis
+                </p>
+                <p className="text-2xl font-bold">{stats.bannedUsers}</p>
               </div>
             </div>
           </CardContent>
@@ -265,7 +278,7 @@ export default function UsersManagement() {
                 onClick={() => setFilterStatus('active')}
                 size="sm"
               >
-                Utilisateurs
+                Actifs
               </Button>
               <Button
                 variant={filterStatus === 'admin' ? 'default' : 'outline'}
@@ -273,6 +286,13 @@ export default function UsersManagement() {
                 size="sm"
               >
                 Admins
+              </Button>
+              <Button
+                variant={filterStatus === 'banned' ? 'default' : 'outline'}
+                onClick={() => setFilterStatus('banned')}
+                size="sm"
+              >
+                Bannis
               </Button>
             </div>
           </div>
@@ -282,7 +302,11 @@ export default function UsersManagement() {
       {/* Users Table */}
       <Card>
         <CardContent>
-          {filteredUsers.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : users.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-slate-300 mx-auto mb-4" />
               <p className="text-slate-500">Aucun utilisateur trouvé</p>
@@ -303,7 +327,8 @@ export default function UsersManagement() {
                     </I18nText>
                   </TableHead>
                   <TableHead>Contributions</TableHead>
-                  <TableHead>Localization</TableHead>
+                  <TableHead>Points</TableHead>
+                  <TableHead>Dernière activité</TableHead>
                   <TableHead>
                     <I18nText translationKey="admin.users.actions">
                       Actions
@@ -312,33 +337,25 @@ export default function UsersManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
+                {users.map((userData) => (
+                  <TableRow key={userData.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{user.full_name || 'Nom non défini'}</div>
+                        <div className="font-medium">{userData.full_name || 'Nom non défini'}</div>
                         <div className="text-sm text-muted-foreground">
-                          @{user.username || 'username non défini'}
+                          @{userData.username || 'username non défini'}
                         </div>
-                        {user.bio && (
-                          <div className="text-xs text-slate-400 max-w-xs truncate mt-1">
-                            {user.bio}
-                          </div>
-                        )}
                       </div>
                     </TableCell>
-                    <TableCell>{getStatusBadge(user)}</TableCell>
-                    <TableCell>{new Date(user.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                    <TableCell>{getStatusBadge(userData)}</TableCell>
+                    <TableCell>{new Date(userData.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                    <TableCell>{userData.contributions_count}</TableCell>
+                    <TableCell>{userData.total_points}</TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        <div>{user.contributions_count} contributions</div>
-                        <div className="text-slate-500">{user.verified_uploads} vérifiées</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-slate-500">
-                        {user.location || 'Non renseigné'}
-                      </div>
+                      {userData.last_activity 
+                        ? new Date(userData.last_activity).toLocaleDateString('fr-FR')
+                        : 'Jamais'
+                      }
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -353,21 +370,29 @@ export default function UsersManagement() {
                               Voir le profil
                             </I18nText>
                           </DropdownMenuItem>
-                          {user.id !== user?.id && (
-                            <DropdownMenuItem
-                              onClick={() => handleToggleAdmin(user.id, user.is_admin)}
-                              className={user.is_admin ? "text-orange-600" : "text-blue-600"}
-                            >
-                              {user.is_admin ? (
-                                <I18nText translationKey="admin.users.removeAdmin">
-                                  Retirer les droits admin
-                                </I18nText>
-                              ) : (
-                                <I18nText translationKey="admin.users.makeAdmin">
-                                  Rendre administrateur
-                                </I18nText>
-                              )}
-                            </DropdownMenuItem>
+                          {userData.id !== user?.id && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => handleToggleAdmin(userData.id, userData.is_admin)}
+                                className={userData.is_admin ? "text-orange-600" : "text-blue-600"}
+                              >
+                                {userData.is_admin ? (
+                                  <I18nText translationKey="admin.users.removeAdmin">
+                                    Retirer les droits admin
+                                  </I18nText>
+                                ) : (
+                                  <I18nText translationKey="admin.users.makeAdmin">
+                                    Rendre administrateur
+                                  </I18nText>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleToggleBan(userData.id, userData.is_banned)}
+                                className={userData.is_banned ? "text-green-600" : "text-red-600"}
+                              >
+                                {userData.is_banned ? 'Débannir' : 'Bannir'}
+                              </DropdownMenuItem>
+                            </>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>

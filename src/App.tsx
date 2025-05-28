@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/sonner";
@@ -17,6 +18,15 @@ import MobileAppPage from '@/pages/MobileApp';
 import MapExplorer from '@/pages/MapExplorer';
 import SymbolsPage from '@/pages/SymbolsPage';
 
+// Admin pages
+import AdminLayout from '@/pages/Admin/AdminLayout';
+import Dashboard from '@/pages/Admin/Dashboard';
+import UsersManagement from '@/pages/Admin/UsersManagement';
+import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
+import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
+import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
+import SystemSettings from '@/pages/Admin/SystemSettings';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -28,7 +38,6 @@ const queryClient = new QueryClient({
 
 // Simple placeholder components for missing pages
 const SearchPage = () => <div className="p-8"><h1>Search Page</h1></div>;
-const AdminPage = () => <div className="p-8"><h1>Admin Page</h1></div>;
 const LegalPage = () => <div className="p-8"><h1>Legal Page</h1></div>;
 const PrivacyPage = () => <div className="p-8"><h1>Privacy Page</h1></div>;
 const TermsPage = () => <div className="p-8"><h1>Terms Page</h1></div>;
@@ -44,6 +53,16 @@ function App() {
               {/* Mobile app route - accessible without layout for full mobile experience */}
               <Route path="/mobile" element={<MobileAppPage />} />
               
+              {/* Admin routes with AdminLayout */}
+              <Route path="/admin" element={<AdminLayout><Outlet /></AdminLayout>}>
+                <Route index element={<Dashboard />} />
+                <Route path="users" element={<UsersManagement />} />
+                <Route path="contributions" element={<ContributionsManagement />} />
+                <Route path="symbols" element={<SymbolsManagement />} />
+                <Route path="collections" element={<CollectionsManagement />} />
+                <Route path="settings" element={<SystemSettings />} />
+              </Route>
+              
               {/* All other routes with standard layout */}
               <Route path="/" element={<Layout><Outlet /></Layout>}>
                 <Route index element={<HomePage />} />
@@ -55,7 +74,6 @@ function App() {
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/profile/:username" element={<UserProfilePage />} />
                 <Route path="/profile/:username/edit" element={<Profile />} />
-                <Route path="/admin" element={<AdminPage />} />
                 <Route path="/enterprise" element={<EnterprisePage />} />
                 <Route path="/collections" element={<CollectionsPage />} />
                 <Route path="/community" element={<CommunityPage />} />

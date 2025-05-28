@@ -4,187 +4,202 @@ import { supabase } from '@/integrations/supabase/client';
 export interface AdminStats {
   totalUsers: number;
   activeUsersLast30Days: number;
+  bannedUsers: number;
+  adminUsers: number;
+  newUsersToday: number;
+  newUsersWeek: number;
   totalContributions: number;
   pendingContributions: number;
+  approvedContributions: number;
+  rejectedContributions: number;
+  contributionsToday: number;
+  contributionsWeek: number;
   totalSymbols: number;
   verifiedSymbols: number;
   totalSymbolLocations: number;
-  userRegistrationsOverTime: TimeSeriesPoint[];
-  contributionsOverTime: TimeSeriesPoint[];
-  topContributors: TopContributor[];
+  topContributors: Array<{
+    userId: string;
+    username: string;
+    fullName: string;
+    contributionsCount: number;
+    pointsTotal: number;
+  }>;
+  contributionsOverTime: Array<{
+    date: string;
+    count: number;
+  }>;
 }
 
-export interface TimeSeriesPoint {
-  date: string;
-  count: number;
+export interface UserManagementStats {
+  total_users: number;
+  active_users_30d: number;
+  banned_users: number;
+  admin_users: number;
+  new_users_today: number;
+  new_users_week: number;
 }
 
-export interface TopContributor {
-  userId: string;
-  username: string | null;
-  fullName: string | null;
-  contributionsCount: number;
-  pointsTotal: number;
+export interface ContributionManagementStats {
+  total_contributions: number;
+  pending_contributions: number;
+  approved_contributions: number;
+  rejected_contributions: number;
+  contributions_today: number;
+  contributions_week: number;
 }
 
 /**
- * Service pour récupérer les statistiques administratives
+ * Service pour gérer les statistiques d'administration
  */
 export const adminStatsService = {
   /**
-   * Récupère les statistiques globales pour le tableau de bord
+   * Récupère toutes les statistiques du tableau de bord admin
    */
   getDashboardStats: async (): Promise<AdminStats> => {
     try {
-      // Get total users count
-      const { count: totalUsers, error: usersError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+      // Récupérer les statistiques des utilisateurs
+      const { data: userStats, error: userError } = await supabase
+        .rpc('get_user_management_stats');
       
-      if (usersError) throw usersError;
+      if (userError) throw userError;
+
+      // Récupérer les statistiques des contributions
+      const { data: contributionStats, error: contributionError } = await supabase
+        .rpc('get_contribution_management_stats');
       
-      // Get active users in last 30 days
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const { data: activeUsersData, error: activeUsersError } = await supabase
-        .from('user_activities')
-        .select('user_id')
-        .gte('created_at', thirtyDaysAgo.toISOString());
-      
-      if (activeUsersError) throw activeUsersError;
-      
-      // Count unique active users
-      const activeUserIds = new Set((activeUsersData || []).map(item => item.user_id));
-      const activeUsers = activeUserIds.size;
-      
-      // Get contributions counts
-      const { data: contributionsData, error: contribError } = await supabase
-        .from('user_contributions')
-        .select('status');
-        
-      if (contribError) throw contribError;
-      
-      const totalContributions = contributionsData?.length || 0;
-      const pendingContributions = contributionsData?.filter(c => c.status === 'pending').length || 0;
-      
-      // Get symbols counts
-      const { count: totalSymbols, error: symbolsError } = await supabase
+      if (contributionError) throw contributionError;
+
+      // Récupérer les statistiques des symboles
+      const { data: symbolsData, error: symbolsError } = await supabase
         .from('symbols')
-        .select('*', { count: 'exact', head: true });
-        
+        .select('id');
+      
       if (symbolsError) throw symbolsError;
-      
-      // Get verified symbols count
-      const { count: verifiedSymbols, error: verifiedError } = await supabase
+
+      // Récupérer les statistiques des emplacements de symboles
+      const { data: symbolLocationsData, error: symbolLocationsError } = await supabase
         .from('symbol_locations')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_verified', true);
-        
-      if (verifiedError) throw verifiedError;
+        .select('id, is_verified');
       
-      // Get total symbol locations
-      const { count: totalLocations, error: locationsError } = await supabase
-        .from('symbol_locations')
-        .select('*', { count: 'exact', head: true });
-        
-      if (locationsError) throw locationsError;
+      if (symbolLocationsError) throw symbolLocationsError;
+
+      // Récupérer les top contributeurs
+      const { data: topContributorsData, error: topContributorsError } = await supabase
+        .rpc('get_top_contributors', { p_limit: 10 });
       
-      // Get time series data for registrations
-      const { data: registrationsData, error: regTimeError } = await supabase
-        .from('profiles')
-        .select('created_at')
-        .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 60)).toISOString())
-        .order('created_at', { ascending: true });
-        
-      if (regTimeError) throw regTimeError;
-      
-      const userRegistrationsOverTime = processTimeSeriesData(registrationsData || [], 'created_at');
-      
-      // Get time series data for contributions
-      const { data: contribTimeData, error: contribTimeError } = await supabase
+      if (topContributorsError) throw topContributorsError;
+
+      // Récupérer les contributions au fil du temps (30 derniers jours)
+      const { data: contributionsOverTimeData, error: contributionsOverTimeError } = await supabase
         .from('user_contributions')
         .select('created_at')
-        .gte('created_at', new Date(new Date().setDate(new Date().getDate() - 60)).toISOString())
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
         .order('created_at', { ascending: true });
-        
-      if (contribTimeError) throw contribTimeError;
       
-      const contributionsOverTime = processTimeSeriesData(contribTimeData || [], 'created_at');
-      
-      // Get top contributors using RPC function
-      const { data: topContribData, error: topContribError } = await supabase
-        .rpc('get_top_contributors', { p_limit: 10 });
-        
-      if (topContribError) throw topContribError;
-      
-      const topContributors = (topContribData || []).map((contributor: any) => ({
-        userId: contributor.user_id,
-        username: contributor.username,
-        fullName: contributor.full_name,
-        contributionsCount: contributor.contributions_count || 0,
-        pointsTotal: contributor.total_points || 0
-      }));
-      
+      if (contributionsOverTimeError) throw contributionsOverTimeError;
+
+      // Traiter les données des contributions au fil du temps
+      const contributionsOverTime = contributionsOverTimeData?.reduce((acc: any[], contribution) => {
+        const date = new Date(contribution.created_at).toISOString().split('T')[0];
+        const existing = acc.find(item => item.date === date);
+        if (existing) {
+          existing.count++;
+        } else {
+          acc.push({ date, count: 1 });
+        }
+        return acc;
+      }, []) || [];
+
+      const userStatsRow = userStats?.[0] as UserManagementStats || {
+        total_users: 0,
+        active_users_30d: 0,
+        banned_users: 0,
+        admin_users: 0,
+        new_users_today: 0,
+        new_users_week: 0
+      };
+
+      const contributionStatsRow = contributionStats?.[0] as ContributionManagementStats || {
+        total_contributions: 0,
+        pending_contributions: 0,
+        approved_contributions: 0,
+        rejected_contributions: 0,
+        contributions_today: 0,
+        contributions_week: 0
+      };
+
+      const verifiedSymbols = symbolLocationsData?.filter(location => location.is_verified).length || 0;
+
       return {
-        totalUsers: totalUsers || 0,
-        activeUsersLast30Days: activeUsers || 0,
-        totalContributions,
-        pendingContributions,
-        totalSymbols: totalSymbols || 0,
-        verifiedSymbols: verifiedSymbols || 0,
-        totalSymbolLocations: totalLocations || 0,
-        userRegistrationsOverTime,
-        contributionsOverTime,
-        topContributors
+        totalUsers: Number(userStatsRow.total_users),
+        activeUsersLast30Days: Number(userStatsRow.active_users_30d),
+        bannedUsers: Number(userStatsRow.banned_users),
+        adminUsers: Number(userStatsRow.admin_users),
+        newUsersToday: Number(userStatsRow.new_users_today),
+        newUsersWeek: Number(userStatsRow.new_users_week),
+        totalContributions: Number(contributionStatsRow.total_contributions),
+        pendingContributions: Number(contributionStatsRow.pending_contributions),
+        approvedContributions: Number(contributionStatsRow.approved_contributions),
+        rejectedContributions: Number(contributionStatsRow.rejected_contributions),
+        contributionsToday: Number(contributionStatsRow.contributions_today),
+        contributionsWeek: Number(contributionStatsRow.contributions_week),
+        totalSymbols: symbolsData?.length || 0,
+        verifiedSymbols,
+        totalSymbolLocations: symbolLocationsData?.length || 0,
+        topContributors: (topContributorsData || []).map((contributor: any) => ({
+          userId: contributor.user_id,
+          username: contributor.username || 'Unknown',
+          fullName: contributor.full_name || contributor.username || 'Unknown',
+          contributionsCount: Number(contributor.contributions_count),
+          pointsTotal: Number(contributor.total_points)
+        })),
+        contributionsOverTime
       };
     } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
-      // Return default values in case of error
-      return {
-        totalUsers: 0,
-        activeUsersLast30Days: 0,
-        totalContributions: 0,
-        pendingContributions: 0,
-        totalSymbols: 0,
-        verifiedSymbols: 0,
-        totalSymbolLocations: 0,
-        userRegistrationsOverTime: [],
-        contributionsOverTime: [],
-        topContributors: []
+      console.error('Error fetching dashboard stats:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Récupère les statistiques spécifiques aux utilisateurs
+   */
+  getUserStats: async (): Promise<UserManagementStats> => {
+    try {
+      const { data, error } = await supabase.rpc('get_user_management_stats');
+      if (error) throw error;
+      return data?.[0] || {
+        total_users: 0,
+        active_users_30d: 0,
+        banned_users: 0,
+        admin_users: 0,
+        new_users_today: 0,
+        new_users_week: 0
       };
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Récupère les statistiques spécifiques aux contributions
+   */
+  getContributionStats: async (): Promise<ContributionManagementStats> => {
+    try {
+      const { data, error } = await supabase.rpc('get_contribution_management_stats');
+      if (error) throw error;
+      return data?.[0] || {
+        total_contributions: 0,
+        pending_contributions: 0,
+        approved_contributions: 0,
+        rejected_contributions: 0,
+        contributions_today: 0,
+        contributions_week: 0
+      };
+    } catch (error) {
+      console.error('Error fetching contribution stats:', error);
+      throw error;
     }
   }
 };
-
-/**
- * Helper function to process time series data and group it by day
- */
-function processTimeSeriesData(data: any[], dateField: string): TimeSeriesPoint[] {
-  const groupedByDay: Record<string, number> = {};
-  
-  // Group entries by day
-  data.forEach(item => {
-    if (item[dateField]) {
-      const date = new Date(item[dateField]);
-      const dayStr = date.toISOString().split('T')[0];
-      groupedByDay[dayStr] = (groupedByDay[dayStr] || 0) + 1;
-    }
-  });
-  
-  // Fill in missing days in the last 60 days
-  const result: TimeSeriesPoint[] = [];
-  const endDate = new Date();
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - 60);
-  
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    const dayStr = d.toISOString().split('T')[0];
-    result.push({
-      date: dayStr,
-      count: groupedByDay[dayStr] || 0
-    });
-  }
-  
-  return result;
-}
