@@ -1,212 +1,108 @@
-import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
-export interface MCPSearchRequest {
-  query: string;
-  toolRequests?: string[];
-  contextData?: Record<string, any>;
-}
-
-export interface MCPSearchResponse {
-  success: boolean;
-  response: any;
-  mcpTools: any[];
-  mcpToolResults?: any[];
-  timestamp: string;
-  processingTime?: number;
-  error?: string;
-  debug?: any;
-  mode?: string;
-}
-
-export interface MCPToolResult {
-  toolName: string;
-  result: any;
-  error?: string;
-  callId: string;
-}
-
-// Timeouts réduits et sécurisés
-const FUNCTION_TIMEOUT = 8000; // 8 secondes client
-const SAFETY_TIMEOUT = 12000; // 12 secondes pour reset automatique
+import { useState } from 'react';
+import { MCPSearchResponse } from '@/types/mcp';
+import { MCPService } from '@/services/mcpService';
+import { MCPSpecializedFunctions } from '@/services/mcpSpecializedFunctions';
+import { useMCPSafetyWrapper } from './useMCPSafetyWrapper';
 
 export const useMCPDeepSeek = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [lastResponse, setLastResponse] = useState<MCPSearchResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { isLoading, error, safetyReset, withSafetyWrapper, clearError } = useMCPSafetyWrapper();
 
-  // Reset de sécurité amélioré
-  const safetyReset = useCallback(() => {
-    console.log('🔄 SAFETY: Force reset all states');
-    setIsLoading(false);
-    setError(null);
-    setLastResponse(null);
-  }, []);
-
-  // Wrapper de sécurité optimisé
-  const withSafetyWrapper = useCallback(async <T>(
-    operation: () => Promise<T>,
-    operationName: string
-  ): Promise<T> => {
-    console.log(`🛡️ SAFETY: Starting ${operationName}`);
-    
-    const safetyTimeoutId = setTimeout(() => {
-      console.error(`⏰ SAFETY: ${operationName} exceeded safety timeout, forcing reset`);
-      safetyReset();
-    }, SAFETY_TIMEOUT);
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const result = await Promise.race([
-        operation(),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error(`${operationName} timeout`)), FUNCTION_TIMEOUT)
-        )
-      ]);
-
-      clearTimeout(safetyTimeoutId);
-      console.log(`✅ SAFETY: ${operationName} completed`);
-      return result;
-    } catch (err) {
-      clearTimeout(safetyTimeoutId);
-      const errorMessage = err instanceof Error ? err.message : `${operationName} error`;
-      console.error(`❌ SAFETY: ${operationName} failed:`, errorMessage);
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [safetyReset]);
-
-  // TEST 1: Edge Function simple (reste identique)
-  const testSimpleFunction = useCallback(async (): Promise<any> => {
+  // Core test functions (dans l'ordre de test)
+  const testSimpleFunction = async () => {
     return withSafetyWrapper(async () => {
-      console.log('🧪 TEST 1: Testing basic Edge Function');
-      
-      const { data, error: functionError } = await supabase.functions.invoke('test-simple', {
-        body: { test: true, timestamp: new Date().toISOString() }
-      });
-
-      if (functionError) {
-        throw new Error(`Edge Function error: ${functionError.message}`);
-      }
-
-      console.log('✅ TEST 1: Basic Edge Function works');
-      return data;
+      return MCPService.testSimpleFunction();
     }, 'Simple Function Test');
-  }, [withSafetyWrapper]);
+  };
 
-  // TEST 2: Debug simple (NOUVEAU - sans appel externe)
-  const testSimpleDebug = useCallback(async (): Promise<MCPSearchResponse> => {
+  const testSimpleDebug = async () => {
     return withSafetyWrapper(async () => {
-      console.log('🧪 TEST 2: Testing simple debug (no external calls)');
-      
-      const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
-        body: { debug: true } // Sans query, juste debug config
-      });
-
-      if (functionError) {
-        throw new Error(`Simple debug error: ${functionError.message}`);
-      }
-
-      const response = {
-        ...data,
-        timestamp: new Date().toISOString()
-      };
-
-      console.log('✅ TEST 2: Simple debug successful');
+      const response = await MCPService.testSimpleDebug();
       setLastResponse(response);
       return response;
     }, 'Simple Debug Test');
-  }, [withSafetyWrapper]);
+  };
 
-  // TEST 3: Test connectivité API
-  const testApiConnectivity = useCallback(async (): Promise<MCPSearchResponse> => {
+  const testApiConnectivity = async () => {
     return withSafetyWrapper(async () => {
-      console.log('🧪 TEST 3: Testing API connectivity');
-      
-      const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
-        body: { testConnectivity: true }
-      });
-
-      if (functionError) {
-        throw new Error(`Connectivity test error: ${functionError.message}`);
-      }
-
-      const response = {
-        ...data,
-        timestamp: new Date().toISOString()
-      };
-
-      console.log('✅ TEST 3: API connectivity test successful');
+      const response = await MCPService.testApiConnectivity();
       setLastResponse(response);
       return response;
     }, 'API Connectivity Test');
-  }, [withSafetyWrapper]);
+  };
 
-  // TEST 4: Requête normale (simplifiée)
-  const searchWithMCP = useCallback(async (request: MCPSearchRequest): Promise<MCPSearchResponse> => {
+  const searchWithMCP = async (request: Parameters<typeof MCPService.searchWithMCP>[0]) => {
     return withSafetyWrapper(async () => {
-      console.log('🧪 TEST 4: Normal MCP search');
-      
-      if (!request.query || request.query.trim().length === 0) {
-        throw new Error('Query cannot be empty');
-      }
-
-      const { data, error: functionError } = await supabase.functions.invoke('mcp-deepseek-search', {
-        body: request
-      });
-
-      if (functionError) {
-        throw new Error(`Search error: ${functionError.message}`);
-      }
-
-      const response = {
-        ...data,
-        timestamp: new Date().toISOString()
-      };
-
-      console.log('✅ TEST 4: Normal search successful');
+      const response = await MCPService.searchWithMCP(request);
       setLastResponse(response);
       return response;
     }, 'MCP Search');
-  }, [withSafetyWrapper]);
+  };
 
-  // Fonctions spécialisées simplifiées (gardées pour compatibilité)
-  const analyzeSymbol = useCallback(async (symbolName: string, culture?: string, period?: string) => {
-    return searchWithMCP({
-      query: `Analyze the symbol "${symbolName}" ${culture ? `from ${culture} culture` : ''} ${period ? `during ${period}` : ''}`,
-      toolRequests: ['symbol_analyzer'],
-      contextData: { symbolName, culture, period }
-    });
-  }, [searchWithMCP]);
+  // Specialized functions (wrapper autour des fonctions spécialisées)
+  const analyzeSymbol = async (symbolName: string, culture?: string, period?: string) => {
+    return withSafetyWrapper(async () => {
+      const response = await MCPSpecializedFunctions.analyzeSymbol(symbolName, culture, period);
+      setLastResponse(response);
+      return response;
+    }, 'Symbol Analysis');
+  };
 
-  const getCulturalContext = useCallback(async (culture: string, timeframe?: string, region?: string) => {
-    return searchWithMCP({
-      query: `Cultural context for ${culture} ${timeframe ? `during ${timeframe}` : ''} ${region ? `in ${region}` : ''}`,
-      toolRequests: ['cultural_context_provider'],
-      contextData: { culture, timeframe, region }
-    });
-  }, [searchWithMCP]);
+  const getCulturalContext = async (culture: string, timeframe?: string, region?: string) => {
+    return withSafetyWrapper(async () => {
+      const response = await MCPSpecializedFunctions.getCulturalContext(culture, timeframe, region);
+      setLastResponse(response);
+      return response;
+    }, 'Cultural Context');
+  };
 
-  // ... keep existing code (detectPatterns, compareSymbols, synthesizeResearch, getCachedResult functions)
+  const detectPatterns = async (imageData: string, analysisType?: string) => {
+    return withSafetyWrapper(async () => {
+      const response = await MCPSpecializedFunctions.detectPatterns(imageData, analysisType);
+      setLastResponse(response);
+      return response;
+    }, 'Pattern Detection');
+  };
+
+  const compareSymbols = async (symbol1: string, symbol2: string, comparisonType?: string) => {
+    return withSafetyWrapper(async () => {
+      const response = await MCPSpecializedFunctions.compareSymbols(symbol1, symbol2, comparisonType);
+      setLastResponse(response);
+      return response;
+    }, 'Symbol Comparison');
+  };
+
+  const synthesizeResearch = async (topic: string, sources?: string[], perspective?: string) => {
+    return withSafetyWrapper(async () => {
+      const response = await MCPSpecializedFunctions.synthesizeResearch(topic, sources, perspective);
+      setLastResponse(response);
+      return response;
+    }, 'Research Synthesis');
+  };
+
+  const getCachedResult = async (cacheKey: string) => {
+    return withSafetyWrapper(async () => {
+      const response = await MCPSpecializedFunctions.getCachedResult(cacheKey);
+      setLastResponse(response);
+      return response;
+    }, 'Cache Retrieval');
+  };
 
   return {
     // Core functions (dans l'ordre de test)
-    testSimpleFunction,      // TEST 1
-    testSimpleDebug,         // TEST 2 (NOUVEAU)
-    testApiConnectivity,     // TEST 3 (NOUVEAU)
-    searchWithMCP,           // TEST 4
+    testSimpleFunction,
+    testSimpleDebug,
+    testApiConnectivity,
+    searchWithMCP,
     
     // Specialized functions
     analyzeSymbol,
     getCulturalContext,
-    // detectPatterns,
-    // compareSymbols,
-    // synthesizeResearch,
-    // getCachedResult,
+    detectPatterns,
+    compareSymbols,
+    synthesizeResearch,
+    getCachedResult,
     
     // State
     isLoading,
@@ -214,7 +110,7 @@ export const useMCPDeepSeek = () => {
     error,
     
     // Control functions
-    clearError: () => setError(null),
+    clearError,
     clearLastResponse: () => setLastResponse(null),
     forceReset: safetyReset
   };
