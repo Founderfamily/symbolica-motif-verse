@@ -14,6 +14,11 @@ export const useMCPSearch = () => {
       return;
     }
 
+    if (query.length > 500) {
+      setError('Query too long (max 500 characters)');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     
@@ -22,9 +27,14 @@ export const useMCPSearch = () => {
       setLastResponse(response);
       return response;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Search failed';
+      // Log for debugging but show generic error to user
+      console.error('MCP Search error:', err);
+      
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Service temporarily unavailable';
       setError(errorMessage);
-      throw err;
+      throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }

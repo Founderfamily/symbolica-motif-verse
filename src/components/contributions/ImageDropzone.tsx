@@ -1,7 +1,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, Check, AlertCircle } from 'lucide-react';
+import { Upload, X, Check, AlertCircle, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
@@ -14,35 +14,77 @@ interface ImageDropzoneProps {
 const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selectedImage }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
   const { t } = useTranslation();
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const validateFileContent = async (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const arrayBuffer = e.target?.result as ArrayBuffer;
+        const bytes = new Uint8Array(arrayBuffer);
+        
+        // Check for common image file signatures
+        const isJPEG = bytes[0] === 0xFF && bytes[1] === 0xD8;
+        const isPNG = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47;
+        const isWebP = bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
+        
+        resolve(isJPEG || isPNG || isWebP);
+      };
+      reader.onerror = () => resolve(false);
+      reader.readAsArrayBuffer(file.slice(0, 12));
+    });
+  };
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setError(null);
     if (acceptedFiles.length === 0) {
       return;
     }
 
     const file = acceptedFiles[0];
+    setIsValidating(true);
     
-    // Vérifier le type de fichier
-    if (!file.type.startsWith('image/')) {
-      setError(t('contributions.image.errors.format'));
-      return;
+    try {
+      // Vérifier le type de fichier
+      if (!file.type.startsWith('image/')) {
+        setError(t('contributions.image.errors.format'));
+        return;
+      }
+
+      // Vérifier la taille du fichier (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError(t('contributions.image.errors.size'));
+        return;
+      }
+
+      // Vérification du contenu du fichier
+      const isValidImage = await validateFileContent(file);
+      if (!isValidImage) {
+        setError('Le fichier ne semble pas être une image valide');
+        return;
+      }
+
+      // Vérifier le nom du fichier pour des caractères suspects
+      const suspiciousChars = /[<>:"/\\|?*\x00-\x1f]/;
+      if (suspiciousChars.test(file.name)) {
+        setError('Nom de fichier non autorisé');
+        return;
+      }
+
+      // Créer une URL d'aperçu
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+      onImageSelected(file);
+
+      // Nettoyer l'URL d'aperçu quand le composant est démonté
+      return () => URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      setError('Erreur lors de la validation du fichier');
+      console.error('File validation error:', err);
+    } finally {
+      setIsValidating(false);
     }
-
-    // Vérifier la taille du fichier (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError(t('contributions.image.errors.size'));
-      return;
-    }
-
-    // Créer une URL d'aperçu
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
-    onImageSelected(file);
-
-    // Nettoyer l'URL d'aperçu quand le composant est démonté
-    return () => URL.revokeObjectURL(objectUrl);
   }, [onImageSelected, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -51,6 +93,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
       'image/*': ['.jpeg', '.jpg', '.png', '.webp']
     },
     maxFiles: 1,
+    maxSize: 5 * 1024 * 1024, // 5MB
   });
 
   const handleRemoveImage = () => {
@@ -62,12 +105,6 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
     setError(null);
   };
 
-  // Get translated message strings
-  const dropActiveText = t('contributions.image.dropActive');
-  const dropText = t('contributions.image.drop');
-  const formatsText = t('contributions.image.formats');
-  const removeText = t('contributions.image.remove');
-
   return (
     <div className="space-y-4">
       {!previewUrl ? (
@@ -77,12 +114,20 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
             isDragActive
               ? 'border-primary bg-primary/5'
               : 'border-muted-foreground/25 hover:border-primary/50'
-          }`}
+          } ${isValidating ? 'opacity-50 pointer-events-none' : ''}`}
         >
           <input {...getInputProps()} />
           <div className="flex flex-col items-center justify-center space-y-2">
-            <Upload className="h-8 w-8 text-muted-foreground" />
-            {isDragActive ? (
+            {isValidating ? (
+              <div className="animate-spin">
+                <Shield className="h-8 w-8 text-primary" />
+              </div>
+            ) : (
+              <Upload className="h-8 w-8 text-muted-foreground" />
+            )}
+            {isValidating ? (
+              <p className="text-sm font-medium">Validation en cours...</p>
+            ) : isDragActive ? (
               <p className="text-sm font-medium">
                 <I18nText translationKey="contributions.image.dropActive" />
               </p>
@@ -93,6 +138,10 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
                 </p>
                 <p className="text-xs text-muted-foreground">
                   <I18nText translationKey="contributions.image.formats" />
+                </p>
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <Shield className="h-3 w-3" />
+                  Validation de sécurité automatique
                 </p>
               </>
             )}
@@ -111,6 +160,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
               <span className="text-sm truncate max-w-[200px]">
                 {selectedImage?.name}
               </span>
+              <Shield className="h-4 w-4 text-green-600 ml-2" title="Fichier validé" />
             </div>
             <Button
               variant="ghost"
