@@ -5,6 +5,7 @@ import { Upload, X, Check, AlertCircle, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
+import { SecurityUtils } from '@/utils/securityUtils';
 
 interface ImageDropzoneProps {
   onImageSelected: (file: File) => void;
@@ -66,8 +67,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
       }
 
       // Vérifier le nom du fichier pour des caractères suspects
-      const suspiciousChars = /[<>:"/\\|?*\x00-\x1f]/;
-      if (suspiciousChars.test(file.name)) {
+      if (!SecurityUtils.validateFileName(file.name)) {
         setError('Nom de fichier non autorisé');
         return;
       }
@@ -80,7 +80,7 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
       // Nettoyer l'URL d'aperçu quand le composant est démonté
       return () => URL.revokeObjectURL(objectUrl);
     } catch (err) {
-      setError('Erreur lors de la validation du fichier');
+      setError(SecurityUtils.createSafeErrorResponse(err));
       console.error('File validation error:', err);
     } finally {
       setIsValidating(false);
@@ -160,7 +160,9 @@ const ImageDropzone: React.FC<ImageDropzoneProps> = ({ onImageSelected, selected
               <span className="text-sm truncate max-w-[200px]">
                 {selectedImage?.name}
               </span>
-              <Shield className="h-4 w-4 text-green-600 ml-2" title="Fichier validé" />
+              <div className="ml-2" title="Fichier validé">
+                <Shield className="h-4 w-4 text-green-600" />
+              </div>
             </div>
             <Button
               variant="ghost"

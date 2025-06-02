@@ -7,43 +7,34 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Loader2, AlertCircle, CheckCircle, Brain, Shield } from 'lucide-react';
 import { useMCPSearch } from '@/hooks/useMCPSearch';
 import { toast } from 'sonner';
+import { SecurityUtils } from '@/utils/securityUtils';
 
 const MCPSearchInterface: React.FC = () => {
   const [query, setQuery] = useState('');
   const { search, isLoading, error, lastResponse, clearError } = useMCPSearch();
 
-  const sanitizeInput = (input: string): string => {
-    return input
-      .replace(/[<>]/g, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+=/gi, '')
-      .trim();
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const sanitizedValue = sanitizeInput(e.target.value);
-    setQuery(sanitizedValue);
+    try {
+      const sanitizedValue = SecurityUtils.sanitizeHtml(e.target.value);
+      setQuery(sanitizedValue);
+    } catch (err) {
+      console.error('Input sanitization error:', err);
+      toast.error('Caractères non autorisés détectés');
+    }
   };
 
   const handleSearch = async () => {
-    const trimmedQuery = query.trim();
-    
-    if (!trimmedQuery) {
-      toast.error('Veuillez saisir une requête');
-      return;
-    }
-
-    if (trimmedQuery.length > 500) {
-      toast.error('Requête trop longue (max 500 caractères)');
-      return;
-    }
-
     try {
-      await search(trimmedQuery);
+      const validatedQuery = SecurityUtils.validateInput(query.trim(), 500);
+      await search(validatedQuery);
       toast.success('Recherche effectuée avec succès');
     } catch (err) {
       console.error('Search error:', err);
-      toast.error('Erreur lors de la recherche');
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('Erreur lors de la recherche');
+      }
     }
   };
 
@@ -60,7 +51,9 @@ const MCPSearchInterface: React.FC = () => {
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-6 w-6 text-purple-600" />
             Recherche MCP + DeepSeek
-            <Shield className="h-4 w-4 text-green-600 ml-auto" title="Interface sécurisée" />
+            <div className="ml-auto" title="Interface sécurisée">
+              <Shield className="h-4 w-4 text-green-600" />
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
