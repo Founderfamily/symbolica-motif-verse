@@ -69,7 +69,7 @@ const FeaturedCollections: React.FC = () => {
                     </CardTitle>
                     {collection.is_featured && (
                       <Badge variant="default">
-                        <I18nText translationKey="collections.featured">Vedette</I18nText>
+                        <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
                       </Badge>
                     )}
                   </div>

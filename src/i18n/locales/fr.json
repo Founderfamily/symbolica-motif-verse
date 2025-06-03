@@ -1,4 +1,3 @@
-
 {
   "app": {
     "version": "Version Alpha 0.1"
@@ -60,7 +59,7 @@
       "discoverAll": "Découvrir toutes les collections"
     },
     "title": "Collections",
-    "featured": "En Vedette",
+    "featuredBadge": "En Vedette",
     "backToCollections": "Retour aux collections",
     "notFound": "Collection non trouvée",
     "share": "Partager",
