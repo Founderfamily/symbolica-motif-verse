@@ -1,4 +1,3 @@
-
 // src/hooks/useSymbolImages.ts
 import { useState, useEffect } from 'react';
 import { fetchSymbolData } from '@/services/symbolImageService';
@@ -184,6 +183,11 @@ export const useSymbolImages = (symbolId: string | null) => {
           symbol_id: symbolId,
           image_url: imageUrls.original,
           image_type: 'original' as const,
+          title: null,
+          description: null,
+          location: null,
+          source: null,
+          tags: null,
           uploaded_by: 'system',
           created_at: '',
           updated_at: ''
@@ -193,6 +197,11 @@ export const useSymbolImages = (symbolId: string | null) => {
           symbol_id: symbolId,
           image_url: imageUrls.pattern,
           image_type: 'pattern' as const,
+          title: null,
+          description: null,
+          location: null,
+          source: null,
+          tags: null,
           uploaded_by: 'system',
           created_at: '',
           updated_at: ''
