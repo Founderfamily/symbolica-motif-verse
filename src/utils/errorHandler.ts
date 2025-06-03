@@ -7,20 +7,58 @@ export interface AppError {
   message: string;
   details?: Record<string, any>;
   originalError?: Error;
+  context?: string;
 }
 
 export class ErrorHandler {
+  private static instance: ErrorHandler;
+  private errorCallbacks: Array<(error: AppError) => void> = [];
+
+  static getInstance(): ErrorHandler {
+    if (!ErrorHandler.instance) {
+      ErrorHandler.instance = new ErrorHandler();
+    }
+    return ErrorHandler.instance;
+  }
+
+  /**
+   * Subscribe to error events
+   */
+  onError(callback: (error: AppError) => void): () => void {
+    this.errorCallbacks.push(callback);
+    return () => {
+      const index = this.errorCallbacks.indexOf(callback);
+      if (index > -1) {
+        this.errorCallbacks.splice(index, 1);
+      }
+    };
+  }
+
+  /**
+   * Notify all error subscribers
+   */
+  private notifyErrorCallbacks(error: AppError): void {
+    this.errorCallbacks.forEach(callback => {
+      try {
+        callback(error);
+      } catch (err) {
+        console.error('Error in error callback:', err);
+      }
+    });
+  }
+
   /**
    * Handle API errors from Supabase and other sources
    */
-  public static handleApiError(error: any, userMessage?: string): AppError {
-    logger.error('API Error', { error });
+  public static handleApiError(error: any, userMessage?: string, context?: string): AppError {
+    logger.error('API Error', { error, context });
     
     const appError: AppError = {
       code: error?.code || 'UNKNOWN_ERROR',
       message: userMessage || error?.message || 'Une erreur s\'est produite',
       details: error?.details || undefined,
-      originalError: error
+      originalError: error,
+      context
     };
     
     // Show user-friendly toast
@@ -30,20 +68,27 @@ export class ErrorHandler {
       variant: "destructive",
     });
     
+    // Notify subscribers
+    ErrorHandler.getInstance().notifyErrorCallbacks(appError);
+    
     return appError;
   }
   
   /**
    * Handle validation errors
    */
-  public static handleValidationError(field: string, message: string): AppError {
-    logger.warning(`Validation error: ${field}`, { field, message });
+  public static handleValidationError(field: string, message: string, context?: string): AppError {
+    logger.warning(`Validation error: ${field}`, { field, message, context });
     
     const appError: AppError = {
       code: 'VALIDATION_ERROR',
       message: message,
-      details: { field }
+      details: { field },
+      context
     };
+    
+    // Notify subscribers
+    ErrorHandler.getInstance().notifyErrorCallbacks(appError);
     
     return appError;
   }
@@ -51,8 +96,8 @@ export class ErrorHandler {
   /**
    * Handle authentication errors
    */
-  public static handleAuthError(error: any): AppError {
-    logger.error('Authentication error', { error });
+  public static handleAuthError(error: any, context?: string): AppError {
+    logger.error('Authentication error', { error, context });
     
     let userMessage: string;
     
@@ -85,19 +130,68 @@ export class ErrorHandler {
       variant: "destructive",
     });
     
-    return {
+    const appError = {
       code: error?.code || 'AUTH_ERROR',
       message: userMessage,
       details: error?.details || undefined,
-      originalError: error
+      originalError: error,
+      context
     };
+
+    // Notify subscribers
+    ErrorHandler.getInstance().notifyErrorCallbacks(appError);
+    
+    return appError;
+  }
+  
+  /**
+   * Handle component errors (React ErrorBoundary)
+   */
+  public static handleComponentError(error: Error, errorInfo: React.ErrorInfo, context?: string): AppError {
+    logger.error('Component error', { error: error.message, stack: error.stack, errorInfo, context });
+    
+    const appError: AppError = {
+      code: 'COMPONENT_ERROR',
+      message: 'Une erreur s\'est produite lors du rendu du composant',
+      details: { 
+        componentStack: errorInfo.componentStack,
+        errorBoundary: errorInfo.errorBoundary 
+      },
+      originalError: error,
+      context
+    };
+
+    // Don't show toast for component errors as ErrorBoundary handles UI
+    // Notify subscribers
+    ErrorHandler.getInstance().notifyErrorCallbacks(appError);
+    
+    return appError;
+  }
+
+  /**
+   * Handle image loading errors
+   */
+  public static handleImageError(src: string, context?: string): AppError {
+    logger.warning('Image loading error', { src, context });
+    
+    const appError: AppError = {
+      code: 'IMAGE_LOAD_ERROR',
+      message: `Impossible de charger l'image: ${src}`,
+      details: { src },
+      context
+    };
+
+    // Notify subscribers
+    ErrorHandler.getInstance().notifyErrorCallbacks(appError);
+    
+    return appError;
   }
   
   /**
    * Handle map errors
    */
-  public static handleMapError(error: any): AppError {
-    logger.error('Map error', { error });
+  public static handleMapError(error: any, context?: string): AppError {
+    logger.error('Map error', { error, context });
     
     let userMessage = 'An error occurred with the map.';
     let errorCode = 'MAP_ERROR';
@@ -123,7 +217,8 @@ export class ErrorHandler {
       code: error?.code || errorCode,
       message: userMessage,
       details: error?.details || undefined,
-      originalError: error
+      originalError: error,
+      context
     };
     
     toast({
@@ -132,14 +227,17 @@ export class ErrorHandler {
       variant: "destructive",
     });
     
+    // Notify subscribers
+    ErrorHandler.getInstance().notifyErrorCallbacks(appError);
+    
     return appError;
   }
   
   /**
    * Handle data loading errors
    */
-  public static handleDataLoadError(error: any, entityName: string): AppError {
-    logger.error(`Data loading error for ${entityName}`, { error });
+  public static handleDataLoadError(error: any, entityName: string, context?: string): AppError {
+    logger.error(`Data loading error for ${entityName}`, { error, context });
     
     const userMessage = `Failed to load ${entityName} data. Please try again later.`;
     
@@ -147,7 +245,8 @@ export class ErrorHandler {
       code: error?.code || 'DATA_LOAD_ERROR',
       message: userMessage,
       details: { entityName, originalMessage: error?.message },
-      originalError: error
+      originalError: error,
+      context
     };
     
     toast({
@@ -155,6 +254,37 @@ export class ErrorHandler {
       description: userMessage,
       variant: "destructive",
     });
+    
+    // Notify subscribers
+    ErrorHandler.getInstance().notifyErrorCallbacks(appError);
+    
+    return appError;
+  }
+
+  /**
+   * Generic error handler
+   */
+  public static handleGenericError(error: any, context?: string, userMessage?: string): AppError {
+    logger.error('Generic error', { error, context });
+    
+    const appError: AppError = {
+      code: error?.code || 'GENERIC_ERROR',
+      message: userMessage || error?.message || 'Une erreur inattendue s\'est produite',
+      details: error?.details || undefined,
+      originalError: error,
+      context
+    };
+
+    if (userMessage) {
+      toast({
+        title: "Erreur",
+        description: userMessage,
+        variant: "destructive",
+      });
+    }
+    
+    // Notify subscribers
+    ErrorHandler.getInstance().notifyErrorCallbacks(appError);
     
     return appError;
   }

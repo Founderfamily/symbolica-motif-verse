@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Hero from '@/components/sections/Hero';
 import QuickAccess from '@/components/sections/QuickAccess';
@@ -12,69 +11,138 @@ import Testimonials from '@/components/sections/Testimonials';
 import TimelineRoadmap from '@/components/sections/TimelineRoadmap';
 import Gamification from '@/components/sections/Gamification';
 import CallToAction from '@/components/sections/CallToAction';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { ErrorHandler } from '@/utils/errorHandler';
 
-const HomePage = () => {
-  console.log('HomePage: Rendering stable home page with static content...');
-  
+const HomePage: React.FC = () => {
+  console.log('🏠 HomePage rendu');
+
+  // Error handling setup
+  React.useEffect(() => {
+    const unsubscribe = ErrorHandler.getInstance().onError((error) => {
+      console.error('HomePage received error:', error);
+    });
+
+    return unsubscribe;
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Hero Section - Static */}
-      <Hero />
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'HomePage')
+        }
+      >
+        <Hero />
+      </ErrorBoundary>
       
-      {/* Quick Access Section - Static */}
-      <div className="py-16">
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'QuickAccess')
+        }
+      >
         <QuickAccess />
-      </div>
+      </ErrorBoundary>
       
-      {/* Featured Collections - Now Static */}
-      <div className="py-16 bg-slate-50/50">
-        <FeaturedCollections />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'FeaturedCollections')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <FeaturedCollections />
+        </div>
+      </ErrorBoundary>
       
-      {/* Symbol Triptych Interactive Section */}
-      <div className="py-16">
-        <SymbolTriptychSection />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'SymbolTriptychSection')
+        }
+      >
+        <div className="py-16">
+          <SymbolTriptychSection />
+        </div>
+      </ErrorBoundary>
       
-      {/* Features Section - Static */}
-      <div className="py-16 bg-slate-50/50">
-        <Features />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'Features')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <Features />
+        </div>
+      </ErrorBoundary>
       
-      {/* How It Works - Static */}
-      <div className="py-16">
-        <HowItWorks />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'HowItWorks')
+        }
+      >
+        <div className="py-16">
+          <HowItWorks />
+        </div>
+      </ErrorBoundary>
       
-      {/* Upload Tools */}
-      <div className="py-16 bg-slate-50/50">
-        <UploadTools />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'UploadTools')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <UploadTools />
+        </div>
+      </ErrorBoundary>
       
-      {/* Community Section */}
-      <div className="py-16">
-        <Community />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'Community')
+        }
+      >
+        <div className="py-16">
+          <Community />
+        </div>
+      </ErrorBoundary>
       
-      {/* Gamification Section */}
-      <div className="py-16 bg-slate-50/50">
-        <Gamification />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'Gamification')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <Gamification />
+        </div>
+      </ErrorBoundary>
       
-      {/* Testimonials - Static */}
-      <div className="py-16">
-        <Testimonials />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'Testimonials')
+        }
+      >
+        <div className="py-16">
+          <Testimonials />
+        </div>
+      </ErrorBoundary>
       
-      {/* Roadmap - Static */}
-      <div className="py-16 bg-slate-50/50">
-        <TimelineRoadmap />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'TimelineRoadmap')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <TimelineRoadmap />
+        </div>
+      </ErrorBoundary>
       
-      {/* Call to Action */}
-      <div className="py-16">
-        <CallToAction />
-      </div>
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'CallToAction')
+        }
+      >
+        <div className="py-16">
+          <CallToAction />
+        </div>
+      </ErrorBoundary>
     </div>
   );
 };

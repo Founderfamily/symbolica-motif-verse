@@ -1,10 +1,19 @@
-
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-// French translations
-import frTranslation from './locales/fr.json';
+// French translations - modular structure
+import frApp from './locales/fr/app.json';
+import frHero from './locales/fr/hero.json';
+import frSections from './locales/fr/sections.json';
+import frFeatures from './locales/fr/features.json';
+import frQuickAccess from './locales/fr/quickAccess.json';
+import frCallToAction from './locales/fr/callToAction.json';
+import frHowItWorks from './locales/fr/howItWorks.json';
+import frUploadTools from './locales/fr/uploadTools.json';
+
+// Import remaining sections from original file
+import frTranslationRemaining from './locales/fr.json';
 
 // English translations - split into thematic files
 import enNavigation from './locales/en/navigation.json';
@@ -20,6 +29,31 @@ import enCollections from './locales/en/collections.json';
 import enSearchFilters from './locales/en/searchFilters.json';
 
 const LANGUAGE_STORAGE_KEY = 'app_language';
+
+// Merge all French translation files
+const frTranslation = {
+  app: frApp,
+  hero: frHero,
+  sections: frSections,
+  features: frFeatures,
+  quickAccess: frQuickAccess,
+  callToAction: frCallToAction,
+  howItWorks: frHowItWorks,
+  uploadTools: frUploadTools,
+  // Keep remaining translations from original file
+  collections: frTranslationRemaining.collections,
+  community: frTranslationRemaining.community,
+  testimonials: frTranslationRemaining.testimonials,
+  gamification: frTranslationRemaining.gamification,
+  about: frTranslationRemaining.about,
+  faq: frTranslationRemaining.faq,
+  roadmap: frTranslationRemaining.roadmap,
+  symbolTriptych: frTranslationRemaining.symbolTriptych,
+  navigation: frTranslationRemaining.navigation,
+  common: frTranslationRemaining.common,
+  symbols: frTranslationRemaining.symbols,
+  searchFilters: frTranslationRemaining.searchFilters
+};
 
 // Merge all English translation files
 const enTranslation = {

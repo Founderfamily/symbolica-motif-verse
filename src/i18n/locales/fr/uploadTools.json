@@ -1,0 +1,27 @@
+
+{
+  "title": "Outils de Téléchargement et d'Analyse",
+  "subtitle": "Contribuez à notre base de données croissante de symboles",
+  "capture": {
+    "title": "Capturer et Télécharger",
+    "desc": "Prenez des photos de motifs d'artefacts, d'architecture ou de textiles et téléchargez-les directement sur notre plateforme"
+  },
+  "analyze": {
+    "title": "Analyse Automatisée",
+    "desc": "Notre système IA examine vos soumissions pour identifier les motifs, les faire correspondre avec notre base de données et suggérer des contextes culturels"
+  },
+  "share": {
+    "title": "Partager et Collaborer",
+    "desc": "Une fois analysées, vos contributions deviennent partie de notre référentiel mondial et peuvent être étudiées par la communauté"
+  },
+  "process": {
+    "title": "Processus d'Analyse",
+    "subtitle": "Voyez comment nous transformons les artefacts en motifs catalogués",
+    "original": "Image d'Artefact Original",
+    "detection": "Détection de Motif",
+    "extraction": "Extraction de Motif",
+    "classification": "Classification IA",
+    "result": "Résultat du Traitement",
+    "example": "Notre système identifie les motifs récurrents, les extrait et les fait correspondre avec notre base de données."
+  }
+}

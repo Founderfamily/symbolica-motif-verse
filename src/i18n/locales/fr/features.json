@@ -1,0 +1,17 @@
+
+{
+  "tagline": "Découvrez Nos Fonctionnalités",
+  "title": "Outils pour l'Exploration de Symboles",
+  "mapping": {
+    "title": "Cartographie Mondiale",
+    "description": "Visualisez les connexions symboliques entre les cultures et les périodes historiques grâce à notre interface cartographique interactive."
+  },
+  "identification": {
+    "title": "Identification de Symboles",
+    "description": "Téléchargez des images pour identifier les symboles et découvrir leur contexte culturel, leur histoire et leur signification."
+  },
+  "documentation": {
+    "title": "Documentation Collaborative",
+    "description": "Contribuez à notre base de données en ajoutant des symboles, du contexte historique et de la signification culturelle."
+  }
+}
