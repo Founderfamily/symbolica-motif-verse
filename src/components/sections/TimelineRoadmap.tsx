@@ -4,9 +4,19 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getRoadmapItems, RoadmapItem } from '@/services/roadmapService';
+import { supabase } from '@/integrations/supabase/client';
 import EmptyState from '@/components/common/EmptyState';
 import { useNavigate } from 'react-router-dom';
+
+interface RoadmapItem {
+  id: string;
+  phase: string;
+  title: Record<string, string>;
+  description: Record<string, string>;
+  is_current: boolean;
+  is_completed: boolean;
+  display_order: number;
+}
 
 const TimelineRoadmap = () => {
   const { i18n } = useTranslation();
@@ -18,15 +28,23 @@ const TimelineRoadmap = () => {
   useEffect(() => {
     const fetchRoadmapItems = async () => {
       try {
-        console.log('🚀 [TimelineRoadmap] Starting fetch...');
+        console.log('🚀 [TimelineRoadmap] Fetching roadmap items...');
         setLoading(true);
         setError(null);
         
-        const data = await getRoadmapItems(3); // 3 retries
-        console.log('✅ [TimelineRoadmap] Data received:', data?.length || 0, 'items');
+        const { data, error } = await supabase
+          .from('roadmap_items')
+          .select('*')
+          .order('display_order');
         
+        if (error) {
+          console.error('❌ [TimelineRoadmap] Database error:', error);
+          throw new Error(`Database error: ${error.message}`);
+        }
+        
+        console.log('✅ [TimelineRoadmap] Data received:', data?.length || 0, 'items');
         setRoadmapItems(data || []);
-        setError(null);
+        
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Erreur de chargement des données';
         console.error('❌ [TimelineRoadmap] Error:', errorMessage);
@@ -38,20 +56,7 @@ const TimelineRoadmap = () => {
       }
     };
 
-    // Safety timeout of 30 seconds
-    const safetyTimeout = setTimeout(() => {
-      if (loading) {
-        console.log('⏰ [TimelineRoadmap] 30s safety timeout reached');
-        setLoading(false);
-        setError('Délai d\'attente dépassé après 30 secondes');
-      }
-    }, 30000);
-
-    fetchRoadmapItems().finally(() => {
-      clearTimeout(safetyTimeout);
-    });
-
-    return () => clearTimeout(safetyTimeout);
+    fetchRoadmapItems();
   }, []);
 
   console.log('🎨 [TimelineRoadmap] Rendering - loading:', loading, 'error:', error, 'items:', roadmapItems.length);
@@ -105,7 +110,7 @@ const TimelineRoadmap = () => {
             <div className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-slate-200"></div>
             
             <div className="space-y-8">
-              {roadmapItems.map((item, index) => {
+              {roadmapItems.map((item) => {
                 const circleColor = item.is_completed 
                   ? 'bg-green-500' 
                   : item.is_current 
