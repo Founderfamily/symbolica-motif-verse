@@ -1,3 +1,4 @@
+
 {
   "common": {
     "viewMore": "Voir plus",
@@ -412,12 +413,12 @@
   "hero": {
     "heading": "Découvrez le patrimoine symbolique mondial",
     "subheading": "Explorez, contribuez et apprenez sur les motifs culturels à travers les âges",
-    "community": "Rejoignez une communauté d'amateurs de culture",
+    "community": "Rejoindre une communauté d'amateurs de culture",
     "explore": "Commencer l'exploration"
   },
   "app": {
     "name": "Symbolica",
-    "version": "Version 0.1.0"
+    "version": "Version Alpha 0.1"
   },
   "about": {
     "title": "À propos du Musée Symbolica",
@@ -633,7 +634,15 @@
   },
   "map": {
     "placeholder": "Carte Interactive Bientôt Disponible",
-    "comingSoon": "Nous travaillons sur une carte interactive pour explorer les symboles à travers le monde"
+    "comingSoon": "Nous travaillons sur une carte interactive pour explorer les symboles à travers le monde",
+    "mapboxAuth": {
+      "title": "Configuration Mapbox",
+      "description": "Pour utiliser la carte interactive, vous devez fournir un token d'accès Mapbox.",
+      "learnMore": "En savoir plus",
+      "tokenInstructions": "Vous pouvez obtenir un token gratuit en créant un compte sur Mapbox. Ce token est nécessaire pour afficher la carte interactive.",
+      "submit": "Configurer",
+      "clear": "Effacer"
+    }
   },
   "gamification": {
     "title": "Gagnez des Récompenses pour vos Contributions",
