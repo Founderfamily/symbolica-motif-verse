@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, Info, AlertCircle } from 'lucide-react';
+import { Lock, Info, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { mapboxAuthService } from '@/services/mapboxAuthService';
 import { toast } from '@/components/ui/use-toast';
@@ -15,6 +15,7 @@ const MapboxAuth: React.FC<MapboxAuthProps> = ({ onTokenSubmit }) => {
   const [token, setToken] = useState<string>('');
   const [showInfo, setShowInfo] = useState<boolean>(false);
   const [isInvalid, setIsInvalid] = useState<boolean>(false);
+  const [showToken, setShowToken] = useState<boolean>(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,10 +48,16 @@ const MapboxAuth: React.FC<MapboxAuthProps> = ({ onTokenSubmit }) => {
     mapboxAuthService.clearToken();
     setToken('');
     setIsInvalid(false);
+    setShowToken(false);
     toast({
       title: "Token removed",
       description: "Your Mapbox token has been removed.",
     });
+  };
+
+  const maskToken = (token: string): string => {
+    if (token.length <= 10) return token;
+    return token.substring(0, 6) + '•'.repeat(token.length - 10) + token.substring(token.length - 4);
   };
 
   // Check if there's a stored token when component mounts
@@ -99,16 +106,30 @@ const MapboxAuth: React.FC<MapboxAuthProps> = ({ onTokenSubmit }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Input
-            type="text"
-            value={token}
-            onChange={(e) => {
-              setToken(e.target.value);
-              if (isInvalid) setIsInvalid(false);
-            }}
-            placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbFhYeSJ9.exampleToken123456"
-            className={`w-full ${isInvalid ? 'border-red-500 focus-visible:ring-red-300' : ''}`}
-          />
+          <div className="relative">
+            <Input
+              type={showToken ? "text" : "password"}
+              value={showToken ? token : maskToken(token)}
+              onChange={(e) => {
+                if (showToken) {
+                  setToken(e.target.value);
+                }
+                if (isInvalid) setIsInvalid(false);
+              }}
+              placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbFhYeSJ9.••••••••••••••••••••"
+              className={`w-full pr-10 ${isInvalid ? 'border-red-500 focus-visible:ring-red-300' : ''}`}
+              readOnly={!showToken && token.length > 0}
+            />
+            {token.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowToken(!showToken)}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            )}
+          </div>
           {isInvalid && (
             <div className="flex items-center mt-1 text-xs text-red-500">
               <AlertCircle className="h-3 w-3 mr-1" />

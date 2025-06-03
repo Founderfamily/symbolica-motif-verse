@@ -18,6 +18,8 @@ import MobileAppPage from '@/pages/MobileApp';
 import MapExplorer from '@/pages/MapExplorer';
 import SymbolsPage from '@/pages/SymbolsPage';
 import MCPSearchPage from '@/pages/MCPSearchPage';
+import Auth from '@/pages/Auth';
+import NewContribution from '@/pages/NewContribution';
 
 // Admin pages
 import AdminLayout from '@/pages/Admin/AdminLayout';
@@ -55,6 +57,9 @@ function App() {
               {/* Mobile app route - accessible without layout for full mobile experience */}
               <Route path="/mobile" element={<MobileAppPage />} />
               
+              {/* Auth route - accessible without main layout */}
+              <Route path="/auth" element={<Auth />} />
+              
               {/* Admin routes with AdminLayout */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Dashboard />} />
@@ -71,6 +76,7 @@ function App() {
                 <Route index element={<HomePage />} />
                 <Route path="/analysis" element={<AnalysisPage />} />
                 <Route path="/contributions" element={<ContributionsPage />} />
+                <Route path="/contribute" element={<NewContribution />} />
                 <Route path="/symbols" element={<SymbolsPage />} />
                 <Route path="/symbols/:id" element={<SymbolExplorer />} />
                 <Route path="/map" element={<MapExplorer />} />
