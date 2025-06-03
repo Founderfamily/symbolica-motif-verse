@@ -72,7 +72,7 @@ const Testimonials = () => {
       
       {isEmpty ? (
         <EmptyState
-          icon={MessageSquote}
+          icon={MessageSquare}
           title="Aucun témoignage"
           description="Il n'y a pas encore de témoignages d'utilisateurs disponibles."
           actionLabel="Contribuer à la plateforme"
