@@ -14,19 +14,19 @@ import Gamification from '@/components/sections/Gamification';
 import CallToAction from '@/components/sections/CallToAction';
 
 const HomePage = () => {
-  console.log('HomePage: Rendering home page...');
+  console.log('HomePage: Rendering stable home page with static content...');
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Hero Section */}
+      {/* Hero Section - Static */}
       <Hero />
       
-      {/* Quick Access Section */}
+      {/* Quick Access Section - Static */}
       <div className="py-16">
         <QuickAccess />
       </div>
       
-      {/* Featured Collections */}
+      {/* Featured Collections - Now Static */}
       <div className="py-16 bg-slate-50/50">
         <FeaturedCollections />
       </div>
@@ -36,12 +36,12 @@ const HomePage = () => {
         <SymbolTriptychSection />
       </div>
       
-      {/* Features Section */}
+      {/* Features Section - Static */}
       <div className="py-16 bg-slate-50/50">
         <Features />
       </div>
       
-      {/* How It Works */}
+      {/* How It Works - Static */}
       <div className="py-16">
         <HowItWorks />
       </div>
@@ -61,12 +61,12 @@ const HomePage = () => {
         <Gamification />
       </div>
       
-      {/* Testimonials */}
+      {/* Testimonials - Static */}
       <div className="py-16">
         <Testimonials />
       </div>
       
-      {/* Roadmap */}
+      {/* Roadmap - Static */}
       <div className="py-16 bg-slate-50/50">
         <TimelineRoadmap />
       </div>
