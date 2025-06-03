@@ -32,31 +32,30 @@ const Community = () => {
       }
     };
 
-    fetchGroups();
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setIsEmpty(true);
+    }, 2000);
+
+    fetchGroups().finally(() => {
+      clearTimeout(timeoutId);
+    });
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
-  if (loading) {
-    return (
-      <section className="py-16 px-4 md:px-8 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
-              <I18nText translationKey="sections.community" />
-            </span>
-            <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-              <I18nText translationKey="community.title" />
-            </h2>
-            <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
-              <I18nText translationKey="community.description" />
-            </p>
-          </div>
-          <div className="flex items-center justify-center h-64">
-            <div className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Don't show loading spinner for more than 500ms
+  useEffect(() => {
+    const quickTimeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setIsEmpty(true);
+      }
+    }, 500);
+
+    return () => clearTimeout(quickTimeout);
+  }, [loading]);
   
   return (
     <section className="py-16 px-4 md:px-8 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
@@ -76,7 +75,11 @@ const Community = () => {
           </p>
         </div>
         
-        {isEmpty ? (
+        {loading ? (
+          <div className="flex items-center justify-center h-32 mb-12">
+            <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+          </div>
+        ) : isEmpty ? (
           <EmptyState
             icon={Users}
             title="Aucun groupe communautaire"

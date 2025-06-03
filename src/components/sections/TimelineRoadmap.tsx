@@ -29,32 +29,30 @@ const TimelineRoadmap = () => {
       }
     };
 
-    fetchRoadmapItems();
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setIsEmpty(true);
+    }, 2000);
+
+    fetchRoadmapItems().finally(() => {
+      clearTimeout(timeoutId);
+    });
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
-  if (loading) {
-    return (
-      <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <I18nText 
-              translationKey="sections.roadmap" 
-              as="h2" 
-              className="text-3xl font-bold text-slate-800 mb-4"
-            />
-            <I18nText 
-              translationKey="roadmap.subtitle" 
-              as="p" 
-              className="text-xl text-slate-600"
-            />
-          </div>
-          <div className="flex items-center justify-center h-64">
-            <div className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Don't show loading spinner for more than 500ms
+  useEffect(() => {
+    const quickTimeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setIsEmpty(true);
+      }
+    }, 500);
+
+    return () => clearTimeout(quickTimeout);
+  }, [loading]);
 
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
@@ -72,7 +70,11 @@ const TimelineRoadmap = () => {
           />
         </div>
         
-        {isEmpty ? (
+        {loading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+          </div>
+        ) : isEmpty ? (
           <EmptyState
             icon={MapPin}
             title="Aucune étape de développement"

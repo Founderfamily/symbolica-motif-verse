@@ -30,30 +30,30 @@ const Testimonials = () => {
       }
     };
 
-    fetchTestimonials();
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setIsEmpty(true);
+    }, 2000);
+
+    fetchTestimonials().finally(() => {
+      clearTimeout(timeoutId);
+    });
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
-  if (loading) {
-    return (
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <I18nText 
-            translationKey="sections.testimonials" 
-            as="h2" 
-            className="text-3xl font-bold text-slate-800 mb-4"
-          />
-          <I18nText 
-            translationKey="testimonials.subtitle" 
-            as="p" 
-            className="text-xl text-slate-600"
-          />
-        </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
-        </div>
-      </section>
-    );
-  }
+  // Don't show loading spinner for more than 500ms
+  useEffect(() => {
+    const quickTimeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setIsEmpty(true);
+      }
+    }, 500);
+
+    return () => clearTimeout(quickTimeout);
+  }, [loading]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,7 +70,11 @@ const Testimonials = () => {
         />
       </div>
       
-      {isEmpty ? (
+      {loading ? (
+        <div className="flex items-center justify-center h-32">
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+        </div>
+      ) : isEmpty ? (
         <EmptyState
           icon={MessageSquare}
           title="Aucun témoignage"
