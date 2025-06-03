@@ -13,6 +13,11 @@ export interface SymbolData {
   medium?: string[] | null;
   technique?: string[] | null;
   function?: string[] | null;
+  // Add missing properties for static data compatibility
+  significance?: string | null;
+  historical_context?: string | null;
+  related_symbols?: string[] | null;
+  tags?: string[] | null;
   translations?: {
     [language: string]: {
       name: string;
@@ -35,6 +40,9 @@ export interface SymbolImage {
   location: string | null;
   source: string | null;
   tags: string[] | null;
+  // Add missing property for static data compatibility
+  uploaded_by?: string | null;
+  updated_at?: string | null;
   translations?: {
     [language: string]: {
       title?: string;
