@@ -5,43 +5,34 @@ import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getRoadmapItems, RoadmapItem } from '@/services/roadmapService';
-import { CheckCircle, Clock, Circle } from 'lucide-react';
+import { CheckCircle, Clock, Circle, AlertCircle } from 'lucide-react';
 
 const RoadmapSection = () => {
   const { i18n } = useTranslation();
   const [items, setItems] = useState<RoadmapItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
+        console.log('🚀 [RoadmapSection] Fetching roadmap items from Supabase...');
+        setLoading(true);
+        setError(null);
+        
         const data = await getRoadmapItems();
+        console.log('✅ [RoadmapSection] Données récupérées:', data.length, 'items');
+        console.log('📊 [RoadmapSection] Détail des items:', data);
+        
         setItems(data);
-      } catch (error) {
-        console.error('Error loading roadmap:', error);
-        // Afficher des données par défaut en cas d'erreur
-        setItems([
-          {
-            id: '1',
-            phase: 'Phase 1',
-            title: { fr: 'Lancement de la plateforme', en: 'Platform Launch' },
-            description: { fr: 'Mise en ligne de la version initiale', en: 'Initial platform release' },
-            is_current: false,
-            is_completed: true,
-            display_order: 1
-          },
-          {
-            id: '2',
-            phase: 'Phase 2',
-            title: { fr: 'Fonctionnalités communautaires', en: 'Community Features' },
-            description: { fr: 'Groupes et discussions', en: 'Groups and discussions' },
-            is_current: true,
-            is_completed: false,
-            display_order: 2
-          }
-        ]);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion à Supabase';
+        console.error('❌ [RoadmapSection] Erreur lors de la récupération:', errorMessage);
+        setError(errorMessage);
+        // PAS DE FALLBACK ICI - on laisse items vide pour afficher l'erreur
       } finally {
         setLoading(false);
+        console.log('🏁 [RoadmapSection] Chargement terminé');
       }
     };
 
@@ -72,6 +63,7 @@ const RoadmapSection = () => {
     return null;
   };
 
+  // État de chargement
   if (loading) {
     return (
       <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
@@ -85,13 +77,60 @@ const RoadmapSection = () => {
           </div>
           <div className="flex items-center justify-center h-32">
             <div className="w-8 h-8 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div>
-            <span className="ml-3 text-slate-600">Chargement...</span>
+            <span className="ml-3 text-slate-600">Chargement de la feuille de route...</span>
           </div>
         </div>
       </section>
     );
   }
 
+  // État d'erreur
+  if (error) {
+    return (
+      <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <I18nText 
+              translationKey="sections.roadmap" 
+              as="h2" 
+              className="text-3xl font-bold text-slate-800 mb-4"
+            />
+          </div>
+          <div className="flex items-center justify-center h-32">
+            <AlertCircle className="w-8 h-8 text-red-500 mr-3" />
+            <div className="text-center">
+              <p className="text-red-600 font-semibold">Erreur de chargement</p>
+              <p className="text-slate-600 text-sm mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Aucune donnée
+  if (items.length === 0) {
+    return (
+      <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <I18nText 
+              translationKey="sections.roadmap" 
+              as="h2" 
+              className="text-3xl font-bold text-slate-800 mb-4"
+            />
+          </div>
+          <div className="flex items-center justify-center h-32">
+            <div className="text-center">
+              <p className="text-slate-600">Aucune étape de développement disponible pour le moment.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Affichage des vraies données de Supabase
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
       <div className="max-w-4xl mx-auto">
@@ -109,7 +148,7 @@ const RoadmapSection = () => {
           />
         </div>
 
-        {/* Timeline */}
+        {/* Timeline - Affichage des VRAIES données de Supabase */}
         <div className="relative">
           {/* Ligne verticale */}
           <div className="absolute left-[23px] top-0 bottom-0 w-0.5 bg-slate-200"></div>
@@ -125,7 +164,7 @@ const RoadmapSection = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">
-                      {item.title?.[i18n.language] || item.title?.fr || item.title || 'Titre'}
+                      {item.title?.[i18n.language] || item.title?.fr || item.title || `${item.phase} - Titre`}
                     </CardTitle>
                     {getStatusBadge(item)}
                   </div>
@@ -133,13 +172,21 @@ const RoadmapSection = () => {
                 
                 <CardContent>
                   <p className="text-slate-600">
-                    {item.description?.[i18n.language] || item.description?.fr || item.description || 'Description'}
+                    {item.description?.[i18n.language] || item.description?.fr || item.description || 'Description en cours...'}
                   </p>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
+
+        {/* Debug info en dev mode */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-8 p-4 bg-gray-100 rounded text-sm">
+            <p><strong>Debug:</strong> {items.length} éléments chargés depuis Supabase</p>
+            <p><strong>Phases:</strong> {items.map(item => item.phase).join(', ')}</p>
+          </div>
+        )}
       </div>
     </section>
   );
