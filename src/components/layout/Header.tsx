@@ -82,11 +82,11 @@ const Header: React.FC = () => {
             <Link to="/" className="flex items-center space-x-2">
               <img 
                 src="/logo.svg" 
-                alt="Cultural Symbols" 
+                alt="Symbolica" 
                 className="h-8 w-8"
               />
               <span className="font-bold text-xl text-slate-900 hidden sm:block">
-                Cultural Symbols
+                Symbolica
               </span>
             </Link>
             
