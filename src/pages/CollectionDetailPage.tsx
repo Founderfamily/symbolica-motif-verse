@@ -58,7 +58,17 @@ const CollectionDetailPage = () => {
     const translation = collection.collection_translations?.find(
       (t: any) => t.language === currentLanguage
     );
-    return translation?.[field] || '';
+    const value = translation?.[field];
+    
+    // Fallback logic: if current language translation is missing, try the other language
+    if (!value && collection.collection_translations?.length > 0) {
+      const fallbackTranslation = collection.collection_translations.find(
+        (t: any) => t.language !== currentLanguage
+      );
+      return fallbackTranslation?.[field] || '';
+    }
+    
+    return value || '';
   };
 
   // Convert collection symbols to SymbolData format
@@ -99,7 +109,7 @@ const CollectionDetailPage = () => {
                 </h1>
                 {collection.is_featured && (
                   <Badge className="bg-amber-600">
-                    <I18nText translationKey="collections.featured">En vedette</I18nText>
+                    <I18nText translationKey="collections.featuredBadge">En vedette</I18nText>
                   </Badge>
                 )}
               </div>
@@ -111,10 +121,12 @@ const CollectionDetailPage = () => {
               <div className="flex items-center gap-4 text-sm text-slate-500">
                 <span className="flex items-center gap-1">
                   <BookOpen className="w-4 h-4" />
-                  {symbols.length} symboles
+                  {symbols.length} <I18nText translationKey="collections.symbolsCount">symboles</I18nText>
                 </span>
                 <span>•</span>
-                <span>Créée le {new Date(collection.created_at).toLocaleDateString('fr-FR')}</span>
+                <span>
+                  <I18nText translationKey="collections.createdOn">Créée le</I18nText> {new Date(collection.created_at).toLocaleDateString(currentLanguage === 'fr' ? 'fr-FR' : 'en-US')}
+                </span>
               </div>
             </div>
             

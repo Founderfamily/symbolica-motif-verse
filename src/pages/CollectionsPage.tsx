@@ -7,12 +7,13 @@ import CreateCollectionDialog from '@/components/collections/CreateCollectionDia
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { I18nText } from '@/components/ui/i18n-text';
-import { useFeaturedCollections } from '@/hooks/useCollections';
+import { useFeaturedCollections, useCollections } from '@/hooks/useCollections';
 
 const CollectionsPage = () => {
   const { currentLanguage } = useTranslation();
   const { user } = useAuth();
   const { data: featuredCollections } = useFeaturedCollections();
+  const { data: allCollections } = useCollections();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -24,7 +25,7 @@ const CollectionsPage = () => {
               <I18nText translationKey="collections.heroTitle">Cultural Collections</I18nText>
             </h1>
             <Badge variant="outline" className="text-amber-600 border-amber-600">
-              {featuredCollections?.length || 0} collections
+              {allCollections?.length || 0} collections
             </Badge>
           </div>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
@@ -75,7 +76,7 @@ const CollectionsPage = () => {
               <I18nText translationKey="collections.allCollections">All Collections</I18nText>
             </h2>
             <div className="text-sm text-slate-600">
-              {featuredCollections?.length || 0} <I18nText translationKey="collections.allCollectionsCount">thematic journeys available</I18nText>
+              {allCollections?.length || 0} <I18nText translationKey="collections.allCollectionsCount">thematic journeys available</I18nText>
             </div>
           </div>
           <CollectionGrid />

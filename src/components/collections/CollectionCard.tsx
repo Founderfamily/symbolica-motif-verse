@@ -18,7 +18,18 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
     const translation = collection.collection_translations?.find(
       (t: any) => t.language === currentLanguage
     );
-    return translation?.[field] || '';
+    const value = translation?.[field];
+    
+    // Fallback logic: if current language translation is missing, try the other language
+    if (!value && collection.collection_translations?.length > 0) {
+      const fallbackTranslation = collection.collection_translations.find(
+        (t: any) => t.language !== currentLanguage
+      );
+      console.log('Using fallback translation for', field, ':', fallbackTranslation?.[field]);
+      return fallbackTranslation?.[field] || `[${field} missing]`;
+    }
+    
+    return value || `[${field} missing]`;
   };
 
   return (

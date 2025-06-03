@@ -11,9 +11,9 @@
   "notFound": "Collection not found",
   "share": "Share",
   "viewOnMap": "View on map",
-  "symbolsCount": "Symbols",
-  "culturesCount": "Cultures", 
-  "periodsCount": "Periods",
+  "symbolsCount": "symbols",
+  "culturesCount": "cultures", 
+  "periodsCount": "periods",
   "symbolsInCollection": "Symbols in collection",
   "noSymbols": "No symbols in this collection",
   "explore": "Explore →",
@@ -31,5 +31,6 @@
     "digital": "Digital Era"
   },
   "allCollections": "All Collections",
-  "allCollectionsCount": "thematic journeys available"
+  "allCollectionsCount": "thematic journeys available",
+  "createdOn": "Created on"
 }

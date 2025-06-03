@@ -11,9 +11,9 @@
   "notFound": "Collection non trouvée",
   "share": "Partager",
   "viewOnMap": "Voir sur la carte",
-  "symbolsCount": "Symboles",
-  "culturesCount": "Cultures", 
-  "periodsCount": "Périodes",
+  "symbolsCount": "symboles",
+  "culturesCount": "cultures", 
+  "periodsCount": "périodes",
   "symbolsInCollection": "Symboles de la collection",
   "noSymbols": "Aucun symbole dans cette collection",
   "explore": "Explorer →",
@@ -31,5 +31,6 @@
     "digital": "Ère Numérique"
   },
   "allCollections": "Toutes les Collections",
-  "allCollectionsCount": "parcours thématiques disponibles"
+  "allCollectionsCount": "parcours thématiques disponibles",
+  "createdOn": "Créée le"
 }
