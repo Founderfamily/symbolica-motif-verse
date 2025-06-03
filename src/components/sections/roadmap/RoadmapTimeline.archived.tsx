@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RoadmapItem } from './RoadmapItem';
+import { RoadmapItem } from './RoadmapItem.archived';
 import { RoadmapItem as RoadmapItemType } from '@/services/roadmapService';
 
 interface RoadmapTimelineProps {

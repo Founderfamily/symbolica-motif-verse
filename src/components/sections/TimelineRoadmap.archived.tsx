@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import EmptyState from '@/components/common/EmptyState';
 import { useNavigate } from 'react-router-dom';
-import { getRoadmapItemsWithFallback, RoadmapItem } from '@/services/roadmapService';
-import { RoadmapHeader } from './roadmap/RoadmapHeader';
-import { RoadmapTimeline } from './roadmap/RoadmapTimeline';
-import { LoadingSpinner } from './roadmap/LoadingSpinner';
+import { getRoadmapItems, RoadmapItem } from '@/services/roadmapService';
+import { RoadmapHeader } from './roadmap/RoadmapHeader.archived';
+import { RoadmapTimeline } from './roadmap/RoadmapTimeline.archived';
+import { LoadingSpinner } from './roadmap/LoadingSpinner.archived';
 
 const TimelineRoadmap = () => {
   const navigate = useNavigate();
@@ -22,16 +22,29 @@ const TimelineRoadmap = () => {
         setLoading(true);
         setError(null);
         
-        const { items, usingFallback: fallback, error: fetchError } = await getRoadmapItemsWithFallback();
+        const items = await getRoadmapItems();
         
         setRoadmapItems(items);
-        setUsingFallback(fallback);
-        setError(fetchError || null);
+        setUsingFallback(false);
+        setError(null);
         
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
         console.error('❌ [TimelineRoadmap] Error:', errorMessage);
         setError(errorMessage);
+        setUsingFallback(true);
+        // Fallback data
+        setRoadmapItems([
+          {
+            id: '1',
+            phase: 'Phase 1',
+            title: { fr: 'Lancement de la plateforme', en: 'Platform Launch' },
+            description: { fr: 'Mise en ligne de la version initiale', en: 'Initial platform release' },
+            is_current: false,
+            is_completed: true,
+            display_order: 1
+          }
+        ]);
       } finally {
         setLoading(false);
         console.log('🏁 [TimelineRoadmap] Fetch completed');
