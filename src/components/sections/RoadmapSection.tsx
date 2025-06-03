@@ -16,23 +16,24 @@ const RoadmapSection = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        console.log('🚀 [RoadmapSection] Fetching roadmap items from Supabase...');
+        console.log('🚀 [RoadmapSection] Début du chargement des données Supabase...');
         setLoading(true);
         setError(null);
         
         const data = await getRoadmapItems();
-        console.log('✅ [RoadmapSection] Données récupérées:', data.length, 'items');
-        console.log('📊 [RoadmapSection] Détail des items:', data);
+        console.log('✅ [RoadmapSection] Données Supabase récupérées:', data.length, 'items');
+        console.log('📊 [RoadmapSection] Détail complet:', JSON.stringify(data, null, 2));
         
         setItems(data);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion à Supabase';
-        console.error('❌ [RoadmapSection] Erreur lors de la récupération:', errorMessage);
+        const errorMessage = err instanceof Error ? err.message : 'Erreur de chargement des données';
+        console.error('❌ [RoadmapSection] Erreur Supabase:', errorMessage);
+        console.error('🔍 [RoadmapSection] Stack trace:', err);
         setError(errorMessage);
-        // PAS DE FALLBACK - on laisse items vide pour afficher l'erreur
+        // PAS DE FALLBACK - on garde items vide pour afficher l'erreur
       } finally {
         setLoading(false);
-        console.log('🏁 [RoadmapSection] Chargement terminé');
+        console.log('🏁 [RoadmapSection] Fin du processus de chargement');
       }
     };
 
@@ -130,7 +131,9 @@ const RoadmapSection = () => {
     );
   }
 
-  // Affichage des vraies données de Supabase
+  // Affichage des VRAIES données de Supabase (Phase 0 à Phase 4)
+  console.log('🎯 [RoadmapSection] Rendu avec', items.length, 'éléments Supabase');
+  
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
       <div className="max-w-4xl mx-auto">
@@ -154,38 +157,41 @@ const RoadmapSection = () => {
           <div className="absolute left-[23px] top-0 bottom-0 w-0.5 bg-slate-200"></div>
           
           <div className="space-y-8">
-            {items.map((item) => (
-              <Card key={item.id} className="relative ml-12 shadow-sm hover:shadow-md transition-shadow">
-                {/* Icône de statut */}
-                <div className="absolute -left-[35px] top-6">
-                  {getStatusIcon(item)}
-                </div>
-                
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">
-                      {item.title?.[i18n.language] || item.title?.fr || item.title || `${item.phase} - Titre`}
-                    </CardTitle>
-                    {getStatusBadge(item)}
+            {items.map((item) => {
+              console.log('🔄 [RoadmapSection] Rendu item:', item.id, item.phase, item.is_completed);
+              return (
+                <Card key={item.id} className="relative ml-12 shadow-sm hover:shadow-md transition-shadow">
+                  {/* Icône de statut */}
+                  <div className="absolute -left-[35px] top-6">
+                    {getStatusIcon(item)}
                   </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <p className="text-slate-600">
-                    {item.description?.[i18n.language] || item.description?.fr || item.description || 'Description en cours...'}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+                  
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">
+                        {item.title?.[i18n.language] || item.title?.fr || item.title || `${item.phase} - Titre`}
+                      </CardTitle>
+                      {getStatusBadge(item)}
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <p className="text-slate-600">
+                      {item.description?.[i18n.language] || item.description?.fr || item.description || 'Description en cours...'}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
 
         {/* Debug info en dev mode */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mt-8 p-4 bg-gray-100 rounded text-sm">
-            <p><strong>Debug:</strong> {items.length} éléments chargés depuis Supabase</p>
+            <p><strong>Debug Supabase:</strong> {items.length} éléments chargés</p>
             <p><strong>Phases:</strong> {items.map(item => item.phase).join(', ')}</p>
-            <p><strong>Données:</strong> {JSON.stringify(items.map(item => ({ id: item.id, phase: item.phase, completed: item.is_completed, current: item.is_current })), null, 2)}</p>
+            <p><strong>États:</strong> {items.map(item => `${item.phase}=${item.is_completed ? 'terminé' : item.is_current ? 'en cours' : 'à venir'}`).join(', ')}</p>
           </div>
         )}
       </div>
