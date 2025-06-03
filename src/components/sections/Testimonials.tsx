@@ -2,22 +2,29 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { MessageSquare } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getTestimonials, Testimonial } from '@/services/testimonialsService';
+import EmptyState from '@/components/common/EmptyState';
+import { useNavigate } from 'react-router-dom';
 
 const Testimonials = () => {
   const { i18n } = useTranslation();
+  const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isEmpty, setIsEmpty] = useState(false);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
         const data = await getTestimonials(true); // Only fetch active testimonials
         setTestimonials(data);
+        setIsEmpty(data.length === 0);
       } catch (error) {
         console.error('Error fetching testimonials:', error);
+        setIsEmpty(true);
       } finally {
         setLoading(false);
       }
@@ -63,10 +70,14 @@ const Testimonials = () => {
         />
       </div>
       
-      {testimonials.length === 0 ? (
-        <div className="text-center text-slate-500">
-          <p>Aucun témoignage disponible pour le moment.</p>
-        </div>
+      {isEmpty ? (
+        <EmptyState
+          icon={MessageSquote}
+          title="Aucun témoignage"
+          description="Il n'y a pas encore de témoignages d'utilisateurs disponibles."
+          actionLabel="Contribuer à la plateforme"
+          onAction={() => navigate('/contribute')}
+        />
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial) => (
