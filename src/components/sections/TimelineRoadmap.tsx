@@ -13,26 +13,51 @@ const TimelineRoadmap = () => {
   const navigate = useNavigate();
   const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRoadmapItems = async () => {
       try {
-        console.log('Fetching roadmap items...');
+        console.log('🚀 [TimelineRoadmap] Starting fetch...');
+        console.log('🚀 [TimelineRoadmap] Service function:', typeof getRoadmapItems);
+        
         const data = await getRoadmapItems();
-        console.log('Roadmap items fetched:', data);
-        setRoadmapItems(data);
-        setError(false);
-      } catch (error) {
-        console.error('Error fetching roadmap items:', error);
-        setError(true);
+        
+        console.log('✅ [TimelineRoadmap] Fetch successful');
+        console.log('📊 [TimelineRoadmap] Items count:', data?.length || 0);
+        console.log('📋 [TimelineRoadmap] Raw data:', data);
+        
+        if (data && Array.isArray(data)) {
+          setRoadmapItems(data);
+          setError(null);
+          console.log('✅ [TimelineRoadmap] State updated with items:', data.length);
+        } else {
+          console.log('⚠️ [TimelineRoadmap] Data is not an array:', typeof data);
+          setRoadmapItems([]);
+          setError('Invalid data format');
+        }
+      } catch (err) {
+        console.error('❌ [TimelineRoadmap] Error caught:', err);
+        console.error('❌ [TimelineRoadmap] Error type:', typeof err);
+        console.error('❌ [TimelineRoadmap] Error message:', err instanceof Error ? err.message : String(err));
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        setRoadmapItems([]);
       } finally {
+        console.log('🏁 [TimelineRoadmap] Setting loading to false');
         setLoading(false);
       }
     };
 
     fetchRoadmapItems();
   }, []);
+
+  // Debug current state
+  console.log('🔍 [TimelineRoadmap] Current state:', {
+    loading,
+    error,
+    itemsCount: roadmapItems.length,
+    items: roadmapItems
+  });
 
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
@@ -53,8 +78,23 @@ const TimelineRoadmap = () => {
         {loading ? (
           <div className="flex items-center justify-center h-32">
             <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+            <span className="ml-3 text-slate-600">Chargement de la feuille de route...</span>
           </div>
-        ) : error || roadmapItems.length === 0 ? (
+        ) : error ? (
+          <div className="text-center">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+              <h3 className="text-red-800 font-semibold mb-2">Erreur de chargement</h3>
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+            <EmptyState
+              icon={MapPin}
+              title="Impossible de charger la feuille de route"
+              description="Une erreur est survenue lors du chargement des étapes de développement."
+              actionLabel="Réessayer"
+              onAction={() => window.location.reload()}
+            />
+          </div>
+        ) : roadmapItems.length === 0 ? (
           <EmptyState
             icon={MapPin}
             title="Aucune étape de développement"
