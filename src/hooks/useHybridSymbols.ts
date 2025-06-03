@@ -1,0 +1,105 @@
+
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { SymbolData } from '@/types/supabase';
+import { STATIC_SYMBOLS, STATIC_FILTER_VALUES } from '@/data/staticSymbols';
+
+export type DataSource = 'static' | 'api' | 'hybrid';
+
+interface UseHybridSymbolsReturn {
+  symbols: SymbolData[];
+  isLoading: boolean;
+  error: Error | null;
+  dataSource: DataSource;
+  filterValues: typeof STATIC_FILTER_VALUES;
+}
+
+export const useHybridSymbols = (): UseHybridSymbolsReturn => {
+  const [dataSource, setDataSource] = useState<DataSource>('static');
+  const [symbols, setSymbols] = useState<SymbolData[]>(STATIC_SYMBOLS);
+
+  // Tentative de chargement des données API en arrière-plan
+  const { data: apiSymbols, isLoading: apiLoading, error: apiError } = useQuery({
+    queryKey: ['symbols-api'],
+    queryFn: async () => {
+      console.log('🔄 Tentative de chargement des symboles via API...');
+      const { data, error } = await supabase
+        .from('symbols')
+        .select('*');
+        
+      if (error) {
+        console.error('❌ Erreur API symboles:', error);
+        throw error;
+      }
+      
+      console.log('✅ Symboles API chargés:', data?.length || 0);
+      return (data as unknown) as SymbolData[];
+    },
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Fusion des données quand l'API réussit
+  useEffect(() => {
+    if (apiSymbols && apiSymbols.length > 0) {
+      console.log('🔄 Fusion des données statiques et API...');
+      
+      // Créer un Map pour éviter les doublons (priorité à l'API)
+      const symbolsMap = new Map<string, SymbolData>();
+      
+      // D'abord ajouter les symboles statiques
+      STATIC_SYMBOLS.forEach(symbol => {
+        symbolsMap.set(symbol.id, symbol);
+      });
+      
+      // Ensuite ajouter/remplacer avec les symboles API
+      apiSymbols.forEach(symbol => {
+        symbolsMap.set(symbol.id, symbol);
+      });
+      
+      const mergedSymbols = Array.from(symbolsMap.values());
+      setSymbols(mergedSymbols);
+      setDataSource('hybrid');
+      
+      console.log('✅ Données fusionnées:', mergedSymbols.length, 'symboles');
+    } else if (apiError) {
+      console.log('⚠️ API échouée, utilisation des données statiques uniquement');
+      setDataSource('static');
+      setSymbols(STATIC_SYMBOLS);
+    }
+  }, [apiSymbols, apiError]);
+
+  // Calcul des valeurs de filtres dynamiques basées sur les données actuelles
+  const filterValues = {
+    cultures: [...new Set([
+      ...STATIC_FILTER_VALUES.cultures,
+      ...symbols.map(s => s.culture)
+    ])].sort(),
+    periods: [...new Set([
+      ...STATIC_FILTER_VALUES.periods,
+      ...symbols.map(s => s.period)
+    ])].sort(),
+    functions: [...new Set([
+      ...STATIC_FILTER_VALUES.functions,
+      ...symbols.flatMap(s => s.function || [])
+    ])].sort(),
+    techniques: [...new Set([
+      ...STATIC_FILTER_VALUES.techniques,
+      ...symbols.flatMap(s => s.technique || [])
+    ])].sort(),
+    mediums: [...new Set([
+      ...STATIC_FILTER_VALUES.mediums,
+      ...symbols.flatMap(s => s.medium || [])
+    ])].sort(),
+  };
+
+  return {
+    symbols,
+    isLoading: apiLoading && dataSource === 'static', // Seulement loading au début
+    error: dataSource === 'static' ? apiError : null,
+    dataSource,
+    filterValues
+  };
+};

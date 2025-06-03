@@ -1,7 +1,5 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { SymbolData } from '@/types/supabase';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -11,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
 import { AdvancedFilters } from '@/components/search/AdvancedFilters';
 import { I18nText } from '@/components/ui/i18n-text';
-import { Search, FilterX } from 'lucide-react';
+import { Search, FilterX, Database, Wifi, WifiOff } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useHybridSymbols } from '@/hooks/useHybridSymbols';
 
 const SymbolsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -25,64 +24,43 @@ const SymbolsPage: React.FC = () => {
     mediums: [] as string[],
   });
   
-  // Fetch all symbols
-  const { data: symbols, isLoading } = useQuery({
-    queryKey: ['symbols'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('symbols')
-        .select('*');
-        
-      if (error) throw error;
-      return (data as unknown) as SymbolData[];
-    }
-  });
+  // Utilisation du système hybride
+  const { symbols, isLoading, dataSource, filterValues } = useHybridSymbols();
   
-  // Extract unique values for filters
-  const cultures = [...new Set(symbols?.map(s => s.culture) || [])];
-  const periods = [...new Set(symbols?.map(s => s.period) || [])];
-  const functions = [...new Set(symbols?.flatMap(s => s.function || []) || [])];
-  const techniques = [...new Set(symbols?.flatMap(s => s.technique || []) || [])];
-  const mediums = [...new Set(symbols?.flatMap(s => s.medium || []) || [])];
-  
-  // Filter symbols based on search term and filters
-  const filteredSymbols = symbols?.filter(symbol => {
-    // Text search
+  // Filtrage des symboles
+  const filteredSymbols = symbols.filter(symbol => {
+    // Recherche textuelle
     const matchesSearch = searchTerm === '' || 
       symbol.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       symbol.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       symbol.culture.toLowerCase().includes(searchTerm.toLowerCase()) ||
       symbol.period.toLowerCase().includes(searchTerm.toLowerCase());
       
-    // Filter by culture
+    // Filtres
     const matchesCulture = filters.cultures.length === 0 || 
       filters.cultures.includes(symbol.culture);
       
-    // Filter by period
     const matchesPeriod = filters.periods.length === 0 || 
       filters.periods.includes(symbol.period);
 
-    // Filter by function
     const matchesFunction = filters.functions.length === 0 ||
       (symbol.function && symbol.function.some(f => filters.functions.includes(f)));
 
-    // Filter by technique
     const matchesTechnique = filters.techniques.length === 0 ||
       (symbol.technique && symbol.technique.some(t => filters.techniques.includes(t)));
 
-    // Filter by medium
     const matchesMedium = filters.mediums.length === 0 ||
       (symbol.medium && symbol.medium.some(m => filters.mediums.includes(m)));
       
     return matchesSearch && matchesCulture && matchesPeriod && matchesFunction && matchesTechnique && matchesMedium;
   });
   
-  // Handle filter changes
+  // Gestion des filtres
   const handleFilterChange = (type: keyof typeof filters, value: string[]) => {
     setFilters(prev => ({ ...prev, [type]: value }));
   };
   
-  // Clear all filters
+  // Réinitialisation des filtres
   const clearFilters = () => {
     setFilters({ 
       cultures: [], 
@@ -93,6 +71,45 @@ const SymbolsPage: React.FC = () => {
     });
     setSearchTerm('');
   };
+
+  // Indicateur de source de données
+  const DataSourceIndicator = () => {
+    const getSourceConfig = () => {
+      switch (dataSource) {
+        case 'static':
+          return {
+            icon: WifiOff,
+            text: 'Données locales',
+            color: 'text-amber-600 bg-amber-50',
+            description: 'Affichage des données statiques'
+          };
+        case 'hybrid':
+          return {
+            icon: Database,
+            text: 'Données complètes',
+            color: 'text-green-600 bg-green-50',
+            description: 'Données locales + base de données'
+          };
+        case 'api':
+          return {
+            icon: Wifi,
+            text: 'Base de données',
+            color: 'text-blue-600 bg-blue-50',
+            description: 'Données de la base de données'
+          };
+      }
+    };
+
+    const config = getSourceConfig();
+    const Icon = config.icon;
+
+    return (
+      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        <Icon className="w-3 h-3" />
+        <span>{config.text}</span>
+      </div>
+    );
+  };
   
   return (
     <div className="container mx-auto p-4 pt-12 pb-20">
@@ -100,9 +117,12 @@ const SymbolsPage: React.FC = () => {
       
       <div className="flex flex-col justify-between items-start gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            <I18nText translationKey="symbols.page.title">Tous les Symboles</I18nText>
-          </h1>
+          <div className="flex items-center gap-4 mb-2">
+            <h1 className="text-3xl font-bold text-slate-900">
+              <I18nText translationKey="symbols.page.title">Tous les Symboles</I18nText>
+            </h1>
+            <DataSourceIndicator />
+          </div>
           <p className="text-slate-600">
             <I18nText translationKey="symbols.page.description">
               Explorez notre collection complète de symboles culturels du monde entier
@@ -112,7 +132,7 @@ const SymbolsPage: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Left sidebar with filters */}
+        {/* Sidebar avec filtres */}
         <div className="md:col-span-1">
           <Card className="p-4">
             <div className="mb-4">
@@ -145,11 +165,11 @@ const SymbolsPage: React.FC = () => {
             </div>
             
             <AdvancedFilters 
-              cultures={cultures}
-              periods={periods}
-              functions={functions}
-              techniques={techniques}
-              mediums={mediums}
+              cultures={filterValues.cultures}
+              periods={filterValues.periods}
+              functions={filterValues.functions}
+              techniques={filterValues.techniques}
+              mediums={filterValues.mediums}
               selectedFilters={filters}
               onFilterChange={handleFilterChange}
             />
@@ -169,7 +189,7 @@ const SymbolsPage: React.FC = () => {
                     {value}
                     <button 
                       onClick={() => handleFilterChange(type as keyof typeof filters, values.filter(v => v !== value))}
-                      className="ml-1 text-xs"
+                      className="ml-1 text-xs hover:text-red-500"
                     >
                       ×
                     </button>
@@ -186,11 +206,14 @@ const SymbolsPage: React.FC = () => {
           </Card>
         </div>
         
-        {/* Main content area */}
+        {/* Zone de contenu principal */}
         <div className="md:col-span-3">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+              <div className="text-center">
+                <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-slate-600">Chargement des symboles...</p>
+              </div>
             </div>
           ) : (
             <>
@@ -198,14 +221,20 @@ const SymbolsPage: React.FC = () => {
                 <div className="text-slate-600">
                   <I18nText 
                     translationKey="symbols.page.resultsCount" 
-                    params={{ count: filteredSymbols?.length || 0 }}
+                    params={{ count: filteredSymbols.length }}
                   >
-                    {filteredSymbols?.length || 0} symboles trouvés
+                    {filteredSymbols.length} symboles trouvés
                   </I18nText>
                 </div>
+                
+                {dataSource === 'static' && (
+                  <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                    Mode hors ligne
+                  </div>
+                )}
               </div>
               
-              <SymbolGrid symbols={filteredSymbols || []} />
+              <SymbolGrid symbols={filteredSymbols} />
             </>
           )}
         </div>
