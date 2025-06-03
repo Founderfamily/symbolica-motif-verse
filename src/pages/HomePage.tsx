@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Hero from '@/components/sections/Hero';
 import QuickAccess from '@/components/sections/QuickAccess';
@@ -8,7 +9,7 @@ import HowItWorks from '@/components/sections/HowItWorks';
 import Community from '@/components/sections/Community';
 import UploadTools from '@/components/sections/UploadTools';
 import Testimonials from '@/components/sections/Testimonials';
-import TimelineRoadmap from '@/components/sections/TimelineRoadmap';
+import RoadmapSection from '@/components/sections/RoadmapSection';
 import Gamification from '@/components/sections/Gamification';
 import CallToAction from '@/components/sections/CallToAction';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
@@ -126,12 +127,10 @@ const HomePage: React.FC = () => {
       
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'TimelineRoadmap')
+          ErrorHandler.handleComponentError(error, errorInfo, 'RoadmapSection')
         }
       >
-        <div className="py-16 bg-slate-50/50">
-          <TimelineRoadmap />
-        </div>
+        <RoadmapSection />
       </ErrorBoundary>
       
       <ErrorBoundary 
