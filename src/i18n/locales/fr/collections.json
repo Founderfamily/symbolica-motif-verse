@@ -2,11 +2,11 @@
 {
   "title": "Collections",
   "featured": {
-    "title": "Collections en Vedette",
+    "title": "Collections en Vedette", 
     "description": "Explorez des parcours thématiques à travers les symboles du monde entier",
     "discoverAll": "Découvrir Toutes les Collections"
   },
-  "featuredBadge": "Vedette",
+  "featuredBadge": "En vedette",
   "backToCollections": "Retour aux collections",
   "notFound": "Collection non trouvée",
   "share": "Partager",

@@ -23,6 +23,7 @@ const FeaturedCollectionsGrid: React.FC = () => {
   }
 
   if (!collections || collections.length === 0) {
+    console.log('No featured collections found:', collections);
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-medium mb-2 text-slate-700">
@@ -37,6 +38,7 @@ const FeaturedCollectionsGrid: React.FC = () => {
     );
   }
 
+  console.log('Featured collections data:', collections);
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       {collections.map((collection) => (

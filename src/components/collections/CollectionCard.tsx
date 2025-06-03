@@ -34,7 +34,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
             </CardTitle>
             {collection.is_featured && (
               <Badge variant="default">
-                <I18nText translationKey="collections.featured" />
+                <I18nText translationKey="collections.featuredBadge">Featured</I18nText>
               </Badge>
             )}
           </div>
@@ -44,7 +44,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
             {getTranslation('description')}
           </p>
           <div className="mt-4 text-sm text-amber-600 font-medium">
-            <I18nText translationKey="collections.explore" />
+            <I18nText translationKey="collections.explore">Explore →</I18nText>
           </div>
         </CardContent>
       </Card>
