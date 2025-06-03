@@ -1,5 +1,15 @@
 
 {
+  "page": {
+    "title": "All Symbols",
+    "description": "Explore our complete collection of cultural symbols from around the world",
+    "filters": "Filters",
+    "searchPlaceholder": "Search symbols...",
+    "clearFilters": "Clear all",
+    "activeFilters": "Active Filters",
+    "noFilters": "No active filters",
+    "resultsCount": "{{count}} symbols found"
+  },
   "symbolTriptych": {
     "original": "Original Image",
     "pattern": "Extracted Pattern",
