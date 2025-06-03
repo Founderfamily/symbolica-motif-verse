@@ -154,8 +154,7 @@ export class ErrorHandler {
       code: 'COMPONENT_ERROR',
       message: 'Une erreur s\'est produite lors du rendu du composant',
       details: { 
-        componentStack: errorInfo.componentStack,
-        errorBoundary: errorInfo.errorBoundary 
+        componentStack: errorInfo.componentStack
       },
       originalError: error,
       context
