@@ -1,6 +1,37 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { InterestGroup } from '@/types/interest-groups';
+
+/**
+ * Fetches a limited number of interest groups for display
+ */
+export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]> => {
+  try {
+    let query = supabase
+      .from('interest_groups')
+      .select('*')
+      .order('name');
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    if (!data) return [];
+
+    // Type cast to fix the type issue with translations
+    return data.map(group => ({
+      ...group,
+      translations: typeof group.translations === 'string' 
+        ? JSON.parse(group.translations)
+        : group.translations
+    })) as InterestGroup[];
+  } catch (error) {
+    console.error('Error fetching interest groups:', error);
+    return [];
+  }
+};
 
 /**
  * Fetches all interest groups
