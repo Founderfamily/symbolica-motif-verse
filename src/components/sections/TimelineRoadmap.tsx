@@ -18,38 +18,94 @@ interface RoadmapItem {
   display_order: number;
 }
 
+// Données statiques de fallback
+const FALLBACK_ROADMAP_ITEMS: RoadmapItem[] = [
+  {
+    id: '1',
+    phase: 'Phase 1',
+    title: { fr: 'Lancement de la plateforme', en: 'Platform Launch' },
+    description: { fr: 'Mise en ligne de la version initiale avec les fonctionnalités de base', en: 'Initial release with core features' },
+    is_current: false,
+    is_completed: true,
+    display_order: 1
+  },
+  {
+    id: '2',
+    phase: 'Phase 2',
+    title: { fr: 'Ajout des fonctionnalités communautaires', en: 'Community Features' },
+    description: { fr: 'Implémentation des groupes d\'intérêt et des discussions', en: 'Implementation of interest groups and discussions' },
+    is_current: true,
+    is_completed: false,
+    display_order: 2
+  },
+  {
+    id: '3',
+    phase: 'Phase 3',
+    title: { fr: 'Intelligence artificielle avancée', en: 'Advanced AI Features' },
+    description: { fr: 'Reconnaissance automatique de motifs et analyse prédictive', en: 'Automatic pattern recognition and predictive analysis' },
+    is_current: false,
+    is_completed: false,
+    display_order: 3
+  }
+];
+
 const TimelineRoadmap = () => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingFallback, setUsingFallback] = useState(false);
 
   useEffect(() => {
     const fetchRoadmapItems = async () => {
       try {
-        console.log('🚀 [TimelineRoadmap] Fetching roadmap items...');
+        console.log('🚀 [TimelineRoadmap] Testing Supabase connection...');
         setLoading(true);
         setError(null);
+        
+        // Test de connexion avec timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        console.log('🔗 [TimelineRoadmap] Supabase URL:', supabase.supabaseUrl);
+        console.log('🔑 [TimelineRoadmap] Has API Key:', !!supabase.supabaseKey);
         
         const { data, error } = await supabase
           .from('roadmap_items')
           .select('*')
-          .order('display_order');
+          .order('display_order')
+          .abortSignal(controller.signal);
+        
+        clearTimeout(timeoutId);
         
         if (error) {
-          console.error('❌ [TimelineRoadmap] Database error:', error);
-          throw new Error(`Database error: ${error.message}`);
+          console.error('❌ [TimelineRoadmap] Supabase error:', error);
+          throw new Error(`Erreur Supabase: ${error.message}`);
         }
         
         console.log('✅ [TimelineRoadmap] Data received:', data?.length || 0, 'items');
-        setRoadmapItems(data || []);
+        console.log('📄 [TimelineRoadmap] Sample data:', data?.[0]);
+        
+        if (data && data.length > 0) {
+          setRoadmapItems(data);
+          setUsingFallback(false);
+        } else {
+          console.log('⚠️ [TimelineRoadmap] No data returned, using fallback');
+          setRoadmapItems(FALLBACK_ROADMAP_ITEMS);
+          setUsingFallback(true);
+        }
         
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Erreur de chargement des données';
+        const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
         console.error('❌ [TimelineRoadmap] Error:', errorMessage);
-        setError(errorMessage);
-        setRoadmapItems([]);
+        
+        // Utiliser les données de fallback en cas d'erreur
+        console.log('🔄 [TimelineRoadmap] Using fallback data due to error');
+        setRoadmapItems(FALLBACK_ROADMAP_ITEMS);
+        setUsingFallback(true);
+        setError(`Connexion base de données échouée (utilisation des données locales): ${errorMessage}`);
+        
       } finally {
         setLoading(false);
         console.log('🏁 [TimelineRoadmap] Fetch completed');
@@ -59,7 +115,7 @@ const TimelineRoadmap = () => {
     fetchRoadmapItems();
   }, []);
 
-  console.log('🎨 [TimelineRoadmap] Rendering - loading:', loading, 'error:', error, 'items:', roadmapItems.length);
+  console.log('🎨 [TimelineRoadmap] Rendering - loading:', loading, 'error:', error, 'items:', roadmapItems.length, 'fallback:', usingFallback);
 
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
@@ -75,26 +131,19 @@ const TimelineRoadmap = () => {
             as="p" 
             className="text-xl text-slate-600"
           />
+          {usingFallback && (
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-amber-800 text-sm">
+                📱 Mode déconnecté - Affichage des données locales
+              </p>
+            </div>
+          )}
         </div>
         
         {loading ? (
           <div className="flex items-center justify-center h-32">
             <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
             <span className="ml-3 text-slate-600">Chargement de la feuille de route...</span>
-          </div>
-        ) : error ? (
-          <div className="text-center">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-              <h3 className="text-red-800 font-semibold mb-2">Erreur de chargement</h3>
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-            <EmptyState
-              icon={MapPin}
-              title="Impossible de charger la feuille de route"
-              description="Une erreur est survenue lors du chargement des étapes de développement."
-              actionLabel="Réessayer"
-              onAction={() => window.location.reload()}
-            />
           </div>
         ) : roadmapItems.length === 0 ? (
           <EmptyState
@@ -106,6 +155,13 @@ const TimelineRoadmap = () => {
           />
         ) : (
           <div className="relative">
+            {/* Message d'erreur non bloquant */}
+            {error && !usingFallback && (
+              <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <p className="text-orange-800 text-sm">{error}</p>
+              </div>
+            )}
+            
             {/* Vertical line */}
             <div className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-slate-200"></div>
             
@@ -132,12 +188,12 @@ const TimelineRoadmap = () => {
                     <div className="flex-1 min-w-0 pb-4">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-slate-800">
-                          {item.title?.[i18n.language] || item.title?.fr || 'Titre non disponible'}
+                          {item.title?.[i18n.language] || item.title?.fr || item.title || 'Titre non disponible'}
                         </h3>
                         {statusBadge}
                       </div>
                       <p className="text-slate-600">
-                        {item.description?.[i18n.language] || item.description?.fr || 'Description non disponible'}
+                        {item.description?.[i18n.language] || item.description?.fr || item.description || 'Description non disponible'}
                       </p>
                     </div>
                   </div>
