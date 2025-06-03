@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
+import { useTranslation } from '@/i18n/useTranslation';
+import { getRoadmapItems, RoadmapItem } from '@/services/roadmapService';
 
 const TimelineItem = ({ 
   phase, 
@@ -35,40 +37,44 @@ const TimelineItem = ({
 };
 
 const TimelineRoadmap = () => {
-  const roadmapItems = [
-    {
-      id: '1',
-      phase: 'Phase 0 - Terminée',
-      title: 'Conception et recherche',
-      description: 'Définition du projet, études préliminaires et identification des besoins des communautés de passionnés',
-      is_current: false,
-      is_completed: true
-    },
-    {
-      id: '2',
-      phase: 'Phase 1 - En cours',
-      title: 'Plateforme communautaire',
-      description: 'Lancement des outils de base permettant le partage, l\'analyse et la documentation collaborative des symboles patrimoniaux',
-      is_current: true,
-      is_completed: false
-    },
-    {
-      id: '3',
-      phase: 'Phase 2 - À venir',
-      title: 'Intelligence culturelle',
-      description: 'Déploiement des algorithmes avancés pour l\'identification, la comparaison et l\'analyse contextuelle des motifs',
-      is_current: false,
-      is_completed: false
-    },
-    {
-      id: '4',
-      phase: 'Phase 3 - À venir',
-      title: 'Écosystème global',
-      description: 'Expansion internationale et partenariats avec institutions culturelles pour créer un réseau mondial de préservation symbolique',
-      is_current: false,
-      is_completed: false
-    }
-  ];
+  const { i18n } = useTranslation();
+  const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRoadmapItems = async () => {
+      try {
+        const data = await getRoadmapItems();
+        setRoadmapItems(data);
+      } catch (error) {
+        console.error('Error fetching roadmap items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRoadmapItems();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-16 px-4 md:px-8 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-center">
+            <I18nText translationKey="sections.roadmap">Notre Feuille de Route</I18nText>
+          </h2>
+          <p className="text-center text-slate-600 mb-10">
+            <I18nText translationKey="roadmap.subtitle">
+              Symbolica se construit progressivement avec votre participation
+            </I18nText>
+          </p>
+          <div className="flex items-center justify-center h-64">
+            <div className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
   
   return (
     <section className="py-16 px-4 md:px-8 bg-white">
@@ -82,20 +88,26 @@ const TimelineRoadmap = () => {
           </I18nText>
         </p>
         
-        <div className="relative">
-          <div className="absolute left-[7px] top-0 bottom-0 w-[2px] bg-slate-200"></div>
-          
-          {roadmapItems.map((item) => (
-            <TimelineItem 
-              key={item.id}
-              phase={item.phase}
-              title={item.title}
-              description={item.description}
-              isCurrent={item.is_current}
-              isCompleted={item.is_completed}
-            />
-          ))}
-        </div>
+        {roadmapItems.length === 0 ? (
+          <div className="text-center text-slate-500">
+            <p>Aucune étape de la feuille de route disponible pour le moment.</p>
+          </div>
+        ) : (
+          <div className="relative">
+            <div className="absolute left-[7px] top-0 bottom-0 w-[2px] bg-slate-200"></div>
+            
+            {roadmapItems.map((item) => (
+              <TimelineItem 
+                key={item.id}
+                phase={item.phase}
+                title={item.title?.[i18n.language] || item.title?.fr || 'Titre non disponible'}
+                description={item.description?.[i18n.language] || item.description?.fr || 'Description non disponible'}
+                isCurrent={item.is_current}
+                isCompleted={item.is_completed}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
