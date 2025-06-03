@@ -16,46 +16,41 @@ const Community = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<InterestGroup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isEmpty, setIsEmpty] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGroups = async () => {
       try {
+        console.log('🚀 [Community] Fetching interest groups...');
         const data = await getInterestGroups(4); // Limit to 4 groups for display
-        setGroups(data);
-        setIsEmpty(data.length === 0);
-      } catch (error) {
-        console.error('Error fetching interest groups:', error);
-        setIsEmpty(true);
+        console.log('✅ [Community] Data received:', data?.length || 0, 'groups');
+        
+        setGroups(data || []);
+        setError(null);
+      } catch (err) {
+        console.error('❌ [Community] Error:', err);
+        setError(err instanceof Error ? err.message : 'Erreur de chargement');
+        setGroups([]);
       } finally {
         setLoading(false);
       }
     };
 
-    // Add timeout to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      setLoading(false);
-      setIsEmpty(true);
-    }, 2000);
+    // Timeout de sécurité raisonnable (10 secondes)
+    const safetyTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('⏰ [Community] Safety timeout reached');
+        setLoading(false);
+        setError('Délai d\'attente dépassé');
+      }
+    }, 10000);
 
     fetchGroups().finally(() => {
-      clearTimeout(timeoutId);
+      clearTimeout(safetyTimeout);
     });
 
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(safetyTimeout);
   }, []);
-
-  // Don't show loading spinner for more than 500ms
-  useEffect(() => {
-    const quickTimeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        setIsEmpty(true);
-      }
-    }, 500);
-
-    return () => clearTimeout(quickTimeout);
-  }, [loading]);
   
   return (
     <section className="py-16 px-4 md:px-8 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
@@ -78,8 +73,24 @@ const Community = () => {
         {loading ? (
           <div className="flex items-center justify-center h-32 mb-12">
             <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+            <span className="ml-3 text-slate-600">Chargement des groupes communautaires...</span>
           </div>
-        ) : isEmpty ? (
+        ) : error ? (
+          <div className="text-center mb-12">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+              <h3 className="text-red-800 font-semibold mb-2">Erreur de chargement</h3>
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+            <EmptyState
+              icon={Users}
+              title="Impossible de charger les groupes"
+              description="Une erreur est survenue lors du chargement des groupes communautaires."
+              actionLabel="Réessayer"
+              onAction={() => window.location.reload()}
+              className="mb-12"
+            />
+          </div>
+        ) : groups.length === 0 ? (
           <EmptyState
             icon={Users}
             title="Aucun groupe communautaire"

@@ -18,46 +18,36 @@ const TimelineRoadmap = () => {
   useEffect(() => {
     const fetchRoadmapItems = async () => {
       try {
-        console.log('🚀 [TimelineRoadmap] Starting fetch...');
-        console.log('🚀 [TimelineRoadmap] Service function:', typeof getRoadmapItems);
-        
+        console.log('🚀 [TimelineRoadmap] Fetching roadmap items...');
         const data = await getRoadmapItems();
+        console.log('✅ [TimelineRoadmap] Data received:', data?.length || 0, 'items');
         
-        console.log('✅ [TimelineRoadmap] Fetch successful');
-        console.log('📊 [TimelineRoadmap] Items count:', data?.length || 0);
-        console.log('📋 [TimelineRoadmap] Raw data:', data);
-        
-        if (data && Array.isArray(data)) {
-          setRoadmapItems(data);
-          setError(null);
-          console.log('✅ [TimelineRoadmap] State updated with items:', data.length);
-        } else {
-          console.log('⚠️ [TimelineRoadmap] Data is not an array:', typeof data);
-          setRoadmapItems([]);
-          setError('Invalid data format');
-        }
+        setRoadmapItems(data || []);
+        setError(null);
       } catch (err) {
-        console.error('❌ [TimelineRoadmap] Error caught:', err);
-        console.error('❌ [TimelineRoadmap] Error type:', typeof err);
-        console.error('❌ [TimelineRoadmap] Error message:', err instanceof Error ? err.message : String(err));
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.error('❌ [TimelineRoadmap] Error:', err);
+        setError(err instanceof Error ? err.message : 'Erreur de chargement');
         setRoadmapItems([]);
       } finally {
-        console.log('🏁 [TimelineRoadmap] Setting loading to false');
         setLoading(false);
       }
     };
 
-    fetchRoadmapItems();
-  }, []);
+    // Timeout de sécurité raisonnable (10 secondes)
+    const safetyTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('⏰ [TimelineRoadmap] Safety timeout reached');
+        setLoading(false);
+        setError('Délai d\'attente dépassé');
+      }
+    }, 10000);
 
-  // Debug current state
-  console.log('🔍 [TimelineRoadmap] Current state:', {
-    loading,
-    error,
-    itemsCount: roadmapItems.length,
-    items: roadmapItems
-  });
+    fetchRoadmapItems().finally(() => {
+      clearTimeout(safetyTimeout);
+    });
+
+    return () => clearTimeout(safetyTimeout);
+  }, []);
 
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">

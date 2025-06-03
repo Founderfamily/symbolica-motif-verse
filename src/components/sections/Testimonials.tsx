@@ -14,46 +14,41 @@ const Testimonials = () => {
   const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isEmpty, setIsEmpty] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
+        console.log('🚀 [Testimonials] Fetching testimonials...');
         const data = await getTestimonials(true); // Only fetch active testimonials
-        setTestimonials(data);
-        setIsEmpty(data.length === 0);
-      } catch (error) {
-        console.error('Error fetching testimonials:', error);
-        setIsEmpty(true);
+        console.log('✅ [Testimonials] Data received:', data?.length || 0, 'testimonials');
+        
+        setTestimonials(data || []);
+        setError(null);
+      } catch (err) {
+        console.error('❌ [Testimonials] Error:', err);
+        setError(err instanceof Error ? err.message : 'Erreur de chargement');
+        setTestimonials([]);
       } finally {
         setLoading(false);
       }
     };
 
-    // Add timeout to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      setLoading(false);
-      setIsEmpty(true);
-    }, 2000);
+    // Timeout de sécurité raisonnable (10 secondes)
+    const safetyTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('⏰ [Testimonials] Safety timeout reached');
+        setLoading(false);
+        setError('Délai d\'attente dépassé');
+      }
+    }, 10000);
 
     fetchTestimonials().finally(() => {
-      clearTimeout(timeoutId);
+      clearTimeout(safetyTimeout);
     });
 
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(safetyTimeout);
   }, []);
-
-  // Don't show loading spinner for more than 500ms
-  useEffect(() => {
-    const quickTimeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        setIsEmpty(true);
-      }
-    }, 500);
-
-    return () => clearTimeout(quickTimeout);
-  }, [loading]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -73,8 +68,23 @@ const Testimonials = () => {
       {loading ? (
         <div className="flex items-center justify-center h-32">
           <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+          <span className="ml-3 text-slate-600">Chargement des témoignages...</span>
         </div>
-      ) : isEmpty ? (
+      ) : error ? (
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+            <h3 className="text-red-800 font-semibold mb-2">Erreur de chargement</h3>
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+          <EmptyState
+            icon={MessageSquare}
+            title="Impossible de charger les témoignages"
+            description="Une erreur est survenue lors du chargement des témoignages."
+            actionLabel="Réessayer"
+            onAction={() => window.location.reload()}
+          />
+        </div>
+      ) : testimonials.length === 0 ? (
         <EmptyState
           icon={MessageSquare}
           title="Aucun témoignage"
