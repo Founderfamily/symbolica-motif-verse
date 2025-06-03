@@ -20,6 +20,7 @@ import SymbolsPage from '@/pages/SymbolsPage';
 import MCPSearchPage from '@/pages/MCPSearchPage';
 import Auth from '@/pages/Auth';
 import NewContribution from '@/pages/NewContribution';
+import TrendingPage from '@/pages/TrendingPage';
 
 // Admin pages
 import AdminLayout from '@/pages/Admin/AdminLayout';
@@ -82,6 +83,7 @@ function App() {
                 <Route path="/map" element={<MapExplorer />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/mcp-search" element={<MCPSearchPage />} />
+                <Route path="/trending" element={<TrendingPage />} />
                 <Route path="/profile/:username" element={<UserProfilePage />} />
                 <Route path="/profile/:username/edit" element={<Profile />} />
                 <Route path="/enterprise" element={<EnterprisePage />} />
