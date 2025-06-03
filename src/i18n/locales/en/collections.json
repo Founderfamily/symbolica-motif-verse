@@ -1,7 +1,12 @@
 
 {
   "title": "Collections",
-  "featured": "Featured",
+  "featured": {
+    "title": "Featured Collections",
+    "description": "Explore thematic journeys through symbols from around the world",
+    "discoverAll": "Discover All Collections"
+  },
+  "featuredBadge": "Featured",
   "backToCollections": "Back to collections",
   "notFound": "Collection not found",
   "share": "Share",
@@ -10,5 +15,21 @@
   "culturesCount": "Cultures", 
   "periodsCount": "Periods",
   "symbolsInCollection": "Symbols in collection",
-  "noSymbols": "No symbols in this collection"
+  "noSymbols": "No symbols in this collection",
+  "explore": "Explore →",
+  "noCollections": "No collections available",
+  "noCollectionsMessage": "Collections will be available soon. Come back later!",
+  "noFeaturedCollections": "No featured collections",
+  "noFeaturedCollectionsMessage": "Thematic collections coming soon!",
+  "createCollection": "Create Collection",
+  "heroTitle": "Cultural Collections",
+  "heroDescription": "Explore thematic journeys through symbols from around the world. Discover fascinating connections between cultures and eras.",
+  "heroStats": {
+    "mysteries": "Mysteries & Secrets",
+    "geometry": "Sacred Geometry",
+    "mythologies": "Mythologies", 
+    "digital": "Digital Era"
+  },
+  "allCollections": "All Collections",
+  "allCollectionsCount": "thematic journeys available"
 }

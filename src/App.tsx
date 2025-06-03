@@ -14,6 +14,7 @@ import Profile from '@/pages/Profile';
 import EnterprisePage from '@/pages/EnterprisePage';
 import NotFound from '@/pages/NotFound';
 import CollectionsPage from '@/pages/CollectionsPage';
+import CollectionDetailPage from '@/pages/CollectionDetailPage';
 import MobileAppPage from '@/pages/MobileApp';
 import MapExplorer from '@/pages/MapExplorer';
 import SymbolsPage from '@/pages/SymbolsPage';
@@ -88,6 +89,7 @@ function App() {
                 <Route path="/profile/:username/edit" element={<Profile />} />
                 <Route path="/enterprise" element={<EnterprisePage />} />
                 <Route path="/collections" element={<CollectionsPage />} />
+                <Route path="/collections/:slug" element={<CollectionDetailPage />} />
                 <Route path="/community" element={<CommunityPage />} />
                 <Route path="/legal" element={<LegalPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
