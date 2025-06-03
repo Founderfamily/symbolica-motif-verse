@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SymbolData } from '@/types/supabase';
 import { Input } from '@/components/ui/input';
@@ -26,6 +25,14 @@ const SymbolsPage: React.FC = () => {
   
   // Utilisation du système hybride
   const { symbols, isLoading, dataSource, filterValues } = useHybridSymbols();
+  
+  console.log('🔍 SymbolsPage - État:', { 
+    isLoading, 
+    dataSource, 
+    symbolsCount: symbols.length,
+    searchTerm,
+    activeFilters: Object.values(filters).flat().length
+  });
   
   // Filtrage des symboles
   const filteredSymbols = symbols.filter(symbol => {
@@ -213,6 +220,9 @@ const SymbolsPage: React.FC = () => {
               <div className="text-center">
                 <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-slate-600">Chargement des symboles...</p>
+                <p className="text-xs text-slate-400 mt-2">
+                  {console.log('⏳ Affichage du loading...') && 'Initialisation...'}
+                </p>
               </div>
             </div>
           ) : (

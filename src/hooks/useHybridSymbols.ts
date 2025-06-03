@@ -18,6 +18,9 @@ interface UseHybridSymbolsReturn {
 export const useHybridSymbols = (): UseHybridSymbolsReturn => {
   const [dataSource, setDataSource] = useState<DataSource>('static');
   const [symbols, setSymbols] = useState<SymbolData[]>(STATIC_SYMBOLS);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  console.log('🔧 useHybridSymbols - État initial:', { dataSource, symbolsCount: symbols.length });
 
   // Tentative de chargement des données API en arrière-plan
   const { data: apiSymbols, isLoading: apiLoading, error: apiError } = useQuery({
@@ -40,6 +43,16 @@ export const useHybridSymbols = (): UseHybridSymbolsReturn => {
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  // Initialisation immédiate avec les données statiques
+  useEffect(() => {
+    if (!isInitialized) {
+      console.log('🚀 Initialisation avec données statiques');
+      setSymbols(STATIC_SYMBOLS);
+      setDataSource('static');
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
 
   // Fusion des données quand l'API réussit
   useEffect(() => {
@@ -64,12 +77,12 @@ export const useHybridSymbols = (): UseHybridSymbolsReturn => {
       setDataSource('hybrid');
       
       console.log('✅ Données fusionnées:', mergedSymbols.length, 'symboles');
-    } else if (apiError) {
+    } else if (apiError && isInitialized) {
       console.log('⚠️ API échouée, utilisation des données statiques uniquement');
       setDataSource('static');
       setSymbols(STATIC_SYMBOLS);
     }
-  }, [apiSymbols, apiError]);
+  }, [apiSymbols, apiError, isInitialized]);
 
   // Calcul des valeurs de filtres dynamiques basées sur les données actuelles
   const filterValues = {
@@ -95,10 +108,22 @@ export const useHybridSymbols = (): UseHybridSymbolsReturn => {
     ])].sort(),
   };
 
+  // isLoading est true seulement si on n'est pas encore initialisé
+  // Une fois initialisé avec les données statiques, on n'est plus en loading
+  const isLoading = !isInitialized;
+
+  console.log('📊 useHybridSymbols - État final:', { 
+    isLoading, 
+    isInitialized, 
+    dataSource, 
+    symbolsCount: symbols.length,
+    apiLoading 
+  });
+
   return {
     symbols,
-    isLoading: apiLoading && dataSource === 'static', // Seulement loading au début
-    error: dataSource === 'static' ? apiError : null,
+    isLoading,
+    error: dataSource === 'static' && !apiLoading ? apiError : null,
     dataSource,
     filterValues
   };
