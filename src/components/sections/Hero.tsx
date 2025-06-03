@@ -1,43 +1,10 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ArrowRight, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTranslation } from '@/i18n/useTranslation';
-import { ContentSection, getContentSectionByKey } from '@/services/contentService';
 import { I18nText } from '@/components/ui/i18n-text';
 
 const Hero = () => {
-  const { i18n } = useTranslation();
-  const [heroContent, setHeroContent] = useState<ContentSection | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  
-  useEffect(() => {
-    const fetchHeroContent = async () => {
-      console.log('Hero: Starting to fetch content...');
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const content = await getContentSectionByKey('hero');
-        console.log('Hero: Content fetched:', content);
-        setHeroContent(content);
-      } catch (error) {
-        console.error('Hero: Error fetching content:', error);
-        setError(error as Error);
-        // Continue with fallback content instead of failing completely
-      } finally {
-        setLoading(false);
-        console.log('Hero: Loading finished');
-      }
-    };
-    
-    fetchHeroContent();
-  }, []);
-  
-  const lang = i18n.language || 'fr';
-  console.log('Hero: Current language:', lang);
-  
   return (
     <section className="relative pt-10 md:pt-16 px-4 md:px-8 max-w-7xl mx-auto">
       {/* Decorative background elements */}
@@ -54,29 +21,18 @@ const Hero = () => {
           </div>
         </div>
 
-        {loading ? (
-          <div className="space-y-4">
-            <div className="h-12 w-3/4 mx-auto bg-slate-200 animate-pulse rounded"></div>
-            <div className="h-6 w-2/3 mx-auto bg-slate-200 animate-pulse rounded"></div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
-              {(heroContent?.title?.[lang]) || (
-                <I18nText translationKey="hero.heading">
-                  Découvrez le patrimoine symbolique mondial
-                </I18nText>
-              )}
-            </h1>
-            <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
-              {(heroContent?.subtitle?.[lang]) || (
-                <I18nText translationKey="hero.subheading">
-                  Explorez, contribuez et apprenez sur les motifs culturels à travers les âges
-                </I18nText>
-              )}
-            </p>
-          </div>
-        )}
+        <div className="space-y-4">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
+            <I18nText translationKey="hero.heading">
+              Découvrez le patrimoine symbolique mondial
+            </I18nText>
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
+            <I18nText translationKey="hero.subheading">
+              Explorez, contribuez et apprenez sur les motifs culturels à travers les âges
+            </I18nText>
+          </p>
+        </div>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
           <Button size="lg" className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-lg shadow-amber-600/20 transform hover:-translate-y-1 transition-all">
