@@ -1,10 +1,9 @@
-
 # Documentation Complète de la Page d'Accueil - Symbolica
 ## Version 1.0.1 - Mise à jour de Stabilité
 
 ## Vue d'ensemble
 
-La page d'accueil de Symbolica est construite autour du composant principal `HomePage.tsx` qui orchestre 13 sections distinctes pour présenter la plateforme de patrimoine symbolique mondial. Chaque section a un rôle spécifique dans l'expérience utilisateur et est maintenant protégée par un système complet de gestion d'erreurs et de monitoring des performances.
+La page d'accueil de Symbolica est construite autour du composant principal `HomePage.tsx` qui orchestre 12 sections distinctes pour présenter la plateforme de patrimoine symbolique mondial. Chaque section a un rôle spécifique dans l'expérience utilisateur et est maintenant protégée par un système complet de gestion d'erreurs et de monitoring des performances.
 
 ## Architecture Technique
 
@@ -94,9 +93,7 @@ La page d'accueil utilise maintenant des ErrorBoundary pour chaque section majeu
 
 ### Monitoring des Performances
 
-**Fichiers** : 
-- `src/hooks/usePerformanceMonitor.ts`
-- `src/hooks/usePerformance.ts`
+**Fichier** : `src/hooks/usePerformanceMonitor.ts`
 
 **Métriques collectées** :
 - Temps de montage des composants
@@ -115,7 +112,7 @@ La page d'accueil utilise maintenant des ErrorBoundary pour chaque section majeu
 ### Composant Principal - HomePage.tsx
 
 ```typescript
-// Structure de rendu des sections avec ErrorBoundary
+// Structure de rendu des sections avec ErrorBoundary (ordre correct)
 1. Hero (ErrorBoundary)
 2. QuickAccess (py-16, ErrorBoundary)
 3. FeaturedCollections (py-16 bg-slate-50/50, ErrorBoundary)
@@ -151,17 +148,17 @@ La page d'accueil utilise maintenant des ErrorBoundary pour chaque section majeu
 - Éléments décoratifs de fond (cercles flous)
 
 **Éléments visuels**:
-- Badge: Version Alpha 0.1 avec gradient amber
+- Badge: Version 1.0.1 avec gradient amber
 - Titre: Gradient de slate-800 à slate-600
 - Arrière-plan: 3 cercles colorés avec blur-3xl
 - Boutons: Gradient amber + outline avec hover effects
 
 **Traductions utilisées**:
-- `app.version`
-- `hero.heading`
-- `hero.subheading`
-- `hero.community`
-- `hero.explore`
+- `app.version` - "Version 1.0.1"
+- `hero.heading` - "Découvrez le patrimoine symbolique mondial"
+- `hero.subheading` - "Explorez, contribuez et apprenez sur les motifs culturels à travers les âges"
+- `hero.community` - "Rejoindre une communauté"
+- `hero.explore` - "Commencer l'exploration"
 
 **Interactions**:
 - Hover effects sur les boutons avec translation-y
@@ -500,8 +497,8 @@ La page d'accueil utilise maintenant des ErrorBoundary pour chaque section majeu
 **Fichiers de traduction français** :
 ```
 src/i18n/locales/fr/
-├── app.json          # Version de l'application
-├── hero.json         # Section Hero
+├── app.json          # Version de l'application (v1.0.1)
+├── hero.json         # Section Hero (corrigé)
 ├── callToAction.json # Appel à l'action
 ├── sections.json     # Titres de sections générales
 ├── howItWorks.json   # Comment ça marche
@@ -534,12 +531,12 @@ export type TranslationKeyPaths =
   // ...autres types
 ```
 
-### Compatibilité Backward
+### Compatibilité et Migration
 
 - Support des anciens appels `t()`
-- Migration progressive
-- Fallback vers l'ancien système
-- Documentation de migration
+- Migration progressive des composants
+- Validation automatique des clés
+- Documentation de migration disponible
 
 ---
 
@@ -876,27 +873,27 @@ Plus de 20 icônes utilisées à travers les sections:
 
 ## Changelog Version 1.0.1
 
-### ✅ Ajouts de Stabilité
+### ✅ Corrections Critiques
 
-1. **ErrorBoundary System**
+1. **Synchronisation des Traductions**
+   - Correction `hero.json` pour correspondre à l'affichage
+   - Mise à jour du badge de version (1.0.1)
+   - Cohérence entre documentation et code
+
+2. **ErrorBoundary System**
    - Isolation d'erreurs par section
    - Fallback UI gracieux
    - Error reporting automatique
 
-2. **SafeImage Component**
+3. **SafeImage Component**
    - Gestion d'erreurs de chargement
    - Système de fallback intelligent
    - Placeholder loading states
 
-3. **Performance Monitoring**
+4. **Performance Monitoring**
    - Métriques temps réel
    - Alertes de performance
    - Stockage local des données
-
-4. **Centralized Error Handling**
-   - ErrorHandler singleton
-   - Toast notifications
-   - Structured logging
 
 ### 🔄 Améliorations Système
 
@@ -917,9 +914,9 @@ Plus de 20 icônes utilisées à travers les sections:
 
 ### 📝 Documentation
 
-1. **Version tracking**
-2. **Architecture updates**
-3. **Migration guides**
-4. **Best practices**
+1. **Correction des incohérences**
+2. **Références de fichiers mises à jour**
+3. **Architecture documentation**
+4. **Migration guides**
 
-Cette documentation couvre l'intégralité de la page d'accueil version 1.0.1 avec toutes les améliorations de stabilité, le système de monitoring, et la restructuration des traductions. Elle peut servir de référence complète pour la maintenance, l'évolution et la compréhension du code.
+Cette documentation corrigée reflète maintenant fidèlement l'état actuel du code et élimine les incohérences critiques identifiées.
