@@ -29,7 +29,7 @@ const RoadmapSection = () => {
         const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion à Supabase';
         console.error('❌ [RoadmapSection] Erreur lors de la récupération:', errorMessage);
         setError(errorMessage);
-        // PAS DE FALLBACK ICI - on laisse items vide pour afficher l'erreur
+        // PAS DE FALLBACK - on laisse items vide pour afficher l'erreur
       } finally {
         setLoading(false);
         console.log('🏁 [RoadmapSection] Chargement terminé');
@@ -108,7 +108,7 @@ const RoadmapSection = () => {
     );
   }
 
-  // Aucune donnée
+  // Aucune donnée mais pas d'erreur
   if (items.length === 0) {
     return (
       <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
@@ -185,6 +185,7 @@ const RoadmapSection = () => {
           <div className="mt-8 p-4 bg-gray-100 rounded text-sm">
             <p><strong>Debug:</strong> {items.length} éléments chargés depuis Supabase</p>
             <p><strong>Phases:</strong> {items.map(item => item.phase).join(', ')}</p>
+            <p><strong>Données:</strong> {JSON.stringify(items.map(item => ({ id: item.id, phase: item.phase, completed: item.is_completed, current: item.is_current })), null, 2)}</p>
           </div>
         )}
       </div>
