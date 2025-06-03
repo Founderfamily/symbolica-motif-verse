@@ -12,10 +12,12 @@ interface RoadmapTimelineProps {
 export const RoadmapTimeline = ({ items, error, usingFallback }: RoadmapTimelineProps) => {
   return (
     <div className="relative">
-      {/* Message d'erreur non bloquant */}
-      {error && !usingFallback && (
-        <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-          <p className="text-orange-800 text-sm">{error}</p>
+      {/* Message d'erreur discret */}
+      {error && usingFallback && (
+        <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-amber-800 text-sm">
+            ⚠️ Données temporaires affichées - {error}
+          </p>
         </div>
       )}
       

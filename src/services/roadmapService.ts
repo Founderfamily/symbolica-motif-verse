@@ -13,7 +13,7 @@ export interface RoadmapItem {
   updated_at?: string;
 }
 
-// Données statiques de fallback
+// Données statiques de fallback (réduites)
 const FALLBACK_ROADMAP_ITEMS: RoadmapItem[] = [
   {
     id: '1',
@@ -32,43 +32,29 @@ const FALLBACK_ROADMAP_ITEMS: RoadmapItem[] = [
     is_current: true,
     is_completed: false,
     display_order: 2
-  },
-  {
-    id: '3',
-    phase: 'Phase 3',
-    title: { fr: 'Intelligence artificielle avancée', en: 'Advanced AI Features' },
-    description: { fr: 'Reconnaissance automatique de motifs et analyse prédictive', en: 'Automatic pattern recognition and predictive analysis' },
-    is_current: false,
-    is_completed: false,
-    display_order: 3
   }
 ];
 
 export const getRoadmapItemsWithFallback = async (): Promise<{ items: RoadmapItem[], usingFallback: boolean, error?: string }> => {
   try {
-    console.log('🚀 [RoadmapService] Testing Supabase connection...');
-    
-    // Test de connexion avec timeout de 5 secondes
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    console.log('🔗 [RoadmapService] Attempting to fetch roadmap data...');
+    console.log('🚀 [RoadmapService] Fetching roadmap data from database...');
     
     const { data, error } = await supabase
       .from('roadmap_items')
       .select('*')
-      .order('display_order')
-      .abortSignal(controller.signal);
-    
-    clearTimeout(timeoutId);
+      .order('display_order');
     
     if (error) {
       console.error('❌ [RoadmapService] Supabase error:', error);
-      throw new Error(`Erreur Supabase: ${error.message}`);
+      console.log('🔄 [RoadmapService] Using fallback data due to error');
+      return { 
+        items: FALLBACK_ROADMAP_ITEMS, 
+        usingFallback: true, 
+        error: `Erreur de base de données: ${error.message}` 
+      };
     }
     
     console.log('✅ [RoadmapService] Data received:', data?.length || 0, 'items');
-    console.log('📄 [RoadmapService] Sample data:', data?.[0]);
     
     if (data && data.length > 0) {
       return { items: data, usingFallback: false };
@@ -81,12 +67,10 @@ export const getRoadmapItemsWithFallback = async (): Promise<{ items: RoadmapIte
     const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
     console.error('❌ [RoadmapService] Error:', errorMessage);
     
-    // Utiliser les données de fallback en cas d'erreur
-    console.log('🔄 [RoadmapService] Using fallback data due to error');
     return { 
       items: FALLBACK_ROADMAP_ITEMS, 
       usingFallback: true, 
-      error: `Connexion base de données échouée (utilisation des données locales): ${errorMessage}` 
+      error: `Connexion échouée: ${errorMessage}` 
     };
   }
 };
