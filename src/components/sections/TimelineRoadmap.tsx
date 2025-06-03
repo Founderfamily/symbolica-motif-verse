@@ -64,12 +64,11 @@ const TimelineRoadmap = () => {
         setLoading(true);
         setError(null);
         
-        // Test de connexion avec timeout
+        // Test de connexion avec timeout de 5 secondes
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         
-        console.log('🔗 [TimelineRoadmap] Supabase URL:', supabase.supabaseUrl);
-        console.log('🔑 [TimelineRoadmap] Has API Key:', !!supabase.supabaseKey);
+        console.log('🔗 [TimelineRoadmap] Attempting to fetch roadmap data...');
         
         const { data, error } = await supabase
           .from('roadmap_items')
