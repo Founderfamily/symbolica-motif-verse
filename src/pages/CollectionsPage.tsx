@@ -25,7 +25,7 @@ const CollectionsPage = () => {
               <I18nText translationKey="collections.heroTitle">Cultural Collections</I18nText>
             </h1>
             <Badge variant="outline" className="text-amber-600 border-amber-600">
-              {allCollections?.length || 0} collections
+              {allCollections?.length || 0} <I18nText translationKey="collections.collectionsUnit">collections</I18nText>
             </Badge>
           </div>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">

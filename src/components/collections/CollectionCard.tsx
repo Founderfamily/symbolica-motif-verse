@@ -15,21 +15,38 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
   const { currentLanguage } = useTranslation();
 
   const getTranslation = (field: string) => {
-    const translation = collection.collection_translations?.find(
+    // Find translation for current language first
+    const currentTranslation = collection.collection_translations?.find(
       (t: any) => t.language === currentLanguage
     );
-    const value = translation?.[field];
     
-    // Fallback logic: if current language translation is missing, try the other language
-    if (!value && collection.collection_translations?.length > 0) {
-      const fallbackTranslation = collection.collection_translations.find(
-        (t: any) => t.language !== currentLanguage
-      );
-      console.log('Using fallback translation for', field, ':', fallbackTranslation?.[field]);
-      return fallbackTranslation?.[field] || `[${field} missing]`;
+    if (currentTranslation?.[field] && currentTranslation[field].trim()) {
+      return currentTranslation[field];
     }
     
-    return value || `[${field} missing]`;
+    // If current language translation is missing or empty, use any available translation
+    // but prefer the opposite language (en/fr)
+    const fallbackLang = currentLanguage === 'fr' ? 'en' : 'fr';
+    const fallbackTranslation = collection.collection_translations?.find(
+      (t: any) => t.language === fallbackLang
+    );
+    
+    if (fallbackTranslation?.[field] && fallbackTranslation[field].trim()) {
+      console.log(`Using ${fallbackLang} fallback for collection ${collection.id} field ${field}`);
+      return fallbackTranslation[field];
+    }
+    
+    // Last resort: use any translation available
+    const anyTranslation = collection.collection_translations?.find(
+      (t: any) => t[field] && t[field].trim()
+    );
+    
+    if (anyTranslation?.[field]) {
+      console.log(`Using any available translation for collection ${collection.id} field ${field}`);
+      return anyTranslation[field];
+    }
+    
+    return `[${field} missing]`;
   };
 
   return (
