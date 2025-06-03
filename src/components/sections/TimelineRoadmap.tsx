@@ -18,29 +18,34 @@ const TimelineRoadmap = () => {
   useEffect(() => {
     const fetchRoadmapItems = async () => {
       try {
-        console.log('🚀 [TimelineRoadmap] Fetching roadmap items...');
-        const data = await getRoadmapItems();
+        console.log('🚀 [TimelineRoadmap] Starting fetch...');
+        setLoading(true);
+        setError(null);
+        
+        const data = await getRoadmapItems(3); // 3 retries
         console.log('✅ [TimelineRoadmap] Data received:', data?.length || 0, 'items');
         
         setRoadmapItems(data || []);
         setError(null);
       } catch (err) {
-        console.error('❌ [TimelineRoadmap] Error:', err);
-        setError(err instanceof Error ? err.message : 'Erreur de chargement');
+        const errorMessage = err instanceof Error ? err.message : 'Erreur de chargement des données';
+        console.error('❌ [TimelineRoadmap] Error:', errorMessage);
+        setError(errorMessage);
         setRoadmapItems([]);
       } finally {
         setLoading(false);
+        console.log('🏁 [TimelineRoadmap] Fetch completed');
       }
     };
 
-    // Timeout de sécurité raisonnable (10 secondes)
+    // Safety timeout of 30 seconds
     const safetyTimeout = setTimeout(() => {
       if (loading) {
-        console.log('⏰ [TimelineRoadmap] Safety timeout reached');
+        console.log('⏰ [TimelineRoadmap] 30s safety timeout reached');
         setLoading(false);
-        setError('Délai d\'attente dépassé');
+        setError('Délai d\'attente dépassé après 30 secondes');
       }
-    }, 10000);
+    }, 30000);
 
     fetchRoadmapItems().finally(() => {
       clearTimeout(safetyTimeout);
@@ -48,6 +53,8 @@ const TimelineRoadmap = () => {
 
     return () => clearTimeout(safetyTimeout);
   }, []);
+
+  console.log('🎨 [TimelineRoadmap] Rendering - loading:', loading, 'error:', error, 'items:', roadmapItems.length);
 
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
