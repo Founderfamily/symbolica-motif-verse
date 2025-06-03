@@ -11,8 +11,8 @@ import { useNavigate } from 'react-router-dom';
 interface RoadmapItem {
   id: string;
   phase: string;
-  title: Record<string, string>;
-  description: Record<string, string>;
+  title: any; // Database returns Json type
+  description: any; // Database returns Json type
   is_current: boolean;
   is_completed: boolean;
   display_order: number;
