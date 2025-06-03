@@ -1,58 +1,42 @@
 
 {
-  "community": {
-    "title": "Community Hub",
-    "subtitle": "Join interest groups and connect with fellow researchers",
-    "createGroup": "Create Group",
-    "createNewGroup": "Create New Group",
-    "groupName": "Group Name",
-    "description": "Description",
-    "themeColor": "Theme Color",
-    "publicGroup": "Public Group",
+  "title": "Community Hub",
+  "description": "Join thematic groups and connect with fellow researchers passionate about cultural symbols",
+  "stats": {
     "members": "members",
-    "discoveries": "discoveries",
-    "member": "Member",
-    "public": "Public",
-    "private": "Private",
-    "viewGroup": "View Group",
-    "join": "Join",
-    "leave": "Leave",
-    "unfollow": "Unfollow",
-    "follow": "Follow",
-    "totalGroups": "Active Groups",
-    "totalMembers": "Total Members",
-    "totalDiscoveries": "Discoveries Shared",
-    "allGroups": "All Groups",
-    "popular": "Popular",
-    "mostActive": "Most Active",
-    "noGroups": "No groups found",
-    "noGroupsDescription": "Try adjusting your search or create a new group",
-    "shareThoughts": "Share your thoughts",
-    "post": "Post",
-    "share": "Share",
-    "noDiscussions": "No discussions yet",
-    "startConversation": "Be the first to start a conversation in this group",
-    "discussion": "Discussion",
-    "sharedDiscoveries": "Shared Discoveries",
-    "groupMembers": "Group Members",
-    "membersComingSoon": "Member list functionality coming soon",
-    "discoveriesComingSoon": "Discoveries sharing functionality coming soon",
-    "groupNotFound": "Group not found",
-    "groupNotFoundDescription": "The group you're looking for doesn't exist or has been removed.",
-    "joinToSeeDiscussions": "Join to see discussions",
-    "joinToParticipate": "Join this group to participate in discussions and see posts from other members",
-    "noMembers": "No members yet",
-    "topContributors": "Top Contributors",
-    "recentActivity": "Recent Activity",
-    "noContributors": "No contributors yet",
-    "noActivity": "No recent activity",
-    "followers": "followers",
-    "following": "following",
-    "contributions": "contributions",
-    "userNotFound": "User not found",
-    "userContributions": "User Contributions",
-    "contributionsComingSoon": "Contributions list functionality coming soon",
-    "followersComingSoon": "Followers list functionality coming soon",
-    "followingComingSoon": "Following list functionality coming soon"
+    "discoveries": "discoveries", 
+    "join": "Join"
+  },
+  "groups": {
+    "artDeco": {
+      "name": "Decorative Arts",
+      "culture": "Art Deco"
+    },
+    "celticSymbolism": {
+      "name": "Celtic Symbolism",
+      "culture": "Celtic"
+    },
+    "japanesePatterns": {
+      "name": "Japanese Patterns", 
+      "culture": "Japanese"
+    },
+    "islamicArt": {
+      "name": "Islamic Art",
+      "culture": "Islamic"
+    }
+  },
+  "features": {
+    "thematicCommunities": {
+      "title": "Thematic Communities",
+      "description": "Join specialized groups by culture, era, or symbol type"
+    },
+    "personalSpace": {
+      "title": "Personal Space", 
+      "description": "Create your private collection and share your discoveries"
+    },
+    "intuitiveNavigation": {
+      "title": "Intuitive Navigation",
+      "description": "Easily explore symbols by region, culture, or meaning"
+    }
   }
 }

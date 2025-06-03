@@ -1,0 +1,42 @@
+
+{
+  "title": "Hub Communautaire",
+  "description": "Rejoignez des groupes thématiques et connectez-vous avec d'autres chercheurs passionnés de symboles culturels",
+  "stats": {
+    "members": "membres",
+    "discoveries": "découvertes",
+    "join": "Rejoindre"
+  },
+  "groups": {
+    "artDeco": {
+      "name": "Art Décoratif",
+      "culture": "Art Déco"
+    },
+    "celticSymbolism": {
+      "name": "Symbolisme Celtique", 
+      "culture": "Celtique"
+    },
+    "japanesePatterns": {
+      "name": "Motifs Japonais",
+      "culture": "Japonaise"
+    },
+    "islamicArt": {
+      "name": "Art Islamique",
+      "culture": "Islamique"
+    }
+  },
+  "features": {
+    "thematicCommunities": {
+      "title": "Communautés Thématiques",
+      "description": "Rejoignez des groupes spécialisés par culture, époque ou type de symbole"
+    },
+    "personalSpace": {
+      "title": "Espace Personnel",
+      "description": "Créez votre collection privée et partagez vos découvertes"
+    },
+    "intuitiveNavigation": {
+      "title": "Navigation Intuitive",
+      "description": "Explorez facilement les symboles par région, culture ou signification"
+    }
+  }
+}
