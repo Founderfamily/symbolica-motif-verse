@@ -1,18 +1,19 @@
+
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
-import { Layout } from '@/components/layout/Layout'
-import { HomePage } from '@/pages/HomePage'
-import { SymbolsPage } from '@/pages/SymbolsPage'
-import { CollectionsPage } from '@/pages/CollectionsPage'
-import { CommunityPage } from '@/pages/CommunityPage'
-import { ProfilePage } from '@/pages/Profile'
-import { ContributionsPage } from '@/pages/ContributionsPage'
-import { MapExplorer } from '@/pages/MapExplorer'
-import { AboutPage } from '@/pages/AboutPage'
-import { Auth } from '@/pages/Auth'
-import { NotFound } from '@/pages/NotFound'
+import Layout from '@/components/layout/Layout'
+import HomePage from '@/pages/HomePage'
+import SymbolsPage from '@/pages/SymbolsPage'
+import CollectionsPage from '@/pages/CollectionsPage'
+import CommunityPage from '@/pages/CommunityPage'
+import Profile from '@/pages/Profile'
+import ContributionsPage from '@/pages/ContributionsPage'
+import MapExplorer from '@/pages/MapExplorer'
+import AboutPage from '@/pages/AboutPage'
+import Auth from '@/pages/Auth'
+import NotFound from '@/pages/NotFound'
 import { TranslationDevTools } from '@/components/dev/TranslationDevTools'
 import './i18n/config'
 import './App.css'
@@ -42,7 +43,7 @@ function App() {
                   <Route path="/symbols" element={<SymbolsPage />} />
                   <Route path="/collections" element={<CollectionsPage />} />
                   <Route path="/community" element={<CommunityPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/profile" element={<Profile />} />
                   <Route path="/contributions" element={<ContributionsPage />} />
                   <Route path="/map" element={<MapExplorer />} />
                   <Route path="/about" element={<AboutPage />} />
