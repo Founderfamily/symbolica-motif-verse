@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Collection, CollectionWithTranslations, CollectionDetails, CreateCollectionData } from '@/types/collections';
 import { logger } from './logService';
@@ -14,22 +13,48 @@ class CollectionsService {
   }
 
   /**
-   * Récupère toutes les collections avec leurs traductions
+   * Récupère toutes les collections avec leurs traductions - CORRIGÉ
    */
   async getCollections(): Promise<CollectionWithTranslations[]> {
     try {
       const { data, error } = await supabase
         .from('collections')
         .select(`
-          *,
-          collection_translations (*)
+          id,
+          slug,
+          created_by,
+          created_at,
+          updated_at,
+          is_featured,
+          collection_translations (
+            id,
+            collection_id,
+            language,
+            title,
+            description
+          )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      console.log('Collections service - raw data:', data?.length || 0, 'collections');
+      
+      // Transformer les données pour avoir la structure attendue
+      const transformedData = data?.map(collection => ({
+        ...collection,
+        collection_translations: collection.collection_translations || []
+      })) || [];
+      
+      console.log('Collections service - transformed:', transformedData.length, 'collections');
+      transformedData.forEach(c => {
+        console.log(`- ${c.slug}: featured=${c.is_featured}, translations=${c.collection_translations?.length || 0}`);
+      });
+      
+      return transformedData;
     } catch (error) {
       logger.error('Error fetching collections', { error });
+      console.error('Collections service error:', error);
       return [];
     }
   }

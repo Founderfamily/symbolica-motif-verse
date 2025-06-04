@@ -14,17 +14,13 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
       };
     }
 
-    // Temporairement, marquer certaines collections comme featured si elles ne le sont pas encore
-    const collectionsWithTempFeatured = collections.map(c => {
-      if (['culture-egyptienne', 'culture-chinoise', 'culture-celtique'].includes(c.slug)) {
-        return { ...c, is_featured: true };
-      }
-      return c;
-    });
+    console.log('Categorizing collections:', collections.length);
 
-    const featured = collectionsWithTempFeatured.filter(c => c.is_featured);
+    // Récupérer les collections featured (avec leur statut réel de la base)
+    const featured = collections.filter(c => c.is_featured);
+    console.log('Featured collections found:', featured.length);
     
-    // Logique de catégorisation basée sur les vrais slugs de la BDD
+    // Logique de catégorisation basée sur les slugs de la BDD
     const cultures = collections.filter(c => {
       const slug = c.slug.toLowerCase();
       return slug.startsWith('culture-') ||
@@ -86,16 +82,13 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
       !sciences.some(science => science.id === c.id)
     );
 
-    console.log('Categorization results:', {
+    console.log('Final categorization:', {
       total: collections.length,
       featured: featured.length,
       cultures: cultures.length,
       periods: periods.length,
       sciences: sciences.length,
-      others: others.length,
-      allSlugs: collections.map(c => c.slug),
-      cultureSlugs: cultures.map(c => c.slug),
-      featuredSlugs: featured.map(c => c.slug)
+      others: others.length
     });
 
     return { featured, cultures, periods, sciences, others };

@@ -14,25 +14,12 @@ const CollectionCategories: React.FC = React.memo(() => {
   const { featured, cultures, periods, sciences, others } = useCollectionCategories(collections);
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
 
-  // Logs de diagnostic
-  console.log('CollectionCategories Debug:', {
-    collections: collections?.length || 0,
-    isLoading,
-    error: error?.message,
-    featured: featured?.length || 0,
-    cultures: cultures?.length || 0,
-    periods: periods?.length || 0,
-    sciences: sciences?.length || 0,
-    others: others?.length || 0
-  });
-
   const handleRetry = () => {
     window.location.reload();
   };
 
   const handlePerformanceUpdate = (metrics: any) => {
     setPerformanceMetrics(metrics);
-    console.log('Collections Performance Metrics:', metrics);
   };
 
   if (error) {
@@ -73,7 +60,6 @@ const CollectionCategories: React.FC = React.memo(() => {
   }
 
   if (!collections || collections.length === 0) {
-    console.warn('No collections found');
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-medium mb-2 text-slate-700">
