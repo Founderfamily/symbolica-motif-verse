@@ -106,7 +106,7 @@ const CollectionCategories: React.FC = React.memo(() => {
           </I18nText>
         </p>
         <p className="text-xs text-slate-400 mt-4">
-          Debug: collections array = {JSON.stringify(collections)}
+          Debug: collections array = {JSON.stringify(collections ?? [])}
         </p>
       </div>
     );

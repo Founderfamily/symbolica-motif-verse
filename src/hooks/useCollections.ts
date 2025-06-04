@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collectionsService } from '@/services/collectionsService';
 import { CreateCollectionData } from '@/types/collections';
@@ -24,8 +25,7 @@ export const useCollections = () => {
         return result;
       } catch (error) {
         console.error('❌ useCollections: Error!', error);
-        // Ne pas jeter l'erreur, retourner un tableau vide pour éviter le loading infini
-        return [];
+        throw error; // Laisser React Query gérer l'erreur
       }
     },
     staleTime: 10 * 60 * 1000, // 10 minutes

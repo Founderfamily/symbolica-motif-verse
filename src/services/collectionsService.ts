@@ -13,29 +13,18 @@ class CollectionsService {
   }
 
   /**
-   * Récupère toutes les collections avec leurs traductions - VERSION CORRIGÉE
+   * Récupère toutes les collections avec leurs traductions - VERSION OPTIMISÉE
    */
   async getCollections(): Promise<CollectionWithTranslations[]> {
     try {
-      console.log('🔍 CollectionsService: Starting database query...');
+      console.log('🔍 CollectionsService: Starting optimized database query...');
       
       const startTime = Date.now();
       const { data, error } = await supabase
         .from('collections')
         .select(`
-          id,
-          slug,
-          created_by,
-          created_at,
-          updated_at,
-          is_featured,
-          collection_translations (
-            id,
-            collection_id,
-            language,
-            title,
-            description
-          )
+          *,
+          collection_translations (*)
         `)
         .order('created_at', { ascending: false });
 
@@ -77,7 +66,6 @@ class CollectionsService {
     } catch (error) {
       console.error('❌ CollectionsService: Critical error in getCollections:', error);
       logger.error('Error fetching collections', { error });
-      // Au lieu de retourner un tableau vide, jeter l'erreur pour que React Query la gère
       throw error;
     }
   }
