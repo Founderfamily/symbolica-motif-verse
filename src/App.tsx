@@ -1,84 +1,140 @@
 
-import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Toaster } from '@/components/ui/sonner'
-import Layout from '@/components/layout/Layout'
-import HomePage from '@/pages/HomePage'
-import SymbolsPage from '@/pages/SymbolsPage'
-import CollectionsPage from '@/pages/CollectionsPage'
-import CommunityPage from '@/pages/CommunityPage'
-import Profile from '@/pages/Profile'
-import ContributionsPage from '@/pages/ContributionsPage'
-import MapExplorer from '@/pages/MapExplorer'
-import AboutPage from '@/pages/AboutPage'
-import Auth from '@/pages/Auth'
-import NotFound from '@/pages/NotFound'
-import { TranslationDevTools } from '@/components/dev/TranslationDevTools'
-import './i18n/config'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from '@/hooks/useAuth';
+import Layout from '@/components/layout/Layout';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import HomePage from '@/pages/HomePage';
+import AnalysisPage from '@/pages/AnalysisPage';
+import ContributionsPage from '@/pages/ContributionsPage';
+import SymbolExplorer from '@/pages/SymbolExplorer';
+import CommunityPage from '@/pages/CommunityPage';
+import UserProfilePage from '@/pages/UserProfilePage';
+import Profile from '@/pages/Profile';
+import EnterprisePage from '@/pages/EnterprisePage';
+import NotFound from '@/pages/NotFound';
+import CollectionsPage from '@/pages/CollectionsPage';
+import CollectionDetailPage from '@/pages/CollectionDetailPage';
+import MobileAppPage from '@/pages/MobileApp';
+import MapExplorer from '@/pages/MapExplorer';
+import SymbolsPage from '@/pages/SymbolsPage';
+import MCPSearchPage from '@/pages/MCPSearchPage';
+import Auth from '@/pages/Auth';
+import NewContribution from '@/pages/NewContribution';
+import TrendingPage from '@/pages/TrendingPage';
 
-// React Query client
-// https://tanstack.com/query/v5/
-function App() {
-  console.log('🚀 App component loaded');
+// Admin pages
+import AdminLayout from '@/pages/Admin/AdminLayout';
+import Dashboard from '@/pages/Admin/Dashboard';
+import UsersManagement from '@/pages/Admin/UsersManagement';
+import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
+import ContributionsModerationPage from '@/pages/Admin/ContributionsModerationPage';
+import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
+import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
+import SystemSettings from '@/pages/Admin/SystemSettings';
 
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        retry: 1,
-      },
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 60 * 1000, // 1 minute
     },
-  }))
+  },
+});
 
-  console.log('🔧 QueryClient initialized');
+// Simple placeholder components for missing pages
+const SearchPage = () => <div className="p-8"><h1>Search Page</h1></div>;
+const LegalPage = () => <div className="p-8"><h1>Legal Page</h1></div>;
+const PrivacyPage = () => <div className="p-8"><h1>Privacy Page</h1></div>;
+const TermsPage = () => <div className="p-8"><h1>Terms Page</h1></div>;
+const ContactPage = () => <div className="p-8"><h1>Contact Page</h1></div>;
 
-  try {
-    console.log('🎨 Starting App render');
-    
-    return (
-      <QueryClientProvider client={queryClient}>
-        <Router>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
           <div className="min-h-screen bg-background">
             <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/*" element={
-                <Layout>
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/symbols" element={<SymbolsPage />} />
-                    <Route path="/collections" element={<CollectionsPage />} />
-                    <Route path="/community" element={<CommunityPage />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/contributions" element={<ContributionsPage />} />
-                    <Route path="/map" element={<MapExplorer />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Layout>
-              } />
+              {/* Mobile app route - accessible without layout for full mobile experience */}
+              <Route path="/mobile" element={<MobileAppPage />} />
+              
+              {/* Admin routes with AdminLayout - protected */}
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="users" element={<UsersManagement />} />
+                <Route path="contributions" element={<ContributionsManagement />} />
+                <Route path="moderation" element={<ContributionsModerationPage />} />
+                <Route path="symbols" element={<SymbolsManagement />} />
+                <Route path="collections" element={<CollectionsManagement />} />
+                <Route path="settings" element={<SystemSettings />} />
+              </Route>
+              
+              {/* All other routes with standard layout */}
+              <Route path="/" element={<Layout><Outlet /></Layout>}>
+                {/* Public routes */}
+                <Route index element={<HomePage />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/symbols" element={<SymbolsPage />} />
+                <Route path="/symbols/:id" element={<SymbolExplorer />} />
+                <Route path="/collections" element={<CollectionsPage />} />
+                <Route path="/collections/:slug" element={<CollectionDetailPage />} />
+                <Route path="/community" element={<CommunityPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/trending" element={<TrendingPage />} />
+                <Route path="/profile/:username" element={<UserProfilePage />} />
+                <Route path="/profile/:username/edit" element={<Profile />} />
+                <Route path="/legal" element={<LegalPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                
+                {/* Protected routes - require authentication */}
+                <Route path="/enterprise" element={
+                  <ProtectedRoute>
+                    <EnterprisePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/analysis" element={
+                  <ProtectedRoute>
+                    <AnalysisPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/map" element={
+                  <ProtectedRoute>
+                    <MapExplorer />
+                  </ProtectedRoute>
+                } />
+                <Route path="/mcp-search" element={
+                  <ProtectedRoute>
+                    <MCPSearchPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/contributions" element={
+                  <ProtectedRoute>
+                    <ContributionsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/contribute" element={
+                  <ProtectedRoute>
+                    <NewContribution />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="*" element={<NotFound />} />
+              </Route>
             </Routes>
             <Toaster />
-            <TranslationDevTools />
           </div>
-        </Router>
-      </QueryClientProvider>
-    )
-  } catch (error) {
-    console.error('❌ Error in App component:', error);
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-red-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Application Error</h1>
-          <p className="text-gray-700 mb-4">Something went wrong while loading the application.</p>
-          <pre className="text-xs text-left bg-gray-100 p-4 rounded overflow-auto">
-            {error instanceof Error ? error.message : String(error)}
-          </pre>
-        </div>
-      </div>
-    );
-  }
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;

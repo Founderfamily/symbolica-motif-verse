@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight } from 'lucide-react';
-import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 import { useFeaturedCollections } from '@/hooks/useCollections';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const FeaturedCollections: React.FC = () => {
   const { data: collections, isLoading } = useFeaturedCollections();
-  const { t, currentLanguage } = useTranslation();
+  const { currentLanguage } = useTranslation();
 
   const getTranslation = (collection: any, field: string) => {
     // Find translation for current language first
@@ -75,10 +76,12 @@ const FeaturedCollections: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-            {t('collections.featured.title')}
+            <I18nText translationKey="collections.featured.title">Collections en Vedette</I18nText>
           </h2>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-            {t('collections.featured.description')}
+            <I18nText translationKey="collections.featured.description">
+              Explorez des parcours thématiques à travers les symboles du monde entier
+            </I18nText>
           </p>
         </div>
 
@@ -111,7 +114,7 @@ const FeaturedCollections: React.FC = () => {
                       </CardTitle>
                       {collection.is_featured && (
                         <Badge variant="default">
-                          {t('collections.featuredBadge')}
+                          <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
                         </Badge>
                       )}
                     </div>
@@ -124,7 +127,7 @@ const FeaturedCollections: React.FC = () => {
                       }
                     </p>
                     <div className="mt-4 text-sm text-amber-600 font-medium">
-                      {t('collections.explore')} →
+                      <I18nText translationKey="collections.explore">Explorer →</I18nText>
                     </div>
                   </CardContent>
                 </Card>
@@ -136,7 +139,7 @@ const FeaturedCollections: React.FC = () => {
         <div className="text-center">
           <Link to="/collections">
             <Button size="lg" className="bg-amber-600 hover:bg-amber-700">
-              {t('collections.featured.discoverAll')}
+              <I18nText translationKey="collections.featured.discoverAll">Découvrir Toutes les Collections</I18nText>
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </Link>

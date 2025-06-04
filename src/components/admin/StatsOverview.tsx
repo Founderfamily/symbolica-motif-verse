@@ -2,15 +2,13 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, FileText, Map, Award, Bookmark, Clock } from 'lucide-react';
+import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
 import { AdminStats } from '@/services/admin/statsService';
-import AdminErrorBoundary from './AdminErrorBoundary';
 
 interface StatsOverviewProps {
   stats: AdminStats;
   loading: boolean;
-  error?: Error | null;
-  onRetry?: () => void;
 }
 
 const StatCard = ({ 
@@ -48,22 +46,17 @@ const StatCard = ({
   </Card>
 );
 
-export default function StatsOverview({ stats, loading, error, onRetry }: StatsOverviewProps) {
+export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
   const { t } = useTranslation();
-  
-  if (error) {
-    return (
-      <AdminErrorBoundary 
-        error={error}
-        onRetry={onRetry}
-        title="Erreur de chargement des statistiques"
-        description="Impossible de charger les statistiques du tableau de bord."
-      />
-    );
-  }
   
   const formatNumber = (num: number): string => {
     return new Intl.NumberFormat().format(num);
+  };
+  
+  const calculateGrowthRate = (current: number, previous: number): string => {
+    if (previous === 0) return '0%';
+    const growth = ((current - previous) / previous) * 100;
+    return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
   };
   
   // Safe access with default values
@@ -71,7 +64,6 @@ export default function StatsOverview({ stats, loading, error, onRetry }: StatsO
   const activeUsersLast30Days = stats?.activeUsersLast30Days || 0;
   const totalContributions = stats?.totalContributions || 0;
   const pendingContributions = stats?.pendingContributions || 0;
-  const approvedContributions = stats?.approvedContributions || 0;
   const totalSymbols = stats?.totalSymbols || 0;
   const verifiedSymbols = stats?.verifiedSymbols || 0;
   const totalSymbolLocations = stats?.totalSymbolLocations || 0;
@@ -84,6 +76,7 @@ export default function StatsOverview({ stats, loading, error, onRetry }: StatsO
     : '0%';
   
   // Calculate approval rate for contributions
+  const approvedContributions = totalContributions - pendingContributions;
   const approvalRate = totalContributions > 0 
     ? `${((approvedContributions / totalContributions) * 100).toFixed(1)}%` 
     : '0%';

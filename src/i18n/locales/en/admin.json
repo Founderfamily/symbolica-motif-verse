@@ -1,107 +1,133 @@
 
 {
   "admin": {
-    "title": "Administration",
     "dashboard": {
-      "title": "Dashboard",
-      "subtitle": "Platform overview"
-    },
-    "navigation": {
-      "dashboard": "Dashboard",
-      "users": "Users",
-      "contributions": "Contributions",
-      "moderation": "Moderation",
-      "symbols": "Symbols",
-      "collections": "Collections",
-      "settings": "Settings"
+      "title": "Admin Dashboard",
+      "welcome": "Welcome, ",
+      "welcomeMessage": "Manage your Symbolica platform from this dashboard.",
+      "overview": "General Overview",
+      "analytics": "Analytics and Trends",
+      "recentActivity": "Recent Activity"
     },
     "stats": {
-      "totalUsers": "Total users",
-      "activeUsers": "{{count}} active ({{rate}})",
-      "totalContributions": "Total contributions",
+      "totalUsers": "Total Users",
+      "activeUsers": "{{count}} active last 30d ({{rate}})",
+      "totalContributions": "Total Contributions",
       "pendingContributions": "{{count}} pending ({{rate}} approved)",
-      "totalSymbols": "Total symbols",
-      "symbolLocations": "Symbol locations",
+      "totalSymbols": "Total Symbols",
+      "symbolLocations": "Symbol Locations",
       "verifiedLocations": "{{count}} verified ({{rate}})",
-      "topContributor": "Top contributor",
+      "topContributor": "Top Contributor",
       "contributorStats": "{{contributions}} contributions, {{points}} points",
       "lastContribution": "Last contribution",
       "noRecentActivity": "No recent activity"
     },
-    "users": {
-      "title": "User management",
-      "search": "Search users...",
-      "filters": {
-        "all": "All",
-        "admin": "Administrators",
-        "banned": "Banned",
-        "user": "Users"
-      },
-      "table": {
-        "username": "Username",
-        "fullName": "Full name",
-        "role": "Role",
-        "status": "Status",
-        "contributions": "Contributions",
-        "points": "Points",
-        "lastActivity": "Last activity",
-        "actions": "Actions"
-      },
-      "actions": {
-        "ban": "Ban",
-        "unban": "Unban",
-        "makeAdmin": "Make admin",
-        "removeAdmin": "Remove admin"
-      },
-      "status": {
-        "admin": "Admin",
-        "banned": "Banned",
-        "active": "Active"
-      }
+    "charts": {
+      "activityOverTime": "Activity over the last 60 days",
+      "topContributors": "Top 5 Contributors",
+      "newUsers": "New Users",
+      "newContributions": "New Contributions",
+      "points": "Points",
+      "contributions": "Contributions"
     },
-    "contributions": {
-      "title": "Contribution management",
-      "moderation": "Contribution moderation",
-      "filters": {
-        "all": "All",
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected"
-      },
-      "table": {
-        "title": "Title",
-        "author": "Author",
-        "status": "Status",
-        "createdAt": "Created at",
-        "reviewedAt": "Reviewed at",
-        "actions": "Actions"
-      },
-      "actions": {
-        "approve": "Approve",
-        "reject": "Reject",
-        "pending": "Set pending",
-        "delete": "Delete",
-        "view": "View"
-      },
-      "status": {
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected"
-      }
+    "actions": {
+      "refresh": "Refresh",
+      "export": "Export",
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "approve": "Approve",
+      "reject": "Reject",
+      "ban": "Ban",
+      "unban": "Unban",
+      "makeAdmin": "Make Admin",
+      "removeAdmin": "Remove Admin"
+    },
+    "access": {
+      "denied": "Access Denied",
+      "notAuthorized": "You are not authorized to access the admin dashboard."
     },
     "logs": {
-      "title": "Administration logs",
-      "table": {
-        "admin": "Administrator",
-        "action": "Action",
-        "entity": "Entity",
-        "date": "Date",
-        "details": "Details"
-      }
+      "title": "Admin Logs",
+      "action": "Action",
+      "entity": "Entity",
+      "admin": "Administrator",
+      "date": "Date",
+      "details": "Details",
+      "noLogs": "No logs available",
+      "filter": "Filter logs"
     },
-    "loading": "Loading...",
-    "error": "An error occurred",
-    "noData": "No data available",
-    "success": "Operation successful"
+    "users": {
+      "title": "User Management",
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "bannedUsers": "Banned Users",
+      "admins": "Administrators",
+      "search": "Search users...",
+      "filters": "Filters",
+      "status": "Status",
+      "role": "Role",
+      "joinDate": "Join Date",
+      "lastActive": "Last Active",
+      "actions": "Actions",
+      "viewProfile": "View Profile",
+      "banUser": "Ban User",
+      "unbanUser": "Unban User",
+      "makeAdmin": "Make Admin",
+      "removeAdmin": "Remove Admin Rights"
+    },
+    "analysis": {
+      "title": "Analysis Examples Management",
+      "create": "Create Example",
+      "edit": "Edit Example",
+      "delete": "Delete Example",
+      "upload": "Upload Images",
+      "preview": "Preview",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "moderation": {
+      "title": "Comment Moderation",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "flagged": "Flagged",
+      "approve": "Approve",
+      "reject": "Reject",
+      "flag": "Flag",
+      "unflag": "Unflag"
+    },
+    "settings": {
+      "title": "System Settings",
+      "general": "General",
+      "security": "Security",
+      "notifications": "Notifications",
+      "maintenance": "Maintenance",
+      "backup": "Backup",
+      "logs": "Logs",
+      "performance": "Performance"
+    },
+    "notifications": {
+      "title": "Admin Notifications",
+      "unread": "Unread",
+      "all": "All",
+      "markAsRead": "Mark as Read",
+      "markAllAsRead": "Mark All as Read",
+      "noNotifications": "No notifications"
+    },
+    "symbolsManagement": "Symbols Management",
+    "contentManagement": "Content Management",
+    "contributionsManagement": "Contributions Management",
+    "usersManagement": "Users Management",
+    "settingsManagement": "Settings",
+    "welcomeAdmin": "Welcome to the Admin Panel",
+    "pendingContributions": "Pending Contributions",
+    "approvedContributions": "Approved Contributions",
+    "rejectedContributions": "Rejected Contributions",
+    "totalSymbols": "Total Symbols",
+    "totalContributions": "Total Contributions",
+    "totalUsers": "Total Users",
+    "recentActivity": "Recent Activity",
+    "newSymbol": "New Symbol"
   }
 }

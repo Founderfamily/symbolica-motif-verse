@@ -1,4 +1,3 @@
-
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -12,24 +11,11 @@ import frQuickAccess from './locales/fr/quickAccess.json';
 import frCallToAction from './locales/fr/callToAction.json';
 import frHowItWorks from './locales/fr/howItWorks.json';
 import frUploadTools from './locales/fr/uploadTools.json';
-import frAuth from './locales/fr/auth.json';
-import frAdmin from './locales/fr/admin.json';
-import frCollections from './locales/fr/collections.json';
-import frCommunity from './locales/fr/community.json';
-import frProfile from './locales/fr/profile.json';
-import frNavigation from './locales/fr/navigation.json';
-import frCommon from './locales/fr/common.json';
-import frContributions from './locales/fr/contributions.json';
-import frGamification from './locales/fr/gamification.json';
-import frSymbols from './locales/fr/symbols.json';
-import frSearchFilters from './locales/fr/searchFilters.json';
 
 // Import remaining sections from original file
 import frTranslationRemaining from './locales/fr.json';
 
 // English translations - split into thematic files
-import enApp from './locales/en/app.json';
-import enHero from './locales/en/hero.json';
 import enNavigation from './locales/en/navigation.json';
 import enCommon from './locales/en/common.json';
 import enAuth from './locales/en/auth.json';
@@ -44,10 +30,8 @@ import enSearchFilters from './locales/en/searchFilters.json';
 
 const LANGUAGE_STORAGE_KEY = 'app_language';
 
-// Merge all French translation files with consistent structure
+// Merge all French translation files
 const frTranslation = {
-  ...frNavigation,
-  ...frCommon,
   app: frApp,
   hero: frHero,
   sections: frSections,
@@ -56,38 +40,34 @@ const frTranslation = {
   callToAction: frCallToAction,
   howItWorks: frHowItWorks,
   uploadTools: frUploadTools,
-  auth: frAuth.auth,
-  admin: frAdmin.admin,
-  collections: frCollections,
-  community: frCommunity,
-  profile: frProfile.profile,
-  contributions: frContributions.contributions,
-  gamification: frGamification.gamification,
-  symbols: frSymbols,
-  searchFilters: frSearchFilters.searchFilters,
-  // Keep remaining translations from original file for backward compatibility
+  // Keep remaining translations from original file
+  collections: frTranslationRemaining.collections,
+  community: frTranslationRemaining.community,
   testimonials: frTranslationRemaining.testimonials,
+  gamification: frTranslationRemaining.gamification,
   about: frTranslationRemaining.about,
   faq: frTranslationRemaining.faq,
   roadmap: frTranslationRemaining.roadmap,
-  symbolTriptych: frTranslationRemaining.symbolTriptych
+  symbolTriptych: frTranslationRemaining.symbolTriptych,
+  navigation: frTranslationRemaining.navigation,
+  common: frTranslationRemaining.common,
+  symbols: frTranslationRemaining.symbols,
+  searchFilters: frTranslationRemaining.searchFilters
 };
 
-// Merge all English translation files with consistent structure
+// Merge all English translation files
 const enTranslation = {
   ...enNavigation,
   ...enCommon,
-  app: enApp,
-  hero: enHero,
-  auth: enAuth.auth,
-  profile: enProfile.profile,
+  ...enAuth,
+  ...enProfile,
   ...enSections,
-  contributions: enContributions.contributions,
-  symbols: enSymbols,
-  gamification: enGamification.gamification,
-  admin: enAdmin.admin,
-  collections: enCollections,
-  searchFilters: enSearchFilters.searchFilters
+  ...enContributions,
+  ...enSymbols,
+  ...enGamification,
+  ...enAdmin,
+  ...enCollections,
+  ...enSearchFilters
 };
 
 i18n

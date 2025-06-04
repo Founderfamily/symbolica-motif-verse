@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/i18n/useTranslation';
+import { I18nText } from '@/components/ui/i18n-text';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
@@ -101,11 +102,15 @@ export default function PasswordResetConfirmation() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <CardTitle>
-            {t('auth.resetPassword.newPasswordTitle')}
+            <I18nText translationKey="auth.resetPassword.newPasswordTitle">
+              Définir un nouveau mot de passe
+            </I18nText>
           </CardTitle>
         </div>
         <CardDescription>
-          {t('auth.resetPassword.newPasswordDescription')}
+          <I18nText translationKey="auth.resetPassword.newPasswordDescription">
+            Veuillez entrer votre nouveau mot de passe ci-dessous.
+          </I18nText>
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -113,7 +118,7 @@ export default function PasswordResetConfirmation() {
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>
-              {t('error.title')}
+              <I18nText translationKey="error.title">Erreur</I18nText>
             </AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -124,16 +129,22 @@ export default function PasswordResetConfirmation() {
             <Alert variant="default" className="bg-green-50 border-green-200">
               <CheckCircle className="h-4 w-4 text-green-500" />
               <AlertTitle className="text-green-700">
-                {t('auth.resetPassword.successTitle')}
+                <I18nText translationKey="auth.resetPassword.successTitle">
+                  Mot de passe mis à jour
+                </I18nText>
               </AlertTitle>
               <AlertDescription className="text-green-600">
-                {t('auth.resetPassword.passwordUpdated')}
+                <I18nText translationKey="auth.resetPassword.passwordUpdated">
+                  Votre mot de passe a été mis à jour avec succès. Vous allez être redirigé vers la page de connexion.
+                </I18nText>
               </AlertDescription>
             </Alert>
             
             <Button asChild variant="outline" className="mt-4">
               <Link to="/auth">
-                {t('auth.buttons.backToLogin')}
+                <I18nText translationKey="auth.buttons.backToLogin">
+                  Retour à la connexion
+                </I18nText>
               </Link>
             </Button>
           </div>
@@ -146,7 +157,7 @@ export default function PasswordResetConfirmation() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {t('auth.labels.newPassword')}
+                      <I18nText translationKey="auth.labels.newPassword" />
                     </FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
@@ -162,7 +173,7 @@ export default function PasswordResetConfirmation() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {t('auth.labels.confirmNewPassword')}
+                      <I18nText translationKey="auth.labels.confirmNewPassword" />
                     </FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
@@ -178,8 +189,8 @@ export default function PasswordResetConfirmation() {
                 disabled={loading || !hashPresent}
               >
                 {loading ? 
-                  t('auth.buttons.updating') : 
-                  t('auth.buttons.updatePassword')
+                  <I18nText translationKey="auth.buttons.updating" /> : 
+                  <I18nText translationKey="auth.buttons.updatePassword" />
                 }
               </Button>
             </form>
