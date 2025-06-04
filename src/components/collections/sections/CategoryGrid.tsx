@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CollectionWithTranslations } from '@/types/collections';
-import CollectionCard from '../CollectionCard';
+import { OptimizedCollectionCard } from '../OptimizedCollectionCard';
 import { EmptyCategory } from './EmptyCategory';
 
 interface CategoryGridProps {
@@ -20,7 +20,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = React.memo(({
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {collections.map((collection) => (
-        <CollectionCard key={collection.id} collection={collection} />
+        <OptimizedCollectionCard key={collection.id} collection={collection} />
       ))}
     </div>
   );
