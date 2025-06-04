@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useOptimizedCollections } from '@/hooks/useOptimizedCollections';
+import { useCollections } from '@/hooks/useCollections';
 import { useCollectionCategories } from '@/hooks/useCollectionCategories';
 import { I18nText } from '@/components/ui/i18n-text';
 import { FeaturedCollectionsSection } from './sections/FeaturedCollectionsSection';
@@ -8,19 +8,23 @@ import { CollectionTabs } from './sections/CollectionTabs';
 import { ProgressiveLoader } from './ProgressiveLoader';
 import { EnhancedErrorState } from './EnhancedErrorStates';
 import { PerformanceTracker } from './PerformanceTracker';
-import { AdaptiveGrid } from './AdaptiveGrid';
 
 const CollectionCategories: React.FC = React.memo(() => {
-  const { collections, isLoading, error, prefetchFeatured } = useOptimizedCollections();
+  // Utilisation temporaire du hook standard pour diagnostic
+  const { data: collections, isLoading, error } = useCollections();
   const { featured, cultures, periods, others } = useCollectionCategories(collections);
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
 
-  // Prefetch des collections populaires au montage
-  React.useEffect(() => {
-    if (!isLoading && collections.length > 0) {
-      prefetchFeatured();
-    }
-  }, [isLoading, collections.length, prefetchFeatured]);
+  // Logs de diagnostic
+  console.log('CollectionCategories Debug:', {
+    collections: collections?.length || 0,
+    isLoading,
+    error: error?.message,
+    featured: featured?.length || 0,
+    cultures: cultures?.length || 0,
+    periods: periods?.length || 0,
+    others: others?.length || 0
+  });
 
   const handleRetry = () => {
     window.location.reload();
@@ -32,6 +36,7 @@ const CollectionCategories: React.FC = React.memo(() => {
   };
 
   if (error) {
+    console.error('Collections error:', error);
     return (
       <div className="flex justify-center items-center min-h-96">
         <EnhancedErrorState
@@ -43,7 +48,28 @@ const CollectionCategories: React.FC = React.memo(() => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <ProgressiveLoader
+        isLoading={true}
+        stage="fetching"
+        estimatedTime={2000}
+      >
+        <div className="space-y-12">
+          <div className="text-center py-12">
+            <p className="text-slate-600">
+              <I18nText translationKey="collections.loading">
+                Chargement des collections...
+              </I18nText>
+            </p>
+          </div>
+        </div>
+      </ProgressiveLoader>
+    );
+  }
+
   if (!collections || collections.length === 0) {
+    console.warn('No collections found');
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-medium mb-2 text-slate-700">
@@ -63,9 +89,9 @@ const CollectionCategories: React.FC = React.memo(() => {
       <PerformanceTracker onMetricsUpdate={handlePerformanceUpdate} />
       
       <ProgressiveLoader
-        isLoading={isLoading}
-        stage={isLoading ? 'fetching' : 'rendering'}
-        estimatedTime={2000}
+        isLoading={false}
+        stage="rendering"
+        estimatedTime={500}
       >
         <div className="space-y-12">
           <FeaturedCollectionsSection collections={featured} />

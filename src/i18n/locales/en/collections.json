@@ -8,6 +8,10 @@
     "myCollections": "My Collections",
     "explore": "Explore",
     "symbols": "symbols",
-    "themes": "Themes"
+    "themes": "Themes",
+    "loading": "Loading collections...",
+    "noCollections": "No collections available",
+    "noCollectionsMessage": "Collections will be available soon. Come back later!",
+    "featuredBadge": "Featured"
   }
 }
