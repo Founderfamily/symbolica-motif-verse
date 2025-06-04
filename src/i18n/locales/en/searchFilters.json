@@ -1,9 +1,27 @@
 
 {
-  "cultures": "Cultures",
-  "periods": "Periods", 
-  "functions": "Functions",
-  "techniques": "Techniques",
-  "mediums": "Materials",
-  "clearAll": "Clear all"
+  "searchFilters": {
+    "title": "Search Filters",
+    "cultures": "Cultures",
+    "periods": "Periods",
+    "tags": "Tags",
+    "styles": "Styles",
+    "locations": "Locations",
+    "contributors": "Contributors",
+    "dateRange": "Date Range",
+    "categories": "Categories",
+    "clearAll": "Clear All",
+    "apply": "Apply",
+    "reset": "Reset",
+    "advanced": "Advanced Filters",
+    "basic": "Basic Filters",
+    "saved": "Saved Filters",
+    "save": "Save",
+    "load": "Load",
+    "delete": "Delete",
+    "noResults": "No results found",
+    "resultsCount": "{{count}} results found",
+    "filtering": "Filtering...",
+    "error": "Error while filtering"
+  }
 }
