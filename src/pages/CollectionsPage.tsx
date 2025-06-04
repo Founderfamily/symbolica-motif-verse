@@ -3,10 +3,10 @@ import React from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
 import CollectionCategories from '@/components/collections/CollectionCategories';
 import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '@/hooks/useCollections';
+import { CollectionStatsDisplay } from '@/components/collections/CollectionStatsDisplay';
 
 const CollectionsPage = () => {
   const { currentLanguage } = useTranslation();
@@ -22,9 +22,7 @@ const CollectionsPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-slate-900">
               <I18nText translationKey="collections.title">Collections</I18nText>
             </h1>
-            <Badge variant="outline" className="text-amber-600 border-amber-600">
-              {allCollections?.length || 0} <I18nText translationKey="collections.collectionsUnit">collections</I18nText>
-            </Badge>
+            <CollectionStatsDisplay collections={allCollections} />
           </div>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
             <I18nText translationKey="collections.featured.description">

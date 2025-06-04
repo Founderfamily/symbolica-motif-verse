@@ -5,50 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
 import { CollectionWithTranslations } from '@/types/collections';
-import { useTranslation } from '@/i18n/useTranslation';
+import { useCollectionTranslations } from '@/hooks/useCollectionTranslations';
 
 interface CollectionCardProps {
   collection: CollectionWithTranslations;
 }
 
-const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
-  const { currentLanguage } = useTranslation();
-
-  const getTranslation = (field: string) => {
-    if (!collection.collection_translations || collection.collection_translations.length === 0) {
-      return `[${field} missing]`;
-    }
-
-    // Find translation for current language first
-    const currentTranslation = collection.collection_translations.find(
-      (t: any) => t.language === currentLanguage
-    );
-    
-    if (currentTranslation?.[field] && currentTranslation[field].trim()) {
-      return currentTranslation[field];
-    }
-    
-    // If current language translation is missing or empty, use fallback language
-    const fallbackLang = currentLanguage === 'fr' ? 'en' : 'fr';
-    const fallbackTranslation = collection.collection_translations.find(
-      (t: any) => t.language === fallbackLang
-    );
-    
-    if (fallbackTranslation?.[field] && fallbackTranslation[field].trim()) {
-      return fallbackTranslation[field];
-    }
-    
-    // Last resort: use any translation available
-    const anyTranslation = collection.collection_translations.find(
-      (t: any) => t[field] && t[field].trim()
-    );
-    
-    if (anyTranslation?.[field]) {
-      return anyTranslation[field];
-    }
-    
-    return `[${field} missing]`;
-  };
+const CollectionCard: React.FC<CollectionCardProps> = React.memo(({ collection }) => {
+  const { getTranslation } = useCollectionTranslations();
 
   return (
     <Link
@@ -59,7 +23,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
         <CardHeader>
           <div className="flex justify-between items-start mb-2">
             <CardTitle className="text-xl">
-              {getTranslation('title')}
+              {getTranslation(collection, 'title')}
             </CardTitle>
             {collection.is_featured && (
               <Badge variant="default">
@@ -70,7 +34,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
         </CardHeader>
         <CardContent>
           <p className="text-slate-600 line-clamp-3">
-            {getTranslation('description')}
+            {getTranslation(collection, 'description')}
           </p>
           <div className="mt-4 text-sm text-amber-600 font-medium">
             <I18nText translationKey="collections.explore">Explore →</I18nText>
@@ -79,6 +43,8 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
       </Card>
     </Link>
   );
-};
+});
+
+CollectionCard.displayName = 'CollectionCard';
 
 export default CollectionCard;
