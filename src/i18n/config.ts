@@ -31,7 +31,7 @@ import enSearchFilters from './locales/en/searchFilters.json';
 
 const LANGUAGE_STORAGE_KEY = 'app_language';
 
-// Merge all French translation files
+// Merge all French translation files with correct structure
 const frTranslation = {
   app: frApp,
   hero: frHero,
@@ -41,7 +41,7 @@ const frTranslation = {
   callToAction: frCallToAction,
   howItWorks: frHowItWorks,
   uploadTools: frUploadTools,
-  auth: frAuth,
+  auth: frAuth.auth, // Extract the auth object from the nested structure
   // Keep remaining translations from original file
   collections: frTranslationRemaining.collections,
   community: frTranslationRemaining.community,
@@ -57,11 +57,11 @@ const frTranslation = {
   searchFilters: frTranslationRemaining.searchFilters
 };
 
-// Merge all English translation files
+// Merge all English translation files with correct structure
 const enTranslation = {
   ...enNavigation,
   ...enCommon,
-  ...enAuth,
+  auth: enAuth.auth, // Extract the auth object from the nested structure
   ...enProfile,
   ...enSections,
   ...enContributions,

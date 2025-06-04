@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/i18n/useTranslation';
 import { UserProfile } from '@/types/auth';
-import { I18nText } from '@/components/ui/i18n-text';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -161,10 +160,10 @@ export default function AuthForm() {
         <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">
-              <I18nText translationKey="auth.login.title" />
+              {t('auth.login.title')}
             </TabsTrigger>
             <TabsTrigger value="register">
-              <I18nText translationKey="auth.register.title" />
+              {t('auth.register.title')}
             </TabsTrigger>
           </TabsList>
           
@@ -172,10 +171,10 @@ export default function AuthForm() {
           <TabsContent value="login" className="space-y-4">
             <div className="space-y-2 text-center">
               <CardTitle className="text-xl">
-                <I18nText translationKey="auth.login.title" />
+                {t('auth.login.title')}
               </CardTitle>
               <CardDescription>
-                <I18nText translationKey="auth.login.subtitle" />
+                {t('auth.login.subtitle')}
               </CardDescription>
             </div>
             
@@ -187,7 +186,7 @@ export default function AuthForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.fields.email.label" />
+                        {t('auth.fields.email.label')}
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -211,7 +210,7 @@ export default function AuthForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.fields.password.label" />
+                        {t('auth.fields.password.label')}
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -244,22 +243,22 @@ export default function AuthForm() {
                   {isLoading ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span><I18nText translationKey="auth.login.loading" /></span>
+                      <span>{t('auth.login.loading')}</span>
                     </div>
                   ) : (
-                    <I18nText translationKey="auth.login.button" />
+                    t('auth.login.button')
                   )}
                 </Button>
               </form>
             </Form>
 
             <div className="text-center text-sm text-slate-600">
-              <I18nText translationKey="auth.login.noAccount" />{' '}
+              {t('auth.login.noAccount')}{' '}
               <button 
                 onClick={() => setActiveTab('register')}
                 className="text-amber-600 hover:text-amber-700 font-medium"
               >
-                <I18nText translationKey="auth.login.signUpLink" />
+                {t('auth.login.signUpLink')}
               </button>
             </div>
           </TabsContent>
@@ -268,10 +267,10 @@ export default function AuthForm() {
           <TabsContent value="register" className="space-y-4">
             <div className="space-y-2 text-center">
               <CardTitle className="text-xl">
-                <I18nText translationKey="auth.register.title" />
+                {t('auth.register.title')}
               </CardTitle>
               <CardDescription>
-                <I18nText translationKey="auth.register.subtitle" />
+                {t('auth.register.subtitle')}
               </CardDescription>
             </div>
             
@@ -283,7 +282,7 @@ export default function AuthForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.fields.email.label" />
+                        {t('auth.fields.email.label')}
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -307,7 +306,7 @@ export default function AuthForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.fields.username.label" />
+                        {t('auth.fields.username.label')}
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -331,8 +330,8 @@ export default function AuthForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.fields.fullName.label" /> 
-                        <span className="text-slate-400 text-sm">(<I18nText translationKey="auth.fields.fullName.optional" />)</span>
+                        {t('auth.fields.fullName.label')} 
+                        <span className="text-slate-400 text-sm">({t('auth.fields.fullName.optional')})</span>
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -356,7 +355,7 @@ export default function AuthForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.fields.password.label" />
+                        {t('auth.fields.password.label')}
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -387,7 +386,7 @@ export default function AuthForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.fields.confirmPassword.label" />
+                        {t('auth.fields.confirmPassword.label')}
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
@@ -413,22 +412,22 @@ export default function AuthForm() {
                   {isLoading ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span><I18nText translationKey="auth.register.loading" /></span>
+                      <span>{t('auth.register.loading')}</span>
                     </div>
                   ) : (
-                    <I18nText translationKey="auth.register.button" />
+                    t('auth.register.button')
                   )}
                 </Button>
               </form>
             </Form>
 
             <div className="text-center text-sm text-slate-600">
-              <I18nText translationKey="auth.register.hasAccount" />{' '}
+              {t('auth.register.hasAccount')}{' '}
               <button 
                 onClick={() => setActiveTab('login')}
                 className="text-amber-600 hover:text-amber-700 font-medium"
               >
-                <I18nText translationKey="auth.register.signInLink" />
+                {t('auth.register.signInLink')}
               </button>
             </div>
           </TabsContent>
