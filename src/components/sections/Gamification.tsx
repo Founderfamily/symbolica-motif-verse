@@ -2,7 +2,6 @@
 import React from 'react';
 import { Award, Shield, Trophy, Users, Star, ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -17,27 +16,24 @@ const GamificationItem = ({
   descriptionKey: string;
   points?: number;
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-amber-100 hover:shadow-lg transition-all hover:border-amber-200">
       <div className="bg-amber-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
         <Icon className="h-6 w-6 text-amber-700" />
       </div>
       <h3 className="text-lg font-medium mb-2">
-        <I18nText translationKey={titleKey}>
-          {/* Fallback derived from the key */}
-          {titleKey.split('.').pop()?.replace(/([A-Z])/g, ' $1')}
-        </I18nText>
+        {t(titleKey)}
       </h3>
       <p className="text-slate-600 mb-4">
-        <I18nText translationKey={descriptionKey}>
-          Features and gamification elements to enhance your experience.
-        </I18nText>
+        {t(descriptionKey)}
       </p>
       {points !== undefined && (
         <div className="flex items-center text-amber-700 font-medium">
           <Star className="h-4 w-4 mr-1 fill-amber-500 stroke-amber-700" />
           <span>
-            {points} <I18nText translationKey="gamification.points">points</I18nText>
+            {points} {t('gamification.points.title')}
           </span>
         </div>
       )}
@@ -52,7 +48,7 @@ const Gamification = () => {
     {
       icon: Trophy,
       titleKey: "gamification.badges.title",
-      descriptionKey: "gamification.badges.description",
+      descriptionKey: "gamification.badges.title",
       points: 50
     },
     {
@@ -64,13 +60,13 @@ const Gamification = () => {
     {
       icon: Users,
       titleKey: "gamification.leaderboard.title",
-      descriptionKey: "gamification.leaderboard.description",
+      descriptionKey: "gamification.leaderboard.title",
       points: 100
     },
     {
       icon: Award,
       titleKey: "gamification.achievements.title",
-      descriptionKey: "gamification.achievements.description",
+      descriptionKey: "gamification.achievements.title",
       points: 75
     }
   ];
@@ -80,14 +76,10 @@ const Gamification = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">
-            <I18nText translationKey="gamification.title">
-              Earn Rewards for Contributions
-            </I18nText>
+            {t('gamification.points.title')}
           </h2>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            <I18nText translationKey="gamification.subtitle">
-              Join our community and earn points, badges and recognition
-            </I18nText>
+            {t('gamification.points.description')}
           </p>
         </div>
         
@@ -106,9 +98,7 @@ const Gamification = () => {
         <div className="mt-12 text-center">
           <Button asChild className="gap-2 bg-amber-600 hover:bg-amber-700">
             <Link to="/profile">
-              <I18nText translationKey="gamification.viewYourProgress">
-                View Your Progress
-              </I18nText>
+              {t('profile.viewProfile')}
               <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>

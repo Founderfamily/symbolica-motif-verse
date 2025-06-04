@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Search, Map, BookOpen, Upload, Users, TrendingUp } from 'lucide-react';
-import { I18nText } from '@/components/ui/i18n-text';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const QuickAccess: React.FC = () => {
+  const { t } = useTranslation();
+  
   const quickActions = [
     {
       titleKey: 'quickAccess.exploreSymbols.title',
@@ -63,10 +65,10 @@ const QuickAccess: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-            <I18nText translationKey="quickAccess.title" />
+            {t('quickAccess.title')}
           </h2>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            <I18nText translationKey="quickAccess.description" />
+            {t('quickAccess.description')}
           </p>
         </div>
 
@@ -79,15 +81,15 @@ const QuickAccess: React.FC = () => {
                     <action.icon className={`w-6 h-6 ${action.iconColor}`} />
                   </div>
                   <CardTitle className="text-lg font-semibold text-slate-900">
-                    <I18nText translationKey={action.titleKey} />
+                    {t(action.titleKey)}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <p className="text-slate-600 text-sm mb-4">
-                    <I18nText translationKey={action.descriptionKey} />
+                    {t(action.descriptionKey)}
                   </p>
                   <Button variant="ghost" size="sm" className="p-0 h-auto font-medium group-hover:underline">
-                    <I18nText translationKey="quickAccess.explore" />
+                    {t('quickAccess.explore')}
                   </Button>
                 </CardContent>
               </Card>
