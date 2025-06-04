@@ -139,7 +139,7 @@ const Header: React.FC = () => {
             {/* Language Selector */}
             <LanguageSelector />
 
-            {/* User Menu */}
+            {/* User Menu or Auth Buttons */}
             {auth?.user && auth?.profile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -180,11 +180,18 @@ const Header: React.FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button variant="outline" asChild>
-                <Link to="/auth">
-                  <I18nText translationKey="header.login">Log In</I18nText>
-                </Link>
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" asChild>
+                  <Link to="/auth">
+                    <I18nText translationKey="auth.buttons.login">Log In</I18nText>
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/auth">
+                    <I18nText translationKey="auth.buttons.register">Sign Up</I18nText>
+                  </Link>
+                </Button>
+              </div>
             )}
           </div>
         </div>

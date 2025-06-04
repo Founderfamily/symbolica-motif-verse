@@ -1,0 +1,38 @@
+
+{
+  "footer": {
+    "tagline": "Préserver et célébrer l'héritage symbolique mondial",
+    "platform": "Plateforme",
+    "home": "Accueil",
+    "explore": "Explorer",
+    "map": "Carte",
+    "contribute": "Contribuer",
+    "about": "À propos",
+    "community": "Communauté",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "legal": "Légal",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "contact": "Contact",
+    "copyright": "© 2025 Musée Symbolica",
+    "newsletter": {
+      "title": "Restez Informé",
+      "description": "Recevez les dernières mises à jour sur les nouveaux symboles et fonctionnalités",
+      "placeholder": "Entrez votre email",
+      "subscribe": "S'abonner",
+      "success": "Merci de vous être abonné !"
+    },
+    "stats": {
+      "symbols": "Symboles",
+      "cultures": "Cultures",
+      "contributors": "Contributeurs",
+      "countries": "Pays"
+    },
+    "social": {
+      "title": "Suivez-nous",
+      "description": "Rejoignez notre communauté sur les réseaux sociaux"
+    }
+  }
+}

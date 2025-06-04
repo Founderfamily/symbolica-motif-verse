@@ -1,0 +1,38 @@
+
+{
+  "footer": {
+    "tagline": "Preserving and celebrating the world's symbolic heritage",
+    "platform": "Platform",
+    "home": "Home",
+    "explore": "Explore",
+    "map": "Map",
+    "contribute": "Contribute",
+    "about": "About",
+    "community": "Community",
+    "github": "GitHub",
+    "discord": "Discord",
+    "forum": "Forum",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact",
+    "copyright": "© 2025 Symbolica Museum",
+    "newsletter": {
+      "title": "Stay Updated",
+      "description": "Get the latest updates on new symbols and features",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe",
+      "success": "Thank you for subscribing!"
+    },
+    "stats": {
+      "symbols": "Symbols",
+      "cultures": "Cultures",
+      "contributors": "Contributors",
+      "countries": "Countries"
+    },
+    "social": {
+      "title": "Follow Us",
+      "description": "Join our community on social media"
+    }
+  }
+}
