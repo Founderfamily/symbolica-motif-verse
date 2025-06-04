@@ -83,59 +83,66 @@ export const CollectionAnimations: React.FC<CollectionAnimationsProps> = ({
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className={getLayoutClasses()}
-    >
-      <AnimatePresence mode="popLayout">
-        {collections.map((collection, index) => (
-          <motion.div
-            key={collection.id}
-            variants={itemVariants}
-            whileHover="hover"
-            whileTap="tap"
-            onHoverStart={() => setHoveredId(collection.id)}
-            onHoverEnd={() => setHoveredId(null)}
-            className="relative"
-            style={{
-              zIndex: hoveredId === collection.id ? 10 : 1
-            }}
-          >
+    <>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className={getLayoutClasses()}
+      >
+        <AnimatePresence mode="popLayout">
+          {collections.map((collection, index) => (
             <motion.div
-              variants={hoverVariants}
-              className="h-full"
+              key={collection.id}
+              variants={itemVariants}
+              whileHover="hover"
+              whileTap="tap"
+              onHoverStart={() => setHoveredId(collection.id)}
+              onHoverEnd={() => setHoveredId(null)}
+              className="relative"
+              style={{
+                zIndex: hoveredId === collection.id ? 10 : 1
+              }}
             >
-              <OptimizedCollectionCard collection={collection} />
+              <motion.div
+                variants={hoverVariants}
+                className="h-full"
+              >
+                <OptimizedCollectionCard collection={collection} />
+              </motion.div>
+
+              {/* Effet de brillance au survol */}
+              <AnimatePresence>
+                {hoveredId === collection.id && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="absolute inset-0 rounded-lg pointer-events-none shimmer-effect"
+                  />
+                )}
+              </AnimatePresence>
             </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
-            {/* Effet de brillance au survol */}
-            <AnimatePresence>
-              {hoveredId === collection.id && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                    transform: 'skewX(-12deg) translateX(-100%)',
-                    animation: 'shimmer 0.6s ease-out'
-                  }}
-                />
-              )}
-            </AnimatePresence>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-
-      <style jsx>{`
+      <style>{`
         @keyframes shimmer {
-          0% { transform: skewX(-12deg) translateX(-100%); }
-          100% { transform: skewX(-12deg) translateX(100%); }
+          0% { 
+            transform: skewX(-12deg) translateX(-100%); 
+          }
+          100% { 
+            transform: skewX(-12deg) translateX(100%); 
+          }
+        }
+        
+        .shimmer-effect {
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transform: skewX(-12deg) translateX(-100%);
+          animation: shimmer 0.6s ease-out;
         }
       `}</style>
-    </motion.div>
+    </>
   );
 };
