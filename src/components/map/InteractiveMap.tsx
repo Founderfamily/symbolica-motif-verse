@@ -195,7 +195,7 @@ const InteractiveMap = () => {
       };
     } catch (err) {
       console.error("Error initializing map:", err);
-      ErrorHandler.handleMapError(err);
+      ErrorHandler.handleGenericError(err, 'Map initialization', 'Failed to initialize map. Please try again.');
       setTokenError(true);
       setError("Failed to initialize map. Please try again.");
       mapInitializedRef.current = false;
