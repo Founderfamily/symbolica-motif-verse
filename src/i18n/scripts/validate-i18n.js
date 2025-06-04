@@ -11,7 +11,6 @@
  * - Génère un rapport détaillé
  * 
  * Usage:
- *   npm run validate-i18n
  *   node src/i18n/scripts/validate-i18n.js [--fix] [--report=rapport.csv]
  */
 
@@ -88,7 +87,7 @@ const scanSourceCode = () => {
   
   // Chercher dans tous les fichiers .tsx, .ts, .jsx, .js
   const sourceFiles = glob.sync(`${SRC_DIR}/**/*.{tsx,ts,jsx,js}`, {
-    ignore: ['**/node_modules/**', '**/dist/**', '**/build/**']
+    ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/scripts/**']
   });
   
   sourceFiles.forEach(file => {
@@ -332,31 +331,32 @@ const generateCSVReport = (results, filePath) => {
 
 // Correction automatique (version basique)
 const autoFix = (results) => {
-  console.log('🔧 Application des corrections automatiques...\n');
+  console.log('🔧 Proposition de corrections automatiques...\n');
   
   let fixCount = 0;
   
-  // Ajouter les clés manquantes avec un marqueur [TODO]
+  // Proposer l'ajout des clés manquantes
   Object.keys(results.missing).forEach(direction => {
     const [source, target] = direction.split('->');
     
     if (results.missing[direction].length > 0) {
-      console.log(`Ajout de ${results.missing[direction].length} clés manquantes en ${target.toUpperCase()}`);
+      console.log(`Proposition d'ajout de ${results.missing[direction].length} clés manquantes en ${target.toUpperCase()}:`);
       
-      results.missing[direction].forEach(key => {
-        // Logique simplifiée : ajouter avec un marqueur TODO
-        const sourceValue = results.languages[source] ? 
-          results.languages[source][key] || `[TODO] ${key}` : 
-          `[TODO] ${key}`;
-        
-        console.log(`  + ${key} = "[TODO] ${sourceValue}"`);
+      results.missing[direction].slice(0, 5).forEach(key => {
+        console.log(`  + "${key}": "[TODO] Traduction requise"`);
         fixCount++;
       });
+      
+      if (results.missing[direction].length > 5) {
+        console.log(`  ... et ${results.missing[direction].length - 5} autres clés`);
+      }
+      console.log('');
     }
   });
   
-  console.log(`\n✅ ${fixCount} corrections automatiques proposées`);
-  console.log('⚠️ Les clés [TODO] doivent être traduites manuellement\n');
+  console.log(`\n💡 ${fixCount} corrections automatiques proposées`);
+  console.log('⚠️ Les clés [TODO] doivent être traduites manuellement');
+  console.log('📝 Ajoutez-les aux fichiers de traduction appropriés\n');
   
   return fixCount;
 };
@@ -371,7 +371,7 @@ const main = () => {
     generateCSVReport(results, reportPath);
   }
   
-  // Appliquer les corrections automatiques si demandé
+  // Proposer des corrections automatiques si demandé
   if (shouldFix) {
     autoFix(results);
   }
@@ -379,11 +379,17 @@ const main = () => {
   // Code de sortie pour CI/CD
   const hasErrors = results.summary.undefinedKeysCount > 0 || results.summary.missingKeysCount > 0;
   
+  console.log('\n🚀 COMMENT UTILISER CE SCRIPT:');
+  console.log('================================');
+  console.log('node src/i18n/scripts/validate-i18n.js           # Validation simple');
+  console.log('node src/i18n/scripts/validate-i18n.js --fix     # Avec propositions');
+  console.log('node src/i18n/scripts/validate-i18n.js --report=rapport.csv # Avec rapport');
+  
   if (hasErrors) {
-    console.log('❌ Des problèmes critiques ont été détectés');
+    console.log('\n❌ Des problèmes critiques ont été détectés');
     process.exit(1);
   } else {
-    console.log('✅ Validation réussie !');
+    console.log('\n✅ Validation réussie !');
     process.exit(0);
   }
 };

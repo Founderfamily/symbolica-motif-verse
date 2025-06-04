@@ -5,24 +5,31 @@
 
 Le script `validate-i18n.js` vérifie automatiquement l'intégrité des traductions dans le projet.
 
-### Installation
-
-```bash
-# Ajouter les scripts npm (à exécuter une fois)
-node src/i18n/scripts/add-npm-script.js
-```
-
-### Utilisation
+### Utilisation Directe
 
 ```bash
 # Validation simple
-npm run validate-i18n
+node src/i18n/scripts/validate-i18n.js
 
-# Validation avec corrections automatiques
-npm run validate-i18n:fix
+# Validation avec propositions de corrections
+node src/i18n/scripts/validate-i18n.js --fix
 
 # Validation avec rapport CSV
-npm run validate-i18n:report
+node src/i18n/scripts/validate-i18n.js --report=i18n-report.csv
+```
+
+### Installation des Scripts NPM (Optionnel)
+
+Pour utiliser avec `npm run`, ajoutez ces lignes dans votre `package.json` :
+
+```json
+{
+  "scripts": {
+    "validate-i18n": "node src/i18n/scripts/validate-i18n.js",
+    "validate-i18n:fix": "node src/i18n/scripts/validate-i18n.js --fix",
+    "validate-i18n:report": "node src/i18n/scripts/validate-i18n.js --report=i18n-report.csv"
+  }
+}
 ```
 
 ### Ce que vérifie le script
@@ -72,21 +79,22 @@ Le script retourne un code d'erreur (exit code 1) si des problèmes critiques so
 
 Idéal pour bloquer les déploiements avec des traductions incomplètes.
 
-### Corrections automatiques
+### Propositions de corrections
 
-L'option `--fix` ajoute automatiquement les clés manquantes avec un marqueur `[TODO]` :
+L'option `--fix` propose automatiquement l'ajout des clés manquantes :
 
-```json
-{
-  "auth": {
-    "welcome": {
-      "getStarted": "[TODO] Get Started"
-    }
-  }
-}
 ```
+🔧 Proposition de corrections automatiques...
 
-⚠️ **Important** : Les clés `[TODO]` doivent être traduites manuellement.
+Proposition d'ajout de 3 clés manquantes en FR:
+  + "auth.resetPassword.invalidToken": "[TODO] Traduction requise"
+  + "auth.welcome.getStarted": "[TODO] Traduction requise"
+  + "profile.settings.theme": "[TODO] Traduction requise"
+
+💡 3 corrections automatiques proposées
+⚠️ Les clés [TODO] doivent être traduites manuellement
+📝 Ajoutez-les aux fichiers de traduction appropriés
+```
 
 ### Rapport CSV
 
@@ -98,3 +106,16 @@ L'option `--report=fichier.csv` génère un rapport détaillé au format CSV ave
 - Action recommandée
 
 Utile pour suivre les corrections dans un tableur.
+
+### Commandes disponibles
+
+```bash
+# Validation simple
+node src/i18n/scripts/validate-i18n.js
+
+# Avec propositions de corrections
+node src/i18n/scripts/validate-i18n.js --fix
+
+# Avec rapport CSV
+node src/i18n/scripts/validate-i18n.js --report=rapport.csv
+```
