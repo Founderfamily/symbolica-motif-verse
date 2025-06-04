@@ -8,41 +8,11 @@ import { ArrowRight } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useFeaturedCollections } from '@/hooks/useCollections';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Skeleton } from '@/components/ui/skeleton';
+import { FeaturedCollectionsLoadingSkeleton } from './FeaturedCollectionsLoadingSkeleton';
 
-const FeaturedCollections: React.FC = () => {
-  const { data: collections, isLoading, error } = useFeaturedCollections();
-  const { currentLanguage } = useTranslation();
-
-  const getTranslation = (collection: any, field: string) => {
-    if (!collection?.collection_translations) {
-      return '';
-    }
-
-    // Find translation for current language first
-    const currentTranslation = collection.collection_translations.find(
-      (t: any) => t.language === currentLanguage
-    );
-    
-    if (currentTranslation?.[field] && currentTranslation[field].trim()) {
-      return currentTranslation[field];
-    }
-    
-    // If current language translation is missing or empty, use fallback language
-    const fallbackLang = currentLanguage === 'fr' ? 'en' : 'fr';
-    const fallbackTranslation = collection.collection_translations.find(
-      (t: any) => t.language === fallbackLang
-    );
-    
-    if (fallbackTranslation?.[field] && fallbackTranslation[field].trim()) {
-      return fallbackTranslation[field];
-    }
-    
-    return '';
-  };
-
-  // Static collections fallback if no data is available
-  const staticCollections = [
+// Extracted static collections to a separate memoized component
+const StaticCollections: React.FC<{ currentLanguage: string }> = React.memo(({ currentLanguage }) => {
+  const staticCollections = React.useMemo(() => [
     {
       id: '1',
       slug: 'geometrie-sacree',
@@ -79,9 +49,118 @@ const FeaturedCollections: React.FC = () => {
         : 'The evolution of symbols in the digital age: emojis, logos, modern iconography.',
       is_featured: true
     }
-  ];
+  ], [currentLanguage]);
 
-  const displayCollections = (!isLoading && collections && collections.length > 0) ? collections : staticCollections;
+  return (
+    <>
+      {staticCollections.slice(0, 4).map((collection) => (
+        <Link
+          key={collection.id}
+          to={`/collections/${collection.slug}`}
+          className="block transition-transform hover:scale-105"
+        >
+          <Card className="h-full hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-start mb-2">
+                <CardTitle className="text-lg">
+                  {collection.title}
+                </CardTitle>
+                {collection.is_featured && (
+                  <Badge variant="default">
+                    <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-600 text-sm line-clamp-3">
+                {collection.description}
+              </p>
+              <div className="mt-4 text-sm text-amber-600 font-medium">
+                <I18nText translationKey="collections.explore">Explorer →</I18nText>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
+    </>
+  );
+});
+
+StaticCollections.displayName = 'StaticCollections';
+
+// Extracted dynamic collections to a separate component
+const DynamicCollections: React.FC<{ collections: any[]; getTranslation: (collection: any, field: string) => string }> = React.memo(({ collections, getTranslation }) => {
+  return (
+    <>
+      {collections.slice(0, 4).map((collection) => (
+        <Link
+          key={collection.id}
+          to={`/collections/${collection.slug}`}
+          className="block transition-transform hover:scale-105"
+        >
+          <Card className="h-full hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-start mb-2">
+                <CardTitle className="text-lg">
+                  {getTranslation(collection, 'title')}
+                </CardTitle>
+                {collection.is_featured && (
+                  <Badge variant="default">
+                    <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-600 text-sm line-clamp-3">
+                {getTranslation(collection, 'description')}
+              </p>
+              <div className="mt-4 text-sm text-amber-600 font-medium">
+                <I18nText translationKey="collections.explore">Explorer →</I18nText>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
+    </>
+  );
+});
+
+DynamicCollections.displayName = 'DynamicCollections';
+
+const FeaturedCollections: React.FC = () => {
+  const { data: collections, isLoading, error } = useFeaturedCollections();
+  const { currentLanguage } = useTranslation();
+
+  const getTranslation = React.useCallback((collection: any, field: string) => {
+    if (!collection?.collection_translations) {
+      return '';
+    }
+
+    // Find translation for current language first
+    const currentTranslation = collection.collection_translations.find(
+      (t: any) => t.language === currentLanguage
+    );
+    
+    if (currentTranslation?.[field] && currentTranslation[field].trim()) {
+      return currentTranslation[field];
+    }
+    
+    // If current language translation is missing or empty, use fallback language
+    const fallbackLang = currentLanguage === 'fr' ? 'en' : 'fr';
+    const fallbackTranslation = collection.collection_translations.find(
+      (t: any) => t.language === fallbackLang
+    );
+    
+    if (fallbackTranslation?.[field] && fallbackTranslation[field].trim()) {
+      return fallbackTranslation[field];
+    }
+    
+    return '';
+  }, [currentLanguage]);
+
+  const hasValidCollections = collections && collections.length > 0;
 
   if (error) {
     return (
@@ -117,53 +196,14 @@ const FeaturedCollections: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="space-y-3">
-                <Skeleton className="h-48 w-full rounded-lg" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            ))}
-          </div>
+          <FeaturedCollectionsLoadingSkeleton />
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {displayCollections.slice(0, 4).map((collection) => (
-              <Link
-                key={collection.id}
-                to={`/collections/${collection.slug}`}
-                className="block transition-transform hover:scale-105"
-              >
-                <Card className="h-full hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex justify-between items-start mb-2">
-                      <CardTitle className="text-lg">
-                        {collections && collections.length > 0 
-                          ? getTranslation(collection, 'title') 
-                          : collection.title
-                        }
-                      </CardTitle>
-                      {collection.is_featured && (
-                        <Badge variant="default">
-                          <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 text-sm line-clamp-3">
-                      {collections && collections.length > 0 
-                        ? getTranslation(collection, 'description') 
-                        : collection.description
-                      }
-                    </p>
-                    <div className="mt-4 text-sm text-amber-600 font-medium">
-                      <I18nText translationKey="collections.explore">Explorer →</I18nText>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {hasValidCollections ? (
+              <DynamicCollections collections={collections} getTranslation={getTranslation} />
+            ) : (
+              <StaticCollections currentLanguage={currentLanguage} />
+            )}
           </div>
         )}
         
@@ -180,4 +220,4 @@ const FeaturedCollections: React.FC = () => {
   );
 };
 
-export default FeaturedCollections;
+export default React.memo(FeaturedCollections);
