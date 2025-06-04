@@ -1,12 +1,22 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Collection, CollectionWithTranslations, CollectionDetails, CreateCollectionData } from '@/types/collections';
+import { logger } from './logService';
 
-export const collectionsService = {
+class CollectionsService {
+  private static instance: CollectionsService;
+
+  static getInstance(): CollectionsService {
+    if (!CollectionsService.instance) {
+      CollectionsService.instance = new CollectionsService();
+    }
+    return CollectionsService.instance;
+  }
+
   /**
    * Récupère toutes les collections avec leurs traductions
    */
-  getCollections: async (): Promise<CollectionWithTranslations[]> => {
+  async getCollections(): Promise<CollectionWithTranslations[]> {
     try {
       const { data, error } = await supabase
         .from('collections')
@@ -19,15 +29,15 @@ export const collectionsService = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching collections:', error);
+      logger.error('Error fetching collections', { error });
       return [];
     }
-  },
+  }
 
   /**
    * Récupère les collections en vedette
    */
-  getFeaturedCollections: async (): Promise<CollectionWithTranslations[]> => {
+  async getFeaturedCollections(): Promise<CollectionWithTranslations[]> {
     try {
       const { data, error } = await supabase
         .from('collections')
@@ -42,15 +52,15 @@ export const collectionsService = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching featured collections:', error);
+      logger.error('Error fetching featured collections', { error });
       return [];
     }
-  },
+  }
 
   /**
-   * Récupère une collection par son slug avec ses symboles
+   * Récupère une collection par son slug
    */
-  getCollectionBySlug: async (slug: string): Promise<CollectionDetails | null> => {
+  async getCollectionBySlug(slug: string): Promise<CollectionDetails | null> {
     try {
       const { data, error } = await supabase
         .from('collections')
@@ -81,15 +91,15 @@ export const collectionsService = {
       if (error) throw error;
       return data as CollectionDetails;
     } catch (error) {
-      console.error('Error fetching collection by slug:', error);
+      logger.error('Error fetching collection by slug', { error, slug });
       return null;
     }
-  },
+  }
 
   /**
    * Crée une nouvelle collection
    */
-  createCollection: async (collectionData: CreateCollectionData): Promise<Collection | null> => {
+  async createCollection(collectionData: CreateCollectionData): Promise<Collection | null> {
     try {
       // Créer la collection
       const { data: collection, error: collectionError } = await supabase
@@ -104,56 +114,28 @@ export const collectionsService = {
       if (collectionError) throw collectionError;
 
       // Créer les traductions
-      const translations = [
-        {
-          collection_id: collection.id,
-          language: 'fr',
-          title: collectionData.translations.fr.title,
-          description: collectionData.translations.fr.description
-        },
-        {
-          collection_id: collection.id,
-          language: 'en',
-          title: collectionData.translations.en.title,
-          description: collectionData.translations.en.description
-        }
-      ];
-
-      const { error: translationsError } = await supabase
-        .from('collection_translations')
-        .insert(translations);
-
-      if (translationsError) throw translationsError;
+      await this.createTranslations(collection.id, collectionData.translations);
 
       // Ajouter les symboles si fournis
-      if (collectionData.symbol_ids && collectionData.symbol_ids.length > 0) {
-        const collectionSymbols = collectionData.symbol_ids.map((symbolId, index) => ({
-          collection_id: collection.id,
-          symbol_id: symbolId,
-          position: index + 1
-        }));
-
-        const { error: symbolsError } = await supabase
-          .from('collection_symbols')
-          .insert(collectionSymbols);
-
-        if (symbolsError) throw symbolsError;
+      if (collectionData.symbol_ids?.length) {
+        await this.addSymbolsToCollection(collection.id, collectionData.symbol_ids);
       }
 
+      logger.info('Collection created successfully', { collectionId: collection.id });
       return collection;
     } catch (error) {
-      console.error('Error creating collection:', error);
+      logger.error('Error creating collection', { error });
       return null;
     }
-  },
+  }
 
   /**
    * Met à jour une collection
    */
-  updateCollection: async (id: string, updates: Partial<CreateCollectionData>): Promise<boolean> => {
+  async updateCollection(id: string, updates: Partial<CreateCollectionData>): Promise<boolean> {
     try {
       if (updates.slug || updates.is_featured !== undefined) {
-        const { error: collectionError } = await supabase
+        const { error } = await supabase
           .from('collections')
           .update({
             ...(updates.slug && { slug: updates.slug }),
@@ -161,46 +143,25 @@ export const collectionsService = {
           })
           .eq('id', id);
 
-        if (collectionError) throw collectionError;
+        if (error) throw error;
       }
 
       if (updates.translations) {
-        // Mettre à jour les traductions françaises
-        if (updates.translations.fr) {
-          await supabase
-            .from('collection_translations')
-            .update({
-              title: updates.translations.fr.title,
-              description: updates.translations.fr.description
-            })
-            .eq('collection_id', id)
-            .eq('language', 'fr');
-        }
-
-        // Mettre à jour les traductions anglaises
-        if (updates.translations.en) {
-          await supabase
-            .from('collection_translations')
-            .update({
-              title: updates.translations.en.title,
-              description: updates.translations.en.description
-            })
-            .eq('collection_id', id)
-            .eq('language', 'en');
-        }
+        await this.updateTranslations(id, updates.translations);
       }
 
+      logger.info('Collection updated successfully', { collectionId: id });
       return true;
     } catch (error) {
-      console.error('Error updating collection:', error);
+      logger.error('Error updating collection', { error, collectionId: id });
       return false;
     }
-  },
+  }
 
   /**
    * Supprime une collection
    */
-  deleteCollection: async (id: string): Promise<boolean> => {
+  async deleteCollection(id: string): Promise<boolean> {
     try {
       const { error } = await supabase
         .from('collections')
@@ -208,17 +169,19 @@ export const collectionsService = {
         .eq('id', id);
 
       if (error) throw error;
+      
+      logger.info('Collection deleted successfully', { collectionId: id });
       return true;
     } catch (error) {
-      console.error('Error deleting collection:', error);
+      logger.error('Error deleting collection', { error, collectionId: id });
       return false;
     }
-  },
+  }
 
   /**
    * Met à jour l'ordre des symboles dans une collection
    */
-  updateSymbolsOrder: async (collectionId: string, symbolIds: string[]): Promise<boolean> => {
+  async updateSymbolsOrder(collectionId: string, symbolIds: string[]): Promise<boolean> {
     try {
       // Supprimer tous les symboles existants
       await supabase
@@ -238,10 +201,76 @@ export const collectionsService = {
         .insert(collectionSymbols);
 
       if (error) throw error;
+      
+      logger.info('Symbols order updated successfully', { collectionId });
       return true;
     } catch (error) {
-      console.error('Error updating symbols order:', error);
+      logger.error('Error updating symbols order', { error, collectionId });
       return false;
     }
   }
-};
+
+  // Méthodes privées pour réduire la duplication
+  private async createTranslations(collectionId: string, translations: CreateCollectionData['translations']) {
+    const translationData = [
+      {
+        collection_id: collectionId,
+        language: 'fr',
+        title: translations.fr.title,
+        description: translations.fr.description
+      },
+      {
+        collection_id: collectionId,
+        language: 'en',
+        title: translations.en.title,
+        description: translations.en.description
+      }
+    ];
+
+    const { error } = await supabase
+      .from('collection_translations')
+      .insert(translationData);
+
+    if (error) throw error;
+  }
+
+  private async updateTranslations(collectionId: string, translations: CreateCollectionData['translations']) {
+    if (translations.fr) {
+      await supabase
+        .from('collection_translations')
+        .update({
+          title: translations.fr.title,
+          description: translations.fr.description
+        })
+        .eq('collection_id', collectionId)
+        .eq('language', 'fr');
+    }
+
+    if (translations.en) {
+      await supabase
+        .from('collection_translations')
+        .update({
+          title: translations.en.title,
+          description: translations.en.description
+        })
+        .eq('collection_id', collectionId)
+        .eq('language', 'en');
+    }
+  }
+
+  private async addSymbolsToCollection(collectionId: string, symbolIds: string[]) {
+    const collectionSymbols = symbolIds.map((symbolId, index) => ({
+      collection_id: collectionId,
+      symbol_id: symbolId,
+      position: index + 1
+    }));
+
+    const { error } = await supabase
+      .from('collection_symbols')
+      .insert(collectionSymbols);
+
+    if (error) throw error;
+  }
+}
+
+export const collectionsService = CollectionsService.getInstance();

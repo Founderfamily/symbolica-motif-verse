@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Ban, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/services/logService';
 
 const CollectionsManagement = () => {
   const { data: collections, isLoading, refetch } = useCollections();
@@ -15,11 +16,15 @@ const CollectionsManagement = () => {
 
   const handleDelete = async (id: string, title: string) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer la collection "${title}" ?`)) {
+      logger.info('Admin deleting collection', { collectionId: id, title });
+      
       const success = await deleteCollection.mutateAsync(id);
       if (success) {
         toast.success('Collection supprimée avec succès');
+        logger.info('Collection deleted successfully', { collectionId: id });
       } else {
         toast.error('Erreur lors de la suppression');
+        logger.error('Failed to delete collection', { collectionId: id });
       }
     }
   };
@@ -27,6 +32,12 @@ const CollectionsManagement = () => {
   const handleToggleStatus = async (id: string, currentStatus: boolean, title: string) => {
     try {
       const newStatus = !currentStatus;
+      logger.info('Admin toggling collection status', { 
+        collectionId: id, 
+        currentStatus, 
+        newStatus 
+      });
+
       const { error } = await supabase
         .from('collections')
         .update({ is_featured: newStatus })
@@ -39,9 +50,15 @@ const CollectionsManagement = () => {
           ? `Collection "${title}" activée`
           : `Collection "${title}" suspendue`
       );
+      
+      logger.info('Collection status toggled successfully', { 
+        collectionId: id, 
+        newStatus 
+      });
+      
       refetch();
     } catch (error) {
-      console.error('Error toggling collection status:', error);
+      logger.error('Error toggling collection status', { error, collectionId: id });
       toast.error('Erreur lors de la modification du statut');
     }
   };

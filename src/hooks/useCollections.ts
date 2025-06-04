@@ -2,32 +2,46 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collectionsService } from '@/services/collectionsService';
 import { CreateCollectionData } from '@/types/collections';
+import { logger } from '@/services/logService';
+
+// Clés de requête centralisées
+const QUERY_KEYS = {
+  collections: ['collections'] as const,
+  featured: ['collections', 'featured'] as const,
+  bySlug: (slug: string) => ['collections', 'slug', slug] as const,
+} as const;
 
 export const useCollections = () => {
   return useQuery({
-    queryKey: ['collections'],
+    queryKey: QUERY_KEYS.collections,
     queryFn: collectionsService.getCollections,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
 export const useFeaturedCollections = () => {
   return useQuery({
-    queryKey: ['collections', 'featured'],
+    queryKey: QUERY_KEYS.featured,
     queryFn: collectionsService.getFeaturedCollections,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
 export const useCollection = (slug: string) => {
   return useQuery({
-    queryKey: ['collections', slug],
+    queryKey: QUERY_KEYS.bySlug(slug),
     queryFn: () => collectionsService.getCollectionBySlug(slug),
     enabled: !!slug,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
@@ -36,9 +50,15 @@ export const useCreateCollection = () => {
 
   return useMutation({
     mutationFn: (data: CreateCollectionData) => collectionsService.createCollection(data),
-    onSuccess: () => {
-      // More conservative invalidation to avoid conflicts
-      queryClient.invalidateQueries({ queryKey: ['collections'], exact: true });
+    onSuccess: (result) => {
+      if (result) {
+        logger.info('Collection created, invalidating cache');
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.collections });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.featured });
+      }
+    },
+    onError: (error) => {
+      logger.error('Failed to create collection', { error });
     },
   });
 };
@@ -49,10 +69,19 @@ export const useUpdateCollection = () => {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<CreateCollectionData> }) =>
       collectionsService.updateCollection(id, updates),
-    onSuccess: (_, { id }) => {
-      // More targeted invalidation
-      queryClient.invalidateQueries({ queryKey: ['collections'], exact: true });
-      queryClient.invalidateQueries({ queryKey: ['collections', id], exact: true });
+    onSuccess: (success, { id }) => {
+      if (success) {
+        logger.info('Collection updated, invalidating cache', { collectionId: id });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.collections });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.featured });
+        // Invalider aussi la collection spécifique si on a son slug
+        queryClient.invalidateQueries({ 
+          predicate: (query) => query.queryKey[0] === 'collections' && query.queryKey[1] === 'slug'
+        });
+      }
+    },
+    onError: (error) => {
+      logger.error('Failed to update collection', { error });
     },
   });
 };
@@ -62,8 +91,15 @@ export const useDeleteCollection = () => {
 
   return useMutation({
     mutationFn: (id: string) => collectionsService.deleteCollection(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['collections'], exact: true });
+    onSuccess: (success) => {
+      if (success) {
+        logger.info('Collection deleted, invalidating cache');
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.collections });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.featured });
+      }
+    },
+    onError: (error) => {
+      logger.error('Failed to delete collection', { error });
     },
   });
 };
@@ -74,9 +110,20 @@ export const useUpdateSymbolsOrder = () => {
   return useMutation({
     mutationFn: ({ collectionId, symbolIds }: { collectionId: string; symbolIds: string[] }) =>
       collectionsService.updateSymbolsOrder(collectionId, symbolIds),
-    onSuccess: (_, { collectionId }) => {
-      // Conservative invalidation for specific collection only
-      queryClient.invalidateQueries({ queryKey: ['collections', collectionId], exact: true });
+    onSuccess: (success, { collectionId }) => {
+      if (success) {
+        logger.info('Symbols order updated, invalidating cache', { collectionId });
+        // Invalider seulement les requêtes qui incluent des détails de collection
+        queryClient.invalidateQueries({ 
+          predicate: (query) => {
+            return query.queryKey[0] === 'collections' && 
+                   query.queryKey[1] === 'slug';
+          }
+        });
+      }
+    },
+    onError: (error) => {
+      logger.error('Failed to update symbols order', { error });
     },
   });
 };

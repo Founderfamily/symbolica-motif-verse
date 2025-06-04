@@ -3,6 +3,7 @@ import React, { Component, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/services/logService';
 
 interface Props {
   children: ReactNode;
@@ -13,7 +14,6 @@ interface Props {
 interface State {
   hasError: boolean;
   error?: Error;
-  errorInfo?: React.ErrorInfo;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -27,31 +27,25 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    logger.error('ErrorBoundary caught an error', { error: error.message, stack: error.stack, errorInfo });
     
-    this.setState({
-      error,
-      errorInfo
-    });
+    this.setState({ error });
 
-    // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+    this.setState({ hasError: false, error: undefined });
   };
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback UI
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default error UI
       return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
           <Card className="w-full max-w-md">
@@ -99,16 +93,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Hook version for functional components
 export const useErrorHandler = () => {
   const handleError = React.useCallback((error: Error, context?: string) => {
-    console.error(`Error in ${context || 'component'}:`, error);
-    
-    // Could integrate with error reporting service here
-    if (process.env.NODE_ENV === 'production') {
-      // Example: Send to error reporting service
-      // errorReportingService.captureException(error, { context });
-    }
+    logger.error(`Error in ${context || 'component'}`, { error: error.message, stack: error.stack });
   }, []);
 
   return { handleError };
