@@ -1,17 +1,19 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useOptimizedCollections } from '@/hooks/useOptimizedCollections';
 import { useCollectionCategories } from '@/hooks/useCollectionCategories';
-import { useOptimizedLoading } from '@/hooks/useOptimizedLoading';
-import { Skeleton } from '@/components/ui/skeleton';
 import { I18nText } from '@/components/ui/i18n-text';
 import { FeaturedCollectionsSection } from './sections/FeaturedCollectionsSection';
 import { CollectionTabs } from './sections/CollectionTabs';
+import { ProgressiveLoader } from './ProgressiveLoader';
+import { EnhancedErrorState } from './EnhancedErrorStates';
+import { PerformanceTracker } from './PerformanceTracker';
+import { AdaptiveGrid } from './AdaptiveGrid';
 
 const CollectionCategories: React.FC = React.memo(() => {
   const { collections, isLoading, error, prefetchFeatured } = useOptimizedCollections();
   const { featured, cultures, periods, others } = useCollectionCategories(collections);
-  const { isInitialLoading } = useOptimizedLoading(isLoading);
+  const [performanceMetrics, setPerformanceMetrics] = useState(null);
 
   // Prefetch des collections populaires au montage
   React.useEffect(() => {
@@ -20,33 +22,23 @@ const CollectionCategories: React.FC = React.memo(() => {
     }
   }, [isLoading, collections.length, prefetchFeatured]);
 
-  if (isInitialLoading) {
-    return (
-      <div className="space-y-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(12)].map((_, i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-full" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const handleRetry = () => {
+    window.location.reload();
+  };
+
+  const handlePerformanceUpdate = (metrics: any) => {
+    setPerformanceMetrics(metrics);
+    console.log('Collections Performance Metrics:', metrics);
+  };
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-xl font-medium mb-2 text-red-600">
-          <I18nText translationKey="collections.errorLoading">Error loading collections</I18nText>
-        </h3>
-        <p className="text-slate-600">
-          <I18nText translationKey="collections.errorMessage">
-            Unable to load collections. Please try again later.
-          </I18nText>
-        </p>
+      <div className="flex justify-center items-center min-h-96">
+        <EnhancedErrorState
+          error={error}
+          context="collections-categories"
+          onRetry={handleRetry}
+        />
       </div>
     );
   }
@@ -67,14 +59,24 @@ const CollectionCategories: React.FC = React.memo(() => {
   }
 
   return (
-    <div className="space-y-12">
-      <FeaturedCollectionsSection collections={featured} />
-      <CollectionTabs 
-        cultures={cultures}
-        periods={periods}
-        others={others}
-      />
-    </div>
+    <>
+      <PerformanceTracker onMetricsUpdate={handlePerformanceUpdate} />
+      
+      <ProgressiveLoader
+        isLoading={isLoading}
+        stage={isLoading ? 'fetching' : 'rendering'}
+        estimatedTime={2000}
+      >
+        <div className="space-y-12">
+          <FeaturedCollectionsSection collections={featured} />
+          <CollectionTabs 
+            cultures={cultures}
+            periods={periods}
+            others={others}
+          />
+        </div>
+      </ProgressiveLoader>
+    </>
   );
 });
 

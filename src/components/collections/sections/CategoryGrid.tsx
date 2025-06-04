@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { CollectionWithTranslations } from '@/types/collections';
-import { OptimizedCollectionCard } from '../OptimizedCollectionCard';
+import { AdaptiveGrid } from '../AdaptiveGrid';
 import { EmptyCategory } from './EmptyCategory';
+import { useRouter } from 'react-router-dom';
 
 interface CategoryGridProps {
   collections: CollectionWithTranslations[];
@@ -13,16 +14,21 @@ export const CategoryGrid: React.FC<CategoryGridProps> = React.memo(({
   collections, 
   emptyMessage = "collections.categories.noOthers" 
 }) => {
+  const router = useRouter();
+
+  const handleCollectionSelect = (collection: CollectionWithTranslations) => {
+    router.push(`/collections/${collection.slug}`);
+  };
+
   if (collections.length === 0) {
     return <EmptyCategory message={emptyMessage} />;
   }
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {collections.map((collection) => (
-        <OptimizedCollectionCard key={collection.id} collection={collection} />
-      ))}
-    </div>
+    <AdaptiveGrid 
+      collections={collections}
+      onCollectionSelect={handleCollectionSelect}
+    />
   );
 });
 
