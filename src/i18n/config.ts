@@ -12,6 +12,16 @@ import frCallToAction from './locales/fr/callToAction.json';
 import frHowItWorks from './locales/fr/howItWorks.json';
 import frUploadTools from './locales/fr/uploadTools.json';
 import frAuth from './locales/fr/auth.json';
+import frAdmin from './locales/fr/admin.json';
+import frCollections from './locales/fr/collections.json';
+import frCommunity from './locales/fr/community.json';
+import frProfile from './locales/fr/profile.json';
+import frNavigation from './locales/fr/navigation.json';
+import frCommon from './locales/fr/common.json';
+import frContributions from './locales/fr/contributions.json';
+import frGamification from './locales/fr/gamification.json';
+import frSymbols from './locales/fr/symbols.json';
+import frSearchFilters from './locales/fr/searchFilters.json';
 
 // Import remaining sections from original file
 import frTranslationRemaining from './locales/fr.json';
@@ -29,13 +39,12 @@ import enAdmin from './locales/en/admin.json';
 import enCollections from './locales/en/collections.json';
 import enSearchFilters from './locales/en/searchFilters.json';
 
-// Import French admin translations
-import frAdmin from './locales/fr/admin.json';
-
 const LANGUAGE_STORAGE_KEY = 'app_language';
 
-// Merge all French translation files with correct structure
+// Merge all French translation files with consistent structure
 const frTranslation = {
+  ...frNavigation,
+  ...frCommon,
   app: frApp,
   hero: frHero,
   sections: frSections,
@@ -44,36 +53,36 @@ const frTranslation = {
   callToAction: frCallToAction,
   howItWorks: frHowItWorks,
   uploadTools: frUploadTools,
-  auth: frAuth.auth, // Extract the auth object from the nested structure
-  admin: frAdmin.admin, // Add admin translations
-  // Keep remaining translations from original file
-  collections: frTranslationRemaining.collections,
-  community: frTranslationRemaining.community,
+  auth: frAuth.auth,
+  admin: frAdmin.admin,
+  collections: frCollections,
+  community: frCommunity,
+  profile: frProfile.profile,
+  contributions: frContributions.contributions,
+  gamification: frGamification.gamification,
+  symbols: frSymbols,
+  searchFilters: frSearchFilters.searchFilters,
+  // Keep remaining translations from original file for backward compatibility
   testimonials: frTranslationRemaining.testimonials,
-  gamification: frTranslationRemaining.gamification,
   about: frTranslationRemaining.about,
   faq: frTranslationRemaining.faq,
   roadmap: frTranslationRemaining.roadmap,
-  symbolTriptych: frTranslationRemaining.symbolTriptych,
-  navigation: frTranslationRemaining.navigation,
-  common: frTranslationRemaining.common,
-  symbols: frTranslationRemaining.symbols,
-  searchFilters: frTranslationRemaining.searchFilters
+  symbolTriptych: frTranslationRemaining.symbolTriptych
 };
 
-// Merge all English translation files with correct structure
+// Merge all English translation files with consistent structure
 const enTranslation = {
   ...enNavigation,
   ...enCommon,
-  auth: enAuth.auth, // Extract the auth object from the nested structure
-  ...enProfile,
+  auth: enAuth.auth,
+  profile: enProfile.profile,
   ...enSections,
-  ...enContributions,
-  ...enSymbols,
-  ...enGamification,
-  admin: enAdmin.admin, // Add admin translations
-  ...enCollections,
-  ...enSearchFilters
+  contributions: enContributions.contributions,
+  symbols: enSymbols,
+  gamification: enGamification.gamification,
+  admin: enAdmin.admin,
+  collections: enCollections,
+  searchFilters: enSearchFilters.searchFilters
 };
 
 i18n

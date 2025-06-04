@@ -1,0 +1,32 @@
+
+{
+  "navigation": {
+    "home": "Accueil",
+    "symbols": "Symboles",
+    "collections": "Collections",
+    "community": "Communauté",
+    "contribute": "Contribuer",
+    "about": "À Propos",
+    "profile": "Profil",
+    "admin": "Administration",
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Déconnexion",
+    "settings": "Paramètres",
+    "help": "Aide",
+    "search": "Rechercher",
+    "menu": "Menu",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "view": "Voir",
+    "download": "Télécharger",
+    "upload": "Téléverser",
+    "share": "Partager"
+  }
+}

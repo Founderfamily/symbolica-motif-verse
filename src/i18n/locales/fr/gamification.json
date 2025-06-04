@@ -1,0 +1,54 @@
+
+{
+  "gamification": {
+    "points": {
+      "title": "Gagner des Points",
+      "description": "Obtenez des points pour chaque contribution, commentaire et validation que vous faites",
+      "total": "Points Total",
+      "earned": "Points Gagnés",
+      "available": "Points Disponibles"
+    },
+    "levels": {
+      "title": "Niveaux",
+      "current": "Niveau Actuel",
+      "next": "Niveau Suivant",
+      "progress": "Progression",
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé",
+      "expert": "Expert",
+      "master": "Maître"
+    },
+    "badges": {
+      "title": "Badges",
+      "earned": "Badges Gagnés",
+      "available": "Badges Disponibles",
+      "firstContribution": "Première Contribution",
+      "symbolExpert": "Expert en Symboles",
+      "culturalExplorer": "Explorateur Culturel",
+      "communityBuilder": "Bâtisseur de Communauté"
+    },
+    "achievements": {
+      "title": "Réalisations",
+      "recent": "Réalisations Récentes",
+      "all": "Toutes les Réalisations",
+      "unlocked": "Débloqué",
+      "locked": "Verrouillé"
+    },
+    "leaderboard": {
+      "title": "Classement",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuel",
+      "allTime": "Tous les Temps",
+      "rank": "Rang",
+      "user": "Utilisateur",
+      "score": "Score"
+    },
+    "notifications": {
+      "pointsEarned": "Vous avez gagné {{points}} points !",
+      "levelUp": "Félicitations ! Vous avez atteint le niveau {{level}} !",
+      "badgeEarned": "Nouveau badge débloqué : {{badge}} !",
+      "achievementUnlocked": "Nouvelle réalisation : {{achievement}} !"
+    }
+  }
+}

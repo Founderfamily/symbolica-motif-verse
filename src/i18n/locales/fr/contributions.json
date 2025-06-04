@@ -1,0 +1,48 @@
+
+{
+  "contributions": {
+    "title": "Mes Contributions",
+    "subtitle": "Gérez et suivez vos contributions à la communauté",
+    "newContribution": "Nouvelle Contribution",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvée",
+      "rejected": "Rejetée",
+      "draft": "Brouillon"
+    },
+    "form": {
+      "title": "Titre",
+      "description": "Description",
+      "culture": "Culture",
+      "period": "Période",
+      "location": "Localisation",
+      "tags": "Tags",
+      "image": "Image",
+      "submit": "Soumettre",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "required": "Requis",
+      "optional": "Optionnel",
+      "placeholder": {
+        "title": "Entrez le titre de votre contribution",
+        "description": "Décrivez votre symbole ou motif",
+        "culture": "Sélectionnez une culture",
+        "period": "Sélectionnez une période",
+        "location": "Entrez une localisation",
+        "tags": "Ajoutez des tags"
+      }
+    },
+    "validation": {
+      "titleRequired": "Le titre est requis",
+      "descriptionRequired": "La description est requise",
+      "imageRequired": "Une image est requise",
+      "cultureRequired": "La culture est requise"
+    },
+    "messages": {
+      "submitted": "Contribution soumise avec succès",
+      "saved": "Contribution sauvegardée",
+      "deleted": "Contribution supprimée",
+      "error": "Une erreur s'est produite"
+    }
+  }
+}

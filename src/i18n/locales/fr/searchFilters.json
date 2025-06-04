@@ -1,0 +1,27 @@
+
+{
+  "searchFilters": {
+    "title": "Filtres de Recherche",
+    "cultures": "Cultures",
+    "periods": "Périodes",
+    "tags": "Tags",
+    "styles": "Styles",
+    "locations": "Lieux",
+    "contributors": "Contributeurs",
+    "dateRange": "Plage de Dates",
+    "categories": "Catégories",
+    "clearAll": "Tout Effacer",
+    "apply": "Appliquer",
+    "reset": "Réinitialiser",
+    "advanced": "Filtres Avancés",
+    "basic": "Filtres de Base",
+    "saved": "Filtres Sauvegardés",
+    "save": "Sauvegarder",
+    "load": "Charger",
+    "delete": "Supprimer",
+    "noResults": "Aucun résultat trouvé",
+    "resultsCount": "{{count}} résultats trouvés",
+    "filtering": "Filtrage en cours...",
+    "error": "Erreur lors du filtrage"
+  }
+}

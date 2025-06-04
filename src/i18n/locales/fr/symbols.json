@@ -1,0 +1,78 @@
+
+{
+  "page": {
+    "title": "Tous les Symboles",
+    "description": "Explorez notre collection complète de symboles culturels du monde entier",
+    "filters": "Filtres",
+    "searchPlaceholder": "Rechercher des symboles...",
+    "clearFilters": "Tout effacer",
+    "activeFilters": "Filtres Actifs",
+    "noFilters": "Aucun filtre actif",
+    "resultsCount": "{{count}} symboles trouvés"
+  },
+  "symbolTriptych": {
+    "original": "Image Originale",
+    "pattern": "Motif Extrait",
+    "reuse": "Réutilisation",
+    "selectSymbol": "Sélectionner un symbole",
+    "noSymbolSelected": "Aucun symbole sélectionné",
+    "detailsTitle": "Détails du Symbole",
+    "culture": "Culture",
+    "period": "Période",
+    "description": "Description",
+    "noDescription": "Aucune description disponible pour ce symbole.",
+    "relatedPatterns": "Motifs Associés",
+    "noRelatedPatterns": "Aucun motif associé.",
+    "imageErrorDesc": "L'image n'a pas pu être chargée correctement. Une image alternative est affichée."
+  },
+  "symbolExplorer": {
+    "title": "Explorateur de Symboles",
+    "description": "Explorez notre collection de symboles, motifs et patrons culturels",
+    "filters": "Filtres",
+    "searchPlaceholder": "Rechercher des symboles...",
+    "gridView": "Grille",
+    "listView": "Liste",
+    "mapView": "Carte",
+    "activeFilters": "Filtres Actifs",
+    "noFilters": "Aucun filtre actif",
+    "clearFilters": "Tout effacer",
+    "resultsCount": "{{count}} symboles trouvés",
+    "noResults": "Aucun symbole ne correspond à vos critères de filtre",
+    "mapViewComingSoon": "La vue carte interactive arrive bientôt",
+    "mapViewDescription": "Explorez les symboles selon leur origine géographique et leur distribution"
+  },
+  "searchFilters": {
+    "cultures": "Cultures",
+    "periods": "Périodes",
+    "tags": "Tags",
+    "styles": "Styles",
+    "clearAll": "Tout effacer"
+  },
+  "collections": {
+    "title": "Collections",
+    "featured": "En Vedette",
+    "backToCollections": "Retour aux collections",
+    "notFound": "Collection non trouvée",
+    "share": "Partager",
+    "viewOnMap": "Voir sur la carte",
+    "symbolsCount": "Symboles",
+    "culturesCount": "Cultures",
+    "periodsCount": "Périodes", 
+    "symbolsInCollection": "Symboles de la collection",
+    "noSymbols": "Aucun symbole dans cette collection"
+  },
+  "mapExplorer": {
+    "title": "Explorateur de Carte des Symboles",
+    "description": "Explorez les symboles et motifs de différentes cultures du monde entier",
+    "searchLocation": "Rechercher un lieu...",
+    "filters": "Filtres",
+    "zoom": "Zoom",
+    "mapView": "Vue Carte",
+    "listView": "Vue Liste",
+    "symbolCount": "{{count}} symboles",
+    "countriesCount": "{{count}} pays",
+    "betaNotice": "La carte interactive est actuellement en version bêta. Plus de fonctionnalités et de symboles seront ajoutés prochainement.",
+    "listViewComingSoon": "La vue liste arrive bientôt !",
+    "popularRegions": "Régions Populaires"
+  }
+}
