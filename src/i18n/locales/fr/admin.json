@@ -1,0 +1,107 @@
+
+{
+  "admin": {
+    "title": "Administration",
+    "dashboard": {
+      "title": "Tableau de bord",
+      "subtitle": "Vue d'ensemble de la plateforme"
+    },
+    "navigation": {
+      "dashboard": "Tableau de bord",
+      "users": "Utilisateurs",
+      "contributions": "Contributions",
+      "moderation": "Modération",
+      "symbols": "Symboles",
+      "collections": "Collections",
+      "settings": "Paramètres"
+    },
+    "stats": {
+      "totalUsers": "Total utilisateurs",
+      "activeUsers": "{{count}} actifs ({{rate}})",
+      "totalContributions": "Total contributions",
+      "pendingContributions": "{{count}} en attente ({{rate}} approuvées)",
+      "totalSymbols": "Total symboles",
+      "symbolLocations": "Emplacements de symboles",
+      "verifiedLocations": "{{count}} vérifiés ({{rate}})",
+      "topContributor": "Top contributeur",
+      "contributorStats": "{{contributions}} contributions, {{points}} points",
+      "lastContribution": "Dernière contribution",
+      "noRecentActivity": "Aucune activité récente"
+    },
+    "users": {
+      "title": "Gestion des utilisateurs",
+      "search": "Rechercher des utilisateurs...",
+      "filters": {
+        "all": "Tous",
+        "admin": "Administrateurs",
+        "banned": "Bannis",
+        "user": "Utilisateurs"
+      },
+      "table": {
+        "username": "Nom d'utilisateur",
+        "fullName": "Nom complet",
+        "role": "Rôle",
+        "status": "Statut",
+        "contributions": "Contributions",
+        "points": "Points",
+        "lastActivity": "Dernière activité",
+        "actions": "Actions"
+      },
+      "actions": {
+        "ban": "Bannir",
+        "unban": "Débannir",
+        "makeAdmin": "Promouvoir admin",
+        "removeAdmin": "Rétrograder"
+      },
+      "status": {
+        "admin": "Admin",
+        "banned": "Banni",
+        "active": "Actif"
+      }
+    },
+    "contributions": {
+      "title": "Gestion des contributions",
+      "moderation": "Modération des contributions",
+      "filters": {
+        "all": "Toutes",
+        "pending": "En attente",
+        "approved": "Approuvées",
+        "rejected": "Rejetées"
+      },
+      "table": {
+        "title": "Titre",
+        "author": "Auteur",
+        "status": "Statut",
+        "createdAt": "Créé le",
+        "reviewedAt": "Examiné le",
+        "actions": "Actions"
+      },
+      "actions": {
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "pending": "Remettre en attente",
+        "delete": "Supprimer",
+        "view": "Voir"
+      },
+      "status": {
+        "pending": "En attente",
+        "approved": "Approuvée",
+        "rejected": "Rejetée"
+      }
+    },
+    "logs": {
+      "title": "Journaux d'administration",
+      "table": {
+        "admin": "Administrateur",
+        "action": "Action",
+        "entity": "Entité",
+        "date": "Date",
+        "details": "Détails"
+      }
+    },
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "noData": "Aucune donnée disponible",
+    "success": "Opération réussie"
+  }
+}

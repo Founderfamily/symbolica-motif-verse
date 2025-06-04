@@ -29,6 +29,9 @@ import enAdmin from './locales/en/admin.json';
 import enCollections from './locales/en/collections.json';
 import enSearchFilters from './locales/en/searchFilters.json';
 
+// Import French admin translations
+import frAdmin from './locales/fr/admin.json';
+
 const LANGUAGE_STORAGE_KEY = 'app_language';
 
 // Merge all French translation files with correct structure
@@ -42,6 +45,7 @@ const frTranslation = {
   howItWorks: frHowItWorks,
   uploadTools: frUploadTools,
   auth: frAuth.auth, // Extract the auth object from the nested structure
+  admin: frAdmin.admin, // Add admin translations
   // Keep remaining translations from original file
   collections: frTranslationRemaining.collections,
   community: frTranslationRemaining.community,
@@ -67,7 +71,7 @@ const enTranslation = {
   ...enContributions,
   ...enSymbols,
   ...enGamification,
-  ...enAdmin,
+  admin: enAdmin.admin, // Add admin translations
   ...enCollections,
   ...enSearchFilters
 };
