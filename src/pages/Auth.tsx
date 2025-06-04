@@ -16,12 +16,12 @@ const Auth: React.FC = () => {
     return <Navigate to="/" replace />;
   }
 
-  // Utiliser directement les clés de traduction pour les bénéfices
+  // Utiliser les nouvelles clés de traduction individuelles
   const benefits = [
-    t('auth.benefits.features.0'),
-    t('auth.benefits.features.1'),
-    t('auth.benefits.features.2'),
-    t('auth.benefits.features.3')
+    t('auth.benefits.feature1'),
+    t('auth.benefits.feature2'),
+    t('auth.benefits.feature3'),
+    t('auth.benefits.feature4')
   ];
 
   const stats = [
