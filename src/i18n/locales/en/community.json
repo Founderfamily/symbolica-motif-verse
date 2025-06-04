@@ -1,42 +1,44 @@
 
 {
-  "title": "Community Hub",
-  "description": "Join thematic groups and connect with fellow researchers passionate about cultural symbols",
-  "stats": {
-    "members": "members",
-    "discoveries": "discoveries", 
-    "join": "Join"
-  },
-  "groups": {
-    "artDeco": {
-      "name": "Decorative Arts",
-      "culture": "Art Deco"
+  "community": {
+    "title": "Join a Global Community of Symbol Enthusiasts",
+    "description": "Connect with people passionate about cultural symbols and heritage from around the world.",
+    "stats": {
+      "members": "members",
+      "discoveries": "discoveries", 
+      "join": "Join"
     },
-    "celticSymbolism": {
-      "name": "Celtic Symbolism",
-      "culture": "Celtic"
+    "groups": {
+      "artDeco": {
+        "name": "Art Deco Patterns",
+        "culture": "Global"
+      },
+      "celticSymbolism": {
+        "name": "Celtic Symbolism",
+        "culture": "Celtic"
+      },
+      "japanesePatterns": {
+        "name": "Japanese Patterns",
+        "culture": "Japanese"
+      },
+      "islamicArt": {
+        "name": "Islamic Art Patterns",
+        "culture": "Islamic"
+      }
     },
-    "japanesePatterns": {
-      "name": "Japanese Patterns", 
-      "culture": "Japanese"
-    },
-    "islamicArt": {
-      "name": "Islamic Art",
-      "culture": "Islamic"
-    }
-  },
-  "features": {
-    "thematicCommunities": {
-      "title": "Thematic Communities",
-      "description": "Join specialized groups by culture, era, or symbol type"
-    },
-    "personalSpace": {
-      "title": "Personal Space", 
-      "description": "Create your private collection and share your discoveries"
-    },
-    "intuitiveNavigation": {
-      "title": "Intuitive Navigation",
-      "description": "Easily explore symbols by region, culture, or meaning"
+    "features": {
+      "thematicCommunities": {
+        "title": "Thematic Communities",
+        "description": "Join specialized communities focused on particular symbol traditions, regions, or time periods."
+      },
+      "personalSpace": {
+        "title": "Personal Collections",
+        "description": "Build and organize your own library of symbolic patterns that resonate with you."
+      },
+      "intuitiveNavigation": {
+        "title": "Advanced Discovery",
+        "description": "Explore connections between symbols across cultures and time periods with our intuitive navigation."
+      }
     }
   }
 }

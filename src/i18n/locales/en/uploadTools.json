@@ -1,0 +1,29 @@
+
+{
+  "uploadTools": {
+    "title": "Upload & Analysis Tools",
+    "subtitle": "Contribute to our growing database of symbols",
+    "capture": {
+      "title": "Capture & Upload",
+      "desc": "Take photos of patterns from artifacts, architecture, or textiles and upload them directly to our platform"
+    },
+    "analyze": {
+      "title": "Automated Analysis",
+      "desc": "Our AI system examines your submissions to identify patterns, match them with our database, and suggest cultural contexts"
+    },
+    "share": {
+      "title": "Share & Collaborate", 
+      "desc": "Once analyzed, your contributions become part of our global repository, and can be studied by the community"
+    },
+    "process": {
+      "title": "Analysis Process",
+      "subtitle": "See how we transform artifacts into cataloged patterns",
+      "original": "Original Artifact Image",
+      "detection": "Pattern Detection",
+      "extraction": "Pattern Extraction", 
+      "classification": "AI Classification",
+      "result": "Processing Result",
+      "example": "Our system identifies recurring patterns, extracts them, and matches them against our database."
+    }
+  }
+}

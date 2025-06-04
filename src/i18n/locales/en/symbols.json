@@ -1,78 +1,15 @@
 
 {
-  "page": {
-    "title": "All Symbols",
-    "description": "Explore our complete collection of cultural symbols from around the world",
-    "filters": "Filters",
-    "searchPlaceholder": "Search symbols...",
-    "clearFilters": "Clear all",
-    "activeFilters": "Active Filters",
-    "noFilters": "No active filters",
-    "resultsCount": "{{count}} symbols found"
-  },
-  "symbolTriptych": {
-    "original": "Original Image",
-    "pattern": "Extracted Pattern",
-    "reuse": "Reuse",
-    "selectSymbol": "Select a symbol",
-    "noSymbolSelected": "No symbol selected",
-    "detailsTitle": "Symbol Details",
+  "symbols": {
+    "title": "Symbols",
+    "explore": "Explore",
+    "search": "Search symbols...",
+    "filter": "Filter",
+    "noResults": "No symbols found",
+    "loadMore": "Load more",
     "culture": "Culture",
     "period": "Period",
-    "description": "Description",
-    "noDescription": "No description available for this symbol.",
-    "relatedPatterns": "Related Patterns",
-    "noRelatedPatterns": "No related patterns.",
-    "imageErrorDesc": "The image couldn't be loaded properly. An alternative image is being displayed."
-  },
-  "symbolExplorer": {
-    "title": "Symbol Explorer",
-    "description": "Explore our collection of cultural symbols, patterns and motifs",
-    "filters": "Filters",
-    "searchPlaceholder": "Search symbols...",
-    "gridView": "Grid",
-    "listView": "List",
-    "mapView": "Map",
-    "activeFilters": "Active Filters",
-    "noFilters": "No active filters",
-    "clearFilters": "Clear all",
-    "resultsCount": "{{count}} symbols found",
-    "noResults": "No symbols match your filter criteria",
-    "mapViewComingSoon": "Interactive map view coming soon",
-    "mapViewDescription": "Explore symbols based on their geographical origin and distribution"
-  },
-  "searchFilters": {
-    "cultures": "Cultures",
-    "periods": "Periods",
-    "tags": "Tags",
-    "styles": "Styles",
-    "clearAll": "Clear all"
-  },
-  "collections": {
-    "title": "Collections",
-    "featured": "Featured",
-    "backToCollections": "Back to collections",
-    "notFound": "Collection not found",
-    "share": "Share",
-    "viewOnMap": "View on map",
-    "symbolsCount": "Symbols",
-    "culturesCount": "Cultures",
-    "periodsCount": "Periods", 
-    "symbolsInCollection": "Symbols in collection",
-    "noSymbols": "No symbols in this collection"
-  },
-  "mapExplorer": {
-    "title": "Symbol Map Explorer",
-    "description": "Explore symbols and patterns from different cultures around the world",
-    "searchLocation": "Search a location...",
-    "filters": "Filters",
-    "zoom": "Zoom",
-    "mapView": "Map View",
-    "listView": "List View",
-    "symbolCount": "{{count}} symbols",
-    "countriesCount": "{{count}} countries",
-    "betaNotice": "The interactive map is currently in beta. More features and symbols will be added soon.",
-    "listViewComingSoon": "List view is coming soon!",
-    "popularRegions": "Popular Regions"
+    "meaning": "Meaning",
+    "origin": "Origin"
   }
 }

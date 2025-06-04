@@ -1,0 +1,32 @@
+
+{
+  "quickAccess": {
+    "title": "Quick Access",
+    "description": "Explore, discover and contribute to our global collection of cultural symbols",
+    "explore": "Explore →",
+    "exploreSymbols": {
+      "title": "Explore Symbols",
+      "description": "Discover our complete collection with advanced filters"
+    },
+    "interactiveMap": {
+      "title": "Interactive Map", 
+      "description": "Explore symbols by geographical location"
+    },
+    "thematicCollections": {
+      "title": "Thematic Collections",
+      "description": "Browse our collections organized by theme"
+    },
+    "contribute": {
+      "title": "Contribute",
+      "description": "Share your discoveries with the community"
+    },
+    "community": {
+      "title": "Community",
+      "description": "Join interest groups and discussions"
+    },
+    "trends": {
+      "title": "Trends",
+      "description": "Discover popular and recent symbols"
+    }
+  }
+}

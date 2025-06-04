@@ -1,0 +1,26 @@
+
+{
+  "howItWorks": {
+    "process": "Our Process",
+    "title": "How it works",
+    "intro": "From discovery to digitization, we make symbolic heritage accessible",
+    "steps": {
+      "1": {
+        "title": "Capture",
+        "desc": "Upload images of patterns from artifacts, architecture, or textiles"
+      },
+      "2": {
+        "title": "Identify", 
+        "desc": "Our AI helps identify the pattern and find similar examples"
+      },
+      "3": {
+        "title": "Explore",
+        "desc": "Discover the cultural context and historical significance"
+      },
+      "4": {
+        "title": "Participate",
+        "desc": "Contribute to the global repository of symbolic knowledge"
+      }
+    }
+  }
+}

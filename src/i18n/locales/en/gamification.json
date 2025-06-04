@@ -1,38 +1,15 @@
 
 {
   "gamification": {
-    "title": "Earn Rewards for Contributions",
-    "subtitle": "Join our community and earn points, badges and recognition for your contributions to the world of symbols",
-    "badges": {
-      "title": "Collect Badges",
-      "description": "Earn unique badges for your achievements and showcase them on your profile"
-    },
     "points": {
       "title": "Earn Points",
-      "description": "Gain points for every contribution, comment, and validation you make"
+      "description": "Get points for every contribution, comment and validation you make"
     },
-    "leaderboard": {
-      "title": "Climb Leaderboards",
-      "description": "Compete with other contributors and climb the global and regional leaderboards"
-    },
-    "achievements": {
-      "title": "Complete Achievements",
-      "description": "Complete special challenges to unlock unique rewards and recognition"
-    },
-    "viewYourProgress": "View Your Progress",
-    "noAchievements": "No achievements available yet",
-    "points": "points",
-    "earnedAt": "Earned on",
-    "seeMoreAchievements": "See more achievements",
-    "noActivity": "No recent activity",
-    "noRankingsYet": "No rankings available yet",
-    "activity": {
-      "contribution": "Contributed {{title}}",
-      "genericContribution": "Made a contribution",
-      "exploredSymbol": "Explored symbol {{name}}",
-      "genericExploration": "Explored a symbol",
-      "comment": "Commented on a contribution",
-      "generic": "Performed an activity"
-    }
+    "level": "Level",
+    "progress": "Progress",
+    "achievements": "Achievements",
+    "leaderboard": "Leaderboard",
+    "badges": "Badges",
+    "rank": "Rank"
   }
 }

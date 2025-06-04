@@ -11,22 +11,20 @@ import frQuickAccess from './locales/fr/quickAccess.json';
 import frCallToAction from './locales/fr/callToAction.json';
 import frHowItWorks from './locales/fr/howItWorks.json';
 import frUploadTools from './locales/fr/uploadTools.json';
+import frAuth from './locales/fr/auth.json';
 
 // Import remaining sections from original file
 import frTranslationRemaining from './locales/fr.json';
 
-// English translations - split into thematic files
+// English translations - now importing existing files only
 import enNavigation from './locales/en/navigation.json';
 import enCommon from './locales/en/common.json';
 import enAuth from './locales/en/auth.json';
 import enProfile from './locales/en/profile.json';
 import enSections from './locales/en/sections.json';
-import enContributions from './locales/en/contributions.json';
-import enSymbols from './locales/en/symbols.json';
-import enGamification from './locales/en/gamification.json';
-import enAdmin from './locales/en/admin.json';
-import enCollections from './locales/en/collections.json';
 import enSearchFilters from './locales/en/searchFilters.json';
+import enTestimonials from './locales/en/testimonials.json';
+import enRoadmap from './locales/en/roadmap.json';
 
 const LANGUAGE_STORAGE_KEY = 'app_language';
 
@@ -40,6 +38,7 @@ const frTranslation = {
   callToAction: frCallToAction,
   howItWorks: frHowItWorks,
   uploadTools: frUploadTools,
+  auth: frAuth,
   // Keep remaining translations from original file
   collections: frTranslationRemaining.collections,
   community: frTranslationRemaining.community,
@@ -55,19 +54,16 @@ const frTranslation = {
   searchFilters: frTranslationRemaining.searchFilters
 };
 
-// Merge all English translation files
+// Merge all English translation files - only existing ones
 const enTranslation = {
   ...enNavigation,
   ...enCommon,
   ...enAuth,
   ...enProfile,
   ...enSections,
-  ...enContributions,
-  ...enSymbols,
-  ...enGamification,
-  ...enAdmin,
-  ...enCollections,
-  ...enSearchFilters
+  ...enSearchFilters,
+  ...enTestimonials,
+  ...enRoadmap
 };
 
 i18n

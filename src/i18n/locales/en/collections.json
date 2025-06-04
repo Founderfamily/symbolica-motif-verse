@@ -1,44 +1,13 @@
 
 {
-  "title": "Cultural Collections",
-  "featured": {
-    "title": "Featured Collections",
-    "description": "Explore thematic journeys through symbols from around the world",
-    "discoverAll": "Discover All Collections"
-  },
-  "featuredBadge": "Featured",
-  "backToCollections": "Back to collections",
-  "notFound": "Collection not found",
-  "share": "Share",
-  "viewOnMap": "View on map",
-  "symbolsCount": "symbols",
-  "culturesCount": "cultures", 
-  "periodsCount": "periods",
-  "symbolsInCollection": "Symbols in collection",
-  "noSymbols": "No symbols in this collection",
-  "explore": "Explore →",
-  "noCollections": "No collections available",
-  "noCollectionsMessage": "Collections will be available soon. Come back later!",
-  "noFeaturedCollections": "No featured collections",
-  "noFeaturedCollectionsMessage": "Thematic collections coming soon!",
-  "createCollection": "Create Collection",
-  "heroStats": {
-    "cultures": "World Cultures",
-    "periods": "Historical Periods",
-    "mythologies": "Mythologies", 
-    "art": "Symbolic Art"
-  },
-  "allCollections": "All Collections",
-  "allCollectionsCount": "thematic journeys available",
-  "collectionsUnit": "collections",
-  "createdOn": "Created on",
-  "categories": {
-    "cultures": "Cultures",
-    "periods": "Periods",
-    "others": "Others",
-    "culturesDescription": "Explore symbols organized by their cultural origin",
-    "periodsDescription": "Discover the evolution of symbols through the ages",
-    "othersDescription": "Thematic collections and personalized creations",
-    "noOthers": "No other collections at the moment"
+  "collections": {
+    "title": "Collections",
+    "featured": "Featured Collections",
+    "create": "Create Collection",
+    "browse": "Browse Collections",
+    "myCollections": "My Collections",
+    "explore": "Explore",
+    "symbols": "symbols",
+    "themes": "Themes"
   }
 }
