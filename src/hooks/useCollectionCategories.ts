@@ -4,7 +4,11 @@ import { CollectionWithTranslations } from '@/types/collections';
 
 export const useCollectionCategories = (collections: CollectionWithTranslations[] | undefined) => {
   const categorizedCollections = useMemo(() => {
-    if (!collections) {
+    console.log('🏷️ Categorizing collections:', collections?.length || 0);
+    
+    // Guard pour éviter les erreurs si collections est undefined ou null
+    if (!collections || !Array.isArray(collections) || collections.length === 0) {
+      console.log('⚠️ No collections to categorize');
       return {
         featured: [],
         cultures: [],
@@ -15,11 +19,12 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
     }
 
     // Récupérer les collections featured (avec leur statut réel de la base)
-    const featured = collections.filter(c => c.is_featured);
+    const featured = collections.filter(c => c?.is_featured === true);
+    console.log('✨ Featured collections:', featured.length);
     
     // Logique de catégorisation améliorée basée sur les slugs de la BDD
     const cultures = collections.filter(c => {
-      const slug = c.slug.toLowerCase();
+      const slug = c?.slug?.toLowerCase() || '';
       return slug.includes('culture-') ||
              slug.includes('egyptien') || 
              slug.includes('chinois') || 
@@ -39,7 +44,7 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
     });
     
     const periods = collections.filter(c => {
-      const slug = c.slug.toLowerCase();
+      const slug = c?.slug?.toLowerCase() || '';
       return slug.includes('medieval') || 
              slug.includes('renaissance') || 
              slug.includes('ancien') || 
@@ -54,7 +59,7 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
     
     // Sciences et ésotérisme
     const sciences = collections.filter(c => {
-      const slug = c.slug.toLowerCase();
+      const slug = c?.slug?.toLowerCase() || '';
       return slug.includes('alchimie') || 
              slug.includes('geometrie') || 
              slug.includes('sacre') || 
@@ -73,11 +78,19 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
     
     // Autres collections qui ne rentrent pas dans les catégories précédentes
     const others = collections.filter(c => 
-      !c.is_featured && 
+      c?.is_featured !== true && 
       !cultures.some(culture => culture.id === c.id) &&
       !periods.some(period => period.id === c.id) &&
       !sciences.some(science => science.id === c.id)
     );
+
+    console.log('📊 Categorization results:', {
+      featured: featured.length,
+      cultures: cultures.length,
+      periods: periods.length,
+      sciences: sciences.length,
+      others: others.length
+    });
 
     return { featured, cultures, periods, sciences, others };
   }, [collections]);

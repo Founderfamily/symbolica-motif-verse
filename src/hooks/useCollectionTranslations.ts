@@ -7,23 +7,30 @@ export const useCollectionTranslations = () => {
   const { currentLanguage } = useTranslation();
 
   const getTranslation = useCallback((collection: CollectionWithTranslations, field: string) => {
-    if (!collection.collection_translations || collection.collection_translations.length === 0) {
+    // Guard principal : vérifier que la collection et ses traductions existent
+    if (!collection || !collection.collection_translations || !Array.isArray(collection.collection_translations)) {
+      // Fallback intelligent basé sur le slug si pas de traductions
+      if (field === 'title' && collection?.slug) {
+        return collection.slug.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+      }
       return `[${field} missing]`;
     }
 
+    const translations = collection.collection_translations;
+
     // Find translation for current language first
-    const currentTranslation = collection.collection_translations.find(
-      (t: any) => t.language === currentLanguage
+    const currentTranslation = translations.find(
+      (t: any) => t.language === currentLanguage && t[field]
     );
     
     if (currentTranslation?.[field] && currentTranslation[field].trim()) {
       return currentTranslation[field];
     }
     
-    // If current language translation is missing or empty, use fallback language
+    // If current language translation is missing, use fallback language
     const fallbackLang = currentLanguage === 'fr' ? 'en' : 'fr';
-    const fallbackTranslation = collection.collection_translations.find(
-      (t: any) => t.language === fallbackLang
+    const fallbackTranslation = translations.find(
+      (t: any) => t.language === fallbackLang && t[field]
     );
     
     if (fallbackTranslation?.[field] && fallbackTranslation[field].trim()) {
@@ -31,12 +38,17 @@ export const useCollectionTranslations = () => {
     }
     
     // Last resort: use any translation available
-    const anyTranslation = collection.collection_translations.find(
+    const anyTranslation = translations.find(
       (t: any) => t[field] && t[field].trim()
     );
     
     if (anyTranslation?.[field]) {
       return anyTranslation[field];
+    }
+    
+    // Final fallback basé sur le slug pour le titre
+    if (field === 'title' && collection.slug) {
+      return collection.slug.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
     }
     
     return `[${field} missing]`;

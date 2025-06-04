@@ -13,10 +13,12 @@ class CollectionsService {
   }
 
   /**
-   * Récupère toutes les collections avec leurs traductions - OPTIMISÉ
+   * Récupère toutes les collections avec leurs traductions - VERSION CORRIGÉE
    */
   async getCollections(): Promise<CollectionWithTranslations[]> {
     try {
+      console.log('🔍 Fetching collections from Supabase...');
+      
       const { data, error } = await supabase
         .from('collections')
         .select(`
@@ -36,16 +38,25 @@ class CollectionsService {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
       
-      // Transformer les données pour avoir la structure attendue
-      const transformedData = data?.map(collection => ({
+      console.log('✅ Raw data from Supabase:', data?.length || 0, 'collections');
+      
+      // Transformation sécurisée des données
+      const transformedData: CollectionWithTranslations[] = (data || []).map(collection => ({
         ...collection,
-        collection_translations: collection.collection_translations || []
-      })) || [];
+        collection_translations: Array.isArray(collection.collection_translations) 
+          ? collection.collection_translations 
+          : []
+      }));
       
+      console.log('✅ Transformed collections:', transformedData.length);
       return transformedData;
     } catch (error) {
+      console.error('❌ Error in getCollections:', error);
       logger.error('Error fetching collections', { error });
       return [];
     }

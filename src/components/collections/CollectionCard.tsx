@@ -14,9 +14,15 @@ interface CollectionCardProps {
 const CollectionCard: React.FC<CollectionCardProps> = React.memo(({ collection }) => {
   const { getTranslation } = useCollectionTranslations();
 
-  // Fallbacks robustes pour les traductions
-  const title = getTranslation(collection, 'title') || collection.slug.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
-  const description = getTranslation(collection, 'description') || `Découvrez la collection ${title}`;
+  // Guard principal pour éviter les erreurs
+  if (!collection || !collection.slug) {
+    console.warn('⚠️ CollectionCard received invalid collection:', collection);
+    return null;
+  }
+
+  // Récupération sécurisée des traductions avec fallbacks intelligents
+  const title = getTranslation(collection, 'title');
+  const description = getTranslation(collection, 'description');
 
   return (
     <Link

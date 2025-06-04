@@ -6,13 +6,13 @@ import CreateCollectionDialog from '@/components/collections/CreateCollectionDia
 import { CollectionErrorBoundary } from '@/components/collections/CollectionErrorBoundary';
 import { useAuth } from '@/hooks/useAuth';
 import { I18nText } from '@/components/ui/i18n-text';
-import { useOptimizedCollections } from '@/hooks/useOptimizedCollections';
+import { useCollections } from '@/hooks/useCollections';
 import { CollectionStatsDisplay } from '@/components/collections/CollectionStatsDisplay';
 
 const CollectionsPage = () => {
   const { currentLanguage } = useTranslation();
   const { user } = useAuth();
-  const { collections } = useOptimizedCollections();
+  const { data: collections } = useCollections();
 
   return (
     <CollectionErrorBoundary>
