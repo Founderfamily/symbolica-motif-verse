@@ -14,7 +14,15 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
       };
     }
 
-    const featured = collections.filter(c => c.is_featured);
+    // Temporairement, marquer certaines collections comme featured si elles ne le sont pas encore
+    const collectionsWithTempFeatured = collections.map(c => {
+      if (['culture-egyptienne', 'culture-chinoise', 'culture-celtique'].includes(c.slug)) {
+        return { ...c, is_featured: true };
+      }
+      return c;
+    });
+
+    const featured = collectionsWithTempFeatured.filter(c => c.is_featured);
     
     // Logique de catégorisation basée sur les vrais slugs de la BDD
     const cultures = collections.filter(c => {

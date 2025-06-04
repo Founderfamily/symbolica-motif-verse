@@ -32,6 +32,7 @@
   "allCollectionsCount": "parcours thématiques disponibles",
   "collectionsUnit": "collections",
   "createdOn": "Créée le",
+  "loading": "Chargement des collections...",
   "categories": {
     "cultures": "Cultures",
     "periods": "Périodes",

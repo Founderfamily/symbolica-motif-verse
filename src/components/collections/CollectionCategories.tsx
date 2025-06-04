@@ -1,15 +1,15 @@
+
 import React, { useState } from 'react';
 import { useCollections } from '@/hooks/useCollections';
 import { useCollectionCategories } from '@/hooks/useCollectionCategories';
 import { I18nText } from '@/components/ui/i18n-text';
 import { FeaturedCollectionsSection } from './sections/FeaturedCollectionsSection';
 import { CollectionTabs } from './sections/CollectionTabs';
-import { ProgressiveLoader } from './ProgressiveLoader';
 import { EnhancedErrorState } from './EnhancedErrorStates';
 import { PerformanceTracker } from './PerformanceTracker';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const CollectionCategories: React.FC = React.memo(() => {
-  // Utilisation temporaire du hook standard pour diagnostic
   const { data: collections, isLoading, error } = useCollections();
   const { featured, cultures, periods, sciences, others } = useCollectionCategories(collections);
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
@@ -50,21 +50,25 @@ const CollectionCategories: React.FC = React.memo(() => {
 
   if (isLoading) {
     return (
-      <ProgressiveLoader
-        isLoading={true}
-        stage="fetching"
-        estimatedTime={2000}
-      >
-        <div className="space-y-12">
-          <div className="text-center py-12">
-            <p className="text-slate-600">
-              <I18nText translationKey="collections.loading">
-                Chargement des collections...
-              </I18nText>
-            </p>
-          </div>
+      <div className="space-y-12">
+        <div className="text-center py-12">
+          <p className="text-slate-600">
+            <I18nText translationKey="collections.loading">
+              Chargement des collections...
+            </I18nText>
+          </p>
         </div>
-      </ProgressiveLoader>
+        {/* Skeleton loader simple */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-48 w-full rounded-lg" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -88,21 +92,15 @@ const CollectionCategories: React.FC = React.memo(() => {
     <>
       <PerformanceTracker onMetricsUpdate={handlePerformanceUpdate} />
       
-      <ProgressiveLoader
-        isLoading={false}
-        stage="rendering"
-        estimatedTime={500}
-      >
-        <div className="space-y-12">
-          <FeaturedCollectionsSection collections={featured} />
-          <CollectionTabs 
-            cultures={cultures}
-            periods={periods}
-            sciences={sciences}
-            others={others}
-          />
-        </div>
-      </ProgressiveLoader>
+      <div className="space-y-12">
+        <FeaturedCollectionsSection collections={featured} />
+        <CollectionTabs 
+          cultures={cultures}
+          periods={periods}
+          sciences={sciences}
+          others={others}
+        />
+      </div>
     </>
   );
 });
