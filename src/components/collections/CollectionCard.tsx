@@ -15,8 +15,12 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
   const { currentLanguage } = useTranslation();
 
   const getTranslation = (field: string) => {
+    if (!collection.collection_translations || collection.collection_translations.length === 0) {
+      return `[${field} missing]`;
+    }
+
     // Find translation for current language first
-    const currentTranslation = collection.collection_translations?.find(
+    const currentTranslation = collection.collection_translations.find(
       (t: any) => t.language === currentLanguage
     );
     
@@ -24,25 +28,22 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection }) => {
       return currentTranslation[field];
     }
     
-    // If current language translation is missing or empty, use any available translation
-    // but prefer the opposite language (en/fr)
+    // If current language translation is missing or empty, use fallback language
     const fallbackLang = currentLanguage === 'fr' ? 'en' : 'fr';
-    const fallbackTranslation = collection.collection_translations?.find(
+    const fallbackTranslation = collection.collection_translations.find(
       (t: any) => t.language === fallbackLang
     );
     
     if (fallbackTranslation?.[field] && fallbackTranslation[field].trim()) {
-      console.log(`Using ${fallbackLang} fallback for collection ${collection.id} field ${field}`);
       return fallbackTranslation[field];
     }
     
     // Last resort: use any translation available
-    const anyTranslation = collection.collection_translations?.find(
+    const anyTranslation = collection.collection_translations.find(
       (t: any) => t[field] && t[field].trim()
     );
     
     if (anyTranslation?.[field]) {
-      console.log(`Using any available translation for collection ${collection.id} field ${field}`);
       return anyTranslation[field];
     }
     

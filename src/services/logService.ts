@@ -10,7 +10,7 @@ interface LogEntry {
 class LogService {
   private static instance: LogService;
   private logs: LogEntry[] = [];
-  private consoleEnabled = true;
+  private consoleEnabled = process.env.NODE_ENV === 'development';
   private persistenceEnabled = true;
   
   private constructor() {
@@ -81,14 +81,9 @@ class LogService {
   }
   
   private persistToStorage(entry: LogEntry): void {
-    // In a real implementation, we might want to:
-    // 1. Buffer logs and send them in batches
-    // 2. Send to a backend service
-    // 3. Store in IndexedDB or localStorage with rotation
-    
-    // For now, we'll just keep them in memory with a reasonable limit
+    // Keep only the latest 1000 logs to prevent memory issues
     if (this.logs.length > 1000) {
-      this.logs = this.logs.slice(-1000); // Keep only the latest 1000 logs
+      this.logs = this.logs.slice(-1000);
     }
   }
   
@@ -98,6 +93,14 @@ class LogService {
   
   public clearLogs(): void {
     this.logs = [];
+  }
+  
+  public enableConsole(): void {
+    this.consoleEnabled = true;
+  }
+  
+  public disableConsole(): void {
+    this.consoleEnabled = false;
   }
 }
 

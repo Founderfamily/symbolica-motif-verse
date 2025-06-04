@@ -11,12 +11,16 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const FeaturedCollections: React.FC = () => {
-  const { data: collections, isLoading } = useFeaturedCollections();
+  const { data: collections, isLoading, error } = useFeaturedCollections();
   const { currentLanguage } = useTranslation();
 
   const getTranslation = (collection: any, field: string) => {
+    if (!collection?.collection_translations) {
+      return '';
+    }
+
     // Find translation for current language first
-    const currentTranslation = collection.collection_translations?.find(
+    const currentTranslation = collection.collection_translations.find(
       (t: any) => t.language === currentLanguage
     );
     
@@ -26,7 +30,7 @@ const FeaturedCollections: React.FC = () => {
     
     // If current language translation is missing or empty, use fallback language
     const fallbackLang = currentLanguage === 'fr' ? 'en' : 'fr';
-    const fallbackTranslation = collection.collection_translations?.find(
+    const fallbackTranslation = collection.collection_translations.find(
       (t: any) => t.language === fallbackLang
     );
     
@@ -42,34 +46,61 @@ const FeaturedCollections: React.FC = () => {
     {
       id: '1',
       slug: 'geometrie-sacree',
-      title: 'Géométrie Sacrée',
-      description: 'Explorez les motifs géométriques sacrés à travers les cultures : mandalas, spirales dorées, fractales naturelles.',
+      title: currentLanguage === 'fr' ? 'Géométrie Sacrée' : 'Sacred Geometry',
+      description: currentLanguage === 'fr' 
+        ? 'Explorez les motifs géométriques sacrés à travers les cultures : mandalas, spirales dorées, fractales naturelles.'
+        : 'Explore sacred geometric patterns across cultures: mandalas, golden spirals, natural fractals.',
       is_featured: true
     },
     {
       id: '2', 
       slug: 'mysteres-anciens',
-      title: 'Mystères Anciens',
-      description: 'Découvrez les symboles énigmatiques des civilisations perdues et leurs significations cachées.',
+      title: currentLanguage === 'fr' ? 'Mystères Anciens' : 'Ancient Mysteries',
+      description: currentLanguage === 'fr'
+        ? 'Découvrez les symboles énigmatiques des civilisations perdues et leurs significations cachées.'
+        : 'Discover the enigmatic symbols of lost civilizations and their hidden meanings.',
       is_featured: true
     },
     {
       id: '3',
       slug: 'mythologies-mondiales', 
-      title: 'Mythologies Mondiales',
-      description: 'Plongez dans l\'univers des créatures mythiques et des divinités à travers les cultures du monde.',
+      title: currentLanguage === 'fr' ? 'Mythologies Mondiales' : 'World Mythologies',
+      description: currentLanguage === 'fr'
+        ? 'Plongez dans l\'univers des créatures mythiques et des divinités à travers les cultures du monde.'
+        : 'Dive into the universe of mythical creatures and deities across world cultures.',
       is_featured: true
     },
     {
       id: '4',
       slug: 'ere-numerique',
-      title: 'Ère Numérique',
-      description: 'L\'évolution des symboles à l\'ère digitale : émojis, logos, iconographie moderne.',
+      title: currentLanguage === 'fr' ? 'Ère Numérique' : 'Digital Era',
+      description: currentLanguage === 'fr'
+        ? 'L\'évolution des symboles à l\'ère digitale : émojis, logos, iconographie moderne.'
+        : 'The evolution of symbols in the digital age: emojis, logos, modern iconography.',
       is_featured: true
     }
   ];
 
-  const displayCollections = collections && collections.length > 0 ? collections : staticCollections;
+  const displayCollections = (!isLoading && collections && collections.length > 0) ? collections : staticCollections;
+
+  if (error) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              <I18nText translationKey="collections.featured.title">Collections en Vedette</I18nText>
+            </h2>
+            <p className="text-red-600 mb-8">
+              <I18nText translationKey="collections.featured.error">
+                Unable to load collections at the moment.
+              </I18nText>
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-white">
@@ -97,7 +128,7 @@ const FeaturedCollections: React.FC = () => {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {displayCollections.map((collection) => (
+            {displayCollections.slice(0, 4).map((collection) => (
               <Link
                 key={collection.id}
                 to={`/collections/${collection.slug}`}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Search, User, Settings, HelpCircle, Users, Building } from 'lucide-react';
+import { Search, User, Settings, HelpCircle, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
 import { LanguageSelector } from '@/components/ui/language-selector';
@@ -43,13 +44,7 @@ const Header: React.FC = () => {
   ];
 
   // Pages protégées, visibles uniquement pour les utilisateurs connectés
-  const protectedNavigationItems = [
-    { 
-      name: 'Enterprise', 
-      href: '/enterprise',
-      icon: <Building className="h-4 w-4" />,
-      badge: 'New'
-    },
+  const protectedNavigationItems = auth?.user ? [
     { 
       name: 'Map', 
       href: '/map',
@@ -74,12 +69,23 @@ const Header: React.FC = () => {
       href: '/contributions',
       icon: <I18nText translationKey="navigation.contributions">Contributions</I18nText>
     }
-  ];
+  ] : [];
+
+  // Admin items - only visible to admin users
+  const adminNavigationItems = (auth?.user && auth?.profile?.is_admin) ? [
+    { 
+      name: 'Enterprise', 
+      href: '/enterprise',
+      icon: <span className="flex items-center gap-1">
+        <span>🏢</span>
+        <span>Enterprise</span>
+      </span>,
+      badge: 'New'
+    }
+  ] : [];
 
   // Combiner les éléments de navigation selon le statut de connexion
-  const navigationItems = auth?.user 
-    ? [...publicNavigationItems, ...protectedNavigationItems]
-    : publicNavigationItems;
+  const navigationItems = [...publicNavigationItems, ...protectedNavigationItems, ...adminNavigationItems];
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
@@ -167,13 +173,17 @@ const Header: React.FC = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <I18nText translationKey="header.adminDashboard">Admin Dashboard</I18nText>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  {auth.profile.is_admin && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin">
+                          <Settings className="mr-2 h-4 w-4" />
+                          <I18nText translationKey="header.adminDashboard">Admin Dashboard</I18nText>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem onClick={() => auth.signOut()}>
                     <I18nText translationKey="header.logout">Log out</I18nText>
                   </DropdownMenuItem>

@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { I18nText } from '@/components/ui/i18n-text';
 
 const FeaturedCollectionsGrid: React.FC = () => {
-  const { data: collections, isLoading } = useFeaturedCollections();
+  const { data: collections, isLoading, error } = useFeaturedCollections();
 
   if (isLoading) {
     return (
@@ -22,8 +22,22 @@ const FeaturedCollectionsGrid: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-xl font-medium mb-2 text-red-600">
+          <I18nText translationKey="collections.errorLoading">Error loading collections</I18nText>
+        </h3>
+        <p className="text-slate-600">
+          <I18nText translationKey="collections.errorMessage">
+            Unable to load featured collections. Please try again later.
+          </I18nText>
+        </p>
+      </div>
+    );
+  }
+
   if (!collections || collections.length === 0) {
-    console.log('No featured collections found:', collections);
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-medium mb-2 text-slate-700">
@@ -38,7 +52,6 @@ const FeaturedCollectionsGrid: React.FC = () => {
     );
   }
 
-  console.log('Featured collections data:', collections);
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       {collections.map((collection) => (
