@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from '@/hooks/useAuth';
 import Layout from '@/components/layout/Layout';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import HomePage from '@/pages/HomePage';
 import AnalysisPage from '@/pages/AnalysisPage';
 import ContributionsPage from '@/pages/ContributionsPage';
@@ -62,8 +63,12 @@ function App() {
               {/* Auth route - accessible without main layout */}
               <Route path="/auth" element={<Auth />} />
               
-              {/* Admin routes with AdminLayout */}
-              <Route path="/admin" element={<AdminLayout />}>
+              {/* Admin routes with AdminLayout - protected */}
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }>
                 <Route index element={<Dashboard />} />
                 <Route path="users" element={<UsersManagement />} />
                 <Route path="contributions" element={<ContributionsManagement />} />
@@ -75,26 +80,50 @@ function App() {
               
               {/* All other routes with standard layout */}
               <Route path="/" element={<Layout><Outlet /></Layout>}>
+                {/* Public routes */}
                 <Route index element={<HomePage />} />
-                <Route path="/analysis" element={<AnalysisPage />} />
-                <Route path="/contributions" element={<ContributionsPage />} />
-                <Route path="/contribute" element={<NewContribution />} />
                 <Route path="/symbols" element={<SymbolsPage />} />
                 <Route path="/symbols/:id" element={<SymbolExplorer />} />
-                <Route path="/map" element={<MapExplorer />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/mcp-search" element={<MCPSearchPage />} />
-                <Route path="/trending" element={<TrendingPage />} />
-                <Route path="/profile/:username" element={<UserProfilePage />} />
-                <Route path="/profile/:username/edit" element={<Profile />} />
-                <Route path="/enterprise" element={<EnterprisePage />} />
                 <Route path="/collections" element={<CollectionsPage />} />
                 <Route path="/collections/:slug" element={<CollectionDetailPage />} />
                 <Route path="/community" element={<CommunityPage />} />
+                <Route path="/enterprise" element={<EnterprisePage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/trending" element={<TrendingPage />} />
+                <Route path="/profile/:username" element={<UserProfilePage />} />
+                <Route path="/profile/:username/edit" element={<Profile />} />
                 <Route path="/legal" element={<LegalPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/contact" element={<ContactPage />} />
+                
+                {/* Protected routes - require authentication */}
+                <Route path="/analysis" element={
+                  <ProtectedRoute>
+                    <AnalysisPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/map" element={
+                  <ProtectedRoute>
+                    <MapExplorer />
+                  </ProtectedRoute>
+                } />
+                <Route path="/mcp-search" element={
+                  <ProtectedRoute>
+                    <MCPSearchPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/contributions" element={
+                  <ProtectedRoute>
+                    <ContributionsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/contribute" element={
+                  <ProtectedRoute>
+                    <NewContribution />
+                  </ProtectedRoute>
+                } />
+                
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

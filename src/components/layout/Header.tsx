@@ -23,21 +23,38 @@ const Header: React.FC = () => {
   const auth = useAuth();
   const { t } = useTranslation();
 
-  const navigationItems = [
+  // Pages publiques accessibles à tous
+  const publicNavigationItems = [
     { 
       name: 'Symbols', 
       href: '/symbols',
       icon: <I18nText translationKey="navigation.symbols">Symbols</I18nText>
     },
     { 
-      name: 'Map', 
-      href: '/map',
-      icon: <I18nText translationKey="navigation.map">Map</I18nText>
-    },
-    { 
       name: 'Collections', 
       href: '/collections',
       icon: <I18nText translationKey="navigation.collections">Collections</I18nText>
+    },
+    { 
+      name: 'Community', 
+      href: '/community',
+      icon: <Users className="h-4 w-4 inline mr-1" />,
+      badge: 'New'
+    },
+    { 
+      name: 'Enterprise', 
+      href: '/enterprise',
+      icon: <Building className="h-4 w-4" />,
+      badge: 'New'
+    }
+  ];
+
+  // Pages protégées, visibles uniquement pour les utilisateurs connectés
+  const protectedNavigationItems = [
+    { 
+      name: 'Map', 
+      href: '/map',
+      icon: <I18nText translationKey="navigation.map">Map</I18nText>
     },
     { 
       name: 'Analysis', 
@@ -54,23 +71,16 @@ const Header: React.FC = () => {
       badge: 'AI'
     },
     { 
-      name: 'Community', 
-      href: '/community',
-      icon: <Users className="h-4 w-4 inline mr-1" />,
-      badge: 'New'
-    },
-    { 
       name: 'Contributions', 
       href: '/contributions',
       icon: <I18nText translationKey="navigation.contributions">Contributions</I18nText>
-    },
-    { 
-      name: 'Enterprise', 
-      href: '/enterprise',
-      icon: <Building className="h-4 w-4" />,
-      badge: 'New'
     }
   ];
+
+  // Combiner les éléments de navigation selon le statut de connexion
+  const navigationItems = auth?.user 
+    ? [...publicNavigationItems, ...protectedNavigationItems]
+    : publicNavigationItems;
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
