@@ -25,32 +25,32 @@ const Auth: React.FC = () => {
   ];
 
   const stats = [
-    { icon: Users, value: '1,234', label: 'Active researchers' },
-    { icon: Globe, value: '89', label: 'Countries represented' },
-    { icon: BookOpen, value: '2,847', label: 'Symbols documented' },
-    { icon: TrendingUp, value: '156', label: 'Cultural traditions' }
+    { icon: Users, value: '1,234', label: 'Chercheurs actifs' },
+    { icon: Globe, value: '89', label: 'Pays représentés' },
+    { icon: BookOpen, value: '2,847', label: 'Symboles documentés' },
+    { icon: TrendingUp, value: '156', label: 'Traditions culturelles' }
   ];
 
   const testimonials = [
     {
       name: "Dr. Sarah Chen",
-      role: "Cultural Anthropologist",
+      role: "Anthropologue culturelle",
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
-      content: "Symbolica has revolutionized my research. The AI-powered analysis tools are incredible.",
+      content: "Symbolica a révolutionné mes recherches. Les outils d'analyse IA sont incroyables.",
       rating: 5
     },
     {
       name: "Marcus Rodriguez",
-      role: "Museum Curator",
+      role: "Conservateur de musée",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      content: "An invaluable resource for understanding symbolic heritage across cultures.",
+      content: "Une ressource inestimable pour comprendre l'héritage symbolique des cultures.",
       rating: 5
     },
     {
       name: "Prof. Elena Volkov",
-      role: "Archaeologist",
+      role: "Archéologue",
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      content: "The global community aspect makes this platform truly unique.",
+      content: "L'aspect communauté globale rend cette plateforme vraiment unique.",
       rating: 5
     }
   ];
@@ -77,14 +77,14 @@ const Auth: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
             
             {/* Left side - Benefits and community info */}
-            <div className="space-y-8">
+            <div className="space-y-8 order-2 lg:order-1">
               <div className="text-center lg:text-left">
                 <div className="flex items-center justify-center lg:justify-start space-x-2 mb-4">
                   <img src="/logo.svg" alt="Symbolica" className="h-10 w-10" />
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
+                  <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
                     <I18nText translationKey="app.name">Symbolica</I18nText>
                   </h1>
                   <Badge variant="outline" className="text-amber-600 border-amber-600 animate-pulse">
@@ -92,15 +92,15 @@ const Auth: React.FC = () => {
                   </Badge>
                 </div>
                 
-                <h2 className="text-3xl font-semibold text-slate-900 mb-4">
+                <h2 className="text-2xl lg:text-3xl font-semibold text-slate-900 mb-4">
                   <I18nText translationKey="auth.benefits.title">
-                    Join thousands of researchers
+                    Rejoignez des milliers de chercheurs
                   </I18nText>
                 </h2>
                 
-                <p className="text-lg text-slate-600 mb-8">
+                <p className="text-base lg:text-lg text-slate-600 mb-8">
                   <I18nText translationKey="auth.benefits.subtitle">
-                    Discover, contribute and connect with a global community passionate about symbolic heritage
+                    Découvrez, contribuez et connectez-vous avec une communauté mondiale passionnée par l'héritage symbolique
                   </I18nText>
                 </p>
               </div>
@@ -108,7 +108,7 @@ const Auth: React.FC = () => {
               {/* Features highlight */}
               <div className="grid grid-cols-1 gap-4 mb-8">
                 {features.map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-4 p-4 bg-white rounded-lg border border-slate-200 hover:shadow-md transition-shadow">
+                  <div key={index} className="flex items-start space-x-4 p-4 bg-white rounded-lg border border-slate-200 hover:shadow-md transition-all duration-200">
                     <div className="bg-amber-100 p-2 rounded-lg">
                       <feature.icon className="h-5 w-5 text-amber-600" />
                     </div>
@@ -134,7 +134,7 @@ const Auth: React.FC = () => {
               {/* Community stats */}
               <div className="grid grid-cols-2 gap-4">
                 {stats.map((stat, index) => (
-                  <div key={index} className="bg-white rounded-lg p-4 border border-slate-200 hover:shadow-md transition-shadow">
+                  <div key={index} className="bg-white rounded-lg p-4 border border-slate-200 hover:shadow-md transition-all duration-200">
                     <div className="flex items-center space-x-3">
                       <div className="bg-amber-100 p-2 rounded-lg">
                         <stat.icon className="h-5 w-5 text-amber-600" />
@@ -149,13 +149,13 @@ const Auth: React.FC = () => {
               </div>
 
               {/* Testimonials */}
-              <div className="space-y-4">
+              <div className="space-y-4 hidden lg:block">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  <I18nText translationKey="testimonials.subtitle">What our users say</I18nText>
+                  <I18nText translationKey="testimonials.subtitle">Ce que disent nos utilisateurs</I18nText>
                 </h3>
                 <div className="space-y-4">
                   {testimonials.map((testimonial, index) => (
-                    <div key={index} className="bg-white rounded-lg p-4 border border-slate-200 hover:shadow-md transition-shadow">
+                    <div key={index} className="bg-white rounded-lg p-4 border border-slate-200 hover:shadow-md transition-all duration-200">
                       <div className="flex items-start space-x-3">
                         <img 
                           src={testimonial.avatar} 
@@ -184,7 +184,7 @@ const Auth: React.FC = () => {
             </div>
 
             {/* Right side - Auth form */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="flex justify-center lg:justify-end order-1 lg:order-2">
               <div className="w-full max-w-md sticky top-8">
                 <AuthForm />
               </div>
