@@ -87,7 +87,6 @@ function App() {
                 <Route path="/collections" element={<CollectionsPage />} />
                 <Route path="/collections/:slug" element={<CollectionDetailPage />} />
                 <Route path="/community" element={<CommunityPage />} />
-                <Route path="/enterprise" element={<EnterprisePage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/trending" element={<TrendingPage />} />
                 <Route path="/profile/:username" element={<UserProfilePage />} />
@@ -98,6 +97,11 @@ function App() {
                 <Route path="/contact" element={<ContactPage />} />
                 
                 {/* Protected routes - require authentication */}
+                <Route path="/enterprise" element={
+                  <ProtectedRoute>
+                    <EnterprisePage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/analysis" element={
                   <ProtectedRoute>
                     <AnalysisPage />

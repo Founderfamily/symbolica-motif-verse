@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -40,17 +39,17 @@ const Header: React.FC = () => {
       href: '/community',
       icon: <Users className="h-4 w-4 inline mr-1" />,
       badge: 'New'
-    },
-    { 
-      name: 'Enterprise', 
-      href: '/enterprise',
-      icon: <Building className="h-4 w-4" />,
-      badge: 'New'
     }
   ];
 
   // Pages protégées, visibles uniquement pour les utilisateurs connectés
   const protectedNavigationItems = [
+    { 
+      name: 'Enterprise', 
+      href: '/enterprise',
+      icon: <Building className="h-4 w-4" />,
+      badge: 'New'
+    },
     { 
       name: 'Map', 
       href: '/map',
