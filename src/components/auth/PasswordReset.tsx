@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/i18n/useTranslation';
-import { I18nText } from '@/components/ui/i18n-text';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
@@ -69,15 +68,11 @@ export default function PasswordReset() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <CardTitle>
-            <I18nText translationKey="auth.resetPassword.title">
-              Réinitialiser votre mot de passe
-            </I18nText>
+            {t('auth.resetPassword.title')}
           </CardTitle>
         </div>
         <CardDescription>
-          <I18nText translationKey="auth.resetPassword.description">
-            Entrez votre adresse email pour recevoir un lien de réinitialisation de mot de passe.
-          </I18nText>
+          {t('auth.resetPassword.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -85,22 +80,16 @@ export default function PasswordReset() {
           <div className="text-center space-y-4">
             <div className="bg-green-50 text-green-700 p-3 rounded-md">
               <p className="font-medium">
-                <I18nText translationKey="auth.resetPassword.successTitle">
-                  Email envoyé avec succès
-                </I18nText>
+                {t('auth.resetPassword.successTitle')}
               </p>
               <p className="text-sm mt-1">
-                <I18nText translationKey="auth.resetPassword.successMessage">
-                  Veuillez vérifier votre boîte de réception et suivre les instructions.
-                </I18nText>
+                {t('auth.resetPassword.successMessage')}
               </p>
             </div>
             
             <Button asChild variant="outline" className="mt-4">
               <Link to="/auth">
-                <I18nText translationKey="auth.buttons.backToLogin">
-                  Retour à la connexion
-                </I18nText>
+                {t('auth.buttons.backToLogin')}
               </Link>
             </Button>
           </div>
@@ -113,7 +102,7 @@ export default function PasswordReset() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      <I18nText translationKey="auth.labels.email" />
+                      {t('auth.labels.email')}
                     </FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="exemple@email.com" {...field} />
@@ -125,8 +114,8 @@ export default function PasswordReset() {
               
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 
-                  <I18nText translationKey="auth.buttons.sending" /> : 
-                  <I18nText translationKey="auth.buttons.sendResetLink" />
+                  t('auth.buttons.sending') : 
+                  t('auth.buttons.sendResetLink')
                 }
               </Button>
             </form>

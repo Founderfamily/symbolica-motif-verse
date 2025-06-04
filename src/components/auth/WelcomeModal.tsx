@@ -3,6 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowRight, Sparkles, Users, MapPin } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface WelcomeModalProps {
   isOpen: boolean;
@@ -11,24 +12,26 @@ interface WelcomeModalProps {
 }
 
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, userName }) => {
+  const { t } = useTranslation();
+
   const nextSteps = [
     {
       icon: Sparkles,
-      title: 'Explorez les symboles',
-      description: 'Découvrez notre collection de milliers de symboles du monde entier',
-      action: 'Explorer'
+      title: t('auth.welcome.exploreSymbols.title'),
+      description: t('auth.welcome.exploreSymbols.description'),
+      action: t('auth.welcome.exploreSymbols.action')
     },
     {
       icon: MapPin,
-      title: 'Contribuez',
-      description: 'Partagez vos propres découvertes avec la communauté',
-      action: 'Contribuer'
+      title: t('auth.welcome.contribute.title'),
+      description: t('auth.welcome.contribute.description'),
+      action: t('auth.welcome.contribute.action')
     },
     {
       icon: Users,
-      title: 'Rejoignez la communauté',
-      description: 'Connectez-vous avec d\'autres passionnés de symbolique',
-      action: 'Découvrir'
+      title: t('auth.welcome.joinCommunity.title'),
+      description: t('auth.welcome.joinCommunity.description'),
+      action: t('auth.welcome.joinCommunity.action')
     }
   ];
 
@@ -40,10 +43,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, use
             <CheckCircle className="h-6 w-6 text-white" />
           </div>
           <DialogTitle className="text-center text-xl">
-            Bienvenue{userName ? ` ${userName}` : ''} !
+            {t('auth.welcome.title', { userName: userName ? ` ${userName}` : '' })}
           </DialogTitle>
           <p className="text-center text-slate-600 mt-2">
-            Votre compte a été créé avec succès. Voici comment commencer :
+            {t('auth.welcome.description')}
           </p>
         </DialogHeader>
         
@@ -64,10 +67,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, use
 
         <div className="flex space-x-3 mt-6">
           <Button variant="outline" onClick={onClose} className="flex-1">
-            Plus tard
+            {t('auth.welcome.laterButton')}
           </Button>
           <Button onClick={onClose} className="flex-1 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800">
-            Commencer
+            {t('auth.welcome.startButton')}
           </Button>
         </div>
       </DialogContent>
