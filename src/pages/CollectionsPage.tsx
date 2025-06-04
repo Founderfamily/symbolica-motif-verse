@@ -1,18 +1,16 @@
 
 import React from 'react';
 import { useTranslation } from '@/i18n/useTranslation';
-import FeaturedCollectionsGrid from '@/components/collections/FeaturedCollectionsGrid';
-import CollectionGrid from '@/components/collections/CollectionGrid';
+import CollectionCategories from '@/components/collections/CollectionCategories';
 import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { I18nText } from '@/components/ui/i18n-text';
-import { useFeaturedCollections, useCollections } from '@/hooks/useCollections';
+import { useCollections } from '@/hooks/useCollections';
 
 const CollectionsPage = () => {
   const { currentLanguage } = useTranslation();
   const { user } = useAuth();
-  const { data: featuredCollections } = useFeaturedCollections();
   const { data: allCollections } = useCollections();
 
   return (
@@ -36,16 +34,16 @@ const CollectionsPage = () => {
           
           <div className="flex items-center justify-center gap-6 text-sm text-slate-600 mb-8">
             <span className="flex items-center gap-2">
-              🏛️ <I18nText translationKey="collections.heroStats.mysteries">Mystères & Secrets</I18nText>
+              🌍 <I18nText translationKey="collections.heroStats.cultures">Cultures du Monde</I18nText>
             </span>
             <span className="flex items-center gap-2">
-              📐 <I18nText translationKey="collections.heroStats.geometry">Géométrie Sacrée</I18nText>
+              ⏳ <I18nText translationKey="collections.heroStats.periods">Époques Historiques</I18nText>
             </span>
             <span className="flex items-center gap-2">
               🏺 <I18nText translationKey="collections.heroStats.mythologies">Mythologies</I18nText>
             </span>
             <span className="flex items-center gap-2">
-              💻 <I18nText translationKey="collections.heroStats.digital">Ère Numérique</I18nText>
+              🎨 <I18nText translationKey="collections.heroStats.art">Art Symbolique</I18nText>
             </span>
           </div>
 
@@ -56,31 +54,8 @@ const CollectionsPage = () => {
           )}
         </section>
 
-        {/* Featured Collections */}
-        <section className="mb-16">
-          <div className="flex items-center gap-3 mb-8">
-            <h2 className="text-3xl font-bold text-slate-900">
-              <I18nText translationKey="collections.featured.title">Collections en Vedette</I18nText>
-            </h2>
-            <Badge className="bg-amber-600 hover:bg-amber-700">
-              <I18nText translationKey="collections.featuredBadge">En vedette</I18nText>
-            </Badge>
-          </div>
-          <FeaturedCollectionsGrid />
-        </section>
-
-        {/* All Collections */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-slate-900">
-              <I18nText translationKey="collections.allCollections">Toutes les Collections</I18nText>
-            </h2>
-            <div className="text-sm text-slate-600">
-              {allCollections?.length || 0} <I18nText translationKey="collections.allCollectionsCount">parcours thématiques disponibles</I18nText>
-            </div>
-          </div>
-          <CollectionGrid />
-        </section>
+        {/* Collections organisées par catégories */}
+        <CollectionCategories />
       </div>
     </div>
   );

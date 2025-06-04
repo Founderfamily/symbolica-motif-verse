@@ -23,13 +23,22 @@
   "noFeaturedCollectionsMessage": "Thematic collections coming soon!",
   "createCollection": "Create Collection",
   "heroStats": {
-    "mysteries": "Mysteries & Secrets",
-    "geometry": "Sacred Geometry",
+    "cultures": "World Cultures",
+    "periods": "Historical Periods",
     "mythologies": "Mythologies", 
-    "digital": "Digital Era"
+    "art": "Symbolic Art"
   },
   "allCollections": "All Collections",
   "allCollectionsCount": "thematic journeys available",
   "collectionsUnit": "collections",
-  "createdOn": "Created on"
+  "createdOn": "Created on",
+  "categories": {
+    "cultures": "Cultures",
+    "periods": "Periods",
+    "others": "Others",
+    "culturesDescription": "Explore symbols organized by their cultural origin",
+    "periodsDescription": "Discover the evolution of symbols through the ages",
+    "othersDescription": "Thematic collections and personalized creations",
+    "noOthers": "No other collections at the moment"
+  }
 }

@@ -23,13 +23,22 @@
   "noFeaturedCollectionsMessage": "Les collections thématiques arrivent bientôt !",
   "createCollection": "Créer une Collection",
   "heroStats": {
-    "mysteries": "Mystères & Secrets",
-    "geometry": "Géométrie Sacrée", 
+    "cultures": "Cultures du Monde",
+    "periods": "Époques Historiques", 
     "mythologies": "Mythologies",
-    "digital": "Ère Numérique"
+    "art": "Art Symbolique"
   },
   "allCollections": "Toutes les Collections",
   "allCollectionsCount": "parcours thématiques disponibles",
   "collectionsUnit": "collections",
-  "createdOn": "Créée le"
+  "createdOn": "Créée le",
+  "categories": {
+    "cultures": "Cultures",
+    "periods": "Périodes",
+    "others": "Autres",
+    "culturesDescription": "Explorez les symboles organisés par leur origine culturelle",
+    "periodsDescription": "Découvrez l'évolution des symboles à travers les époques",
+    "othersDescription": "Collections thématiques et créations personnalisées",
+    "noOthers": "Aucune autre collection pour le moment"
+  }
 }
