@@ -19,17 +19,22 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
     // Logique de catégorisation basée sur les vrais slugs de la BDD
     const cultures = collections.filter(c => {
       const slug = c.slug.toLowerCase();
-      return slug.includes('culture-') || 
-             slug.includes('egyptienne') || 
-             slug.includes('chinoise') || 
+      return slug.startsWith('culture-') ||
+             slug.includes('egyptien') || 
+             slug.includes('chinois') || 
              slug.includes('celtique') || 
              slug.includes('maya') || 
-             slug.includes('grecque') ||
-             slug.includes('romaine') ||
-             slug.includes('japonaise') ||
-             slug.includes('africaine') ||
+             slug.includes('grec') ||
+             slug.includes('romain') ||
+             slug.includes('japonais') ||
+             slug.includes('africain') ||
              slug.includes('nordique') ||
-             slug.includes('viking');
+             slug.includes('viking') ||
+             slug.includes('arabe') ||
+             slug.includes('perse') ||
+             slug.includes('indien') ||
+             slug.includes('azteque') ||
+             slug.includes('aborigene');
     });
     
     const periods = collections.filter(c => {
@@ -39,7 +44,11 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
              slug.includes('ancien') || 
              slug.includes('moderne') ||
              slug.includes('antique') ||
-             slug.includes('epoque');
+             slug.includes('epoque') ||
+             slug.includes('prehistoire') ||
+             slug.includes('contemporain') ||
+             slug.includes('baroque') ||
+             slug.includes('classique');
     });
     
     // Sciences et ésotérisme
@@ -53,7 +62,12 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
              slug.includes('chakra') ||
              slug.includes('astro') ||
              slug.includes('mathematique') ||
-             slug.includes('science');
+             slug.includes('science') ||
+             slug.includes('mystique') ||
+             slug.includes('esoter') ||
+             slug.includes('spirituel') ||
+             slug.includes('mystere') ||
+             slug.includes('numerologie');
     });
     
     // Autres collections qui ne rentrent pas dans les catégories précédentes
@@ -71,6 +85,7 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
       periods: periods.length,
       sciences: sciences.length,
       others: others.length,
+      allSlugs: collections.map(c => c.slug),
       cultureSlugs: cultures.map(c => c.slug),
       featuredSlugs: featured.map(c => c.slug)
     });
