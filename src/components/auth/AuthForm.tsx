@@ -12,33 +12,47 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useTranslation } from '@/i18n/useTranslation';
 import { UserProfile } from '@/types/auth';
 import { I18nText } from '@/components/ui/i18n-text';
-import { Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-// Login validation schema
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
+// Login validation schema with translated messages
+const createLoginSchema = (t: (key: string) => string) => z.object({
+  email: z.string()
+    .min(1, { message: t('auth.validation.email.required') })
+    .email({ message: t('auth.validation.email.invalid') }),
+  password: z.string()
+    .min(1, { message: t('auth.validation.password.required') })
+    .min(6, { message: t('auth.validation.password.minLength') }),
 });
 
-// Register validation schema
-const registerSchema = z.object({
-  email: z.string().email(),
-  username: z.string().min(3).max(50),
-  fullName: z.string().min(2).max(100).optional(),
+// Register validation schema with translated messages
+const createRegisterSchema = (t: (key: string) => string) => z.object({
+  email: z.string()
+    .min(1, { message: t('auth.validation.email.required') })
+    .email({ message: t('auth.validation.email.invalid') }),
+  username: z.string()
+    .min(1, { message: t('auth.validation.username.required') })
+    .min(3, { message: t('auth.validation.username.minLength') })
+    .max(50, { message: t('auth.validation.username.maxLength') }),
+  fullName: z.string()
+    .min(2, { message: t('auth.validation.fullName.minLength') })
+    .max(100, { message: t('auth.validation.fullName.maxLength') })
+    .optional(),
   password: z.string()
-    .min(6)
-    .regex(/[A-Z]/)
-    .regex(/[a-z]/)
-    .regex(/\d/),
-  confirmPassword: z.string().min(6),
+    .min(1, { message: t('auth.validation.password.required') })
+    .min(6, { message: t('auth.validation.password.minLength') })
+    .regex(/[A-Z]/, { message: t('auth.validation.password.uppercase') })
+    .regex(/[a-z]/, { message: t('auth.validation.password.lowercase') })
+    .regex(/\d/, { message: t('auth.validation.password.number') }),
+  confirmPassword: z.string()
+    .min(1, { message: t('auth.validation.confirmPassword.required') }),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
+  message: "auth.validation.confirmPassword.mismatch",
   path: ["confirmPassword"],
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type LoginFormValues = z.infer<ReturnType<typeof createLoginSchema>>;
+type RegisterFormValues = z.infer<ReturnType<typeof createRegisterSchema>>;
 
 export default function AuthForm() {
   const { t } = useTranslation();
@@ -46,6 +60,9 @@ export default function AuthForm() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('login');
   const [showPassword, setShowPassword] = useState(false);
+
+  const loginSchema = createLoginSchema(t);
+  const registerSchema = createRegisterSchema(t);
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -91,7 +108,7 @@ export default function AuthForm() {
       if (result.error) {
         toast({
           variant: "destructive",
-          title: "Erreur de connexion",
+          title: t('auth.errors.title'),
           description: getErrorMessage(result.error),
         });
       } else {
@@ -102,7 +119,7 @@ export default function AuthForm() {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erreur",
+        title: t('auth.errors.title'),
         description: getErrorMessage(error),
       });
     }
@@ -120,7 +137,7 @@ export default function AuthForm() {
       if (result.error) {
         toast({
           variant: "destructive",
-          title: "Erreur d'inscription",
+          title: t('auth.errors.registerTitle'),
           description: getErrorMessage(result.error),
         });
       } else {
@@ -132,7 +149,7 @@ export default function AuthForm() {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erreur",
+        title: t('auth.errors.registerTitle'),
         description: getErrorMessage(error),
       });
     }
@@ -315,7 +332,7 @@ export default function AuthForm() {
                     <FormItem>
                       <FormLabel>
                         <I18nText translationKey="auth.fields.fullName.label" /> 
-                        <span className="text-slate-400 text-sm">(optionnel)</span>
+                        <span className="text-slate-400 text-sm">(<I18nText translationKey="auth.fields.fullName.optional" />)</span>
                       </FormLabel>
                       <FormControl>
                         <div className="relative">

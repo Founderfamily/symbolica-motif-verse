@@ -11,6 +11,7 @@ import frQuickAccess from './locales/fr/quickAccess.json';
 import frCallToAction from './locales/fr/callToAction.json';
 import frHowItWorks from './locales/fr/howItWorks.json';
 import frUploadTools from './locales/fr/uploadTools.json';
+import frAuth from './locales/fr/auth.json';
 
 // Import remaining sections from original file
 import frTranslationRemaining from './locales/fr.json';
@@ -40,6 +41,7 @@ const frTranslation = {
   callToAction: frCallToAction,
   howItWorks: frHowItWorks,
   uploadTools: frUploadTools,
+  auth: frAuth,
   // Keep remaining translations from original file
   collections: frTranslationRemaining.collections,
   community: frTranslationRemaining.community,
