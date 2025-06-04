@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,6 +16,7 @@ const Auth: React.FC = () => {
     return <Navigate to="/" replace />;
   }
 
+  // Utiliser directement les clés de traduction pour les bénéfices
   const benefits = [
     t('auth.benefits.features.0'),
     t('auth.benefits.features.1'),
