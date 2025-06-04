@@ -1,3 +1,4 @@
+
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -27,6 +28,8 @@ import frSearchFilters from './locales/fr/searchFilters.json';
 import frTranslationRemaining from './locales/fr.json';
 
 // English translations - split into thematic files
+import enApp from './locales/en/app.json';
+import enHero from './locales/en/hero.json';
 import enNavigation from './locales/en/navigation.json';
 import enCommon from './locales/en/common.json';
 import enAuth from './locales/en/auth.json';
@@ -74,6 +77,8 @@ const frTranslation = {
 const enTranslation = {
   ...enNavigation,
   ...enCommon,
+  app: enApp,
+  hero: enHero,
   auth: enAuth.auth,
   profile: enProfile.profile,
   ...enSections,
