@@ -17,8 +17,9 @@ class CollectionsService {
    */
   async getCollections(): Promise<CollectionWithTranslations[]> {
     try {
-      console.log('🔍 Fetching collections from Supabase...');
+      console.log('🔍 CollectionsService: Starting database query...');
       
+      const startTime = Date.now();
       const { data, error } = await supabase
         .from('collections')
         .select(`
@@ -38,27 +39,46 @@ class CollectionsService {
         `)
         .order('created_at', { ascending: false });
 
+      const queryTime = Date.now() - startTime;
+      console.log(`⏱️ CollectionsService: Query completed in ${queryTime}ms`);
+
       if (error) {
-        console.error('❌ Supabase error:', error);
+        console.error('❌ CollectionsService: Supabase error:', error);
         throw error;
       }
       
-      console.log('✅ Raw data from Supabase:', data?.length || 0, 'collections');
+      console.log('📊 CollectionsService: Raw data analysis:', {
+        totalRows: data?.length || 0,
+        firstRow: data?.[0] || null,
+        hasTranslations: data?.[0]?.collection_translations ? 'Yes' : 'No'
+      });
       
       // Transformation sécurisée des données
-      const transformedData: CollectionWithTranslations[] = (data || []).map(collection => ({
-        ...collection,
-        collection_translations: Array.isArray(collection.collection_translations) 
-          ? collection.collection_translations 
-          : []
-      }));
+      const transformedData: CollectionWithTranslations[] = (data || []).map(collection => {
+        const result = {
+          ...collection,
+          collection_translations: Array.isArray(collection.collection_translations) 
+            ? collection.collection_translations 
+            : []
+        };
+        
+        console.log(`📝 Transformed collection ${collection.slug}:`, {
+          id: result.id,
+          slug: result.slug,
+          translationsCount: result.collection_translations.length,
+          translations: result.collection_translations.map(t => `${t.language}: ${t.title}`)
+        });
+        
+        return result;
+      });
       
-      console.log('✅ Transformed collections:', transformedData.length);
+      console.log('✅ CollectionsService: Successfully transformed', transformedData.length, 'collections');
       return transformedData;
     } catch (error) {
-      console.error('❌ Error in getCollections:', error);
+      console.error('❌ CollectionsService: Critical error in getCollections:', error);
       logger.error('Error fetching collections', { error });
-      return [];
+      // Au lieu de retourner un tableau vide, jeter l'erreur pour que React Query la gère
+      throw error;
     }
   }
 

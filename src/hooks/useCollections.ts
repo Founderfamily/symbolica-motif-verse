@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collectionsService } from '@/services/collectionsService';
 import { CreateCollectionData } from '@/types/collections';
@@ -12,14 +11,42 @@ const QUERY_KEYS = {
 } as const;
 
 export const useCollections = () => {
-  return useQuery({
+  const query = useQuery({
     queryKey: QUERY_KEYS.collections,
-    queryFn: collectionsService.getCollections,
+    queryFn: async () => {
+      console.log('🚀 useCollections: Starting fetch...');
+      try {
+        const result = await collectionsService.getCollections();
+        console.log('✅ useCollections: Success!', {
+          count: result?.length || 0,
+          sample: result?.[0] || null
+        });
+        return result;
+      } catch (error) {
+        console.error('❌ useCollections: Error!', error);
+        // Ne pas jeter l'erreur, retourner un tableau vide pour éviter le loading infini
+        return [];
+      }
+    },
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    // Force une valeur par défaut pour éviter undefined
+    placeholderData: [],
   });
+
+  // Debug du state React Query
+  console.log('🔍 useCollections state:', {
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error?.message,
+    dataLength: query.data?.length || 0,
+    status: query.status
+  });
+
+  return query;
 };
 
 export const useFeaturedCollections = () => {
