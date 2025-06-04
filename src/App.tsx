@@ -60,9 +60,6 @@ function App() {
               {/* Mobile app route - accessible without layout for full mobile experience */}
               <Route path="/mobile" element={<MobileAppPage />} />
               
-              {/* Auth route - accessible without main layout */}
-              <Route path="/auth" element={<Auth />} />
-              
               {/* Admin routes with AdminLayout - protected */}
               <Route path="/admin" element={
                 <ProtectedRoute>
@@ -82,6 +79,7 @@ function App() {
               <Route path="/" element={<Layout><Outlet /></Layout>}>
                 {/* Public routes */}
                 <Route index element={<HomePage />} />
+                <Route path="/auth" element={<Auth />} />
                 <Route path="/symbols" element={<SymbolsPage />} />
                 <Route path="/symbols/:id" element={<SymbolExplorer />} />
                 <Route path="/collections" element={<CollectionsPage />} />

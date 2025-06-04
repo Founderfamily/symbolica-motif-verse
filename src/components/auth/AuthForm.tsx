@@ -138,9 +138,7 @@ export default function AuthForm() {
               </h2>
             </div>
             <p className="text-amber-100 text-sm">
-              <I18nText translationKey="auth.intro">
-                Explorez, analysez et contribuez au patrimoine symbolique mondial
-              </I18nText>
+              <I18nText translationKey="auth.intro" />
             </p>
           </div>
 
@@ -164,7 +162,7 @@ export default function AuthForm() {
                     <I18nText translationKey="auth.titles.login" />
                   </h3>
                   <p className="text-slate-600 text-sm">
-                    Connectez-vous pour accéder à votre espace personnel
+                    <I18nText translationKey="auth.form.loginDescription" />
                   </p>
                 </div>
                 
@@ -183,7 +181,7 @@ export default function AuthForm() {
                               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="email" 
-                                placeholder="votre.email@exemple.com" 
+                                placeholder={t('auth.form.emailPlaceholder')} 
                                 className="pl-10 pr-10 h-12 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -209,9 +207,7 @@ export default function AuthForm() {
                               to="/auth/reset-password"
                               className="text-xs text-amber-600 hover:text-amber-700 transition-colors"
                             >
-                              <I18nText translationKey="auth.buttons.forgotPassword">
-                                Mot de passe oublié ?
-                              </I18nText>
+                              <I18nText translationKey="auth.buttons.forgotPassword" />
                             </Link>
                           </div>
                           <FormControl>
@@ -219,7 +215,7 @@ export default function AuthForm() {
                               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type={showPassword ? "text" : "password"}
-                                placeholder="••••••••"
+                                placeholder={t('auth.form.passwordPlaceholder')}
                                 className="pl-10 pr-10 h-12 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -269,7 +265,7 @@ export default function AuthForm() {
                     <I18nText translationKey="auth.titles.register" />
                   </h3>
                   <p className="text-slate-600 text-sm">
-                    Créez votre compte pour rejoindre notre communauté
+                    <I18nText translationKey="auth.form.registerDescription" />
                   </p>
                 </div>
                 
@@ -288,7 +284,7 @@ export default function AuthForm() {
                               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="email" 
-                                placeholder="votre.email@exemple.com" 
+                                placeholder={t('auth.form.emailPlaceholder')} 
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -314,7 +310,7 @@ export default function AuthForm() {
                               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="text" 
-                                placeholder="nom_utilisateur"
+                                placeholder={t('auth.form.usernamePlaceholder')}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -333,14 +329,16 @@ export default function AuthForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-700 font-medium">
-                            <I18nText translationKey="auth.labels.fullName" /> <span className="text-slate-400 text-xs">(optionnel)</span>
+                            <I18nText translationKey="auth.labels.fullName" /> <span className="text-slate-400 text-xs">
+                              <I18nText translationKey="auth.form.fullNameOptional" />
+                            </span>
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
                               <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="text" 
-                                placeholder="Prénom Nom"
+                                placeholder={t('auth.form.fullNamePlaceholder')}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -366,7 +364,7 @@ export default function AuthForm() {
                               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type={showPassword ? "text" : "password"}
-                                placeholder="••••••••"
+                                placeholder={t('auth.form.passwordPlaceholder')}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -397,7 +395,7 @@ export default function AuthForm() {
                               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="password"
-                                placeholder="••••••••"
+                                placeholder={t('auth.form.passwordPlaceholder')}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />

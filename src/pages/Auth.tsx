@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,32 +26,48 @@ const Auth: React.FC = () => {
   ];
 
   const stats = [
-    { icon: Users, value: '1,234', label: 'Chercheurs actifs' },
-    { icon: Globe, value: '89', label: 'Pays représentés' },
-    { icon: BookOpen, value: '2,847', label: 'Symboles documentés' },
-    { icon: TrendingUp, value: '156', label: 'Traditions culturelles' }
+    { 
+      icon: Users, 
+      value: '1,234', 
+      label: <I18nText translationKey="auth.stats.activeResearchers" />
+    },
+    { 
+      icon: Globe, 
+      value: '89', 
+      label: <I18nText translationKey="auth.stats.countriesRepresented" />
+    },
+    { 
+      icon: BookOpen, 
+      value: '2,847', 
+      label: <I18nText translationKey="auth.stats.symbolsDocumented" />
+    },
+    { 
+      icon: TrendingUp, 
+      value: '156', 
+      label: <I18nText translationKey="auth.stats.culturalTraditions" />
+    }
   ];
 
   const testimonials = [
     {
-      name: "Dr. Sarah Chen",
-      role: "Anthropologue culturelle",
+      name: t('auth.testimonials.testimonial1.name'),
+      role: t('auth.testimonials.testimonial1.role'),
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
-      content: "Symbolica a révolutionné mes recherches. Les outils d'analyse IA sont incroyables.",
+      content: t('auth.testimonials.testimonial1.content'),
       rating: 5
     },
     {
-      name: "Marcus Rodriguez",
-      role: "Conservateur de musée",
+      name: t('auth.testimonials.testimonial2.name'),
+      role: t('auth.testimonials.testimonial2.role'),
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      content: "Une ressource inestimable pour comprendre l'héritage symbolique des cultures.",
+      content: t('auth.testimonials.testimonial2.content'),
       rating: 5
     },
     {
-      name: "Prof. Elena Volkov",
-      role: "Archéologue",
+      name: t('auth.testimonials.testimonial3.name'),
+      role: t('auth.testimonials.testimonial3.role'),
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      content: "L'aspect communauté globale rend cette plateforme vraiment unique.",
+      content: t('auth.testimonials.testimonial3.content'),
       rating: 5
     }
   ];
@@ -58,18 +75,18 @@ const Auth: React.FC = () => {
   const features = [
     {
       icon: Shield,
-      title: "Sécurisé & Privé",
-      description: "Vos données sont protégées avec un chiffrement de niveau bancaire"
+      title: <I18nText translationKey="auth.features.secure.title" />,
+      description: <I18nText translationKey="auth.features.secure.description" />
     },
     {
       icon: Zap,
-      title: "IA Avancée",
-      description: "Outils d'analyse alimentés par l'intelligence artificielle"
+      title: <I18nText translationKey="auth.features.ai.title" />,
+      description: <I18nText translationKey="auth.features.ai.description" />
     },
     {
       icon: Award,
-      title: "Certifié Académique",
-      description: "Reconnu par les institutions de recherche mondiales"
+      title: <I18nText translationKey="auth.features.certified.title" />,
+      description: <I18nText translationKey="auth.features.certified.description" />
     }
   ];
   
@@ -93,15 +110,11 @@ const Auth: React.FC = () => {
                 </div>
                 
                 <h2 className="text-2xl lg:text-3xl font-semibold text-slate-900 mb-4">
-                  <I18nText translationKey="auth.benefits.title">
-                    Rejoignez des milliers de chercheurs
-                  </I18nText>
+                  <I18nText translationKey="auth.benefits.title" />
                 </h2>
                 
                 <p className="text-base lg:text-lg text-slate-600 mb-8">
-                  <I18nText translationKey="auth.benefits.subtitle">
-                    Découvrez, contribuez et connectez-vous avec une communauté mondiale passionnée par l'héritage symbolique
-                  </I18nText>
+                  <I18nText translationKey="auth.benefits.subtitle" />
                 </p>
               </div>
 
@@ -122,7 +135,9 @@ const Auth: React.FC = () => {
 
               {/* Benefits list */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-900 mb-3">Ce que vous obtenez :</h3>
+                <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                  <I18nText translationKey="auth.benefits.whatYouGet" />
+                </h3>
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
@@ -151,7 +166,7 @@ const Auth: React.FC = () => {
               {/* Testimonials */}
               <div className="space-y-4 hidden lg:block">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  <I18nText translationKey="testimonials.subtitle">Ce que disent nos utilisateurs</I18nText>
+                  <I18nText translationKey="auth.testimonials.subtitle" />
                 </h3>
                 <div className="space-y-4">
                   {testimonials.map((testimonial, index) => (
