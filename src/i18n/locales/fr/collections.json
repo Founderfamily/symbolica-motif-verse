@@ -1,6 +1,6 @@
 
 {
-  "title": "Collections",
+  "title": "Collections Culturelles",
   "featured": {
     "title": "Collections en Vedette", 
     "description": "Explorez des parcours thématiques à travers les symboles du monde entier",
@@ -22,8 +22,6 @@
   "noFeaturedCollections": "Aucune collection en vedette",
   "noFeaturedCollectionsMessage": "Les collections thématiques arrivent bientôt !",
   "createCollection": "Créer une Collection",
-  "heroTitle": "Collections Culturelles",
-  "heroDescription": "Explorez des parcours thématiques à travers les symboles du monde entier. Découvrez les connexions fascinantes entre cultures et époques.",
   "heroStats": {
     "mysteries": "Mystères & Secrets",
     "geometry": "Géométrie Sacrée", 

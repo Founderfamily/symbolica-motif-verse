@@ -1,6 +1,6 @@
 
 {
-  "title": "Collections",
+  "title": "Cultural Collections",
   "featured": {
     "title": "Featured Collections",
     "description": "Explore thematic journeys through symbols from around the world",
@@ -22,8 +22,6 @@
   "noFeaturedCollections": "No featured collections",
   "noFeaturedCollectionsMessage": "Thematic collections coming soon!",
   "createCollection": "Create Collection",
-  "heroTitle": "Cultural Collections",
-  "heroDescription": "Explore thematic journeys through symbols from around the world. Discover fascinating connections between cultures and eras.",
   "heroStats": {
     "mysteries": "Mysteries & Secrets",
     "geometry": "Sacred Geometry",
