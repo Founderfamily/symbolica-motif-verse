@@ -13,5 +13,16 @@
     "noCollections": "No collections available",
     "noCollectionsMessage": "Collections will be available soon. Come back later!",
     "featuredBadge": "Featured"
+  },
+  "categories": {
+    "cultures": "Cultures",
+    "periods": "Periods",
+    "sciences": "Sciences",
+    "others": "Others",
+    "culturesDescription": "Explore symbols organized by their cultural origin",
+    "periodsDescription": "Discover the evolution of symbols through the ages",
+    "sciencesDescription": "Discover symbols related to sciences and esoteric traditions",
+    "othersDescription": "Thematic collections and custom creations",
+    "noOthers": "No other collections at the moment"
   }
 }

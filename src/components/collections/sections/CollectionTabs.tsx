@@ -9,17 +9,19 @@ import { CategoryGrid } from './CategoryGrid';
 interface CollectionTabsProps {
   cultures: CollectionWithTranslations[];
   periods: CollectionWithTranslations[];
+  sciences: CollectionWithTranslations[];
   others: CollectionWithTranslations[];
 }
 
 export const CollectionTabs: React.FC<CollectionTabsProps> = React.memo(({ 
   cultures, 
   periods, 
+  sciences,
   others 
 }) => (
   <section>
     <Tabs defaultValue="cultures" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="cultures" className="flex items-center gap-2">
           🌍 <I18nText translationKey="collections.categories.cultures">Cultures</I18nText>
           <Badge variant="secondary">{cultures.length}</Badge>
@@ -27,6 +29,10 @@ export const CollectionTabs: React.FC<CollectionTabsProps> = React.memo(({
         <TabsTrigger value="periods" className="flex items-center gap-2">
           ⏳ <I18nText translationKey="collections.categories.periods">Périodes</I18nText>
           <Badge variant="secondary">{periods.length}</Badge>
+        </TabsTrigger>
+        <TabsTrigger value="sciences" className="flex items-center gap-2">
+          🔬 <I18nText translationKey="collections.categories.sciences">Sciences</I18nText>
+          <Badge variant="secondary">{sciences.length}</Badge>
         </TabsTrigger>
         <TabsTrigger value="others" className="flex items-center gap-2">
           📚 <I18nText translationKey="collections.categories.others">Autres</I18nText>
@@ -60,6 +66,20 @@ export const CollectionTabs: React.FC<CollectionTabsProps> = React.memo(({
           </p>
         </div>
         <CategoryGrid collections={periods} />
+      </TabsContent>
+
+      <TabsContent value="sciences" className="mt-8">
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-slate-900 mb-2">
+            <I18nText translationKey="collections.categories.sciences">Sciences & Ésotérisme</I18nText>
+          </h3>
+          <p className="text-slate-600">
+            <I18nText translationKey="collections.categories.sciencesDescription">
+              Découvrez les symboles liés aux sciences et traditions ésotériques
+            </I18nText>
+          </p>
+        </div>
+        <CategoryGrid collections={sciences} />
       </TabsContent>
 
       <TabsContent value="others" className="mt-8">

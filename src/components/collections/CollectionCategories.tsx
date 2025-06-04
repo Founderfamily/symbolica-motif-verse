@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCollections } from '@/hooks/useCollections';
 import { useCollectionCategories } from '@/hooks/useCollectionCategories';
@@ -12,7 +11,7 @@ import { PerformanceTracker } from './PerformanceTracker';
 const CollectionCategories: React.FC = React.memo(() => {
   // Utilisation temporaire du hook standard pour diagnostic
   const { data: collections, isLoading, error } = useCollections();
-  const { featured, cultures, periods, others } = useCollectionCategories(collections);
+  const { featured, cultures, periods, sciences, others } = useCollectionCategories(collections);
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
 
   // Logs de diagnostic
@@ -23,6 +22,7 @@ const CollectionCategories: React.FC = React.memo(() => {
     featured: featured?.length || 0,
     cultures: cultures?.length || 0,
     periods: periods?.length || 0,
+    sciences: sciences?.length || 0,
     others: others?.length || 0
   });
 
@@ -98,6 +98,7 @@ const CollectionCategories: React.FC = React.memo(() => {
           <CollectionTabs 
             cultures={cultures}
             periods={periods}
+            sciences={sciences}
             others={others}
           />
         </div>

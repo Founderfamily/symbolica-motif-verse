@@ -35,9 +35,11 @@
   "categories": {
     "cultures": "Cultures",
     "periods": "Périodes",
+    "sciences": "Sciences",
     "others": "Autres",
     "culturesDescription": "Explorez les symboles organisés par leur origine culturelle",
     "periodsDescription": "Découvrez l'évolution des symboles à travers les époques",
+    "sciencesDescription": "Découvrez les symboles liés aux sciences et traditions ésotériques",
     "othersDescription": "Collections thématiques et créations personnalisées",
     "noOthers": "Aucune autre collection pour le moment"
   }
