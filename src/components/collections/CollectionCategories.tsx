@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCollections } from '@/hooks/useCollections';
 import { useCollectionCategories } from '@/hooks/useCollectionCategories';
 import { I18nText } from '@/components/ui/i18n-text';
@@ -8,13 +8,21 @@ import { CollectionTabs } from './sections/CollectionTabs';
 import { EnhancedErrorState } from './EnhancedErrorStates';
 import { PerformanceTracker } from './PerformanceTracker';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useQueryClient } from '@tanstack/react-query';
 
 const CollectionCategories: React.FC = React.memo(() => {
+  const queryClient = useQueryClient();
   const { data: collections, isLoading, error } = useCollections();
   const { featured, cultures, periods, sciences, others } = useCollectionCategories(collections);
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
 
+  // Vider le cache au démarrage pour forcer un rechargement frais
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['collections'] });
+  }, [queryClient]);
+
   const handleRetry = () => {
+    queryClient.clear();
     window.location.reload();
   };
 
@@ -23,7 +31,6 @@ const CollectionCategories: React.FC = React.memo(() => {
   };
 
   if (error) {
-    console.error('Collections error:', error);
     return (
       <div className="flex justify-center items-center min-h-96">
         <EnhancedErrorState

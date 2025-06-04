@@ -14,16 +14,13 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
       };
     }
 
-    console.log('Categorizing collections:', collections.length);
-
     // Récupérer les collections featured (avec leur statut réel de la base)
     const featured = collections.filter(c => c.is_featured);
-    console.log('Featured collections found:', featured.length);
     
-    // Logique de catégorisation basée sur les slugs de la BDD
+    // Logique de catégorisation améliorée basée sur les slugs de la BDD
     const cultures = collections.filter(c => {
       const slug = c.slug.toLowerCase();
-      return slug.startsWith('culture-') ||
+      return slug.includes('culture-') ||
              slug.includes('egyptien') || 
              slug.includes('chinois') || 
              slug.includes('celtique') || 
@@ -81,15 +78,6 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
       !periods.some(period => period.id === c.id) &&
       !sciences.some(science => science.id === c.id)
     );
-
-    console.log('Final categorization:', {
-      total: collections.length,
-      featured: featured.length,
-      cultures: cultures.length,
-      periods: periods.length,
-      sciences: sciences.length,
-      others: others.length
-    });
 
     return { featured, cultures, periods, sciences, others };
   }, [collections]);

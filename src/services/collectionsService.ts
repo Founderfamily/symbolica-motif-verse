@@ -13,7 +13,7 @@ class CollectionsService {
   }
 
   /**
-   * Récupère toutes les collections avec leurs traductions - CORRIGÉ
+   * Récupère toutes les collections avec leurs traductions - OPTIMISÉ
    */
   async getCollections(): Promise<CollectionWithTranslations[]> {
     try {
@@ -38,23 +38,15 @@ class CollectionsService {
 
       if (error) throw error;
       
-      console.log('Collections service - raw data:', data?.length || 0, 'collections');
-      
       // Transformer les données pour avoir la structure attendue
       const transformedData = data?.map(collection => ({
         ...collection,
         collection_translations: collection.collection_translations || []
       })) || [];
       
-      console.log('Collections service - transformed:', transformedData.length, 'collections');
-      transformedData.forEach(c => {
-        console.log(`- ${c.slug}: featured=${c.is_featured}, translations=${c.collection_translations?.length || 0}`);
-      });
-      
       return transformedData;
     } catch (error) {
       logger.error('Error fetching collections', { error });
-      console.error('Collections service error:', error);
       return [];
     }
   }
