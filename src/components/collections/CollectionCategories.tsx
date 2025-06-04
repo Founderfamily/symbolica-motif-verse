@@ -13,6 +13,7 @@ const CollectionCategories: React.FC = React.memo(() => {
   const { data: collections, isLoading, error } = useCollections();
   const { featured, cultures, periods, sciences, others } = useCollectionCategories(collections);
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
 
   // Debug logs détaillés
   console.log('🔍 CollectionCategories render state:', {
@@ -31,9 +32,11 @@ const CollectionCategories: React.FC = React.memo(() => {
       console.log('⏰ Loading started...');
       timeoutId = setTimeout(() => {
         console.error('❌ Loading timeout after 10s - forcing display with empty state');
+        setLoadingTimeout(true);
       }, 10000);
     } else {
       console.log('✅ Loading completed');
+      setLoadingTimeout(false);
     }
 
     return () => {
@@ -50,17 +53,8 @@ const CollectionCategories: React.FC = React.memo(() => {
     setPerformanceMetrics(metrics);
   };
 
-  // Force affichage d'erreur si loading > 10s
-  const [forceError, setForceError] = useState(false);
-  useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => setForceError(true), 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-
-  if (error || forceError) {
-    console.log('❌ Showing error state:', { error: error?.message, forceError });
+  if (error || loadingTimeout) {
+    console.log('❌ Showing error state:', { error: error?.message, loadingTimeout });
     return (
       <div className="flex justify-center items-center min-h-96">
         <EnhancedErrorState
@@ -72,7 +66,7 @@ const CollectionCategories: React.FC = React.memo(() => {
     );
   }
 
-  if (isLoading && !forceError) {
+  if (isLoading && !loadingTimeout) {
     console.log('⏳ Showing loading state');
     return (
       <div className="space-y-12">
@@ -83,7 +77,7 @@ const CollectionCategories: React.FC = React.memo(() => {
             </I18nText>
           </p>
           <p className="text-xs text-slate-400 mt-2">
-            Debug: isLoading={String(isLoading)}, collections={collections?.length || 0}
+            Debug: isLoading={String(isLoading)}, collections={(collections?.length || 0)}
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
