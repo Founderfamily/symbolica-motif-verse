@@ -6,9 +6,12 @@ export { default as CollectionCard } from './components/cards/CollectionCard';
 export { UnifiedCollectionGrid } from './components/grids/UnifiedCollectionGrid';
 export { FeaturedCollectionsSection } from './components/sections/FeaturedCollectionsSection';
 
-// Hooks
+// Hooks - main exports
 export * from './hooks/useCollections';
-export * from './hooks/useCollectionCategories';
+
+// Hooks - specific queries and mutations
+export * from './hooks/queries';
+export * from './hooks/mutations';
 
 // Services
 export { collectionsService } from './services';
