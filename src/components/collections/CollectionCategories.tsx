@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useCollections } from '@/hooks/useCollections';
 import { useCollectionCategories } from '@/hooks/useCollectionCategories';
@@ -76,7 +77,7 @@ const CollectionCategories: React.FC = React.memo(() => {
             </I18nText>
           </p>
           <p className="text-xs text-slate-400 mt-2">
-            Debug: isLoading={String(isLoading)}, collections={(collections && Array.isArray(collections)) ? collections.length.toString() : '0'}
+            Debug: isLoading={String(isLoading)}, status=loading
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -105,7 +106,7 @@ const CollectionCategories: React.FC = React.memo(() => {
           </I18nText>
         </p>
         <p className="text-xs text-slate-400 mt-4">
-          Debug: collections array = {collections && Array.isArray(collections) ? JSON.stringify(collections) : 'undefined or not array'}
+          Debug: collections status = empty
         </p>
       </div>
     );
