@@ -1,7 +1,16 @@
 
 {
   "title": "Hub Communautaire",
+  "subtitle": "Rejoignez des groupes d'intérêt et connectez-vous avec d'autres chercheurs",
   "description": "Rejoignez des groupes thématiques et connectez-vous avec d'autres chercheurs passionnés de symboles culturels",
+  "totalGroups": "Groupes Actifs",
+  "totalMembers": "Membres Total",
+  "totalDiscoveries": "Découvertes Partagées",
+  "allGroups": "Tous les Groupes",
+  "popular": "Populaires",
+  "mostActive": "Plus Actifs",
+  "noGroups": "Aucun groupe trouvé",
+  "noGroupsDescription": "Essayez d'ajuster votre recherche ou créez un nouveau groupe",
   "stats": {
     "members": "membres",
     "discoveries": "découvertes",

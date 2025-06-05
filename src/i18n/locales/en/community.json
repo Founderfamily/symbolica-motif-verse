@@ -1,44 +1,51 @@
 
 {
-  "community": {
-    "title": "Join a Global Community of Symbol Enthusiasts",
-    "description": "Connect with people passionate about cultural symbols and heritage from around the world.",
-    "stats": {
-      "members": "members",
-      "discoveries": "discoveries", 
-      "join": "Join"
+  "title": "Community Hub",
+  "subtitle": "Join interest groups and connect with fellow researchers",
+  "description": "Connect with people passionate about cultural symbols and heritage from around the world.",
+  "totalGroups": "Active Groups",
+  "totalMembers": "Total Members",
+  "totalDiscoveries": "Discoveries Shared",
+  "allGroups": "All Groups",
+  "popular": "Popular",
+  "mostActive": "Most Active",
+  "noGroups": "No groups found",
+  "noGroupsDescription": "Try adjusting your search or create a new group",
+  "stats": {
+    "members": "members",
+    "discoveries": "discoveries",
+    "join": "Join"
+  },
+  "groups": {
+    "artDeco": {
+      "name": "Art Deco Patterns",
+      "culture": "Global"
     },
-    "groups": {
-      "artDeco": {
-        "name": "Art Deco Patterns",
-        "culture": "Global"
-      },
-      "celticSymbolism": {
-        "name": "Celtic Symbolism",
-        "culture": "Celtic"
-      },
-      "japanesePatterns": {
-        "name": "Japanese Patterns",
-        "culture": "Japanese"
-      },
-      "islamicArt": {
-        "name": "Islamic Art Patterns",
-        "culture": "Islamic"
-      }
+    "celticSymbolism": {
+      "name": "Celtic Symbolism",
+      "culture": "Celtic"
     },
-    "features": {
-      "thematicCommunities": {
-        "title": "Thematic Communities",
-        "description": "Join specialized communities focused on particular symbol traditions, regions, or time periods."
-      },
-      "personalSpace": {
-        "title": "Personal Collections",
-        "description": "Build and organize your own library of symbolic patterns that resonate with you."
-      },
-      "intuitiveNavigation": {
-        "title": "Advanced Discovery",
-        "description": "Explore connections between symbols across cultures and time periods with our intuitive navigation."
-      }
+    "japanesePatterns": {
+      "name": "Japanese Patterns",
+      "culture": "Japanese"
+    },
+    "islamicArt": {
+      "name": "Islamic Art Patterns",
+      "culture": "Islamic"
+    }
+  },
+  "features": {
+    "thematicCommunities": {
+      "title": "Thematic Communities",
+      "description": "Join specialized communities focused on particular symbol traditions, regions, or time periods."
+    },
+    "personalSpace": {
+      "title": "Personal Collections",
+      "description": "Build and organize your own library of symbolic patterns that resonate with you."
+    },
+    "intuitiveNavigation": {
+      "title": "Advanced Discovery",
+      "description": "Explore connections between symbols across cultures and time periods with our intuitive navigation."
     }
   }
 }
