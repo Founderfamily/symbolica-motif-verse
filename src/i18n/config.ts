@@ -1,4 +1,3 @@
-
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -189,26 +188,6 @@ const enTranslation = {
       classification: "Classification",
       result: "Result",
       example: "Example"
-    }
-  },
-  
-  // Harmonized testimonials with same people as French version
-  testimonials: {
-    subtitle: "What our users say",
-    testimonial1: {
-      name: "Dr. Marie Dubois",
-      role: "Cultural Anthropologist",
-      content: "Symbolica has revolutionized my research. The AI analysis tools are incredible for decoding ancient symbols."
-    },
-    testimonial2: {
-      name: "Jean-Pierre Martin",
-      role: "Museum Curator",
-      content: "An invaluable resource for understanding the symbolic heritage of cultures. Essential for any researcher."
-    },
-    testimonial3: {
-      name: "Prof. Claire Moreau",
-      role: "Archaeologist",
-      content: "The global community aspect makes this platform truly unique. A treasure for collaborative research."
     }
   },
   
