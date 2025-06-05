@@ -1,8 +1,9 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { InterestGroup } from '@/types/interest-groups';
 
 /**
- * Fetches a limited number of interest groups for display
+ * Fetches a limited number of interest groups for display - respects RLS policies
  */
 export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]> => {
   try {
@@ -17,7 +18,11 @@ export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]
 
     const { data, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching interest groups:', error);
+      return [];
+    }
+    
     if (!data) return [];
 
     // Type cast to fix the type issue with translations
@@ -34,7 +39,7 @@ export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]
 };
 
 /**
- * Fetches all interest groups
+ * Fetches all interest groups - respects RLS policies
  */
 export const getAllGroups = async (): Promise<InterestGroup[]> => {
   try {
@@ -43,7 +48,11 @@ export const getAllGroups = async (): Promise<InterestGroup[]> => {
       .select('*')
       .order('name');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching all groups:', error);
+      return [];
+    }
+    
     if (!data) return [];
 
     // Type cast to fix the type issue with translations
@@ -54,13 +63,13 @@ export const getAllGroups = async (): Promise<InterestGroup[]> => {
         : group.translations
     })) as InterestGroup[];
   } catch (error) {
-    console.error('Error fetching interest groups:', error);
+    console.error('Error fetching all groups:', error);
     return [];
   }
 };
 
 /**
- * Fetches a single interest group by ID
+ * Fetches a single interest group by ID - respects RLS policies
  */
 export const getGroupById = async (id: string): Promise<InterestGroup | null> => {
   try {
@@ -68,9 +77,13 @@ export const getGroupById = async (id: string): Promise<InterestGroup | null> =>
       .from('interest_groups')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error(`Error fetching interest group with ID ${id}:`, error);
+      return null;
+    }
+    
     if (!data) return null;
 
     // Type cast to fix the type issue with translations
@@ -87,7 +100,7 @@ export const getGroupById = async (id: string): Promise<InterestGroup | null> =>
 };
 
 /**
- * Creates a new interest group
+ * Creates a new interest group - respects RLS policies
  */
 export const createGroup = async (groupData: Partial<InterestGroup>): Promise<InterestGroup | null> => {
   try {
@@ -112,9 +125,14 @@ export const createGroup = async (groupData: Partial<InterestGroup>): Promise<In
         translations: groupData.translations || { en: {}, fr: {} }
       })
       .select()
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating interest group:', error);
+      throw new Error(`Failed to create group: ${error.message}`);
+    }
+    
+    if (!data) return null;
     
     // Type cast to fix the type issue with translations
     return {
@@ -125,12 +143,12 @@ export const createGroup = async (groupData: Partial<InterestGroup>): Promise<In
     } as InterestGroup;
   } catch (error) {
     console.error('Error creating interest group:', error);
-    return null;
+    throw error;
   }
 };
 
 /**
- * Updates an existing interest group
+ * Updates an existing interest group - respects RLS policies
  */
 export const updateGroup = async (id: string, groupData: Partial<InterestGroup>): Promise<InterestGroup | null> => {
   try {
@@ -139,9 +157,14 @@ export const updateGroup = async (id: string, groupData: Partial<InterestGroup>)
       .update(groupData)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error(`Error updating interest group with ID ${id}:`, error);
+      throw new Error(`Failed to update group: ${error.message}`);
+    }
+    
+    if (!data) return null;
     
     // Type cast to fix the type issue with translations
     return {
@@ -152,6 +175,6 @@ export const updateGroup = async (id: string, groupData: Partial<InterestGroup>)
     } as InterestGroup;
   } catch (error) {
     console.error(`Error updating interest group with ID ${id}:`, error);
-    return null;
+    throw error;
   }
 };

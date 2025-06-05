@@ -1,28 +1,34 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { InterestGroup, GroupPost, GroupMember } from '@/types/interest-groups';
+import { GroupPost, GroupMember } from '@/types/interest-groups';
 
-export const joinGroup = async (groupId: string, userId: string) => {
+/**
+ * Join a group - now with proper RLS handling
+ */
+export const joinGroup = async (groupId: string, userId: string): Promise<void> => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('group_members')
       .insert({
         group_id: groupId,
         user_id: userId,
         role: 'member'
-      })
-      .select()
-      .single();
+      });
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error('Error joining group:', error);
+      throw new Error(`Failed to join group: ${error.message}`);
+    }
   } catch (error) {
-    console.error('Error joining group:', error);
+    console.error('Error in joinGroup service:', error);
     throw error;
   }
 };
 
-export const leaveGroup = async (groupId: string, userId: string) => {
+/**
+ * Leave a group - now with proper RLS handling
+ */
+export const leaveGroup = async (groupId: string, userId: string): Promise<void> => {
   try {
     const { error } = await supabase
       .from('group_members')
@@ -30,150 +36,191 @@ export const leaveGroup = async (groupId: string, userId: string) => {
       .eq('group_id', groupId)
       .eq('user_id', userId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error leaving group:', error);
+      throw new Error(`Failed to leave group: ${error.message}`);
+    }
   } catch (error) {
-    console.error('Error leaving group:', error);
+    console.error('Error in leaveGroup service:', error);
     throw error;
   }
 };
 
-export const checkGroupMembership = async (groupId: string, userId: string) => {
+/**
+ * Check if user is a member of a group
+ */
+export const checkGroupMembership = async (groupId: string, userId: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase
       .from('group_members')
       .select('id')
       .eq('group_id', groupId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') throw error;
+    if (error) {
+      console.error('Error checking membership:', error);
+      return false;
+    }
+
     return !!data;
   } catch (error) {
-    console.error('Error checking membership:', error);
+    console.error('Error in checkGroupMembership service:', error);
     return false;
   }
 };
 
-export const getGroupPosts = async (groupId: string) => {
+/**
+ * Get group posts with user profiles - respects RLS policies
+ */
+export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
   try {
-    // First get posts
-    const { data: posts, error } = await supabase
+    const { data, error } = await supabase
       .from('group_posts')
-      .select('*')
+      .select(`
+        *,
+        profiles!group_posts_user_id_fkey (
+          username,
+          full_name
+        )
+      `)
       .eq('group_id', groupId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching group posts:', error);
+      return [];
+    }
 
-    // Then get user profiles separately for each post
-    const postsWithProfiles = await Promise.all(
-      (posts || []).map(async (post) => {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username, full_name')
-          .eq('id', post.user_id)
-          .single();
+    if (!data) return [];
 
-        return {
-          ...post,
-          user_profile: profile || { username: 'unknown', full_name: 'Unknown User' }
-        };
-      })
-    );
-
-    return postsWithProfiles || [];
+    // Transform the data to match GroupPost interface
+    return data.map(post => ({
+      ...post,
+      user_profile: post.profiles ? {
+        username: post.profiles.username || 'Unknown',
+        full_name: post.profiles.full_name || 'Unknown User'
+      } : undefined
+    }));
   } catch (error) {
-    console.error('Error fetching group posts:', error);
+    console.error('Error in getGroupPosts service:', error);
     return [];
   }
 };
 
-export const createGroupPost = async (groupId: string, userId: string, content: string) => {
+/**
+ * Create a new group post - respects RLS policies
+ */
+export const createGroupPost = async (groupId: string, userId: string, content: string): Promise<void> => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('group_posts')
       .insert({
         group_id: groupId,
         user_id: userId,
-        content: content
-      })
-      .select()
-      .single();
+        content: content.trim()
+      });
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error('Error creating group post:', error);
+      throw new Error(`Failed to create post: ${error.message}`);
+    }
   } catch (error) {
-    console.error('Error creating post:', error);
+    console.error('Error in createGroupPost service:', error);
     throw error;
   }
 };
 
-export const likePost = async (postId: string, userId: string) => {
+/**
+ * Like/unlike a post - respects RLS policies
+ */
+export const likePost = async (postId: string, userId: string): Promise<void> => {
   try {
-    // Check if already liked
-    const { data: existingLike } = await supabase
+    // Check if user already liked the post
+    const { data: existingLike, error: checkError } = await supabase
       .from('post_likes')
       .select('id')
       .eq('post_id', postId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Error checking existing like:', checkError);
+      throw new Error(`Failed to check like status: ${checkError.message}`);
+    }
 
     if (existingLike) {
-      // Unlike
-      const { error } = await supabase
+      // Unlike the post
+      const { error: deleteError } = await supabase
         .from('post_likes')
         .delete()
         .eq('post_id', postId)
         .eq('user_id', userId);
 
-      if (error) throw error;
+      if (deleteError) {
+        console.error('Error removing like:', deleteError);
+        throw new Error(`Failed to unlike post: ${deleteError.message}`);
+      }
     } else {
-      // Like
-      const { error } = await supabase
+      // Like the post
+      const { error: insertError } = await supabase
         .from('post_likes')
         .insert({
           post_id: postId,
           user_id: userId
         });
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Error adding like:', insertError);
+        throw new Error(`Failed to like post: ${insertError.message}`);
+      }
     }
   } catch (error) {
-    console.error('Error toggling like:', error);
+    console.error('Error in likePost service:', error);
     throw error;
   }
 };
 
-export const getGroupMembers = async (groupId: string) => {
+/**
+ * Get group members with profiles - respects RLS policies
+ */
+export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> => {
   try {
-    // First get group members
-    const { data: members, error } = await supabase
+    const { data, error } = await supabase
       .from('group_members')
-      .select('*')
+      .select(`
+        *,
+        profiles!group_members_user_id_fkey (
+          id,
+          username,
+          full_name
+        )
+      `)
       .eq('group_id', groupId)
       .order('joined_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching group members:', error);
+      return [];
+    }
 
-    // Then get profiles separately
-    const membersWithProfiles = await Promise.all(
-      (members || []).map(async (member) => {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username, full_name')
-          .eq('id', member.user_id)
-          .single();
+    if (!data) return [];
 
-        return {
-          ...member,
-          profiles: profile || { username: 'unknown', full_name: 'Unknown User' }
-        };
-      })
-    );
-
-    return membersWithProfiles || [];
+    // Transform the data to match GroupMember interface
+    return data.map(member => ({
+      ...member,
+      profiles: member.profiles ? {
+        id: member.profiles.id,
+        username: member.profiles.username || 'Unknown',
+        full_name: member.profiles.full_name || 'Unknown User'
+      } : {
+        id: member.user_id,
+        username: 'Unknown',
+        full_name: 'Unknown User'
+      }
+    }));
   } catch (error) {
-    console.error('Error fetching group members:', error);
+    console.error('Error in getGroupMembers service:', error);
     return [];
   }
 };

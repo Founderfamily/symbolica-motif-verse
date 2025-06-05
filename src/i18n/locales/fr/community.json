@@ -11,6 +11,28 @@
   "mostActive": "Plus Actifs",
   "noGroups": "Aucun groupe trouvé",
   "noGroupsDescription": "Essayez d'ajuster votre recherche ou créez un nouveau groupe",
+  "createGroup": "Créer un Groupe",
+  "join": "Rejoindre",
+  "leave": "Quitter",
+  "joined": "Rejoint",
+  "members": "Membres",
+  "discoveries": "Découvertes",
+  "discussion": "Discussion",
+  "public": "Public",
+  "private": "Privé",
+  "groupNotFound": "Groupe introuvable",
+  "groupNotFoundDescription": "Le groupe que vous recherchez n'existe pas ou a été supprimé.",
+  "joinToSeeDiscussions": "Rejoignez pour voir les discussions",
+  "joinToParticipate": "Rejoignez ce groupe pour participer aux discussions et voir les posts des autres membres",
+  "sharedDiscoveries": "Découvertes Partagées",
+  "discoveriesComingSoon": "La fonctionnalité de partage de découvertes arrive bientôt",
+  "writePost": "Écrivez un post...",
+  "post": "Publier",
+  "like": "J'aime",
+  "comment": "Commenter",
+  "share": "Partager",
+  "loginRequired": "Veuillez vous connecter pour rejoindre des groupes et participer aux discussions",
+  "authenticationRequired": "Authentification Requise",
   "stats": {
     "members": "membres",
     "discoveries": "découvertes",
@@ -47,5 +69,15 @@
       "title": "Navigation Intuitive",
       "description": "Explorez facilement les symboles par région, culture ou signification"
     }
+  },
+  "errors": {
+    "joinGroupError": "Impossible de rejoindre le groupe. Veuillez réessayer.",
+    "leaveGroupError": "Impossible de quitter le groupe. Veuillez réessayer.",
+    "createPostError": "Impossible de créer le post. Veuillez réessayer.",
+    "likePostError": "Impossible d'aimer le post. Veuillez réessayer.",
+    "loadGroupError": "Impossible de charger les informations du groupe.",
+    "loadPostsError": "Impossible de charger les discussions.",
+    "loadMembersError": "Impossible de charger les membres du groupe.",
+    "authenticationRequired": "Vous devez être connecté pour effectuer cette action."
   }
 }

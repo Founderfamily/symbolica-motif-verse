@@ -11,6 +11,28 @@
   "mostActive": "Most Active",
   "noGroups": "No groups found",
   "noGroupsDescription": "Try adjusting your search or create a new group",
+  "createGroup": "Create Group",
+  "join": "Join",
+  "leave": "Leave",
+  "joined": "Joined",
+  "members": "Members",
+  "discoveries": "Discoveries",
+  "discussion": "Discussion",
+  "public": "Public",
+  "private": "Private",
+  "groupNotFound": "Group not found",
+  "groupNotFoundDescription": "The group you're looking for doesn't exist or has been removed.",
+  "joinToSeeDiscussions": "Join to see discussions",
+  "joinToParticipate": "Join this group to participate in discussions and see posts from other members",
+  "sharedDiscoveries": "Shared Discoveries",
+  "discoveriesComingSoon": "Discoveries sharing functionality coming soon",
+  "writePost": "Write a post...",
+  "post": "Post",
+  "like": "Like",
+  "comment": "Comment",
+  "share": "Share",
+  "loginRequired": "Please log in to join groups and participate in discussions",
+  "authenticationRequired": "Authentication Required",
   "stats": {
     "members": "members",
     "discoveries": "discoveries",
@@ -47,5 +69,15 @@
       "title": "Advanced Discovery",
       "description": "Explore connections between symbols across cultures and time periods with our intuitive navigation."
     }
+  },
+  "errors": {
+    "joinGroupError": "Unable to join group. Please try again.",
+    "leaveGroupError": "Unable to leave group. Please try again.",
+    "createPostError": "Unable to create post. Please try again.",
+    "likePostError": "Unable to like post. Please try again.",
+    "loadGroupError": "Unable to load group information.",
+    "loadPostsError": "Unable to load discussions.",
+    "loadMembersError": "Unable to load group members.",
+    "authenticationRequired": "You must be logged in to perform this action."
   }
 }
