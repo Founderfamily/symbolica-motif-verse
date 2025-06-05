@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { UnifiedCollectionGrid } from '../grids/UnifiedCollectionGrid';
 import { useCollections } from '../../hooks/useCollections';
@@ -85,12 +84,28 @@ const CollectionCategories: React.FC = () => {
         <FallbackNotice onRetry={handleRetry} />
       )}
       
-      <UnifiedCollectionGrid
-        featured={featured}
-        others={others}
-        isLoading={isLoading}
-        currentLanguage={currentLanguage}
-      />
+      {/* Featured Collections Section */}
+      {featured.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Featured Collections</h2>
+          <UnifiedCollectionGrid
+            collections={featured}
+            isLoading={isLoading}
+            maxCols="lg"
+          />
+        </div>
+      )}
+
+      {/* Other Collections Section */}
+      {others.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">All Collections</h2>
+          <UnifiedCollectionGrid
+            collections={others}
+            isLoading={isLoading}
+          />
+        </div>
+      )}
 
       <CollectionDebugInfo
         collections={finalCollections}
