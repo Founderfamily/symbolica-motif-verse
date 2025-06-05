@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { CollectionWithTranslations, CollectionDetails } from '@/types/collections';
+import { CollectionWithTranslations, CollectionDetails } from '../../types/collections';
 import { logger } from '@/services/logService';
 
 /**

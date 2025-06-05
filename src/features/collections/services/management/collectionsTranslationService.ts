@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { CreateCollectionData } from '@/types/collections';
+import { CreateCollectionData } from '../../types/collections';
 
 /**
  * Service for managing collection translations

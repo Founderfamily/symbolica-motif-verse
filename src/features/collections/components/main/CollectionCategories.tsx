@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { useCollections } from '@/hooks/useCollections';
-import { useCollectionCategories } from '@/hooks/useCollectionCategories';
+import { useCollections } from '../../hooks/useCollections';
+import { useCollectionCategories } from '../../hooks/useCollectionCategories';
 import { I18nText } from '@/components/ui/i18n-text';
-import { FeaturedCollectionsSection } from './sections/FeaturedCollectionsSection';
-import { CollectionTabs } from './sections/CollectionTabs';
-import { EnhancedErrorState } from './EnhancedErrorStates';
-import { PerformanceTracker } from './PerformanceTracker';
+import { FeaturedCollectionsSection } from '../sections/FeaturedCollectionsSection';
+import { CollectionTabs } from '@/components/collections/sections/CollectionTabs';
+import { EnhancedErrorState } from '@/components/collections/EnhancedErrorStates';
+import { PerformanceTracker } from '@/components/collections/PerformanceTracker';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CollectionWithTranslations } from '@/types/collections';
+import { CollectionWithTranslations } from '../../types/collections';
 
 // Collections de fallback temporaires pour diagnostic
 const getFallbackCollections = (): CollectionWithTranslations[] => [

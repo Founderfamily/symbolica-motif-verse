@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { useFeaturedCollections } from '@/hooks/useCollections';
+import { useFeaturedCollections } from '@/features/collections/hooks/useCollections';
 import { useTranslation } from '@/i18n/useTranslation';
 import { FeaturedCollectionsLoadingSkeleton } from './FeaturedCollectionsLoadingSkeleton';
 
