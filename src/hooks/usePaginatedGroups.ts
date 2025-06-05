@@ -50,7 +50,7 @@ export const usePaginatedGroups = (searchQuery?: string): PaginatedGroupsResult 
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes,
   });
 
   const groups = data?.pages.flatMap(page => page.groups) || [];
