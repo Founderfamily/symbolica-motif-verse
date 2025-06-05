@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -70,30 +71,10 @@ const getStaticCollections = (currentLanguage: string): StaticCollection[] => [
       : 'The evolution of symbols in the digital age: emojis, logos, modern iconography.',
     is_featured: false,
     created_at: '2024-01-04'
-  },
-  {
-    id: '5',
-    slug: 'alchimie-esoterisme',
-    title: currentLanguage === 'fr' ? 'Alchimie & Ésotérisme' : 'Alchemy & Esotericism',
-    description: currentLanguage === 'fr'
-      ? 'Les symboles hermétiques et alchimiques : pentagrammes, ouroboros, signes planétaires.'
-      : 'Hermetic and alchemical symbols: pentagrams, ouroboros, planetary signs.',
-    is_featured: false,
-    created_at: '2024-01-05'
-  },
-  {
-    id: '6',
-    slug: 'art-religieux',
-    title: currentLanguage === 'fr' ? 'Art Religieux' : 'Religious Art',
-    description: currentLanguage === 'fr'
-      ? 'Symboles sacrés des grandes traditions spirituelles : christianisme, islam, bouddhisme, hindouisme.'
-      : 'Sacred symbols from major spiritual traditions: Christianity, Islam, Buddhism, Hinduism.',
-    is_featured: false,
-    created_at: '2024-01-06'
   }
 ];
 
-// Skeleton de chargement
+// Loading skeleton component
 const CollectionsLoadingSkeleton: React.FC = React.memo(() => {
   return (
     <div className="space-y-8">
@@ -113,10 +94,36 @@ const CollectionsLoadingSkeleton: React.FC = React.memo(() => {
 
 CollectionsLoadingSkeleton.displayName = 'CollectionsLoadingSkeleton';
 
-// Component principal
+// Error state component
+const CollectionsErrorState: React.FC<{ error: Error; retry: () => void }> = React.memo(({ error, retry }) => {
+  return (
+    <div className="text-center py-12">
+      <div className="text-red-600 text-lg mb-4">
+        <I18nText translationKey="collections.errorLoading">Erreur de chargement</I18nText>
+      </div>
+      <p className="text-slate-600 mb-4">
+        {error.message}
+      </p>
+      <Button onClick={retry} variant="outline">
+        <I18nText translationKey="collections.retry">Réessayer</I18nText>
+      </Button>
+    </div>
+  );
+});
+
+CollectionsErrorState.displayName = 'CollectionsErrorState';
+
+// Main component
 const CollectionCategories: React.FC = () => {
   const { currentLanguage } = useTranslation();
-  const { data: collections = [], isLoading, error } = useCollections();
+  const { data: collections = [], isLoading, error, refetch } = useCollections();
+
+  console.log('🎯 [CollectionCategories] Rendu avec:', {
+    collectionsCount: collections?.length || 0,
+    isLoading,
+    hasError: !!error,
+    errorMessage: error?.message
+  });
 
   const getTranslation = React.useCallback((collection: CollectionWithTranslations, field: string) => {
     if (!collection?.collection_translations) {
@@ -161,11 +168,17 @@ const CollectionCategories: React.FC = () => {
     return getTranslation(collection, 'description');
   }, [getTranslation]);
 
-  // Get static collections and ensure proper typing
+  // LOGIQUE CORRIGÉE : priorité aux données de la base
   const staticCollections = React.useMemo(() => getStaticCollections(currentLanguage), [currentLanguage]);
   
-  const hasValidCollections = collections && collections.length > 0;
+  // Utiliser les collections de la base si disponibles, sinon fallback statique
+  const hasValidCollections = collections && Array.isArray(collections) && collections.length > 0;
   const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : staticCollections;
+
+  console.log('📊 [CollectionCategories] Collections finales:', {
+    sourceType: hasValidCollections ? 'database' : 'static',
+    count: finalCollections.length
+  });
 
   // Use filters hook
   const {
@@ -187,13 +200,20 @@ const CollectionCategories: React.FC = () => {
     return <CollectionsLoadingSkeleton />;
   }
 
-  // Error state - but still show static content
-  if (error && !hasValidCollections) {
-    console.warn('Collections API error, using static fallback:', error);
+  // Error state - montrer l'erreur au lieu de masquer
+  if (error) {
+    return <CollectionsErrorState error={error} retry={() => refetch()} />;
   }
 
   return (
     <div className="space-y-8">
+      {/* Debug info en développement */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="bg-blue-50 p-4 rounded-lg text-sm">
+          <strong>Debug:</strong> {hasValidCollections ? `${collections.length} collections de la base` : `${staticCollections.length} collections statiques`}
+        </div>
+      )}
+
       {/* Controls Section */}
       <CollectionControls
         sortBy={sortBy}

@@ -4,98 +4,82 @@ import { CollectionWithTranslations } from '../../../types/collections';
 import { logger } from '@/services/logService';
 
 /**
- * Query service for fetching all collections with translations
+ * Query service for fetching all collections with translations - VERSION CORRIGÉE
  */
 export class GetAllCollectionsQuery {
   /**
-   * Récupère toutes les collections avec leurs traductions - VERSION DIAGNOSTIQUE RENFORCÉE
+   * Récupère toutes les collections avec leurs traductions
    */
   async execute(): Promise<CollectionWithTranslations[]> {
-    console.log('🚀 [GetAllCollectionsQuery] DÉBUT de getCollections()');
+    console.log('🚀 [GetAllCollectionsQuery] DÉBUT - Version corrigée');
     
     try {
-      // Test de connexion Supabase
-      console.log('🔗 [GetAllCollectionsQuery] Test de connexion Supabase...');
-      const { data: testConnection } = await supabase.from('collections').select('count', { count: 'exact' });
-      console.log('📊 [GetAllCollectionsQuery] Connexion OK - Nombre total de collections:', testConnection);
+      // Test de base simple d'abord
+      console.log('🔗 [GetAllCollectionsQuery] Test de connexion basique...');
+      const { data: testData, error: testError } = await supabase
+        .from('collections')
+        .select('id, slug, is_featured')
+        .limit(5);
+      
+      if (testError) {
+        console.error('❌ [GetAllCollectionsQuery] ERREUR test basique:', testError);
+        throw testError;
+      }
+      
+      console.log('✅ [GetAllCollectionsQuery] Test basique OK:', testData?.length || 0, 'collections');
 
+      // Requête principale simplifiée et corrigée
       const startTime = Date.now();
-      console.log('🔍 [GetAllCollectionsQuery] Exécution de la requête principale...');
+      console.log('🔍 [GetAllCollectionsQuery] Exécution requête principale...');
       
       const { data, error } = await supabase
         .from('collections')
         .select(`
-          *,
-          collection_translations (*)
+          id,
+          slug,
+          is_featured,
+          created_at,
+          updated_at,
+          created_by,
+          collection_translations!inner (
+            id,
+            language,
+            title,
+            description
+          )
         `)
         .order('created_at', { ascending: false });
 
       const queryTime = Date.now() - startTime;
       console.log(`⏱️ [GetAllCollectionsQuery] Requête terminée en ${queryTime}ms`);
 
-      // Diagnostic d'erreur approfondi
+      // Gestion d'erreur stricte - NE PAS masquer les erreurs
       if (error) {
-        console.error('❌ [GetAllCollectionsQuery] ERREUR SUPABASE DÉTAILLÉE:', {
-          error,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-          message: error.message
-        });
-        
-        logger.error('Supabase collections query failed', { 
-          error,
-          queryTime,
-          timestamp: new Date().toISOString()
-        });
-        
-        // Retourner un tableau vide au lieu de lancer l'erreur
-        console.warn('⚠️ [GetAllCollectionsQuery] Retour tableau vide à cause de l\'erreur');
-        return [];
+        console.error('❌ [GetAllCollectionsQuery] ERREUR SUPABASE:', error);
+        logger.error('Collections query failed', { error, queryTime });
+        throw new Error(`Supabase query failed: ${error.message}`);
       }
       
-      // Analyse très détaillée des données reçues
-      console.log('📊 [GetAllCollectionsQuery] ANALYSE DÉTAILLÉE des données reçues:', {
+      console.log('📊 [GetAllCollectionsQuery] Données reçues:', {
         totalRows: data?.length || 0,
         dataType: typeof data,
         isArray: Array.isArray(data),
-        isNull: data === null,
-        isUndefined: data === undefined,
-        rawDataSample: data?.slice(0, 2) || null,
-        queryTime: `${queryTime}ms`
+        sampleData: data?.[0] || null
       });
 
-      // Analyse de chaque collection individuellement
-      if (data && Array.isArray(data)) {
-        data.forEach((collection, index) => {
-          console.log(`📝 [GetAllCollectionsQuery] Collection ${index + 1}:`, {
-            id: collection?.id,
-            slug: collection?.slug,
-            is_featured: collection?.is_featured,
-            translationsCount: collection?.collection_translations?.length || 0,
-            translationsRaw: collection?.collection_translations,
-            hasValidTranslations: Array.isArray(collection?.collection_translations) && collection.collection_translations.length > 0
-          });
-        });
-      }
-      
       if (!data || !Array.isArray(data)) {
-        console.warn('⚠️ [GetAllCollectionsQuery] Données invalides ou nulles reçues de Supabase');
+        console.warn('⚠️ [GetAllCollectionsQuery] Données nulles ou invalides');
         return [];
       }
       
-      // Transformation avec validation renforcée
+      // Transformation avec validation stricte
       const transformedData: CollectionWithTranslations[] = data
         .filter(collection => {
-          if (!collection) {
-            console.warn('⚠️ [GetAllCollectionsQuery] Collection null/undefined filtrée');
-            return false;
+          const isValid = collection && collection.slug && collection.collection_translations;
+          if (!isValid) {
+            console.warn('⚠️ [GetAllCollectionsQuery] Collection invalide filtrée:', collection?.id);
           }
-          if (!collection.slug) {
-            console.warn('⚠️ [GetAllCollectionsQuery] Collection sans slug filtrée:', collection.id);
-            return false;
-          }
-          return true;
+          return isValid;
         })
         .map(collection => {
           const result = {
@@ -105,43 +89,30 @@ export class GetAllCollectionsQuery {
               : []
           };
           
-          console.log(`✅ [GetAllCollectionsQuery] Collection transformée avec succès:`, {
+          console.log(`✅ [GetAllCollectionsQuery] Collection transformée:`, {
             id: result.id,
             slug: result.slug,
             is_featured: result.is_featured,
-            translationsCount: result.collection_translations.length,
-            validTranslations: result.collection_translations.filter(t => t.title && t.title.trim()).length
+            translationsCount: result.collection_translations.length
           });
           
           return result;
         });
       
-      console.log('✅ [GetAllCollectionsQuery] SUCCÈS FINAL:', {
-        collectionsTransformées: transformedData.length,
+      console.log('🎉 [GetAllCollectionsQuery] SUCCÈS FINAL:', {
+        collectionsTotal: transformedData.length,
         collectionsAvecTraductions: transformedData.filter(c => c.collection_translations.length > 0).length,
-        collectionsEnVedette: transformedData.filter(c => c.is_featured).length,
-        échantillon: transformedData.slice(0, 1).map(c => ({
-          slug: c.slug,
-          translations: c.collection_translations.map(t => `${t.language}: ${t.title}`)
-        }))
+        collectionsEnVedette: transformedData.filter(c => c.is_featured).length
       });
       
       return transformedData;
       
     } catch (error) {
-      console.error('❌ [GetAllCollectionsQuery] ERREUR CRITIQUE dans getCollections:', {
-        error,
-        stack: error instanceof Error ? error.stack : 'No stack trace',
-        timestamp: new Date().toISOString()
-      });
+      console.error('💥 [GetAllCollectionsQuery] ERREUR CRITIQUE:', error);
+      logger.error('Critical error in getAllCollectionsQuery', { error });
       
-      logger.error('Critical error fetching collections', { 
-        error,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Retourner un tableau vide même en cas d'erreur critique
-      return [];
+      // NE PAS retourner un tableau vide - propager l'erreur
+      throw error;
     }
   }
 }

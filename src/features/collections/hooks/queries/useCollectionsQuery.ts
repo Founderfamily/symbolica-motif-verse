@@ -11,61 +11,56 @@ export const COLLECTIONS_QUERY_KEYS = {
 } as const;
 
 export const useCollectionsQuery = () => {
-  console.log('🎯 [useCollectionsQuery] Hook initialization');
+  console.log('🎯 [useCollectionsQuery] Hook démarré - Version corrigée');
   
   const query = useQuery({
     queryKey: COLLECTIONS_QUERY_KEYS.collections,
     queryFn: async () => {
-      console.log('🚀 [useCollectionsQuery] Début de queryFn...');
+      console.log('🚀 [useCollectionsQuery] Début queryFn...');
       const startTime = Date.now();
       
       try {
         const result = await collectionsService.getCollections();
         const executionTime = Date.now() - startTime;
         
-        console.log('✅ [useCollectionsQuery] queryFn SUCCESS!', {
+        console.log('✅ [useCollectionsQuery] queryFn SUCCÈS!', {
           executionTime: `${executionTime}ms`,
           resultType: typeof result,
           isArray: Array.isArray(result),
-          count: result?.length || 0,
-          sample: result?.[0] || null,
-          isValidArray: Array.isArray(result) && result.length >= 0
+          count: result?.length || 0
         });
         
-        // Garantir que nous retournons toujours un tableau
-        const finalResult = Array.isArray(result) ? result : [];
-        console.log('📦 [useCollectionsQuery] Résultat final garanti comme tableau:', finalResult.length);
-        
-        return finalResult;
+        // Toujours retourner un tableau, même vide
+        return Array.isArray(result) ? result : [];
         
       } catch (error) {
         const executionTime = Date.now() - startTime;
-        console.error('❌ [useCollectionsQuery] queryFn ERROR!', {
+        console.error('❌ [useCollectionsQuery] queryFn ERREUR!', {
           error,
           executionTime: `${executionTime}ms`,
-          errorMessage: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack?.substring(0, 200) : 'No stack'
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
         });
         
+        // Laisser React Query gérer l'erreur
         throw error;
       }
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error) => {
-      console.log(`🔄 [useCollectionsQuery] Retry attempt ${failureCount}:`, error);
-      return failureCount < 3;
+      console.log(`🔄 [useCollectionsQuery] Tentative ${failureCount}:`, error);
+      return failureCount < 2; // Réduire les tentatives
     },
     retryDelay: attemptIndex => {
-      const delay = Math.min(1000 * 2 ** attemptIndex, 30000);
-      console.log(`⏰ [useCollectionsQuery] Retry delay: ${delay}ms`);
+      const delay = Math.min(1000 * 2 ** attemptIndex, 10000);
+      console.log(`⏰ [useCollectionsQuery] Délai retry: ${delay}ms`);
       return delay;
     },
-    initialData: [],
+    // Supprimer initialData pour forcer le fetch
   });
 
-  // Debug complet du state React Query
-  console.log('🔍 [useCollectionsQuery] État React Query COMPLET:', {
+  // Debug détaillé de l'état React Query
+  console.log('🔍 [useCollectionsQuery] État React Query:', {
     status: query.status,
     fetchStatus: query.fetchStatus,
     isLoading: query.isLoading,
@@ -73,23 +68,12 @@ export const useCollectionsQuery = () => {
     isError: query.isError,
     isSuccess: query.isSuccess,
     isPending: query.isPending,
+    hasData: !!query.data,
+    dataLength: query.data?.length || 0,
     error: query.error ? {
       message: query.error.message,
       name: query.error.name
-    } : null,
-    dataInfo: {
-      type: typeof query.data,
-      isArray: Array.isArray(query.data),
-      length: query.data?.length || 0,
-      isNull: query.data === null,
-      isUndefined: query.data === undefined
-    },
-    queryMeta: {
-      dataUpdatedAt: query.dataUpdatedAt,
-      errorUpdatedAt: query.errorUpdatedAt,
-      failureCount: query.failureCount,
-      failureReason: query.failureReason?.message
-    }
+    } : null
   });
 
   return query;
