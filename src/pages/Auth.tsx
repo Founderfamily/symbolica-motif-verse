@@ -17,7 +17,7 @@ const Auth: React.FC = () => {
     return <Navigate to="/" replace />;
   }
 
-  // Utiliser les nouvelles clés de traduction individuelles
+  // Benefits list avec traductions
   const benefits = [
     t('auth.benefits.feature1'),
     t('auth.benefits.feature2'),
@@ -25,6 +25,7 @@ const Auth: React.FC = () => {
     t('auth.benefits.feature4')
   ];
 
+  // Statistiques communauté - valeurs actuelles documentées
   const stats = [
     { 
       icon: Users, 
@@ -48,6 +49,7 @@ const Auth: React.FC = () => {
     }
   ];
 
+  // Testimonials - documentés en détail
   const testimonials = [
     {
       name: t('auth.testimonials.testimonial1.name'),
@@ -72,6 +74,7 @@ const Auth: React.FC = () => {
     }
   ];
 
+  // Features highlights - documentées précisément
   const features = [
     {
       icon: Shield,
@@ -163,7 +166,7 @@ const Auth: React.FC = () => {
                 ))}
               </div>
 
-              {/* Testimonials */}
+              {/* Testimonials - Note: hidden on mobile as documented */}
               <div className="space-y-4 hidden lg:block">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
                   <I18nText translationKey="auth.testimonials.subtitle" />
@@ -198,7 +201,7 @@ const Auth: React.FC = () => {
               </div>
             </div>
 
-            {/* Right side - Auth form */}
+            {/* Right side - Auth form (sticky positioning as documented) */}
             <div className="flex justify-center lg:justify-end order-1 lg:order-2">
               <div className="w-full max-w-md sticky top-8">
                 <AuthForm />
