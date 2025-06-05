@@ -1,179 +1,105 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { UnifiedCollectionGrid } from '../grids/UnifiedCollectionGrid';
 import { useCollections } from '../../hooks/useCollections';
-import { useCollectionCategories } from '../../hooks/useCollectionCategories';
 import { useFallbackCollections } from '../../hooks/useFallbackCollections';
 import { useLoadingTimeout } from '../../hooks/useLoadingTimeout';
-import { I18nText } from '@/components/ui/i18n-text';
-import { FeaturedCollectionsSection } from '../sections/FeaturedCollectionsSection';
-import { CollectionTabs } from '@/components/collections/sections/CollectionTabs';
-import { PerformanceTracker } from '@/components/collections/PerformanceTracker';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CollectionDebugInfo } from '../debug/CollectionDebugInfo';
 import { FallbackNotice } from '../states/FallbackNotice';
 import { CollectionErrorState } from '../states/CollectionErrorState';
 import { CollectionEmptyState } from '../states/CollectionEmptyState';
-import { CollectionDebugInfo } from '../debug/CollectionDebugInfo';
+import { useTranslation } from '@/i18n/useTranslation';
 
-const CollectionCategories: React.FC = React.memo(() => {
-  const { data: collections, isLoading, error } = useCollections();
-  const { useFallback, fallbackCollections, enableFallback, disableFallback } = useFallbackCollections();
-  const [performanceMetrics, setPerformanceMetrics] = useState(null);
+const CollectionCategories: React.FC = () => {
+  const { currentLanguage } = useTranslation();
+  const { data: collections = [], isLoading, error, refetch } = useCollections();
+  
+  const {
+    useFallback,
+    fallbackCollections,
+    enableFallback,
+    disableFallback
+  } = useFallbackCollections();
 
-  // LOGS DE DEBUG TRÈS DÉTAILLÉS
-  console.log('🔍 [CollectionCategories] DIAGNOSTIC COMPLET:', {
-    timestamp: new Date().toISOString(),
-    route: '/collections',
-    isLoading,
-    error: error ? {
-      message: error.message,
-      name: error.name,
-      stack: error.stack?.substring(0, 200)
-    } : null,
-    collections: {
-      type: typeof collections,
-      isArray: Array.isArray(collections),
-      length: collections?.length || 0,
-      isNull: collections === null,
-      isUndefined: collections === undefined,
-      firstItem: collections?.[0] || null,
-      rawValue: collections
-    },
-    performance: {
-      userAgent: navigator.userAgent.substring(0, 50),
-      connectionType: (navigator as any).connection?.effectiveType || 'unknown',
-      memoryUsage: (performance as any).memory ? {
-        used: Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024),
-        total: Math.round((performance as any).memory.totalJSHeapSize / 1024 / 1024)
-      } : 'unavailable'
-    }
-  });
+  const onTimeout = () => {
+    console.log('🚨 Loading timeout reached - enabling fallback mode');
+    enableFallback();
+  };
 
-  // Setup loading timeout with fallback activation
-  useLoadingTimeout({
-    isLoading,
-    timeoutMs: 8000,
-    onTimeout: enableFallback
-  });
-
-  // Fallback automatique si pas de données après loading
-  useEffect(() => {
-    if (!isLoading && !error && (!collections || collections.length === 0)) {
-      console.warn('⚠️ [CollectionCategories] Aucune donnée reçue - activation fallback automatique');
-      enableFallback();
-    }
-  }, [isLoading, error, collections, enableFallback]);
-
-  // Déterminer les collections à utiliser
-  const finalCollections = useFallback ? fallbackCollections : collections || [];
-  const { featured, cultures, periods, sciences, others } = useCollectionCategories(finalCollections);
-
-  console.log('📊 [CollectionCategories] DONNÉES ANALYSÉES:', {
-    finalCollections: {
-      count: finalCollections.length,
-      source: useFallback ? 'FALLBACK' : 'SUPABASE',
-      sample: finalCollections.slice(0, 2)
-    },
-    categorization: {
-      featured: featured.length,
-      cultures: cultures.length,
-      periods: periods.length,
-      sciences: sciences.length,
-      others: others.length
-    }
-  });
+  useLoadingTimeout({ isLoading, onTimeout });
 
   const handleRetry = () => {
-    console.log('🔄 [CollectionCategories] Retry button clicked');
+    console.log('🔄 Retry requested - disabling fallback and refetching...');
     disableFallback();
-    window.location.reload();
+    refetch();
   };
 
-  const handlePerformanceUpdate = (metrics: any) => {
-    setPerformanceMetrics(metrics);
+  const handleUseFallback = () => {
+    console.log('⚠️ Manual fallback activation requested');
+    enableFallback();
   };
 
-  // État d'erreur avec option de fallback
+  // Use fallback collections if enabled, otherwise use real collections
+  const finalCollections = useFallback ? fallbackCollections : collections;
+
+  console.log('🎯 [CollectionCategories] Rendering state:', {
+    isLoading,
+    error: !!error,
+    useFallback,
+    collectionsCount: finalCollections.length,
+    finalCollections: finalCollections.slice(0, 2) // Sample for debugging
+  });
+
+  // Split collections into featured and others
+  const featured = finalCollections.filter(collection => collection.is_featured);
+  const others = finalCollections.filter(collection => !collection.is_featured);
+
+  // Show fallback notice if we're using fallback data
+  const showFallbackNotice = useFallback && !isLoading;
+
+  // Handle error state
   if (error && !useFallback) {
-    console.log('❌ [CollectionCategories] Showing error state with fallback option');
     return (
       <CollectionErrorState
         error={error}
         onRetry={handleRetry}
-        onUseFallback={enableFallback}
+        onUseFallback={handleUseFallback}
       />
     );
   }
 
-  // État de chargement (uniquement si pas de fallback)
-  if (isLoading && !useFallback) {
-    console.log('⏳ [CollectionCategories] Showing loading state');
-    return (
-      <div className="space-y-12">
-        <div className="text-center py-12">
-          <p className="text-slate-600">
-            <I18nText translationKey="collections.loading">
-              Chargement des collections...
-            </I18nText>
-          </p>
-          <p className="text-xs text-slate-400 mt-2">
-            Debug: isLoading={String(isLoading)}, route=/collections
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-full" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // État vide uniquement si vraiment aucune donnée (même pas de fallback)
-  if (!useFallback && (!finalCollections || finalCollections.length === 0)) {
-    console.log('📭 [CollectionCategories] Showing empty state');
+  // Handle empty state (no collections and not using fallback)
+  if (!isLoading && finalCollections.length === 0) {
     return (
       <CollectionEmptyState
-        onUseFallback={enableFallback}
+        onUseFallback={handleUseFallback}
         collections={finalCollections}
         useFallback={useFallback}
       />
     );
   }
 
-  console.log('✅ [CollectionCategories] Showing collections content with data source:', useFallback ? 'FALLBACK' : 'SUPABASE');
-
   return (
-    <>
-      <PerformanceTracker onMetricsUpdate={handlePerformanceUpdate} />
-      
-      {useFallback && (
+    <div className="container mx-auto px-4 py-8">
+      {showFallbackNotice && (
         <FallbackNotice onRetry={handleRetry} />
       )}
       
-      <div className="space-y-12">
-        <FeaturedCollectionsSection collections={featured} />
-        <CollectionTabs 
-          cultures={cultures}
-          periods={periods}
-          sciences={sciences}
-          others={others}
-        />
-      </div>
-      
+      <UnifiedCollectionGrid
+        featured={featured}
+        others={others}
+        isLoading={isLoading}
+        currentLanguage={currentLanguage}
+      />
+
       <CollectionDebugInfo
         collections={finalCollections}
         useFallback={useFallback}
         featured={featured}
-        others={cultures.length + periods.length + sciences.length + others.length}
+        others={others}
       />
-    </>
+    </div>
   );
-});
-
-CollectionCategories.displayName = 'CollectionCategories';
+};
 
 export default CollectionCategories;
