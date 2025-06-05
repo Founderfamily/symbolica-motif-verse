@@ -3,13 +3,11 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '@/components/auth/AuthForm';
-import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Users, Globe, BookOpen, TrendingUp, Star, Shield, Zap, Award } from 'lucide-react';
 
 const Auth: React.FC = () => {
-  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   
   // Redirect if user is already logged in
@@ -19,10 +17,10 @@ const Auth: React.FC = () => {
 
   // Benefits list avec traductions
   const benefits = [
-    t('auth.benefits.feature1'),
-    t('auth.benefits.feature2'),
-    t('auth.benefits.feature3'),
-    t('auth.benefits.feature4')
+    <I18nText translationKey="auth.benefits.feature1" />,
+    <I18nText translationKey="auth.benefits.feature2" />,
+    <I18nText translationKey="auth.benefits.feature3" />,
+    <I18nText translationKey="auth.benefits.feature4" />
   ];
 
   // Statistiques communauté - vraies données Symbolica
@@ -49,27 +47,27 @@ const Auth: React.FC = () => {
     }
   ];
 
-  // Testimonials - vraies données Symbolica
+  // Testimonials - harmonisés avec les mêmes personnes FR/EN
   const testimonials = [
     {
-      name: t('auth.testimonials.testimonial1.name'),
-      role: t('auth.testimonials.testimonial1.role'),
+      name: <I18nText translationKey="auth.testimonials.testimonial1.name" />,
+      role: <I18nText translationKey="auth.testimonials.testimonial1.role" />,
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
-      content: t('auth.testimonials.testimonial1.content'),
+      content: <I18nText translationKey="auth.testimonials.testimonial1.content" />,
       rating: 5
     },
     {
-      name: t('auth.testimonials.testimonial2.name'),
-      role: t('auth.testimonials.testimonial2.role'),
+      name: <I18nText translationKey="auth.testimonials.testimonial2.name" />,
+      role: <I18nText translationKey="auth.testimonials.testimonial2.role" />,
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      content: t('auth.testimonials.testimonial2.content'),
+      content: <I18nText translationKey="auth.testimonials.testimonial2.content" />,
       rating: 5
     },
     {
-      name: t('auth.testimonials.testimonial3.name'),
-      role: t('auth.testimonials.testimonial3.role'),
+      name: <I18nText translationKey="auth.testimonials.testimonial3.name" />,
+      role: <I18nText translationKey="auth.testimonials.testimonial3.role" />,
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      content: t('auth.testimonials.testimonial3.content'),
+      content: <I18nText translationKey="auth.testimonials.testimonial3.content" />,
       rating: 5
     }
   ];
@@ -105,7 +103,7 @@ const Auth: React.FC = () => {
                 <div className="flex items-center justify-center lg:justify-start space-x-2 mb-4">
                   <img src="/logo.svg" alt="Symbolica" className="h-10 w-10" />
                   <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
-                    Symbolica
+                    <I18nText translationKey="app.name">Symbolica</I18nText>
                   </h1>
                   <Badge variant="outline" className="text-amber-600 border-amber-600 animate-pulse">
                     <I18nText translationKey="auth.communityBadge">Community</I18nText>
@@ -177,7 +175,7 @@ const Auth: React.FC = () => {
                       <div className="flex items-start space-x-3">
                         <img 
                           src={testimonial.avatar} 
-                          alt={testimonial.name}
+                          alt={typeof testimonial.name === 'string' ? testimonial.name : 'User'}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                         <div className="flex-1">

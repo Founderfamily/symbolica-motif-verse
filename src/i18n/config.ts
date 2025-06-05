@@ -54,16 +54,201 @@ const frTranslation = {
   searchFilters: frTranslationRemaining.searchFilters
 };
 
-// Merge all English translation files - only existing ones
+// Restructured English translations with proper hierarchy
 const enTranslation = {
-  ...enNavigation,
-  ...enCommon,
-  ...enAuth,
-  ...enProfile,
-  ...enSections,
-  ...enSearchFilters,
-  ...enTestimonials,
-  ...enRoadmap
+  // Create proper hierarchical structure from existing files
+  navigation: enNavigation.navigation,
+  common: enCommon.common,
+  auth: enAuth.auth,
+  profile: enProfile.profile,
+  sections: enSections.sections,
+  searchFilters: enSearchFilters.searchFilters,
+  roadmap: enRoadmap.roadmap,
+  
+  // Add missing app section
+  app: {
+    name: "Symbolica",
+    version: "1.0"
+  },
+  
+  // Add missing hero section
+  hero: {
+    heading: "Explore the World's Symbolic Heritage",
+    subheading: "Discover, analyze and contribute to the global symbolic heritage with our AI-powered platform",
+    community: "Community",
+    explore: "Explore"
+  },
+  
+  // Add missing features section
+  features: {
+    tagline: "Advanced Features",
+    title: "Powerful Tools for Symbol Analysis",
+    mapping: {
+      title: "Intelligent Mapping",
+      description: "Map symbols across cultures and time periods"
+    },
+    identification: {
+      title: "AI Identification",
+      description: "Identify symbols using advanced AI technology"
+    },
+    documentation: {
+      title: "Comprehensive Documentation",
+      description: "Document and preserve symbolic heritage"
+    }
+  },
+  
+  // Add missing quickAccess section
+  quickAccess: {
+    title: "Quick Access",
+    description: "Explore our main features",
+    explore: "Explore",
+    exploreSymbols: {
+      title: "Explore Symbols",
+      description: "Browse our extensive symbol database"
+    },
+    interactiveMap: {
+      title: "Interactive Map",
+      description: "Discover symbols on our world map"
+    },
+    thematicCollections: {
+      title: "Thematic Collections",
+      description: "Curated symbol collections by theme"
+    },
+    contribute: {
+      title: "Contribute",
+      description: "Share your symbolic discoveries"
+    },
+    community: {
+      title: "Community",
+      description: "Connect with fellow researchers"
+    },
+    trends: {
+      title: "Trends",
+      description: "Discover trending symbols and patterns"
+    }
+  },
+  
+  // Add missing callToAction section
+  callToAction: {
+    joinUs: "Join Our Community",
+    description: "Become part of the global symbolic heritage preservation movement",
+    join: "Join Now",
+    explore: "Explore",
+    support: "Support"
+  },
+  
+  // Add missing howItWorks section
+  howItWorks: {
+    process: "Process",
+    title: "How It Works",
+    intro: "Discover how our platform helps preserve symbolic heritage",
+    steps: {
+      upload: {
+        title: "Upload",
+        desc: "Share your symbolic discoveries"
+      },
+      analyze: {
+        title: "Analyze",
+        desc: "Use AI to analyze and identify symbols"
+      },
+      document: {
+        title: "Document",
+        desc: "Add cultural context and meaning"
+      },
+      share: {
+        title: "Share",
+        desc: "Contribute to the global knowledge base"
+      }
+    }
+  },
+  
+  // Add missing uploadTools section
+  uploadTools: {
+    title: "Upload Tools",
+    subtitle: "Share your symbolic discoveries",
+    capture: {
+      title: "Capture",
+      desc: "Take photos of symbols you discover"
+    },
+    analyze: {
+      title: "Analyze",
+      desc: "Use AI to analyze and identify"
+    },
+    share: {
+      title: "Share",
+      desc: "Add to the global database"
+    },
+    process: {
+      title: "Analysis Process",
+      subtitle: "How our AI analyzes symbols",
+      original: "Original",
+      detection: "Detection",
+      extraction: "Extraction",
+      classification: "Classification",
+      result: "Result",
+      example: "Example"
+    }
+  },
+  
+  // Harmonized testimonials with same people as French version
+  testimonials: {
+    subtitle: "What our users say",
+    testimonial1: {
+      name: "Dr. Marie Dubois",
+      role: "Cultural Anthropologist",
+      content: "Symbolica has revolutionized my research. The AI analysis tools are incredible for decoding ancient symbols."
+    },
+    testimonial2: {
+      name: "Jean-Pierre Martin",
+      role: "Museum Curator",
+      content: "An invaluable resource for understanding the symbolic heritage of cultures. Essential for any researcher."
+    },
+    testimonial3: {
+      name: "Prof. Claire Moreau",
+      role: "Archaeologist",
+      content: "The global community aspect makes this platform truly unique. A treasure for collaborative research."
+    }
+  },
+  
+  // Keep other sections that may exist in the old structure
+  collections: {
+    title: "Collections",
+    featured: "Featured Collections",
+    explore: "Explore Collections"
+  },
+  
+  community: {
+    title: "Community",
+    join: "Join Community",
+    contributors: "Contributors"
+  },
+  
+  gamification: {
+    title: "Achievements",
+    level: "Level",
+    points: "Points"
+  },
+  
+  about: {
+    title: "About",
+    mission: "Our Mission"
+  },
+  
+  faq: {
+    title: "FAQ",
+    questions: "Frequently Asked Questions"
+  },
+  
+  symbolTriptych: {
+    title: "Symbol Gallery",
+    explore: "Explore Symbols"
+  },
+  
+  symbols: {
+    title: "Symbols",
+    search: "Search Symbols",
+    filter: "Filter"
+  }
 };
 
 i18n
