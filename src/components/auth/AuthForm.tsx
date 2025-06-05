@@ -17,31 +17,6 @@ import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import { SecurityBadges } from './SecurityBadges';
 import { WelcomeModal } from './WelcomeModal';
 
-// Validation schema for login
-const loginSchema = z.object({
-  email: z.string().email('Veuillez entrer un email valide'),
-  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
-});
-
-// Extended validation schema for registration
-const registerSchema = z.object({
-  email: z.string().email('Veuillez entrer un email valide'),
-  username: z.string().min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères').max(50),
-  fullName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').max(100).optional(),
-  password: z.string()
-    .min(6, 'Le mot de passe doit contenir au moins 6 caractères')
-    .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
-    .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
-    .regex(/\d/, 'Le mot de passe doit contenir au moins un chiffre'),
-  passwordConfirm: z.string().min(6),
-}).refine((data) => data.password === data.passwordConfirm, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["passwordConfirm"],
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
-
 export default function AuthForm() {
   const { t } = useTranslation();
   const { signIn, signUp, isLoading } = useAuth();
@@ -50,6 +25,31 @@ export default function AuthForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [newUserName, setNewUserName] = useState<string>('');
+
+  // Validation schema for login with internationalized messages
+  const loginSchema = z.object({
+    email: z.string().email(t('auth.errors.invalidEmail')),
+    password: z.string().min(6, t('auth.errors.passwordTooShort')),
+  });
+
+  // Extended validation schema for registration with internationalized messages
+  const registerSchema = z.object({
+    email: z.string().email(t('auth.errors.invalidEmail')),
+    username: z.string().min(3, t('auth.errors.usernameTooShort')).max(50),
+    fullName: z.string().min(2, t('auth.errors.fullNameTooShort')).max(100).optional(),
+    password: z.string()
+      .min(6, t('auth.errors.passwordTooShort'))
+      .regex(/[A-Z]/, t('auth.errors.passwordUppercase'))
+      .regex(/[a-z]/, t('auth.errors.passwordLowercase'))
+      .regex(/\d/, t('auth.errors.passwordNumber')),
+    passwordConfirm: z.string().min(6),
+  }).refine((data) => data.password === data.passwordConfirm, {
+    message: t('auth.errors.passwordsNoMatch'),
+    path: ["passwordConfirm"],
+  });
+
+  type LoginFormValues = z.infer<typeof loginSchema>;
+  type RegisterFormValues = z.infer<typeof registerSchema>;
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -82,11 +82,11 @@ export default function AuthForm() {
       const result = await signIn(values.email, values.password);
       if (result.error) {
         setAuthError(result.error.message === 'Invalid login credentials' 
-          ? 'Email ou mot de passe incorrect' 
+          ? t('auth.errors.invalidCredentials')
           : result.error.message);
       }
     } catch (error: any) {
-      setAuthError('Une erreur est survenue lors de la connexion');
+      setAuthError(t('auth.errors.loginError'));
     }
   };
 
@@ -101,7 +101,7 @@ export default function AuthForm() {
       const result = await signUp(values.email, values.password, userData);
       if (result.error) {
         if (result.error.message.includes('already registered')) {
-          setAuthError('Cette adresse email est déjà utilisée');
+          setAuthError(t('auth.errors.emailAlreadyUsed'));
         } else {
           setAuthError(result.error.message);
         }
@@ -110,7 +110,7 @@ export default function AuthForm() {
         setShowWelcomeModal(true);
       }
     } catch (error: any) {
-      setAuthError('Une erreur est survenue lors de la création du compte');
+      setAuthError(t('auth.errors.registrationError'));
     }
   };
 
