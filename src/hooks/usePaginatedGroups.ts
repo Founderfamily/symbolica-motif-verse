@@ -15,6 +15,11 @@ interface PaginatedGroupsResult {
   refetch: () => void;
 }
 
+interface GroupsPageData {
+  groups: InterestGroup[];
+  nextPage: number | null;
+}
+
 export const usePaginatedGroups = (searchQuery?: string): PaginatedGroupsResult => {
   const {
     data,
@@ -23,14 +28,14 @@ export const usePaginatedGroups = (searchQuery?: string): PaginatedGroupsResult 
     hasNextPage,
     fetchNextPage,
     refetch
-  } = useInfiniteQuery({
+  } = useInfiniteQuery<GroupsPageData>({
     queryKey: ['groups', 'paginated', searchQuery],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0 }: { pageParam?: number }) => {
       let query = supabase
         .from('interest_groups')
         .select('*')
         .order('name')
-        .range(pageParam * GROUPS_PER_PAGE, (pageParam + 1) * GROUPS_PER_PAGE - 1);
+        .range((pageParam as number) * GROUPS_PER_PAGE, ((pageParam as number) + 1) * GROUPS_PER_PAGE - 1);
 
       if (searchQuery) {
         query = query.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
@@ -45,10 +50,11 @@ export const usePaginatedGroups = (searchQuery?: string): PaginatedGroupsResult 
 
       return {
         groups: groups || [],
-        nextPage: groups && groups.length === GROUPS_PER_PAGE ? pageParam + 1 : null
+        nextPage: groups && groups.length === GROUPS_PER_PAGE ? (pageParam as number) + 1 : null
       };
     },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: GroupsPageData) => lastPage.nextPage,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes,
   });
