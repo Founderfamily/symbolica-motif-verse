@@ -8,9 +8,27 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../../hooks/useCollections';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CollectionWithTranslations } from '../../types/collections';
 
-// Static collections data function - not a component
-const getStaticCollections = (currentLanguage: string) => [
+// Static collection type
+interface StaticCollection {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  is_featured: boolean;
+}
+
+// Union type for collections
+type UnifiedCollection = CollectionWithTranslations | StaticCollection;
+
+// Type guard to check if collection is static
+const isStaticCollection = (collection: UnifiedCollection): collection is StaticCollection => {
+  return 'title' in collection && typeof collection.title === 'string';
+};
+
+// Static collections data function
+const getStaticCollections = (currentLanguage: string): StaticCollection[] => [
   {
     id: '1',
     slug: 'geometrie-sacree',
@@ -109,7 +127,7 @@ const CollectionCategories: React.FC = () => {
   const { currentLanguage } = useTranslation();
   const { data: collections = [], isLoading, error } = useCollections();
 
-  const getTranslation = React.useCallback((collection: any, field: string) => {
+  const getTranslation = React.useCallback((collection: CollectionWithTranslations, field: string) => {
     if (!collection?.collection_translations) {
       return '';
     }
@@ -136,11 +154,27 @@ const CollectionCategories: React.FC = () => {
     return '';
   }, [currentLanguage]);
 
+  // Function to get title from any collection type
+  const getCollectionTitle = React.useCallback((collection: UnifiedCollection) => {
+    if (isStaticCollection(collection)) {
+      return collection.title;
+    }
+    return getTranslation(collection, 'title');
+  }, [getTranslation]);
+
+  // Function to get description from any collection type
+  const getCollectionDescription = React.useCallback((collection: UnifiedCollection) => {
+    if (isStaticCollection(collection)) {
+      return collection.description;
+    }
+    return getTranslation(collection, 'description');
+  }, [getTranslation]);
+
   // Get static collections and ensure proper typing
   const staticCollections = React.useMemo(() => getStaticCollections(currentLanguage), [currentLanguage]);
   
   const hasValidCollections = collections && collections.length > 0;
-  const finalCollections = hasValidCollections ? collections : staticCollections;
+  const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : staticCollections;
 
   // Split collections into featured and others
   const featured = finalCollections.filter(collection => collection.is_featured);
@@ -180,7 +214,7 @@ const CollectionCategories: React.FC = () => {
                   <CardHeader>
                     <div className="flex justify-between items-start mb-2">
                       <CardTitle className="text-lg">
-                        {hasValidCollections ? getTranslation(collection, 'title') : collection.title}
+                        {getCollectionTitle(collection)}
                       </CardTitle>
                       <Badge variant="default">
                         <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
@@ -189,7 +223,7 @@ const CollectionCategories: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 text-sm line-clamp-3">
-                      {hasValidCollections ? getTranslation(collection, 'description') : collection.description}
+                      {getCollectionDescription(collection)}
                     </p>
                     <div className="mt-4 text-sm text-amber-600 font-medium">
                       <I18nText translationKey="collections.explore">Explorer →</I18nText>
@@ -218,12 +252,12 @@ const CollectionCategories: React.FC = () => {
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle className="text-lg">
-                      {hasValidCollections ? getTranslation(collection, 'title') : collection.title}
+                      {getCollectionTitle(collection)}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 text-sm line-clamp-3">
-                      {hasValidCollections ? getTranslation(collection, 'description') : collection.description}
+                      {getCollectionDescription(collection)}
                     </p>
                     <div className="mt-4 text-sm text-amber-600 font-medium">
                       <I18nText translationKey="collections.explore">Explorer →</I18nText>
