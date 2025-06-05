@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const CollectionCategories: React.FC = React.memo(() => {
   const { data: collections, isLoading, error } = useCollections();
-  const { featured, cultures, periods, sciences, others } = useCollectionCategories(collections);
+  const { featured, cultures, periods, sciences, others } = useCollectionCategories(collections || []);
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
 
