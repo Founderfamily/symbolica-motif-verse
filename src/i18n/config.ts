@@ -1,3 +1,4 @@
+
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -57,13 +58,14 @@ const frTranslation = {
 // Restructured English translations with proper hierarchy
 const enTranslation = {
   // Create proper hierarchical structure from existing files
-  navigation: enNavigation.navigation,
-  common: enCommon.common,
-  auth: enAuth.auth,
-  profile: enProfile.profile,
-  sections: enSections.sections,
-  searchFilters: enSearchFilters.searchFilters,
-  roadmap: enRoadmap.roadmap,
+  navigation: enNavigation,
+  common: enCommon,
+  auth: enAuth,
+  profile: enProfile,
+  sections: enSections,
+  searchFilters: enSearchFilters,
+  testimonials: enTestimonials,
+  roadmap: enRoadmap,
   
   // Add missing app section
   app: {
