@@ -75,33 +75,55 @@ export const checkGroupMembership = async (groupId: string, userId: string): Pro
  */
 export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
   try {
-    const { data, error } = await supabase
+    // First get posts
+    const { data: posts, error: postsError } = await supabase
       .from('group_posts')
-      .select(`
-        *,
-        profiles!group_posts_user_id_fkey (
-          username,
-          full_name
-        )
-      `)
+      .select('*')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching group posts:', error);
+    if (postsError) {
+      console.error('Error fetching group posts:', postsError);
       return [];
     }
 
-    if (!data) return [];
+    if (!posts || posts.length === 0) return [];
 
-    // Transform the data to match GroupPost interface
-    return data.map(post => ({
-      ...post,
-      user_profile: post.profiles ? {
-        username: post.profiles.username || 'Unknown',
-        full_name: post.profiles.full_name || 'Unknown User'
-      } : undefined
-    }));
+    // Get unique user IDs
+    const userIds = [...new Set(posts.map(post => post.user_id))];
+
+    // Get profiles for these users
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, username, full_name')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+      // Return posts without profile info if profiles fetch fails
+      return posts.map(post => ({
+        ...post,
+        user_profile: {
+          username: 'Unknown',
+          full_name: 'Unknown User'
+        }
+      }));
+    }
+
+    // Map profiles to posts
+    return posts.map(post => {
+      const profile = profiles?.find(p => p.id === post.user_id);
+      return {
+        ...post,
+        user_profile: profile ? {
+          username: profile.username || 'Unknown',
+          full_name: profile.full_name || 'Unknown User'
+        } : {
+          username: 'Unknown',
+          full_name: 'Unknown User'
+        }
+      };
+    });
   } catch (error) {
     console.error('Error in getGroupPosts service:', error);
     return [];
@@ -186,39 +208,60 @@ export const likePost = async (postId: string, userId: string): Promise<void> =>
  */
 export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> => {
   try {
-    const { data, error } = await supabase
+    // First get group members
+    const { data: members, error: membersError } = await supabase
       .from('group_members')
-      .select(`
-        *,
-        profiles!group_members_user_id_fkey (
-          id,
-          username,
-          full_name
-        )
-      `)
+      .select('*')
       .eq('group_id', groupId)
       .order('joined_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching group members:', error);
+    if (membersError) {
+      console.error('Error fetching group members:', membersError);
       return [];
     }
 
-    if (!data) return [];
+    if (!members || members.length === 0) return [];
 
-    // Transform the data to match GroupMember interface
-    return data.map(member => ({
-      ...member,
-      profiles: member.profiles ? {
-        id: member.profiles.id,
-        username: member.profiles.username || 'Unknown',
-        full_name: member.profiles.full_name || 'Unknown User'
-      } : {
-        id: member.user_id,
-        username: 'Unknown',
-        full_name: 'Unknown User'
-      }
-    }));
+    // Get unique user IDs
+    const userIds = [...new Set(members.map(member => member.user_id))];
+
+    // Get profiles for these users
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, username, full_name')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+      // Return members without profile info if profiles fetch fails
+      return members.map(member => ({
+        ...member,
+        role: member.role as 'member' | 'admin' | 'moderator',
+        profiles: {
+          id: member.user_id,
+          username: 'Unknown',
+          full_name: 'Unknown User'
+        }
+      }));
+    }
+
+    // Map profiles to members
+    return members.map(member => {
+      const profile = profiles?.find(p => p.id === member.user_id);
+      return {
+        ...member,
+        role: member.role as 'member' | 'admin' | 'moderator',
+        profiles: profile ? {
+          id: profile.id,
+          username: profile.username || 'Unknown',
+          full_name: profile.full_name || 'Unknown User'
+        } : {
+          id: member.user_id,
+          username: 'Unknown',
+          full_name: 'Unknown User'
+        }
+      };
+    });
   } catch (error) {
     console.error('Error in getGroupMembers service:', error);
     return [];
