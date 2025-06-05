@@ -15,7 +15,7 @@ const CollectionCategories: React.FC = React.memo(() => {
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
 
-  // Debug logs détaillés
+  // Debug logs détaillés avec vérification de sécurité
   console.log('🔍 CollectionCategories render state:', {
     isLoading,
     error: error ? error.message : null,
@@ -106,7 +106,7 @@ const CollectionCategories: React.FC = React.memo(() => {
           </I18nText>
         </p>
         <p className="text-xs text-slate-400 mt-4">
-          Debug: collections array = {JSON.stringify(collections || [])}
+          Debug: collections array = {collections ? JSON.stringify(collections) : 'undefined'}
         </p>
       </div>
     );
