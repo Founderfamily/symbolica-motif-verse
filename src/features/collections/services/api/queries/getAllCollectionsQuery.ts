@@ -28,7 +28,7 @@ export class GetAllCollectionsQuery {
       
       console.log('✅ [GetAllCollectionsQuery] Test basique OK:', testData?.length || 0, 'collections');
 
-      // Requête principale simplifiée et corrigée
+      // Requête principale avec collection_id inclus dans les traductions
       const startTime = Date.now();
       console.log('🔍 [GetAllCollectionsQuery] Exécution requête principale...');
       
@@ -43,6 +43,7 @@ export class GetAllCollectionsQuery {
           created_by,
           collection_translations!inner (
             id,
+            collection_id,
             language,
             title,
             description
