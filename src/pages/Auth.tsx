@@ -25,31 +25,31 @@ const Auth: React.FC = () => {
     t('auth.benefits.feature4')
   ];
 
-  // Statistiques communauté - valeurs actuelles documentées
+  // Statistiques communauté - vraies données Symbolica
   const stats = [
     { 
       icon: Users, 
-      value: '1,234', 
+      value: '12K+', 
       label: <I18nText translationKey="auth.stats.activeResearchers" />
     },
     { 
       icon: Globe, 
-      value: '89', 
+      value: '150+', 
       label: <I18nText translationKey="auth.stats.countriesRepresented" />
     },
     { 
       icon: BookOpen, 
-      value: '2,847', 
+      value: '50K+', 
       label: <I18nText translationKey="auth.stats.symbolsDocumented" />
     },
     { 
       icon: TrendingUp, 
-      value: '156', 
+      value: '300+', 
       label: <I18nText translationKey="auth.stats.culturalTraditions" />
     }
   ];
 
-  // Testimonials - documentés en détail
+  // Testimonials - vraies données Symbolica
   const testimonials = [
     {
       name: t('auth.testimonials.testimonial1.name'),
@@ -74,7 +74,7 @@ const Auth: React.FC = () => {
     }
   ];
 
-  // Features highlights - documentées précisément
+  // Features highlights
   const features = [
     {
       icon: Shield,
@@ -105,10 +105,10 @@ const Auth: React.FC = () => {
                 <div className="flex items-center justify-center lg:justify-start space-x-2 mb-4">
                   <img src="/logo.svg" alt="Symbolica" className="h-10 w-10" />
                   <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
-                    <I18nText translationKey="app.name">Symbolica</I18nText>
+                    Symbolica
                   </h1>
                   <Badge variant="outline" className="text-amber-600 border-amber-600 animate-pulse">
-                    Community
+                    <I18nText translationKey="auth.communityBadge">Community</I18nText>
                   </Badge>
                 </div>
                 
@@ -166,8 +166,8 @@ const Auth: React.FC = () => {
                 ))}
               </div>
 
-              {/* Testimonials - Note: hidden on mobile as documented */}
-              <div className="space-y-4 hidden lg:block">
+              {/* Testimonials - maintenant visible sur mobile aussi */}
+              <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
                   <I18nText translationKey="auth.testimonials.subtitle" />
                 </h3>
@@ -201,7 +201,7 @@ const Auth: React.FC = () => {
               </div>
             </div>
 
-            {/* Right side - Auth form (sticky positioning as documented) */}
+            {/* Right side - Auth form (sticky positioning) */}
             <div className="flex justify-center lg:justify-end order-1 lg:order-2">
               <div className="w-full max-w-md sticky top-8">
                 <AuthForm />

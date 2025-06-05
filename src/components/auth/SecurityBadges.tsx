@@ -1,28 +1,29 @@
 
 import React from 'react';
 import { Shield, Lock, Eye, Award } from 'lucide-react';
+import { I18nText } from '@/components/ui/i18n-text';
 
 export const SecurityBadges: React.FC = () => {
   const badges = [
     {
       icon: Shield,
-      text: 'Données sécurisées',
-      subtext: 'Chiffrement SSL'
+      text: <I18nText translationKey="auth.security.dataSecure" />,
+      subtext: <I18nText translationKey="auth.security.sslEncryption" />
     },
     {
       icon: Lock,
-      text: 'Confidentialité',
-      subtext: 'RGPD conforme'
+      text: <I18nText translationKey="auth.security.privacy" />,
+      subtext: <I18nText translationKey="auth.security.gdprCompliant" />
     },
     {
       icon: Eye,
-      text: 'Pas de spam',
-      subtext: 'Aucun email indésirable'
+      text: <I18nText translationKey="auth.security.noSpam" />,
+      subtext: <I18nText translationKey="auth.security.noUnwantedEmails" />
     },
     {
       icon: Award,
-      text: 'Gratuit',
-      subtext: 'Aucun engagement'
+      text: <I18nText translationKey="auth.security.free" />,
+      subtext: <I18nText translationKey="auth.security.noCommitment" />
     }
   ];
 
