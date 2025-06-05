@@ -9,76 +9,63 @@ import { useCollections } from '../../hooks/useCollections';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Collections statiques comme fallback (similaire à FeaturedCollections)
-const StaticCollections: React.FC<{ currentLanguage: string }> = React.memo(({ currentLanguage }) => {
-  const staticCollections = React.useMemo(() => [
-    {
-      id: '1',
-      slug: 'geometrie-sacree',
-      title: currentLanguage === 'fr' ? 'Géométrie Sacrée' : 'Sacred Geometry',
-      description: currentLanguage === 'fr' 
-        ? 'Explorez les motifs géométriques sacrés à travers les cultures : mandalas, spirales dorées, fractales naturelles.'
-        : 'Explore sacred geometric patterns across cultures: mandalas, golden spirals, natural fractals.',
-      is_featured: true
-    },
-    {
-      id: '2', 
-      slug: 'mysteres-anciens',
-      title: currentLanguage === 'fr' ? 'Mystères Anciens' : 'Ancient Mysteries',
-      description: currentLanguage === 'fr'
-        ? 'Découvrez les symboles énigmatiques des civilisations perdues et leurs significations cachées.'
-        : 'Discover the enigmatic symbols of lost civilizations and their hidden meanings.',
-      is_featured: true
-    },
-    {
-      id: '3',
-      slug: 'mythologies-mondiales', 
-      title: currentLanguage === 'fr' ? 'Mythologies Mondiales' : 'World Mythologies',
-      description: currentLanguage === 'fr'
-        ? 'Plongez dans l\'univers des créatures mythiques et des divinités à travers les cultures du monde.'
-        : 'Dive into the universe of mythical creatures and deities across world cultures.',
-      is_featured: false
-    },
-    {
-      id: '4',
-      slug: 'ere-numerique',
-      title: currentLanguage === 'fr' ? 'Ère Numérique' : 'Digital Era',
-      description: currentLanguage === 'fr'
-        ? 'L\'évolution des symboles à l\'ère digitale : émojis, logos, iconographie moderne.'
-        : 'The evolution of symbols in the digital age: emojis, logos, modern iconography.',
-      is_featured: false
-    },
-    {
-      id: '5',
-      slug: 'alchimie-esoterisme',
-      title: currentLanguage === 'fr' ? 'Alchimie & Ésotérisme' : 'Alchemy & Esotericism',
-      description: currentLanguage === 'fr'
-        ? 'Les symboles hermétiques et alchimiques : pentagrammes, ouroboros, signes planétaires.'
-        : 'Hermetic and alchemical symbols: pentagrams, ouroboros, planetary signs.',
-      is_featured: false
-    },
-    {
-      id: '6',
-      slug: 'art-religieux',
-      title: currentLanguage === 'fr' ? 'Art Religieux' : 'Religious Art',
-      description: currentLanguage === 'fr'
-        ? 'Symboles sacrés des grandes traditions spirituelles : christianisme, islam, bouddhisme, hindouisme.'
-        : 'Sacred symbols from major spiritual traditions: Christianity, Islam, Buddhism, Hinduism.',
-      is_featured: false
-    }
-  ], [currentLanguage]);
-
-  return staticCollections;
-});
-
-StaticCollections.displayName = 'StaticCollections';
-
-// Component pour afficher les collections dynamiques
-const DynamicCollections: React.FC<{ collections: any[]; getTranslation: (collection: any, field: string) => string }> = React.memo(({ collections, getTranslation }) => {
-  return collections;
-});
-
-DynamicCollections.displayName = 'DynamicCollections';
+// Static collections data function - not a component
+const getStaticCollections = (currentLanguage: string) => [
+  {
+    id: '1',
+    slug: 'geometrie-sacree',
+    title: currentLanguage === 'fr' ? 'Géométrie Sacrée' : 'Sacred Geometry',
+    description: currentLanguage === 'fr' 
+      ? 'Explorez les motifs géométriques sacrés à travers les cultures : mandalas, spirales dorées, fractales naturelles.'
+      : 'Explore sacred geometric patterns across cultures: mandalas, golden spirals, natural fractals.',
+    is_featured: true
+  },
+  {
+    id: '2', 
+    slug: 'mysteres-anciens',
+    title: currentLanguage === 'fr' ? 'Mystères Anciens' : 'Ancient Mysteries',
+    description: currentLanguage === 'fr'
+      ? 'Découvrez les symboles énigmatiques des civilisations perdues et leurs significations cachées.'
+      : 'Discover the enigmatic symbols of lost civilizations and their hidden meanings.',
+    is_featured: true
+  },
+  {
+    id: '3',
+    slug: 'mythologies-mondiales', 
+    title: currentLanguage === 'fr' ? 'Mythologies Mondiales' : 'World Mythologies',
+    description: currentLanguage === 'fr'
+      ? 'Plongez dans l\'univers des créatures mythiques et des divinités à travers les cultures du monde.'
+      : 'Dive into the universe of mythical creatures and deities across world cultures.',
+    is_featured: false
+  },
+  {
+    id: '4',
+    slug: 'ere-numerique',
+    title: currentLanguage === 'fr' ? 'Ère Numérique' : 'Digital Era',
+    description: currentLanguage === 'fr'
+      ? 'L\'évolution des symboles à l\'ère digitale : émojis, logos, iconographie moderne.'
+      : 'The evolution of symbols in the digital age: emojis, logos, modern iconography.',
+    is_featured: false
+  },
+  {
+    id: '5',
+    slug: 'alchimie-esoterisme',
+    title: currentLanguage === 'fr' ? 'Alchimie & Ésotérisme' : 'Alchemy & Esotericism',
+    description: currentLanguage === 'fr'
+      ? 'Les symboles hermétiques et alchimiques : pentagrammes, ouroboros, signes planétaires.'
+      : 'Hermetic and alchemical symbols: pentagrams, ouroboros, planetary signs.',
+    is_featured: false
+  },
+  {
+    id: '6',
+    slug: 'art-religieux',
+    title: currentLanguage === 'fr' ? 'Art Religieux' : 'Religious Art',
+    description: currentLanguage === 'fr'
+      ? 'Symboles sacrés des grandes traditions spirituelles : christianisme, islam, bouddhisme, hindouisme.'
+      : 'Sacred symbols from major spiritual traditions: Christianity, Islam, Buddhism, Hinduism.',
+    is_featured: false
+  }
+];
 
 // Skeleton de chargement
 const CollectionsLoadingSkeleton: React.FC = React.memo(() => {
@@ -117,7 +104,7 @@ const CollectionsLoadingSkeleton: React.FC = React.memo(() => {
 
 CollectionsLoadingSkeleton.displayName = 'CollectionsLoadingSkeleton';
 
-// Component principal simplifié
+// Component principal
 const CollectionCategories: React.FC = () => {
   const { currentLanguage } = useTranslation();
   const { data: collections = [], isLoading, error } = useCollections();
@@ -149,12 +136,9 @@ const CollectionCategories: React.FC = () => {
     return '';
   }, [currentLanguage]);
 
-  // Utiliser les collections statiques si les dynamiques ne sont pas disponibles
-  const staticCollections = React.useMemo(() => {
-    const staticData = StaticCollections({ currentLanguage });
-    return staticData;
-  }, [currentLanguage]);
-
+  // Get static collections and ensure proper typing
+  const staticCollections = React.useMemo(() => getStaticCollections(currentLanguage), [currentLanguage]);
+  
   const hasValidCollections = collections && collections.length > 0;
   const finalCollections = hasValidCollections ? collections : staticCollections;
 
