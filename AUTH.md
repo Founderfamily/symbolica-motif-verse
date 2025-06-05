@@ -40,6 +40,30 @@ CREATE TABLE public.profiles (
 
 **Note importante** : Actuellement, aucune politique RLS n'est configurée sur la table `profiles`, ce qui signifie que l'accès est ouvert. Ceci pourrait nécessiter une révision pour la sécurité.
 
+**Politiques RLS recommandées** :
+```sql
+-- Permettre aux utilisateurs de voir leur propre profil
+CREATE POLICY "Users can view own profile" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+
+-- Permettre aux utilisateurs de modifier leur propre profil
+CREATE POLICY "Users can update own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Permettre la lecture publique des profils (optionnel)
+CREATE POLICY "Public profiles are viewable by everyone" ON profiles
+  FOR SELECT USING (true);
+
+-- Permettre aux admins de tout voir et modifier
+CREATE POLICY "Admins have full access" ON profiles
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND is_admin = true
+    )
+  );
+```
+
 ### Fonctions SQL Dédiées
 
 #### `handle_new_user()`
@@ -86,6 +110,172 @@ La table `profiles` est référencée par de nombreuses autres tables :
 - `admin_logs` → `profiles.id`
 - `collections` → `profiles.id` (created_by)
 - Et bien d'autres...
+
+### Index et Contraintes
+
+```sql
+-- Index pour optimiser les requêtes
+CREATE INDEX idx_profiles_username ON profiles(username);
+CREATE INDEX idx_profiles_is_admin ON profiles(is_admin);
+CREATE INDEX idx_profiles_created_at ON profiles(created_at);
+
+-- Contraintes d'unicité
+ALTER TABLE profiles ADD CONSTRAINT profiles_username_unique UNIQUE (username);
+```
+
+### Tables Connexes pour l'Authentification
+
+#### `user_activities` - Suivi des activités
+```sql
+CREATE TABLE public.user_activities (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES profiles(id) NOT NULL,
+  activity_type text NOT NULL,
+  entity_id uuid,
+  points_earned integer DEFAULT 0,
+  details jsonb,
+  created_at timestamp with time zone DEFAULT now()
+);
+```
+
+#### `user_points` - Système de gamification
+```sql
+CREATE TABLE public.user_points (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES profiles(id) UNIQUE NOT NULL,
+  total integer DEFAULT 0,
+  contribution_points integer DEFAULT 0,
+  exploration_points integer DEFAULT 0,
+  validation_points integer DEFAULT 0,
+  community_points integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now()
+);
+```
+
+#### `user_follows` - Système de suivi
+```sql
+CREATE TABLE public.user_follows (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  follower_id uuid REFERENCES profiles(id) NOT NULL,
+  followed_id uuid REFERENCES profiles(id) NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  UNIQUE(follower_id, followed_id)
+);
+```
+
+#### `admin_logs` - Journalisation administrative
+```sql
+CREATE TABLE public.admin_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_id uuid REFERENCES profiles(id) NOT NULL,
+  action text NOT NULL,
+  entity_type text NOT NULL,
+  entity_id uuid,
+  details jsonb DEFAULT '{}',
+  created_at timestamp with time zone DEFAULT now()
+);
+```
+
+### Triggers Configurés
+
+```sql
+-- Trigger pour création automatique de profil
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- Trigger pour mise à jour automatique de updated_at
+CREATE TRIGGER update_profiles_updated_at
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION update_modified_column();
+```
+
+### Fonctions Utilitaires pour l'Authentification
+
+#### `is_admin()` - Vérification des droits admin
+```sql
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE plpgsql
+STABLE SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() AND is_admin = true
+  );
+END;
+$$;
+```
+
+#### `get_user_profile(user_id)` - Récupération de profil
+```sql
+CREATE OR REPLACE FUNCTION public.get_user_profile(p_user_id uuid)
+RETURNS TABLE(
+  id uuid,
+  username text,
+  full_name text,
+  is_admin boolean,
+  is_banned boolean,
+  created_at timestamp with time zone,
+  total_points integer,
+  contributions_count bigint
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    p.id,
+    p.username,
+    p.full_name,
+    p.is_admin,
+    p.is_banned,
+    p.created_at,
+    COALESCE(up.total, 0) as total_points,
+    (SELECT COUNT(*) FROM user_contributions uc WHERE uc.user_id = p.id) as contributions_count
+  FROM profiles p
+  LEFT JOIN user_points up ON p.id = up.user_id
+  WHERE p.id = p_user_id;
+END;
+$$;
+```
+
+### Requêtes Courantes
+
+#### Récupérer un profil complet avec statistiques
+```sql
+SELECT 
+  p.*,
+  COALESCE(up.total, 0) as total_points,
+  COALESCE(up.contribution_points, 0) as contribution_points,
+  (SELECT COUNT(*) FROM user_contributions uc WHERE uc.user_id = p.id) as contributions_count,
+  (SELECT COUNT(*) FROM user_follows uf WHERE uf.followed_id = p.id) as followers_count,
+  (SELECT COUNT(*) FROM user_follows uf WHERE uf.follower_id = p.id) as following_count
+FROM profiles p
+LEFT JOIN user_points up ON p.id = up.user_id
+WHERE p.id = $1;
+```
+
+#### Lister les utilisateurs actifs avec pagination
+```sql
+SELECT 
+  p.id,
+  p.username,
+  p.full_name,
+  p.created_at,
+  COALESCE(up.total, 0) as total_points,
+  (SELECT MAX(ua.created_at) FROM user_activities ua WHERE ua.user_id = p.id) as last_activity
+FROM profiles p
+LEFT JOIN user_points up ON p.id = up.user_id
+WHERE p.is_banned = false OR p.is_banned IS NULL
+ORDER BY last_activity DESC NULLS LAST
+LIMIT $1 OFFSET $2;
+```
 
 ---
 
