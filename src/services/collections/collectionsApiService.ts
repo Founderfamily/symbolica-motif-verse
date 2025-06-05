@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { CollectionWithTranslations, CollectionDetails } from '@/types/collections';
 import { logger } from '@/services/logService';
@@ -8,13 +7,20 @@ import { logger } from '@/services/logService';
  */
 export class CollectionsApiService {
   /**
-   * Récupère toutes les collections avec leurs traductions - VERSION ROBUSTE
+   * Récupère toutes les collections avec leurs traductions - VERSION DIAGNOSTIQUE RENFORCÉE
    */
   async getCollections(): Promise<CollectionWithTranslations[]> {
+    console.log('🚀 [CollectionsApiService] DÉBUT de getCollections()');
+    
     try {
-      console.log('🔍 CollectionsApiService: Starting database query...');
-      
+      // Test de connexion Supabase
+      console.log('🔗 [CollectionsApiService] Test de connexion Supabase...');
+      const { data: testConnection } = await supabase.from('collections').select('count', { count: 'exact' });
+      console.log('📊 [CollectionsApiService] Connexion OK - Nombre total de collections:', testConnection);
+
       const startTime = Date.now();
+      console.log('🔍 [CollectionsApiService] Exécution de la requête principale...');
+      
       const { data, error } = await supabase
         .from('collections')
         .select(`
@@ -24,55 +30,116 @@ export class CollectionsApiService {
         .order('created_at', { ascending: false });
 
       const queryTime = Date.now() - startTime;
-      console.log(`⏱️ CollectionsApiService: Query completed in ${queryTime}ms`);
+      console.log(`⏱️ [CollectionsApiService] Requête terminée en ${queryTime}ms`);
 
+      // Diagnostic d'erreur approfondi
       if (error) {
-        console.error('❌ CollectionsApiService: Supabase error:', error);
-        logger.error('Supabase collections query failed', { error });
+        console.error('❌ [CollectionsApiService] ERREUR SUPABASE DÉTAILLÉE:', {
+          error,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          message: error.message
+        });
+        
+        logger.error('Supabase collections query failed', { 
+          error,
+          queryTime,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Retourner un tableau vide au lieu de lancer l'erreur
+        console.warn('⚠️ [CollectionsApiService] Retour tableau vide à cause de l\'erreur');
         return [];
       }
       
-      console.log('📊 CollectionsApiService: Raw data analysis:', {
+      // Analyse très détaillée des données reçues
+      console.log('📊 [CollectionsApiService] ANALYSE DÉTAILLÉE des données reçues:', {
         totalRows: data?.length || 0,
         dataType: typeof data,
         isArray: Array.isArray(data),
-        firstRow: data?.[0] || null,
-        hasTranslations: data?.[0]?.collection_translations ? 'Yes' : 'No'
+        isNull: data === null,
+        isUndefined: data === undefined,
+        rawDataSample: data?.slice(0, 2) || null,
+        queryTime: `${queryTime}ms`
       });
+
+      // Analyse de chaque collection individuellement
+      if (data && Array.isArray(data)) {
+        data.forEach((collection, index) => {
+          console.log(`📝 [CollectionsApiService] Collection ${index + 1}:`, {
+            id: collection?.id,
+            slug: collection?.slug,
+            is_featured: collection?.is_featured,
+            translationsCount: collection?.collection_translations?.length || 0,
+            translationsRaw: collection?.collection_translations,
+            hasValidTranslations: Array.isArray(collection?.collection_translations) && collection.collection_translations.length > 0
+          });
+        });
+      }
       
       if (!data || !Array.isArray(data)) {
-        console.warn('⚠️ CollectionsApiService: No data or invalid data format');
+        console.warn('⚠️ [CollectionsApiService] Données invalides ou nulles reçues de Supabase');
         return [];
       }
       
-      const transformedData: CollectionWithTranslations[] = data.map(collection => {
-        if (!collection) {
-          console.warn('⚠️ CollectionsApiService: Found null/undefined collection');
-          return null;
-        }
-
-        const result = {
-          ...collection,
-          collection_translations: Array.isArray(collection.collection_translations) 
-            ? collection.collection_translations 
-            : []
-        };
-        
-        console.log(`📝 Transformed collection ${collection.slug}:`, {
-          id: result.id,
-          slug: result.slug,
-          translationsCount: result.collection_translations.length,
-          translations: result.collection_translations.map(t => `${t.language}: ${t.title}`)
+      // Transformation avec validation renforcée
+      const transformedData: CollectionWithTranslations[] = data
+        .filter(collection => {
+          if (!collection) {
+            console.warn('⚠️ [CollectionsApiService] Collection null/undefined filtrée');
+            return false;
+          }
+          if (!collection.slug) {
+            console.warn('⚠️ [CollectionsApiService] Collection sans slug filtrée:', collection.id);
+            return false;
+          }
+          return true;
+        })
+        .map(collection => {
+          const result = {
+            ...collection,
+            collection_translations: Array.isArray(collection.collection_translations) 
+              ? collection.collection_translations 
+              : []
+          };
+          
+          console.log(`✅ [CollectionsApiService] Collection transformée avec succès:`, {
+            id: result.id,
+            slug: result.slug,
+            is_featured: result.is_featured,
+            translationsCount: result.collection_translations.length,
+            validTranslations: result.collection_translations.filter(t => t.title && t.title.trim()).length
+          });
+          
+          return result;
         });
-        
-        return result;
-      }).filter(Boolean);
       
-      console.log('✅ CollectionsApiService: Successfully transformed', transformedData.length, 'collections');
+      console.log('✅ [CollectionsApiService] SUCCÈS FINAL:', {
+        collectionsTransformées: transformedData.length,
+        collectionsAvecTraductions: transformedData.filter(c => c.collection_translations.length > 0).length,
+        collectionsEnVedette: transformedData.filter(c => c.is_featured).length,
+        échantillon: transformedData.slice(0, 1).map(c => ({
+          slug: c.slug,
+          translations: c.collection_translations.map(t => `${t.language}: ${t.title}`)
+        }))
+      });
+      
       return transformedData;
+      
     } catch (error) {
-      console.error('❌ CollectionsApiService: Critical error in getCollections:', error);
-      logger.error('Error fetching collections', { error });
+      console.error('❌ [CollectionsApiService] ERREUR CRITIQUE dans getCollections:', {
+        error,
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        timestamp: new Date().toISOString()
+      });
+      
+      logger.error('Critical error fetching collections', { 
+        error,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Retourner un tableau vide même en cas d'erreur critique
       return [];
     }
   }
