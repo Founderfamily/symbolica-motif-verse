@@ -106,7 +106,7 @@ const CollectionCategories: React.FC = React.memo(() => {
           </I18nText>
         </p>
         <p className="text-xs text-slate-400 mt-4">
-          Debug: collections array = {collections ? JSON.stringify(collections) : 'undefined'}
+          Debug: collections array = {collections && Array.isArray(collections) ? JSON.stringify(collections) : 'undefined or not array'}
         </p>
       </div>
     );
