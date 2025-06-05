@@ -13,11 +13,11 @@ class CollectionsService {
   }
 
   /**
-   * Récupère toutes les collections avec leurs traductions - VERSION OPTIMISÉE
+   * Récupère toutes les collections avec leurs traductions - VERSION ROBUSTE
    */
   async getCollections(): Promise<CollectionWithTranslations[]> {
     try {
-      console.log('🔍 CollectionsService: Starting optimized database query...');
+      console.log('🔍 CollectionsService: Starting database query...');
       
       const startTime = Date.now();
       const { data, error } = await supabase
@@ -33,17 +33,32 @@ class CollectionsService {
 
       if (error) {
         console.error('❌ CollectionsService: Supabase error:', error);
-        throw error;
+        logger.error('Supabase collections query failed', { error });
+        // CORRECTION: Retourner un tableau vide en cas d'erreur au lieu de throw
+        return [];
       }
       
       console.log('📊 CollectionsService: Raw data analysis:', {
         totalRows: data?.length || 0,
+        dataType: typeof data,
+        isArray: Array.isArray(data),
         firstRow: data?.[0] || null,
         hasTranslations: data?.[0]?.collection_translations ? 'Yes' : 'No'
       });
       
+      // CORRECTION: Vérification plus robuste des données
+      if (!data || !Array.isArray(data)) {
+        console.warn('⚠️ CollectionsService: No data or invalid data format');
+        return [];
+      }
+      
       // Transformation sécurisée des données
-      const transformedData: CollectionWithTranslations[] = (data || []).map(collection => {
+      const transformedData: CollectionWithTranslations[] = data.map(collection => {
+        if (!collection) {
+          console.warn('⚠️ CollectionsService: Found null/undefined collection');
+          return null;
+        }
+
         const result = {
           ...collection,
           collection_translations: Array.isArray(collection.collection_translations) 
@@ -59,19 +74,20 @@ class CollectionsService {
         });
         
         return result;
-      });
+      }).filter(Boolean); // CORRECTION: Filtrer les éléments null/undefined
       
       console.log('✅ CollectionsService: Successfully transformed', transformedData.length, 'collections');
       return transformedData;
     } catch (error) {
       console.error('❌ CollectionsService: Critical error in getCollections:', error);
       logger.error('Error fetching collections', { error });
-      throw error;
+      // CORRECTION: Retourner un tableau vide au lieu de throw
+      return [];
     }
   }
 
   /**
-   * Récupère les collections en vedette
+   * Récupère les collections en vedette - VERSION ROBUSTE
    */
   async getFeaturedCollections(): Promise<CollectionWithTranslations[]> {
     try {
@@ -85,8 +101,12 @@ class CollectionsService {
         .order('created_at', { ascending: false })
         .limit(4);
 
-      if (error) throw error;
-      return data || [];
+      if (error) {
+        console.error('❌ Featured collections query failed:', error);
+        return [];
+      }
+
+      return (data || []).filter(Boolean);
     } catch (error) {
       logger.error('Error fetching featured collections', { error });
       return [];

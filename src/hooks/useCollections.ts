@@ -20,20 +20,21 @@ export const useCollections = () => {
         const result = await collectionsService.getCollections();
         console.log('✅ useCollections: Success!', {
           count: result?.length || 0,
-          sample: result?.[0] || null
+          sample: result?.[0] || null,
+          isArray: Array.isArray(result)
         });
-        return result;
+        return result || []; // CORRECTION: Always return array
       } catch (error) {
         console.error('❌ useCollections: Error!', error);
-        throw error; // Laisser React Query gérer l'erreur
+        throw error;
       }
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    // Force une valeur par défaut pour éviter undefined
-    placeholderData: [],
+    // CORRECTION: Initialiser avec un tableau vide garanti
+    initialData: [],
   });
 
   // Debug du state React Query
@@ -43,6 +44,8 @@ export const useCollections = () => {
     isError: query.isError,
     error: query.error?.message,
     dataLength: query.data?.length || 0,
+    dataType: typeof query.data,
+    isDataArray: Array.isArray(query.data),
     status: query.status
   });
 
@@ -52,11 +55,15 @@ export const useCollections = () => {
 export const useFeaturedCollections = () => {
   return useQuery({
     queryKey: QUERY_KEYS.featured,
-    queryFn: collectionsService.getFeaturedCollections,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 15 * 60 * 1000, // 15 minutes
+    queryFn: async () => {
+      const result = await collectionsService.getFeaturedCollections();
+      return result || [];
+    },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    initialData: [],
   });
 };
 
@@ -65,8 +72,8 @@ export const useCollection = (slug: string) => {
     queryKey: QUERY_KEYS.bySlug(slug),
     queryFn: () => collectionsService.getCollectionBySlug(slug),
     enabled: !!slug,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
@@ -101,7 +108,6 @@ export const useUpdateCollection = () => {
         logger.info('Collection updated, invalidating cache', { collectionId: id });
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.collections });
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.featured });
-        // Invalider aussi la collection spécifique si on a son slug
         queryClient.invalidateQueries({ 
           predicate: (query) => query.queryKey[0] === 'collections' && query.queryKey[1] === 'slug'
         });
@@ -140,7 +146,6 @@ export const useUpdateSymbolsOrder = () => {
     onSuccess: (success, { collectionId }) => {
       if (success) {
         logger.info('Symbols order updated, invalidating cache', { collectionId });
-        // Invalider seulement les requêtes qui incluent des détails de collection
         queryClient.invalidateQueries({ 
           predicate: (query) => {
             return query.queryKey[0] === 'collections' && 

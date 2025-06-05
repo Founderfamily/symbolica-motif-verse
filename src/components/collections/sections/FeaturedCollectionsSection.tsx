@@ -3,7 +3,7 @@ import React from 'react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Badge } from '@/components/ui/badge';
 import { CollectionWithTranslations } from '@/types/collections';
-import CollectionCard from '../CollectionCard';
+import { UnifiedCollectionGrid } from '../UnifiedCollectionGrid';
 
 interface FeaturedCollectionsSectionProps {
   collections: CollectionWithTranslations[];
@@ -22,11 +22,12 @@ export const FeaturedCollectionsSection: React.FC<FeaturedCollectionsSectionProp
           <I18nText translationKey="collections.featuredBadge">En vedette</I18nText>
         </Badge>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {collections.map((collection) => (
-          <CollectionCard key={collection.id} collection={collection} />
-        ))}
-      </div>
+      <UnifiedCollectionGrid 
+        collections={collections}
+        emptyMessage="collections.noFeaturedCollections"
+        emptyDescription="collections.noFeaturedCollectionsMessage"
+        maxCols="xl"
+      />
     </section>
   );
 });

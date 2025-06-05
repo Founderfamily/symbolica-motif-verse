@@ -15,12 +15,14 @@ const CollectionCategories: React.FC = React.memo(() => {
   const [performanceMetrics, setPerformanceMetrics] = useState(null);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
 
-  // Debug logs détaillés avec vérification de sécurité
-  console.log('🔍 CollectionCategories render state:', {
+  // Debug logs détaillés - RÉTABLIS pour diagnostic
+  console.log('🔍 CollectionCategories render state DETAILED:', {
     isLoading,
     error: error ? error.message : null,
+    collectionsType: typeof collections,
+    collectionsIsArray: Array.isArray(collections),
     collectionsCount: collections?.length || 0,
-    collections: collections?.slice(0, 2), // Premiers éléments pour debug
+    collectionsFirst3: collections?.slice(0, 3) || null,
     timestamp: new Date().toISOString()
   });
 
@@ -94,7 +96,12 @@ const CollectionCategories: React.FC = React.memo(() => {
   }
 
   if (!collections || collections.length === 0) {
-    console.log('📭 Showing empty state');
+    console.log('📭 Showing empty state - DETAILED DEBUG:', {
+      collections,
+      collectionsLength: collections?.length,
+      collectionsType: typeof collections,
+      isArray: Array.isArray(collections)
+    });
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-medium mb-2 text-slate-700">
@@ -106,7 +113,7 @@ const CollectionCategories: React.FC = React.memo(() => {
           </I18nText>
         </p>
         <p className="text-xs text-slate-400 mt-4">
-          Debug: collections status = empty
+          Debug: collections = {JSON.stringify(collections)} | type = {typeof collections}
         </p>
       </div>
     );
