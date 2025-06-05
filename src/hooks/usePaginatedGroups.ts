@@ -30,12 +30,13 @@ export const usePaginatedGroups = (searchQuery?: string): PaginatedGroupsResult 
     refetch
   } = useInfiniteQuery<GroupsPageData>({
     queryKey: ['groups', 'paginated', searchQuery],
-    queryFn: async ({ pageParam = 0 }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam = 0 }) => {
+      const page = pageParam as number;
       let query = supabase
         .from('interest_groups')
         .select('*')
         .order('name')
-        .range((pageParam as number) * GROUPS_PER_PAGE, ((pageParam as number) + 1) * GROUPS_PER_PAGE - 1);
+        .range(page * GROUPS_PER_PAGE, (page + 1) * GROUPS_PER_PAGE - 1);
 
       if (searchQuery) {
         query = query.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
@@ -50,7 +51,7 @@ export const usePaginatedGroups = (searchQuery?: string): PaginatedGroupsResult 
 
       return {
         groups: groups || [],
-        nextPage: groups && groups.length === GROUPS_PER_PAGE ? (pageParam as number) + 1 : null
+        nextPage: groups && groups.length === GROUPS_PER_PAGE ? page + 1 : null
       };
     },
     initialPageParam: 0,
