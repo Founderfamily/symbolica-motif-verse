@@ -1,45 +1,39 @@
 
 {
-  "title": "Collections Culturelles",
-  "featured": {
-    "title": "Collections en Vedette", 
-    "description": "Explorez des parcours thématiques à travers les symboles du monde entier",
-    "discoverAll": "Découvrir Toutes les Collections"
+  "collections": {
+    "title": "Collections",
+    "featured": {
+      "title": "Collections en Vedette",
+      "description": "Explorez des parcours thématiques à travers les symboles du monde entier"
+    },
+    "allCollections": "Toutes les Collections",
+    "create": "Créer une Collection",
+    "browse": "Parcourir les Collections",
+    "myCollections": "Mes Collections",
+    "explore": "Explorer",
+    "symbols": "symboles",
+    "themes": "Thèmes",
+    "loading": "Chargement des collections...",
+    "noCollections": "Aucune collection disponible",
+    "noCollectionsMessage": "Les collections seront bientôt disponibles. Revenez plus tard !",
+    "featuredBadge": "En vedette",
+    "discoverMore": "Découvrez plus de collections",
+    "discoverMoreDescription": "De nouvelles collections thématiques sont ajoutées régulièrement",
+    "exploreSymbols": "Explorer les Symboles",
+    "heroStats": {
+      "cultures": "Cultures du Monde",
+      "periods": "Époques Historiques", 
+      "mythologies": "Mythologies",
+      "art": "Art Symbolique"
+    }
   },
-  "featuredBadge": "En vedette",
-  "backToCollections": "Retour aux collections",
-  "notFound": "Collection non trouvée",
-  "share": "Partager",
-  "viewOnMap": "Voir sur la carte",
-  "symbolsCount": "symboles",
-  "culturesCount": "cultures", 
-  "periodsCount": "périodes",
-  "symbolsInCollection": "Symboles de la collection",
-  "noSymbols": "Aucun symbole dans cette collection",
-  "explore": "Explorer →",
-  "noCollections": "Aucune collection disponible",
-  "noCollectionsMessage": "Les collections seront bientôt disponibles. Revenez plus tard !",
-  "noFeaturedCollections": "Aucune collection en vedette",
-  "noFeaturedCollectionsMessage": "Les collections thématiques arrivent bientôt !",
-  "createCollection": "Créer une Collection",
-  "heroStats": {
-    "cultures": "Cultures du Monde",
-    "periods": "Époques Historiques", 
-    "mythologies": "Mythologies",
-    "art": "Art Symbolique"
-  },
-  "allCollections": "Toutes les Collections",
-  "allCollectionsCount": "parcours thématiques disponibles",
-  "collectionsUnit": "collections",
-  "createdOn": "Créée le",
-  "loading": "Chargement des collections...",
   "categories": {
     "cultures": "Cultures",
     "periods": "Périodes",
     "sciences": "Sciences",
     "others": "Autres",
     "culturesDescription": "Explorez les symboles organisés par leur origine culturelle",
-    "periodsDescription": "Découvrez l'évolution des symboles à travers les époques",
+    "periodsDescription": "Découvrez l'évolution des symboles à travers les âges",
     "sciencesDescription": "Découvrez les symboles liés aux sciences et traditions ésotériques",
     "othersDescription": "Collections thématiques et créations personnalisées",
     "noOthers": "Aucune autre collection pour le moment"
