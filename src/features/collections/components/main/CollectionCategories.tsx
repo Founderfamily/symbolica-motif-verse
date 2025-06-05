@@ -1,14 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ArrowRight } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../../hooks/useCollections';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CollectionWithTranslations } from '../../types/collections';
+import { useCollectionFilters } from '../../hooks/useCollectionFilters';
+import { CollectionControls } from '../controls/CollectionControls';
+import { FilteredCollectionGrid } from '../grids/FilteredCollectionGrid';
 
 // Static collection type
 interface StaticCollection {
@@ -17,6 +18,7 @@ interface StaticCollection {
   title: string;
   description: string;
   is_featured: boolean;
+  created_at?: string;
 }
 
 // Union type for collections
@@ -36,7 +38,8 @@ const getStaticCollections = (currentLanguage: string): StaticCollection[] => [
     description: currentLanguage === 'fr' 
       ? 'Explorez les motifs géométriques sacrés à travers les cultures : mandalas, spirales dorées, fractales naturelles.'
       : 'Explore sacred geometric patterns across cultures: mandalas, golden spirals, natural fractals.',
-    is_featured: true
+    is_featured: true,
+    created_at: '2024-01-01'
   },
   {
     id: '2', 
@@ -45,7 +48,8 @@ const getStaticCollections = (currentLanguage: string): StaticCollection[] => [
     description: currentLanguage === 'fr'
       ? 'Découvrez les symboles énigmatiques des civilisations perdues et leurs significations cachées.'
       : 'Discover the enigmatic symbols of lost civilizations and their hidden meanings.',
-    is_featured: true
+    is_featured: true,
+    created_at: '2024-01-02'
   },
   {
     id: '3',
@@ -54,7 +58,8 @@ const getStaticCollections = (currentLanguage: string): StaticCollection[] => [
     description: currentLanguage === 'fr'
       ? 'Plongez dans l\'univers des créatures mythiques et des divinités à travers les cultures du monde.'
       : 'Dive into the universe of mythical creatures and deities across world cultures.',
-    is_featured: false
+    is_featured: false,
+    created_at: '2024-01-03'
   },
   {
     id: '4',
@@ -63,7 +68,8 @@ const getStaticCollections = (currentLanguage: string): StaticCollection[] => [
     description: currentLanguage === 'fr'
       ? 'L\'évolution des symboles à l\'ère digitale : émojis, logos, iconographie moderne.'
       : 'The evolution of symbols in the digital age: emojis, logos, modern iconography.',
-    is_featured: false
+    is_featured: false,
+    created_at: '2024-01-04'
   },
   {
     id: '5',
@@ -72,7 +78,8 @@ const getStaticCollections = (currentLanguage: string): StaticCollection[] => [
     description: currentLanguage === 'fr'
       ? 'Les symboles hermétiques et alchimiques : pentagrammes, ouroboros, signes planétaires.'
       : 'Hermetic and alchemical symbols: pentagrams, ouroboros, planetary signs.',
-    is_featured: false
+    is_featured: false,
+    created_at: '2024-01-05'
   },
   {
     id: '6',
@@ -81,40 +88,24 @@ const getStaticCollections = (currentLanguage: string): StaticCollection[] => [
     description: currentLanguage === 'fr'
       ? 'Symboles sacrés des grandes traditions spirituelles : christianisme, islam, bouddhisme, hindouisme.'
       : 'Sacred symbols from major spiritual traditions: Christianity, Islam, Buddhism, Hinduism.',
-    is_featured: false
+    is_featured: false,
+    created_at: '2024-01-06'
   }
 ];
 
 // Skeleton de chargement
 const CollectionsLoadingSkeleton: React.FC = React.memo(() => {
   return (
-    <div className="space-y-12">
-      {/* Featured Collections Skeleton */}
-      <div>
-        <Skeleton className="h-8 w-48 mb-6" />
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-full" />
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Other Collections Skeleton */}
-      <div>
-        <Skeleton className="h-8 w-48 mb-6" />
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-full" />
-            </div>
-          ))}
-        </div>
+    <div className="space-y-8">
+      <Skeleton className="h-12 w-full" />
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="space-y-3">
+            <Skeleton className="h-48 w-full rounded-lg" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-full" />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -176,9 +167,20 @@ const CollectionCategories: React.FC = () => {
   const hasValidCollections = collections && collections.length > 0;
   const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : staticCollections;
 
-  // Split collections into featured and others
-  const featured = finalCollections.filter(collection => collection.is_featured);
-  const others = finalCollections.filter(collection => !collection.is_featured);
+  // Use filters hook
+  const {
+    sortBy,
+    setSortBy,
+    filterCategory,
+    setFilterCategory,
+    filterStatus,
+    setFilterStatus,
+    searchQuery,
+    setSearchQuery,
+    filteredAndSortedCollections,
+    resetFilters,
+    activeFiltersCount
+  } = useCollectionFilters({ collections: finalCollections });
 
   // Loading state
   if (isLoading) {
@@ -191,84 +193,28 @@ const CollectionCategories: React.FC = () => {
   }
 
   return (
-    <div className="space-y-12">
-      {/* Featured Collections Section */}
-      {featured.length > 0 && (
-        <section>
-          <div className="flex items-center gap-3 mb-8">
-            <h2 className="text-3xl font-bold text-slate-900">
-              <I18nText translationKey="collections.featured.title">Collections en Vedette</I18nText>
-            </h2>
-            <Badge className="bg-amber-600 hover:bg-amber-700">
-              <I18nText translationKey="collections.featuredBadge">En vedette</I18nText>
-            </Badge>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {featured.map((collection) => (
-              <Link
-                key={collection.id}
-                to={`/collections/${collection.slug}`}
-                className="block transition-transform hover:scale-105"
-              >
-                <Card className="h-full hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex justify-between items-start mb-2">
-                      <CardTitle className="text-lg">
-                        {getCollectionTitle(collection)}
-                      </CardTitle>
-                      <Badge variant="default">
-                        <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 text-sm line-clamp-3">
-                      {getCollectionDescription(collection)}
-                    </p>
-                    <div className="mt-4 text-sm text-amber-600 font-medium">
-                      <I18nText translationKey="collections.explore">Explorer →</I18nText>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+    <div className="space-y-8">
+      {/* Controls Section */}
+      <CollectionControls
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        resetFilters={resetFilters}
+        activeFiltersCount={activeFiltersCount}
+        totalResults={filteredAndSortedCollections.length}
+      />
 
-      {/* Other Collections Section */}
-      {others.length > 0 && (
-        <section>
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">
-            <I18nText translationKey="collections.allCollections">Toutes les Collections</I18nText>
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {others.map((collection) => (
-              <Link
-                key={collection.id}
-                to={`/collections/${collection.slug}`}
-                className="block transition-transform hover:scale-105"
-              >
-                <Card className="h-full hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-lg">
-                      {getCollectionTitle(collection)}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 text-sm line-clamp-3">
-                      {getCollectionDescription(collection)}
-                    </p>
-                    <div className="mt-4 text-sm text-amber-600 font-medium">
-                      <I18nText translationKey="collections.explore">Explorer →</I18nText>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Collections Grid */}
+      <FilteredCollectionGrid
+        collections={filteredAndSortedCollections}
+        getCollectionTitle={getCollectionTitle}
+        getCollectionDescription={getCollectionDescription}
+      />
 
       {/* Call to Action for more collections */}
       <section className="text-center py-8 bg-slate-50 rounded-lg">

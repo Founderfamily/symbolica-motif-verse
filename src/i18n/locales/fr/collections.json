@@ -20,6 +20,24 @@
     "discoverMore": "Découvrez plus de collections",
     "discoverMoreDescription": "De nouvelles collections thématiques sont ajoutées régulièrement",
     "exploreSymbols": "Explorer les Symboles",
+    "noResults": "Aucune collection trouvée",
+    "noResultsMessage": "Essayez de modifier vos critères de recherche ou de filtrage.",
+    "results": "résultat(s)",
+    "activeFilters": "filtre(s) actif(s)",
+    "sort": {
+      "featuredFirst": "Vedettes d'abord",
+      "nameAsc": "Nom A-Z",
+      "nameDesc": "Nom Z-A",
+      "dateDesc": "Plus récent",
+      "dateAsc": "Plus ancien"
+    },
+    "filters": {
+      "allCategories": "Toutes",
+      "allStatus": "Toutes",
+      "featured": "Vedettes",
+      "regular": "Régulières",
+      "reset": "Réinitialiser"
+    },
     "heroStats": {
       "cultures": "Cultures du Monde",
       "periods": "Époques Historiques", 

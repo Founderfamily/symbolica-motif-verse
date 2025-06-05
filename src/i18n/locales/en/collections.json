@@ -12,7 +12,34 @@
     "loading": "Loading collections...",
     "noCollections": "No collections available",
     "noCollectionsMessage": "Collections will be available soon. Come back later!",
-    "featuredBadge": "Featured"
+    "featuredBadge": "Featured",
+    "discoverMore": "Discover more collections",
+    "discoverMoreDescription": "New thematic collections are added regularly",
+    "exploreSymbols": "Explore Symbols",
+    "noResults": "No collections found",
+    "noResultsMessage": "Try modifying your search or filter criteria.",
+    "results": "result(s)",
+    "activeFilters": "active filter(s)",
+    "sort": {
+      "featuredFirst": "Featured first",
+      "nameAsc": "Name A-Z",
+      "nameDesc": "Name Z-A",
+      "dateDesc": "Most recent",
+      "dateAsc": "Oldest"
+    },
+    "filters": {
+      "allCategories": "All",
+      "allStatus": "All",
+      "featured": "Featured",
+      "regular": "Regular",
+      "reset": "Reset"
+    },
+    "heroStats": {
+      "cultures": "World Cultures",
+      "periods": "Historical Periods", 
+      "mythologies": "Mythologies",
+      "art": "Symbolic Art"
+    }
   },
   "categories": {
     "cultures": "Cultures",
