@@ -77,7 +77,7 @@ const CollectionCategories: React.FC = React.memo(() => {
             </I18nText>
           </p>
           <p className="text-xs text-slate-400 mt-2">
-            Debug: isLoading={String(isLoading)}, collections={collections ? collections.length.toString() : '0'}
+            Debug: isLoading={String(isLoading)}, collections={Array.isArray(collections) ? collections.length.toString() : '0'}
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
