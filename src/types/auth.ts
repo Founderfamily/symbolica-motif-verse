@@ -6,8 +6,8 @@ export interface UserProfile {
   full_name: string | null;
   avatar_url?: string | null;
   is_admin?: boolean | null;
-  created_at: string | null;
-  updated_at: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
   contributions_count?: number;
   symbols_count?: number;
   verified_uploads?: number;
@@ -19,6 +19,7 @@ export interface UserProfile {
   // Add missing properties for compatibility
   email?: string | null;
   user_metadata?: Record<string, any> | null;
+  is_banned?: boolean;
 }
 
 export interface AuthState {
