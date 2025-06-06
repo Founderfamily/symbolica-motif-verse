@@ -1,10 +1,11 @@
 
+
 export interface UserProfile {
   id: string;
   username: string | null;
   full_name: string | null;
   avatar_url?: string | null;
-  is_admin: boolean | null;
+  is_admin?: boolean | null;
   created_at: string | null;
   updated_at: string | null;
   contributions_count?: number;
@@ -25,3 +26,4 @@ export interface AuthState {
   user: UserProfile | null;
   error: string | null;
 }
+
