@@ -49,7 +49,7 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
             </CardDescription>
           </div>
           {group.icon && (
-            <div className="ml-3 text-2xl" style={{ color: group.theme_color }}>
+            <div className="ml-3 text-2xl" style={{ color: group.theme_color || '#3b82f6' }}>
               {group.icon}
             </div>
           )}

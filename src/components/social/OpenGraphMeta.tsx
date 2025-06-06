@@ -1,6 +1,5 @@
 
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import React, { useEffect } from 'react';
 
 interface OpenGraphMetaProps {
   title: string;
@@ -22,29 +21,60 @@ export const OpenGraphMeta: React.FC<OpenGraphMetaProps> = ({
   const currentUrl = url || window.location.href;
   const defaultImage = '/placeholder.svg';
 
-  return (
-    <Helmet>
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={currentUrl} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={image || defaultImage} />
-      <meta property="og:site_name" content={siteName} />
+  useEffect(() => {
+    // Update document title
+    document.title = title;
 
-      {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={currentUrl} />
-      <meta property="twitter:title" content={title} />
-      <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={image || defaultImage} />
+    // Function to update or create meta tag
+    const updateMetaTag = (property: string, content: string) => {
+      let element = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('property', property);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
 
-      {/* Standard meta tags */}
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <link rel="canonical" href={currentUrl} />
-    </Helmet>
-  );
+    const updateNameTag = (name: string, content: string) => {
+      let element = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('name', name);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    // Open Graph / Facebook
+    updateMetaTag('og:type', type);
+    updateMetaTag('og:url', currentUrl);
+    updateMetaTag('og:title', title);
+    updateMetaTag('og:description', description);
+    updateMetaTag('og:image', image || defaultImage);
+    updateMetaTag('og:site_name', siteName);
+
+    // Twitter
+    updateMetaTag('twitter:card', 'summary_large_image');
+    updateMetaTag('twitter:url', currentUrl);
+    updateMetaTag('twitter:title', title);
+    updateMetaTag('twitter:description', description);
+    updateMetaTag('twitter:image', image || defaultImage);
+
+    // Standard meta tags
+    updateNameTag('description', description);
+
+    // Update canonical link
+    let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', currentUrl);
+  }, [title, description, image, currentUrl, type, siteName]);
+
+  return null;
 };
 
 export default OpenGraphMeta;

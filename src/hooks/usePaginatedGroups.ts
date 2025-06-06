@@ -42,15 +42,23 @@ export const usePaginatedGroups = (searchQuery?: string): PaginatedGroupsResult 
         query = query.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
       }
 
-      const { data: groups, error } = await query;
+      const { data: rawGroups, error } = await query;
 
       if (error) {
         console.error('Error fetching groups:', error);
         throw error;
       }
 
+      // Transform the raw data to match InterestGroup interface
+      const groups: InterestGroup[] = (rawGroups || []).map(group => ({
+        ...group,
+        translations: typeof group.translations === 'string' 
+          ? JSON.parse(group.translations) 
+          : group.translations || { en: {}, fr: {} }
+      }));
+
       return {
-        groups: groups || [],
+        groups,
         nextPage: groups && groups.length === GROUPS_PER_PAGE ? page + 1 : null
       };
     },
