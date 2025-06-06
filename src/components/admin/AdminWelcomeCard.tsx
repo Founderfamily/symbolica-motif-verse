@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Users, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Profile } from '@/types/auth';
+import { UserProfile } from '@/types/auth';
 
 interface AdminWelcomeCardProps {
-  profile: Profile | null;
+  profile: UserProfile | null;
 }
 
 export default function AdminWelcomeCard({ profile }: AdminWelcomeCardProps) {
