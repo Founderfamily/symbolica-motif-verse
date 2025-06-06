@@ -1,0 +1,35 @@
+
+{
+  "title": "Contributions",
+  "myContributions": "Mes contributions",
+  "newContribution": "Nouvelle contribution",
+  "status": {
+    "pending": "En attente",
+    "approved": "Approuvée",
+    "rejected": "Rejetée",
+    "draft": "Brouillon"
+  },
+  "form": {
+    "title": "Titre",
+    "description": "Description",
+    "culture": "Culture",
+    "period": "Période",
+    "location": "Localisation",
+    "tags": "Tags",
+    "submit": "Soumettre",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "filters": {
+    "all": "Toutes",
+    "pending": "En attente",
+    "approved": "Approuvées",
+    "rejected": "Rejetées"
+  },
+  "stats": {
+    "total": "Total",
+    "thisMonth": "Ce mois",
+    "pending": "En attente",
+    "approved": "Approuvées"
+  }
+}

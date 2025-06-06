@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
-import { Loader2, RefreshCw, Users, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Loader2, RefreshCw, Users, AlertTriangle, CheckCircle, Clock, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import StatsOverview from '@/components/admin/StatsOverview';
 import AnalyticsCharts from '@/components/admin/AnalyticsCharts';
@@ -34,7 +34,7 @@ export default function Dashboard() {
       setStats(dashboardStats);
       toast.success('Données actualisées avec succès');
     } catch (error) {
-      console.error("Error loading dashboard data:", error);
+      console.error("Erreur lors du chargement des données du tableau de bord:", error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur lors du chargement des données';
       setError(errorMessage);
       toast.error(errorMessage);
@@ -46,15 +46,15 @@ export default function Dashboard() {
   if (!isAdmin) {
     return (
       <div className="p-6">
-        <Card>
+        <Card className="max-w-md mx-auto">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-center">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               <I18nText translationKey="admin.access.denied">
                 Accès refusé
               </I18nText>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-center">
               <I18nText translationKey="admin.access.notAuthorized">
                 Vous n'êtes pas autorisé à accéder au tableau de bord administratif.
               </I18nText>
@@ -66,8 +66,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      {/* En-tête avec actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             <I18nText translationKey="admin.dashboard.title">
@@ -86,6 +87,7 @@ export default function Dashboard() {
           size="sm"
           onClick={loadDashboardData}
           disabled={loading}
+          className="self-start sm:self-auto"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -98,17 +100,21 @@ export default function Dashboard() {
         </Button>
       </div>
 
+      {/* Gestion d'erreur améliorée */}
       {error && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-red-800">
-              <AlertTriangle className="h-4 w-4" />
-              <span>{error}</span>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-red-800 dark:text-red-200 font-medium">Erreur de chargement</p>
+                <p className="text-red-700 dark:text-red-300 text-sm mt-1">{error}</p>
+              </div>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={loadDashboardData}
-                className="ml-auto"
+                className="border-red-300 text-red-700 hover:bg-red-100"
               >
                 Réessayer
               </Button>
@@ -117,10 +123,10 @@ export default function Dashboard() {
         </Card>
       )}
       
-      {/* Admin greeting card */}
+      {/* Carte de bienvenue admin */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold">
                 Bienvenue, {profile?.full_name || profile?.username || 'Administrateur'}
@@ -131,7 +137,7 @@ export default function Dashboard() {
                 </I18nText>
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Link to="/admin/users">
                 <Button variant="outline" size="sm">
                   <Users className="h-4 w-4 mr-2" />
@@ -153,13 +159,13 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Actions rapides */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link to="/admin/users">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-all duration-200 cursor-pointer group">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
+                <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
                   <Users className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
@@ -178,10 +184,10 @@ export default function Dashboard() {
         </Link>
 
         <Link to="/admin/contributions">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-all duration-200 cursor-pointer group">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 rounded-lg">
+                <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
                   <Clock className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
@@ -200,10 +206,10 @@ export default function Dashboard() {
         </Link>
 
         <Link to="/admin/symbols">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-all duration-200 cursor-pointer group">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
+                <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
                   <CheckCircle className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
@@ -222,11 +228,11 @@ export default function Dashboard() {
         </Link>
 
         <Link to="/admin/settings">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-all duration-200 cursor-pointer group">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <AlertTriangle className="h-5 w-5 text-green-600" />
+                <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                  <Settings className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
                   <p className="font-medium">Paramètres</p>
@@ -240,7 +246,7 @@ export default function Dashboard() {
         </Link>
       </div>
       
-      {/* Stats overview cards */}
+      {/* Aperçu des statistiques */}
       <div>
         <h2 className="text-xl font-semibold mb-4">
           <I18nText translationKey="admin.dashboard.overview">
@@ -250,7 +256,7 @@ export default function Dashboard() {
         <StatsOverview stats={stats || {} as AdminStats} loading={loading} />
       </div>
       
-      {/* Analytics charts */}
+      {/* Graphiques analytiques */}
       <div>
         <h2 className="text-xl font-semibold mb-4">
           <I18nText translationKey="admin.dashboard.analytics">
@@ -260,7 +266,7 @@ export default function Dashboard() {
         <AnalyticsCharts stats={stats || {} as AdminStats} loading={loading} />
       </div>
       
-      {/* Admin logs */}
+      {/* Logs admin */}
       <div>
         <h2 className="text-xl font-semibold mb-4">
           <I18nText translationKey="admin.dashboard.recentActivity">

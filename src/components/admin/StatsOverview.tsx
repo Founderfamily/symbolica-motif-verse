@@ -26,19 +26,23 @@ const StatCard = ({
   loading: boolean;
   color: string;
 }) => (
-  <Card>
+  <Card className="hover:shadow-md transition-shadow duration-200">
     <CardContent className="p-6">
       <div className="flex justify-between items-start">
-        <div>
-          <p className="text-sm font-medium text-slate-500">{title}</p>
-          <h4 className="text-2xl font-bold mt-1">
+        <div className="flex-1">
+          <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
+          <h4 className="text-2xl font-bold">
             {loading ? (
               <div className="h-7 w-16 bg-slate-200 animate-pulse rounded"></div>
-            ) : value}
+            ) : (
+              <span className="text-slate-900">{value}</span>
+            )}
           </h4>
-          {description && <p className="text-xs text-slate-500 mt-1">{description}</p>}
+          {description && !loading && (
+            <p className="text-xs text-slate-500 mt-2 leading-relaxed">{description}</p>
+          )}
         </div>
-        <div className={`p-2 rounded-md bg-opacity-15 ${color}`}>
+        <div className={`p-3 rounded-lg ${color} bg-opacity-10`}>
           <Icon className={`h-5 w-5 ${color.replace('bg-', 'text-')}`} />
         </div>
       </div>
@@ -50,10 +54,15 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
   const { t } = useTranslation();
   
   const formatNumber = (num: number): string => {
-    return new Intl.NumberFormat().format(num);
+    return new Intl.NumberFormat('fr-FR').format(num);
   };
   
-  // Safe access with default values
+  const formatPercentage = (value: number, total: number): string => {
+    if (total === 0) return '0%';
+    return `${((value / total) * 100).toFixed(1)}%`;
+  };
+  
+  // Accès sécurisé avec valeurs par défaut
   const totalUsers = stats?.totalUsers || 0;
   const activeUsersLast30Days = stats?.activeUsersLast30Days || 0;
   const totalContributions = stats?.totalContributions || 0;
@@ -65,37 +74,31 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
   const topContributors = stats?.topContributors || [];
   const contributionsOverTime = stats?.contributionsOverTime || [];
   
-  // Calculate activity rate (active users / total users)
-  const activityRate = totalUsers > 0 
-    ? `${((activeUsersLast30Days / totalUsers) * 100).toFixed(1)}%` 
-    : '0%';
-  
-  // Calculate approval rate for contributions
-  const approvalRate = totalContributions > 0 
-    ? `${((approvedContributions / totalContributions) * 100).toFixed(1)}%` 
-    : '0%';
-  
-  // Calculate verification rate for symbol locations (fix: use locations, not symbols)
-  const verificationRate = totalSymbolLocations > 0 
-    ? `${((verifiedSymbols / totalSymbolLocations) * 100).toFixed(1)}%` 
-    : '0%';
+  // Calculs corrigés des taux
+  const activityRate = formatPercentage(activeUsersLast30Days, totalUsers);
+  const approvalRate = formatPercentage(approvedContributions, totalContributions);
+  const verificationRate = formatPercentage(verifiedSymbols, totalSymbolLocations);
 
-  // Get last contribution date from real data
+  // Obtenir la date de la dernière contribution depuis les vraies données
   const getLastContributionDate = (): string => {
     if (contributionsOverTime.length === 0) {
       return t('admin.stats.noRecentActivity');
     }
     
-    const lastEntry = contributionsOverTime
-      .slice()
-      .reverse()
-      .find(entry => entry.count > 0);
+    // Trouver la dernière entrée avec des contributions
+    const sortedEntries = contributionsOverTime
+      .filter(entry => entry.count > 0)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
-    if (!lastEntry) {
+    if (sortedEntries.length === 0) {
       return t('admin.stats.noRecentActivity');
     }
     
-    return new Date(lastEntry.date).toLocaleDateString();
+    return new Date(sortedEntries[0].date).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
   };
   
   return (
@@ -104,7 +107,10 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
         icon={Users}
         title={t('admin.stats.totalUsers')}
         value={loading ? '' : formatNumber(totalUsers)}
-        description={t('admin.stats.activeUsers', { count: activeUsersLast30Days, rate: activityRate })}
+        description={t('admin.stats.activeUsers', { 
+          count: formatNumber(activeUsersLast30Days), 
+          rate: activityRate 
+        })}
         loading={loading}
         color="bg-blue-500"
       />
@@ -113,7 +119,10 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
         icon={FileText}
         title={t('admin.stats.totalContributions')}
         value={loading ? '' : formatNumber(totalContributions)}
-        description={t('admin.stats.pendingContributions', { count: pendingContributions, rate: approvalRate })}
+        description={t('admin.stats.pendingContributions', { 
+          count: formatNumber(pendingContributions), 
+          rate: approvalRate 
+        })}
         loading={loading}
         color="bg-amber-500"
       />
@@ -122,6 +131,7 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
         icon={Bookmark}
         title={t('admin.stats.totalSymbols')}
         value={loading ? '' : formatNumber(totalSymbols)}
+        description={`${formatNumber(verifiedSymbols)} vérifiés`}
         loading={loading}
         color="bg-emerald-500"
       />
@@ -130,7 +140,10 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
         icon={Map}
         title={t('admin.stats.symbolLocations')}
         value={loading ? '' : formatNumber(totalSymbolLocations)}
-        description={t('admin.stats.verifiedLocations', { count: verifiedSymbols, rate: verificationRate })}
+        description={t('admin.stats.verifiedLocations', { 
+          count: formatNumber(verifiedSymbols), 
+          rate: verificationRate 
+        })}
         loading={loading}
         color="bg-violet-500"
       />
@@ -138,13 +151,14 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
       <StatCard
         icon={Award}
         title={t('admin.stats.topContributor')}
-        value={loading || topContributors.length === 0 ? '' : 
-          (topContributors[0].fullName || topContributors[0].username || 'Unknown')}
+        value={loading || topContributors.length === 0 ? 
+          t('admin.stats.noRecentActivity') : 
+          (topContributors[0].fullName || topContributors[0].username || 'Utilisateur inconnu')}
         description={topContributors.length > 0 ? 
           t('admin.stats.contributorStats', { 
-            contributions: topContributors[0].contributionsCount, 
-            points: topContributors[0].pointsTotal 
-          }) : ''}
+            contributions: formatNumber(topContributors[0].contributionsCount), 
+            points: formatNumber(topContributors[0].pointsTotal)
+          }) : undefined}
         loading={loading}
         color="bg-pink-500"
       />
