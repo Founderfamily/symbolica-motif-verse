@@ -53,17 +53,12 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
     return new Intl.NumberFormat().format(num);
   };
   
-  const calculateGrowthRate = (current: number, previous: number): string => {
-    if (previous === 0) return '0%';
-    const growth = ((current - previous) / previous) * 100;
-    return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
-  };
-  
   // Safe access with default values
   const totalUsers = stats?.totalUsers || 0;
   const activeUsersLast30Days = stats?.activeUsersLast30Days || 0;
   const totalContributions = stats?.totalContributions || 0;
   const pendingContributions = stats?.pendingContributions || 0;
+  const approvedContributions = stats?.approvedContributions || 0;
   const totalSymbols = stats?.totalSymbols || 0;
   const verifiedSymbols = stats?.verifiedSymbols || 0;
   const totalSymbolLocations = stats?.totalSymbolLocations || 0;
@@ -76,15 +71,32 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
     : '0%';
   
   // Calculate approval rate for contributions
-  const approvedContributions = totalContributions - pendingContributions;
   const approvalRate = totalContributions > 0 
     ? `${((approvedContributions / totalContributions) * 100).toFixed(1)}%` 
     : '0%';
   
-  // Calculate verification rate for symbols
+  // Calculate verification rate for symbol locations (fix: use locations, not symbols)
   const verificationRate = totalSymbolLocations > 0 
     ? `${((verifiedSymbols / totalSymbolLocations) * 100).toFixed(1)}%` 
     : '0%';
+
+  // Get last contribution date from real data
+  const getLastContributionDate = (): string => {
+    if (contributionsOverTime.length === 0) {
+      return t('admin.stats.noRecentActivity');
+    }
+    
+    const lastEntry = contributionsOverTime
+      .slice()
+      .reverse()
+      .find(entry => entry.count > 0);
+    
+    if (!lastEntry) {
+      return t('admin.stats.noRecentActivity');
+    }
+    
+    return new Date(lastEntry.date).toLocaleDateString();
+  };
   
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -140,17 +152,7 @@ export default function StatsOverview({ stats, loading }: StatsOverviewProps) {
       <StatCard
         icon={Clock}
         title={t('admin.stats.lastContribution')}
-        value={loading ? '' : (
-          contributionsOverTime.length > 0 && 
-          contributionsOverTime.some(p => p.count > 0) ? 
-            new Date(
-              contributionsOverTime
-                .slice()
-                .reverse()
-                .find(p => p.count > 0)?.date || ''
-            ).toLocaleDateString() : 
-            t('admin.stats.noRecentActivity')
-        )}
+        value={loading ? '' : getLastContributionDate()}
         loading={loading}
         color="bg-orange-500"
       />

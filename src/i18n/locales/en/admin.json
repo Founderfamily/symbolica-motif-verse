@@ -1,14 +1,56 @@
 
 {
-  "admin": {
-    "dashboard": "Dashboard",
-    "users": "Users",
-    "symbols": "Symbols",
-    "contributions": "Contributions",
-    "collections": "Collections",
-    "settings": "Settings",
-    "moderation": "Moderation",
-    "analytics": "Analytics",
-    "reports": "Reports"
+  "access": {
+    "denied": "Access Denied",
+    "notAuthorized": "You are not authorized to access the admin dashboard."
+  },
+  "dashboard": {
+    "title": "Admin Dashboard",
+    "welcomeMessage": "Manage and supervise the Symbolica platform",
+    "overview": "General Overview",
+    "analytics": "Analytics and Trends",
+    "recentActivity": "Recent Activity"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "manageUsers": "Manage Users",
+    "moderateContributions": "Moderate Contributions",
+    "manageSymbols": "Manage Symbols",
+    "systemSettings": "System Settings"
+  },
+  "stats": {
+    "totalUsers": "Total Users",
+    "activeUsers": "{{count}} active ({{rate}})",
+    "totalContributions": "Total Contributions",
+    "pendingContributions": "{{count}} pending ({{rate}} approved)",
+    "totalSymbols": "Total Symbols",
+    "symbolLocations": "Symbol Locations",
+    "verifiedLocations": "{{count}} verified ({{rate}})",
+    "topContributor": "Top Contributor",
+    "contributorStats": "{{contributions}} contributions, {{points}} points",
+    "lastContribution": "Last Contribution",
+    "noRecentActivity": "No recent activity",
+    "userGrowth": "User Growth",
+    "contributionsPerDay": "Contributions per Day (Week)",
+    "contributionsOverTime": "Contributions Over Time",
+    "contributionStatus": "Contribution Status"
+  },
+  "charts": {
+    "userGrowth": "User Growth",
+    "contributionsPerDay": "Contributions per Day (Week)",
+    "contributionsOverTime": "Contributions Over Time",
+    "contributionStatus": "Contribution Status",
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected"
+  },
+  "logs": {
+    "title": "Admin Logs",
+    "action": "Action",
+    "admin": "Admin",
+    "date": "Date",
+    "details": "Details",
+    "noLogs": "No logs available",
+    "loadingLogs": "Loading logs..."
   }
 }

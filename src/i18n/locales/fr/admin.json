@@ -1,0 +1,56 @@
+
+{
+  "access": {
+    "denied": "Accès refusé",
+    "notAuthorized": "Vous n'êtes pas autorisé à accéder au tableau de bord administratif."
+  },
+  "dashboard": {
+    "title": "Tableau de bord administratif",
+    "welcomeMessage": "Gérez et supervisez la plateforme Symbolica",
+    "overview": "Aperçu général",
+    "analytics": "Analyses et tendances",
+    "recentActivity": "Activité récente"
+  },
+  "actions": {
+    "refresh": "Actualiser",
+    "manageUsers": "Gérer les utilisateurs",
+    "moderateContributions": "Modérer les contributions",
+    "manageSymbols": "Gérer les symboles",
+    "systemSettings": "Paramètres système"
+  },
+  "stats": {
+    "totalUsers": "Utilisateurs totaux",
+    "activeUsers": "{{count}} actifs ({{rate}})",
+    "totalContributions": "Contributions totales",
+    "pendingContributions": "{{count}} en attente ({{rate}} approuvées)",
+    "totalSymbols": "Symboles totaux",
+    "symbolLocations": "Emplacements de symboles",
+    "verifiedLocations": "{{count}} vérifiés ({{rate}})",
+    "topContributor": "Meilleur contributeur",
+    "contributorStats": "{{contributions}} contributions, {{points}} points",
+    "lastContribution": "Dernière contribution",
+    "noRecentActivity": "Aucune activité récente",
+    "userGrowth": "Croissance des utilisateurs",
+    "contributionsPerDay": "Contributions par jour (semaine)",
+    "contributionsOverTime": "Contributions au fil du temps",
+    "contributionStatus": "Statut des contributions"
+  },
+  "charts": {
+    "userGrowth": "Croissance des utilisateurs",
+    "contributionsPerDay": "Contributions par jour (semaine)",
+    "contributionsOverTime": "Contributions au fil du temps",
+    "contributionStatus": "Statut des contributions",
+    "approved": "Approuvées",
+    "pending": "En attente",
+    "rejected": "Rejetées"
+  },
+  "logs": {
+    "title": "Logs d'administration",
+    "action": "Action",
+    "admin": "Administrateur",
+    "date": "Date",
+    "details": "Détails",
+    "noLogs": "Aucun log disponible",
+    "loadingLogs": "Chargement des logs..."
+  }
+}

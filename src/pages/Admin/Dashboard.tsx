@@ -11,6 +11,7 @@ import AnalyticsCharts from '@/components/admin/AnalyticsCharts';
 import AdminLogs from '@/components/admin/AdminLogs';
 import { adminStatsService, AdminStats } from '@/services/admin/statsService';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -31,9 +32,12 @@ export default function Dashboard() {
     try {
       const dashboardStats = await adminStatsService.getDashboardStats();
       setStats(dashboardStats);
+      toast.success('Données actualisées avec succès');
     } catch (error) {
       console.error("Error loading dashboard data:", error);
-      setError(error instanceof Error ? error.message : 'Erreur lors du chargement des données');
+      const errorMessage = error instanceof Error ? error.message : 'Erreur lors du chargement des données';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -71,7 +75,9 @@ export default function Dashboard() {
             </I18nText>
           </h1>
           <p className="text-muted-foreground mt-1">
-            Vue d'ensemble de la plateforme et outils de gestion
+            <I18nText translationKey="admin.dashboard.welcomeMessage">
+              Vue d'ensemble de la plateforme et outils de gestion
+            </I18nText>
           </p>
         </div>
         
@@ -98,6 +104,14 @@ export default function Dashboard() {
             <div className="flex items-center gap-2 text-red-800">
               <AlertTriangle className="h-4 w-4" />
               <span>{error}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={loadDashboardData}
+                className="ml-auto"
+              >
+                Réessayer
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -121,13 +135,17 @@ export default function Dashboard() {
               <Link to="/admin/users">
                 <Button variant="outline" size="sm">
                   <Users className="h-4 w-4 mr-2" />
-                  Gérer les utilisateurs
+                  <I18nText translationKey="admin.actions.manageUsers">
+                    Gérer les utilisateurs
+                  </I18nText>
                 </Button>
               </Link>
               <Link to="/admin/contributions">
                 <Button variant="outline" size="sm">
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Modérer les contributions
+                  <I18nText translationKey="admin.actions.moderateContributions">
+                    Modérer les contributions
+                  </I18nText>
                 </Button>
               </Link>
             </div>
@@ -147,7 +165,11 @@ export default function Dashboard() {
                 <div>
                   <p className="font-medium">Utilisateurs</p>
                   <p className="text-sm text-muted-foreground">
-                    {stats ? `${stats.totalUsers} utilisateurs` : 'Chargement...'}
+                    {loading ? (
+                      <div className="h-4 w-16 bg-slate-200 animate-pulse rounded"></div>
+                    ) : (
+                      `${stats?.totalUsers || 0} utilisateurs`
+                    )}
                   </p>
                 </div>
               </div>
@@ -165,7 +187,11 @@ export default function Dashboard() {
                 <div>
                   <p className="font-medium">Contributions</p>
                   <p className="text-sm text-muted-foreground">
-                    {stats ? `${stats.pendingContributions} en attente` : 'Chargement...'}
+                    {loading ? (
+                      <div className="h-4 w-16 bg-slate-200 animate-pulse rounded"></div>
+                    ) : (
+                      `${stats?.pendingContributions || 0} en attente`
+                    )}
                   </p>
                 </div>
               </div>
@@ -183,7 +209,11 @@ export default function Dashboard() {
                 <div>
                   <p className="font-medium">Symboles</p>
                   <p className="text-sm text-muted-foreground">
-                    {stats ? `${stats.totalSymbols} symboles` : 'Chargement...'}
+                    {loading ? (
+                      <div className="h-4 w-16 bg-slate-200 animate-pulse rounded"></div>
+                    ) : (
+                      `${stats?.totalSymbols || 0} symboles`
+                    )}
                   </p>
                 </div>
               </div>
