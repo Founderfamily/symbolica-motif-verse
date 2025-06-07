@@ -29,11 +29,11 @@
     "points": "Points"
   },
   "stats": {
-    "members": "Community Members",
+    "members": "members",
     "groups": "Interest Groups", 
     "discussions": "Active Discussions",
     "contributions": "Monthly Contributions",
-    "discoveries": "Discoveries",
+    "discoveries": "discoveries",
     "join": "Join"
   },
   "features": {
@@ -65,5 +65,17 @@
     "placeholder": "Search Groups, Discussions...",
     "results": "Search Results",
     "noResults": "No Results Found"
-  }
+  },
+  "groupNotFound": "Group not found",
+  "groupNotFoundDescription": "The group you're looking for doesn't exist or has been removed.",
+  "discussion": "Discussion",
+  "discoveries": "Discoveries",
+  "joinToSeeDiscussions": "Join to see discussions",
+  "joinToParticipate": "Join this group to participate in discussions and see posts from other members",
+  "sharedDiscoveries": "Shared Discoveries",
+  "discoveriesComingSoon": "Discoveries sharing functionality coming soon",
+  "public": "Public",
+  "private": "Private",
+  "leave": "Leave",
+  "join": "Join"
 }

@@ -643,7 +643,7 @@ export type Database = {
         Row: {
           banner_image: string | null
           created_at: string
-          created_by: string
+          created_by: string | null
           description: string | null
           discoveries_count: number
           icon: string | null
@@ -659,7 +659,7 @@ export type Database = {
         Insert: {
           banner_image?: string | null
           created_at?: string
-          created_by: string
+          created_by?: string | null
           description?: string | null
           discoveries_count?: number
           icon?: string | null
@@ -675,7 +675,7 @@ export type Database = {
         Update: {
           banner_image?: string | null
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           description?: string | null
           discoveries_count?: number
           icon?: string | null
