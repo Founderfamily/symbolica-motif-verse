@@ -1,3 +1,4 @@
+
 # Documentation Administrative - Cultural Heritage Symbols
 
 ## Vue d'ensemble du système
