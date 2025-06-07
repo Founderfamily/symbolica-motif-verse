@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Users, Trophy, UserPlus, UserMinus } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { UserProfile } from '@/services/userService';
+import { UserProfile } from '@/types/auth';
 import { followUser, unfollowUser } from '@/services/userService';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -59,11 +59,11 @@ const UserCard: React.FC<UserCardProps> = ({ user, isFollowing = false, onFollow
         <div className="flex items-center space-x-4 text-sm text-slate-600 mb-4">
           <div className="flex items-center space-x-1">
             <Users className="h-4 w-4" />
-            <span>{user.followers_count} <I18nText translationKey="community.followers">followers</I18nText></span>
+            <span>{user.followers_count || 0} <I18nText translationKey="community.followers">followers</I18nText></span>
           </div>
           <div className="flex items-center space-x-1">
             <Trophy className="h-4 w-4" />
-            <span>{user.contributions_count} <I18nText translationKey="community.contributions">contributions</I18nText></span>
+            <span>{user.contributions_count || 0} <I18nText translationKey="community.contributions">contributions</I18nText></span>
           </div>
         </div>
 

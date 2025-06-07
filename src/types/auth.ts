@@ -1,5 +1,4 @@
 
-
 export interface UserProfile {
   id: string;
   username: string | null;
@@ -20,6 +19,12 @@ export interface UserProfile {
   email?: string | null;
   user_metadata?: Record<string, any> | null;
   is_banned?: boolean;
+  // Social features from userService
+  followers_count?: number;
+  following_count?: number;
+  // Admin features
+  total_points?: number;
+  last_activity?: string | null;
 }
 
 export interface AuthState {
@@ -27,4 +32,3 @@ export interface AuthState {
   user: UserProfile | null;
   error: string | null;
 }
-

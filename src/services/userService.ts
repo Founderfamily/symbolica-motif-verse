@@ -1,18 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-
-export interface UserProfile {
-  id: string;
-  username: string;
-  full_name: string;
-  bio?: string;
-  location?: string;
-  website?: string;
-  followers_count: number;
-  following_count: number;
-  contributions_count: number;
-  created_at: string;
-}
+import { UserProfile } from '@/types/auth';
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
   try {

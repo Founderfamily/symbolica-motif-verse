@@ -1,21 +1,7 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-
-export interface UserProfile {
-  id: string;
-  username: string | null;
-  full_name: string | null;
-  avatar_url?: string | null;
-  is_admin?: boolean;
-  is_banned?: boolean;
-  created_at?: string;
-  updated_at?: string;
-  bio?: string | null;
-  location?: string | null;
-  website?: string | null;
-}
+import { UserProfile } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
