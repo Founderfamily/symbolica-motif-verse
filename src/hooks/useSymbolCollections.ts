@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CollectionWithTranslations } from '@/types/collections';
+import { symbolMappingService } from '@/services/symbolMappingService';
 
 /**
  * Hook pour récupérer les collections associées à un symbole
@@ -12,8 +13,25 @@ export const useSymbolCollections = (symbolId: string | number) => {
     queryFn: async (): Promise<CollectionWithTranslations[]> => {
       if (!symbolId) return [];
 
-      // Convertir l'ID en string si c'est un nombre (pour les symboles statiques)
-      const symbolIdStr = symbolId.toString();
+      console.log('useSymbolCollections - symbolId reçu:', symbolId);
+
+      // Déterminer l'ID à utiliser pour la requête
+      let queryId: string | null = null;
+      
+      if (symbolMappingService.isStaticSymbol(symbolId)) {
+        // Pour les symboles statiques, utiliser l'ID mappé en base
+        queryId = symbolMappingService.getCollectionQueryId(symbolId);
+        console.log('Symbole statique détecté, utilisation de l\'ID mappé:', queryId);
+        
+        if (!queryId) {
+          console.log('Aucun mapping trouvé pour le symbole statique:', symbolId);
+          return [];
+        }
+      } else {
+        // Pour les symboles de la base, utiliser l'ID directement
+        queryId = symbolId.toString();
+        console.log('Symbole de base détecté, utilisation de l\'ID:', queryId);
+      }
 
       const { data, error } = await supabase
         .from('collections')
@@ -35,14 +53,14 @@ export const useSymbolCollections = (symbolId: string | number) => {
             symbol_id
           )
         `)
-        .eq('collection_symbols.symbol_id', symbolIdStr);
+        .eq('collection_symbols.symbol_id', queryId);
 
       if (error) {
         console.error('Error fetching symbol collections:', error);
         throw error;
       }
 
-      // Return the data as-is since it already matches CollectionWithTranslations type
+      console.log('Collections trouvées pour le symbole:', data?.length || 0);
       return data || [];
     },
     enabled: !!symbolId

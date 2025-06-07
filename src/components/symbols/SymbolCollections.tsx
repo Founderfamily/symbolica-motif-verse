@@ -8,6 +8,7 @@ import { Loader2, BookOpen, ArrowRight } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useSymbolCollections } from '@/hooks/useSymbolCollections';
 import { useTranslation } from '@/i18n/useTranslation';
+import { symbolMappingService } from '@/services/symbolMappingService';
 
 interface SymbolCollectionsProps {
   symbolId: string | number;
@@ -21,6 +22,15 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const { data: collections, isLoading, error } = useSymbolCollections(symbolId);
+
+  // Log pour debug
+  React.useEffect(() => {
+    console.log('SymbolCollections - symbolId:', symbolId, 'isStatic:', symbolMappingService.isStaticSymbol(symbolId));
+    if (symbolMappingService.isStaticSymbol(symbolId)) {
+      const mappedId = symbolMappingService.getCollectionQueryId(symbolId);
+      console.log('SymbolCollections - mapped ID:', mappedId);
+    }
+  }, [symbolId]);
 
   if (isLoading) {
     return (
@@ -59,6 +69,11 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
               Erreur lors du chargement des collections
             </I18nText>
           </p>
+          {symbolMappingService.isStaticSymbol(symbolId) && (
+            <p className="text-xs text-slate-400 mt-2">
+              Symbole statique: {symbolId} → Mappé vers: {symbolMappingService.getCollectionQueryId(symbolId) || 'Aucun mapping'}
+            </p>
+          )}
         </CardContent>
       </Card>
     );
@@ -81,6 +96,11 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
               Ce symbole n'est dans aucune collection pour le moment.
             </I18nText>
           </p>
+          {symbolMappingService.isStaticSymbol(symbolId) && (
+            <p className="text-xs text-slate-400 mt-2">
+              Symbole statique: {symbolId} → Mappé vers: {symbolMappingService.getCollectionQueryId(symbolId) || 'Aucun mapping disponible'}
+            </p>
+          )}
         </CardContent>
       </Card>
     );
@@ -157,6 +177,15 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
             </I18nText>
           </Button>
         </div>
+
+        {/* Debug info en mode développement */}
+        {process.env.NODE_ENV === 'development' && symbolMappingService.isStaticSymbol(symbolId) && (
+          <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
+            <p>Debug: Symbole statique {symbolId}</p>
+            <p>Mappé vers: {symbolMappingService.getCollectionQueryId(symbolId) || 'Aucun mapping'}</p>
+            <p>Collections trouvées: {collections.length}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
