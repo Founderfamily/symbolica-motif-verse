@@ -31,9 +31,16 @@ export const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ onUserCreate
       return;
     }
 
+    if (formData.password.length < 6) {
+      toast.error('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
     setLoading(true);
     try {
+      console.log('Submitting user creation form...', formData);
       await userManagementService.createUser(formData);
+      
       toast.success('Utilisateur créé avec succès');
       setOpen(false);
       setFormData({
@@ -44,9 +51,10 @@ export const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ onUserCreate
         is_admin: false
       });
       onUserCreated();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating user:', error);
-      toast.error('Erreur lors de la création de l\'utilisateur');
+      const errorMessage = error?.message || 'Erreur lors de la création de l\'utilisateur';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

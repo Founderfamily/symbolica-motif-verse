@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
 
@@ -108,49 +107,27 @@ export const userManagementService = {
   },
 
   /**
-   * Crée un nouvel utilisateur
+   * Crée un nouvel utilisateur via Edge Function
    */
   createUser: async (userData: CreateUserData): Promise<void> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      console.log('Creating user via Edge Function:', userData);
 
-      // Créer l'utilisateur via Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: userData.email,
-        password: userData.password,
-        user_metadata: {
-          username: userData.username,
-          full_name: userData.full_name
-        }
+      const { data, error } = await supabase.functions.invoke('create-user-admin', {
+        body: userData
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Failed to create user');
-
-      // Mettre à jour le profil avec les données admin
-      if (userData.is_admin) {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ is_admin: userData.is_admin })
-          .eq('id', authData.user.id);
-
-        if (updateError) throw updateError;
+      if (error) {
+        console.error('Edge Function error:', error);
+        throw new Error(error.message || 'Failed to create user');
       }
 
-      // Logger l'action
-      await supabase.rpc('insert_admin_log', {
-        p_admin_id: user.id,
-        p_action: 'create_user',
-        p_entity_type: 'user',
-        p_entity_id: authData.user.id,
-        p_details: { 
-          email: userData.email, 
-          username: userData.username, 
-          full_name: userData.full_name,
-          is_admin: userData.is_admin 
-        }
-      });
+      if (!data?.success) {
+        console.error('Edge Function returned error:', data);
+        throw new Error(data?.error || 'Failed to create user');
+      }
+
+      console.log('User created successfully:', data);
     } catch (error) {
       console.error('Error creating user:', error);
       throw error;
