@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Share2, Send } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Send, ChevronDown, ChevronUp } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
+import PostComments from './PostComments';
 
 interface GroupPostWithProfile {
   id: string;
@@ -38,6 +39,7 @@ const GroupDiscussion: React.FC<GroupDiscussionProps> = ({
   onLikePost
 }) => {
   const [newPostContent, setNewPostContent] = useState('');
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const auth = useAuth();
 
   const handleSubmitPost = () => {
@@ -45,6 +47,16 @@ const GroupDiscussion: React.FC<GroupDiscussionProps> = ({
       onCreatePost(newPostContent);
       setNewPostContent('');
     }
+  };
+
+  const toggleComments = (postId: string) => {
+    const newExpanded = new Set(expandedComments);
+    if (newExpanded.has(postId)) {
+      newExpanded.delete(postId);
+    } else {
+      newExpanded.add(postId);
+    }
+    setExpandedComments(newExpanded);
   };
 
   return (
@@ -58,12 +70,25 @@ const GroupDiscussion: React.FC<GroupDiscussionProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea
-              placeholder="What's on your mind about cultural symbols?"
-              value={newPostContent}
-              onChange={(e) => setNewPostContent(e.target.value)}
-              rows={3}
-            />
+            <div className="flex space-x-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage 
+                  src={`https://avatar.vercel.sh/${auth.user.email}.png`} 
+                  alt="You" 
+                />
+                <AvatarFallback>
+                  {auth.user.email?.charAt(0).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <Textarea
+                  placeholder="What's on your mind about cultural symbols?"
+                  value={newPostContent}
+                  onChange={(e) => setNewPostContent(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
             <div className="flex justify-end">
               <Button onClick={handleSubmitPost} disabled={!newPostContent.trim()}>
                 <Send className="h-4 w-4 mr-2" />
@@ -77,56 +102,81 @@ const GroupDiscussion: React.FC<GroupDiscussionProps> = ({
       {/* Posts Feed */}
       <div className="space-y-4">
         {posts.map((post) => (
-          <Card key={post.id}>
-            <CardContent className="p-6">
-              <div className="flex space-x-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage 
-                    src={`https://avatar.vercel.sh/${post.user_profile?.username || 'user'}.png`} 
-                    alt={post.user_profile?.username || 'User'} 
-                  />
-                  <AvatarFallback>
-                    {post.user_profile?.username?.charAt(0).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <p className="font-medium">
-                      {post.user_profile?.full_name || post.user_profile?.username || 'Unknown User'}
-                    </p>
-                    <Badge variant="outline" className="text-xs">
-                      <I18nText translationKey="community.member">Member</I18nText>
-                    </Badge>
-                    <span className="text-slate-500 text-sm">
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-slate-900 mb-3">{post.content}</p>
-                  
-                  {/* Post Actions */}
-                  <div className="flex items-center space-x-4">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => onLikePost(post.id)}
-                      className="text-slate-600 hover:text-red-600"
-                    >
-                      <Heart className="h-4 w-4 mr-1" />
-                      {post.likes_count}
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-slate-600">
-                      <MessageCircle className="h-4 w-4 mr-1" />
-                      {post.comments_count}
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-slate-600">
-                      <Share2 className="h-4 w-4 mr-1" />
-                      <I18nText translationKey="community.share">Share</I18nText>
-                    </Button>
+          <div key={post.id} className="space-y-4">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex space-x-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage 
+                      src={`https://avatar.vercel.sh/${post.user_profile?.username || 'user'}.png`} 
+                      alt={post.user_profile?.username || 'User'} 
+                    />
+                    <AvatarFallback>
+                      {post.user_profile?.username?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <p className="font-medium">
+                        {post.user_profile?.full_name || post.user_profile?.username || 'Unknown User'}
+                      </p>
+                      <Badge variant="outline" className="text-xs">
+                        <I18nText translationKey="community.member">Member</I18nText>
+                      </Badge>
+                      <span className="text-slate-500 text-sm">
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-slate-900 mb-3">{post.content}</p>
+                    
+                    {/* Post Actions */}
+                    <div className="flex items-center space-x-4">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => onLikePost(post.id)}
+                        className="text-slate-600 hover:text-red-600"
+                      >
+                        <Heart className="h-4 w-4 mr-1" />
+                        {post.likes_count}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => toggleComments(post.id)}
+                        className="text-slate-600"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        {post.comments_count}
+                        {expandedComments.has(post.id) ? (
+                          <ChevronUp className="h-4 w-4 ml-1" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 ml-1" />
+                        )}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-slate-600">
+                        <Share2 className="h-4 w-4 mr-1" />
+                        <I18nText translationKey="community.share">Share</I18nText>
+                      </Button>
+                    </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Comments Section */}
+            {expandedComments.has(post.id) && (
+              <div className="ml-4">
+                <PostComments 
+                  postId={post.id}
+                  onCommentsChange={(count) => {
+                    // Update the post's comment count if needed
+                    console.log(`Post ${post.id} has ${count} comments`);
+                  }}
+                />
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         ))}
       </div>
 

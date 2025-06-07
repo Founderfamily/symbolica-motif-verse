@@ -304,6 +304,35 @@ export type Database = {
           },
         ]
       }
+      comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_sections: {
         Row: {
           content: Json | null
@@ -466,6 +495,170 @@ export type Database = {
         }
         Relationships: []
       }
+      discovery_likes: {
+        Row: {
+          created_at: string
+          discovery_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discovery_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discovery_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_likes_discovery_id_fkey"
+            columns: ["discovery_id"]
+            isOneToOne: false
+            referencedRelation: "group_discoveries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_discoveries: {
+        Row: {
+          comments_count: number
+          created_at: string
+          description: string | null
+          entity_id: string
+          entity_type: string
+          group_id: string
+          id: string
+          likes_count: number
+          shared_by: string
+          title: string
+        }
+        Insert: {
+          comments_count?: number
+          created_at?: string
+          description?: string | null
+          entity_id: string
+          entity_type: string
+          group_id: string
+          id?: string
+          likes_count?: number
+          shared_by: string
+          title: string
+        }
+        Update: {
+          comments_count?: number
+          created_at?: string
+          description?: string | null
+          entity_id?: string
+          entity_type?: string
+          group_id?: string
+          id?: string
+          likes_count?: number
+          shared_by?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_discoveries_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "interest_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_invitations: {
+        Row: {
+          created_at: string
+          email: string | null
+          expires_at: string
+          group_id: string
+          id: string
+          invited_by: string
+          invited_user_id: string | null
+          message: string | null
+          responded_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          group_id: string
+          id?: string
+          invited_by: string
+          invited_user_id?: string | null
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          group_id?: string
+          id?: string
+          invited_by?: string
+          invited_user_id?: string | null
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_invitations_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "interest_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_join_requests: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          message: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_join_requests_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "interest_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
           group_id: string
@@ -491,6 +684,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "interest_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_id: string | null
+          group_id: string
+          id: string
+          message: string
+          notification_type: string
+          read: boolean
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string | null
+          group_id: string
+          id?: string
+          message: string
+          notification_type: string
+          read?: boolean
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string | null
+          group_id?: string
+          id?: string
+          message?: string
+          notification_type?: string
+          read?: boolean
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_notifications_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "interest_groups"
