@@ -17,7 +17,7 @@ const Hero = () => {
       <div className="text-center mb-10 relative z-10">
         <div className="inline-block p-2 bg-gradient-to-r from-amber-50 to-amber-100 rounded-full mb-4 animate-pulse-light">
           <div className="bg-gradient-to-r from-amber-800/20 to-amber-700/20 px-4 py-1 rounded-full text-amber-900 text-sm font-medium">
-            <I18nText translationKey="app.version">Version Alpha 0.1</I18nText>
+            <I18nText translationKey="app.version">Version 1.2.0</I18nText>
           </div>
         </div>
 
