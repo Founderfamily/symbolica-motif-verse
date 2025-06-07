@@ -103,9 +103,8 @@ const Auth: React.FC = () => {
             <div className="space-y-8 order-2 lg:order-1">
               <div className="text-center lg:text-left">
                 <div className="flex items-center justify-center lg:justify-start space-x-2 mb-4">
-                  <img src="/logo.svg" alt="Symbolica" className="h-10 w-10" />
                   <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
-                    {t('app.name', { ns: 'app' })}
+                    <I18nText translationKey="name" ns="app">Symbolica</I18nText>
                   </h1>
                   <Badge variant="outline" className="text-amber-600 border-amber-600 animate-pulse">
                     {t('communityBadge', { ns: 'auth' })}
