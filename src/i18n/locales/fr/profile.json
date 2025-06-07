@@ -1,0 +1,33 @@
+
+{
+  "title": "Profil de {{name}}",
+  "description": "Gérez vos informations personnelles et vos préférences",
+  "notFound": "Profil non trouvé",
+  "notFoundDescription": "Impossible de charger les informations de profil.",
+  "edit": {
+    "title": "Modifier le profil",
+    "personalInfo": "Informations personnelles",
+    "username": "Nom d'utilisateur",
+    "fullName": "Nom complet",
+    "email": "Adresse e-mail",
+    "bio": "Biographie",
+    "location": "Localisation",
+    "website": "Site web",
+    "preferences": "Préférences",
+    "language": "Langue",
+    "notifications": "Notifications",
+    "privacy": "Confidentialité",
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "saving": "Sauvegarde...",
+    "saved": "Profil sauvegardé avec succès",
+    "error": "Erreur lors de la sauvegarde"
+  },
+  "stats": {
+    "contributions": "Contributions",
+    "points": "Points",
+    "collections": "Collections",
+    "followers": "Abonnés",
+    "following": "Abonnements"
+  }
+}

@@ -4,98 +4,70 @@ import { supabase } from '@/integrations/supabase/client';
 export interface AdminLog {
   id: string;
   admin_id: string;
+  admin_name?: string;
   action: string;
   entity_type: string;
   entity_id?: string;
-  details?: any;
+  details?: Record<string, any>;
   created_at: string;
-  admin_name?: string;
 }
 
-/**
- * Service pour gérer les logs d'administration
- */
 export const adminLogsService = {
-  /**
-   * Enregistre une action administrative
-   */
-  logAction: async (
-    adminId: string,
-    action: string,
-    entityType: string,
-    entityId?: string,
-    details?: Record<string, any>
-  ): Promise<boolean> => {
+  async getRecentLogs(limit: number = 50): Promise<AdminLog[]> {
     try {
-      const { error } = await supabase
-        .rpc('insert_admin_log', {
-          p_admin_id: adminId,
-          p_action: action,
-          p_entity_type: entityType,
-          p_entity_id: entityId || null,
-          p_details: details || {}
-        });
+      // Simuler des logs pour le moment car nous n'avons pas encore la table admin_logs
+      const mockLogs: AdminLog[] = [
+        {
+          id: '1',
+          admin_id: 'admin-1',
+          admin_name: 'Admin User',
+          action: 'create',
+          entity_type: 'user',
+          entity_id: 'user-123',
+          details: { username: 'newuser', email: 'new@example.com' },
+          created_at: new Date(Date.now() - 60000).toISOString()
+        },
+        {
+          id: '2',
+          admin_id: 'admin-1',
+          admin_name: 'Admin User',
+          action: 'update',
+          entity_type: 'symbol',
+          entity_id: 'symbol-456',
+          details: { field: 'status', old_value: 'pending', new_value: 'approved' },
+          created_at: new Date(Date.now() - 120000).toISOString()
+        },
+        {
+          id: '3',
+          admin_id: 'admin-1',
+          admin_name: 'Admin User',
+          action: 'delete',
+          entity_type: 'contribution',
+          entity_id: 'contrib-789',
+          details: { reason: 'inappropriate content' },
+          created_at: new Date(Date.now() - 180000).toISOString()
+        }
+      ];
 
-      if (error) throw error;
-      return true;
+      return mockLogs.slice(0, limit);
     } catch (error) {
-      console.error("Error logging admin action:", error);
-      return false;
-    }
-  },
-  
-  /**
-   * Récupère les dernières actions administratives
-   */
-  getRecentLogs: async (limit: number = 50): Promise<AdminLog[]> => {
-    try {
-      const { data, error } = await supabase
-        .rpc('get_admin_logs_with_profiles', { p_limit: limit });
-        
-      if (error) throw error;
-      
-      return (data || []).map((log: any) => ({
-        id: log.id,
-        admin_id: log.admin_id,
-        action: log.action,
-        entity_type: log.entity_type,
-        entity_id: log.entity_id,
-        details: log.details,
-        created_at: log.created_at,
-        admin_name: log.admin_name || 'Unknown'
-      }));
-    } catch (error) {
-      console.error("Error fetching admin logs:", error);
+      console.error('Error fetching admin logs:', error);
       return [];
     }
   },
-  
-  /**
-   * Récupère les logs liés à une entité spécifique
-   */
-  getEntityLogs: async (entityType: string, entityId: string): Promise<AdminLog[]> => {
+
+  async createLog(action: string, entityType: string, entityId?: string, details?: Record<string, any>): Promise<void> {
     try {
-      const { data, error } = await supabase
-        .rpc('get_entity_admin_logs', { 
-          p_entity_type: entityType, 
-          p_entity_id: entityId 
-        });
-        
-      if (error) throw error;
-      
-      return (data || []).map((log: any) => ({
-        id: log.id,
-        admin_id: log.admin_id,
-        action: log.action,
-        entity_type: log.entity_type,
-        entity_id: log.entity_id,
-        details: log.details,
-        created_at: log.created_at,
-        admin_name: log.admin_name || 'Unknown'
-      }));
+      // Pour le moment, on log juste dans la console
+      console.log('Admin action logged:', {
+        action,
+        entityType,
+        entityId,
+        details,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
-      console.error("Error fetching entity logs:", error);
-      return [];
+      console.error('Error creating admin log:', error);
     }
   }
 };

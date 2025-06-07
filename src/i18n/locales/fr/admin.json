@@ -9,7 +9,8 @@
     "welcomeMessage": "Gérez et supervisez la plateforme Symbolica",
     "overview": "Aperçu général",
     "analytics": "Analyses et tendances",
-    "recentActivity": "Activité récente"
+    "recentActivity": "Activité récente",
+    "systemHealth": "État du système"
   },
   "actions": {
     "refresh": "Actualiser",
@@ -45,12 +46,25 @@
     "rejected": "Rejetées"
   },
   "logs": {
-    "title": "Logs d'administration",
+    "title": "Journal d'activité des administrateurs",
     "action": "Action",
     "admin": "Administrateur",
     "date": "Date",
     "details": "Détails",
     "noLogs": "Aucun log disponible",
-    "loadingLogs": "Chargement des logs..."
+    "loadingLogs": "Chargement des logs...",
+    "refresh": "Rafraîchir",
+    "searchPlaceholder": "Rechercher dans les logs...",
+    "entityFilter": "Type d'entité",
+    "actionFilter": "Type d'action",
+    "allEntities": "Toutes les entités",
+    "allActions": "Toutes les actions",
+    "noLogsFound": "Aucune activité correspondant aux critères de recherche n'a été trouvée."
+  },
+  "system": {
+    "health": "État du système",
+    "monitoring": "Surveillance",
+    "backup": "Sauvegarde",
+    "maintenance": "Maintenance"
   }
 }

@@ -1,15 +1,33 @@
 
 {
-  "profile": {
-    "title": "Profile",
+  "title": "{{name}}'s Profile",
+  "description": "Manage your personal information and preferences",
+  "notFound": "Profile not found",
+  "notFoundDescription": "Unable to load profile information.",
+  "edit": {
+    "title": "Edit Profile",
+    "personalInfo": "Personal Information",
     "username": "Username",
-    "email": "Email",
     "fullName": "Full Name",
-    "contributions": "My Contributions",
-    "changePassword": "Change Password",
-    "deleteAccount": "Delete Account",
-    "profile": "Profile",
-    "viewProfile": "View Profile",
-    "signOut": "Sign Out"
+    "email": "Email Address",
+    "bio": "Biography",
+    "location": "Location",
+    "website": "Website",
+    "preferences": "Preferences",
+    "language": "Language",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "saved": "Profile saved successfully",
+    "error": "Error saving profile"
+  },
+  "stats": {
+    "contributions": "Contributions",
+    "points": "Points",
+    "collections": "Collections",
+    "followers": "Followers",
+    "following": "Following"
   }
 }

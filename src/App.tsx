@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
@@ -70,6 +69,7 @@ function App() {
                 <Route path="/community" element={<CommunityPage />} />
                 <Route path="/trending" element={<TrendingPage />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/:username" element={<Profile />} />
                 <Route path="/map" element={<MapExplorer />} />
                 <Route path="/analysis" element={<AnalysisPage />} />
