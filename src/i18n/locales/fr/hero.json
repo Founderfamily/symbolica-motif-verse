@@ -1,9 +1,7 @@
 
 {
-  "hero": {
-    "heading": "Découvrez le patrimoine symbolique mondial",
-    "subheading": "Explorez, contribuez et apprenez sur les motifs culturels à travers les âges",
-    "community": "Rejoindre une communauté",
-    "explore": "Commencer l'exploration"
-  }
+  "heading": "Découvrez le patrimoine symbolique mondial",
+  "subheading": "Explorez, contribuez et apprenez sur les motifs culturels à travers les âges",
+  "community": "Rejoindre une communauté",
+  "explore": "Commencer l'exploration"
 }

@@ -1,26 +1,24 @@
 
 {
-  "howItWorks": {
-    "process": "Notre Processus",
-    "title": "Comment Ça Marche",
-    "intro": "De la découverte à la numérisation, nous rendons le patrimoine symbolique accessible",
-    "steps": {
-      "1": {
-        "title": "Capturer",
-        "desc": "Téléchargez des images de motifs d'artefacts, d'architecture ou de textiles"
-      },
-      "2": {
-        "title": "Identifier",
-        "desc": "Notre IA aide à identifier le motif et à trouver des exemples similaires"
-      },
-      "3": {
-        "title": "Explorer",
-        "desc": "Découvrez le contexte culturel et la signification historique"
-      },
-      "4": {
-        "title": "Participer",
-        "desc": "Contribuez au référentiel mondial de connaissances symboliques"
-      }
+  "process": "Notre Processus",
+  "title": "Comment Ça Marche",
+  "intro": "De la découverte à la numérisation, nous rendons le patrimoine symbolique accessible",
+  "steps": {
+    "1": {
+      "title": "Capturer",
+      "desc": "Téléchargez des images de motifs d'artefacts, d'architecture ou de textiles"
+    },
+    "2": {
+      "title": "Identifier",
+      "desc": "Notre IA aide à identifier le motif et à trouver des exemples similaires"
+    },
+    "3": {
+      "title": "Explorer",
+      "desc": "Découvrez le contexte culturel et la signification historique"
+    },
+    "4": {
+      "title": "Participer",
+      "desc": "Contribuez au référentiel mondial de connaissances symboliques"
     }
   }
 }

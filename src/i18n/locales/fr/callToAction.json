@@ -1,10 +1,8 @@
 
 {
-  "callToAction": {
-    "joinUs": "Rejoignez notre communauté mondiale d'enthousiastes du patrimoine",
-    "description": "Aidez-nous à préserver et célébrer les symboles culturels du monde entier grâce à la documentation collaborative et au partage.",
-    "join": "Rejoindre la communauté",
-    "explore": "Explorer les symboles",
-    "support": "Vos contributions aident à préserver le patrimoine symbolique mondial pour les générations futures."
-  }
+  "joinUs": "Rejoignez notre communauté mondiale d'enthousiastes du patrimoine",
+  "description": "Aidez-nous à préserver et célébrer les symboles culturels du monde entier grâce à la documentation collaborative et au partage.",
+  "join": "Rejoindre la communauté",
+  "explore": "Explorer les symboles",
+  "support": "Vos contributions aident à préserver le patrimoine symbolique mondial pour les générations futures."
 }

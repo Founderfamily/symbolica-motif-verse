@@ -27,37 +27,9 @@ import frCommunity from './locales/fr/community.json';
 import enContributions from './locales/en/contributions.json';
 import frContributions from './locales/fr/contributions.json';
 
-// Import homepage sections
-import enHero from './locales/en/hero.json';
-import frHero from './locales/fr/hero.json';
-import enFeatures from './locales/en/features.json';
-import frFeatures from './locales/fr/features.json';
-import enCallToAction from './locales/en/callToAction.json';
-import frCallToAction from './locales/fr/callToAction.json';
-import enGamification from './locales/en/gamification.json';
-import frGamification from './locales/fr/gamification.json';
-import enHowItWorks from './locales/en/howItWorks.json';
-import frHowItWorks from './locales/fr/howItWorks.json';
-import enUploadTools from './locales/en/uploadTools.json';
-import frUploadTools from './locales/fr/uploadTools.json';
-import enTestimonials from './locales/en/testimonials.json';
-import frTestimonials from './locales/fr/testimonials.json';
-import enSections from './locales/en/sections.json';
-import frSections from './locales/fr/sections.json';
-
 const resources = {
   en: {
-    translation: {
-      ...enTranslations,
-      ...enHero.hero,
-      ...enFeatures.features,
-      ...enCallToAction.callToAction,
-      ...enGamification.gamification,
-      ...enHowItWorks.howItWorks,
-      ...enUploadTools.uploadTools,
-      ...enTestimonials,
-      ...enSections.sections
-    },
+    translation: enTranslations,
     app: enTranslations,
     auth: enAuth,
     admin: enAdmin,
@@ -67,28 +39,10 @@ const resources = {
     search: enSearch,
     roadmap: enRoadmap,
     community: enCommunity,
-    contributions: enContributions,
-    hero: enHero,
-    features: enFeatures,
-    callToAction: enCallToAction,
-    gamification: enGamification,
-    howItWorks: enHowItWorks,
-    uploadTools: enUploadTools,
-    testimonials: enTestimonials,
-    sections: enSections
+    contributions: enContributions
   },
   fr: {
-    translation: {
-      ...frTranslations,
-      ...frHero.hero,
-      ...frFeatures.features,
-      ...frCallToAction.callToAction,
-      ...frGamification.gamification,
-      ...frHowItWorks.howItWorks,
-      ...frUploadTools.uploadTools,
-      ...frTestimonials,
-      ...frSections.sections
-    },
+    translation: frTranslations,
     app: frTranslations,
     auth: frAuth,
     admin: frAdmin,
@@ -98,15 +52,7 @@ const resources = {
     search: frSearch,
     roadmap: frRoadmap,
     community: frCommunity,
-    contributions: frContributions,
-    hero: frHero,
-    features: frFeatures,
-    callToAction: frCallToAction,
-    gamification: frGamification,
-    howItWorks: frHowItWorks,
-    uploadTools: frUploadTools,
-    testimonials: frTestimonials,
-    sections: frSections
+    contributions: frContributions
   }
 };
 
@@ -132,7 +78,7 @@ i18n
     
     // Add default namespace
     defaultNS: 'translation',
-    ns: ['translation', 'app', 'auth', 'admin', 'header', 'profile', 'navigation', 'search', 'roadmap', 'community', 'contributions', 'hero', 'features', 'callToAction', 'gamification', 'howItWorks', 'uploadTools', 'testimonials', 'sections']
+    ns: ['translation', 'app', 'auth', 'admin', 'header', 'profile', 'navigation', 'search', 'roadmap', 'community', 'contributions']
   });
 
 export default i18n;

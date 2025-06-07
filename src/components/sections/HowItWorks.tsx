@@ -7,32 +7,32 @@ const HowItWorks = () => {
   const steps = [
     { 
       step: "1", 
-      titleKey: "steps.1.title", 
-      descKey: "steps.1.desc",
+      titleKey: "howItWorks.steps.1.title", 
+      descKey: "howItWorks.steps.1.desc",
       icon: Camera,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50"
     },
     { 
       step: "2", 
-      titleKey: "steps.2.title", 
-      descKey: "steps.2.desc",
+      titleKey: "howItWorks.steps.2.title", 
+      descKey: "howItWorks.steps.2.desc",
       icon: Tag,
       color: "from-amber-500 to-amber-600", 
       bgColor: "bg-amber-50"
     },
     { 
       step: "3", 
-      titleKey: "steps.3.title", 
-      descKey: "steps.3.desc",
+      titleKey: "howItWorks.steps.3.title", 
+      descKey: "howItWorks.steps.3.desc",
       icon: Compass,
       color: "from-emerald-500 to-emerald-600",
       bgColor: "bg-emerald-50"
     },
     { 
       step: "4", 
-      titleKey: "steps.4.title", 
-      descKey: "steps.4.desc",
+      titleKey: "howItWorks.steps.4.title", 
+      descKey: "howItWorks.steps.4.desc",
       icon: Palette,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50"
@@ -50,13 +50,13 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-12">
           <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-slate-200 to-slate-300 text-slate-800 inline-block mb-2">
-            <I18nText translationKey="process">Notre Processus</I18nText>
+            <I18nText translationKey="howItWorks.process">Notre Processus</I18nText>
           </span>
           <h2 className="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-            <I18nText translationKey="title">Comment ça marche</I18nText>
+            <I18nText translationKey="howItWorks.title">Comment ça marche</I18nText>
           </h2>
           <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
-            <I18nText translationKey="intro">
+            <I18nText translationKey="howItWorks.intro">
               De la découverte à la numérisation, nous rendons le patrimoine symbolique accessible
             </I18nText>
           </p>
