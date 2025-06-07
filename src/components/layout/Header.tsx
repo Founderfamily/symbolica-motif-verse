@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -144,7 +145,7 @@ const Header: React.FC = () => {
               </div>
               <Input
                 type="search"
-                placeholder={t('header.search')}
+                placeholder={t('search.placeholder', { ns: 'header' })}
                 className="pl-10 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring focus:ring-blue-200 text-sm w-64"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -170,18 +171,18 @@ const Header: React.FC = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel>
-                    <I18nText translationKey="header.myAccount">My Account</I18nText>
+                    {t('myAccount', { ns: 'header' })}
                   </DropdownMenuLabel>
                   <DropdownMenuItem asChild>
                     <Link to="/profile">
                       <User className="mr-2 h-4 w-4" />
-                      <I18nText translationKey="header.profile">Profile</I18nText>
+                      {t('profile', { ns: 'header' })}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/contribute">
                       <HelpCircle className="mr-2 h-4 w-4" />
-                      <I18nText translationKey="header.contribute">Contribute</I18nText>
+                      {t('contribute', { ns: 'header' })}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -190,14 +191,14 @@ const Header: React.FC = () => {
                       <DropdownMenuItem asChild>
                         <Link to="/admin">
                           <Settings className="mr-2 h-4 w-4" />
-                          <I18nText translationKey="header.adminDashboard">Admin Dashboard</I18nText>
+                          {t('adminDashboard', { ns: 'header' })}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
                   )}
                   <DropdownMenuItem onClick={() => auth.signOut()}>
-                    <I18nText translationKey="header.logout">Log out</I18nText>
+                    {t('logout', { ns: 'header' })}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
