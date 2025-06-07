@@ -3,5 +3,7 @@
   "app": {
     "name": "Symbolica",
     "version": "Version 1.2.0"
-  }
+  },
+  "appName": "Symbolica",
+  "intro": "Explore, analyze and contribute to the world's symbolic heritage"
 }
