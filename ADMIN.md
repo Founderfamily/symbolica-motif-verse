@@ -1,5 +1,3 @@
-
-
 # Documentation Administrative - Cultural Heritage Symbols
 
 ## Vue d'ensemble du système
@@ -777,4 +775,3 @@ Les tables sont configurées pour RLS mais les politiques ne sont pas encore imp
 *Cette documentation reflète la structure RÉELLE de la base de données Cultural Heritage Symbols.*
 *Dernière mise à jour: Décembre 2024*
 *Version: 4.7.0 - Corrigée selon l'état actuel de la base*
-
