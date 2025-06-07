@@ -1,15 +1,23 @@
 
 {
-  "gamification": {
-    "points": {
-      "title": "Earn Points",
-      "description": "Get points for every contribution, comment and validation you make"
-    },
-    "level": "Level",
-    "progress": "Progress",
-    "achievements": "Achievements",
-    "leaderboard": "Leaderboard",
-    "badges": "Badges",
-    "rank": "Rank"
-  }
+  "title": "Earn Rewards for Your Contributions",
+  "subtitle": "Join our community and earn points, badges and recognition",
+  "points": {
+    "title": "Earn Points",
+    "description": "Get points for every contribution, comment and validation you make",
+    "points": "points"
+  },
+  "badges": {
+    "title": "Unlock Badges",
+    "description": "Earn special badges for your achievements and exceptional contributions"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "description": "See where you rank among the community's most active contributors"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "description": "Unlock special achievements for reaching important milestones"
+  },
+  "viewYourProgress": "View Your Progress"
 }

@@ -14,12 +14,12 @@
     "forum": "Forum",
     "legal": "Legal",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
+    "terms": "Terms of Use",
     "contact": "Contact",
     "copyright": "© 2025 Symbolica Museum",
     "newsletter": {
-      "title": "Stay Updated",
-      "description": "Get the latest updates on new symbols and features",
+      "title": "Stay Informed",
+      "description": "Receive the latest updates on new symbols and features",
       "placeholder": "Enter your email",
       "subscribe": "Subscribe",
       "success": "Thank you for subscribing!"

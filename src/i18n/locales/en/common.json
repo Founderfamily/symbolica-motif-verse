@@ -29,28 +29,5 @@
   "hide": "Hide",
   "yes": "Yes",
   "no": "No",
-  "ok": "OK",
-  "days": {
-    "monday": "Mon",
-    "tuesday": "Tue", 
-    "wednesday": "Wed",
-    "thursday": "Thu",
-    "friday": "Fri",
-    "saturday": "Sat",
-    "sunday": "Sun"
-  },
-  "months": {
-    "january": "January",
-    "february": "February",
-    "march": "March", 
-    "april": "April",
-    "may": "May",
-    "june": "June",
-    "july": "July",
-    "august": "August",
-    "september": "September",
-    "october": "October",
-    "november": "November",
-    "december": "December"
-  }
+  "ok": "OK"
 }

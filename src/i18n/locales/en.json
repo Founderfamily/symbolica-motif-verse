@@ -1,0 +1,134 @@
+
+{
+  "app": {
+    "version": "Version 1.2.0"
+  },
+  "hero": {
+    "heading": "Discover the world's symbolic heritage",
+    "subheading": "Explore, contribute and learn about cultural patterns through the ages",
+    "community": "Join a community of cultural enthusiasts",
+    "explore": "Start exploring"
+  },
+  "sections": {
+    "museumPortal": "Symbolica Museum",
+    "communityPortal": "Collaborative symbolic heritage portal",
+    "joinCommunity": "Join a community",
+    "partners": "Our Partners",
+    "contactUs": "Contact Us",
+    "community": "Community",
+    "roadmap": "Our Roadmap",
+    "testimonials": "What people say",
+    "newsletter": "Stay Informed",
+    "newsletterSub": "Receive the latest updates on new symbols and features",
+    "subscribe": "Subscribe",
+    "openSource": "Open Source Project",
+    "howItWorks": "How It Works"
+  },
+  "quickAccess": {
+    "title": "Quick Access",
+    "description": "Explore, discover and contribute to our global collection of cultural symbols",
+    "explore": "Explore →",
+    "exploreSymbols": {
+      "title": "Explore Symbols",
+      "description": "Discover our comprehensive collection with advanced filters"
+    },
+    "interactiveMap": {
+      "title": "Interactive Map",
+      "description": "Explore symbols by geographical location"
+    },
+    "thematicCollections": {
+      "title": "Thematic Collections",
+      "description": "Browse our theme-organized collections"
+    },
+    "contribute": {
+      "title": "Contribute",
+      "description": "Share your discoveries with the community"
+    },
+    "community": {
+      "title": "Community",
+      "description": "Join interest groups and discussions"
+    },
+    "trends": {
+      "title": "Trends",
+      "description": "Discover popular and recent symbols"
+    }
+  },
+  "collections": {
+    "featured": {
+      "title": "Thematic Collections",
+      "description": "Explore fascinating journeys through symbols from around the world. Each collection tells a unique story.",
+      "discoverAll": "Discover all collections"
+    },
+    "title": "Collections",
+    "featuredBadge": "Featured",
+    "backToCollections": "Back to collections",
+    "notFound": "Collection not found",
+    "share": "Share",
+    "viewOnMap": "View on map",
+    "symbolsCount": "Symbols",
+    "culturesCount": "Cultures",
+    "periodsCount": "Periods",
+    "symbolsInCollection": "Symbols in collection",
+    "noSymbols": "No symbols in this collection",
+    "explore": "Explore →"
+  },
+  "callToAction": {
+    "joinUs": "Join our global community of heritage enthusiasts",
+    "description": "Help us preserve and celebrate cultural symbols from around the world through collaborative documentation and sharing.",
+    "join": "Join the community",
+    "explore": "Explore symbols",
+    "support": "Your contributions help preserve the world's symbolic heritage for future generations."
+  },
+  "features": {
+    "tagline": "Discover Our Features",
+    "title": "Tools for Symbol Exploration",
+    "mapping": {
+      "title": "Global Mapping",
+      "description": "Visualize symbolic connections between cultures and historical periods through our interactive mapping interface."
+    },
+    "identification": {
+      "title": "Symbol Identification",
+      "description": "Upload images to identify symbols and discover their cultural context, history and meaning."
+    },
+    "documentation": {
+      "title": "Collaborative Documentation",
+      "description": "Contribute to our database by adding symbols, historical context and cultural significance."
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "symbols": "Symbols",
+    "collections": "Collections",
+    "community": "Community",
+    "contribute": "Contribute",
+    "about": "About",
+    "profile": "Profile",
+    "login": "Login",
+    "logout": "Logout",
+    "admin": "Administration",
+    "mapExplorer": "Explore Map",
+    "analysis": "Analysis",
+    "trending": "Trending",
+    "mcp": "MCP Search",
+    "enterprise": "Enterprise",
+    "mobile": "Mobile"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "name": "Name",
+    "description": "Description"
+  }
+}

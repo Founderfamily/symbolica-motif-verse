@@ -1,19 +1,17 @@
 
 {
-  "features": {
-    "tagline": "Discover Our Features",
-    "title": "Tools for Symbol Exploration",
-    "mapping": {
-      "title": "Global Mapping",
-      "description": "Visualize symbolic connections across cultures and time periods through our interactive map interface."
-    },
-    "identification": {
-      "title": "Symbol Identification", 
-      "description": "Upload images to identify symbols and discover their cultural context, history and significance."
-    },
-    "documentation": {
-      "title": "Collaborative Documentation",
-      "description": "Contribute to our database by adding symbols, historical context and cultural significance."
-    }
+  "tagline": "Discover Our Features",
+  "title": "Tools for Symbol Exploration",
+  "mapping": {
+    "title": "Global Mapping",
+    "description": "Visualize symbolic connections between cultures and historical periods through our interactive mapping interface."
+  },
+  "identification": {
+    "title": "Symbol Identification",
+    "description": "Upload images to identify symbols and discover their cultural context, history and meaning."
+  },
+  "documentation": {
+    "title": "Collaborative Documentation",
+    "description": "Contribute to our database by adding symbols, historical context and cultural significance."
   }
 }
