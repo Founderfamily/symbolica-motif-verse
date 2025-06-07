@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { useEffect } from 'react';
+import { AuthProvider } from '@/hooks/useAuth';
 import Layout from '@/components/layout/Layout';
 import HomePage from '@/pages/HomePage';
 import SymbolsPage from '@/pages/SymbolsPage';
@@ -57,43 +58,45 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="min-h-screen bg-slate-50">
-          <Layout>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/symbols" element={<SymbolsPage />} />
-              <Route path="/collections" element={<CollectionsPage />} />
-              <Route path="/collection/:id" element={<LazyCollectionDetailPage />} />
-              <Route path="/community" element={<CommunityPage />} />
-              <Route path="/trending" element={<TrendingPage />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/profile/:username" element={<Profile />} />
-              <Route path="/map" element={<MapExplorer />} />
-              <Route path="/analysis" element={<AnalysisPage />} />
-              <Route path="/contributions" element={<ContributionsPage />} />
-              <Route path="/contribute" element={<NewContribution />} />
-              <Route path="/legal" element={<LegalPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/enterprise" element={<EnterprisePage />} />
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-slate-50">
+            <Layout>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/symbols" element={<SymbolsPage />} />
+                <Route path="/collections" element={<CollectionsPage />} />
+                <Route path="/collection/:id" element={<LazyCollectionDetailPage />} />
+                <Route path="/community" element={<CommunityPage />} />
+                <Route path="/trending" element={<TrendingPage />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/profile/:username" element={<Profile />} />
+                <Route path="/map" element={<MapExplorer />} />
+                <Route path="/analysis" element={<AnalysisPage />} />
+                <Route path="/contributions" element={<ContributionsPage />} />
+                <Route path="/contribute" element={<NewContribution />} />
+                <Route path="/legal" element={<LegalPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/enterprise" element={<EnterprisePage />} />
 
-              {/* Admin Routes */}
-              <Route path="/admin" element={<Dashboard />} />
-              <Route path="/admin/users" element={<UsersManagement />} />
-              <Route path="/admin/contributions" element={<ContributionsManagement />} />
-              <Route path="/admin/symbols" element={<SymbolsManagement />} />
-              <Route path="/admin/collections" element={<CollectionsManagement />} />
-              <Route path="/admin/settings" element={<SystemSettings />} />
+                {/* Admin Routes */}
+                <Route path="/admin" element={<Dashboard />} />
+                <Route path="/admin/users" element={<UsersManagement />} />
+                <Route path="/admin/contributions" element={<ContributionsManagement />} />
+                <Route path="/admin/symbols" element={<SymbolsManagement />} />
+                <Route path="/admin/collections" element={<CollectionsManagement />} />
+                <Route path="/admin/settings" element={<SystemSettings />} />
 
-              {/* Not Found Route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-          <Toaster position="top-right" />
-        </div>
-      </Router>
+                {/* Not Found Route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+            <Toaster position="top-right" />
+          </div>
+        </Router>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
