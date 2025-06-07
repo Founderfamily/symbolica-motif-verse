@@ -52,6 +52,8 @@ import enTestimonials from './locales/en/testimonials.json';
 import frTestimonials from './locales/fr/testimonials.json';
 import enGamification from './locales/en/gamification.json';
 import frGamification from './locales/fr/gamification.json';
+import enSymbols from './locales/en/symbols.json';
+import frSymbols from './locales/fr/symbols.json';
 
 const resources = {
   en: {
@@ -77,7 +79,8 @@ const resources = {
     quickAccess: enQuickAccess,
     uploadTools: enUploadTools,
     testimonials: enTestimonials,
-    gamification: enGamification
+    gamification: enGamification,
+    symbols: enSymbols
   },
   fr: {
     translation: frTranslations,
@@ -102,7 +105,8 @@ const resources = {
     quickAccess: frQuickAccess,
     uploadTools: frUploadTools,
     testimonials: frTestimonials,
-    gamification: frGamification
+    gamification: frGamification,
+    symbols: frSymbols
   }
 };
 

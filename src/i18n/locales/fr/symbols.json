@@ -1,0 +1,34 @@
+
+{
+  "title": "Symboles",
+  "subtitle": "Explorez notre collection de symboles culturels du monde entier",
+  "description": "Découvrez la richesse du patrimoine symbolique mondial à travers notre collection collaborative",
+  "explore": "Explorer",
+  "search": "Rechercher des symboles...",
+  "filter": "Filtrer",
+  "noResults": "Aucun symbole trouvé",
+  "loadMore": "Charger plus",
+  "culture": "Culture",
+  "period": "Période",
+  "meaning": "Signification",
+  "origin": "Origine",
+  "stats": {
+    "totalSymbols": "Symboles documentés",
+    "cultures": "Cultures représentées",
+    "contributors": "Contributeurs actifs",
+    "countries": "Pays couverts"
+  },
+  "categories": {
+    "all": "Tous",
+    "religious": "Religieux",
+    "cultural": "Culturel",
+    "historical": "Historique",
+    "artistic": "Artistique"
+  },
+  "details": {
+    "information": "Informations",
+    "history": "Histoire",
+    "meaning": "Signification",
+    "variations": "Variations"
+  }
+}

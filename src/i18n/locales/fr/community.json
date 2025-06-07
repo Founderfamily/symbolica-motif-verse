@@ -32,7 +32,23 @@
     "members": "Membres de la Communauté",
     "groups": "Groupes d'Intérêt",
     "discussions": "Discussions Actives",
-    "contributions": "Contributions Mensuelles"
+    "contributions": "Contributions Mensuelles",
+    "discoveries": "Découvertes",
+    "join": "Rejoindre"
+  },
+  "features": {
+    "thematicCommunities": {
+      "title": "Communautés Thématiques",
+      "description": "Rejoignez des groupes spécialisés selon vos centres d'intérêt culturels et patrimoniaux"
+    },
+    "personalSpace": {
+      "title": "Espace Personnel",
+      "description": "Créez votre propre collection de symboles et partagez vos découvertes avec la communauté"
+    },
+    "intuitiveNavigation": {
+      "title": "Navigation Intuitive",
+      "description": "Explorez facilement les symboles grâce à notre interface de recherche avancée et nos filtres intelligents"
+    }
   },
   "createGroup": {
     "title": "Créer un Nouveau Groupe d'Intérêt",

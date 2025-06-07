@@ -60,13 +60,13 @@ const Community = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-12">
           <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
-            <I18nText translationKey="sections.community" />
+            <I18nText translationKey="community" ns="sections">Communauté</I18nText>
           </span>
           <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-            <I18nText translationKey="community.title" />
+            <I18nText translationKey="title" ns="community">Hub Communautaire</I18nText>
           </h2>
           <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
-            <I18nText translationKey="community.description" />
+            <I18nText translationKey="description" ns="community">Participez aux discussions, partagez vos découvertes et collaborez avec d'autres chercheurs</I18nText>
           </p>
         </div>
         
@@ -121,17 +121,17 @@ const Community = () => {
                       </p>
                       <p className="text-sm text-slate-500 flex items-center">
                         <Users className="h-3 w-3 mr-1 text-slate-400" /> 
-                        {group.members_count} <I18nText translationKey="community.stats.members" />
+                        {group.members_count} <I18nText translationKey="stats.members" ns="community">membres</I18nText>
                       </p>
                     </div>
                   </div>
                   <div className="flex justify-between text-sm items-center">
                     <span className="flex items-center gap-1 text-slate-600">
                       <MapPin className="h-4 w-4 text-slate-500" />
-                      {group.discoveries_count} <I18nText translationKey="community.stats.discoveries" />
+                      {group.discoveries_count} <I18nText translationKey="stats.discoveries" ns="community">découvertes</I18nText>
                     </span>
                     <span className="px-3 py-1.5 text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
-                      <I18nText translationKey="community.stats.join" />
+                      <I18nText translationKey="stats.join" ns="community">Rejoindre</I18nText>
                     </span>
                   </div>
                 </CardContent>
@@ -146,10 +146,10 @@ const Community = () => {
               <Users className="h-6 w-6" />
             </div>
             <h3 className="text-xl font-semibold mb-2">
-              <I18nText translationKey="community.features.thematicCommunities.title" />
+              <I18nText translationKey="features.thematicCommunities.title" ns="community">Communautés Thématiques</I18nText>
             </h3>
             <p className="text-slate-600">
-              <I18nText translationKey="community.features.thematicCommunities.description" />
+              <I18nText translationKey="features.thematicCommunities.description" ns="community">Rejoignez des groupes spécialisés selon vos centres d'intérêt culturels et patrimoniaux</I18nText>
             </p>
           </div>
           
@@ -158,10 +158,10 @@ const Community = () => {
               <Book className="h-6 w-6" />
             </div>
             <h3 className="text-xl font-semibold mb-2">
-              <I18nText translationKey="community.features.personalSpace.title" />
+              <I18nText translationKey="features.personalSpace.title" ns="community">Espace Personnel</I18nText>
             </h3>
             <p className="text-slate-600">
-              <I18nText translationKey="community.features.personalSpace.description" />
+              <I18nText translationKey="features.personalSpace.description" ns="community">Créez votre propre collection de symboles et partagez vos découvertes avec la communauté</I18nText>
             </p>
           </div>
           
@@ -170,10 +170,10 @@ const Community = () => {
               <Search className="h-6 w-6" />
             </div>
             <h3 className="text-xl font-semibold mb-2">
-              <I18nText translationKey="community.features.intuitiveNavigation.title" />
+              <I18nText translationKey="features.intuitiveNavigation.title" ns="community">Navigation Intuitive</I18nText>
             </h3>
             <p className="text-slate-600">
-              <I18nText translationKey="community.features.intuitiveNavigation.description" />
+              <I18nText translationKey="features.intuitiveNavigation.description" ns="community">Explorez facilement les symboles grâce à notre interface de recherche avancée et nos filtres intelligents</I18nText>
             </p>
           </div>
         </div>

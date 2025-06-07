@@ -7,10 +7,13 @@
   "contactUs": "Nous Contacter",
   "community": "Communauté",
   "roadmap": "Notre Feuille de Route",
-  "testimonials": "Ce que les gens disent",
+  "testimonials": "Ce qu'ils en disent",
   "newsletter": "Restez Informé",
-  "newsletterSub": "Recevez les dernières mises à jour sur les nouveaux symboles et fonctionnalités",
+  "newsletterSub": "Recevez les dernières actualités sur les nouveaux symboles et fonctionnalités",
   "subscribe": "S'abonner",
   "openSource": "Projet Open Source",
-  "howItWorks": "Comment Ça Marche"
+  "howItWorks": "Comment ça fonctionne",
+  "symbols": "Symboles",
+  "collections": "Collections",
+  "features": "Fonctionnalités"
 }
