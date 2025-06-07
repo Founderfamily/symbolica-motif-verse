@@ -23,14 +23,24 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
   const { i18n } = useTranslation();
   const { data: collections, isLoading, error } = useSymbolCollections(symbolId);
 
-  // Log pour debug
+  // Log pour debug étendu
   React.useEffect(() => {
-    console.log('SymbolCollections - symbolId:', symbolId, 'isStatic:', symbolMappingService.isStaticSymbol(symbolId));
+    console.log('=== DEBUG SymbolCollections Component ===');
+    console.log('Props - symbolId:', symbolId, typeof symbolId);
+    console.log('Props - symbolName:', symbolName);
+    console.log('isStaticSymbol:', symbolMappingService.isStaticSymbol(symbolId));
+    
     if (symbolMappingService.isStaticSymbol(symbolId)) {
       const mappedId = symbolMappingService.getCollectionQueryId(symbolId);
-      console.log('SymbolCollections - mapped ID:', mappedId);
+      console.log('Mapped ID:', mappedId);
+      console.log('Available mappings:', symbolMappingService.getAvailableMappings());
     }
-  }, [symbolId]);
+    
+    console.log('Collections data:', collections);
+    console.log('Loading state:', isLoading);
+    console.log('Error state:', error);
+    console.log('=== FIN DEBUG SymbolCollections Component ===');
+  }, [symbolId, symbolName, collections, isLoading, error]);
 
   if (isLoading) {
     return (
@@ -69,10 +79,22 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
               Erreur lors du chargement des collections
             </I18nText>
           </p>
-          {symbolMappingService.isStaticSymbol(symbolId) && (
-            <p className="text-xs text-slate-400 mt-2">
-              Symbole statique: {symbolId} → Mappé vers: {symbolMappingService.getCollectionQueryId(symbolId) || 'Aucun mapping'}
-            </p>
+          
+          {/* Informations de debug détaillées */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 p-3 bg-red-50 rounded text-xs">
+              <p className="font-bold text-red-700">Debug Info:</p>
+              <p>Symbole ID: {symbolId}</p>
+              <p>Type: {typeof symbolId}</p>
+              <p>Est statique: {symbolMappingService.isStaticSymbol(symbolId) ? 'Oui' : 'Non'}</p>
+              {symbolMappingService.isStaticSymbol(symbolId) && (
+                <>
+                  <p>ID mappé: {symbolMappingService.getCollectionQueryId(symbolId) || 'AUCUN'}</p>
+                  <p>Mappings disponibles: {Object.keys(symbolMappingService.getAvailableMappings()).join(', ')}</p>
+                </>
+              )}
+              <p>Erreur: {error?.message || 'Inconnue'}</p>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -96,10 +118,22 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
               Ce symbole n'est dans aucune collection pour le moment.
             </I18nText>
           </p>
-          {symbolMappingService.isStaticSymbol(symbolId) && (
-            <p className="text-xs text-slate-400 mt-2">
-              Symbole statique: {symbolId} → Mappé vers: {symbolMappingService.getCollectionQueryId(symbolId) || 'Aucun mapping disponible'}
-            </p>
+          
+          {/* Informations de debug détaillées */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 p-3 bg-yellow-50 rounded text-xs">
+              <p className="font-bold text-yellow-700">Debug Info (Aucune collection):</p>
+              <p>Symbole ID: {symbolId}</p>
+              <p>Type: {typeof symbolId}</p>
+              <p>Est statique: {symbolMappingService.isStaticSymbol(symbolId) ? 'Oui' : 'Non'}</p>
+              {symbolMappingService.isStaticSymbol(symbolId) && (
+                <>
+                  <p>ID mappé: {symbolMappingService.getCollectionQueryId(symbolId) || 'AUCUN'}</p>
+                  <p>Mappings disponibles: {Object.keys(symbolMappingService.getAvailableMappings()).join(', ')}</p>
+                </>
+              )}
+              <p>Collections trouvées: {collections?.length || 0}</p>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -178,11 +212,15 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
           </Button>
         </div>
 
-        {/* Debug info en mode développement */}
-        {process.env.NODE_ENV === 'development' && symbolMappingService.isStaticSymbol(symbolId) && (
-          <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
-            <p>Debug: Symbole statique {symbolId}</p>
-            <p>Mappé vers: {symbolMappingService.getCollectionQueryId(symbolId) || 'Aucun mapping'}</p>
+        {/* Debug info en mode développement avec succès */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-2 p-2 bg-green-100 rounded text-xs">
+            <p className="font-bold text-green-700">Debug Info (Succès):</p>
+            <p>Symbole ID: {symbolId}</p>
+            <p>Est statique: {symbolMappingService.isStaticSymbol(symbolId) ? 'Oui' : 'Non'}</p>
+            {symbolMappingService.isStaticSymbol(symbolId) && (
+              <p>ID mappé: {symbolMappingService.getCollectionQueryId(symbolId)}</p>
+            )}
             <p>Collections trouvées: {collections.length}</p>
           </div>
         )}

@@ -13,25 +13,34 @@ export const useSymbolCollections = (symbolId: string | number) => {
     queryFn: async (): Promise<CollectionWithTranslations[]> => {
       if (!symbolId) return [];
 
-      console.log('useSymbolCollections - symbolId reçu:', symbolId);
+      console.log('=== DEBUG useSymbolCollections ===');
+      console.log('1. symbolId reçu:', symbolId, typeof symbolId);
 
       // Déterminer l'ID à utiliser pour la requête
       let queryId: string | null = null;
+      const symbolIdStr = symbolId.toString();
       
-      if (symbolMappingService.isStaticSymbol(symbolId)) {
+      console.log('2. symbolIdStr:', symbolIdStr);
+      console.log('3. isStaticSymbol test:', symbolMappingService.isStaticSymbol(symbolIdStr));
+      
+      if (symbolMappingService.isStaticSymbol(symbolIdStr)) {
         // Pour les symboles statiques, utiliser l'ID mappé en base
-        queryId = symbolMappingService.getCollectionQueryId(symbolId);
-        console.log('Symbole statique détecté, utilisation de l\'ID mappé:', queryId);
+        queryId = symbolMappingService.getCollectionQueryId(symbolIdStr);
+        console.log('4. Symbole statique détecté');
+        console.log('5. ID mappé obtenu:', queryId);
         
         if (!queryId) {
-          console.log('Aucun mapping trouvé pour le symbole statique:', symbolId);
+          console.log('6. ERREUR: Aucun mapping trouvé pour le symbole statique:', symbolIdStr);
+          console.log('7. Mappings disponibles:', Object.keys(symbolMappingService['staticToDbMapping'] || {}));
           return [];
         }
       } else {
         // Pour les symboles de la base, utiliser l'ID directement
-        queryId = symbolId.toString();
-        console.log('Symbole de base détecté, utilisation de l\'ID:', queryId);
+        queryId = symbolIdStr;
+        console.log('4. Symbole de base détecté, utilisation de l\'ID:', queryId);
       }
+
+      console.log('8. ID final pour la requête:', queryId);
 
       const { data, error } = await supabase
         .from('collections')
@@ -55,12 +64,17 @@ export const useSymbolCollections = (symbolId: string | number) => {
         `)
         .eq('collection_symbols.symbol_id', queryId);
 
+      console.log('9. Requête Supabase terminée');
+      console.log('10. Error:', error);
+      console.log('11. Data reçue:', data);
+      console.log('12. Nombre de collections trouvées:', data?.length || 0);
+
       if (error) {
         console.error('Error fetching symbol collections:', error);
         throw error;
       }
 
-      console.log('Collections trouvées pour le symbole:', data?.length || 0);
+      console.log('=== FIN DEBUG useSymbolCollections ===');
       return data || [];
     },
     enabled: !!symbolId
