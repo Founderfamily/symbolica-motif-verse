@@ -1,4 +1,3 @@
-
 # Documentation Administrative - Cultural Heritage Symbols
 
 ## Vue d'ensemble du système
@@ -243,10 +242,10 @@ Contributions soumises par les utilisateurs
 - reviewed_by (uuid) : Référence à profiles.id (modérateur)
 - reviewed_at (timestamp with time zone) : Date de révision
 - title_translations (jsonb) : Traductions du titre (défaut: {"en": null, "fr": null})
-- description_translations (jsonb) : Traductions de la description
-- cultural_context_translations (jsonb) : Traductions du contexte
-- period_translations (jsonb) : Traductions de la période
-- location_name_translations (jsonb) : Traductions du lieu
+- description_translations (jsonb) : Traductions de la description (défaut: {"en": null, "fr": null})
+- cultural_context_translations (jsonb) : Traductions du contexte (défaut: {"en": null, "fr": null})
+- period_translations (jsonb) : Traductions de la période (défaut: {"en": null, "fr": null})
+- location_name_translations (jsonb) : Traductions du lieu (défaut: {"en": null, "fr": null})
 - created_at, updated_at (timestamp with time zone)
 ```
 
