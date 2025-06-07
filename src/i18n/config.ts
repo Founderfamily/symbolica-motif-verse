@@ -27,6 +27,9 @@ import frCommunity from './locales/fr/community.json';
 import enContributions from './locales/en/contributions.json';
 import frContributions from './locales/fr/contributions.json';
 
+// Import app namespace
+import frApp from './locales/fr/app.json';
+
 const resources = {
   en: {
     translation: enTranslations,
@@ -42,6 +45,7 @@ const resources = {
   },
   fr: {
     translation: frTranslations,
+    app: frApp,
     auth: frAuth,
     admin: frAdmin,
     header: frHeader,
