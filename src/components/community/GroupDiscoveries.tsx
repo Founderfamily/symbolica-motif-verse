@@ -8,8 +8,9 @@ import { Heart, Share2, Plus, Eye, Folder, FileText } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { GroupDiscovery } from '@/types/interest-groups';
-import { getGroupDiscoveries, shareDiscovery } from '@/services/communityService';
+import { getGroupDiscoveries } from '@/services/communityService';
 import { toast } from 'sonner';
+import ShareDiscoveryDialog from './ShareDiscoveryDialog';
 
 interface GroupDiscoveriesProps {
   groupId: string;
@@ -19,7 +20,6 @@ interface GroupDiscoveriesProps {
 const GroupDiscoveries: React.FC<GroupDiscoveriesProps> = ({ groupId, isMember }) => {
   const [discoveries, setDiscoveries] = useState<GroupDiscovery[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showShareForm, setShowShareForm] = useState(false);
   const auth = useAuth();
 
   useEffect(() => {
@@ -101,43 +101,14 @@ const GroupDiscoveries: React.FC<GroupDiscoveriesProps> = ({ groupId, isMember }
         </div>
         
         {isMember && auth?.user && (
-          <Button 
-            onClick={() => setShowShareForm(!showShareForm)}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            <I18nText translationKey="community.shareDiscovery">Share Discovery</I18nText>
-          </Button>
+          <ShareDiscoveryDialog groupId={groupId}>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              <I18nText translationKey="community.shareDiscovery">Share Discovery</I18nText>
+            </Button>
+          </ShareDiscoveryDialog>
         )}
       </div>
-
-      {/* Share Form - Placeholder for now */}
-      {showShareForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <I18nText translationKey="community.shareNewDiscovery">Share New Discovery</I18nText>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-slate-500">
-              <Share2 className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-              <p>
-                <I18nText translationKey="community.discoveriesComingSoon">
-                  Discoveries sharing functionality coming soon
-                </I18nText>
-              </p>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowShareForm(false)}
-                className="mt-4"
-              >
-                <I18nText translationKey="common.close">Close</I18nText>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Discoveries List */}
       <div className="space-y-4">

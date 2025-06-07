@@ -75,7 +75,6 @@ export const checkGroupMembership = async (groupId: string, userId: string): Pro
  */
 export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
   try {
-    // First get posts
     const { data: posts, error: postsError } = await supabase
       .from('group_posts')
       .select('*')
@@ -89,10 +88,8 @@ export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
 
     if (!posts || posts.length === 0) return [];
 
-    // Get unique user IDs
     const userIds = [...new Set(posts.map(post => post.user_id))];
 
-    // Get profiles for these users
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, username, full_name')
@@ -100,30 +97,18 @@ export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
 
     if (profilesError) {
       console.error('Error fetching profiles:', profilesError);
-      // Return posts without profile info if profiles fetch fails
-      return posts.map(post => ({
-        ...post,
-        user_profile: {
-          username: 'Unknown',
-          full_name: 'Unknown User'
-        }
-      }));
     }
 
-    // Map profiles to posts
-    return posts.map(post => {
-      const profile = profiles?.find(p => p.id === post.user_id);
-      return {
-        ...post,
-        user_profile: profile ? {
-          username: profile.username || 'Unknown',
-          full_name: profile.full_name || 'Unknown User'
-        } : {
-          username: 'Unknown',
-          full_name: 'Unknown User'
-        }
-      };
-    });
+    return posts.map(post => ({
+      ...post,
+      user_profile: profiles?.find(p => p.id === post.user_id) ? {
+        username: profiles.find(p => p.id === post.user_id)?.username || 'Unknown',
+        full_name: profiles.find(p => p.id === post.user_id)?.full_name || 'Unknown User'
+      } : {
+        username: 'Unknown',
+        full_name: 'Unknown User'
+      }
+    }));
   } catch (error) {
     console.error('Error in getGroupPosts service:', error);
     return [];
@@ -158,7 +143,6 @@ export const createGroupPost = async (groupId: string, userId: string, content: 
  */
 export const likePost = async (postId: string, userId: string): Promise<void> => {
   try {
-    // Check if user already liked the post
     const { data: existingLike, error: checkError } = await supabase
       .from('post_likes')
       .select('id')
@@ -172,7 +156,6 @@ export const likePost = async (postId: string, userId: string): Promise<void> =>
     }
 
     if (existingLike) {
-      // Unlike the post
       const { error: deleteError } = await supabase
         .from('post_likes')
         .delete()
@@ -184,7 +167,6 @@ export const likePost = async (postId: string, userId: string): Promise<void> =>
         throw new Error(`Failed to unlike post: ${deleteError.message}`);
       }
     } else {
-      // Like the post
       const { error: insertError } = await supabase
         .from('post_likes')
         .insert({
@@ -208,7 +190,6 @@ export const likePost = async (postId: string, userId: string): Promise<void> =>
  */
 export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> => {
   try {
-    // First get group members
     const { data: members, error: membersError } = await supabase
       .from('group_members')
       .select('*')
@@ -222,10 +203,8 @@ export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> =
 
     if (!members || members.length === 0) return [];
 
-    // Get unique user IDs
     const userIds = [...new Set(members.map(member => member.user_id))];
 
-    // Get profiles for these users
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, username, full_name')
@@ -233,35 +212,21 @@ export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> =
 
     if (profilesError) {
       console.error('Error fetching profiles:', profilesError);
-      // Return members without profile info if profiles fetch fails
-      return members.map(member => ({
-        ...member,
-        role: member.role as 'member' | 'admin' | 'moderator',
-        profiles: {
-          id: member.user_id,
-          username: 'Unknown',
-          full_name: 'Unknown User'
-        }
-      }));
     }
 
-    // Map profiles to members
-    return members.map(member => {
-      const profile = profiles?.find(p => p.id === member.user_id);
-      return {
-        ...member,
-        role: member.role as 'member' | 'admin' | 'moderator',
-        profiles: profile ? {
-          id: profile.id,
-          username: profile.username || 'Unknown',
-          full_name: profile.full_name || 'Unknown User'
-        } : {
-          id: member.user_id,
-          username: 'Unknown',
-          full_name: 'Unknown User'
-        }
-      };
-    });
+    return members.map(member => ({
+      ...member,
+      role: member.role as 'member' | 'admin' | 'moderator',
+      profiles: profiles?.find(p => p.id === member.user_id) ? {
+        id: profiles.find(p => p.id === member.user_id)!.id,
+        username: profiles.find(p => p.id === member.user_id)?.username || 'Unknown',
+        full_name: profiles.find(p => p.id === member.user_id)?.full_name || 'Unknown User'
+      } : {
+        id: member.user_id,
+        username: 'Unknown',
+        full_name: 'Unknown User'
+      }
+    }));
   } catch (error) {
     console.error('Error in getGroupMembers service:', error);
     return [];
@@ -286,10 +251,8 @@ export const getPostComments = async (postId: string): Promise<PostComment[]> =>
 
     if (!comments || comments.length === 0) return [];
 
-    // Get unique user IDs
     const userIds = [...new Set(comments.map(comment => comment.user_id))];
 
-    // Get profiles for these users
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, username, full_name')
@@ -299,22 +262,17 @@ export const getPostComments = async (postId: string): Promise<PostComment[]> =>
       console.error('Error fetching profiles:', profilesError);
     }
 
-    // Map profiles to comments and organize by parent/child
-    const commentsWithProfiles = comments.map(comment => {
-      const profile = profiles?.find(p => p.id === comment.user_id);
-      return {
-        ...comment,
-        user_profile: profile ? {
-          username: profile.username || 'Unknown',
-          full_name: profile.full_name || 'Unknown User'
-        } : {
-          username: 'Unknown',
-          full_name: 'Unknown User'
-        }
-      } as PostComment;
-    });
+    const commentsWithProfiles = comments.map(comment => ({
+      ...comment,
+      user_profile: profiles?.find(p => p.id === comment.user_id) ? {
+        username: profiles.find(p => p.id === comment.user_id)?.username || 'Unknown',
+        full_name: profiles.find(p => p.id === comment.user_id)?.full_name || 'Unknown User'
+      } : {
+        username: 'Unknown',
+        full_name: 'Unknown User'
+      }
+    } as PostComment));
 
-    // Organize comments in a tree structure
     const topLevelComments = commentsWithProfiles.filter(comment => !comment.parent_comment_id);
     const childComments = commentsWithProfiles.filter(comment => comment.parent_comment_id);
 
@@ -357,7 +315,6 @@ export const createComment = async (postId: string, userId: string, content: str
  */
 export const likeComment = async (commentId: string, userId: string): Promise<void> => {
   try {
-    // Check if user already liked the comment
     const { data: existingLike, error: checkError } = await supabase
       .from('comment_likes')
       .select('id')
@@ -371,7 +328,6 @@ export const likeComment = async (commentId: string, userId: string): Promise<vo
     }
 
     if (existingLike) {
-      // Unlike the comment
       const { error: deleteError } = await supabase
         .from('comment_likes')
         .delete()
@@ -383,7 +339,6 @@ export const likeComment = async (commentId: string, userId: string): Promise<vo
         throw new Error(`Failed to unlike comment: ${deleteError.message}`);
       }
     } else {
-      // Like the comment
       const { error: insertError } = await supabase
         .from('comment_likes')
         .insert({
@@ -542,10 +497,8 @@ export const getGroupDiscoveries = async (groupId: string): Promise<GroupDiscove
 
     if (!discoveries || discoveries.length === 0) return [];
 
-    // Get unique user IDs
     const userIds = [...new Set(discoveries.map(discovery => discovery.shared_by))];
 
-    // Get profiles for these users
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, username, full_name')
@@ -555,7 +508,6 @@ export const getGroupDiscoveries = async (groupId: string): Promise<GroupDiscove
       console.error('Error fetching profiles:', profilesError);
     }
 
-    // Map profiles to discoveries
     return discoveries.map(discovery => ({
       id: discovery.id,
       group_id: discovery.group_id,
@@ -577,6 +529,103 @@ export const getGroupDiscoveries = async (groupId: string): Promise<GroupDiscove
     }));
   } catch (error) {
     console.error('Error in getGroupDiscoveries service:', error);
+    return [];
+  }
+};
+
+/**
+ * Get group invitations for a user
+ */
+export const getUserInvitations = async (userId: string): Promise<GroupInvitation[]> => {
+  try {
+    const { data: invitations, error } = await supabase
+      .from('group_invitations')
+      .select(`
+        id,
+        group_id,
+        invited_by,
+        invited_user_id,
+        email,
+        status,
+        message,
+        created_at,
+        expires_at,
+        responded_at,
+        interest_groups (name, slug)
+      `)
+      .eq('invited_user_id', userId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching invitations:', error);
+      return [];
+    }
+
+    return (invitations || []).map(invitation => ({
+      id: invitation.id,
+      group_id: invitation.group_id,
+      invited_by: invitation.invited_by,
+      invited_user_id: invitation.invited_user_id,
+      email: invitation.email,
+      status: invitation.status as GroupInvitation['status'],
+      message: invitation.message,
+      created_at: invitation.created_at,
+      expires_at: invitation.expires_at,
+      responded_at: invitation.responded_at,
+      group: invitation.interest_groups ? {
+        name: invitation.interest_groups.name,
+        slug: invitation.interest_groups.slug
+      } : undefined
+    }));
+  } catch (error) {
+    console.error('Error in getUserInvitations service:', error);
+    return [];
+  }
+};
+
+/**
+ * Respond to group invitation
+ */
+export const respondToInvitation = async (invitationId: string, response: 'accepted' | 'declined'): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('group_invitations')
+      .update({
+        status: response,
+        responded_at: new Date().toISOString()
+      })
+      .eq('id', invitationId);
+
+    if (error) {
+      console.error('Error responding to invitation:', error);
+      throw new Error(`Failed to respond to invitation: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error in respondToInvitation service:', error);
+    throw error;
+  }
+};
+
+/**
+ * Search users for invitation
+ */
+export const searchUsersForInvitation = async (query: string): Promise<Array<{id: string, username: string, full_name: string}>> => {
+  try {
+    const { data: users, error } = await supabase
+      .from('profiles')
+      .select('id, username, full_name')
+      .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
+      .limit(10);
+
+    if (error) {
+      console.error('Error searching users:', error);
+      return [];
+    }
+
+    return users || [];
+  } catch (error) {
+    console.error('Error in searchUsersForInvitation service:', error);
     return [];
   }
 };

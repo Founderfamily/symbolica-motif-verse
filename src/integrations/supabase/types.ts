@@ -1168,6 +1168,8 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          likes_count: number
+          parent_comment_id: string | null
           post_id: string
           translations: Json | null
           updated_at: string
@@ -1177,6 +1179,8 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
           post_id: string
           translations?: Json | null
           updated_at?: string
@@ -1186,12 +1190,21 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
           post_id?: string
           translations?: Json | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "post_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "post_comments_post_id_fkey"
             columns: ["post_id"]

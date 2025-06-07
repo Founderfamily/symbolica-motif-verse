@@ -98,5 +98,18 @@
   "startSharingDiscoveries": "Be the first to share an interesting symbol or collection",
   "viewDetails": "View Details",
   "groupMembers": "Group Members",
-  "noMembers": "No members yet"
+  "noMembers": "No members yet",
+  "inviteUsers": "Invite Users",
+  "searchUsers": "Search Users",
+  "selectedUsers": "Selected Users",
+  "inviteByEmail": "Invite by Email",
+  "invitationMessage": "Message (Optional)",
+  "sendInvitations": "Send Invitations",
+  "groupInvitations": "Group Invitations",
+  "noInvitations": "No pending invitations",
+  "discoveryType": "Discovery Type",
+  "entityId": "Item ID",
+  "discoveryTitle": "Title",
+  "discoveryDescription": "Description (Optional)",
+  "backToCommunity": "Back to Community"
 }

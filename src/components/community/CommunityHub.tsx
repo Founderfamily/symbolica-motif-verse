@@ -9,6 +9,9 @@ import CommunityTabs from './CommunityTabs';
 import CommunityEmptyState from './CommunityEmptyState';
 import TopContributors from './TopContributors';
 import ActivityFeed from './ActivityFeed';
+import GroupNotificationCenter from './GroupNotificationCenter';
+import InvitationsCenter from './InvitationsCenter';
+import RealTimeNotifications from './RealTimeNotifications';
 
 const CommunityHub: React.FC = () => {
   const [groups, setGroups] = useState<InterestGroup[]>([]);
@@ -38,6 +41,8 @@ const CommunityHub: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      <RealTimeNotifications />
+      
       <CommunityHeader onGroupCreated={loadGroups} />
       
       <CommunitySearch 
@@ -65,6 +70,8 @@ const CommunityHub: React.FC = () => {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          <GroupNotificationCenter />
+          <InvitationsCenter />
           <TopContributors />
           <ActivityFeed />
         </div>
