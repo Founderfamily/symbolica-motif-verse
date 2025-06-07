@@ -12,10 +12,10 @@ const Features = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-10">
           <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
-            <I18nText translationKey="features.tagline">Découvrez Nos Fonctionnalités</I18nText>
+            <I18nText translationKey="features.tagline" ns="features">Découvrez Nos Fonctionnalités</I18nText>
           </span>
           <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
-            <I18nText translationKey="features.title">Outils pour l'Exploration des Symboles</I18nText>
+            <I18nText translationKey="features.title" ns="features">Outils pour l'Exploration des Symboles</I18nText>
           </h2>
         </div>
         
@@ -27,10 +27,10 @@ const Features = () => {
                 <MapPin className="h-7 w-7 text-blue-600" />
               </div>
               <h3 className="text-xl font-semibold mb-3 text-slate-800">
-                <I18nText translationKey="features.mapping.title">Cartographie Mondiale</I18nText>
+                <I18nText translationKey="features.mapping.title" ns="features">Cartographie Mondiale</I18nText>
               </h3>
               <p className="text-slate-600 leading-relaxed">
-                <I18nText translationKey="features.mapping.description">
+                <I18nText translationKey="features.mapping.description" ns="features">
                   Visualisez les connexions symboliques à travers les cultures et les époques grâce à notre interface cartographique interactive.
                 </I18nText>
               </p>
@@ -44,10 +44,10 @@ const Features = () => {
                 <Search className="h-7 w-7 text-amber-600" />
               </div>
               <h3 className="text-xl font-semibold mb-3 text-slate-800">
-                <I18nText translationKey="features.identification.title">Identification des Symboles</I18nText>
+                <I18nText translationKey="features.identification.title" ns="features">Identification des Symboles</I18nText>
               </h3>
               <p className="text-slate-600 leading-relaxed">
-                <I18nText translationKey="features.identification.description">
+                <I18nText translationKey="features.identification.description" ns="features">
                   Téléchargez des images pour identifier des symboles et découvrir leur contexte culturel, leur histoire et leur signification.
                 </I18nText>
               </p>
@@ -61,10 +61,10 @@ const Features = () => {
                 <Book className="h-7 w-7 text-emerald-600" />
               </div>
               <h3 className="text-xl font-semibold mb-3 text-slate-800">
-                <I18nText translationKey="features.documentation.title">Documentation Collaborative</I18nText>
+                <I18nText translationKey="features.documentation.title" ns="features">Documentation Collaborative</I18nText>
               </h3>
               <p className="text-slate-600 leading-relaxed">
-                <I18nText translationKey="features.documentation.description">
+                <I18nText translationKey="features.documentation.description" ns="features">
                   Contribuez à notre base de données en ajoutant des symboles, leur contexte historique et leur signification culturelle.
                 </I18nText>
               </p>

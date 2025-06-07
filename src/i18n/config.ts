@@ -27,6 +27,16 @@ import frCommunity from './locales/fr/community.json';
 import enContributions from './locales/en/contributions.json';
 import frContributions from './locales/fr/contributions.json';
 
+// Import homepage sections
+import enHero from './locales/en/hero.json';
+import frHero from './locales/fr/hero.json';
+import enFeatures from './locales/en/features.json';
+import frFeatures from './locales/fr/features.json';
+import enCallToAction from './locales/en/callToAction.json';
+import frCallToAction from './locales/fr/callToAction.json';
+import enGamification from './locales/en/gamification.json';
+import frGamification from './locales/fr/gamification.json';
+
 const resources = {
   en: {
     translation: enTranslations,
@@ -39,7 +49,11 @@ const resources = {
     search: enSearch,
     roadmap: enRoadmap,
     community: enCommunity,
-    contributions: enContributions
+    contributions: enContributions,
+    hero: enHero,
+    features: enFeatures,
+    callToAction: enCallToAction,
+    gamification: enGamification
   },
   fr: {
     translation: frTranslations,
@@ -52,7 +66,11 @@ const resources = {
     search: frSearch,
     roadmap: frRoadmap,
     community: frCommunity,
-    contributions: frContributions
+    contributions: frContributions,
+    hero: frHero,
+    features: frFeatures,
+    callToAction: frCallToAction,
+    gamification: frGamification
   }
 };
 
@@ -78,7 +96,7 @@ i18n
     
     // Add default namespace
     defaultNS: 'translation',
-    ns: ['translation', 'app', 'auth', 'admin', 'header', 'profile', 'navigation', 'search', 'roadmap', 'community', 'contributions']
+    ns: ['translation', 'app', 'auth', 'admin', 'header', 'profile', 'navigation', 'search', 'roadmap', 'community', 'contributions', 'hero', 'features', 'callToAction', 'gamification']
   });
 
 export default i18n;
