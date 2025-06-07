@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { SecurityUtils } from '@/utils/securityUtils';
 
 export interface AdminLog {
   id: string;
@@ -15,59 +16,93 @@ export interface AdminLog {
 export const adminLogsService = {
   async getRecentLogs(limit: number = 50): Promise<AdminLog[]> {
     try {
-      // Simuler des logs pour le moment car nous n'avons pas encore la table admin_logs
-      const mockLogs: AdminLog[] = [
-        {
-          id: '1',
-          admin_id: 'admin-1',
-          admin_name: 'Admin User',
-          action: 'create',
-          entity_type: 'user',
-          entity_id: 'user-123',
-          details: { username: 'newuser', email: 'new@example.com' },
-          created_at: new Date(Date.now() - 60000).toISOString()
-        },
-        {
-          id: '2',
-          admin_id: 'admin-1',
-          admin_name: 'Admin User',
-          action: 'update',
-          entity_type: 'symbol',
-          entity_id: 'symbol-456',
-          details: { field: 'status', old_value: 'pending', new_value: 'approved' },
-          created_at: new Date(Date.now() - 120000).toISOString()
-        },
-        {
-          id: '3',
-          admin_id: 'admin-1',
-          admin_name: 'Admin User',
-          action: 'delete',
-          entity_type: 'contribution',
-          entity_id: 'contrib-789',
-          details: { reason: 'inappropriate content' },
-          created_at: new Date(Date.now() - 180000).toISOString()
-        }
-      ];
+      // Rate limiting check
+      if (!SecurityUtils.checkRateLimit('admin_logs_fetch', 10, 60000)) {
+        throw new Error('Rate limit exceeded');
+      }
 
-      return mockLogs.slice(0, limit);
+      const { data, error } = await supabase
+        .rpc('get_admin_logs_with_profiles', { p_limit: limit });
+
+      if (error) {
+        console.error('Error fetching admin logs:', error);
+        return [];
+      }
+
+      return data || [];
     } catch (error) {
-      console.error('Error fetching admin logs:', error);
+      console.error('Error in adminLogsService.getRecentLogs:', error);
       return [];
     }
   },
 
   async createLog(action: string, entityType: string, entityId?: string, details?: Record<string, any>): Promise<void> {
     try {
-      // Pour le moment, on log juste dans la console
-      console.log('Admin action logged:', {
-        action,
-        entityType,
-        entityId,
-        details,
-        timestamp: new Date().toISOString()
-      });
+      // Validate inputs
+      const sanitizedAction = SecurityUtils.validateInput(action, 100);
+      const sanitizedEntityType = SecurityUtils.validateInput(entityType, 50);
+      
+      // Sanitize details object
+      const sanitizedDetails = details ? this.sanitizeDetails(details) : {};
+
+      // Use the database function for secure logging
+      const { error } = await supabase
+        .rpc('insert_admin_log', {
+          p_admin_id: (await supabase.auth.getUser()).data.user?.id,
+          p_action: sanitizedAction,
+          p_entity_type: sanitizedEntityType,
+          p_entity_id: entityId || null,
+          p_details: sanitizedDetails
+        });
+
+      if (error) {
+        console.error('Error creating admin log:', error);
+        throw error;
+      }
     } catch (error) {
-      console.error('Error creating admin log:', error);
+      console.error('Error in adminLogsService.createLog:', error);
+      throw error;
     }
+  },
+
+  async getEntityLogs(entityType: string, entityId: string): Promise<AdminLog[]> {
+    try {
+      // Validate inputs
+      const sanitizedEntityType = SecurityUtils.validateInput(entityType, 50);
+      const sanitizedEntityId = SecurityUtils.validateInput(entityId, 100);
+
+      const { data, error } = await supabase
+        .rpc('get_entity_admin_logs', {
+          p_entity_type: sanitizedEntityType,
+          p_entity_id: sanitizedEntityId
+        });
+
+      if (error) {
+        console.error('Error fetching entity logs:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in adminLogsService.getEntityLogs:', error);
+      return [];
+    }
+  },
+
+  // Helper method to sanitize details object
+  sanitizeDetails(details: Record<string, any>): Record<string, any> {
+    const sanitized: Record<string, any> = {};
+    
+    for (const [key, value] of Object.entries(details)) {
+      if (typeof value === 'string') {
+        sanitized[key] = SecurityUtils.sanitizeHtml(value);
+      } else if (typeof value === 'number' || typeof value === 'boolean') {
+        sanitized[key] = value;
+      } else if (value !== null && value !== undefined) {
+        sanitized[key] = String(value);
+      }
+    }
+    
+    return sanitized;
   }
 };
