@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +10,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 import { adminLogsService, AdminLog } from '@/services/admin/logsService';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Json } from '@/integrations/supabase/types';
 
 export default function AdminLogs() {
   const { t } = useTranslation();
@@ -32,6 +34,17 @@ export default function AdminLogs() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to safely convert Json to a displayable format
+  const formatLogDetails = (details: Json): Record<string, any> => {
+    if (details === null || details === undefined) {
+      return {};
+    }
+    if (typeof details === 'object' && !Array.isArray(details)) {
+      return details as Record<string, any>;
+    }
+    return { value: details };
   };
   
   // Get unique entity types and actions for filtering
@@ -168,48 +181,52 @@ export default function AdminLogs() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredLogs.map(log => (
-              <div 
-                key={log.id} 
-                className="flex gap-3 p-3 rounded-md hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-none"
-              >
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback>
-                    {log.admin_name?.charAt(0) || 'A'}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-grow">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="font-medium">{log.admin_name}</span>
-                      <span className="mx-1 text-slate-400">·</span>
-                      <Badge variant={getActionBadgeVariant(log.action)}>
-                        {log.action}
-                      </Badge>
-                      <span className="ml-1 text-slate-700">
-                        {log.entity_type}
-                        {log.entity_id && <span className="text-xs text-slate-500 ml-1">#{log.entity_id.substring(0, 8)}</span>}
+            {filteredLogs.map(log => {
+              const formattedDetails = formatLogDetails(log.details);
+              
+              return (
+                <div 
+                  key={log.id} 
+                  className="flex gap-3 p-3 rounded-md hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-none"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback>
+                      {log.admin_name?.charAt(0) || 'A'}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-grow">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="font-medium">{log.admin_name}</span>
+                        <span className="mx-1 text-slate-400">·</span>
+                        <Badge variant={getActionBadgeVariant(log.action)}>
+                          {log.action}
+                        </Badge>
+                        <span className="ml-1 text-slate-700">
+                          {log.entity_type}
+                          {log.entity_id && <span className="text-xs text-slate-500 ml-1">#{log.entity_id.substring(0, 8)}</span>}
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-500">
+                        {formatDate(log.created_at)}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-500">
-                      {formatDate(log.created_at)}
-                    </span>
+                    
+                    {formattedDetails && Object.keys(formattedDetails).length > 0 && (
+                      <div className="mt-1 text-sm text-slate-600 bg-slate-50 p-2 rounded">
+                        {Object.entries(formattedDetails).map(([key, value]) => (
+                          <div key={key} className="flex gap-2">
+                            <span className="font-medium">{key}:</span>
+                            <span>{typeof value === 'string' ? value : JSON.stringify(value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  
-                  {log.details && Object.keys(log.details).length > 0 && (
-                    <div className="mt-1 text-sm text-slate-600 bg-slate-50 p-2 rounded">
-                      {Object.entries(log.details).map(([key, value]) => (
-                        <div key={key} className="flex gap-2">
-                          <span className="font-medium">{key}:</span>
-                          <span>{typeof value === 'string' ? value : JSON.stringify(value)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>

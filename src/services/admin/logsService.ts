@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { SecurityUtils } from '@/utils/securityUtils';
+import { Json } from '@/integrations/supabase/types';
 
 export interface AdminLog {
   id: string;
@@ -9,9 +10,21 @@ export interface AdminLog {
   action: string;
   entity_type: string;
   entity_id?: string;
-  details?: Record<string, any>;
+  details?: Json;
   created_at: string;
 }
+
+// Helper function to safely convert Json to Record<string, any>
+const convertJsonToRecord = (json: Json): Record<string, any> => {
+  if (json === null || json === undefined) {
+    return {};
+  }
+  if (typeof json === 'object' && !Array.isArray(json)) {
+    return json as Record<string, any>;
+  }
+  // If it's not an object, wrap it in a generic structure
+  return { value: json };
+};
 
 export const adminLogsService = {
   async getRecentLogs(limit: number = 50): Promise<AdminLog[]> {
