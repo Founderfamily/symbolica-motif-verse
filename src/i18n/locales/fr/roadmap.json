@@ -4,10 +4,10 @@
   "subtitle": "Découvrez Ce Qui Arrive Ensuite",
   "description": "Suivez notre progression de développement et les fonctionnalités à venir",
   "quarters": {
-    "q1": "T1 2024",
-    "q2": "T2 2024",
-    "q3": "T3 2024", 
-    "q4": "T4 2024"
+    "q1": "T1 2025",
+    "q2": "T2 2025",
+    "q3": "T3 2025", 
+    "q4": "T4 2025"
   },
   "status": {
     "completed": "Terminé",
@@ -24,21 +24,37 @@
     "api": "API et Intégrations"
   },
   "features": {
+    "coreStabilization": {
+      "title": "Stabilisation de la Plateforme",
+      "description": "Système d'authentification complet, gestion des collections et tableau de bord admin"
+    },
+    "performanceOptimization": {
+      "title": "Optimisation des Performances",
+      "description": "Amélioration des vitesses de chargement, mise en cache et design responsive"
+    },
+    "multilingualExpansion": {
+      "title": "Extension Multilingue",
+      "description": "Support pour l'espagnol, l'allemand et l'italien"
+    },
+    "advancedSearch": {
+      "title": "Recherche et Filtrage Avancés",
+      "description": "Recherche alimentée par IA avec filtres culturels et géographiques"
+    },
+    "publicAPI": {
+      "title": "Plateforme API Publique",
+      "description": "API RESTful pour chercheurs et intégrations tierces"
+    },
+    "realTimeCollaboration": {
+      "title": "Collaboration Temps Réel",
+      "description": "Édition en direct, commentaires et outils de recherche collaborative"
+    },
     "aiPatternRecognition": {
       "title": "Reconnaissance de Motifs par IA",
       "description": "IA avancée pour identifier et catégoriser automatiquement les motifs culturels"
     },
     "mobileApp": {
-      "title": "Application Mobile",
-      "description": "Application mobile native pour la recherche sur le terrain et la découverte de symboles"
-    },
-    "collaborativeAnalysis": {
-      "title": "Analyse Collaborative",
-      "description": "Outils de collaboration en temps réel pour les chercheurs et universitaires"
-    },
-    "apiPlatform": {
-      "title": "Plateforme API Développeur",
-      "description": "API complète pour les intégrations tierces et la recherche académique"
+      "title": "Application Mobile Native",
+      "description": "Applications iOS et Android pour la recherche terrain et découverte de symboles"
     }
   },
   "viewMore": "Voir Plus de Détails",

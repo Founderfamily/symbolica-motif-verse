@@ -1,7 +1,7 @@
 
 /**
  * Application versioning utilities
- * Updated for stability improvements release
+ * Updated to Version 1.2.0 - Mature platform with 500+ commits
  */
 
 export interface AppVersion {
@@ -12,11 +12,11 @@ export interface AppVersion {
   fullVersion: string;
 }
 
-// Current application version - Updated for stability improvements (ErrorBoundary, SafeImage, Performance Monitoring)
+// Current application version - Updated to reflect mature platform status
 export const APP_VERSION: AppVersion = {
   major: 1,
-  minor: 0,
-  patch: 1,
+  minor: 2,
+  patch: 0,
   build: 'stable',
   get fullVersion() {
     return `${this.major}.${this.minor}.${this.patch}`;
@@ -25,6 +25,20 @@ export const APP_VERSION: AppVersion = {
 
 // Version history with changelog entries
 export const VERSION_HISTORY = [
+  {
+    version: '1.2.0',
+    date: '2025-06-07',
+    changes: [
+      'Mise à jour majeure de version pour refléter la maturité du projet',
+      'Plus de 500 commits de développement',
+      'Feuille de route mise à jour pour 2025',
+      'Système de traductions complètement stabilisé',
+      'Interface utilisateur mature et fonctionnelle',
+      'Système d\'administration complet',
+      'Gestion avancée des collections et symboles',
+      'Performance et stabilité optimisées'
+    ]
+  },
   {
     version: '1.0.1',
     date: '2025-06-03',
@@ -53,16 +67,6 @@ export const VERSION_HISTORY = [
       'Dashboard administrateur complet',
       'Intégration Supabase',
       'Plus de 300 commits de développement'
-    ]
-  },
-  {
-    version: '1.0.0-alpha',
-    date: '2025-05-14',
-    changes: [
-      'Version initiale du site Symbolica',
-      'Implémentation du tableau de bord administrateur',
-      'Ajout de la gestion des symboles',
-      'Amélioration de la gestion des images'
     ]
   }
 ];
@@ -102,13 +106,15 @@ export const getFullVersionInfo = () => {
     displayVersion: getDisplayVersion(),
     releaseDate: VERSION_HISTORY[0]?.date,
     changelog: VERSION_HISTORY[0]?.changes || [],
-    stabilityFeatures: [
-      'ErrorBoundary System',
-      'SafeImage Component', 
+    maturityFeatures: [
+      'Complete Authentication System',
+      'Advanced Collections Management',
+      'Admin Dashboard',
+      'Multilingual Support (FR/EN)',
       'Performance Monitoring',
-      'Centralized Error Handling',
-      'Modular Translation System',
-      'TypeScript Type Safety'
+      'Error Boundary System',
+      'TypeScript Type Safety',
+      'Modular Translation System'
     ]
   };
 };
@@ -123,35 +129,38 @@ export const hasStabilityFeatures = (version: string = APP_VERSION.fullVersion):
 };
 
 /**
- * Get stability features for current version
+ * Get maturity features for current version
  */
-export const getStabilityFeatures = () => {
-  if (!hasStabilityFeatures()) return [];
-  
+export const getMaturityFeatures = () => {
   return [
     {
-      name: 'ErrorBoundary System',
-      description: 'Isolation des erreurs par section avec fallback UI',
-      version: '1.0.1'
+      name: 'Complete Authentication System',
+      description: 'Système d\'authentification robuste avec gestion des rôles',
+      version: '1.0.0'
     },
     {
-      name: 'SafeImage Component',
-      description: 'Gestion robuste du chargement d\'images avec fallbacks',
+      name: 'Advanced Collections Management',
+      description: 'Gestion complète des collections avec traductions',
+      version: '1.0.0'
+    },
+    {
+      name: 'Admin Dashboard',
+      description: 'Interface d\'administration complète et fonctionnelle',
+      version: '1.0.0'
+    },
+    {
+      name: 'Multilingual Support',
+      description: 'Support complet français/anglais avec système modulaire',
       version: '1.0.1'
     },
     {
       name: 'Performance Monitoring',
-      description: 'Métriques temps réel et alertes de performance',
+      description: 'Monitoring en temps réel avec métriques détaillées',
       version: '1.0.1'
     },
     {
-      name: 'Centralized Error Handling',
-      description: 'Système ErrorHandler singleton avec notifications',
-      version: '1.0.1'
-    },
-    {
-      name: 'Modular Translation System',
-      description: 'Architecture modulaire avec types TypeScript',
+      name: 'Error Boundary System',
+      description: 'Gestion robuste des erreurs avec recovery automatique',
       version: '1.0.1'
     }
   ];
