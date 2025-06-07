@@ -44,22 +44,38 @@ export default function Dashboard() {
     try {
       // Simuler des données si le service n'est pas disponible
       const mockStats: AdminStats = {
-        total_users: 156,
-        active_users: 45,
-        total_contributions: 1247,
-        pending_contributions: 23,
-        total_symbols: 892,
-        verified_symbols: 756,
-        user_growth: [
-          { date: '2024-01-01', count: 100 },
-          { date: '2024-01-02', count: 105 },
-          { date: '2024-01-03', count: 110 },
-          { date: '2024-01-04', count: 120 },
-          { date: '2024-01-05', count: 135 },
-          { date: '2024-01-06', count: 145 },
-          { date: '2024-01-07', count: 156 }
+        totalUsers: 156,
+        activeUsersLast30Days: 45,
+        bannedUsers: 3,
+        adminUsers: 5,
+        newUsersToday: 2,
+        newUsersWeek: 12,
+        totalContributions: 1247,
+        pendingContributions: 23,
+        approvedContributions: 1180,
+        rejectedContributions: 44,
+        contributionsToday: 8,
+        contributionsWeek: 67,
+        totalSymbols: 892,
+        verifiedSymbols: 756,
+        totalSymbolLocations: 1024,
+        topContributors: [
+          {
+            userId: 'user1',
+            username: 'marie_culturelle',
+            fullName: 'Marie Dupont',
+            contributionsCount: 45,
+            pointsTotal: 1250
+          },
+          {
+            userId: 'user2', 
+            username: 'ahmed_artisan',
+            fullName: 'Ahmed Hassan',
+            contributionsCount: 38,
+            pointsTotal: 1100
+          }
         ],
-        contributions_per_day: [
+        contributionsOverTime: [
           { date: '2024-01-01', count: 15 },
           { date: '2024-01-02', count: 18 },
           { date: '2024-01-03', count: 22 },
@@ -67,17 +83,7 @@ export default function Dashboard() {
           { date: '2024-01-05', count: 25 },
           { date: '2024-01-06', count: 21 },
           { date: '2024-01-07', count: 28 }
-        ],
-        top_contributor: {
-          username: 'marie_culturelle',
-          contributions: 45,
-          points: 1250
-        },
-        last_contribution: {
-          title: 'Motif berbère traditionnel',
-          created_at: new Date().toISOString(),
-          author: 'ahmed_artisan'
-        }
+        ]
       };
 
       try {
