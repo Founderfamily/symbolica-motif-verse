@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,13 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Search, Users, UserCheck, UserX, Shield, MoreHorizontal, AlertTriangle, Loader2 } from 'lucide-react';
+import { Search, Users, UserCheck, UserX, Shield, MoreHorizontal, AlertTriangle, Loader2, Edit, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -27,6 +27,9 @@ import {
 import { userManagementService, UserFilters } from '@/services/admin/userManagementService';
 import { adminStatsService } from '@/services/admin/statsService';
 import { UserProfile } from '@/types/auth';
+import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
+import { EditUserDialog } from '@/components/admin/EditUserDialog';
+import { DeleteUserDialog } from '@/components/admin/DeleteUserDialog';
 
 export default function UsersManagement() {
   const { t } = useTranslation();
@@ -35,6 +38,10 @@ export default function UsersManagement() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'user' | 'admin' | 'banned'>('all');
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -92,8 +99,6 @@ export default function UsersManagement() {
       ));
 
       toast.success(`L'utilisateur a été ${!currentIsBanned ? 'banni' : 'débanni'}.`);
-      
-      // Recharger les stats
       loadStats();
     } catch (error) {
       console.error('Error toggling ban status:', error);
@@ -112,13 +117,21 @@ export default function UsersManagement() {
       ));
 
       toast.success(`L'utilisateur a été ${!currentIsAdmin ? 'promu administrateur' : 'retiré des administrateurs'}.`);
-      
-      // Recharger les stats
       loadStats();
     } catch (error) {
       console.error('Error updating admin status:', error);
       toast.error("Impossible de modifier le statut administrateur.");
     }
+  };
+
+  const handleEditUser = (userId: string) => {
+    setEditingUserId(userId);
+    setEditDialogOpen(true);
+  };
+
+  const handleDeleteUser = (userData: UserProfile) => {
+    setDeleteUser(userData);
+    setDeleteDialogOpen(true);
   };
 
   const getStatusBadge = (user: UserProfile) => {
@@ -156,10 +169,13 @@ export default function UsersManagement() {
             Gérez les comptes utilisateurs et leurs permissions
           </p>
         </div>
-        <Button onClick={loadUsers} variant="outline" disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-          Actualiser
-        </Button>
+        <div className="flex gap-2">
+          <CreateUserDialog onUserCreated={loadUsers} />
+          <Button onClick={loadUsers} variant="outline" disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+            Actualiser
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -349,17 +365,20 @@ export default function UsersManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <I18nText translationKey="admin.users.viewProfile">
-                              Voir le profil
-                            </I18nText>
+                          <DropdownMenuItem onClick={() => handleEditUser(userData.id)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Modifier
                           </DropdownMenuItem>
+                          
+                          <DropdownMenuSeparator />
+                          
                           {userData.id !== user?.id && (
                             <>
                               <DropdownMenuItem
                                 onClick={() => handleToggleAdmin(userData.id, userData.is_admin || false)}
                                 className={userData.is_admin ? "text-orange-600" : "text-blue-600"}
                               >
+                                <Shield className="h-4 w-4 mr-2" />
                                 {userData.is_admin ? (
                                   <I18nText translationKey="admin.users.removeAdmin">
                                     Retirer les droits admin
@@ -372,9 +391,20 @@ export default function UsersManagement() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleToggleBan(userData.id, userData.is_banned || false)}
-                                className={userData.is_banned ? "text-green-600" : "text-red-600"}
+                                className={userData.is_banned ? "text-green-600" : "text-orange-600"}
                               >
+                                <UserX className="h-4 w-4 mr-2" />
                                 {userData.is_banned ? 'Débannir' : 'Bannir'}
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuSeparator />
+                              
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteUser(userData)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
                               </DropdownMenuItem>
                             </>
                           )}
@@ -388,7 +418,21 @@ export default function UsersManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Dialogs */}
+      <EditUserDialog
+        userId={editingUserId}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onUserUpdated={loadUsers}
+      />
+      
+      <DeleteUserDialog
+        user={deleteUser}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onUserDeleted={loadUsers}
+      />
     </div>
   );
 }
-

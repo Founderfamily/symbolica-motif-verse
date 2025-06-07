@@ -1858,6 +1858,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_user_as_admin: {
+        Args: {
+          p_admin_id: string
+          p_email: string
+          p_password: string
+          p_username?: string
+          p_full_name?: string
+          p_is_admin?: boolean
+        }
+        Returns: string
+      }
+      delete_user_as_admin: {
+        Args: { p_admin_id: string; p_user_id: string }
+        Returns: undefined
+      }
       get_admin_logs_with_profiles: {
         Args: { p_limit?: number }
         Returns: {
@@ -1924,6 +1939,24 @@ export type Database = {
           total_points: number
         }[]
       }
+      get_user_details_for_admin: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          username: string
+          full_name: string
+          is_admin: boolean
+          is_banned: boolean
+          created_at: string
+          updated_at: string
+          last_activity: string
+          contributions_count: number
+          total_points: number
+          followers_count: number
+          following_count: number
+          achievements_count: number
+        }[]
+      }
       get_user_management_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1987,6 +2020,16 @@ export type Database = {
       }
       toggle_user_ban: {
         Args: { p_user_id: string; p_admin_id: string; p_banned: boolean }
+        Returns: undefined
+      }
+      update_user_as_admin: {
+        Args: {
+          p_admin_id: string
+          p_user_id: string
+          p_username?: string
+          p_full_name?: string
+          p_is_admin?: boolean
+        }
         Returns: undefined
       }
     }
