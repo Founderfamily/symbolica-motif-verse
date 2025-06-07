@@ -1,3 +1,4 @@
+
 # Documentation Administrative - Cultural Heritage Symbols
 
 ## Vue d'ensemble du système
@@ -50,7 +51,7 @@ La base de données PostgreSQL est organisée en plusieurs groupes de tables li�
 Table principale des profils utilisateur étendant auth.users
 ```sql
 - id (uuid, PK) : Référence à auth.users.id
-- username (text) : Nom d'utilisateur unique
+- username (text) : Nom d'utilisateur
 - full_name (text) : Nom complet de l'utilisateur
 - is_admin (boolean) : Statut administrateur (défaut: false)
 - is_banned (boolean) : Statut de bannissement (défaut: false)
