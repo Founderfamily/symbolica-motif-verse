@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Share2, Plus, Eye, Collection, FileText } from 'lucide-react';
+import { Heart, Share2, Plus, Eye, Folder, FileText } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { GroupDiscovery } from '@/types/interest-groups';
@@ -43,7 +43,7 @@ const GroupDiscoveries: React.FC<GroupDiscoveriesProps> = ({ groupId, isMember }
       case 'symbol':
         return <Eye className="h-4 w-4" />;
       case 'collection':
-        return <Collection className="h-4 w-4" />;
+        return <Folder className="h-4 w-4" />;
       case 'contribution':
         return <FileText className="h-4 w-4" />;
       default:

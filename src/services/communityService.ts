@@ -275,7 +275,7 @@ export const getPostComments = async (postId: string): Promise<PostComment[]> =>
   try {
     const { data: comments, error: commentsError } = await supabase
       .from('post_comments')
-      .select('*')
+      .select('id, post_id, user_id, parent_comment_id, content, created_at, updated_at, likes_count, translations')
       .eq('post_id', postId)
       .order('created_at', { ascending: true });
 
@@ -311,7 +311,7 @@ export const getPostComments = async (postId: string): Promise<PostComment[]> =>
           username: 'Unknown',
           full_name: 'Unknown User'
         }
-      };
+      } as PostComment;
     });
 
     // Organize comments in a tree structure
@@ -435,7 +435,16 @@ export const getGroupNotifications = async (userId: string): Promise<GroupNotifi
     const { data: notifications, error } = await supabase
       .from('group_notifications')
       .select(`
-        *,
+        id,
+        user_id,
+        group_id,
+        notification_type,
+        entity_id,
+        title,
+        message,
+        read,
+        created_at,
+        created_by,
         interest_groups (name, slug)
       `)
       .eq('user_id', userId)
@@ -447,7 +456,22 @@ export const getGroupNotifications = async (userId: string): Promise<GroupNotifi
       return [];
     }
 
-    return notifications || [];
+    return (notifications || []).map(notif => ({
+      id: notif.id,
+      user_id: notif.user_id,
+      group_id: notif.group_id,
+      notification_type: notif.notification_type as GroupNotification['notification_type'],
+      entity_id: notif.entity_id,
+      title: notif.title,
+      message: notif.message,
+      read: notif.read,
+      created_at: notif.created_at,
+      created_by: notif.created_by,
+      group: notif.interest_groups ? {
+        name: notif.interest_groups.name,
+        slug: notif.interest_groups.slug
+      } : undefined
+    }));
   } catch (error) {
     console.error('Error in getGroupNotifications service:', error);
     return [];
@@ -507,7 +531,7 @@ export const getGroupDiscoveries = async (groupId: string): Promise<GroupDiscove
   try {
     const { data: discoveries, error } = await supabase
       .from('group_discoveries')
-      .select('*')
+      .select('id, group_id, shared_by, entity_type, entity_id, title, description, created_at, likes_count, comments_count')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false });
 
@@ -532,19 +556,25 @@ export const getGroupDiscoveries = async (groupId: string): Promise<GroupDiscove
     }
 
     // Map profiles to discoveries
-    return discoveries.map(discovery => {
-      const profile = profiles?.find(p => p.id === discovery.shared_by);
-      return {
-        ...discovery,
-        sharer_profile: profile ? {
-          username: profile.username || 'Unknown',
-          full_name: profile.full_name || 'Unknown User'
-        } : {
-          username: 'Unknown',
-          full_name: 'Unknown User'
-        }
-      };
-    });
+    return discoveries.map(discovery => ({
+      id: discovery.id,
+      group_id: discovery.group_id,
+      shared_by: discovery.shared_by,
+      entity_type: discovery.entity_type as GroupDiscovery['entity_type'],
+      entity_id: discovery.entity_id,
+      title: discovery.title,
+      description: discovery.description,
+      created_at: discovery.created_at,
+      likes_count: discovery.likes_count,
+      comments_count: discovery.comments_count,
+      sharer_profile: profiles?.find(p => p.id === discovery.shared_by) ? {
+        username: profiles.find(p => p.id === discovery.shared_by)?.username || 'Unknown',
+        full_name: profiles.find(p => p.id === discovery.shared_by)?.full_name || 'Unknown User'
+      } : {
+        username: 'Unknown',
+        full_name: 'Unknown User'
+      }
+    }));
   } catch (error) {
     console.error('Error in getGroupDiscoveries service:', error);
     return [];

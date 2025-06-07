@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bell, Heart, MessageCircle, Users, Mail, Mention, Check, X } from 'lucide-react';
+import { Bell, Heart, MessageCircle, Users, Mail, AtSign, Check, X } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { GroupNotification } from '@/types/interest-groups';
@@ -68,7 +68,7 @@ const GroupNotificationCenter: React.FC = () => {
       case 'invitation':
         return <Mail className="h-4 w-4" />;
       case 'mention':
-        return <Mention className="h-4 w-4" />;
+        return <AtSign className="h-4 w-4" />;
       default:
         return <Bell className="h-4 w-4" />;
     }
