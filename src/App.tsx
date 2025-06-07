@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
@@ -25,7 +26,7 @@ import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
 import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
 import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
 import SystemSettings from '@/pages/Admin/SystemSettings';
-import NotFoundPage from '@/pages/NotFoundPage';
+import NotFound from '@/pages/NotFound';
 import LazyCollectionDetailPage from '@/components/collections/LazyCollectionDetailPage';
 
 import { initializationService } from '@/services/admin/initializationService';
@@ -87,7 +88,7 @@ function App() {
               <Route path="/admin/settings" element={<SystemSettings />} />
 
               {/* Not Found Route */}
-              <Route path="*" element={<NotFoundPage />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
           <Toaster position="top-right" />

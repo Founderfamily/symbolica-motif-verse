@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Clock, Play, Pause, Settings, Activity } from 'lucide-react';
 import { backupService } from '@/services/admin/backupService';
 import { monitoringService } from '@/services/admin/monitoringService';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ScheduleConfig {
   autoBackup: boolean;
@@ -48,23 +48,63 @@ const MaintenanceScheduler: React.FC = () => {
     };
   }, [isAdmin]);
 
-  const loadConfig = () => {
-    // Charger la configuration depuis localStorage ou API
-    const savedConfig = localStorage.getItem('maintenance-config');
-    if (savedConfig) {
-      try {
-        setConfig(JSON.parse(savedConfig));
-      } catch (error) {
+  const loadConfig = async () => {
+    try {
+      // Charger la configuration depuis content_sections
+      const { data, error } = await supabase
+        .from('content_sections')
+        .select('content')
+        .eq('section_key', 'maintenance_config')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
         console.error('Erreur chargement config:', error);
+        return;
       }
+
+      if (data?.content) {
+        const content = data.content as { fr?: string };
+        if (content.fr) {
+          try {
+            const savedConfig = JSON.parse(content.fr);
+            setConfig(prev => ({ ...prev, ...savedConfig }));
+          } catch (parseError) {
+            console.error('Erreur parsing config:', parseError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Exception chargement config:', error);
     }
   };
 
-  const saveConfig = (newConfig: ScheduleConfig) => {
-    setConfig(newConfig);
-    localStorage.setItem('maintenance-config', JSON.stringify(newConfig));
-    setupSchedules(newConfig);
-    toast.success('Configuration sauvegardée');
+  const saveConfig = async (newConfig: ScheduleConfig) => {
+    try {
+      setConfig(newConfig);
+      
+      // Sauvegarder dans content_sections
+      const { error } = await supabase
+        .from('content_sections')
+        .upsert({
+          section_key: 'maintenance_config',
+          content: {
+            fr: JSON.stringify(newConfig),
+            en: JSON.stringify(newConfig)
+          }
+        });
+
+      if (error) {
+        console.error('Erreur sauvegarde config:', error);
+        toast.error('Erreur lors de la sauvegarde de la configuration');
+        return;
+      }
+      
+      setupSchedules(newConfig);
+      toast.success('Configuration sauvegardée');
+    } catch (error) {
+      console.error('Exception sauvegarde config:', error);
+      toast.error('Erreur lors de la sauvegarde');
+    }
   };
 
   const setupSchedules = (newConfig: ScheduleConfig) => {
@@ -89,7 +129,7 @@ const MaintenanceScheduler: React.FC = () => {
           console.error('Erreur sauvegarde auto:', error);
           toast.error('Erreur lors de la sauvegarde automatique');
         }
-      }, newConfig.backupFrequency * 60 * 60 * 1000); // Convertir en millisecondes
+      }, newConfig.backupFrequency * 60 * 60 * 1000);
     }
 
     // Configurer le monitoring automatique
@@ -100,22 +140,26 @@ const MaintenanceScheduler: React.FC = () => {
         } catch (error) {
           console.error('Erreur monitoring auto:', error);
         }
-      }, newConfig.monitoringInterval * 60 * 1000); // Convertir en millisecondes
+      }, newConfig.monitoringInterval * 60 * 1000);
     }
 
     // Configurer le nettoyage automatique
     if (newConfig.autoCleanup) {
       newIntervals.cleanup = setInterval(async () => {
         try {
-          const deletedCount = await backupService.cleanupOldBackups(newConfig.cleanupRetentionDays);
-          if (deletedCount > 0) {
-            toast.success(`Nettoyage automatique: ${deletedCount} sauvegardes supprimées`);
+          const deletedBackups = await backupService.cleanupOldBackups(newConfig.cleanupRetentionDays);
+          
+          // Nettoyer aussi les données système anciennes
+          await supabase.rpc('cleanup_old_system_data');
+          
+          if (deletedBackups > 0) {
+            toast.success(`Nettoyage automatique: ${deletedBackups} sauvegardes supprimées`);
           }
         } catch (error) {
           console.error('Erreur nettoyage auto:', error);
           toast.error('Erreur lors du nettoyage automatique');
         }
-      }, 24 * 60 * 60 * 1000); // Une fois par jour
+      }, 24 * 60 * 60 * 1000);
     }
 
     setIntervals(newIntervals);
@@ -144,6 +188,7 @@ const MaintenanceScheduler: React.FC = () => {
   const runManualCleanup = async () => {
     try {
       const deletedCount = await backupService.cleanupOldBackups(config.cleanupRetentionDays);
+      await supabase.rpc('cleanup_old_system_data');
       toast.success(`Nettoyage manuel: ${deletedCount} sauvegardes supprimées`);
     } catch (error) {
       console.error('Erreur nettoyage manuel:', error);
@@ -260,7 +305,7 @@ const MaintenanceScheduler: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <Label className="text-base font-medium">Nettoyage automatique</Label>
-                <p className="text-sm text-gray-600">Supprimer automatiquement les anciennes sauvegardes</p>
+                <p className="text-sm text-gray-600">Supprimer automatiquement les anciennes données</p>
               </div>
               <Switch
                 checked={config.autoCleanup}

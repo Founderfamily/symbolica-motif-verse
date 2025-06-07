@@ -1347,6 +1347,149 @@ export type Database = {
         }
         Relationships: []
       }
+      system_alerts: {
+        Row: {
+          alert_key: string
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          source: string
+          title: string
+          type: string
+        }
+        Insert: {
+          alert_key: string
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          source?: string
+          title: string
+          type: string
+        }
+        Update: {
+          alert_key?: string
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          source?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_backups: {
+        Row: {
+          backup_data: Json | null
+          backup_key: string
+          completed_at: string | null
+          config: Json
+          created_at: string
+          errors: string[] | null
+          id: string
+          size_bytes: number
+          status: string
+          tables_backed_up: string[]
+        }
+        Insert: {
+          backup_data?: Json | null
+          backup_key: string
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          errors?: string[] | null
+          id?: string
+          size_bytes?: number
+          status: string
+          tables_backed_up?: string[]
+        }
+        Update: {
+          backup_data?: Json | null
+          backup_key?: string
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          errors?: string[] | null
+          id?: string
+          size_bytes?: number
+          status?: string
+          tables_backed_up?: string[]
+        }
+        Relationships: []
+      }
+      system_health_checks: {
+        Row: {
+          auth_status: string
+          checked_at: string
+          database_status: string
+          details: Json | null
+          id: string
+          issues: string[] | null
+          overall_status: string
+          storage_status: string
+        }
+        Insert: {
+          auth_status: string
+          checked_at?: string
+          database_status: string
+          details?: Json | null
+          id?: string
+          issues?: string[] | null
+          overall_status: string
+          storage_status: string
+        }
+        Update: {
+          auth_status?: string
+          checked_at?: string
+          database_status?: string
+          details?: Json | null
+          id?: string
+          issues?: string[] | null
+          overall_status?: string
+          storage_status?: string
+        }
+        Relationships: []
+      }
+      system_metrics: {
+        Row: {
+          collected_at: string
+          id: string
+          metric_type: string
+          values: Json
+        }
+        Insert: {
+          collected_at?: string
+          id?: string
+          metric_type: string
+          values: Json
+        }
+        Update: {
+          collected_at?: string
+          id?: string
+          metric_type?: string
+          values?: Json
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           created_at: string | null
@@ -1710,6 +1853,10 @@ export type Database = {
           updated_at: string
           translations: Json
         }[]
+      }
+      cleanup_old_system_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       get_admin_logs_with_profiles: {
         Args: { p_limit?: number }
