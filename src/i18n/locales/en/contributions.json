@@ -1,8 +1,10 @@
 
 {
-  "contributions": {
-    "title": "Contributions",
-    "myContributions": "My Contributions",
+  "title": "Contributions",
+  "myContributions": "My Contributions",
+  "newContribution": "New Contribution",
+  "loading": "Loading...",
+  "status": {
     "pending": "Pending",
     "approved": "Approved",
     "rejected": "Rejected",
@@ -10,5 +12,53 @@
     "submitted": "Submitted",
     "underReview": "Under Review",
     "published": "Published"
+  },
+  "form": {
+    "title": "Title",
+    "description": "Description",
+    "culture": "Culture",
+    "period": "Period",
+    "location": "Location",
+    "tags": "Tags",
+    "submit": "Submit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "images": "Images",
+    "uploadImages": "Upload Images",
+    "generalInfo": "General Information",
+    "culturalContext": "Cultural Context",
+    "locationInfo": "Location Information"
+  },
+  "filters": {
+    "all": "All",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "stats": {
+    "total": "Total",
+    "thisMonth": "This Month",
+    "pending": "Pending",
+    "approved": "Approved"
+  },
+  "admin": {
+    "title": "Contributions Management",
+    "subtitle": "Review and moderate user contributions",
+    "pending": "Pending",
+    "pendingDescription": "Contributions pending review",
+    "noPending": "No pending contributions",
+    "noActive": "All contributions have been processed.",
+    "accessRestricted": "Access Restricted",
+    "accessRestrictedDescription": "You don't have permission to access this section.",
+    "backToHome": "Back to Home",
+    "table": {
+      "caption": "List of contributions pending moderation",
+      "title": "Title",
+      "submittedBy": "Submitted By",
+      "date": "Date",
+      "type": "Type",
+      "actions": "Actions",
+      "view": "View"
+    }
   }
 }

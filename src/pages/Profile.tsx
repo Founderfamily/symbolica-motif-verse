@@ -27,12 +27,12 @@ export default function Profile() {
         <Card>
           <CardHeader>
             <CardTitle>
-              <I18nText translationKey="profile.notFound">
+              <I18nText translationKey="profile:notFound">
                 Profil non trouvé
               </I18nText>
             </CardTitle>
             <CardDescription>
-              <I18nText translationKey="profile.notFoundDescription">
+              <I18nText translationKey="profile:notFoundDescription">
                 Impossible de charger les informations de profil.
               </I18nText>
             </CardDescription>
@@ -49,14 +49,14 @@ export default function Profile() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold">
           <I18nText 
-            translationKey="profile.title" 
+            translationKey="profile:title" 
             params={{ name: displayName }}
           >
             Profil de {displayName}
           </I18nText>
         </h1>
         <p className="text-muted-foreground mt-1">
-          <I18nText translationKey="profile.description">
+          <I18nText translationKey="profile:description">
             Gérez vos informations personnelles et vos préférences
           </I18nText>
         </p>
@@ -79,7 +79,7 @@ export default function Profile() {
                   {profile?.contributions_count || 0}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <I18nText translationKey="profile.stats.contributions">
+                  <I18nText translationKey="profile:stats.contributions">
                     Contributions
                   </I18nText>
                 </div>
@@ -89,7 +89,7 @@ export default function Profile() {
                   {profile?.total_points || 0}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <I18nText translationKey="profile.stats.points">
+                  <I18nText translationKey="profile:stats.points">
                     Points
                   </I18nText>
                 </div>
@@ -99,7 +99,7 @@ export default function Profile() {
                   {profile?.followers_count || 0}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <I18nText translationKey="profile.stats.followers">
+                  <I18nText translationKey="profile:stats.followers">
                     Abonnés
                   </I18nText>
                 </div>

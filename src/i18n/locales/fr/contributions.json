@@ -3,11 +3,15 @@
   "title": "Contributions",
   "myContributions": "Mes contributions",
   "newContribution": "Nouvelle contribution",
+  "loading": "Chargement...",
   "status": {
     "pending": "En attente",
     "approved": "Approuvée",
     "rejected": "Rejetée",
-    "draft": "Brouillon"
+    "draft": "Brouillon",
+    "submitted": "Soumise",
+    "underReview": "En cours d'examen",
+    "published": "Publiée"
   },
   "form": {
     "title": "Titre",
@@ -18,7 +22,12 @@
     "tags": "Tags",
     "submit": "Soumettre",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "images": "Images",
+    "uploadImages": "Télécharger des images",
+    "generalInfo": "Informations générales",
+    "culturalContext": "Contexte culturel",
+    "locationInfo": "Informations de localisation"
   },
   "filters": {
     "all": "Toutes",
@@ -31,5 +40,25 @@
     "thisMonth": "Ce mois",
     "pending": "En attente",
     "approved": "Approuvées"
+  },
+  "admin": {
+    "title": "Gestion des contributions",
+    "subtitle": "Examiner et modérer les contributions des utilisateurs",
+    "pending": "En attente",
+    "pendingDescription": "Contributions en attente de révision",
+    "noPending": "Aucune contribution en attente",
+    "noActive": "Toutes les contributions ont été traitées.",
+    "accessRestricted": "Accès restreint",
+    "accessRestrictedDescription": "Vous n'avez pas les permissions pour accéder à cette section.",
+    "backToHome": "Retour à l'accueil",
+    "table": {
+      "caption": "Liste des contributions en attente de modération",
+      "title": "Titre",
+      "submittedBy": "Soumis par",
+      "date": "Date",
+      "type": "Type",
+      "actions": "Actions",
+      "view": "Voir"
+    }
   }
 }

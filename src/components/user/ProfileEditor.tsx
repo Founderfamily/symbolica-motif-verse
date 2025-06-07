@@ -83,8 +83,8 @@ export default function ProfileEditor() {
       if (!file.type.startsWith('image/')) {
         toast({
           variant: "destructive",
-          title: t('error.title'),
-          description: t('profile.editor.notAnImage'),
+          title: t('profile:edit.error'),
+          description: t('profile:edit.notAnImage'),
         });
         return;
       }
@@ -92,8 +92,8 @@ export default function ProfileEditor() {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
         toast({
           variant: "destructive",
-          title: t('error.title'),
-          description: t('profile.editor.fileTooLarge'),
+          title: t('profile:edit.error'),
+          description: t('profile:edit.fileTooLarge'),
         });
         return;
       }
@@ -141,7 +141,7 @@ export default function ProfileEditor() {
         if (uploadedUrl) {
           avatarUrl = uploadedUrl;
         } else {
-          throw new Error(t('profile.editor.avatarUploadFailed'));
+          throw new Error(t('profile:edit.avatarUploadFailed'));
         }
       }
       
@@ -152,8 +152,8 @@ export default function ProfileEditor() {
       });
       
       toast({
-        title: t('profile.editor.success'),
-        description: t('profile.editor.profileUpdated'),
+        title: t('profile:edit.success'),
+        description: t('profile:edit.profileUpdated'),
       });
       
       // Clean up avatar preview URL
@@ -164,11 +164,11 @@ export default function ProfileEditor() {
       }
       
     } catch (err: any) {
-      setError(err.message || t('profile.editor.updateError'));
+      setError(err.message || t('profile:edit.updateError'));
       toast({
         variant: "destructive",
-        title: t('error.title'),
-        description: err.message || t('profile.editor.updateError'),
+        title: t('profile:edit.error'),
+        description: err.message || t('profile:edit.updateError'),
       });
     } finally {
       setLoading(false);
@@ -179,12 +179,12 @@ export default function ProfileEditor() {
     <Card className="w-full">
       <CardHeader>
         <CardTitle>
-          <I18nText translationKey="profile.editor.title">
+          <I18nText translationKey="profile:edit.title">
             Modifier votre profil
           </I18nText>
         </CardTitle>
         <CardDescription>
-          <I18nText translationKey="profile.editor.description">
+          <I18nText translationKey="profile:edit.description">
             Mettez à jour vos informations personnelles
           </I18nText>
         </CardDescription>
@@ -194,7 +194,7 @@ export default function ProfileEditor() {
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>
-              <I18nText translationKey="error.title">Erreur</I18nText>
+              <I18nText translationKey="profile:edit.error">Erreur</I18nText>
             </AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -227,13 +227,13 @@ export default function ProfileEditor() {
               size="sm"
               className="text-sm"
             >
-              <I18nText translationKey="profile.editor.changeAvatar">
+              <I18nText translationKey="profile:edit.changeAvatar">
                 Changer d'avatar
               </I18nText>
             </Button>
             
             <p className="text-xs text-slate-500 text-center max-w-[200px]">
-              <I18nText translationKey="profile.editor.avatarRequirements">
+              <I18nText translationKey="profile:edit.avatarRequirements">
                 JPG, PNG ou GIF. 5 MB maximum.
               </I18nText>
             </p>
@@ -249,7 +249,7 @@ export default function ProfileEditor() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.labels.username" />
+                        <I18nText translationKey="profile:edit.username" />
                       </FormLabel>
                       <FormControl>
                         <Input {...field} />
@@ -265,7 +265,7 @@ export default function ProfileEditor() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="auth.labels.fullName" />
+                        <I18nText translationKey="profile:edit.fullName" />
                       </FormLabel>
                       <FormControl>
                         <Input {...field} />
@@ -281,13 +281,13 @@ export default function ProfileEditor() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <I18nText translationKey="profile.editor.bio" />
+                        <I18nText translationKey="profile:edit.bio" />
                       </FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
                           value={field.value || ''}
-                          placeholder={t('profile.editor.bioPlaceholder')}
+                          placeholder={t('profile:edit.bioPlaceholder')}
                           className="resize-none"
                           rows={3}
                         />
@@ -304,13 +304,13 @@ export default function ProfileEditor() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          <I18nText translationKey="profile.editor.location" />
+                          <I18nText translationKey="profile:edit.location" />
                         </FormLabel>
                         <FormControl>
                           <Input
                             {...field}
                             value={field.value || ''}
-                            placeholder={t('profile.editor.locationPlaceholder')}
+                            placeholder={t('profile:edit.locationPlaceholder')}
                           />
                         </FormControl>
                         <FormMessage />
@@ -324,7 +324,7 @@ export default function ProfileEditor() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          <I18nText translationKey="profile.editor.website" />
+                          <I18nText translationKey="profile:edit.website" />
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -348,12 +348,12 @@ export default function ProfileEditor() {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        <I18nText translationKey="profile.editor.saving">
+                        <I18nText translationKey="profile:edit.saving">
                           Sauvegarde en cours...
                         </I18nText>
                       </>
                     ) : (
-                      <I18nText translationKey="profile.editor.saveChanges">
+                      <I18nText translationKey="profile:edit.saveChanges">
                         Sauvegarder les modifications
                       </I18nText>
                     )}
@@ -364,7 +364,7 @@ export default function ProfileEditor() {
                     onClick={() => form.reset()}
                     disabled={loading}
                   >
-                    <I18nText translationKey="common.cancel">
+                    <I18nText translationKey="profile:edit.cancel">
                       Annuler
                     </I18nText>
                   </Button>
@@ -378,12 +378,12 @@ export default function ProfileEditor() {
         
         <div>
           <h3 className="text-lg font-medium mb-2">
-            <I18nText translationKey="profile.editor.emailSection">
+            <I18nText translationKey="profile:edit.emailSection">
               Email et Mot de passe
             </I18nText>
           </h3>
           <p className="text-sm text-slate-500 mb-4">
-            <I18nText translationKey="profile.editor.emailDescription">
+            <I18nText translationKey="profile:edit.emailDescription">
               Gérez votre email et votre mot de passe
             </I18nText>
           </p>
@@ -391,7 +391,7 @@ export default function ProfileEditor() {
           <div className="flex flex-col sm:flex-row gap-2">
             <Button variant="outline" asChild>
               <a href="/auth/reset-password">
-                <I18nText translationKey="auth.buttons.changePassword">
+                <I18nText translationKey="auth:buttons.changePassword">
                   Changer de mot de passe
                 </I18nText>
               </a>
@@ -399,7 +399,7 @@ export default function ProfileEditor() {
             
             <Button variant="outline" asChild>
               <a href="/auth/update-email">
-                <I18nText translationKey="auth.buttons.updateEmail">
+                <I18nText translationKey="auth:buttons.updateEmail">
                   Mettre à jour l'email
                 </I18nText>
               </a>

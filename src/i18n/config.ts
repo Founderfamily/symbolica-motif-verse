@@ -24,6 +24,8 @@ import enRoadmap from './locales/en/roadmap.json';
 import frRoadmap from './locales/fr/roadmap.json';
 import enCommunity from './locales/en/community.json';
 import frCommunity from './locales/fr/community.json';
+import enContributions from './locales/en/contributions.json';
+import frContributions from './locales/fr/contributions.json';
 
 const resources = {
   en: {
@@ -35,7 +37,8 @@ const resources = {
     navigation: enNavigation,
     search: enSearch,
     roadmap: enRoadmap,
-    community: enCommunity
+    community: enCommunity,
+    contributions: enContributions
   },
   fr: {
     translation: frTranslations,
@@ -46,7 +49,8 @@ const resources = {
     navigation: frNavigation,
     search: frSearch,
     roadmap: frRoadmap,
-    community: frCommunity
+    community: frCommunity,
+    contributions: frContributions
   }
 };
 
