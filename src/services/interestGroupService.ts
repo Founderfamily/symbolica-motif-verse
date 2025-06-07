@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { InterestGroup } from '@/types/interest-groups';
 
@@ -155,6 +156,49 @@ export const getGroupById = async (id: string): Promise<InterestGroup | null> =>
   } catch (error) {
     console.error(`Error fetching interest group with ID ${id}:`, error);
     return null;
+  }
+};
+
+/**
+ * Fetches a single interest group by slug - respects RLS policies
+ */
+export const getGroupBySlug = async (slug: string): Promise<InterestGroup | null> => {
+  try {
+    console.log('🚀 [getGroupBySlug] Fetching group with slug:', slug);
+    
+    const { data, error } = await supabase
+      .from('interest_groups')
+      .select('*')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (error) {
+      console.error(`Error fetching interest group with slug ${slug}:`, error);
+      // Check sample data as fallback
+      const sampleGroup = sampleGroups.find(group => group.slug === slug);
+      return sampleGroup || null;
+    }
+    
+    if (!data) {
+      // Check sample data as fallback
+      const sampleGroup = sampleGroups.find(group => group.slug === slug);
+      return sampleGroup || null;
+    }
+
+    console.log('✅ [getGroupBySlug] Found group:', data.name);
+
+    // Type cast to fix the type issue with translations
+    return {
+      ...data,
+      translations: typeof data.translations === 'string'
+        ? JSON.parse(data.translations)
+        : data.translations
+    } as InterestGroup;
+  } catch (error) {
+    console.error(`Error fetching interest group with slug ${slug}:`, error);
+    // Check sample data as fallback
+    const sampleGroup = sampleGroups.find(group => group.slug === slug);
+    return sampleGroup || null;
   }
 };
 
