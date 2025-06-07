@@ -12,16 +12,61 @@ const SymbolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Parser l'ID et trouver le symbole par index
-  const symbolIndex = id ? parseInt(id, 10) : -1;
-  const symbol = symbolIndex >= 0 && symbolIndex < SYMBOLS.length ? SYMBOLS[symbolIndex] : null;
+  console.log(`SymbolDetailPage: ID reçu: ${id}`);
 
-  console.log(`SymbolDetailPage: ID reçu: ${id}, Index parsé: ${symbolIndex}, Symbole trouvé: ${symbol?.name || 'Non trouvé'}`);
+  // Fonction pour trouver le symbole
+  const findSymbol = (identifier: string) => {
+    if (!identifier) return null;
 
-  // Vérifier si l'ID est un nombre valide
-  if (id && isNaN(symbolIndex)) {
-    console.error(`ID invalide: "${id}" n'est pas un nombre`);
-  }
+    // 1. Essayer de parser comme index numérique
+    const numericIndex = parseInt(identifier, 10);
+    if (!isNaN(numericIndex) && numericIndex >= 0 && numericIndex < SYMBOLS.length) {
+      console.log(`SymbolDetailPage: Symbole trouvé par index ${numericIndex}:`, SYMBOLS[numericIndex].name);
+      return { symbol: SYMBOLS[numericIndex], index: numericIndex };
+    }
+
+    // 2. Chercher par nom (pour compatibilité avec les anciens liens)
+    const symbolByName = SYMBOLS.find((symbol, index) => {
+      const nameSlug = symbol.name.toLowerCase()
+        .replace(/[éèê]/g, 'e')
+        .replace(/[àâ]/g, 'a')
+        .replace(/[ç]/g, 'c')
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      
+      // Vérifier plusieurs variantes possibles
+      const variants = [
+        nameSlug,
+        `${nameSlug}-${index}`,
+        `${nameSlug}-1`,
+        symbol.name.toLowerCase().replace(/\s+/g, '-')
+      ];
+      
+      return variants.includes(identifier);
+    });
+
+    if (symbolByName) {
+      const index = SYMBOLS.indexOf(symbolByName);
+      console.log(`SymbolDetailPage: Symbole trouvé par nom "${identifier}":`, symbolByName.name, 'à l\'index', index);
+      return { symbol: symbolByName, index };
+    }
+
+    console.log(`SymbolDetailPage: Aucun symbole trouvé pour "${identifier}"`);
+    return null;
+  };
+
+  const result = findSymbol(id || '');
+  const symbol = result?.symbol || null;
+  const symbolIndex = result?.index ?? -1;
+
+  // Redirection automatique pour les anciens liens
+  React.useEffect(() => {
+    if (symbol && symbolIndex >= 0 && id !== symbolIndex.toString()) {
+      console.log(`SymbolDetailPage: Redirection de "${id}" vers "${symbolIndex}"`);
+      navigate(`/symbols/${symbolIndex}`, { replace: true });
+    }
+  }, [symbol, symbolIndex, id, navigate]);
 
   if (!symbol) {
     return (
@@ -30,8 +75,11 @@ const SymbolDetailPage: React.FC = () => {
           <h2 className="text-2xl font-bold text-slate-900 mb-4">
             <I18nText translationKey="symbols.notFound">Symbole non trouvé</I18nText>
           </h2>
-          <p className="text-slate-600 mb-6">
+          <p className="text-slate-600 mb-4">
             <I18nText translationKey="symbols.notFoundDesc">Le symbole que vous recherchez n'existe pas.</I18nText>
+          </p>
+          <p className="text-sm text-slate-500 mb-6">
+            ID recherché : "{id}"
           </p>
           <Button onClick={() => navigate('/symbols')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -126,6 +174,11 @@ const SymbolDetailPage: React.FC = () => {
                 <div>
                   <label className="text-sm font-medium text-slate-700">Index du symbole</label>
                   <p className="text-slate-900">#{symbolIndex}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">URL actuelle</label>
+                  <p className="text-xs text-slate-600 break-all">/symbols/{id}</p>
                 </div>
               </div>
             </Card>

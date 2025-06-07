@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Info, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { Link } from 'react-router-dom';
+import { SYMBOLS } from '@/data/symbols';
 
 interface SymbolCardProps {
   symbol: SymbolData;
@@ -77,9 +78,28 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     
     return cultures[symbol.culture] || "hover:bg-gradient-to-br from-slate-50 to-slate-100 hover:border-slate-200";
   }, [symbol.culture]);
+
+  // Fonction pour générer le lien de navigation cohérent
+  const getSymbolLink = () => {
+    // Essayer de trouver le symbole dans les données statiques par nom
+    const staticSymbolIndex = SYMBOLS.findIndex(s => 
+      s.name.toLowerCase() === symbol.name.toLowerCase() ||
+      s.name.toLowerCase().includes(symbol.name.toLowerCase()) ||
+      symbol.name.toLowerCase().includes(s.name.toLowerCase())
+    );
+
+    if (staticSymbolIndex >= 0) {
+      console.log(`SymbolCard (search): Symbole "${symbol.name}" trouvé dans les données statiques à l'index ${staticSymbolIndex}`);
+      return `/symbols/${staticSymbolIndex}`;
+    }
+
+    // Sinon utiliser l'UUID
+    console.log(`SymbolCard (search): Symbole "${symbol.name}" non trouvé dans les données statiques, utilisation de l'UUID ${symbol.id}`);
+    return `/symbols/${symbol.id}`;
+  };
   
   return (
-    <Link to={`/symbols/${symbol.id}`} className="block">
+    <Link to={getSymbolLink()} className="block">
       <Card 
         className={`overflow-hidden shadow-sm hover:shadow-md border-2 border-white transition-all duration-300 symbol-card ${culturalGradient}`}
         onMouseEnter={() => setIsHovered(true)}
