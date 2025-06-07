@@ -1,29 +1,53 @@
 
 {
   "title": "Hub Communautaire",
-  "subtitle": "Rejoignez des groupes d'intérêt et connectez-vous avec d'autres chercheurs",
-  "allGroups": "Tous les groupes",
-  "popular": "Populaires",
-  "mostActive": "Plus actifs",
-  "noGroups": "Aucun groupe trouvé",
-  "noGroupsDescription": "Essayez d'ajuster votre recherche ou créez un nouveau groupe",
-  "stats": {
-    "members": "membres",
-    "discoveries": "découvertes",
-    "join": "Rejoindre"
+  "subtitle": "Connectez-vous avec des Passionnés de Patrimoine Culturel du Monde Entier",
+  "description": "Participez aux discussions, partagez vos découvertes et collaborez avec d'autres chercheurs",
+  "tabs": {
+    "groups": "Groupes d'Intérêt",
+    "discussions": "Discussions",
+    "contributors": "Meilleurs Contributeurs",
+    "events": "Événements"
   },
-  "features": {
-    "thematicCommunities": {
-      "title": "Communautés thématiques",
-      "description": "Rejoignez des groupes spécialisés axés sur des traditions culturelles et des types de symboles spécifiques"
-    },
-    "personalSpace": {
-      "title": "Espace personnel",
-      "description": "Créez et gérez vos propres collections, partagez vos découvertes avec la communauté"
-    },
-    "intuitiveNavigation": {
-      "title": "Navigation intuitive",
-      "description": "Explorez les symboles par région, période ou signification culturelle avec nos outils interactifs"
-    }
+  "groups": {
+    "title": "Groupes d'Intérêt",
+    "subtitle": "Rejoignez des Groupes Basés sur Vos Intérêts Culturels",
+    "create": "Créer un Nouveau Groupe",
+    "join": "Rejoindre le Groupe",
+    "members": "Membres",
+    "discussions": "Discussions",
+    "recentActivity": "Activité Récente",
+    "noGroups": "Aucun Groupe Trouvé",
+    "loading": "Chargement des Groupes..."
+  },
+  "contributors": {
+    "title": "Meilleurs Contributeurs",
+    "subtitle": "Reconnaissez Nos Membres les Plus Actifs de la Communauté",
+    "thisMonth": "Ce Mois-ci",
+    "allTime": "Tous les Temps",
+    "contributions": "Contributions",
+    "points": "Points"
+  },
+  "stats": {
+    "members": "Membres de la Communauté",
+    "groups": "Groupes d'Intérêt",
+    "discussions": "Discussions Actives",
+    "contributions": "Contributions Mensuelles"
+  },
+  "createGroup": {
+    "title": "Créer un Nouveau Groupe d'Intérêt",
+    "name": "Nom du Groupe",
+    "description": "Description",
+    "category": "Catégorie",
+    "privacy": "Paramètres de Confidentialité",
+    "public": "Public",
+    "private": "Privé",
+    "create": "Créer le Groupe",
+    "cancel": "Annuler"
+  },
+  "search": {
+    "placeholder": "Rechercher des Groupes, Discussions...",
+    "results": "Résultats de Recherche",
+    "noResults": "Aucun Résultat Trouvé"
   }
 }

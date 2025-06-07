@@ -1,6 +1,46 @@
 
 {
-  "subtitle": "Symbolica se construit progressivement avec votre participation",
-  "inProgress": "En cours",
-  "completed": "Terminé"
+  "title": "Feuille de Route",
+  "subtitle": "Découvrez Ce Qui Arrive Ensuite",
+  "description": "Suivez notre progression de développement et les fonctionnalités à venir",
+  "quarters": {
+    "q1": "T1 2024",
+    "q2": "T2 2024",
+    "q3": "T3 2024", 
+    "q4": "T4 2024"
+  },
+  "status": {
+    "completed": "Terminé",
+    "inProgress": "En Cours",
+    "planned": "Planifié",
+    "research": "Phase de Recherche"
+  },
+  "categories": {
+    "platform": "Plateforme",
+    "ai": "IA et Apprentissage Automatique",
+    "mobile": "Expérience Mobile",
+    "community": "Fonctionnalités Communautaires",
+    "analysis": "Outils d'Analyse",
+    "api": "API et Intégrations"
+  },
+  "features": {
+    "aiPatternRecognition": {
+      "title": "Reconnaissance de Motifs par IA",
+      "description": "IA avancée pour identifier et catégoriser automatiquement les motifs culturels"
+    },
+    "mobileApp": {
+      "title": "Application Mobile",
+      "description": "Application mobile native pour la recherche sur le terrain et la découverte de symboles"
+    },
+    "collaborativeAnalysis": {
+      "title": "Analyse Collaborative",
+      "description": "Outils de collaboration en temps réel pour les chercheurs et universitaires"
+    },
+    "apiPlatform": {
+      "title": "Plateforme API Développeur",
+      "description": "API complète pour les intégrations tierces et la recherche académique"
+    }
+  },
+  "viewMore": "Voir Plus de Détails",
+  "lastUpdated": "Dernière Mise à Jour"
 }

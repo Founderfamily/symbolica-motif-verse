@@ -1,60 +1,51 @@
 
 {
-  "nav": {
-    "home": "Home",
-    "about": "About",
-    "profile": "Profile",
-    "contributions": "Contributions",
-    "symbols": "Symbols",
-    "login": "Log in",
-    "logout": "Log out",
-    "menu": "Menu"
-  },
-  "navigation": {
-    "home": "Home",
-    "about": "About",
-    "profile": "Profile",
-    "contributions": "Contributions",
-    "symbols": "Symbols",
-    "collections": "Collections",
-    "allSymbols": "All symbols",
-    "map": "Map",
-    "explore": "Explore",
-    "signIn": "Sign In",
-    "signOut": "Sign Out"
-  },
-  "header": {
-    "signIn": "Sign In",
-    "signOut": "Sign Out",
-    "profile": "Profile",
-    "admin": "Admin",
-    "email": "Email",
-    "home": "Home",
-    "explore": "Explore",
-    "map": "Map",
-    "about": "About Us",
-    "contact": "Contact",
-    "menu": "Menu",
-    "close": "Close",
-    "contribute": "Contribute"
-  },
+  "home": "Home",
+  "symbols": "Symbols",
+  "collections": "Collections",
+  "community": "Community",
+  "contribute": "Contribute",
+  "analysis": "Analysis",
+  "map": "Map",
+  "trending": "Trending",
+  "search": "Search",
+  "about": "About",
+  "contact": "Contact",
+  "legal": "Legal",
+  "privacy": "Privacy",
+  "terms": "Terms",
   "footer": {
-    "rights": "All rights reserved",
-    "terms": "Terms of Use",
-    "privacy": "Privacy Policy",
-    "tagline": "Preserving and celebrating the world's symbolic heritage",
-    "platform": "Platform",
-    "home": "Home",
-    "explore": "Explore",
-    "contribute": "Contribute",
-    "about": "About",
-    "community": "Community",
-    "github": "GitHub",
-    "discord": "Discord",
-    "forum": "Forum",
-    "legal": "Legal",
-    "license": "License",
-    "copyright": "© 2025 Symbolica Museum",
-    "map": "Map"
+    "followUs": "Follow Us",
+    "newsletter": "Newsletter",
+    "support": "Support",
+    "company": "Company",
+    "product": "Product",
+    "legal": "Legal"
+  },
+  "meta": {
+    "home": {
+      "title": "Cultural Symbol Explorer - Discover Worldwide Heritage",
+      "description": "Explore and discover cultural symbols from around the world. Join our community of cultural heritage enthusiasts."
+    },
+    "symbols": {
+      "title": "Symbol Explorer - Browse Cultural Symbols",
+      "description": "Browse and explore cultural symbols from different civilizations and time periods."
+    },
+    "collections": {
+      "title": "Cultural Collections - Curated Symbol Sets",
+      "description": "Discover curated collections of cultural symbols organized by themes, regions, and historical periods."
+    },
+    "community": {
+      "title": "Cultural Community - Connect with Enthusiasts",
+      "description": "Join our community of cultural heritage enthusiasts and share your discoveries."
+    },
+    "search": {
+      "title": "Search Symbols - Find Cultural Heritage",
+      "description": "Search through our extensive database of cultural symbols and heritage items."
+    },
+    "trending": {
+      "title": "Trending Symbols - Popular Discoveries",
+      "description": "Discover the most popular and trending cultural symbols in our community."
+    }
   }
 }

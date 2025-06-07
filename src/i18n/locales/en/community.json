@@ -1,29 +1,53 @@
 
 {
   "title": "Community Hub",
-  "subtitle": "Join interest groups and connect with fellow researchers",
-  "allGroups": "All Groups",
-  "popular": "Popular",
-  "mostActive": "Most Active",
-  "noGroups": "No groups found",
-  "noGroupsDescription": "Try adjusting your search or create a new group",
-  "stats": {
-    "members": "members",
-    "discoveries": "discoveries",
-    "join": "Join"
+  "subtitle": "Connect with Cultural Heritage Enthusiasts Worldwide",
+  "description": "Join discussions, share discoveries, and collaborate with fellow researchers",
+  "tabs": {
+    "groups": "Interest Groups",
+    "discussions": "Discussions",
+    "contributors": "Top Contributors",
+    "events": "Events"
   },
-  "features": {
-    "thematicCommunities": {
-      "title": "Thematic Communities",
-      "description": "Join specialized groups focused on specific cultural traditions and symbol types"
-    },
-    "personalSpace": {
-      "title": "Personal Space",
-      "description": "Create and manage your own collections, share discoveries with the community"
-    },
-    "intuitiveNavigation": {
-      "title": "Intuitive Navigation",
-      "description": "Explore symbols by region, period, or cultural significance with our interactive tools"
-    }
+  "groups": {
+    "title": "Interest Groups",
+    "subtitle": "Join Groups Based on Your Cultural Interests",
+    "create": "Create New Group",
+    "join": "Join Group",
+    "members": "Members",
+    "discussions": "Discussions",
+    "recentActivity": "Recent Activity",
+    "noGroups": "No Groups Found",
+    "loading": "Loading Groups..."
+  },
+  "contributors": {
+    "title": "Top Contributors",
+    "subtitle": "Recognize Our Most Active Community Members",
+    "thisMonth": "This Month",
+    "allTime": "All Time",
+    "contributions": "Contributions",
+    "points": "Points"
+  },
+  "stats": {
+    "members": "Community Members",
+    "groups": "Interest Groups", 
+    "discussions": "Active Discussions",
+    "contributions": "Monthly Contributions"
+  },
+  "createGroup": {
+    "title": "Create New Interest Group",
+    "name": "Group Name",
+    "description": "Description",
+    "category": "Category",
+    "privacy": "Privacy Settings",
+    "public": "Public",
+    "private": "Private",
+    "create": "Create Group",
+    "cancel": "Cancel"
+  },
+  "search": {
+    "placeholder": "Search Groups, Discussions...",
+    "results": "Search Results",
+    "noResults": "No Results Found"
   }
 }

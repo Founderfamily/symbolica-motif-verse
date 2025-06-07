@@ -19,8 +19,13 @@
     "button": "Rechercher"
   },
   "language": {
-    "switch": "Changer de langue",
+    "switch": "Changer de Langue",
     "french": "Français",
     "english": "English"
-  }
+  },
+  "myAccount": "Mon Compte",
+  "profile": "Profil",
+  "contribute": "Contribuer",
+  "adminDashboard": "Tableau de Bord Admin",
+  "logout": "Se Déconnecter"
 }

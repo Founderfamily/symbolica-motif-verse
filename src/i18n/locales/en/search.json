@@ -1,11 +1,30 @@
 
 {
   "title": "Search",
-  "subtitle": "Explore our collection of symbols and cultural collections",
-  "placeholder": "Search symbols, collections...",
+  "subtitle": "Explore Our Collection of Symbols and Cultural Collections",
+  "placeholder": "Search Symbols, Collections...",
   "filters": "Filters",
   "search": "Search",
-  "advancedFilters": "Advanced filters",
-  "noResults": "No results found",
-  "resultsCount": "results found"
+  "advancedFilters": "Advanced Filters",
+  "noResults": "No Results Found",
+  "resultsCount": "Results Found",
+  "sortBy": "Sort By",
+  "relevance": "Relevance",
+  "newest": "Newest",
+  "oldest": "Oldest",
+  "popular": "Popular",
+  "categories": {
+    "all": "All Categories",
+    "symbols": "Symbols",
+    "collections": "Collections",
+    "cultures": "Cultures",
+    "periods": "Historical Periods"
+  },
+  "filters": {
+    "culture": "Culture",
+    "period": "Period",
+    "type": "Type",
+    "location": "Location",
+    "clearAll": "Clear All Filters"
+  }
 }

@@ -19,8 +19,13 @@
     "button": "Search"
   },
   "language": {
-    "switch": "Switch language",
+    "switch": "Switch Language",
     "french": "Français",
     "english": "English"
-  }
+  },
+  "myAccount": "My Account",
+  "profile": "Profile",
+  "contribute": "Contribute",
+  "adminDashboard": "Admin Dashboard",
+  "logout": "Log Out"
 }
