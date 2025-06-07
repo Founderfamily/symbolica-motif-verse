@@ -23,6 +23,12 @@ import MCPSearchPage from '@/pages/MCPSearchPage';
 import Auth from '@/pages/Auth';
 import NewContribution from '@/pages/NewContribution';
 import TrendingPage from '@/pages/TrendingPage';
+import SearchPage from '@/pages/SearchPage';
+import LegalPage from '@/pages/LegalPage';
+import PrivacyPage from '@/pages/PrivacyPage';
+import TermsPage from '@/pages/TermsPage';
+import ContactPage from '@/pages/ContactPage';
+import PasswordReset from '@/components/auth/PasswordReset';
 
 // Admin pages
 import AdminLayout from '@/pages/Admin/AdminLayout';
@@ -43,13 +49,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Simple placeholder components for missing pages
-const SearchPage = () => <div className="p-8"><h1>Search Page</h1></div>;
-const LegalPage = () => <div className="p-8"><h1>Legal Page</h1></div>;
-const PrivacyPage = () => <div className="p-8"><h1>Privacy Page</h1></div>;
-const TermsPage = () => <div className="p-8"><h1>Terms Page</h1></div>;
-const ContactPage = () => <div className="p-8"><h1>Contact Page</h1></div>;
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -59,6 +58,9 @@ function App() {
             <Routes>
               {/* Mobile app route - accessible without layout for full mobile experience */}
               <Route path="/mobile" element={<MobileAppPage />} />
+              
+              {/* Password reset route - standalone */}
+              <Route path="/reset-password" element={<PasswordReset />} />
               
               {/* Admin routes with AdminLayout - protected */}
               <Route path="/admin" element={

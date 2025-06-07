@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -17,11 +16,21 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { I18nText } from '@/components/ui/i18n-text';
+import { useNavigate } from 'react-router-dom';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const auth = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   // Pages publiques accessibles à tous
   const publicNavigationItems = [
@@ -126,21 +135,24 @@ const Header: React.FC = () => {
             </nav>
           </div>
 
-          {/* Search, Language Selector, and User Menu */}
+          {/* Search, Notifications, Language Selector, and User Menu */}
           <div className="flex items-center space-x-4">
             {/* Search Bar */}
-            <div className="relative hidden md:block">
+            <form onSubmit={handleSearch} className="relative hidden md:block">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <Search className="h-5 w-5 text-slate-400" />
               </div>
               <Input
                 type="search"
                 placeholder={t('header.search')}
-                className="pl-10 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring focus:ring-blue-200 text-sm"
+                className="pl-10 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring focus:ring-blue-200 text-sm w-64"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
+            </form>
+
+            {/* Notifications - only for authenticated users */}
+            {auth?.user && <NotificationCenter />}
 
             {/* Language Selector */}
             <LanguageSelector />

@@ -1735,6 +1735,10 @@ export type Database = {
           contributions_week: number
         }[]
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_entity_admin_logs: {
         Args: { p_entity_type: string; p_entity_id: string }
         Returns: {
@@ -1814,6 +1818,10 @@ export type Database = {
         Returns: undefined
       }
       is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_banned: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
