@@ -1,0 +1,23 @@
+
+{
+  "title": "Gagnez des récompenses pour vos contributions",
+  "subtitle": "Rejoignez notre communauté et gagnez des points, badges et reconnaissance",
+  "points": {
+    "title": "Gagnez des points",
+    "description": "Obtenez des points pour chaque contribution, commentaire et validation que vous faites",
+    "points": "points"
+  },
+  "badges": {
+    "title": "Débloquez des badges",
+    "description": "Gagnez des badges spéciaux pour vos réalisations et contributions exceptionnelles"
+  },
+  "leaderboard": {
+    "title": "Classement",
+    "description": "Voyez où vous vous situez parmi les contributeurs les plus actifs de la communauté"
+  },
+  "achievements": {
+    "title": "Réalisations",
+    "description": "Débloquez des réalisations spéciales en atteignant des jalons importants"
+  },
+  "viewYourProgress": "Voir votre progression"
+}
