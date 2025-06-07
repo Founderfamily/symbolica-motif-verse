@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { adminLogsService } from './logsService';
 
@@ -35,8 +34,7 @@ export const securityService = {
     try {
       // Log via admin logs service avec contexte sécurité
       if (userId) {
-        await adminLogsService.logAction(
-          userId,
+        await adminLogsService.createLog(
           `security_event_${eventType}`,
           'security',
           undefined,
