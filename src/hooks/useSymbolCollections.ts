@@ -43,82 +43,59 @@ export const useSymbolCollections = (symbolId: string | number) => {
       console.log('8. ID final pour la requête:', queryId);
 
       try {
-        // Étape 1: Récupérer les IDs des collections qui contiennent ce symbole
-        const { data: collectionSymbols, error: symbolsError } = await supabase
+        // Utiliser la même syntaxe que getCollectionBySlugQuery qui fonctionne
+        const { data, error } = await supabase
           .from('collection_symbols')
-          .select('collection_id')
+          .select(`
+            collection_id,
+            collections (
+              id,
+              slug,
+              created_by,
+              created_at,
+              updated_at,
+              is_featured,
+              collection_translations (
+                id,
+                collection_id,
+                language,
+                title,
+                description
+              )
+            )
+          `)
           .eq('symbol_id', queryId);
 
-        console.log('9. collection_symbols query result:', collectionSymbols);
-        console.log('10. collection_symbols error:', symbolsError);
+        console.log('9. Requête Supabase terminée');
+        console.log('10. Error:', error);
+        console.log('11. Data reçue:', data);
+        console.log('12. Nombre de relations trouvées:', data?.length || 0);
 
-        if (symbolsError) {
-          console.error('Error fetching collection symbols:', symbolsError);
-          throw symbolsError;
+        if (error) {
+          console.error('Error fetching symbol collections:', error);
+          throw error;
         }
 
-        if (!collectionSymbols || collectionSymbols.length === 0) {
-          console.log('11. Aucune collection trouvée pour ce symbole');
+        if (!data || data.length === 0) {
+          console.log('13. Aucune collection trouvée pour ce symbole');
           return [];
         }
 
-        const collectionIds = collectionSymbols.map(cs => cs.collection_id);
-        console.log('12. Collection IDs trouvés:', collectionIds);
+        // Transformer les données pour correspondre au type attendu
+        const collectionsWithTranslations: CollectionWithTranslations[] = data
+          .filter(item => item.collections) // S'assurer que la collection existe
+          .map(item => ({
+            id: item.collections.id,
+            slug: item.collections.slug,
+            created_by: item.collections.created_by,
+            created_at: item.collections.created_at,
+            updated_at: item.collections.updated_at,
+            is_featured: item.collections.is_featured,
+            collection_translations: item.collections.collection_translations || []
+          }));
 
-        // Étape 2: Récupérer les détails des collections
-        const { data: collections, error: collectionsError } = await supabase
-          .from('collections')
-          .select(`
-            id,
-            slug,
-            created_by,
-            created_at,
-            updated_at,
-            is_featured
-          `)
-          .in('id', collectionIds);
-
-        console.log('13. collections query result:', collections);
-        console.log('14. collections error:', collectionsError);
-
-        if (collectionsError) {
-          console.error('Error fetching collections:', collectionsError);
-          throw collectionsError;
-        }
-
-        if (!collections || collections.length === 0) {
-          console.log('15. Aucune collection trouvée');
-          return [];
-        }
-
-        // Étape 3: Récupérer les traductions pour ces collections
-        const { data: translations, error: translationsError } = await supabase
-          .from('collection_translations')
-          .select(`
-            id,
-            collection_id,
-            language,
-            title,
-            description
-          `)
-          .in('collection_id', collectionIds);
-
-        console.log('16. translations query result:', translations);
-        console.log('17. translations error:', translationsError);
-
-        if (translationsError) {
-          console.error('Error fetching translations:', translationsError);
-          throw translationsError;
-        }
-
-        // Étape 4: Combiner les données
-        const collectionsWithTranslations: CollectionWithTranslations[] = collections.map(collection => ({
-          ...collection,
-          collection_translations: translations?.filter(t => t.collection_id === collection.id) || []
-        }));
-
-        console.log('18. Résultat final:', collectionsWithTranslations);
-        console.log('19. Nombre de collections avec traductions:', collectionsWithTranslations.length);
+        console.log('14. Résultat final:', collectionsWithTranslations);
+        console.log('15. Nombre de collections avec traductions:', collectionsWithTranslations.length);
         console.log('=== FIN DEBUG useSymbolCollections ===');
 
         return collectionsWithTranslations;
