@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { useCollections } from '@/hooks/useCollections';
-import CollectionCard from './CollectionCard';
+import { useCollections } from '@/features/collections/hooks/useCollections';
+import CollectionCard from '@/features/collections/components/cards/CollectionCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { I18nText } from '@/components/ui/i18n-text';
 

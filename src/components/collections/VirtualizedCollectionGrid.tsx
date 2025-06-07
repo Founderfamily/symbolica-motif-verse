@@ -1,7 +1,7 @@
 
 import React, { useMemo, useCallback } from 'react';
-import { CollectionWithTranslations } from '@/types/collections';
-import CollectionCard from './CollectionCard';
+import { CollectionWithTranslations } from '@/features/collections/types/collections';
+import CollectionCard from '@/features/collections/components/cards/CollectionCard';
 import { EmptyCategory } from '@/features/collections/components/states/EmptyCategory';
 
 interface VirtualizedCollectionGridProps {

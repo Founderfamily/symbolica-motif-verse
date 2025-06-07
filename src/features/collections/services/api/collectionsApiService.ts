@@ -5,7 +5,8 @@ import { getFeaturedCollectionsQuery } from './queries/getFeaturedCollectionsQue
 import { getCollectionBySlugQuery } from './queries/getCollectionBySlugQuery';
 
 /**
- * Low-level API service for collections database operations
+ * Service API unifié pour les collections
+ * Centralise toutes les opérations de base de données
  */
 export class CollectionsApiService {
   /**

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
-import { CollectionWithTranslations } from '@/types/collections';
+import { CollectionWithTranslations } from '@/features/collections/types/collections';
 import { useCollectionTranslations } from '@/hooks/useCollectionTranslations';
 
 interface OptimizedCollectionCardProps {

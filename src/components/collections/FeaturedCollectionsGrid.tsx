@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { useFeaturedCollections } from '@/hooks/useCollections';
-import CollectionCard from './CollectionCard';
+import { useFeaturedCollections } from '@/features/collections/hooks/useCollections';
+import CollectionCard from '@/features/collections/components/cards/CollectionCard';
 import { CollectionLoadingSkeleton } from './CollectionLoadingSkeleton';
 import { CollectionErrorState } from './CollectionErrorState';
 import { CollectionEmptyState } from './CollectionEmptyState';

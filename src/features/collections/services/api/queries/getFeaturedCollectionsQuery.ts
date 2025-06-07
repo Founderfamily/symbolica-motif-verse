@@ -4,11 +4,11 @@ import { CollectionWithTranslations } from '../../../types/collections';
 import { logger } from '@/services/logService';
 
 /**
- * Query service for fetching featured collections
+ * Query service pour récupérer les collections en vedette
  */
 export class GetFeaturedCollectionsQuery {
   /**
-   * Récupère les collections en vedette
+   * Récupère les collections en vedette avec leurs traductions
    */
   async execute(): Promise<CollectionWithTranslations[]> {
     try {
@@ -20,10 +20,10 @@ export class GetFeaturedCollectionsQuery {
         `)
         .eq('is_featured', true)
         .order('created_at', { ascending: false })
-        .limit(4);
+        .limit(6);
 
       if (error) {
-        console.error('❌ Featured collections query failed:', error);
+        logger.error('Featured collections query failed', { error });
         return [];
       }
 

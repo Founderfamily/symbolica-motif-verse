@@ -4,11 +4,11 @@ import { CollectionDetails } from '../../../types/collections';
 import { logger } from '@/services/logService';
 
 /**
- * Query service for fetching a collection by its slug
+ * Query service pour récupérer une collection par son slug
  */
 export class GetCollectionBySlugQuery {
   /**
-   * Récupère une collection par son slug
+   * Récupère une collection complète par son slug
    */
   async execute(slug: string): Promise<CollectionDetails | null> {
     try {

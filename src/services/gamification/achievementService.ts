@@ -1,7 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Achievement, UserAchievement, AchievementType, AchievementLevel } from '@/types/gamification';
-import { Json } from '@/integrations/supabase/types';
 
 /**
  * Service pour gérer les réalisations (achievements)
