@@ -1,22 +1,22 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { I18nText } from '@/components/ui/i18n-text';
-import { useCollectionStats } from '@/hooks/useCollectionStats';
-import { CollectionWithTranslations } from '@/types/collections';
+import { CollectionWithTranslations } from '@/features/collections/types/collections';
 
 interface CollectionStatsDisplayProps {
-  collections: CollectionWithTranslations[] | undefined;
+  collections?: CollectionWithTranslations[];
 }
 
-export const CollectionStatsDisplay: React.FC<CollectionStatsDisplayProps> = React.memo(({ collections }) => {
-  const { total } = useCollectionStats(collections);
+export const CollectionStatsDisplay: React.FC<CollectionStatsDisplayProps> = ({ collections }) => {
+  if (!collections || collections.length === 0) {
+    return null;
+  }
+
+  const featuredCount = collections.filter(c => c.is_featured).length;
 
   return (
-    <Badge variant="outline" className="text-amber-600 border-amber-600">
-      {total} <I18nText translationKey="collections.collectionsUnit">collections</I18nText>
+    <Badge variant="secondary" className="ml-2">
+      {collections.length} {featuredCount > 0 && `(${featuredCount} featured)`}
     </Badge>
   );
-});
-
-CollectionStatsDisplay.displayName = 'CollectionStatsDisplay';
+};
