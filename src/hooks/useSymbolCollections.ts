@@ -9,11 +9,11 @@ import { symbolMappingService } from '@/services/symbolMappingService';
  */
 export const useSymbolCollections = (symbolId: string | number) => {
   return useQuery({
-    queryKey: ['symbol-collections', symbolId],
+    queryKey: ['symbol-collections-v2', symbolId, Date.now()], // Version mise à jour avec timestamp pour forcer le refresh
     queryFn: async (): Promise<CollectionWithTranslations[]> => {
       if (!symbolId) return [];
 
-      console.log('=== DEBUG useSymbolCollections ===');
+      console.log('=== DEBUG useSymbolCollections v2 ===');
       console.log('1. symbolId reçu:', symbolId, typeof symbolId);
 
       // Déterminer l'ID à utiliser pour la requête
@@ -31,7 +31,6 @@ export const useSymbolCollections = (symbolId: string | number) => {
         
         if (!queryId) {
           console.log('6. ERREUR: Aucun mapping trouvé pour le symbole statique:', symbolIdStr);
-          console.log('7. Mappings disponibles:', Object.keys(symbolMappingService['staticToDbMapping'] || {}));
           return [];
         }
       } else {
@@ -43,7 +42,7 @@ export const useSymbolCollections = (symbolId: string | number) => {
       console.log('8. ID final pour la requête:', queryId);
 
       try {
-        // Utiliser la même syntaxe que getCollectionBySlugQuery qui fonctionne
+        // Utiliser la syntaxe native Supabase avec jointures imbriquées (comme dans les collections)
         const { data, error } = await supabase
           .from('collection_symbols')
           .select(`
@@ -105,6 +104,10 @@ export const useSymbolCollections = (symbolId: string | number) => {
         throw error;
       }
     },
-    enabled: !!symbolId
+    enabled: !!symbolId,
+    staleTime: 0, // Désactiver le cache pour debug
+    cacheTime: 0, // Forcer la requête à chaque fois
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 };
