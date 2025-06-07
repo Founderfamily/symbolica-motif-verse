@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface BackupResult {
@@ -33,10 +32,10 @@ export const backupService = {
       const errors: string[] = [];
       let totalSize = 0;
       
-      // Sauvegarder chaque table
+      // Sauvegarder chaque table avec assertion de type pour contourner les restrictions TypeScript
       for (const table of tables) {
         try {
-          const { data, error } = await supabase
+          const { data, error } = await (supabase as any)
             .from(table)
             .select('*');
           
@@ -56,7 +55,7 @@ export const backupService = {
       const status = errors.length === 0 ? 'success' : 
                    errors.length === tables.length ? 'failed' : 'partial';
       
-      // Sauvegarder dans la nouvelle table system_backups
+      // Sauvegarder dans la table system_backups
       const { error: insertError } = await supabase
         .from('system_backups')
         .insert({

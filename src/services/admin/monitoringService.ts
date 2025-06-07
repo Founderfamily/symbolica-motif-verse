@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SystemHealth {
@@ -16,6 +15,7 @@ export interface PerformanceMetrics {
   activeUsers: number;
   dbConnections: number;
   storageUsage: number;
+  [key: string]: any; // Ajout d'une signature d'index pour la compatibilité avec Json
 }
 
 export interface Alert {
@@ -81,7 +81,7 @@ export const monitoringService = {
       issues
     };
     
-    // Enregistrer dans la nouvelle table
+    // Enregistrer dans la table system_health_checks
     await supabase
       .from('system_health_checks')
       .insert({
@@ -116,12 +116,12 @@ export const monitoringService = {
         storageUsage
       };
       
-      // Enregistrer dans la nouvelle table
+      // Enregistrer dans la table system_metrics avec conversion explicite
       await supabase
         .from('system_metrics')
         .insert({
           metric_type: 'performance',
-          values: metrics
+          values: metrics as any // Conversion explicite pour la compatibilité Json
         });
       
       return metrics;
