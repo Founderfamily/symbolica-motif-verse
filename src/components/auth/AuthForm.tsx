@@ -134,7 +134,7 @@ export default function AuthForm() {
             <div className="flex items-center justify-center mb-3">
               <Shield className="h-8 w-8 text-white mr-2" />
               <h2 className="text-2xl font-bold text-white">
-                Symbolica
+                <I18nText translationKey="app.name">Symbolica</I18nText>
               </h2>
             </div>
             <p className="text-amber-100 text-sm">

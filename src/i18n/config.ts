@@ -5,7 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Import main translation files
 import enTranslations from './locales/en/app.json';
-import frTranslations from './locales/fr/app.json';
+import frTranslations from './locales/fr.json';
 
 // Import namespace-specific translations
 import enAuth from './locales/en/auth.json';
@@ -30,7 +30,6 @@ import frContributions from './locales/fr/contributions.json';
 const resources = {
   en: {
     translation: enTranslations,
-    app: enTranslations,
     auth: enAuth,
     admin: enAdmin,
     header: enHeader,
@@ -43,7 +42,6 @@ const resources = {
   },
   fr: {
     translation: frTranslations,
-    app: frTranslations,
     auth: frAuth,
     admin: frAdmin,
     header: frHeader,
@@ -74,11 +72,7 @@ i18n
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage']
-    },
-    
-    // Add default namespace
-    defaultNS: 'translation',
-    ns: ['translation', 'app', 'auth', 'admin', 'header', 'profile', 'navigation', 'search', 'roadmap', 'community', 'contributions']
+    }
   });
 
 export default i18n;
