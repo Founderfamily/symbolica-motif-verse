@@ -6,11 +6,18 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { ToolsDropdown } from './ToolsDropdown';
 
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ReactElement;
+  badge?: string;
+}
+
 export const NavigationItems: React.FC = () => {
   const auth = useAuth();
 
   // Pages publiques accessibles à tous
-  const publicNavigationItems = [
+  const publicNavigationItems: NavigationItem[] = [
     { 
       name: 'Symbols', 
       href: '/symbols',
@@ -30,7 +37,7 @@ export const NavigationItems: React.FC = () => {
   ];
 
   // Pages protégées, visibles uniquement pour les utilisateurs connectés
-  const protectedNavigationItems = auth?.user ? [
+  const protectedNavigationItems: NavigationItem[] = auth?.user ? [
     { 
       name: 'Map', 
       href: '/map',
