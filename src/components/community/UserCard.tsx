@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -103,3 +104,4 @@ const UserCard: React.FC<UserCardProps> = ({ user, isFollowing = false, onFollow
 };
 
 export default UserCard;
+

@@ -23,7 +23,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
       followers_count: followersResult.data?.length || 0,
       following_count: followingResult.data?.length || 0,
       contributions_count: contributionsResult.data?.length || 0
-    };
+    } as UserProfile;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;
