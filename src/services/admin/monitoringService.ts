@@ -28,6 +28,11 @@ export interface Alert {
   timestamp: string;
   resolved: boolean;
   source: string;
+  [key: string]: any; // Index signature pour compatibilité Json
+}
+
+interface AlertData {
+  alert_data: Alert;
 }
 
 /**
@@ -117,7 +122,7 @@ export const monitoringService = {
         auth: 'critical',
         overall: 'critical',
         lastCheck: new Date().toISOString(),
-        issues: [`Erreur critique: ${error.message}`]
+        issues: [`Erreur critique: ${error instanceof Error ? error.message : String(error)}`]
       };
     }
   },
@@ -186,12 +191,14 @@ export const monitoringService = {
         source
       };
 
+      const alertData: AlertData = { alert_data: alert };
+
       // Stocker l'alerte
       await supabase
         .from('content_sections')
         .upsert({
           section_key: alertId,
-          content: { alert_data: alert }
+          content: alertData as any
         });
 
       // Logger l'alerte
@@ -223,15 +230,18 @@ export const monitoringService = {
 
       if (fetchError || !data) return false;
 
-      const alertData = data.content?.alert_data;
+      const content = data.content as any;
+      const alertData = content?.alert_data;
       if (!alertData) return false;
 
       alertData.resolved = true;
       alertData.resolvedAt = new Date().toISOString();
 
+      const updatedContent: AlertData = { alert_data: alertData };
+
       const { error: updateError } = await supabase
         .from('content_sections')
-        .update({ content: { alert_data: alertData } })
+        .update({ content: updatedContent as any })
         .eq('section_key', alertId);
 
       if (updateError) throw updateError;
@@ -265,8 +275,10 @@ export const monitoringService = {
 
       if (error) throw error;
 
-      return data?.map(item => item.content?.alert_data)
-        .filter(alert => alert && !alert.resolved) || [];
+      return data?.map(item => {
+        const content = item.content as any;
+        return content?.alert_data;
+      }).filter(alert => alert && !alert.resolved) || [];
     } catch (error) {
       console.error('Erreur récupération alertes:', error);
       return [];

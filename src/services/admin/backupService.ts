@@ -18,6 +18,17 @@ export interface BackupResult {
   errors?: string[];
 }
 
+interface BackupData {
+  backup_metadata: {
+    id: string;
+    timestamp: string;
+    config: BackupConfig;
+    size: number;
+    status: 'success' | 'failed' | 'partial';
+  };
+  backup_data: Record<string, any[]>;
+}
+
 /**
  * Service pour la gestion des sauvegardes automatiques
  */
@@ -49,23 +60,37 @@ export const backupService = {
     const timestamp = new Date().toISOString();
     
     try {
-      const backupData: any = {};
+      const backupData: Record<string, any[]> = {};
       const errors: string[] = [];
       let totalSize = 0;
 
-      // Sauvegarder chaque table
+      // Sauvegarder chaque table avec des appels explicites
+      const tableQueries = {
+        profiles: () => supabase.from('profiles').select('*'),
+        user_contributions: () => supabase.from('user_contributions').select('*'),
+        collections: () => supabase.from('collections').select('*'),
+        symbols: () => supabase.from('symbols').select('*'),
+        user_activities: () => supabase.from('user_activities').select('*'),
+        admin_logs: () => supabase.from('admin_logs').select('*'),
+        notifications: () => supabase.from('notifications').select('*')
+      };
+
       for (const table of finalConfig.tables) {
         try {
-          const { data, error } = await supabase
-            .from(table)
-            .select('*');
+          const queryFn = tableQueries[table as keyof typeof tableQueries];
+          if (!queryFn) {
+            errors.push(`Table non supportée: ${table}`);
+            continue;
+          }
+
+          const { data, error } = await queryFn();
 
           if (error) {
             errors.push(`Erreur table ${table}: ${error.message}`);
             continue;
           }
 
-          backupData[table] = data;
+          backupData[table] = data || [];
           totalSize += JSON.stringify(data).length;
         } catch (error) {
           errors.push(`Erreur critique table ${table}: ${error}`);
@@ -73,21 +98,23 @@ export const backupService = {
       }
 
       // Stocker la sauvegarde
+      const backupContent: BackupData = {
+        backup_metadata: {
+          id: backupId,
+          timestamp,
+          config: finalConfig,
+          size: totalSize,
+          status: errors.length === 0 ? 'success' : 
+                 errors.length === finalConfig.tables.length ? 'failed' : 'partial'
+        },
+        backup_data: backupData
+      };
+
       const { error: storeError } = await supabase
         .from('content_sections')
         .upsert({
           section_key: backupId,
-          content: {
-            backup_metadata: {
-              id: backupId,
-              timestamp,
-              config: finalConfig,
-              size: totalSize,
-              status: errors.length === 0 ? 'success' : 
-                     errors.length === finalConfig.tables.length ? 'failed' : 'partial'
-            },
-            backup_data: backupData
-          }
+          content: backupContent as any
         });
 
       if (storeError) {
@@ -122,7 +149,7 @@ export const backupService = {
         size: 0,
         status: 'failed',
         tables: finalConfig.tables,
-        errors: [error.message]
+        errors: [error instanceof Error ? error.message : String(error)]
       };
     }
   },
@@ -141,7 +168,8 @@ export const backupService = {
       if (error) throw error;
 
       return data?.map(backup => {
-        const metadata = backup.content?.backup_metadata;
+        const content = backup.content as any;
+        const metadata = content?.backup_metadata;
         return {
           id: backup.section_key,
           timestamp: backup.created_at,
@@ -210,7 +238,8 @@ export const backupService = {
 
       if (error || !data) return false;
 
-      const backupData = data.content?.backup_data;
+      const content = data.content as any;
+      const backupData = content?.backup_data;
       if (!backupData) return false;
 
       // Vérifier l'intégrité des données
