@@ -7,9 +7,13 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { AlertTriangle, Save, Database, Mail, Shield } from 'lucide-react';
+import { AlertTriangle, Save, Database, Mail, Shield, Settings, Activity, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import BackupManager from '@/components/admin/BackupManager';
+import SystemMonitoring from '@/components/admin/SystemMonitoring';
+import MaintenanceScheduler from '@/components/admin/MaintenanceScheduler';
 
 interface SystemSettings {
   maintenanceMode: boolean;
@@ -58,7 +62,6 @@ const SystemSettings = () => {
       }
 
       if (data?.content) {
-        // Correction de la vérification de type pour éviter l'erreur TypeScript
         const content = data.content as { fr?: string };
         if (content.fr) {
           try {
@@ -122,80 +125,6 @@ const SystemSettings = () => {
     }
   };
 
-  const handleBackup = async () => {
-    if (!isAdmin) {
-      toast({
-        variant: "destructive",
-        title: "Accès refusé",
-        description: "Vous n'avez pas les permissions nécessaires.",
-      });
-      return;
-    }
-
-    try {
-      // Correction: utiliser des appels séparés au lieu d'une boucle dynamique
-      const backup: any = {};
-
-      // Récupérer les données des tables importantes
-      const { data: symbolsData } = await supabase.from('symbols').select('*');
-      const { data: collectionsData } = await supabase.from('collections').select('*');
-      const { data: contributionsData } = await supabase.from('user_contributions').select('*');
-      const { data: profilesData } = await supabase.from('profiles').select('*');
-
-      backup.symbols = symbolsData;
-      backup.collections = collectionsData;
-      backup.user_contributions = contributionsData;
-      backup.profiles = profilesData;
-
-      // Stocker la sauvegarde
-      const backupData = {
-        timestamp: new Date().toISOString(),
-        data: backup
-      };
-
-      const { error } = await supabase
-        .from('content_sections')
-        .upsert({
-          section_key: `backup_${Date.now()}`,
-          content: {
-            fr: JSON.stringify(backupData),
-            en: JSON.stringify(backupData)
-          }
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Sauvegarde créée",
-        description: "La sauvegarde a été créée avec succès.",
-      });
-    } catch (error) {
-      console.error('Error creating backup:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur de sauvegarde",
-        description: "Impossible de créer la sauvegarde.",
-      });
-    }
-  };
-
-  const handleTestEmail = async () => {
-    if (!isAdmin) {
-      toast({
-        variant: "destructive",
-        title: "Accès refusé",
-        description: "Vous n'avez pas les permissions nécessaires.",
-      });
-      return;
-    }
-
-    // Simuler un test d'email pour le moment
-    toast({
-      title: "Test d'email",
-      description: "Fonctionnalité de test d'email à implémenter avec un service d'email.",
-    });
-  };
-
   const updateSetting = (key: keyof SystemSettings, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
@@ -225,172 +154,187 @@ const SystemSettings = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Paramètres système</h1>
         <p className="text-muted-foreground">
-          Gérez la configuration et les paramètres de l'application.
+          Gérez la configuration, le monitoring et la maintenance de l'application.
         </p>
       </div>
 
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Paramètres généraux
-            </CardTitle>
-            <CardDescription>
-              Configuration principale de l'application
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="maintenance"
-                checked={settings.maintenanceMode}
-                onCheckedChange={(checked) => updateSetting('maintenanceMode', checked)}
-              />
-              <Label htmlFor="maintenance">Mode maintenance</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="registration"
-                checked={settings.userRegistration}
-                onCheckedChange={(checked) => updateSetting('userRegistration', checked)}
-              />
-              <Label htmlFor="registration">Autoriser les nouvelles inscriptions</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="auto-approve"
-                checked={settings.autoApproveContributions}
-                onCheckedChange={(checked) => updateSetting('autoApproveContributions', checked)}
-              />
-              <Label htmlFor="auto-approve">Approuver automatiquement les contributions</Label>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="max-file-size">Taille maximale des fichiers (MB)</Label>
-              <Input
-                id="max-file-size"
-                type="number"
-                value={settings.maxFileSize}
-                onChange={(e) => updateSetting('maxFileSize', e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="system-message">Message système</Label>
-              <Textarea
-                id="system-message"
-                placeholder="Message à afficher aux utilisateurs"
-                value={settings.systemMessage}
-                onChange={(e) => updateSetting('systemMessage', e.target.value)}
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="general" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Général
+          </TabsTrigger>
+          <TabsTrigger value="monitoring" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Monitoring
+          </TabsTrigger>
+          <TabsTrigger value="backup" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Sauvegardes
+          </TabsTrigger>
+          <TabsTrigger value="maintenance" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Maintenance
+          </TabsTrigger>
+          <TabsTrigger value="email" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Email
+          </TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              Sauvegarde et maintenance
-            </CardTitle>
-            <CardDescription>
-              Gestion des sauvegardes automatiques
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Créer une sauvegarde</Label>
-                <p className="text-sm text-muted-foreground">
-                  Sauvegarde manuelle des données importantes
-                </p>
+        <TabsContent value="general">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Paramètres généraux
+              </CardTitle>
+              <CardDescription>
+                Configuration principale de l'application
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="maintenance"
+                  checked={settings.maintenanceMode}
+                  onCheckedChange={(checked) => updateSetting('maintenanceMode', checked)}
+                />
+                <Label htmlFor="maintenance">Mode maintenance</Label>
               </div>
-              <Button onClick={handleBackup} variant="outline">
-                <Database className="h-4 w-4 mr-2" />
-                Créer une sauvegarde
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              Configuration email
-            </CardTitle>
-            <CardDescription>
-              Paramètres SMTP pour l'envoi d'emails
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="email-notifications"
-                checked={settings.emailNotifications}
-                onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
-              />
-              <Label htmlFor="email-notifications">Activer les notifications email</Label>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="registration"
+                  checked={settings.userRegistration}
+                  onCheckedChange={(checked) => updateSetting('userRegistration', checked)}
+                />
+                <Label htmlFor="registration">Autoriser les nouvelles inscriptions</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="auto-approve"
+                  checked={settings.autoApproveContributions}
+                  onCheckedChange={(checked) => updateSetting('autoApproveContributions', checked)}
+                />
+                <Label htmlFor="auto-approve">Approuver automatiquement les contributions</Label>
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="smtp-host">Serveur SMTP</Label>
+                <Label htmlFor="max-file-size">Taille maximale des fichiers (MB)</Label>
                 <Input
-                  id="smtp-host"
-                  value={settings.smtpHost}
-                  onChange={(e) => updateSetting('smtpHost', e.target.value)}
+                  id="max-file-size"
+                  type="number"
+                  value={settings.maxFileSize}
+                  onChange={(e) => updateSetting('maxFileSize', e.target.value)}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="smtp-port">Port SMTP</Label>
-                <Input
-                  id="smtp-port"
-                  value={settings.smtpPort}
-                  onChange={(e) => updateSetting('smtpPort', e.target.value)}
+                <Label htmlFor="system-message">Message système</Label>
+                <Textarea
+                  id="system-message"
+                  placeholder="Message à afficher aux utilisateurs"
+                  value={settings.systemMessage}
+                  onChange={(e) => updateSetting('systemMessage', e.target.value)}
                 />
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="smtp-user">Utilisateur SMTP</Label>
-                <Input
-                  id="smtp-user"
-                  value={settings.smtpUser}
-                  onChange={(e) => updateSetting('smtpUser', e.target.value)}
+
+              <div className="flex justify-end pt-4">
+                <Button onClick={handleSave} disabled={saving}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="monitoring">
+          <SystemMonitoring />
+        </TabsContent>
+
+        <TabsContent value="backup">
+          <BackupManager />
+        </TabsContent>
+
+        <TabsContent value="maintenance">
+          <MaintenanceScheduler />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Configuration email
+              </CardTitle>
+              <CardDescription>
+                Paramètres SMTP pour l'envoi d'emails
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="email-notifications"
+                  checked={settings.emailNotifications}
+                  onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
                 />
+                <Label htmlFor="email-notifications">Activer les notifications email</Label>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="smtp-password">Mot de passe SMTP</Label>
-                <Input
-                  id="smtp-password"
-                  type="password"
-                  value={settings.smtpPassword}
-                  onChange={(e) => updateSetting('smtpPassword', e.target.value)}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-host">Serveur SMTP</Label>
+                  <Input
+                    id="smtp-host"
+                    value={settings.smtpHost}
+                    onChange={(e) => updateSetting('smtpHost', e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-port">Port SMTP</Label>
+                  <Input
+                    id="smtp-port"
+                    value={settings.smtpPort}
+                    onChange={(e) => updateSetting('smtpPort', e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
-            
-            <Button onClick={handleTestEmail} variant="outline">
-              <Mail className="h-4 w-4 mr-2" />
-              Tester l'envoi d'email
-            </Button>
-          </CardContent>
-        </Card>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-user">Utilisateur SMTP</Label>
+                  <Input
+                    id="smtp-user"
+                    value={settings.smtpUser}
+                    onChange={(e) => updateSetting('smtpUser', e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-password">Mot de passe SMTP</Label>
+                  <Input
+                    id="smtp-password"
+                    type="password"
+                    value={settings.smtpPassword}
+                    onChange={(e) => updateSetting('smtpPassword', e.target.value)}
+                  />
+                </div>
+              </div>
 
-        <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={saving}>
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Sauvegarde...' : 'Sauvegarder les paramètres'}
-          </Button>
-        </div>
-      </div>
+              <div className="flex justify-end pt-4">
+                <Button onClick={handleSave} disabled={saving}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

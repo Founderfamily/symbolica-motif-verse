@@ -12,6 +12,7 @@ import AdminHeader from '@/components/admin/AdminHeader';
 import AdminErrorDisplay from '@/components/admin/AdminErrorDisplay';
 import AdminWelcomeCard from '@/components/admin/AdminWelcomeCard';
 import AdminQuickActions from '@/components/admin/AdminQuickActions';
+import DashboardSystemWidgets from '@/components/admin/DashboardSystemWidgets';
 import { adminStatsService, AdminStats } from '@/services/admin/statsService';
 import { toast } from 'sonner';
 
@@ -76,6 +77,15 @@ export default function Dashboard() {
       )}
       
       <AdminWelcomeCard profile={profile} />
+
+      <div>
+        <h2 className="text-xl font-semibold mb-4">
+          <I18nText translationKey="admin.dashboard.systemHealth">
+            État du système
+          </I18nText>
+        </h2>
+        <DashboardSystemWidgets />
+      </div>
 
       <AdminQuickActions stats={stats} loading={loading} />
       
