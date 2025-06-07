@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { SYMBOLS } from '@/data/symbols';
 import { I18nText } from '@/components/ui/i18n-text';
 import { ShareButton } from '@/components/social/ShareButton';
+import { SymbolCollections } from '@/components/symbols/SymbolCollections';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
@@ -373,6 +373,14 @@ const SymbolDetailPage: React.FC = () => {
               </div>
             </div>
           </Card>
+        </div>
+
+        {/* Nouvelle section pour les collections associées */}
+        <div className="mt-12">
+          <SymbolCollections 
+            symbolId={symbolIndex} 
+            symbolName={symbol.name}
+          />
         </div>
       </div>
     </div>

@@ -1,46 +1,16 @@
 
 {
-  "title": "Symboles",
-  "subtitle": "Explorez notre collection de symboles culturels du monde entier",
-  "description": "Découvrez la richesse du patrimoine symbolique mondial à travers notre collection collaborative",
-  "explore": "Explorer",
-  "search": "Rechercher des symboles...",
-  "filter": "Filtrer",
-  "noResults": "Aucun symbole trouvé",
-  "loadMore": "Charger plus",
-  "culture": "Culture",
-  "period": "Période",
-  "meaning": "Signification",
-  "origin": "Origine",
   "notFound": "Symbole non trouvé",
   "notFoundDesc": "Le symbole que vous recherchez n'existe pas.",
-  "page": {
-    "title": "Tous les Symboles",
-    "description": "Explorez notre collection complète de symboles culturels du monde entier",
-    "filters": "Filtres",
-    "searchPlaceholder": "Rechercher des symboles...",
-    "clearFilters": "Tout effacer",
-    "activeFilters": "Filtres actifs",
-    "noFilters": "Aucun filtre actif",
-    "resultsCount": "{{count}} symboles trouvés"
-  },
-  "stats": {
-    "totalSymbols": "Symboles documentés",
-    "cultures": "Cultures représentées",
-    "contributors": "Contributeurs actifs",
-    "countries": "Pays couverts"
-  },
-  "categories": {
-    "all": "Tous",
-    "religious": "Religieux",
-    "cultural": "Culturel",
-    "historical": "Historique",
-    "artistic": "Artistique"
-  },
+  "culture": "Culture",
+  "period": "Période",
   "details": {
-    "information": "Informations",
-    "history": "Histoire",
-    "meaning": "Signification",
-    "variations": "Variations"
+    "information": "Informations culturelles"
+  },
+  "collections": {
+    "title": "Collections associées",
+    "empty": "Ce symbole n'est dans aucune collection pour le moment.",
+    "error": "Erreur lors du chargement des collections",
+    "viewAll": "Voir toutes les collections"
   }
 }
