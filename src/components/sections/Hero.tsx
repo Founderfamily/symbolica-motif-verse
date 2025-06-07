@@ -17,18 +17,18 @@ const Hero = () => {
       <div className="text-center mb-10 relative z-10">
         <div className="inline-block p-2 bg-gradient-to-r from-amber-50 to-amber-100 rounded-full mb-4 animate-pulse-light">
           <div className="bg-gradient-to-r from-amber-800/20 to-amber-700/20 px-4 py-1 rounded-full text-amber-900 text-sm font-medium">
-            <I18nText translationKey="app.version" ns="app">Version 1.2.0</I18nText>
+            <I18nText translationKey="app.version">Version 1.2.0</I18nText>
           </div>
         </div>
 
         <div className="space-y-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
-            <I18nText translationKey="hero.heading" ns="hero">
+            <I18nText translationKey="hero.heading">
               Découvrez le patrimoine symbolique mondial
             </I18nText>
           </h1>
           <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto mb-8">
-            <I18nText translationKey="hero.subheading" ns="hero">
+            <I18nText translationKey="hero.subheading">
               Explorez, contribuez et apprenez sur les motifs culturels à travers les âges
             </I18nText>
           </p>
@@ -36,11 +36,11 @@ const Hero = () => {
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
           <Button size="lg" className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-lg shadow-amber-600/20 transform hover:-translate-y-1 transition-all">
-            <I18nText translationKey="hero.community" ns="hero">Rejoindre une communauté</I18nText> 
+            <I18nText translationKey="hero.community">Rejoindre une communauté</I18nText> 
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
           <Button size="lg" variant="outline" className="border-slate-400 text-slate-700 hover:bg-slate-50 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
-            <I18nText translationKey="hero.explore" ns="hero">Commencer l'exploration</I18nText> 
+            <I18nText translationKey="hero.explore">Commencer l'exploration</I18nText> 
             <MapPin className="ml-2 h-4 w-4 text-amber-600" />
           </Button>
         </div>
