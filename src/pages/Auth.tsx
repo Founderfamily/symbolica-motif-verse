@@ -6,9 +6,11 @@ import AuthForm from '@/components/auth/AuthForm';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Users, Globe, BookOpen, TrendingUp, Star, Shield, Zap, Award } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const Auth: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const { t } = useTranslation();
   
   // Redirect if user is already logged in
   if (user && !isLoading) {
@@ -17,10 +19,10 @@ const Auth: React.FC = () => {
 
   // Benefits list avec traductions
   const benefits = [
-    <I18nText translationKey="benefits.feature1">Rejoignez une communauté passionnée qui vous rassemble</I18nText>,
-    <I18nText translationKey="benefits.feature2">Vivez des quêtes fascinantes à travers les cultures</I18nText>,
-    <I18nText translationKey="benefits.feature3">Transmettez un héritage symbolique aux générations futures</I18nText>,
-    <I18nText translationKey="benefits.feature4">Découvrez des nouvelles cultures et leurs trésors cachés</I18nText>
+    <I18nText translationKey="benefits.feature1" ns="auth">Rejoignez une communauté passionnée qui vous rassemble</I18nText>,
+    <I18nText translationKey="benefits.feature2" ns="auth">Vivez des quêtes fascinantes à travers les cultures</I18nText>,
+    <I18nText translationKey="benefits.feature3" ns="auth">Transmettez un héritage symbolique aux générations futures</I18nText>,
+    <I18nText translationKey="benefits.feature4" ns="auth">Découvrez des nouvelles cultures et leurs trésors cachés</I18nText>
   ];
 
   // Statistiques communauté - vraies données Symbolica
@@ -28,46 +30,46 @@ const Auth: React.FC = () => {
     { 
       icon: Users, 
       value: '12K+', 
-      label: <I18nText translationKey="stats.activeResearchers">Chercheurs actifs</I18nText>
+      label: <I18nText translationKey="stats.activeResearchers" ns="auth">Chercheurs actifs</I18nText>
     },
     { 
       icon: Globe, 
       value: '150+', 
-      label: <I18nText translationKey="stats.countriesRepresented">Pays représentés</I18nText>
+      label: <I18nText translationKey="stats.countriesRepresented" ns="auth">Pays représentés</I18nText>
     },
     { 
       icon: BookOpen, 
       value: '50K+', 
-      label: <I18nText translationKey="stats.symbolsDocumented">Symboles documentés</I18nText>
+      label: <I18nText translationKey="stats.symbolsDocumented" ns="auth">Symboles documentés</I18nText>
     },
     { 
       icon: TrendingUp, 
       value: '300+', 
-      label: <I18nText translationKey="stats.culturalTraditions">Traditions culturelles</I18nText>
+      label: <I18nText translationKey="stats.culturalTraditions" ns="auth">Traditions culturelles</I18nText>
     }
   ];
 
   // Testimonials - harmonisés avec les mêmes personnes FR/EN
   const testimonials = [
     {
-      name: <I18nText translationKey="testimonials.testimonial1.name">Dr. Marie Dubois</I18nText>,
-      role: <I18nText translationKey="testimonials.testimonial1.role">Anthropologue culturelle</I18nText>,
+      name: <I18nText translationKey="testimonials.testimonial1.name" ns="auth">Dr. Marie Dubois</I18nText>,
+      role: <I18nText translationKey="testimonials.testimonial1.role" ns="auth">Anthropologue culturelle</I18nText>,
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="testimonials.testimonial1.content">Symbolica a révolutionné mes recherches. Les outils d'analyse IA sont incroyables pour décoder les symboles anciens.</I18nText>,
+      content: <I18nText translationKey="testimonials.testimonial1.content" ns="auth">Symbolica a révolutionné mes recherches. Les outils d'analyse IA sont incroyables pour décoder les symboles anciens.</I18nText>,
       rating: 5
     },
     {
-      name: <I18nText translationKey="testimonials.testimonial2.name">Jean-Pierre Martin</I18nText>,
-      role: <I18nText translationKey="testimonials.testimonial2.role">Conservateur de musée</I18nText>,
+      name: <I18nText translationKey="testimonials.testimonial2.name" ns="auth">Jean-Pierre Martin</I18nText>,
+      role: <I18nText translationKey="testimonials.testimonial2.role" ns="auth">Conservateur de musée</I18nText>,
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="testimonials.testimonial2.content">Une ressource inestimable pour comprendre l'héritage symbolique des cultures. Indispensable pour tout chercheur.</I18nText>,
+      content: <I18nText translationKey="testimonials.testimonial2.content" ns="auth">Une ressource inestimable pour comprendre l'héritage symbolique des cultures. Indispensable pour tout chercheur.</I18nText>,
       rating: 5
     },
     {
-      name: <I18nText translationKey="testimonials.testimonial3.name">Prof. Claire Moreau</I18nText>,
-      role: <I18nText translationKey="testimonials.testimonial3.role">Archéologue</I18nText>,
+      name: <I18nText translationKey="testimonials.testimonial3.name" ns="auth">Prof. Claire Moreau</I18nText>,
+      role: <I18nText translationKey="testimonials.testimonial3.role" ns="auth">Archéologue</I18nText>,
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="testimonials.testimonial3.content">L'aspect communauté globale rend cette plateforme vraiment unique. Un trésor pour la recherche collaborative.</I18nText>,
+      content: <I18nText translationKey="testimonials.testimonial3.content" ns="auth">L'aspect communauté globale rend cette plateforme vraiment unique. Un trésor pour la recherche collaborative.</I18nText>,
       rating: 5
     }
   ];
@@ -76,18 +78,18 @@ const Auth: React.FC = () => {
   const features = [
     {
       icon: Shield,
-      title: <I18nText translationKey="features.secure.title">Sécurisé & Privé</I18nText>,
-      description: <I18nText translationKey="features.secure.description">Vos données sont protégées avec un chiffrement de niveau bancaire</I18nText>
+      title: <I18nText translationKey="features.secure.title" ns="auth">Sécurisé & Privé</I18nText>,
+      description: <I18nText translationKey="features.secure.description" ns="auth">Vos données sont protégées avec un chiffrement de niveau bancaire</I18nText>
     },
     {
       icon: Zap,
-      title: <I18nText translationKey="features.ai.title">IA Avancée</I18nText>,
-      description: <I18nText translationKey="features.ai.description">Outils d'analyse alimentés par l'intelligence artificielle</I18nText>
+      title: <I18nText translationKey="features.ai.title" ns="auth">IA Avancée</I18nText>,
+      description: <I18nText translationKey="features.ai.description" ns="auth">Outils d'analyse alimentés par l'intelligence artificielle</I18nText>
     },
     {
       icon: Award,
-      title: <I18nText translationKey="features.certified.title">Certifié Académique</I18nText>,
-      description: <I18nText translationKey="features.certified.description">Reconnu par les institutions de recherche mondiales</I18nText>
+      title: <I18nText translationKey="features.certified.title" ns="auth">Certifié Académique</I18nText>,
+      description: <I18nText translationKey="features.certified.description" ns="auth">Reconnu par les institutions de recherche mondiales</I18nText>
     }
   ];
   
@@ -103,19 +105,19 @@ const Auth: React.FC = () => {
                 <div className="flex items-center justify-center lg:justify-start space-x-2 mb-4">
                   <img src="/logo.svg" alt="Symbolica" className="h-10 w-10" />
                   <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
-                    <I18nText translationKey="app.name">Symbolica</I18nText>
+                    {t('app.name', { ns: 'app' })}
                   </h1>
                   <Badge variant="outline" className="text-amber-600 border-amber-600 animate-pulse">
-                    <I18nText translationKey="communityBadge">Communauté</I18nText>
+                    <I18nText translationKey="communityBadge" ns="auth">Communauté</I18nText>
                   </Badge>
                 </div>
                 
                 <h2 className="text-2xl lg:text-3xl font-semibold text-slate-900 mb-4">
-                  <I18nText translationKey="benefits.title">Rejoignez des milliers de chercheurs</I18nText>
+                  <I18nText translationKey="benefits.title" ns="auth">Rejoignez des milliers de chercheurs</I18nText>
                 </h2>
                 
                 <p className="text-base lg:text-lg text-slate-600 mb-8">
-                  <I18nText translationKey="benefits.subtitle">Découvrez, contribuez et connectez-vous avec une communauté mondiale passionnée par l'héritage symbolique</I18nText>
+                  <I18nText translationKey="benefits.subtitle" ns="auth">Découvrez, contribuez et connectez-vous avec une communauté mondiale passionnée par l'héritage symbolique</I18nText>
                 </p>
               </div>
 
@@ -137,7 +139,7 @@ const Auth: React.FC = () => {
               {/* Benefits list */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  <I18nText translationKey="benefits.whatYouGet">Ce que vous obtenez :</I18nText>
+                  <I18nText translationKey="benefits.whatYouGet" ns="auth">Ce que vous obtenez :</I18nText>
                 </h3>
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
@@ -167,7 +169,7 @@ const Auth: React.FC = () => {
               {/* Testimonials - maintenant visible sur mobile aussi */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  <I18nText translationKey="testimonials.subtitle">Ce que disent nos utilisateurs</I18nText>
+                  <I18nText translationKey="testimonials.subtitle" ns="auth">Ce que disent nos utilisateurs</I18nText>
                 </h3>
                 <div className="space-y-4">
                   {testimonials.map((testimonial, index) => (
