@@ -3,12 +3,13 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Info, MapPin, Calendar, Share2 } from 'lucide-react';
+import { ArrowLeft, Info, MapPin, Calendar, Share2, Tag, Palette, Hammer, Star, BookOpen, Clock } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { SYMBOLS } from '@/data/symbols';
 import { I18nText } from '@/components/ui/i18n-text';
 import { ShareButton } from '@/components/social/ShareButton';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 const SymbolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -201,7 +202,7 @@ const SymbolDetailPage: React.FC = () => {
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
                 {symbol.name}
               </h1>
-              <div className="flex items-center gap-4 text-slate-600">
+              <div className="flex items-center gap-4 text-slate-600 mb-4">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   <span>{symbol.culture}</span>
@@ -211,45 +212,31 @@ const SymbolDetailPage: React.FC = () => {
                   <span>{symbol.period}</span>
                 </div>
               </div>
+
+              {/* Description enrichie */}
+              {symbol.description && (
+                <p className="text-slate-700 text-lg leading-relaxed">
+                  {symbol.description}
+                </p>
+              )}
             </div>
 
-            {/* Informations détaillées */}
-            <Card className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Info className="h-5 w-5 text-amber-600" />
-                <h3 className="text-lg font-semibold text-slate-900">
-                  <I18nText translationKey="symbols.details.information">Informations</I18nText>
-                </h3>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-slate-700">
-                    <I18nText translationKey="symbols.culture">Culture</I18nText>
-                  </label>
-                  <p className="text-slate-900">{symbol.culture}</p>
+            {/* Tags */}
+            {symbol.tags && symbol.tags.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Tag className="h-4 w-4 text-amber-600" />
+                  <span className="font-medium text-slate-700">Tags</span>
                 </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-slate-700">
-                    <I18nText translationKey="symbols.period">Période</I18nText>
-                  </label>
-                  <p className="text-slate-900">{symbol.period}</p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-slate-700">Type d'image</label>
-                  <p className="text-slate-900">
-                    {symbol.isExternal ? 'Image externe' : 'Image locale'}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-slate-700">Index du symbole</label>
-                  <p className="text-slate-900">#{symbolIndex}</p>
+                <div className="flex flex-wrap gap-2">
+                  {symbol.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="bg-amber-100 text-amber-800">
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
               </div>
-            </Card>
+            )}
 
             {/* Actions fonctionnelles */}
             <div className="flex gap-4">
@@ -265,6 +252,127 @@ const SymbolDetailPage: React.FC = () => {
               />
             </div>
           </div>
+        </div>
+
+        {/* Sections détaillées enrichies */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+          {/* Informations culturelles */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Info className="h-5 w-5 text-amber-600" />
+              <h3 className="text-lg font-semibold text-slate-900">
+                <I18nText translationKey="symbols.details.information">Informations culturelles</I18nText>
+              </h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  <I18nText translationKey="symbols.culture">Culture</I18nText>
+                </label>
+                <p className="text-slate-900">{symbol.culture}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  <I18nText translationKey="symbols.period">Période</I18nText>
+                </label>
+                <p className="text-slate-900">{symbol.period}</p>
+              </div>
+
+              {symbol.historical_context && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    Contexte historique
+                  </label>
+                  <p className="text-slate-900 text-sm leading-relaxed">{symbol.historical_context}</p>
+                </div>
+              )}
+
+              {symbol.significance && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                    <Star className="h-4 w-4" />
+                    Signification
+                  </label>
+                  <p className="text-slate-900 text-sm leading-relaxed">{symbol.significance}</p>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Informations techniques et artistiques */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Palette className="h-5 w-5 text-amber-600" />
+              <h3 className="text-lg font-semibold text-slate-900">
+                Aspects techniques
+              </h3>
+            </div>
+            
+            <div className="space-y-4">
+              {symbol.function && symbol.function.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                    <BookOpen className="h-4 w-4" />
+                    Fonctions
+                  </label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {symbol.function.map((func, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {func}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {symbol.medium && symbol.medium.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                    <Palette className="h-4 w-4" />
+                    Supports utilisés
+                  </label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {symbol.medium.map((med, index) => (
+                      <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                        {med}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {symbol.technique && symbol.technique.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                    <Hammer className="h-4 w-4" />
+                    Techniques
+                  </label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {symbol.technique.map((tech, index) => (
+                      <Badge key={index} variant="outline" className="text-xs bg-green-50 text-green-700">
+                        {tech}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="text-sm font-medium text-slate-700">Type d'image</label>
+                <p className="text-slate-900 text-sm">
+                  {symbol.isExternal ? 'Image externe' : 'Image locale'}
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-slate-700">Index du symbole</label>
+                <p className="text-slate-900 text-sm">#{symbolIndex}</p>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>
