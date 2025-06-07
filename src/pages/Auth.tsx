@@ -17,10 +17,10 @@ const Auth: React.FC = () => {
 
   // Benefits list avec traductions
   const benefits = [
-    <I18nText translationKey="auth.benefits.feature1" />,
-    <I18nText translationKey="auth.benefits.feature2" />,
-    <I18nText translationKey="auth.benefits.feature3" />,
-    <I18nText translationKey="auth.benefits.feature4" />
+    <I18nText translationKey="benefits.feature1">Rejoignez une communauté passionnée qui vous rassemble</I18nText>,
+    <I18nText translationKey="benefits.feature2">Vivez des quêtes fascinantes à travers les cultures</I18nText>,
+    <I18nText translationKey="benefits.feature3">Transmettez un héritage symbolique aux générations futures</I18nText>,
+    <I18nText translationKey="benefits.feature4">Découvrez des nouvelles cultures et leurs trésors cachés</I18nText>
   ];
 
   // Statistiques communauté - vraies données Symbolica
@@ -28,46 +28,46 @@ const Auth: React.FC = () => {
     { 
       icon: Users, 
       value: '12K+', 
-      label: <I18nText translationKey="auth.stats.activeResearchers" />
+      label: <I18nText translationKey="stats.activeResearchers">Chercheurs actifs</I18nText>
     },
     { 
       icon: Globe, 
       value: '150+', 
-      label: <I18nText translationKey="auth.stats.countriesRepresented" />
+      label: <I18nText translationKey="stats.countriesRepresented">Pays représentés</I18nText>
     },
     { 
       icon: BookOpen, 
       value: '50K+', 
-      label: <I18nText translationKey="auth.stats.symbolsDocumented" />
+      label: <I18nText translationKey="stats.symbolsDocumented">Symboles documentés</I18nText>
     },
     { 
       icon: TrendingUp, 
       value: '300+', 
-      label: <I18nText translationKey="auth.stats.culturalTraditions" />
+      label: <I18nText translationKey="stats.culturalTraditions">Traditions culturelles</I18nText>
     }
   ];
 
   // Testimonials - harmonisés avec les mêmes personnes FR/EN
   const testimonials = [
     {
-      name: <I18nText translationKey="auth.testimonials.testimonial1.name" />,
-      role: <I18nText translationKey="auth.testimonials.testimonial1.role" />,
+      name: <I18nText translationKey="testimonials.testimonial1.name">Dr. Marie Dubois</I18nText>,
+      role: <I18nText translationKey="testimonials.testimonial1.role">Anthropologue culturelle</I18nText>,
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="auth.testimonials.testimonial1.content" />,
+      content: <I18nText translationKey="testimonials.testimonial1.content">Symbolica a révolutionné mes recherches. Les outils d'analyse IA sont incroyables pour décoder les symboles anciens.</I18nText>,
       rating: 5
     },
     {
-      name: <I18nText translationKey="auth.testimonials.testimonial2.name" />,
-      role: <I18nText translationKey="auth.testimonials.testimonial2.role" />,
+      name: <I18nText translationKey="testimonials.testimonial2.name">Jean-Pierre Martin</I18nText>,
+      role: <I18nText translationKey="testimonials.testimonial2.role">Conservateur de musée</I18nText>,
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="auth.testimonials.testimonial2.content" />,
+      content: <I18nText translationKey="testimonials.testimonial2.content">Une ressource inestimable pour comprendre l'héritage symbolique des cultures. Indispensable pour tout chercheur.</I18nText>,
       rating: 5
     },
     {
-      name: <I18nText translationKey="auth.testimonials.testimonial3.name" />,
-      role: <I18nText translationKey="auth.testimonials.testimonial3.role" />,
+      name: <I18nText translationKey="testimonials.testimonial3.name">Prof. Claire Moreau</I18nText>,
+      role: <I18nText translationKey="testimonials.testimonial3.role">Archéologue</I18nText>,
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="auth.testimonials.testimonial3.content" />,
+      content: <I18nText translationKey="testimonials.testimonial3.content">L'aspect communauté globale rend cette plateforme vraiment unique. Un trésor pour la recherche collaborative.</I18nText>,
       rating: 5
     }
   ];
@@ -76,18 +76,18 @@ const Auth: React.FC = () => {
   const features = [
     {
       icon: Shield,
-      title: <I18nText translationKey="auth.features.secure.title" />,
-      description: <I18nText translationKey="auth.features.secure.description" />
+      title: <I18nText translationKey="features.secure.title">Sécurisé & Privé</I18nText>,
+      description: <I18nText translationKey="features.secure.description">Vos données sont protégées avec un chiffrement de niveau bancaire</I18nText>
     },
     {
       icon: Zap,
-      title: <I18nText translationKey="auth.features.ai.title" />,
-      description: <I18nText translationKey="auth.features.ai.description" />
+      title: <I18nText translationKey="features.ai.title">IA Avancée</I18nText>,
+      description: <I18nText translationKey="features.ai.description">Outils d'analyse alimentés par l'intelligence artificielle</I18nText>
     },
     {
       icon: Award,
-      title: <I18nText translationKey="auth.features.certified.title" />,
-      description: <I18nText translationKey="auth.features.certified.description" />
+      title: <I18nText translationKey="features.certified.title">Certifié Académique</I18nText>,
+      description: <I18nText translationKey="features.certified.description">Reconnu par les institutions de recherche mondiales</I18nText>
     }
   ];
   
@@ -106,16 +106,16 @@ const Auth: React.FC = () => {
                     <I18nText translationKey="app.name">Symbolica</I18nText>
                   </h1>
                   <Badge variant="outline" className="text-amber-600 border-amber-600 animate-pulse">
-                    <I18nText translationKey="auth.communityBadge">Community</I18nText>
+                    <I18nText translationKey="communityBadge">Communauté</I18nText>
                   </Badge>
                 </div>
                 
                 <h2 className="text-2xl lg:text-3xl font-semibold text-slate-900 mb-4">
-                  <I18nText translationKey="auth.benefits.title" />
+                  <I18nText translationKey="benefits.title">Rejoignez des milliers de chercheurs</I18nText>
                 </h2>
                 
                 <p className="text-base lg:text-lg text-slate-600 mb-8">
-                  <I18nText translationKey="auth.benefits.subtitle" />
+                  <I18nText translationKey="benefits.subtitle">Découvrez, contribuez et connectez-vous avec une communauté mondiale passionnée par l'héritage symbolique</I18nText>
                 </p>
               </div>
 
@@ -137,7 +137,7 @@ const Auth: React.FC = () => {
               {/* Benefits list */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  <I18nText translationKey="auth.benefits.whatYouGet" />
+                  <I18nText translationKey="benefits.whatYouGet">Ce que vous obtenez :</I18nText>
                 </h3>
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
@@ -167,7 +167,7 @@ const Auth: React.FC = () => {
               {/* Testimonials - maintenant visible sur mobile aussi */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  <I18nText translationKey="auth.testimonials.subtitle" />
+                  <I18nText translationKey="testimonials.subtitle">Ce que disent nos utilisateurs</I18nText>
                 </h3>
                 <div className="space-y-4">
                   {testimonials.map((testimonial, index) => (

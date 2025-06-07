@@ -28,23 +28,23 @@ export default function AuthForm() {
 
   // Validation schema for login with internationalized messages
   const loginSchema = z.object({
-    email: z.string().email(t('auth.errors.invalidEmail')),
-    password: z.string().min(6, t('auth.errors.passwordTooShort')),
+    email: z.string().email(t('errors.invalidEmail', { ns: 'auth' })),
+    password: z.string().min(6, t('errors.passwordTooShort', { ns: 'auth' })),
   });
 
   // Extended validation schema for registration with internationalized messages
   const registerSchema = z.object({
-    email: z.string().email(t('auth.errors.invalidEmail')),
-    username: z.string().min(3, t('auth.errors.usernameTooShort')).max(50),
-    fullName: z.string().min(2, t('auth.errors.fullNameTooShort')).max(100).optional(),
+    email: z.string().email(t('errors.invalidEmail', { ns: 'auth' })),
+    username: z.string().min(3, t('errors.usernameTooShort', { ns: 'auth' })).max(50),
+    fullName: z.string().min(2, t('errors.fullNameTooShort', { ns: 'auth' })).max(100).optional(),
     password: z.string()
-      .min(6, t('auth.errors.passwordTooShort'))
-      .regex(/[A-Z]/, t('auth.errors.passwordUppercase'))
-      .regex(/[a-z]/, t('auth.errors.passwordLowercase'))
-      .regex(/\d/, t('auth.errors.passwordNumber')),
+      .min(6, t('errors.passwordTooShort', { ns: 'auth' }))
+      .regex(/[A-Z]/, t('errors.passwordUppercase', { ns: 'auth' }))
+      .regex(/[a-z]/, t('errors.passwordLowercase', { ns: 'auth' }))
+      .regex(/\d/, t('errors.passwordNumber', { ns: 'auth' })),
     passwordConfirm: z.string().min(6),
   }).refine((data) => data.password === data.passwordConfirm, {
-    message: t('auth.errors.passwordsNoMatch'),
+    message: t('errors.passwordsNoMatch', { ns: 'auth' }),
     path: ["passwordConfirm"],
   });
 
@@ -82,11 +82,11 @@ export default function AuthForm() {
       const result = await signIn(values.email, values.password);
       if (result.error) {
         setAuthError(result.error.message === 'Invalid login credentials' 
-          ? t('auth.errors.invalidCredentials')
+          ? t('errors.invalidCredentials', { ns: 'auth' })
           : result.error.message);
       }
     } catch (error: any) {
-      setAuthError(t('auth.errors.loginError'));
+      setAuthError(t('errors.loginError', { ns: 'auth' }));
     }
   };
 
@@ -101,7 +101,7 @@ export default function AuthForm() {
       const result = await signUp(values.email, values.password, userData);
       if (result.error) {
         if (result.error.message.includes('already registered')) {
-          setAuthError(t('auth.errors.emailAlreadyUsed'));
+          setAuthError(t('errors.emailAlreadyUsed', { ns: 'auth' }));
         } else {
           setAuthError(result.error.message);
         }
@@ -110,7 +110,7 @@ export default function AuthForm() {
         setShowWelcomeModal(true);
       }
     } catch (error: any) {
-      setAuthError(t('auth.errors.registrationError'));
+      setAuthError(t('errors.registrationError', { ns: 'auth' }));
     }
   };
 
@@ -138,7 +138,7 @@ export default function AuthForm() {
               </h2>
             </div>
             <p className="text-amber-100 text-sm">
-              <I18nText translationKey="auth.intro" />
+              <I18nText translationKey="intro">Explorez, analysez et contribuez à l'héritage symbolique mondial</I18nText>
             </p>
           </div>
 
@@ -147,11 +147,11 @@ export default function AuthForm() {
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login" className="flex items-center space-x-2">
                   <User className="h-4 w-4" />
-                  <span><I18nText translationKey="auth.buttons.login" /></span>
+                  <span><I18nText translationKey="buttons.login">Se connecter</I18nText></span>
                 </TabsTrigger>
                 <TabsTrigger value="register" className="flex items-center space-x-2">
                   <UserPlus className="h-4 w-4" />
-                  <span><I18nText translationKey="auth.buttons.register" /></span>
+                  <span><I18nText translationKey="buttons.register">S'inscrire</I18nText></span>
                 </TabsTrigger>
               </TabsList>
               
@@ -159,10 +159,10 @@ export default function AuthForm() {
               <TabsContent value="login" className="space-y-0">
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                    <I18nText translationKey="auth.titles.login" />
+                    <I18nText translationKey="titles.login">Bon retour</I18nText>
                   </h3>
                   <p className="text-slate-600 text-sm">
-                    <I18nText translationKey="auth.form.loginDescription" />
+                    <I18nText translationKey="form.loginDescription">Connectez-vous pour accéder à votre espace personnel</I18nText>
                   </p>
                 </div>
                 
@@ -174,14 +174,14 @@ export default function AuthForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-700 font-medium">
-                            <I18nText translationKey="auth.labels.email" />
+                            <I18nText translationKey="labels.email">Adresse email</I18nText>
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="email" 
-                                placeholder={t('auth.form.emailPlaceholder')} 
+                                placeholder={t('form.emailPlaceholder', { ns: 'auth' })} 
                                 className="pl-10 pr-10 h-12 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -201,13 +201,13 @@ export default function AuthForm() {
                         <FormItem>
                           <div className="flex items-center justify-between">
                             <FormLabel className="text-slate-700 font-medium">
-                              <I18nText translationKey="auth.labels.password" />
+                              <I18nText translationKey="labels.password">Mot de passe</I18nText>
                             </FormLabel>
                             <Link
                               to="/auth/reset-password"
                               className="text-xs text-amber-600 hover:text-amber-700 transition-colors"
                             >
-                              <I18nText translationKey="auth.buttons.forgotPassword" />
+                              <I18nText translationKey="buttons.forgotPassword">Mot de passe oublié ?</I18nText>
                             </Link>
                           </div>
                           <FormControl>
@@ -215,7 +215,7 @@ export default function AuthForm() {
                               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type={showPassword ? "text" : "password"}
-                                placeholder={t('auth.form.passwordPlaceholder')}
+                                placeholder={t('form.passwordPlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-12 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -246,10 +246,10 @@ export default function AuthForm() {
                       {isLoading ? (
                         <div className="flex items-center space-x-2">
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span><I18nText translationKey="auth.buttons.loggingIn" /></span>
+                          <span><I18nText translationKey="buttons.loggingIn">Connexion...</I18nText></span>
                         </div>
                       ) : (
-                        <I18nText translationKey="auth.buttons.login" />
+                        <I18nText translationKey="buttons.login">Se connecter</I18nText>
                       )}
                     </Button>
                   </form>
@@ -262,10 +262,10 @@ export default function AuthForm() {
               <TabsContent value="register" className="space-y-0">
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                    <I18nText translationKey="auth.titles.register" />
+                    <I18nText translationKey="titles.register">Rejoignez notre communauté</I18nText>
                   </h3>
                   <p className="text-slate-600 text-sm">
-                    <I18nText translationKey="auth.form.registerDescription" />
+                    <I18nText translationKey="form.registerDescription">Créez votre compte pour rejoindre notre communauté</I18nText>
                   </p>
                 </div>
                 
@@ -277,14 +277,14 @@ export default function AuthForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-700 font-medium">
-                            <I18nText translationKey="auth.labels.email" />
+                            <I18nText translationKey="labels.email">Adresse email</I18nText>
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="email" 
-                                placeholder={t('auth.form.emailPlaceholder')} 
+                                placeholder={t('form.emailPlaceholder', { ns: 'auth' })} 
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -303,14 +303,14 @@ export default function AuthForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-700 font-medium">
-                            <I18nText translationKey="auth.labels.username" />
+                            <I18nText translationKey="labels.username">Nom d'utilisateur</I18nText>
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
                               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="text" 
-                                placeholder={t('auth.form.usernamePlaceholder')}
+                                placeholder={t('form.usernamePlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -329,8 +329,8 @@ export default function AuthForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-700 font-medium">
-                            <I18nText translationKey="auth.labels.fullName" /> <span className="text-slate-400 text-xs">
-                              <I18nText translationKey="auth.form.fullNameOptional" />
+                            <I18nText translationKey="labels.fullName">Nom complet</I18nText> <span className="text-slate-400 text-xs">
+                              <I18nText translationKey="form.fullNameOptional">(optionnel)</I18nText>
                             </span>
                           </FormLabel>
                           <FormControl>
@@ -338,7 +338,7 @@ export default function AuthForm() {
                               <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="text" 
-                                placeholder={t('auth.form.fullNamePlaceholder')}
+                                placeholder={t('form.fullNamePlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -357,14 +357,14 @@ export default function AuthForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-700 font-medium">
-                            <I18nText translationKey="auth.labels.password" />
+                            <I18nText translationKey="labels.password">Mot de passe</I18nText>
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type={showPassword ? "text" : "password"}
-                                placeholder={t('auth.form.passwordPlaceholder')}
+                                placeholder={t('form.passwordPlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -388,14 +388,14 @@ export default function AuthForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-700 font-medium">
-                            <I18nText translationKey="auth.labels.confirmPassword" />
+                            <I18nText translationKey="labels.confirmPassword">Confirmer le mot de passe</I18nText>
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                               <Input 
                                 type="password"
-                                placeholder={t('auth.form.passwordPlaceholder')}
+                                placeholder={t('form.passwordPlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
                               />
@@ -422,10 +422,10 @@ export default function AuthForm() {
                       {isLoading ? (
                         <div className="flex items-center space-x-2">
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span><I18nText translationKey="auth.buttons.creating" /></span>
+                          <span><I18nText translationKey="buttons.creating">Création du compte...</I18nText></span>
                         </div>
                       ) : (
-                        <I18nText translationKey="auth.buttons.register" />
+                        <I18nText translationKey="buttons.register">S'inscrire</I18nText>
                       )}
                     </Button>
                   </form>

@@ -1,4 +1,8 @@
 
 {
+  "app": {
+    "name": "Symbolica",
+    "version": "Version Alpha 0.1"
+  },
   "version": "Version 1.0.1"
 }
