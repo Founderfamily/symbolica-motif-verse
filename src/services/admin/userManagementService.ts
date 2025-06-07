@@ -1,17 +1,7 @@
 
-import { supabase } from '@/integrations/supabase/client';
 
-export interface AdminUser {
-  id: string;
-  username: string | null;
-  full_name: string | null;
-  is_admin: boolean;
-  is_banned: boolean;
-  created_at: string;
-  last_activity: string | null;
-  contributions_count: number;
-  total_points: number;
-}
+import { supabase } from '@/integrations/supabase/client';
+import { UserProfile } from '@/types/auth';
 
 export interface UserFilters {
   search?: string;
@@ -27,7 +17,7 @@ export const userManagementService = {
   /**
    * Récupère la liste des utilisateurs avec filtres et pagination
    */
-  getUsers: async (filters: UserFilters = {}): Promise<AdminUser[]> => {
+  getUsers: async (filters: UserFilters = {}): Promise<UserProfile[]> => {
     try {
       const { 
         search = null, 
@@ -112,3 +102,4 @@ export const userManagementService = {
     }
   }
 };
+

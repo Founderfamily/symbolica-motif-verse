@@ -1,24 +1,12 @@
 
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-
-interface User {
-  id: string;
-  username: string | null;
-  full_name: string | null;
-  is_admin: boolean;
-  created_at: string;
-  contributions_count: number;
-  verified_uploads: number;
-  bio?: string;
-  location?: string;
-  website?: string;
-  favorite_cultures?: string[];
-}
+import { UserProfile } from '@/types/auth';
 
 export const useUsers = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isAdmin } = useAuth();
@@ -41,7 +29,8 @@ export const useUsers = () => {
           username,
           full_name,
           is_admin,
-          created_at
+          created_at,
+          is_banned
         `)
         .order('created_at', { ascending: false });
 
@@ -55,7 +44,10 @@ export const useUsers = () => {
         bio: undefined,
         location: undefined,
         website: undefined,
-        favorite_cultures: undefined
+        favorite_cultures: undefined,
+        total_points: 0,
+        followers_count: 0,
+        following_count: 0
       }));
 
       setUsers(usersWithDefaults);
@@ -101,3 +93,4 @@ export const useUsers = () => {
     updateUserAdmin
   };
 };
+

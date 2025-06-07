@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Trophy, UserPlus, UserMinus, MapPin, Link as LinkIcon } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { UserProfile, getUserProfile, followUser, unfollowUser, checkFollowStatus } from '@/services/userService';
+import { UserProfile } from '@/types/auth';
+import { getUserProfile, followUser, unfollowUser, checkFollowStatus } from '@/services/userService';
 import { useAuth } from '@/hooks/useAuth';
 
 const UserProfilePage: React.FC = () => {

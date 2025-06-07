@@ -1,5 +1,6 @@
 
 
+
 export interface UserProfile {
   id: string;
   username: string | null;
@@ -33,4 +34,5 @@ export interface AuthState {
   user: UserProfile | null;
   error: string | null;
 }
+
 

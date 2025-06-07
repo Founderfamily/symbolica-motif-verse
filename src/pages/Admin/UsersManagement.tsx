@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
 import { Search, Users, UserCheck, UserX, Shield, MoreHorizontal, AlertTriangle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,13 +24,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { userManagementService, AdminUser } from '@/services/admin/userManagementService';
+import { userManagementService, UserFilters } from '@/services/admin/userManagementService';
 import { adminStatsService } from '@/services/admin/statsService';
+import { UserProfile } from '@/types/auth';
 
 export default function UsersManagement() {
   const { t } = useTranslation();
   const { user, isAdmin } = useAuth();
-  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'user' | 'admin' | 'banned'>('all');
@@ -59,11 +61,7 @@ export default function UsersManagement() {
       setUsers(userData);
     } catch (error) {
       console.error('Error loading users:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger les utilisateurs.",
-      });
+      toast.error("Impossible de charger les utilisateurs.");
     } finally {
       setLoading(false);
     }
@@ -93,20 +91,13 @@ export default function UsersManagement() {
           : user
       ));
 
-      toast({
-        title: "Statut mis à jour",
-        description: `L'utilisateur a été ${!currentIsBanned ? 'banni' : 'débanni'}.`,
-      });
+      toast.success(`L'utilisateur a été ${!currentIsBanned ? 'banni' : 'débanni'}.`);
       
       // Recharger les stats
       loadStats();
     } catch (error) {
       console.error('Error toggling ban status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de modifier le statut de bannissement.",
-      });
+      toast.error("Impossible de modifier le statut de bannissement.");
     }
   };
 
@@ -120,24 +111,17 @@ export default function UsersManagement() {
           : user
       ));
 
-      toast({
-        title: "Statut mis à jour",
-        description: `L'utilisateur a été ${!currentIsAdmin ? 'promu administrateur' : 'retiré des administrateurs'}.`,
-      });
+      toast.success(`L'utilisateur a été ${!currentIsAdmin ? 'promu administrateur' : 'retiré des administrateurs'}.`);
       
       // Recharger les stats
       loadStats();
     } catch (error) {
       console.error('Error updating admin status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de modifier le statut administrateur.",
-      });
+      toast.error("Impossible de modifier le statut administrateur.");
     }
   };
 
-  const getStatusBadge = (user: AdminUser) => {
+  const getStatusBadge = (user: UserProfile) => {
     if (user.is_banned) {
       return <Badge variant="destructive">Banni</Badge>;
     }
@@ -348,9 +332,9 @@ export default function UsersManagement() {
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(userData)}</TableCell>
-                    <TableCell>{new Date(userData.created_at).toLocaleDateString('fr-FR')}</TableCell>
-                    <TableCell>{userData.contributions_count}</TableCell>
-                    <TableCell>{userData.total_points}</TableCell>
+                    <TableCell>{userData.created_at ? new Date(userData.created_at).toLocaleDateString('fr-FR') : 'Non défini'}</TableCell>
+                    <TableCell>{userData.contributions_count || 0}</TableCell>
+                    <TableCell>{userData.total_points || 0}</TableCell>
                     <TableCell>
                       {userData.last_activity 
                         ? new Date(userData.last_activity).toLocaleDateString('fr-FR')
@@ -373,7 +357,7 @@ export default function UsersManagement() {
                           {userData.id !== user?.id && (
                             <>
                               <DropdownMenuItem
-                                onClick={() => handleToggleAdmin(userData.id, userData.is_admin)}
+                                onClick={() => handleToggleAdmin(userData.id, userData.is_admin || false)}
                                 className={userData.is_admin ? "text-orange-600" : "text-blue-600"}
                               >
                                 {userData.is_admin ? (
@@ -387,7 +371,7 @@ export default function UsersManagement() {
                                 )}
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleToggleBan(userData.id, userData.is_banned)}
+                                onClick={() => handleToggleBan(userData.id, userData.is_banned || false)}
                                 className={userData.is_banned ? "text-green-600" : "text-red-600"}
                               >
                                 {userData.is_banned ? 'Débannir' : 'Bannir'}
@@ -407,3 +391,4 @@ export default function UsersManagement() {
     </div>
   );
 }
+
