@@ -25,6 +25,8 @@ export const useSymbolCollections = (symbolId: string | number) => {
           updated_at,
           is_featured,
           collection_translations!inner (
+            id,
+            collection_id,
             language,
             title,
             description
@@ -40,17 +42,8 @@ export const useSymbolCollections = (symbolId: string | number) => {
         throw error;
       }
 
-      // Transformer les données pour correspondre au type CollectionWithTranslations
-      return (data || []).map(collection => ({
-        ...collection,
-        translations: collection.collection_translations.reduce((acc, trans) => {
-          acc[trans.language as 'en' | 'fr'] = {
-            title: trans.title,
-            description: trans.description
-          };
-          return acc;
-        }, {} as Record<'en' | 'fr', { title: string; description: string | null }>)
-      }));
+      // Return the data as-is since it already matches CollectionWithTranslations type
+      return data || [];
     },
     enabled: !!symbolId
   });

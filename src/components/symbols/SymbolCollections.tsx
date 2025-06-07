@@ -106,9 +106,14 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
       <CardContent>
         <div className="space-y-3">
           {collections.map((collection) => {
-            const currentTranslation = collection.translations[i18n.language as 'en' | 'fr'] || 
-                                     collection.translations.fr || 
-                                     collection.translations.en;
+            // Find the appropriate translation from collection_translations array
+            const currentTranslation = collection.collection_translations.find(
+              t => t.language === i18n.language
+            ) || collection.collection_translations.find(
+              t => t.language === 'fr'
+            ) || collection.collection_translations.find(
+              t => t.language === 'en'
+            ) || collection.collection_translations[0];
             
             return (
               <div
