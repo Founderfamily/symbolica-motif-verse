@@ -106,7 +106,7 @@ export const useSymbolCollections = (symbolId: string | number) => {
     },
     enabled: !!symbolId,
     staleTime: 0, // Désactiver le cache pour debug
-    cacheTime: 0, // Forcer la requête à chaque fois
+    gcTime: 0, // Propriété corrigée : gcTime au lieu de cacheTime dans React Query v5
     refetchOnMount: true,
     refetchOnWindowFocus: true
   });
