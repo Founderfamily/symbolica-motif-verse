@@ -36,10 +36,28 @@ import enCallToAction from './locales/en/callToAction.json';
 import frCallToAction from './locales/fr/callToAction.json';
 import enGamification from './locales/en/gamification.json';
 import frGamification from './locales/fr/gamification.json';
+import enHowItWorks from './locales/en/howItWorks.json';
+import frHowItWorks from './locales/fr/howItWorks.json';
+import enUploadTools from './locales/en/uploadTools.json';
+import frUploadTools from './locales/fr/uploadTools.json';
+import enTestimonials from './locales/en/testimonials.json';
+import frTestimonials from './locales/fr/testimonials.json';
+import enSections from './locales/en/sections.json';
+import frSections from './locales/fr/sections.json';
 
 const resources = {
   en: {
-    translation: enTranslations,
+    translation: {
+      ...enTranslations,
+      ...enHero.hero,
+      ...enFeatures.features,
+      ...enCallToAction.callToAction,
+      ...enGamification.gamification,
+      ...enHowItWorks.howItWorks,
+      ...enUploadTools.uploadTools,
+      ...enTestimonials,
+      ...enSections.sections
+    },
     app: enTranslations,
     auth: enAuth,
     admin: enAdmin,
@@ -53,10 +71,24 @@ const resources = {
     hero: enHero,
     features: enFeatures,
     callToAction: enCallToAction,
-    gamification: enGamification
+    gamification: enGamification,
+    howItWorks: enHowItWorks,
+    uploadTools: enUploadTools,
+    testimonials: enTestimonials,
+    sections: enSections
   },
   fr: {
-    translation: frTranslations,
+    translation: {
+      ...frTranslations,
+      ...frHero.hero,
+      ...frFeatures.features,
+      ...frCallToAction.callToAction,
+      ...frGamification.gamification,
+      ...frHowItWorks.howItWorks,
+      ...frUploadTools.uploadTools,
+      ...frTestimonials,
+      ...frSections.sections
+    },
     app: frTranslations,
     auth: frAuth,
     admin: frAdmin,
@@ -70,7 +102,11 @@ const resources = {
     hero: frHero,
     features: frFeatures,
     callToAction: frCallToAction,
-    gamification: frGamification
+    gamification: frGamification,
+    howItWorks: frHowItWorks,
+    uploadTools: frUploadTools,
+    testimonials: frTestimonials,
+    sections: frSections
   }
 };
 
@@ -96,7 +132,7 @@ i18n
     
     // Add default namespace
     defaultNS: 'translation',
-    ns: ['translation', 'app', 'auth', 'admin', 'header', 'profile', 'navigation', 'search', 'roadmap', 'community', 'contributions', 'hero', 'features', 'callToAction', 'gamification']
+    ns: ['translation', 'app', 'auth', 'admin', 'header', 'profile', 'navigation', 'search', 'roadmap', 'community', 'contributions', 'hero', 'features', 'callToAction', 'gamification', 'howItWorks', 'uploadTools', 'testimonials', 'sections']
   });
 
 export default i18n;
