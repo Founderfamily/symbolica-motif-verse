@@ -8,6 +8,7 @@ import { NavigationItems } from './header/NavigationItems';
 import { SearchBar } from './header/SearchBar';
 import { UserMenu } from './header/UserMenu';
 import { AuthButtons } from './header/AuthButtons';
+import { I18nText } from '@/components/ui/i18n-text';
 
 const Header: React.FC = () => {
   const auth = useAuth();
@@ -26,7 +27,7 @@ const Header: React.FC = () => {
                 className="h-8 w-8"
               />
               <span className="font-bold text-xl text-slate-900 hidden sm:block">
-                Symbolica
+                <I18nText translationKey="name" ns="app">Symbolica</I18nText>
               </span>
             </Link>
             

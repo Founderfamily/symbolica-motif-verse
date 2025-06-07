@@ -9,12 +9,12 @@ export const AuthButtons: React.FC = () => {
     <div className="flex items-center space-x-2">
       <Button variant="outline" asChild>
         <Link to="/auth">
-          <I18nText translationKey="auth.buttons.login">Log In</I18nText>
+          <I18nText translationKey="login" ns="auth">Se connecter</I18nText>
         </Link>
       </Button>
       <Button asChild>
         <Link to="/auth">
-          <I18nText translationKey="auth.buttons.register">Sign Up</I18nText>
+          <I18nText translationKey="register" ns="auth">S'inscrire</I18nText>
         </Link>
       </Button>
     </div>

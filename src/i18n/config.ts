@@ -34,8 +34,6 @@ import enCommon from './locales/en/common.json';
 import frCommon from './locales/fr/common.json';
 import enFooter from './locales/en/footer.json';
 import frFooter from './locales/fr/footer.json';
-
-// Import missing namespaces
 import enHero from './locales/en/hero.json';
 import frHero from './locales/fr/hero.json';
 import enCallToAction from './locales/en/callToAction.json';
@@ -126,7 +124,19 @@ i18n
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage']
-    }
+    },
+    
+    // Enhanced fallback configuration
+    fallbackNS: 'translation',
+    defaultNS: 'translation',
+    
+    // Return key if translation is missing
+    returnEmptyString: false,
+    returnNull: false,
+    
+    // Namespace separator
+    nsSeparator: ':',
+    keySeparator: '.'
   });
 
 export default i18n;

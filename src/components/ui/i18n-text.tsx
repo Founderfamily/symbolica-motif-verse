@@ -4,6 +4,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 
 type I18nTextProps = {
   translationKey: string;
+  ns?: string;
   params?: Record<string, string | number>;
   values?: Record<string, string | number>;
   className?: string;
@@ -13,6 +14,7 @@ type I18nTextProps = {
 
 export const I18nText = ({
   translationKey,
+  ns,
   params,
   values,
   className = '',
@@ -22,14 +24,24 @@ export const I18nText = ({
   const { t } = useTranslation();
   
   const translationParams = values || params;
-  const translatedText = t(translationKey, translationParams);
+  
+  // Use the enhanced t function with namespace support
+  const translatedText = t(translationKey, { 
+    ...translationParams, 
+    ns 
+  });
   
   // Use children as fallback if provided and translation appears to be missing
   const isMissing = translatedText === translationKey;
   const displayText = isMissing && children ? children : translatedText;
   
+  // Add data attribute for debugging in development
+  const dataAttributes = process.env.NODE_ENV === 'development' 
+    ? { 'data-translation-key': translationKey, 'data-ns': ns }
+    : {};
+  
   return (
-    <Component className={className}>
+    <Component className={className} {...dataAttributes}>
       {displayText}
     </Component>
   );

@@ -1,7 +1,6 @@
 
 {
-  "app": {
-    "name": "Symbolica",
-    "version": "Version 1.2.0"
-  }
+  "name": "Symbolica",
+  "version": "Version 1.2.0",
+  "tagline": "Musée collaboratif du patrimoine symbolique"
 }

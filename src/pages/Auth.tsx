@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -103,19 +104,19 @@ const Auth: React.FC = () => {
               <div className="text-center lg:text-left">
                 <div className="flex items-center justify-center lg:justify-start space-x-2 mb-4">
                   <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">
-                    <I18nText translationKey="app.name">Symbolica</I18nText>
+                    <I18nText translationKey="name" ns="app">Symbolica</I18nText>
                   </h1>
                   <Badge variant="outline" className="text-amber-600 border-amber-600 animate-pulse">
-                    {t('communityBadge', { ns: 'auth' })}
+                    <I18nText translationKey="communityBadge" ns="auth">Communauté</I18nText>
                   </Badge>
                 </div>
                 
                 <h2 className="text-2xl lg:text-3xl font-semibold text-slate-900 mb-4">
-                  {t('benefits.title', { ns: 'auth' })}
+                  <I18nText translationKey="benefits.title" ns="auth">Rejoignez des milliers de chercheurs</I18nText>
                 </h2>
                 
                 <p className="text-base lg:text-lg text-slate-600 mb-8">
-                  {t('benefits.subtitle', { ns: 'auth' })}
+                  <I18nText translationKey="benefits.subtitle" ns="auth">Découvrez, contribuez et connectez-vous avec une communauté mondiale passionnée</I18nText>
                 </p>
               </div>
 
@@ -137,7 +138,7 @@ const Auth: React.FC = () => {
               {/* Benefits list */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  {t('benefits.whatYouGet', { ns: 'auth' })}
+                  <I18nText translationKey="benefits.whatYouGet" ns="auth">Ce que vous obtenez :</I18nText>
                 </h3>
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
@@ -167,7 +168,7 @@ const Auth: React.FC = () => {
               {/* Testimonials - maintenant visible sur mobile aussi */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  {t('testimonials.subtitle', { ns: 'auth' })}
+                  <I18nText translationKey="testimonials.subtitle" ns="auth">Ce que disent nos utilisateurs</I18nText>
                 </h3>
                 <div className="space-y-4">
                   {testimonials.map((testimonial, index) => (

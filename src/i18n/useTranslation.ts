@@ -6,25 +6,45 @@ const LANGUAGE_STORAGE_KEY = 'app_language';
 export const useTranslation = () => {
   const { t: originalT, i18n } = useI18nTranslation();
   
-  // Simplified t function that relies on i18next's native behavior
+  // Enhanced t function with better namespace and fallback handling
   const t = (key: string, options?: any): string => {
-    const translated = originalT(key, options);
+    // Handle namespace properly
+    let translationKey = key;
+    let namespace = options?.ns;
     
-    // Ensure we always return a string
-    const translatedString = typeof translated === 'string' ? translated : String(translated);
-    
-    // If translation is missing (returns key), provide readable fallback in same language
-    if (translatedString === key) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Missing translation: ${key} for language: ${i18n.language}`);
-      }
-      
-      // Convert key to readable text
+    // If no namespace provided and key contains dots, try to extract it
+    if (!namespace && key.includes('.')) {
       const parts = key.split('.');
-      return parts[parts.length - 1].replace(/([A-Z])/g, ' $1').trim();
+      if (parts.length >= 2) {
+        // Try the first part as namespace
+        namespace = parts[0];
+        translationKey = parts.slice(1).join('.');
+      }
     }
     
-    return translatedString;
+    // Try translation with namespace first
+    if (namespace) {
+      const namespacedResult = originalT(translationKey, { ...options, ns: namespace });
+      if (namespacedResult !== translationKey && namespacedResult !== key) {
+        return namespacedResult;
+      }
+    }
+    
+    // Fallback to original key without namespace
+    const directResult = originalT(key, options);
+    if (directResult !== key) {
+      return directResult;
+    }
+    
+    // If still no translation found, provide readable fallback
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`Missing translation: ${key} (namespace: ${namespace || 'none'}) for language: ${i18n.language}`);
+    }
+    
+    // Convert key to readable text as last resort
+    const parts = key.split('.');
+    const lastPart = parts[parts.length - 1];
+    return lastPart.replace(/([A-Z])/g, ' $1').trim();
   };
   
   // Change language with localStorage persistence
@@ -33,10 +53,10 @@ export const useTranslation = () => {
     i18n.changeLanguage(lng);
   };
 
-  // Reset to default language (English)
+  // Reset to default language (French)
   const resetToDefaultLanguage = () => {
     localStorage.removeItem(LANGUAGE_STORAGE_KEY);
-    i18n.changeLanguage('en');
+    i18n.changeLanguage('fr');
   };
   
   return { 
