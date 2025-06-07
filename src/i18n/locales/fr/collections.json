@@ -53,5 +53,15 @@
     "sciencesDescription": "Découvrez les symboles liés aux sciences et traditions ésotériques",
     "othersDescription": "Collections thématiques et créations personnalisées",
     "noOthers": "Aucune autre collection pour le moment"
-  }
+  },
+  "notFound": "Collection non trouvée",
+  "backToCollections": "Retour aux collections",
+  "share": "Partager",
+  "viewOnMap": "Voir sur la carte",
+  "symbolsCount": "symboles",
+  "culturesCount": "Cultures",
+  "periodsCount": "Périodes",
+  "createdOn": "Créée le",
+  "symbolsInCollection": "Symboles de la collection",
+  "noSymbols": "Aucun symbole dans cette collection"
 }

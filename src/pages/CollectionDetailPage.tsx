@@ -20,6 +20,8 @@ const CollectionDetailPage = React.memo(() => {
   const { data: collection, isLoading } = useCollection(slug || '');
   const { getTranslation } = useCollectionTranslations();
 
+  console.log('CollectionDetailPage - slug:', slug, 'collection:', collection);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50">
@@ -45,6 +47,9 @@ const CollectionDetailPage = React.memo(() => {
           <h1 className="text-2xl font-bold text-slate-900 mb-4">
             <I18nText translationKey="collections.notFound">Collection non trouvée</I18nText>
           </h1>
+          <p className="text-slate-600 mb-4">
+            Le slug recherché : "{slug}"
+          </p>
           <Link to="/collections">
             <Button variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />

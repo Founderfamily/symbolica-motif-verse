@@ -9,6 +9,7 @@ import HomePage from '@/pages/HomePage';
 import SymbolsPage from '@/pages/SymbolsPage';
 import SymbolDetailPage from '@/pages/SymbolDetailPage';
 import CollectionsPage from '@/pages/CollectionsPage';
+import CollectionDetailPage from '@/pages/CollectionDetailPage';
 import CommunityPage from '@/pages/CommunityPage';
 import TrendingPage from '@/pages/TrendingPage';
 import Auth from '@/pages/Auth';
@@ -30,7 +31,6 @@ import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
 import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
 import SystemSettings from '@/pages/Admin/SystemSettings';
 import NotFound from '@/pages/NotFound';
-import LazyCollectionDetailPage from '@/components/collections/LazyCollectionDetailPage';
 
 import { initializationService } from '@/services/admin/initializationService';
 
@@ -69,7 +69,7 @@ function App() {
                 <Route path="/symbols" element={<SymbolsPage />} />
                 <Route path="/symbols/:id" element={<SymbolDetailPage />} />
                 <Route path="/collections" element={<CollectionsPage />} />
-                <Route path="/collection/:id" element={<LazyCollectionDetailPage />} />
+                <Route path="/collections/:slug" element={<CollectionDetailPage />} />
                 <Route path="/community" element={<CommunityPage />} />
                 <Route path="/trending" element={<TrendingPage />} />
                 <Route path="/auth" element={<Auth />} />

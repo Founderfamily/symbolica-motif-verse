@@ -53,5 +53,15 @@
     "sciencesDescription": "Discover symbols related to sciences and esoteric traditions",
     "othersDescription": "Thematic collections and personal creations",
     "noOthers": "No other collections at the moment"
-  }
+  },
+  "notFound": "Collection not found",
+  "backToCollections": "Back to collections",
+  "share": "Share",
+  "viewOnMap": "View on map",
+  "symbolsCount": "symbols",
+  "culturesCount": "Cultures",
+  "periodsCount": "Periods",
+  "createdOn": "Created on",
+  "symbolsInCollection": "Symbols in collection",
+  "noSymbols": "No symbols in this collection"
 }
