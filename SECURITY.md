@@ -54,32 +54,113 @@ $$;
 
 ## Politiques Row-Level Security (RLS)
 
-### Tables avec RLS activé
-Toutes les tables principales ont RLS activé :
-- `profiles` - Profils utilisateur
-- `user_contributions` - Contributions
-- `collections` - Collections
-- `symbols` - Symboles
-- `user_activities` - Activités
-- `notifications` - Notifications
-- `direct_messages` - Messages privés
+### ✅ Tables avec RLS activé et sécurisées (MISE À JOUR 2025-01-07)
+Toutes les tables principales ont RLS activé avec politiques standardisées :
+- `profiles` - Profils utilisateur ✅ Optimisé
+- `user_contributions` - Contributions ✅
+- `collections` - Collections ✅
+- `symbols` - Symboles ✅ Optimisé
+- `user_activities` - Activités ✅
+- `notifications` - Notifications ✅
+- `direct_messages` - Messages privés ✅
+- `admin_logs` - Logs administrateur ✅ Optimisé
+- `contribution_comments` - Commentaires ✅ NOUVEAU
+- `contribution_tags` - Tags de contributions ✅ NOUVEAU
 
-### Exemples de politiques
+### Exemples de politiques standardisées (NOUVEAU)
 
-#### Profils utilisateur
+#### Profils utilisateur - Politiques optimisées
 ```sql
--- Les utilisateurs peuvent voir tous les profils publics
-create policy "Public profiles are viewable by everyone"
-on profiles for select
-using (true);
+-- Lecture publique des profils
+CREATE POLICY "profiles_select_policy" 
+ON profiles FOR SELECT 
+USING (true);
 
--- Les utilisateurs ne peuvent modifier que leur propre profil
-create policy "Users can update own profile"
-on profiles for update
-using (auth.uid() = id);
+-- Insertion de son propre profil uniquement
+CREATE POLICY "profiles_insert_policy" 
+ON profiles FOR INSERT 
+WITH CHECK (auth.uid() = id);
+
+-- Modification de son propre profil uniquement
+CREATE POLICY "profiles_update_policy" 
+ON profiles FOR UPDATE 
+USING (auth.uid() = id);
 ```
 
-#### Contributions
+#### Commentaires de contributions - Nouvelles politiques
+```sql
+-- Lecture des commentaires sur contributions approuvées
+CREATE POLICY "Users can view comments on approved contributions" 
+ON contribution_comments FOR SELECT 
+USING (
+  EXISTS (
+    SELECT 1 FROM user_contributions uc 
+    WHERE uc.id = contribution_comments.contribution_id 
+    AND uc.status = 'approved'
+  )
+);
+
+-- Lecture de ses propres commentaires
+CREATE POLICY "Users can view their own comments" 
+ON contribution_comments FOR SELECT 
+USING (auth.uid() = user_id);
+
+-- Gestion complète de ses propres commentaires
+CREATE POLICY "Users can create comments" 
+ON contribution_comments FOR INSERT 
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own comments" 
+ON contribution_comments FOR UPDATE 
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own comments" 
+ON contribution_comments FOR DELETE 
+USING (auth.uid() = user_id);
+```
+
+#### Tags de contributions - Nouvelles politiques
+```sql
+-- Lecture des tags sur contributions approuvées
+CREATE POLICY "Users can view tags on approved contributions" 
+ON contribution_tags FOR SELECT 
+USING (
+  EXISTS (
+    SELECT 1 FROM user_contributions uc 
+    WHERE uc.id = contribution_tags.contribution_id 
+    AND uc.status = 'approved'
+  )
+);
+
+-- Gestion complète pour propriétaires de contributions
+CREATE POLICY "Contribution owners can manage tags" 
+ON contribution_tags FOR ALL 
+USING (
+  EXISTS (
+    SELECT 1 FROM user_contributions uc 
+    WHERE uc.id = contribution_tags.contribution_id 
+    AND uc.user_id = auth.uid()
+  )
+);
+```
+
+#### Logs administrateur - Politique optimisée
+```sql
+-- Accès admin uniquement
+CREATE POLICY "admin_logs_select_policy" 
+ON admin_logs FOR SELECT 
+USING (public.is_admin());
+```
+
+#### Symboles - Politique simplifiée
+```sql
+-- Lecture publique
+CREATE POLICY "symbols_select_policy" 
+ON symbols FOR SELECT 
+USING (true);
+```
+
+### Contributions (politiques existantes maintenues)
 ```sql
 -- Les utilisateurs peuvent voir les contributions approuvées
 create policy "Approved contributions are public"
@@ -97,7 +178,7 @@ on user_contributions for update
 using (public.has_role(auth.uid(), 'admin'));
 ```
 
-#### Collections
+#### Collections (politiques existantes maintenues)
 ```sql
 -- Collections publiques visibles par tous
 create policy "Public collections viewable"
@@ -109,6 +190,22 @@ create policy "Owners can manage collections"
 on collections for all
 using (auth.uid() = created_by);
 ```
+
+## Standards de sécurité RLS (NOUVEAU)
+
+### Conventions de nommage
+- **Format** : `{table}_{operation}_policy`
+- **Langue** : Anglais exclusivement
+- **Exemples** :
+  - `profiles_select_policy`
+  - `admin_logs_select_policy` 
+  - `symbols_select_policy`
+
+### Principes appliqués
+1. **Une politique par opération** : Éviter les doublons
+2. **Nommage descriptif** : Faciliter la maintenance
+3. **Documentation inline** : Commentaires explicitifs
+4. **Tests systématiques** : Validation avant déploiement
 
 ### Sécurité des API
 
@@ -293,6 +390,14 @@ npm run test-rls
 5. Vérification post-déploiement
 
 ### Changelog sécurité
+
+#### 2025-01-07 - Correction critique RLS
+- ✅ **Ajout** : Politiques RLS pour `contribution_comments`
+- ✅ **Ajout** : Politiques RLS pour `contribution_tags`  
+- ✅ **Optimisation** : Nettoyage doublons sur `profiles`, `admin_logs`, `symbols`
+- ✅ **Standardisation** : Conventions de nommage anglaises
+- ✅ **Documentation** : Mise à jour guide sécurité
+
 Toutes les mises à jour de sécurité sont documentées avec :
 - Date et version
 - Description de la vulnérabilité
