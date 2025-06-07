@@ -10,8 +10,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
+import { useAuth } from '@/hooks/useAuth';
 
 export const ToolsDropdown: React.FC = () => {
+  const { isAdmin } = useAuth();
+
+  // Si l'utilisateur n'est pas admin, ne pas afficher le menu Outils
+  if (!isAdmin) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="text-slate-600 hover:text-slate-900 transition-colors flex items-center space-x-1">
