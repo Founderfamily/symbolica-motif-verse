@@ -17,12 +17,12 @@ const Auth: React.FC = () => {
     return <Navigate to="/" replace />;
   }
 
-  // Benefits list avec traductions
+  // Benefits list avec traductions utilisant le namespace auth
   const benefits = [
-    <I18nText translationKey="benefits.feature1" ns="auth">Rejoignez une communauté passionnée qui vous rassemble</I18nText>,
-    <I18nText translationKey="benefits.feature2" ns="auth">Vivez des quêtes fascinantes à travers les cultures</I18nText>,
-    <I18nText translationKey="benefits.feature3" ns="auth">Transmettez un héritage symbolique aux générations futures</I18nText>,
-    <I18nText translationKey="benefits.feature4" ns="auth">Découvrez des nouvelles cultures et leurs trésors cachés</I18nText>
+    t('benefits.feature1', { ns: 'auth' }),
+    t('benefits.feature2', { ns: 'auth' }),
+    t('benefits.feature3', { ns: 'auth' }),
+    t('benefits.feature4', { ns: 'auth' })
   ];
 
   // Statistiques communauté - vraies données Symbolica
@@ -30,46 +30,46 @@ const Auth: React.FC = () => {
     { 
       icon: Users, 
       value: '12K+', 
-      label: <I18nText translationKey="stats.activeResearchers" ns="auth">Chercheurs actifs</I18nText>
+      label: t('stats.activeResearchers', { ns: 'auth' })
     },
     { 
       icon: Globe, 
       value: '150+', 
-      label: <I18nText translationKey="stats.countriesRepresented" ns="auth">Pays représentés</I18nText>
+      label: t('stats.countriesRepresented', { ns: 'auth' })
     },
     { 
       icon: BookOpen, 
       value: '50K+', 
-      label: <I18nText translationKey="stats.symbolsDocumented" ns="auth">Symboles documentés</I18nText>
+      label: t('stats.symbolsDocumented', { ns: 'auth' })
     },
     { 
       icon: TrendingUp, 
       value: '300+', 
-      label: <I18nText translationKey="stats.culturalTraditions" ns="auth">Traditions culturelles</I18nText>
+      label: t('stats.culturalTraditions', { ns: 'auth' })
     }
   ];
 
   // Testimonials - harmonisés avec les mêmes personnes FR/EN
   const testimonials = [
     {
-      name: <I18nText translationKey="testimonials.testimonial1.name" ns="auth">Dr. Marie Dubois</I18nText>,
-      role: <I18nText translationKey="testimonials.testimonial1.role" ns="auth">Anthropologue culturelle</I18nText>,
+      name: t('testimonials.testimonial1.name', { ns: 'auth' }),
+      role: t('testimonials.testimonial1.role', { ns: 'auth' }),
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="testimonials.testimonial1.content" ns="auth">Symbolica a révolutionné mes recherches. Les outils d'analyse IA sont incroyables pour décoder les symboles anciens.</I18nText>,
+      content: t('testimonials.testimonial1.content', { ns: 'auth' }),
       rating: 5
     },
     {
-      name: <I18nText translationKey="testimonials.testimonial2.name" ns="auth">Jean-Pierre Martin</I18nText>,
-      role: <I18nText translationKey="testimonials.testimonial2.role" ns="auth">Conservateur de musée</I18nText>,
+      name: t('testimonials.testimonial2.name', { ns: 'auth' }),
+      role: t('testimonials.testimonial2.role', { ns: 'auth' }),
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="testimonials.testimonial2.content" ns="auth">Une ressource inestimable pour comprendre l'héritage symbolique des cultures. Indispensable pour tout chercheur.</I18nText>,
+      content: t('testimonials.testimonial2.content', { ns: 'auth' }),
       rating: 5
     },
     {
-      name: <I18nText translationKey="testimonials.testimonial3.name" ns="auth">Prof. Claire Moreau</I18nText>,
-      role: <I18nText translationKey="testimonials.testimonial3.role" ns="auth">Archéologue</I18nText>,
+      name: t('testimonials.testimonial3.name', { ns: 'auth' }),
+      role: t('testimonials.testimonial3.role', { ns: 'auth' }),
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      content: <I18nText translationKey="testimonials.testimonial3.content" ns="auth">L'aspect communauté globale rend cette plateforme vraiment unique. Un trésor pour la recherche collaborative.</I18nText>,
+      content: t('testimonials.testimonial3.content', { ns: 'auth' }),
       rating: 5
     }
   ];
@@ -78,18 +78,18 @@ const Auth: React.FC = () => {
   const features = [
     {
       icon: Shield,
-      title: <I18nText translationKey="features.secure.title" ns="auth">Sécurisé & Privé</I18nText>,
-      description: <I18nText translationKey="features.secure.description" ns="auth">Vos données sont protégées avec un chiffrement de niveau bancaire</I18nText>
+      title: t('features.secure.title', { ns: 'auth' }),
+      description: t('features.secure.description', { ns: 'auth' })
     },
     {
       icon: Zap,
-      title: <I18nText translationKey="features.ai.title" ns="auth">IA Avancée</I18nText>,
-      description: <I18nText translationKey="features.ai.description" ns="auth">Outils d'analyse alimentés par l'intelligence artificielle</I18nText>
+      title: t('features.ai.title', { ns: 'auth' }),
+      description: t('features.ai.description', { ns: 'auth' })
     },
     {
       icon: Award,
-      title: <I18nText translationKey="features.certified.title" ns="auth">Certifié Académique</I18nText>,
-      description: <I18nText translationKey="features.certified.description" ns="auth">Reconnu par les institutions de recherche mondiales</I18nText>
+      title: t('features.certified.title', { ns: 'auth' }),
+      description: t('features.certified.description', { ns: 'auth' })
     }
   ];
   
@@ -108,16 +108,16 @@ const Auth: React.FC = () => {
                     {t('app.name', { ns: 'app' })}
                   </h1>
                   <Badge variant="outline" className="text-amber-600 border-amber-600 animate-pulse">
-                    <I18nText translationKey="communityBadge" ns="auth">Communauté</I18nText>
+                    {t('communityBadge', { ns: 'auth' })}
                   </Badge>
                 </div>
                 
                 <h2 className="text-2xl lg:text-3xl font-semibold text-slate-900 mb-4">
-                  <I18nText translationKey="benefits.title" ns="auth">Rejoignez des milliers de chercheurs</I18nText>
+                  {t('benefits.title', { ns: 'auth' })}
                 </h2>
                 
                 <p className="text-base lg:text-lg text-slate-600 mb-8">
-                  <I18nText translationKey="benefits.subtitle" ns="auth">Découvrez, contribuez et connectez-vous avec une communauté mondiale passionnée par l'héritage symbolique</I18nText>
+                  {t('benefits.subtitle', { ns: 'auth' })}
                 </p>
               </div>
 
@@ -139,7 +139,7 @@ const Auth: React.FC = () => {
               {/* Benefits list */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  <I18nText translationKey="benefits.whatYouGet" ns="auth">Ce que vous obtenez :</I18nText>
+                  {t('benefits.whatYouGet', { ns: 'auth' })}
                 </h3>
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
@@ -169,7 +169,7 @@ const Auth: React.FC = () => {
               {/* Testimonials - maintenant visible sur mobile aussi */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  <I18nText translationKey="testimonials.subtitle" ns="auth">Ce que disent nos utilisateurs</I18nText>
+                  {t('testimonials.subtitle', { ns: 'auth' })}
                 </h3>
                 <div className="space-y-4">
                   {testimonials.map((testimonial, index) => (
