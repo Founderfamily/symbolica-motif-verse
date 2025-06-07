@@ -24,13 +24,13 @@ const NewContribution = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const formSchema = z.object({
-    title: z.string().min(5, t('contributions.form.validation.minLength', { count: 5 })),
-    description: z.string().min(20, t('contributions.form.validation.minLength', { count: 20 })),
+    title: z.string().min(5, t('contributions:form.validation.minLength', { count: 5 })),
+    description: z.string().min(20, t('contributions:form.validation.minLength', { count: 20 })),
     location_name: z.string().optional(),
-    cultural_context: z.string().min(3, t('contributions.form.validation.required')),
-    period: z.string().min(3, t('contributions.form.validation.required')),
+    cultural_context: z.string().min(3, t('contributions:form.validation.required')),
+    period: z.string().min(3, t('contributions:form.validation.required')),
     contribution_type: z.string().optional(),
-    tags: z.array(z.string()).min(1, t('contributions.form.validation.minTags')),
+    tags: z.array(z.string()).min(1, t('contributions:form.validation.minTags')),
     latitude: z.number().nullable().optional(),
     longitude: z.number().nullable().optional(),
   });
@@ -44,7 +44,7 @@ const NewContribution = () => {
       cultural_context: '',
       period: '',
       contribution_type: '',
-      tags: [], // Ensure tags is always initialized as an empty array
+      tags: [],
       latitude: null,
       longitude: null,
     },
@@ -57,7 +57,7 @@ const NewContribution = () => {
     }
     
     if (!selectedImage) {
-      form.setError('root', { message: t('contributions.form.validation.imageRequired') });
+      form.setError('root', { message: t('contributions:form.validation.imageRequired') });
       return;
     }
 
@@ -79,17 +79,17 @@ const NewContribution = () => {
   if (!user) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">{t('auth.loginTitle')}</h1>
-        <Button onClick={() => navigate('/auth')}>{t('auth.login')}</Button>
+        <h1 className="text-2xl font-bold mb-6">{t('auth:loginTitle')}</h1>
+        <Button onClick={() => navigate('/auth')}>{t('auth:login')}</Button>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('contributions.form.title')}</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('contributions:form.title')}</h1>
       <p className="text-muted-foreground mb-6">
-        {t('contributions.form.subtitle')}
+        {t('contributions:form.subtitle')}
       </p>
 
       <Form {...form}>
@@ -128,10 +128,10 @@ const NewContribution = () => {
               variant="outline"
               onClick={() => navigate('/contributions')}
             >
-              {t('contributions.form.buttons.cancel')}
+              {t('contributions:form.buttons.cancel')}
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? t('contributions.form.buttons.submitting') : t('contributions.form.buttons.submit')}
+              {submitting ? t('contributions:form.buttons.submitting') : t('contributions:form.buttons.submit')}
             </Button>
           </div>
         </form>
