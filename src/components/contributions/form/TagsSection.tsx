@@ -18,8 +18,8 @@ interface TagsSectionProps {
 
 // Organize common tags by categories for better UX
 const TAG_CATEGORIES = {
-  art: ['symbole', 'motif', 'art', 'décoratif', 'géométrique'],
-  spiritual: ['religieux', 'spirituel', 'sacré', 'rituel', 'cosmologie'],
+  art: ['symbole', 'motif', 'art', 'decoratif', 'geometrique'],
+  spiritual: ['religieux', 'spirituel', 'sacre', 'rituel', 'cosmologie'],
   cultural: ['traditionnel', 'folklore', 'mythologie'],
   nature: ['nature', 'protection']
 };
@@ -35,7 +35,7 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
     const currentTags = getValues('tags') || [];
     
     // For common tags, use the translation key; for custom tags, use the input value
-    const displayTag = tagKey ? t(`contributions.form.tags.${tagKey}`) : tagToAdd;
+    const displayTag = tagKey ? t(`contributions:form.tags.${tagKey}`) : tagToAdd;
     
     if (!currentTags.includes(displayTag)) {
       const newTags = [...currentTags, displayTag];
@@ -53,7 +53,7 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
   const currentTags = getValues('tags') || [];
 
   const isTagSelected = (tagKey: string) => {
-    const translatedTag = t(`contributions.form.tags.${tagKey}`);
+    const translatedTag = t(`contributions:form.tags.${tagKey}`);
     return currentTags.includes(translatedTag);
   };
 
@@ -65,7 +65,7 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
     return (
       <div key={categoryKey} className="space-y-2">
         <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {t(`contributions.form.tagCategories.${categoryKey}`)}
+          {t(`contributions:form.tagCategories.${categoryKey}`)}
         </h4>
         <div className="flex flex-wrap gap-2">
           {availableTags.map(tagKey => (
@@ -76,7 +76,7 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
               onClick={() => handleAddTag(tagKey)}
             >
               <Plus className="mr-1 h-3 w-3" />
-              {t(`contributions.form.tags.${tagKey}`)}
+              {t(`contributions:form.tags.${tagKey}`)}
             </Badge>
           ))}
         </div>
@@ -89,10 +89,10 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
       <CardHeader>
         <CardTitle className="flex items-center">
           <Tags className="mr-2 h-5 w-5 text-primary" />
-          {t('contributions.form.sections.tags')}
+          {t('contributions:form.sections.tags')}
         </CardTitle>
         <CardDescription>
-          {t('contributions.form.sections.tagsDescription')}
+          {t('contributions:form.sections.tagsDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -100,7 +100,7 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
           {/* Custom tag input */}
           <div className="flex gap-2">
             <Input
-              placeholder={t('contributions.form.fields.tagsPlaceholder')}
+              placeholder={t('contributions:form.fields.tagsPlaceholder')}
               value={currentTag}
               onChange={(e) => setCurrentTag(e.target.value)}
               className="flex-1"
@@ -117,15 +117,15 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
               disabled={!currentTag.trim()}
             >
               <Plus className="mr-1 h-4 w-4" />
-              {t('contributions.form.fields.addTag')}
+              {t('contributions:form.fields.addTag')}
             </Button>
           </div>
 
           {/* Common tags organized by categories */}
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium mb-2">{t('contributions.form.fields.commonTags')}</p>
-              <p className="text-xs text-muted-foreground mb-4">{t('contributions.form.fields.commonTagsDescription')}</p>
+              <p className="text-sm font-medium mb-2">{t('contributions:form.fields.commonTags')}</p>
+              <p className="text-xs text-muted-foreground mb-4">{t('contributions:form.fields.commonTagsDescription')}</p>
             </div>
             
             <div className="space-y-4">
@@ -137,7 +137,7 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
 
           {/* Selected tags display */}
           <div className="space-y-2">
-            <h4 className="text-sm font-medium">{t('contributions.form.fields.selectedTags')}</h4>
+            <h4 className="text-sm font-medium">{t('contributions:form.fields.selectedTags')}</h4>
             <div className="flex flex-wrap gap-2 p-3 border rounded-md min-h-[50px] bg-muted/20">
               {currentTags.length > 0 ? (
                 currentTags.map((tag, index) => (
@@ -153,7 +153,7 @@ const TagsSection: React.FC<TagsSectionProps> = ({ getValues, setValue, formErro
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground italic">
-                  {t('contributions.form.fields.noTags')}
+                  {t('contributions:form.fields.noTags')}
                 </p>
               )}
             </div>

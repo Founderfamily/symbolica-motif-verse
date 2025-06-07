@@ -21,6 +21,14 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
   const [showCultureOther, setShowCultureOther] = useState(false);
   const [showPeriodOther, setShowPeriodOther] = useState(false);
 
+  const getCultureKey = (culture: string) => {
+    return culture.toLowerCase().replace(/\s+/g, '').replace(/-/g, '').replace(/é/g, 'e').replace(/è/g, 'e');
+  };
+
+  const getPeriodKey = (period: string) => {
+    return period.toLowerCase().replace(/\s+/g, '').replace(/-/g, '').replace(/è/g, 'e').replace(/é/g, 'e').replace(/â/g, 'a');
+  };
+
   const handleCultureChange = (value: string) => {
     if (value === 'other') {
       setShowCultureOther(true);
@@ -46,10 +54,10 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
       <CardHeader>
         <CardTitle className="flex items-center">
           <Globe className="mr-2 h-5 w-5 text-primary" />
-          {t('contributions.form.sections.cultural')}
+          {t('contributions:form.sections.cultural')}
         </CardTitle>
         <CardDescription>
-          {t('contributions.form.sections.culturalDescription')}
+          {t('contributions:form.sections.culturalDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -58,22 +66,22 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
           name="cultural_context"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('contributions.form.fields.culture')}</FormLabel>
+              <FormLabel>{t('contributions:form.fields.culture')}</FormLabel>
               {!showCultureOther ? (
                 <Select onValueChange={handleCultureChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('contributions.form.fields.culturePlaceholder')} />
+                      <SelectValue placeholder={t('contributions:form.fields.culturePlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {CULTURAL_CONTEXTS.map(culture => (
                       <SelectItem key={culture} value={culture}>
-                        {t(`contributions.form.cultures.${culture.toLowerCase().replace(/\s+/g, '')}`)}
+                        {t(`contributions:form.cultures.${getCultureKey(culture)}`)}
                       </SelectItem>
                     ))}
                     <SelectItem value="other">
-                      {t('contributions.form.fields.cultureOther')}
+                      {t('contributions:form.fields.cultureOther')}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -81,7 +89,7 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
                 <div className="space-y-2">
                   <FormControl>
                     <Input
-                      placeholder={t('contributions.form.fields.cultureOtherPlaceholder')}
+                      placeholder={t('contributions:form.fields.cultureOtherPlaceholder')}
                       {...field}
                     />
                   </FormControl>
@@ -94,7 +102,7 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
                       setValue('cultural_context', '');
                     }}
                   >
-                    {t('contributions.form.fields.backToSelection')}
+                    {t('contributions:form.fields.backToSelection')}
                   </Button>
                 </div>
               )}
@@ -108,23 +116,23 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
           name="period"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('contributions.form.fields.period')}</FormLabel>
+              <FormLabel>{t('contributions:form.fields.period')}</FormLabel>
               {!showPeriodOther ? (
                 <Select onValueChange={handlePeriodChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <Calendar className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder={t('contributions.form.fields.periodPlaceholder')} />
+                      <SelectValue placeholder={t('contributions:form.fields.periodPlaceholder')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {HISTORICAL_PERIODS.map(period => (
                       <SelectItem key={period} value={period}>
-                        {t(`contributions.form.periods.${period.toLowerCase().replace(/\s+/g, '').replace(/-/g, '').replace(/è/g, 'e').replace(/é/g, 'e')}`)}
+                        {t(`contributions:form.periods.${getPeriodKey(period)}`)}
                       </SelectItem>
                     ))}
                     <SelectItem value="other">
-                      {t('contributions.form.fields.periodOther')}
+                      {t('contributions:form.fields.periodOther')}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -134,7 +142,7 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
                     <div className="flex items-center">
                       <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder={t('contributions.form.fields.periodOtherPlaceholder')}
+                        placeholder={t('contributions:form.fields.periodOtherPlaceholder')}
                         {...field}
                       />
                     </div>
@@ -148,7 +156,7 @@ const CulturalContextSection: React.FC<CulturalContextSectionProps> = ({ control
                       setValue('period', '');
                     }}
                   >
-                    {t('contributions.form.fields.backToSelection')}
+                    {t('contributions:form.fields.backToSelection')}
                   </Button>
                 </div>
               )}

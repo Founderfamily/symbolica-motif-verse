@@ -23,10 +23,10 @@ const ImageUploadSection: React.FC<ImageUploadSectionProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center">
           <Upload className="mr-2 h-5 w-5 text-primary" />
-          {t('contributions.form.sections.image')}
+          {t('contributions:form.sections.image')}
         </CardTitle>
         <CardDescription>
-          {t('contributions.form.sections.imageDescription')}
+          {t('contributions:form.sections.imageDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>

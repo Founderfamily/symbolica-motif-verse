@@ -27,10 +27,10 @@ const LocationSection: React.FC<LocationSectionProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center">
           <MapPin className="mr-2 h-5 w-5 text-primary" />
-          {t('contributions.form.sections.location')}
+          {t('contributions:form.sections.location')}
         </CardTitle>
         <CardDescription>
-          {t('contributions.form.sections.locationDescription')}
+          {t('contributions:form.sections.locationDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -44,9 +44,9 @@ const LocationSection: React.FC<LocationSectionProps> = ({
             name="location_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('contributions.form.fields.location')}</FormLabel>
+                <FormLabel>{t('contributions:form.fields.location')}</FormLabel>
                 <FormControl>
-                  <Input {...field} readOnly placeholder={t('contributions.form.fields.locationPlaceholder')} />
+                  <Input {...field} readOnly placeholder={t('contributions:form.fields.locationPlaceholder')} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
