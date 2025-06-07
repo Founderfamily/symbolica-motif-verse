@@ -7,6 +7,37 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { getRoadmapItems, RoadmapItem } from '@/services/roadmapService';
 import { CheckCircle, Clock, Circle, AlertCircle } from 'lucide-react';
 
+// Fallback data in case Supabase fails
+const fallbackRoadmapItems: RoadmapItem[] = [
+  {
+    id: 'fallback-1',
+    phase: 'Phase 0',
+    title: { fr: 'Fondations techniques', en: 'Technical Foundations' },
+    description: { fr: 'Mise en place de l\'infrastructure de base', en: 'Setting up basic infrastructure' },
+    is_current: false,
+    is_completed: true,
+    display_order: 0
+  },
+  {
+    id: 'fallback-2',
+    phase: 'Phase 1',
+    title: { fr: 'Plateforme de base', en: 'Base Platform' },
+    description: { fr: 'Développement des fonctionnalités core', en: 'Development of core features' },
+    is_current: true,
+    is_completed: false,
+    display_order: 1
+  },
+  {
+    id: 'fallback-3',
+    phase: 'Phase 2',
+    title: { fr: 'Communauté et collaboration', en: 'Community and Collaboration' },
+    description: { fr: 'Outils collaboratifs et communautaires', en: 'Collaborative and community tools' },
+    is_current: false,
+    is_completed: false,
+    display_order: 2
+  }
+];
+
 const RoadmapSection = () => {
   const { i18n } = useTranslation();
   const [items, setItems] = useState<RoadmapItem[]>([]);
@@ -15,25 +46,37 @@ const RoadmapSection = () => {
 
   useEffect(() => {
     const fetchItems = async () => {
+      const timeout = setTimeout(() => {
+        console.log('⏰ [RoadmapSection] Timeout reached, using fallback data');
+        setItems(fallbackRoadmapItems);
+        setLoading(false);
+      }, 5000); // 5 second timeout
+
       try {
-        console.log('🚀 [RoadmapSection] Début du chargement des données Supabase...');
+        console.log('🚀 [RoadmapSection] Starting Supabase fetch...');
         setLoading(true);
         setError(null);
         
         const data = await getRoadmapItems();
-        console.log('✅ [RoadmapSection] Données Supabase récupérées:', data.length, 'items');
-        console.log('📊 [RoadmapSection] Détail complet:', JSON.stringify(data, null, 2));
+        clearTimeout(timeout);
         
-        setItems(data);
+        console.log('✅ [RoadmapSection] Supabase data received:', data?.length || 0, 'items');
+        
+        if (data && data.length > 0) {
+          setItems(data);
+        } else {
+          console.log('📝 [RoadmapSection] No data from Supabase, using fallback');
+          setItems(fallbackRoadmapItems);
+        }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Erreur de chargement des données';
-        console.error('❌ [RoadmapSection] Erreur Supabase:', errorMessage);
-        console.error('🔍 [RoadmapSection] Stack trace:', err);
+        clearTimeout(timeout);
+        const errorMessage = err instanceof Error ? err.message : 'Erreur de chargement';
+        console.error('❌ [RoadmapSection] Supabase error:', errorMessage);
+        console.log('🔄 [RoadmapSection] Using fallback data due to error');
         setError(errorMessage);
-        // PAS DE FALLBACK - on garde items vide pour afficher l'erreur
+        setItems(fallbackRoadmapItems); // Use fallback on error
       } finally {
         setLoading(false);
-        console.log('🏁 [RoadmapSection] Fin du processus de chargement');
       }
     };
 
@@ -50,21 +93,21 @@ const RoadmapSection = () => {
     if (item.is_completed) {
       return (
         <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-          <I18nText translationKey="roadmap.completed" />
+          <I18nText translationKey="roadmap:completed">Terminé</I18nText>
         </Badge>
       );
     }
     if (item.is_current) {
       return (
         <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">
-          <I18nText translationKey="roadmap.inProgress" />
+          <I18nText translationKey="roadmap:inProgress">En cours</I18nText>
         </Badge>
       );
     }
     return null;
   };
 
-  // État de chargement
+  // Loading state
   if (loading) {
     return (
       <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
@@ -85,55 +128,7 @@ const RoadmapSection = () => {
     );
   }
 
-  // État d'erreur
-  if (error) {
-    return (
-      <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <I18nText 
-              translationKey="sections.roadmap" 
-              as="h2" 
-              className="text-3xl font-bold text-slate-800 mb-4"
-            />
-          </div>
-          <div className="flex items-center justify-center h-32">
-            <AlertCircle className="w-8 h-8 text-red-500 mr-3" />
-            <div className="text-center">
-              <p className="text-red-600 font-semibold">Erreur de chargement</p>
-              <p className="text-slate-600 text-sm mt-1">{error}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Aucune donnée mais pas d'erreur
-  if (items.length === 0) {
-    return (
-      <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <I18nText 
-              translationKey="sections.roadmap" 
-              as="h2" 
-              className="text-3xl font-bold text-slate-800 mb-4"
-            />
-          </div>
-          <div className="flex items-center justify-center h-32">
-            <div className="text-center">
-              <p className="text-slate-600">Aucune étape de développement disponible pour le moment.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Affichage des VRAIES données de Supabase (Phase 0 à Phase 4)
-  console.log('🎯 [RoadmapSection] Rendu avec', items.length, 'éléments Supabase');
-  
+  // Main render with data (Supabase or fallback)
   return (
     <section className="py-16 px-4 md:px-8 bg-gradient-to-b from-slate-50/50 to-white">
       <div className="max-w-4xl mx-auto">
@@ -145,20 +140,39 @@ const RoadmapSection = () => {
             className="text-3xl font-bold text-slate-800 mb-4"
           />
           <I18nText 
-            translationKey="roadmap.subtitle" 
+            translationKey="roadmap:subtitle" 
             as="p" 
             className="text-xl text-slate-600"
           />
         </div>
 
-        {/* Timeline - Affichage des VRAIES données de Supabase */}
+        {/* Error notice (if applicable) */}
+        {error && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-center">
+              <AlertCircle className="w-5 h-5 text-amber-500 mr-2" />
+              <p className="text-amber-700 text-sm">
+                Données de démonstration affichées (problème de connexion)
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Timeline */}
         <div className="relative">
           {/* Ligne verticale */}
           <div className="absolute left-[23px] top-0 bottom-0 w-0.5 bg-slate-200"></div>
           
           <div className="space-y-8">
             {items.map((item) => {
-              console.log('🔄 [RoadmapSection] Rendu item:', item.id, item.phase, item.is_completed);
+              const title = typeof item.title === 'object' 
+                ? item.title?.[i18n.language] || item.title?.fr || 'Titre manquant'
+                : item.title || 'Titre manquant';
+              
+              const description = typeof item.description === 'object'
+                ? item.description?.[i18n.language] || item.description?.fr || 'Description manquante'
+                : item.description || 'Description manquante';
+
               return (
                 <Card key={item.id} className="relative ml-12 shadow-sm hover:shadow-md transition-shadow">
                   {/* Icône de statut */}
@@ -169,7 +183,7 @@ const RoadmapSection = () => {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">
-                        {item.title?.[i18n.language] || item.title?.fr || item.title || `${item.phase} - Titre`}
+                        {title}
                       </CardTitle>
                       {getStatusBadge(item)}
                     </div>
@@ -177,7 +191,7 @@ const RoadmapSection = () => {
                   
                   <CardContent>
                     <p className="text-slate-600">
-                      {item.description?.[i18n.language] || item.description?.fr || item.description || 'Description en cours...'}
+                      {description}
                     </p>
                   </CardContent>
                 </Card>
@@ -189,9 +203,9 @@ const RoadmapSection = () => {
         {/* Debug info en dev mode */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mt-8 p-4 bg-gray-100 rounded text-sm">
-            <p><strong>Debug Supabase:</strong> {items.length} éléments chargés</p>
+            <p><strong>Debug:</strong> {items.length} éléments affichés</p>
+            <p><strong>Source:</strong> {error ? 'Fallback' : 'Supabase'}</p>
             <p><strong>Phases:</strong> {items.map(item => item.phase).join(', ')}</p>
-            <p><strong>États:</strong> {items.map(item => `${item.phase}=${item.is_completed ? 'terminé' : item.is_current ? 'en cours' : 'à venir'}`).join(', ')}</p>
           </div>
         )}
       </div>

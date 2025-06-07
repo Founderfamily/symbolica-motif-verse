@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users } from 'lucide-react';
-import { I18nText } from '@/components/ui/i18n-text';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface CommunityEmptyStateProps {
   filteredGroupsLength: number;
@@ -13,6 +13,8 @@ const CommunityEmptyState: React.FC<CommunityEmptyStateProps> = ({
   filteredGroupsLength, 
   loading 
 }) => {
+  const { t } = useTranslation();
+
   if (filteredGroupsLength > 0 || loading) return null;
 
   return (
@@ -20,12 +22,10 @@ const CommunityEmptyState: React.FC<CommunityEmptyStateProps> = ({
       <CardContent>
         <Users className="h-12 w-12 text-slate-400 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-slate-900 mb-2">
-          <I18nText translationKey="community.noGroups">No groups found</I18nText>
+          {t('community:noGroups', 'Aucun groupe trouvé')}
         </h3>
         <p className="text-slate-600">
-          <I18nText translationKey="community.noGroupsDescription">
-            Try adjusting your search or create a new group
-          </I18nText>
+          {t('community:noGroupsDescription', 'Essayez d\'ajuster votre recherche ou créez un nouveau groupe')}
         </p>
       </CardContent>
     </Card>

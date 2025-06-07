@@ -2,82 +2,28 @@
 {
   "title": "Hub Communautaire",
   "subtitle": "Rejoignez des groupes d'intérêt et connectez-vous avec d'autres chercheurs",
-  "description": "Rejoignez des groupes thématiques et connectez-vous avec d'autres chercheurs passionnés de symboles culturels",
-  "totalGroups": "Groupes Actifs",
-  "totalMembers": "Membres Total",
-  "totalDiscoveries": "Découvertes Partagées",
-  "allGroups": "Tous les Groupes",
+  "allGroups": "Tous les groupes",
   "popular": "Populaires",
-  "mostActive": "Plus Actifs",
+  "mostActive": "Plus actifs",
   "noGroups": "Aucun groupe trouvé",
   "noGroupsDescription": "Essayez d'ajuster votre recherche ou créez un nouveau groupe",
-  "createGroup": "Créer un Groupe",
-  "join": "Rejoindre",
-  "leave": "Quitter",
-  "joined": "Rejoint",
-  "members": "Membres",
-  "discoveries": "Découvertes",
-  "discussion": "Discussion",
-  "public": "Public",
-  "private": "Privé",
-  "groupNotFound": "Groupe introuvable",
-  "groupNotFoundDescription": "Le groupe que vous recherchez n'existe pas ou a été supprimé.",
-  "joinToSeeDiscussions": "Rejoignez pour voir les discussions",
-  "joinToParticipate": "Rejoignez ce groupe pour participer aux discussions et voir les posts des autres membres",
-  "sharedDiscoveries": "Découvertes Partagées",
-  "discoveriesComingSoon": "La fonctionnalité de partage de découvertes arrive bientôt",
-  "writePost": "Écrivez un post...",
-  "post": "Publier",
-  "like": "J'aime",
-  "comment": "Commenter",
-  "share": "Partager",
-  "loginRequired": "Veuillez vous connecter pour rejoindre des groupes et participer aux discussions",
-  "authenticationRequired": "Authentification Requise",
   "stats": {
     "members": "membres",
     "discoveries": "découvertes",
     "join": "Rejoindre"
   },
-  "groups": {
-    "artDeco": {
-      "name": "Art Décoratif",
-      "culture": "Art Déco"
-    },
-    "celticSymbolism": {
-      "name": "Symbolisme Celtique", 
-      "culture": "Celtique"
-    },
-    "japanesePatterns": {
-      "name": "Motifs Japonais",
-      "culture": "Japonaise"
-    },
-    "islamicArt": {
-      "name": "Art Islamique",
-      "culture": "Islamique"
-    }
-  },
   "features": {
     "thematicCommunities": {
-      "title": "Communautés Thématiques",
-      "description": "Rejoignez des groupes spécialisés par culture, époque ou type de symbole"
+      "title": "Communautés thématiques",
+      "description": "Rejoignez des groupes spécialisés axés sur des traditions culturelles et des types de symboles spécifiques"
     },
     "personalSpace": {
-      "title": "Espace Personnel",
-      "description": "Créez votre collection privée et partagez vos découvertes"
+      "title": "Espace personnel",
+      "description": "Créez et gérez vos propres collections, partagez vos découvertes avec la communauté"
     },
     "intuitiveNavigation": {
-      "title": "Navigation Intuitive",
-      "description": "Explorez facilement les symboles par région, culture ou signification"
+      "title": "Navigation intuitive",
+      "description": "Explorez les symboles par région, période ou signification culturelle avec nos outils interactifs"
     }
-  },
-  "errors": {
-    "joinGroupError": "Impossible de rejoindre le groupe. Veuillez réessayer.",
-    "leaveGroupError": "Impossible de quitter le groupe. Veuillez réessayer.",
-    "createPostError": "Impossible de créer le post. Veuillez réessayer.",
-    "likePostError": "Impossible d'aimer le post. Veuillez réessayer.",
-    "loadGroupError": "Impossible de charger les informations du groupe.",
-    "loadPostsError": "Impossible de charger les discussions.",
-    "loadMembersError": "Impossible de charger les membres du groupe.",
-    "authenticationRequired": "Vous devez être connecté pour effectuer cette action."
   }
 }

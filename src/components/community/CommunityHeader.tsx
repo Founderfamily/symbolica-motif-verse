@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { I18nText } from '@/components/ui/i18n-text';
+import { useTranslation } from '@/i18n/useTranslation';
 import CreateGroupDialog from './CreateGroupDialog';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -9,6 +9,7 @@ interface CommunityHeaderProps {
 }
 
 const CommunityHeader: React.FC<CommunityHeaderProps> = ({ onGroupCreated }) => {
+  const { t } = useTranslation();
   const auth = useAuth();
 
   return (
@@ -16,12 +17,10 @@ const CommunityHeader: React.FC<CommunityHeaderProps> = ({ onGroupCreated }) => 
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-3xl font-bold">
-            <I18nText translationKey="community.title">Community Hub</I18nText>
+            {t('community:title', 'Hub Communautaire')}
           </h1>
           <p className="text-slate-600 mt-1">
-            <I18nText translationKey="community.subtitle">
-              Join interest groups and connect with fellow researchers
-            </I18nText>
+            {t('community:subtitle', 'Rejoignez des groupes d\'intérêt et connectez-vous avec d\'autres chercheurs')}
           </p>
         </div>
         {auth?.user && (

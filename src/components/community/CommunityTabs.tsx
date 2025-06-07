@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { I18nText } from '@/components/ui/i18n-text';
+import { useTranslation } from '@/i18n/useTranslation';
 import { InterestGroup } from '@/types/interest-groups';
 import InterestGroupCard from './InterestGroupCard';
 
@@ -19,6 +19,8 @@ const CommunityTabs: React.FC<CommunityTabsProps> = ({
   activeTab, 
   onTabChange 
 }) => {
+  const { t } = useTranslation();
+  
   const popularGroups = [...groups].sort((a, b) => b.members_count - a.members_count);
   const activeGroups = [...groups].sort((a, b) => b.discoveries_count - a.discoveries_count);
 
@@ -52,13 +54,13 @@ const CommunityTabs: React.FC<CommunityTabsProps> = ({
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="all">
-          <I18nText translationKey="community.allGroups">All Groups</I18nText>
+          {t('community:allGroups', 'Tous les groupes')}
         </TabsTrigger>
         <TabsTrigger value="popular">
-          <I18nText translationKey="community.popular">Popular</I18nText>
+          {t('community:popular', 'Populaires')}
         </TabsTrigger>
         <TabsTrigger value="active">
-          <I18nText translationKey="community.mostActive">Most Active</I18nText>
+          {t('community:mostActive', 'Plus actifs')}
         </TabsTrigger>
       </TabsList>
 

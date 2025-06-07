@@ -20,29 +20,33 @@ import enNavigation from './locales/en/navigation.json';
 import frNavigation from './locales/fr/navigation.json';
 import enSearch from './locales/en/search.json';
 import frSearch from './locales/fr/search.json';
+import enRoadmap from './locales/en/roadmap.json';
+import frRoadmap from './locales/fr/roadmap.json';
+import enCommunity from './locales/en/community.json';
+import frCommunity from './locales/fr/community.json';
 
 const resources = {
   en: {
-    translation: {
-      ...enTranslations,
-      auth: enAuth,
-      admin: enAdmin,
-      header: enHeader,
-      profile: enProfile,
-      navigation: enNavigation,
-      search: enSearch
-    }
+    translation: enTranslations,
+    auth: enAuth,
+    admin: enAdmin,
+    header: enHeader,
+    profile: enProfile,
+    navigation: enNavigation,
+    search: enSearch,
+    roadmap: enRoadmap,
+    community: enCommunity
   },
   fr: {
-    translation: {
-      ...frTranslations,
-      auth: frAuth,
-      admin: frAdmin,
-      header: frHeader,
-      profile: frProfile,
-      navigation: frNavigation,
-      search: frSearch
-    }
+    translation: frTranslations,
+    auth: frAuth,
+    admin: frAdmin,
+    header: frHeader,
+    profile: frProfile,
+    navigation: frNavigation,
+    search: frSearch,
+    roadmap: frRoadmap,
+    community: frCommunity
   }
 };
 

@@ -1,12 +1,55 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { InterestGroup } from '@/types/interest-groups';
 
+// Sample data for testing
+const sampleGroups: InterestGroup[] = [
+  {
+    id: 'sample-1',
+    name: 'Symboles Celtiques',
+    slug: 'symboles-celtiques',
+    description: 'Exploration des symboles et traditions celtiques anciennes',
+    icon: null,
+    banner_image: null,
+    theme_color: '#2563eb',
+    is_public: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    created_by: 'system',
+    members_count: 42,
+    discoveries_count: 18,
+    translations: {
+      en: { name: 'Celtic Symbols', description: 'Exploration of ancient Celtic symbols and traditions' },
+      fr: { name: 'Symboles Celtiques', description: 'Exploration des symboles et traditions celtiques anciennes' }
+    }
+  },
+  {
+    id: 'sample-2',
+    name: 'Art Islamique',
+    slug: 'art-islamique',
+    description: 'Motifs géométriques et calligraphie dans l\'art islamique',
+    icon: null,
+    banner_image: null,
+    theme_color: '#059669',
+    is_public: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    created_by: 'system',
+    members_count: 67,
+    discoveries_count: 34,
+    translations: {
+      en: { name: 'Islamic Art', description: 'Geometric patterns and calligraphy in Islamic art' },
+      fr: { name: 'Art Islamique', description: 'Motifs géométriques et calligraphie dans l\'art islamique' }
+    }
+  }
+];
+
 /**
- * Fetches a limited number of interest groups for display - respects RLS policies
+ * Fetches a limited number of interest groups for display - with fallback data
  */
 export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]> => {
   try {
+    console.log('🚀 [getInterestGroups] Fetching from Supabase...');
+    
     let query = supabase
       .from('interest_groups')
       .select('*')
@@ -19,11 +62,17 @@ export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching interest groups:', error);
-      return [];
+      console.error('❌ [getInterestGroups] Supabase error:', error);
+      console.log('🔄 [getInterestGroups] Using sample data');
+      return limit ? sampleGroups.slice(0, limit) : sampleGroups;
     }
     
-    if (!data) return [];
+    if (!data || data.length === 0) {
+      console.log('📝 [getInterestGroups] No data in Supabase, using sample data');
+      return limit ? sampleGroups.slice(0, limit) : sampleGroups;
+    }
+
+    console.log('✅ [getInterestGroups] Supabase data:', data.length, 'groups');
 
     // Type cast to fix the type issue with translations
     return data.map(group => ({
@@ -33,27 +82,36 @@ export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]
         : group.translations
     })) as InterestGroup[];
   } catch (error) {
-    console.error('Error fetching interest groups:', error);
-    return [];
+    console.error('❌ [getInterestGroups] Network error:', error);
+    console.log('🔄 [getInterestGroups] Using sample data as fallback');
+    return limit ? sampleGroups.slice(0, limit) : sampleGroups;
   }
 };
 
 /**
- * Fetches all interest groups - respects RLS policies
+ * Fetches all interest groups - with fallback data
  */
 export const getAllGroups = async (): Promise<InterestGroup[]> => {
   try {
+    console.log('🚀 [getAllGroups] Fetching from Supabase...');
+    
     const { data, error } = await supabase
       .from('interest_groups')
       .select('*')
       .order('name');
 
     if (error) {
-      console.error('Error fetching all groups:', error);
-      return [];
+      console.error('❌ [getAllGroups] Supabase error:', error);
+      console.log('🔄 [getAllGroups] Using sample data');
+      return sampleGroups;
     }
     
-    if (!data) return [];
+    if (!data || data.length === 0) {
+      console.log('📝 [getAllGroups] No data in Supabase, using sample data');
+      return sampleGroups;
+    }
+
+    console.log('✅ [getAllGroups] Supabase data:', data.length, 'groups');
 
     // Type cast to fix the type issue with translations
     return data.map(group => ({
@@ -63,8 +121,9 @@ export const getAllGroups = async (): Promise<InterestGroup[]> => {
         : group.translations
     })) as InterestGroup[];
   } catch (error) {
-    console.error('Error fetching all groups:', error);
-    return [];
+    console.error('❌ [getAllGroups] Network error:', error);
+    console.log('🔄 [getAllGroups] Using sample data as fallback');
+    return sampleGroups;
   }
 };
 

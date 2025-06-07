@@ -2,82 +2,28 @@
 {
   "title": "Community Hub",
   "subtitle": "Join interest groups and connect with fellow researchers",
-  "description": "Connect with people passionate about cultural symbols and heritage from around the world.",
-  "totalGroups": "Active Groups",
-  "totalMembers": "Total Members",
-  "totalDiscoveries": "Discoveries Shared",
   "allGroups": "All Groups",
   "popular": "Popular",
   "mostActive": "Most Active",
   "noGroups": "No groups found",
   "noGroupsDescription": "Try adjusting your search or create a new group",
-  "createGroup": "Create Group",
-  "join": "Join",
-  "leave": "Leave",
-  "joined": "Joined",
-  "members": "Members",
-  "discoveries": "Discoveries",
-  "discussion": "Discussion",
-  "public": "Public",
-  "private": "Private",
-  "groupNotFound": "Group not found",
-  "groupNotFoundDescription": "The group you're looking for doesn't exist or has been removed.",
-  "joinToSeeDiscussions": "Join to see discussions",
-  "joinToParticipate": "Join this group to participate in discussions and see posts from other members",
-  "sharedDiscoveries": "Shared Discoveries",
-  "discoveriesComingSoon": "Discoveries sharing functionality coming soon",
-  "writePost": "Write a post...",
-  "post": "Post",
-  "like": "Like",
-  "comment": "Comment",
-  "share": "Share",
-  "loginRequired": "Please log in to join groups and participate in discussions",
-  "authenticationRequired": "Authentication Required",
   "stats": {
     "members": "members",
     "discoveries": "discoveries",
     "join": "Join"
   },
-  "groups": {
-    "artDeco": {
-      "name": "Art Deco Patterns",
-      "culture": "Global"
-    },
-    "celticSymbolism": {
-      "name": "Celtic Symbolism",
-      "culture": "Celtic"
-    },
-    "japanesePatterns": {
-      "name": "Japanese Patterns",
-      "culture": "Japanese"
-    },
-    "islamicArt": {
-      "name": "Islamic Art Patterns",
-      "culture": "Islamic"
-    }
-  },
   "features": {
     "thematicCommunities": {
       "title": "Thematic Communities",
-      "description": "Join specialized communities focused on particular symbol traditions, regions, or time periods."
+      "description": "Join specialized groups focused on specific cultural traditions and symbol types"
     },
     "personalSpace": {
-      "title": "Personal Collections",
-      "description": "Build and organize your own library of symbolic patterns that resonate with you."
+      "title": "Personal Space",
+      "description": "Create and manage your own collections, share discoveries with the community"
     },
     "intuitiveNavigation": {
-      "title": "Advanced Discovery",
-      "description": "Explore connections between symbols across cultures and time periods with our intuitive navigation."
+      "title": "Intuitive Navigation",
+      "description": "Explore symbols by region, period, or cultural significance with our interactive tools"
     }
-  },
-  "errors": {
-    "joinGroupError": "Unable to join group. Please try again.",
-    "leaveGroupError": "Unable to leave group. Please try again.",
-    "createPostError": "Unable to create post. Please try again.",
-    "likePostError": "Unable to like post. Please try again.",
-    "loadGroupError": "Unable to load group information.",
-    "loadPostsError": "Unable to load discussions.",
-    "loadMembersError": "Unable to load group members.",
-    "authenticationRequired": "You must be logged in to perform this action."
   }
 }
