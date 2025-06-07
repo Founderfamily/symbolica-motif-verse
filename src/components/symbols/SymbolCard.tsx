@@ -1,6 +1,7 @@
 
 // src/components/symbols/SymbolCard.tsx
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Symbol } from '@/data/symbols';
 import { culturalGradient } from '@/lib/utils';
@@ -26,9 +27,10 @@ const symbolToLocalImage: Record<string, string> = {
 
 interface SymbolCardProps {
   motif: Symbol;
+  index: number; // Ajouter l'index pour l'utiliser comme ID
 }
 
-const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
+const SymbolCard: React.FC<SymbolCardProps> = ({ motif, index }) => {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
@@ -77,52 +79,53 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif }) => {
   const isLocalImage = imageSource.startsWith('/');
 
   return (
-    <div 
-      className={`rounded-lg overflow-hidden shadow-md hover:shadow-xl border-2 border-white transition-all duration-300 symbol-card ${culturalGradient(motif.culture)}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <AspectRatio ratio={1} className="w-full bg-slate-50 relative overflow-hidden">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10 bg-slate-100/50 backdrop-blur-sm">
-            <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
-          </div>
-        )}
-        {error && !useFallback && (
-          <div className="absolute top-2 right-2 z-20">
-            <div className="bg-red-100 text-red-600 p-1 rounded-full">
-              <AlertCircle className="w-4 h-4" />
+    <Link to={`/symbols/${index}`} className="block">
+      <div 
+        className={`rounded-lg overflow-hidden shadow-md hover:shadow-xl border-2 border-white transition-all duration-300 symbol-card ${culturalGradient(motif.culture)}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <AspectRatio ratio={1} className="w-full bg-slate-50 relative overflow-hidden">
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center z-10 bg-slate-100/50 backdrop-blur-sm">
+              <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
             </div>
-          </div>
-        )}
-        <img
-          src={imageSource}
-          alt={motif.name}
-          className={`object-cover w-full h-full transition-all duration-500 ${loading ? 'opacity-0' : 'opacity-100'} ${isHovered ? 'scale-110' : 'scale-100'}`}
-          onError={handleImageError}
-          onLoad={handleImageLoad}
-          crossOrigin={isLocalImage ? "" : "anonymous"} // N'utiliser crossOrigin que pour les images distantes
-        />
-        {isHovered && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3 transition-opacity duration-300">
-            <span className="text-white text-xs font-medium">
-              {motif.period}
-            </span>
-          </div>
-        )}
-      </AspectRatio>
-      <div className="p-3 bg-white/90 backdrop-blur-sm relative">
-        <h4 className="text-sm font-serif text-slate-900 font-medium">{motif.name}</h4>
-        <div className="flex justify-between items-center mt-1">
-          <span className="text-xs text-slate-600">{motif.culture}</span>
-          <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 cursor-pointer hover:bg-amber-200 transition-colors">
-            <Info className="w-3 h-3" />
+          )}
+          {error && !useFallback && (
+            <div className="absolute top-2 right-2 z-20">
+              <div className="bg-red-100 text-red-600 p-1 rounded-full">
+                <AlertCircle className="w-4 h-4" />
+              </div>
+            </div>
+          )}
+          <img
+            src={imageSource}
+            alt={motif.name}
+            className={`object-cover w-full h-full transition-all duration-500 ${loading ? 'opacity-0' : 'opacity-100'} ${isHovered ? 'scale-110' : 'scale-100'}`}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            crossOrigin={isLocalImage ? "" : "anonymous"} // N'utiliser crossOrigin que pour les images distantes
+          />
+          {isHovered && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3 transition-opacity duration-300">
+              <span className="text-white text-xs font-medium">
+                {motif.period}
+              </span>
+            </div>
+          )}
+        </AspectRatio>
+        <div className="p-3 bg-white/90 backdrop-blur-sm relative">
+          <h4 className="text-sm font-serif text-slate-900 font-medium">{motif.name}</h4>
+          <div className="flex justify-between items-center mt-1">
+            <span className="text-xs text-slate-600">{motif.culture}</span>
+            <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 cursor-pointer hover:bg-amber-200 transition-colors">
+              <Info className="w-3 h-3" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
 export default SymbolCard;
-

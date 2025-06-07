@@ -7,6 +7,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 import Layout from '@/components/layout/Layout';
 import HomePage from '@/pages/HomePage';
 import SymbolsPage from '@/pages/SymbolsPage';
+import SymbolDetailPage from '@/pages/SymbolDetailPage';
 import CollectionsPage from '@/pages/CollectionsPage';
 import CommunityPage from '@/pages/CommunityPage';
 import TrendingPage from '@/pages/TrendingPage';
@@ -66,6 +67,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/symbols" element={<SymbolsPage />} />
+                <Route path="/symbols/:id" element={<SymbolDetailPage />} />
                 <Route path="/collections" element={<CollectionsPage />} />
                 <Route path="/collection/:id" element={<LazyCollectionDetailPage />} />
                 <Route path="/community" element={<CommunityPage />} />

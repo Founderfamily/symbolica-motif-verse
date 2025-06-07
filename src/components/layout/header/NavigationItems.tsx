@@ -5,11 +5,18 @@ import { Users } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ReactElement;
+  badge?: string;
+}
+
 export const NavigationItems: React.FC = () => {
   const auth = useAuth();
 
   // Menus de base accessibles à tous
-  const baseNavigationItems = [
+  const baseNavigationItems: NavigationItem[] = [
     { 
       name: 'Symbols', 
       href: '/symbols',
@@ -29,7 +36,7 @@ export const NavigationItems: React.FC = () => {
   ];
 
   // Menus supplémentaires pour les utilisateurs connectés
-  const userNavigationItems = auth?.user ? [
+  const userNavigationItems: NavigationItem[] = auth?.user ? [
     { 
       name: 'Map', 
       href: '/map',

@@ -12,6 +12,8 @@
   "period": "Period",
   "meaning": "Meaning",
   "origin": "Origin",
+  "notFound": "Symbol not found",
+  "notFoundDesc": "The symbol you are looking for does not exist.",
   "page": {
     "title": "All Symbols",
     "description": "Explore our complete collection of cultural symbols from around the world",
