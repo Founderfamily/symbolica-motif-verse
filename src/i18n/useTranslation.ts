@@ -25,15 +25,19 @@ export const useTranslation = () => {
     // Try translation with namespace first
     if (namespace) {
       const namespacedResult = originalT(translationKey, { ...options, ns: namespace });
-      if (namespacedResult !== translationKey && namespacedResult !== key) {
-        return namespacedResult;
+      // Ensure we return a string
+      const resultStr = typeof namespacedResult === 'string' ? namespacedResult : String(namespacedResult);
+      if (resultStr !== translationKey && resultStr !== key) {
+        return resultStr;
       }
     }
     
     // Fallback to original key without namespace
     const directResult = originalT(key, options);
-    if (directResult !== key) {
-      return directResult;
+    // Ensure we return a string
+    const directResultStr = typeof directResult === 'string' ? directResult : String(directResult);
+    if (directResultStr !== key) {
+      return directResultStr;
     }
     
     // If still no translation found, provide readable fallback
