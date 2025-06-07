@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
@@ -20,6 +21,7 @@ import PrivacyPage from '@/pages/PrivacyPage';
 import TermsPage from '@/pages/TermsPage';
 import ContactPage from '@/pages/ContactPage';
 import EnterprisePage from '@/pages/EnterprisePage';
+import MCPSearchPage from '@/pages/MCPSearchPage';
 import Dashboard from '@/pages/Admin/Dashboard';
 import UsersManagement from '@/pages/Admin/UsersManagement';
 import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
@@ -73,6 +75,7 @@ function App() {
                 <Route path="/profile/:username" element={<Profile />} />
                 <Route path="/map" element={<MapExplorer />} />
                 <Route path="/analysis" element={<AnalysisPage />} />
+                <Route path="/mcp-search" element={<MCPSearchPage />} />
                 <Route path="/contributions" element={<ContributionsPage />} />
                 <Route path="/contribute" element={<NewContribution />} />
                 <Route path="/legal" element={<LegalPage />} />

@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NavigationItems } from './header/NavigationItems';
+import { ToolsDropdown } from './header/ToolsDropdown';
 import { SearchBar } from './header/SearchBar';
 import { UserMenu } from './header/UserMenu';
 import { AuthButtons } from './header/AuthButtons';
@@ -33,6 +34,9 @@ const Header: React.FC = () => {
             
             {/* Main Navigation */}
             <NavigationItems />
+
+            {/* Tools Dropdown - Admin Only */}
+            <ToolsDropdown />
           </div>
 
           {/* Search, Notifications, Language Selector, and User Menu */}
