@@ -35,9 +35,11 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     "Symbole Adinkra": "/images/symbols/adinkra.png",
     "Motif Seigaiha": "/images/symbols/seigaiha.png",
     "Yin Yang": "/images/symbols/mandala.png",
+    "Yin et Yang": "/images/symbols/mandala.png",
     "Ankh": "/images/symbols/adinkra.png",
     "Hamsa": "/images/symbols/mandala.png",
     "Attrape-rêves": "/images/symbols/triskelion.png",
+    "Dreamcatcher": "/images/symbols/triskelion.png",
   }), []);
   
   // Déterminer la source d'image avec fallbacks
@@ -79,21 +81,58 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     return cultures[symbol.culture] || "hover:bg-gradient-to-br from-slate-50 to-slate-100 hover:border-slate-200";
   }, [symbol.culture]);
 
-  // Fonction pour générer le lien de navigation cohérent
+  // Fonction améliorée pour générer le lien de navigation cohérent
   const getSymbolLink = () => {
-    // Essayer de trouver le symbole dans les données statiques par nom
-    const staticSymbolIndex = SYMBOLS.findIndex(s => 
-      s.name.toLowerCase() === symbol.name.toLowerCase() ||
-      s.name.toLowerCase().includes(symbol.name.toLowerCase()) ||
-      symbol.name.toLowerCase().includes(s.name.toLowerCase())
-    );
+    // Créer une fonction de correspondance plus robuste
+    const findBestMatch = (searchName: string) => {
+      const normalizedSearch = searchName.toLowerCase().trim();
+      
+      // Recherche exacte d'abord
+      let bestMatchIndex = SYMBOLS.findIndex(s => 
+        s.name.toLowerCase() === normalizedSearch
+      );
+      
+      if (bestMatchIndex >= 0) {
+        return bestMatchIndex;
+      }
+      
+      // Recherche par correspondance partielle
+      bestMatchIndex = SYMBOLS.findIndex(s => {
+        const symbolName = s.name.toLowerCase();
+        return symbolName.includes(normalizedSearch) || normalizedSearch.includes(symbolName);
+      });
+      
+      if (bestMatchIndex >= 0) {
+        return bestMatchIndex;
+      }
+      
+      // Recherche avec variations de noms
+      const variations = [
+        normalizedSearch.replace(/[éèê]/g, 'e').replace(/[àâ]/g, 'a').replace(/[ç]/g, 'c'),
+        normalizedSearch.replace(/\s+/g, '-'),
+        normalizedSearch.replace(/-/g, ' '),
+      ];
+      
+      for (const variation of variations) {
+        bestMatchIndex = SYMBOLS.findIndex(s => 
+          s.name.toLowerCase().includes(variation) || variation.includes(s.name.toLowerCase())
+        );
+        if (bestMatchIndex >= 0) {
+          return bestMatchIndex;
+        }
+      }
+      
+      return -1;
+    };
+
+    const staticSymbolIndex = findBestMatch(symbol.name);
 
     if (staticSymbolIndex >= 0) {
       console.log(`SymbolCard (search): Symbole "${symbol.name}" trouvé dans les données statiques à l'index ${staticSymbolIndex}`);
       return `/symbols/${staticSymbolIndex}`;
     }
 
-    // Sinon utiliser l'UUID
+    // Sinon utiliser l'UUID en dernier recours
     console.log(`SymbolCard (search): Symbole "${symbol.name}" non trouvé dans les données statiques, utilisation de l'UUID ${symbol.id}`);
     return `/symbols/${symbol.id}`;
   };

@@ -78,10 +78,13 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif, index }) => {
   // Déterminer si l'image est locale ou distante
   const isLocalImage = imageSource.startsWith('/');
 
-  console.log(`SymbolCard: ${motif.name} - Index utilisé pour le lien: ${index}`);
+  // Générer un lien cohérent utilisant toujours l'index numérique pour les symboles statiques
+  const symbolLink = `/symbols/${index}`;
+
+  console.log(`SymbolCard: ${motif.name} - Index utilisé pour le lien: ${index}, URL: ${symbolLink}`);
 
   return (
-    <Link to={`/symbols/${index}`} className="block">
+    <Link to={symbolLink} className="block">
       <div 
         className={`rounded-lg overflow-hidden shadow-md hover:shadow-xl border-2 border-white transition-all duration-300 symbol-card ${culturalGradient(motif.culture)}`}
         onMouseEnter={() => setIsHovered(true)}
