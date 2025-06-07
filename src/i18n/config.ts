@@ -3,9 +3,11 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-// Import all translation files
-import enApp from './locales/en/app.json';
-import frApp from './locales/fr/app.json';
+// Import main translation files
+import enTranslations from './locales/en/app.json';
+import frTranslations from './locales/fr.json';
+
+// Import namespace-specific translations
 import enAuth from './locales/en/auth.json';
 import frAuth from './locales/fr/auth.json';
 import enAdmin from './locales/en/admin.json';
@@ -22,7 +24,7 @@ import frSearch from './locales/fr/search.json';
 const resources = {
   en: {
     translation: {
-      ...enApp,
+      ...enTranslations,
       auth: enAuth,
       admin: enAdmin,
       header: enHeader,
@@ -33,7 +35,7 @@ const resources = {
   },
   fr: {
     translation: {
-      ...frApp,
+      ...frTranslations,
       auth: frAuth,
       admin: frAdmin,
       header: frHeader,
