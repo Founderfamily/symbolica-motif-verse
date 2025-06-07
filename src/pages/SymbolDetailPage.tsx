@@ -12,9 +12,16 @@ const SymbolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Trouver le symbole par index (utilisant l'index comme ID pour simplifier)
+  // Parser l'ID et trouver le symbole par index
   const symbolIndex = id ? parseInt(id, 10) : -1;
   const symbol = symbolIndex >= 0 && symbolIndex < SYMBOLS.length ? SYMBOLS[symbolIndex] : null;
+
+  console.log(`SymbolDetailPage: ID reçu: ${id}, Index parsé: ${symbolIndex}, Symbole trouvé: ${symbol?.name || 'Non trouvé'}`);
+
+  // Vérifier si l'ID est un nombre valide
+  if (id && isNaN(symbolIndex)) {
+    console.error(`ID invalide: "${id}" n'est pas un nombre`);
+  }
 
   if (!symbol) {
     return (
@@ -114,6 +121,11 @@ const SymbolDetailPage: React.FC = () => {
                   <p className="text-slate-900">
                     {symbol.isExternal ? 'Image externe' : 'Image locale'}
                   </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Index du symbole</label>
+                  <p className="text-slate-900">#{symbolIndex}</p>
                 </div>
               </div>
             </Card>

@@ -1,4 +1,3 @@
-
 // src/components/symbols/SymbolCard.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -27,7 +26,7 @@ const symbolToLocalImage: Record<string, string> = {
 
 interface SymbolCardProps {
   motif: Symbol;
-  index: number; // Ajouter l'index pour l'utiliser comme ID
+  index: number;
 }
 
 const SymbolCard: React.FC<SymbolCardProps> = ({ motif, index }) => {
@@ -77,6 +76,8 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif, index }) => {
       
   // Déterminer si l'image est locale ou distante
   const isLocalImage = imageSource.startsWith('/');
+
+  console.log(`SymbolCard: ${motif.name} - Index utilisé pour le lien: ${index}`);
 
   return (
     <Link to={`/symbols/${index}`} className="block">
