@@ -32,7 +32,23 @@
     "members": "Community Members",
     "groups": "Interest Groups", 
     "discussions": "Active Discussions",
-    "contributions": "Monthly Contributions"
+    "contributions": "Monthly Contributions",
+    "discoveries": "Discoveries",
+    "join": "Join"
+  },
+  "features": {
+    "thematicCommunities": {
+      "title": "Thematic Communities",
+      "description": "Join specialized groups based on your cultural and heritage interests"
+    },
+    "personalSpace": {
+      "title": "Personal Space",
+      "description": "Create your own symbol collection and share your discoveries with the community"
+    },
+    "intuitiveNavigation": {
+      "title": "Intuitive Navigation",
+      "description": "Easily explore symbols through our advanced search interface and intelligent filters"
+    }
   },
   "createGroup": {
     "title": "Create New Interest Group",

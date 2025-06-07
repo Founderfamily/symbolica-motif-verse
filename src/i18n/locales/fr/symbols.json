@@ -12,6 +12,16 @@
   "period": "Période",
   "meaning": "Signification",
   "origin": "Origine",
+  "page": {
+    "title": "Tous les Symboles",
+    "description": "Explorez notre collection complète de symboles culturels du monde entier",
+    "filters": "Filtres",
+    "searchPlaceholder": "Rechercher des symboles...",
+    "clearFilters": "Tout effacer",
+    "activeFilters": "Filtres actifs",
+    "noFilters": "Aucun filtre actif",
+    "resultsCount": "{{count}} symboles trouvés"
+  },
   "stats": {
     "totalSymbols": "Symboles documentés",
     "cultures": "Cultures représentées",

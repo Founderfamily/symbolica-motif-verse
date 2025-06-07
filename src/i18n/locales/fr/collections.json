@@ -1,49 +1,47 @@
 
 {
-  "collections": {
-    "title": "Collections",
-    "featured": {
-      "title": "Collections en Vedette",
-      "description": "Explorez des parcours thématiques à travers les symboles du monde entier"
-    },
-    "allCollections": "Toutes les Collections",
-    "create": "Créer une Collection",
-    "browse": "Parcourir les Collections",
-    "myCollections": "Mes Collections",
-    "explore": "Explorer",
-    "symbols": "symboles",
-    "themes": "Thèmes",
-    "loading": "Chargement des collections...",
-    "noCollections": "Aucune collection disponible",
-    "noCollectionsMessage": "Les collections seront bientôt disponibles. Revenez plus tard !",
-    "featuredBadge": "En vedette",
-    "discoverMore": "Découvrez plus de collections",
-    "discoverMoreDescription": "De nouvelles collections thématiques sont ajoutées régulièrement",
-    "exploreSymbols": "Explorer les Symboles",
-    "noResults": "Aucune collection trouvée",
-    "noResultsMessage": "Essayez de modifier vos critères de recherche ou de filtrage.",
-    "results": "résultat(s)",
-    "activeFilters": "filtre(s) actif(s)",
-    "sort": {
-      "featuredFirst": "Vedettes d'abord",
-      "nameAsc": "Nom A-Z",
-      "nameDesc": "Nom Z-A",
-      "dateDesc": "Plus récent",
-      "dateAsc": "Plus ancien"
-    },
-    "filters": {
-      "allCategories": "Toutes",
-      "allStatus": "Toutes",
-      "featured": "Vedettes",
-      "regular": "Régulières",
-      "reset": "Réinitialiser"
-    },
-    "heroStats": {
-      "cultures": "Cultures du Monde",
-      "periods": "Époques Historiques", 
-      "mythologies": "Mythologies",
-      "art": "Art Symbolique"
-    }
+  "title": "Collections",
+  "featured": {
+    "title": "Collections en Vedette",
+    "description": "Explorez des parcours thématiques à travers les symboles du monde entier"
+  },
+  "allCollections": "Toutes les Collections",
+  "create": "Créer une Collection",
+  "browse": "Parcourir les Collections",
+  "myCollections": "Mes Collections",
+  "explore": "Explorer",
+  "symbols": "symboles",
+  "themes": "Thèmes",
+  "loading": "Chargement des collections...",
+  "noCollections": "Aucune collection disponible",
+  "noCollectionsMessage": "Les collections seront bientôt disponibles. Revenez plus tard !",
+  "featuredBadge": "En vedette",
+  "discoverMore": "Découvrez plus de collections",
+  "discoverMoreDescription": "De nouvelles collections thématiques sont ajoutées régulièrement",
+  "exploreSymbols": "Explorer les Symboles",
+  "noResults": "Aucune collection trouvée",
+  "noResultsMessage": "Essayez de modifier vos critères de recherche ou de filtrage.",
+  "results": "résultat(s)",
+  "activeFilters": "filtre(s) actif(s)",
+  "sort": {
+    "featuredFirst": "Vedettes d'abord",
+    "nameAsc": "Nom A-Z",
+    "nameDesc": "Nom Z-A",
+    "dateDesc": "Plus récent",
+    "dateAsc": "Plus ancien"
+  },
+  "filters": {
+    "allCategories": "Toutes",
+    "allStatus": "Toutes",
+    "featured": "Vedettes",
+    "regular": "Régulières",
+    "reset": "Réinitialiser"
+  },
+  "heroStats": {
+    "cultures": "Cultures du Monde",
+    "periods": "Époques Historiques", 
+    "mythologies": "Mythologies",
+    "art": "Art Symbolique"
   },
   "categories": {
     "cultures": "Cultures",

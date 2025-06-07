@@ -1,15 +1,44 @@
 
 {
-  "symbols": {
-    "title": "Symbols",
-    "explore": "Explore",
-    "search": "Search symbols...",
-    "filter": "Filter",
-    "noResults": "No symbols found",
-    "loadMore": "Load more",
-    "culture": "Culture",
-    "period": "Period",
+  "title": "Symbols",
+  "subtitle": "Explore our collection of cultural symbols from around the world",
+  "description": "Discover the richness of global symbolic heritage through our collaborative collection",
+  "explore": "Explore",
+  "search": "Search symbols...",
+  "filter": "Filter",
+  "noResults": "No symbols found",
+  "loadMore": "Load more",
+  "culture": "Culture",
+  "period": "Period",
+  "meaning": "Meaning",
+  "origin": "Origin",
+  "page": {
+    "title": "All Symbols",
+    "description": "Explore our complete collection of cultural symbols from around the world",
+    "filters": "Filters",
+    "searchPlaceholder": "Search symbols...",
+    "clearFilters": "Clear all",
+    "activeFilters": "Active filters",
+    "noFilters": "No active filters",
+    "resultsCount": "{{count}} symbols found"
+  },
+  "stats": {
+    "totalSymbols": "Documented symbols",
+    "cultures": "Cultures represented",
+    "contributors": "Active contributors",
+    "countries": "Countries covered"
+  },
+  "categories": {
+    "all": "All",
+    "religious": "Religious",
+    "cultural": "Cultural",
+    "historical": "Historical",
+    "artistic": "Artistic"
+  },
+  "details": {
+    "information": "Information",
+    "history": "History",
     "meaning": "Meaning",
-    "origin": "Origin"
+    "variations": "Variations"
   }
 }
