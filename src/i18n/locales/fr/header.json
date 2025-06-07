@@ -12,7 +12,10 @@
     "auth": "Connexion",
     "profile": "Profil",
     "admin": "Administration",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "tools": "Outils",
+    "mcpSearch": "Recherche MCP",
+    "enterprise": "Entreprise"
   },
   "search": {
     "placeholder": "Rechercher...",

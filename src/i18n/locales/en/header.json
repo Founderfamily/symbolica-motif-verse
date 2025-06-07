@@ -12,7 +12,10 @@
     "auth": "Login",
     "profile": "Profile",
     "admin": "Admin",
-    "logout": "Logout"
+    "logout": "Logout",
+    "tools": "Tools",
+    "mcpSearch": "MCP Search",
+    "enterprise": "Enterprise"
   },
   "search": {
     "placeholder": "Search...",
