@@ -12,6 +12,7 @@ interface CommunityStatsProps {
 const CommunityStats: React.FC<CommunityStatsProps> = ({ groups }) => {
   const totalMembers = groups.reduce((sum, group) => sum + group.members_count, 0);
   const totalDiscoveries = groups.reduce((sum, group) => sum + group.discoveries_count, 0);
+  const totalGroups = groups.length;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -22,9 +23,9 @@ const CommunityStats: React.FC<CommunityStatsProps> = ({ groups }) => {
               <Users className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{groups.length}</p>
+              <p className="text-2xl font-bold">{totalGroups}</p>
               <p className="text-slate-600 text-sm">
-                <I18nText translationKey="community.totalGroups">Active Groups</I18nText>
+                <I18nText translationKey="community.stats.groups">Groupes d'Intérêt</I18nText>
               </p>
             </div>
           </div>
@@ -38,9 +39,9 @@ const CommunityStats: React.FC<CommunityStatsProps> = ({ groups }) => {
               <TrendingUp className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalMembers}</p>
+              <p className="text-2xl font-bold">{totalMembers.toLocaleString()}</p>
               <p className="text-slate-600 text-sm">
-                <I18nText translationKey="community.totalMembers">Total Members</I18nText>
+                <I18nText translationKey="community.stats.members">Membres de la Communauté</I18nText>
               </p>
             </div>
           </div>
@@ -54,9 +55,9 @@ const CommunityStats: React.FC<CommunityStatsProps> = ({ groups }) => {
               <Star className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalDiscoveries}</p>
+              <p className="text-2xl font-bold">{totalDiscoveries.toLocaleString()}</p>
               <p className="text-slate-600 text-sm">
-                <I18nText translationKey="community.totalDiscoveries">Discoveries Shared</I18nText>
+                <I18nText translationKey="community.stats.discoveries">Découvertes Partagées</I18nText>
               </p>
             </div>
           </div>
