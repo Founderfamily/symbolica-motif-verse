@@ -27,10 +27,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('AuthProvider - Initializing auth...');
     
-    // Get initial session
+    // Get initial session with timeout
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Auth timeout')), 3000)
+        );
+        
+        const sessionPromise = supabase.auth.getSession();
+        
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as any;
+        
         console.log('AuthProvider - Initial session:', { session: !!session, error });
         
         if (error) {
@@ -41,12 +52,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          // Fetch profile in background, don't block UI
+          fetchProfile(session.user.id).finally(() => setIsLoading(false));
         } else {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Auth initialization failed:', error);
+        console.error('Auth initialization timeout or failed:', error);
         setIsLoading(false);
       }
     };
@@ -59,7 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        // Don't block on profile fetch
+        fetchProfile(session.user.id);
       } else {
         setProfile(null);
         setIsLoading(false);
@@ -76,15 +89,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('AuthProvider - Fetching profile for user:', userId);
     
     try {
+      // Use maybeSingle to avoid errors when no profile exists
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching profile:', error);
-        // Créer un profil par défaut si aucun n'existe
+        // Create a minimal profile if none exists
         const defaultProfile: UserProfile = {
           id: userId,
           username: null,
@@ -104,8 +118,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
-    } finally {
-      setIsLoading(false);
     }
   };
 

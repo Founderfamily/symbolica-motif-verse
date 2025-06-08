@@ -1,7 +1,7 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import { useEffect } from 'react';
 import { AuthProvider } from '@/hooks/useAuth';
 import Layout from '@/components/layout/Layout';
 import HomePage from '@/pages/HomePage';
@@ -34,31 +34,21 @@ import SystemSettings from '@/pages/Admin/SystemSettings';
 import NotFound from '@/pages/NotFound';
 import ContributionConversionPage from '@/pages/Admin/ContributionConversionPage';
 
-import { initializationService } from '@/services/admin/initializationService';
-
+// Optimized QueryClient with reduced timeouts and retries
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,
-      retry: 1,
+      staleTime: 15 * 60 * 1000, // 15 minutes instead of 5
+      retry: 0, // No retries for faster startup
+      refetchOnWindowFocus: false, // Reduce unnecessary requests
+      gcTime: 30 * 60 * 1000, // 30 minutes cache time
     },
   },
 });
 
 function App() {
-  useEffect(() => {
-    // Initialiser les services automatiques au démarrage de l'app
-    const initializeServices = async () => {
-      try {
-        await initializationService.initializeAutoServices();
-        await initializationService.performInitialHealthCheck();
-      } catch (error) {
-        console.error('Erreur initialisation services:', error);
-      }
-    };
-
-    initializeServices();
-  }, []);
+  // Remove automatic initialization at startup
+  // Services will be initialized lazily when needed
 
   return (
     <QueryClientProvider client={queryClient}>
