@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface TrendingSymbol {
@@ -55,17 +56,17 @@ class TrendingService {
 
       console.log('📊 [TrendingService] Symbols query result:', result);
 
-      if (result.error) {
-        console.error('❌ [TrendingService] Error fetching symbols:', result.error);
+      if ((result as any).error) {
+        console.error('❌ [TrendingService] Error fetching symbols:', (result as any).error);
         return this.getFallbackSymbols();
       }
 
-      if (!result.data || result.data.length === 0) {
+      if (!(result as any).data || (result as any).data.length === 0) {
         console.log('⚠️ [TrendingService] No symbols found, using fallback');
         return this.getFallbackSymbols();
       }
 
-      const trendingSymbols: TrendingSymbol[] = result.data.map((symbol, index) => ({
+      const trendingSymbols: TrendingSymbol[] = (result as any).data.map((symbol: any, index: number) => ({
         id: symbol.id,
         name: symbol.name,
         culture: symbol.culture,
@@ -109,9 +110,9 @@ class TrendingService {
       ]);
 
       const stats: TrendingStats = {
-        symbolsCount: (results[0] as any).count || 20,
-        contributionsCount: (results[1] as any).count || 0,
-        collectionsCount: (results[2] as any).count || 48,
+        symbolsCount: (results as any)[0].count || 20,
+        contributionsCount: (results as any)[1].count || 0,
+        collectionsCount: (results as any)[2].count || 48,
         newToday: (newTodayResult as any).count || 0
       };
 
