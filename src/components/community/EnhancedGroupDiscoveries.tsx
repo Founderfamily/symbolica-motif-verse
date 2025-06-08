@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,8 @@ import { getGroupDiscoveries } from '@/services/communityService';
 import { likeDiscovery, getDiscoveryComments, createDiscoveryComment, likeDiscoveryComment } from '@/services/discoveryService';
 import { toast } from 'sonner';
 import ShareDiscoveryDialog from './ShareDiscoveryDialog';
+import EntityPreviewCard from './EntityPreviewCard';
+import GroupSearch, { SearchFilters } from './GroupSearch';
 
 interface EnhancedGroupDiscoveriesProps {
   groupId: string;
@@ -21,6 +22,7 @@ interface EnhancedGroupDiscoveriesProps {
 
 const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ groupId, isMember }) => {
   const [discoveries, setDiscoveries] = useState<GroupDiscovery[]>([]);
+  const [filteredDiscoveries, setFilteredDiscoveries] = useState<GroupDiscovery[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedDiscovery, setExpandedDiscovery] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, DiscoveryComment[]>>({});
@@ -28,11 +30,17 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({});
   const auth = useAuth();
 
   useEffect(() => {
     loadDiscoveries();
   }, [groupId, auth?.user]);
+
+  useEffect(() => {
+    filterDiscoveries();
+  }, [discoveries, searchQuery, searchFilters]);
 
   const loadDiscoveries = async () => {
     try {
@@ -44,6 +52,48 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterDiscoveries = () => {
+    let filtered = [...discoveries];
+
+    // Apply search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(discovery => 
+        discovery.title.toLowerCase().includes(query) ||
+        discovery.description?.toLowerCase().includes(query) ||
+        discovery.sharer_profile?.username?.toLowerCase().includes(query) ||
+        discovery.sharer_profile?.full_name?.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply entity type filter
+    if (searchFilters.entityType && searchFilters.entityType !== 'all') {
+      filtered = filtered.filter(discovery => discovery.entity_type === searchFilters.entityType);
+    }
+
+    // Apply time range filter
+    if (searchFilters.timeRange && searchFilters.timeRange !== 'all') {
+      const now = new Date();
+      const filterDate = new Date();
+      
+      switch (searchFilters.timeRange) {
+        case 'today':
+          filterDate.setHours(0, 0, 0, 0);
+          break;
+        case 'week':
+          filterDate.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+          filterDate.setMonth(now.getMonth() - 1);
+          break;
+      }
+      
+      filtered = filtered.filter(discovery => new Date(discovery.created_at) >= filterDate);
+    }
+
+    setFilteredDiscoveries(filtered);
   };
 
   const loadComments = async (discoveryId: string) => {
@@ -213,17 +263,9 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
     }
   };
 
-  const getEntityUrl = (discovery: GroupDiscovery) => {
-    switch (discovery.entity_type) {
-      case 'symbol':
-        return `/symbols/${discovery.entity_id}`;
-      case 'collection':
-        return `/collections/${discovery.entity_id}`;
-      case 'contribution':
-        return `/contributions/${discovery.entity_id}`;
-      default:
-        return '#';
-    }
+  const handleEntityNavigate = (entityType: string, entityId: string) => {
+    const url = `/${entityType}s/${entityId}`;
+    window.open(url, '_blank');
   };
 
   const CommentItem: React.FC<{ comment: DiscoveryComment; discoveryId: string; isReply?: boolean }> = ({ comment, discoveryId, isReply = false }) => (
@@ -362,9 +404,15 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
         )}
       </div>
 
+      {/* Search and Filters */}
+      <GroupSearch
+        onSearchChange={setSearchQuery}
+        onFilterChange={setSearchFilters}
+      />
+
       {/* Discoveries List */}
       <div className="space-y-4">
-        {discoveries.map((discovery) => (
+        {filteredDiscoveries.map((discovery) => (
           <Card key={discovery.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex space-x-3">
@@ -401,110 +449,79 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
                       {discovery.description}
                     </p>
                   )}
+
+                  {/* Entity Preview */}
+                  {discovery.entity_preview && (
+                    <div className="mb-4">
+                      <EntityPreviewCard
+                        entity={discovery.entity_preview}
+                        onNavigate={handleEntityNavigate}
+                      />
+                    </div>
+                  )}
                   
-                  {/* Discovery Actions */}
-                  <div className="flex items-center space-x-4 mb-3">
+                  {/* Actions */}
+                  <div className="flex items-center space-x-6 text-slate-500">
                     <Button 
                       variant="ghost" 
                       size="sm"
                       onClick={() => handleLikeDiscovery(discovery.id)}
-                      className={`text-slate-600 hover:text-red-600 ${discovery.is_liked ? 'text-red-600' : ''}`}
+                      className={`hover:text-red-600 ${discovery.is_liked ? 'text-red-600' : ''}`}
                     >
-                      <Heart className={`h-4 w-4 mr-1 ${discovery.is_liked ? 'fill-current' : ''}`} />
+                      <Heart className={`h-4 w-4 mr-2 ${discovery.is_liked ? 'fill-current' : ''}`} />
                       {discovery.likes_count}
                     </Button>
+                    
                     <Button 
                       variant="ghost" 
                       size="sm"
                       onClick={() => toggleDiscoveryExpansion(discovery.id)}
-                      className="text-slate-600"
+                      className="hover:text-blue-600"
                     >
-                      <MessageCircle className="h-4 w-4 mr-1" />
-                      {discovery.comments_count} comments
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      asChild
-                      className="text-slate-600"
-                    >
-                      <a href={getEntityUrl(discovery)} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        <I18nText translationKey="community.viewDetails">View Details</I18nText>
-                      </a>
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      {discovery.comments_count}
                     </Button>
                   </div>
 
                   {/* Comments Section */}
                   {expandedDiscovery === discovery.id && (
-                    <div className="border-t pt-4 space-y-4">
+                    <div className="mt-4 pt-4 border-t border-slate-200">
                       {/* New Comment Form */}
-                      {auth?.user && isMember && (
-                        <div className="space-y-3">
-                          <div className="flex space-x-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage 
-                                src={`https://avatar.vercel.sh/${auth.user.email}.png`} 
-                                alt="You" 
-                              />
-                              <AvatarFallback>
-                                {auth.user.email?.charAt(0).toUpperCase() || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <Textarea
-                                placeholder="Write a comment..."
-                                value={newComment[discovery.id] || ''}
-                                onChange={(e) => setNewComment(prev => ({ ...prev, [discovery.id]: e.target.value }))}
-                                rows={2}
-                              />
-                            </div>
-                          </div>
-                          <div className="flex justify-end">
-                            <Button 
-                              onClick={() => handleCreateComment(discovery.id)}
-                              disabled={!newComment[discovery.id]?.trim()}
-                              size="sm"
-                            >
-                              <Send className="h-4 w-4 mr-2" />
-                              <I18nText translationKey="community.post">Post</I18nText>
-                            </Button>
-                          </div>
+                      {auth?.user && (
+                        <div className="mb-4">
+                          <Textarea
+                            placeholder="Write a comment..."
+                            value={newComment[discovery.id] || ''}
+                            onChange={(e) => setNewComment(prev => ({ 
+                              ...prev, 
+                              [discovery.id]: e.target.value 
+                            }))}
+                            rows={2}
+                            className="mb-2"
+                          />
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleCreateComment(discovery.id)}
+                            disabled={!newComment[discovery.id]?.trim()}
+                          >
+                            <Send className="h-3 w-3 mr-1" />
+                            <I18nText translationKey="community.postComment">Post Comment</I18nText>
+                          </Button>
                         </div>
                       )}
 
                       {/* Comments List */}
-                      {loadingComments[discovery.id] ? (
-                        <div className="space-y-3">
-                          {[...Array(2)].map((_, i) => (
-                            <div key={i} className="flex space-x-3 animate-pulse">
-                              <div className="h-8 w-8 bg-slate-200 rounded-full"></div>
-                              <div className="flex-1">
-                                <div className="h-4 bg-slate-200 rounded w-24 mb-2"></div>
-                                <div className="h-3 bg-slate-200 rounded w-full"></div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : comments[discovery.id] && comments[discovery.id].length > 0 ? (
-                        <div className="space-y-4">
-                          {comments[discovery.id].map((comment) => (
+                      <div className="space-y-4">
+                        {loadingComments[discovery.id] ? (
+                          <div className="text-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                          </div>
+                        ) : (
+                          comments[discovery.id]?.map((comment) => (
                             <CommentItem key={comment.id} comment={comment} discoveryId={discovery.id} />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-6 text-slate-500">
-                          <MessageCircle className="h-8 w-8 mx-auto mb-2 text-slate-400" />
-                          <p>
-                            <I18nText translationKey="community.noComments">No comments yet</I18nText>
-                          </p>
-                          <p className="text-sm">
-                            <I18nText translationKey="community.beFirstToComment">
-                              Be the first to comment on this discovery
-                            </I18nText>
-                          </p>
-                        </div>
-                      )}
+                          ))
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -514,19 +531,34 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
         ))}
       </div>
 
-      {/* Empty State */}
-      {discoveries.length === 0 && (
-        <Card className="text-center py-12">
-          <CardContent>
+      {filteredDiscoveries.length === 0 && !loading && (
+        <Card>
+          <CardContent className="text-center py-12">
             <Share2 className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">
-              <I18nText translationKey="community.noDiscoveries">No discoveries yet</I18nText>
-            </h3>
-            <p className="text-slate-600">
-              <I18nText translationKey="community.startSharingDiscoveries">
-                Be the first to share an interesting symbol or collection
-              </I18nText>
+            <h4 className="font-medium text-slate-900 mb-2">
+              {searchQuery || Object.values(searchFilters).some(v => v !== 'all') ? (
+                <I18nText translationKey="community.noDiscoveriesFound">No discoveries found</I18nText>
+              ) : (
+                <I18nText translationKey="community.noDiscoveries">No discoveries yet</I18nText>
+              )}
+            </h4>
+            <p className="text-slate-600 mb-4">
+              {searchQuery || Object.values(searchFilters).some(v => v !== 'all') ? (
+                <I18nText translationKey="community.tryDifferentSearch">Try adjusting your search or filters</I18nText>
+              ) : (
+                <I18nText translationKey="community.noDiscoveriesDescription">
+                  Share the first discovery to start building the group's knowledge base
+                </I18nText>
+              )}
             </p>
+            {isMember && auth?.user && !searchQuery && (
+              <ShareDiscoveryDialog groupId={groupId} onDiscoveryShared={loadDiscoveries}>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  <I18nText translationKey="community.shareFirstDiscovery">Share First Discovery</I18nText>
+                </Button>
+              </ShareDiscoveryDialog>
+            )}
           </CardContent>
         </Card>
       )}
