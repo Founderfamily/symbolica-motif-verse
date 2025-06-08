@@ -29,6 +29,7 @@ import Dashboard from '@/pages/Admin/Dashboard';
 import UsersManagement from '@/pages/Admin/UsersManagement';
 import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
 import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
+import SymbolEditor from '@/pages/Admin/SymbolEditor';
 import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
 import SystemSettings from '@/pages/Admin/SystemSettings';
 import NotFound from '@/pages/NotFound';
@@ -86,6 +87,7 @@ function App() {
                 <Route path="/admin/contributions" element={<ContributionsManagement />} />
                 <Route path="/admin/conversion" element={<ContributionConversionPage />} />
                 <Route path="/admin/symbols" element={<SymbolsManagement />} />
+                <Route path="/admin/symbols/:id/edit" element={<SymbolEditor />} />
                 <Route path="/admin/collections" element={<CollectionsManagement />} />
                 <Route path="/admin/settings" element={<SystemSettings />} />
 
