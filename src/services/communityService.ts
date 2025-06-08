@@ -42,10 +42,7 @@ export const leaveGroup = async (groupId: string, userId: string): Promise<void>
 export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
   const { data, error } = await supabase
     .from('group_posts')
-    .select(`
-      *,
-      profiles!group_posts_user_id_fkey(username, full_name)
-    `)
+    .select('*')
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
 
@@ -53,14 +50,24 @@ export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
     throw error;
   }
 
+  // Get user profiles separately
+  const userIds = data?.map(post => post.user_id) || [];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', userIds);
+
   // Transform the data to match expected interface
-  const transformedData = (data || []).map(post => ({
-    ...post,
-    user_profile: post.profiles ? {
-      username: post.profiles.username,
-      full_name: post.profiles.full_name
-    } : undefined
-  }));
+  const transformedData = (data || []).map(post => {
+    const profile = profiles?.find(p => p.id === post.user_id);
+    return {
+      ...post,
+      user_profile: profile ? {
+        username: profile.username,
+        full_name: profile.full_name
+      } : undefined
+    };
+  });
 
   return transformedData as GroupPost[];
 };
@@ -141,11 +148,7 @@ export const getPostComments = async (postId: string, userId?: string): Promise<
     .from('post_comments')
     .select(`
       *,
-      profiles!post_comments_user_id_fkey(username, full_name),
-      replies:post_comments!post_comments_parent_comment_id_fkey(
-        *,
-        profiles!post_comments_user_id_fkey(username, full_name)
-      )
+      replies:post_comments!parent_comment_id(*)
     `)
     .eq('post_id', postId)
     .is('parent_comment_id', null)
@@ -166,22 +169,41 @@ export const getPostComments = async (postId: string, userId?: string): Promise<
     userLikes = likesData?.map(like => like.comment_id) || [];
   }
 
+  // Get all user IDs from comments and replies
+  const allUserIds = new Set<string>();
+  data?.forEach(comment => {
+    allUserIds.add(comment.user_id);
+    comment.replies?.forEach((reply: any) => allUserIds.add(reply.user_id));
+  });
+
+  // Get user profiles separately
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', Array.from(allUserIds));
+
   // Transform the data to match expected interface
-  const transformedData = (data || []).map(comment => ({
-    ...comment,
-    user_profile: comment.profiles ? {
-      username: comment.profiles.username,
-      full_name: comment.profiles.full_name
-    } : undefined,
-    is_liked: userLikes.includes(comment.id),
-    replies: comment.replies?.map((reply: any) => ({
-      ...reply,
-      user_profile: reply.profiles ? {
-        username: reply.profiles.username,
-        full_name: reply.profiles.full_name
-      } : undefined
-    }))
-  }));
+  const transformedData = (data || []).map(comment => {
+    const profile = profiles?.find(p => p.id === comment.user_id);
+    return {
+      ...comment,
+      user_profile: profile ? {
+        username: profile.username,
+        full_name: profile.full_name
+      } : undefined,
+      is_liked: userLikes.includes(comment.id),
+      replies: comment.replies?.map((reply: any) => {
+        const replyProfile = profiles?.find(p => p.id === reply.user_id);
+        return {
+          ...reply,
+          user_profile: replyProfile ? {
+            username: replyProfile.username,
+            full_name: replyProfile.full_name
+          } : undefined
+        };
+      })
+    };
+  });
 
   return transformedData as PostComment[];
 };
@@ -288,21 +310,34 @@ export const likePostComment = async (commentId: string, userId: string): Promis
 export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> => {
   const { data, error } = await supabase
     .from('group_members')
-    .select(`
-      *,
-      profiles!group_members_user_id_fkey(
-        id,
-        username,
-        full_name
-      )
-    `)
+    .select('*')
     .eq('group_id', groupId);
 
   if (error) {
     throw error;
   }
 
-  return data as GroupMember[];
+  // Get user profiles separately
+  const userIds = data?.map(member => member.user_id) || [];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', userIds);
+
+  // Transform the data to match expected interface
+  const transformedData = (data || []).map(member => {
+    const profile = profiles?.find(p => p.id === member.user_id);
+    return {
+      ...member,
+      profiles: profile ? {
+        id: profile.id,
+        username: profile.username,
+        full_name: profile.full_name
+      } : undefined
+    };
+  });
+
+  return transformedData as GroupMember[];
 };
 
 export const inviteUsersToGroup = async (groupId: string, invitedBy: string, invitees: { email?: string; userId?: string; message?: string }[]): Promise<void> => {
@@ -332,8 +367,7 @@ export const getGroupInvitations = async (groupId: string, userId: string): Prom
     .from('group_invitations')
     .select(`
       *,
-      interest_groups!group_invitations_group_id_fkey(name, slug),
-      profiles!group_invitations_invited_by_fkey(username, full_name)
+      interest_groups(name, slug)
     `)
     .eq('group_id', groupId)
     .eq('invited_user_id', userId)
@@ -344,18 +378,28 @@ export const getGroupInvitations = async (groupId: string, userId: string): Prom
     throw error;
   }
 
+  // Get inviter profiles separately
+  const inviterIds = data?.map(invitation => invitation.invited_by) || [];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', inviterIds);
+
   // Transform the data to match expected interface
-  const transformedData = (data || []).map(invitation => ({
-    ...invitation,
-    group: invitation.interest_groups ? {
-      name: invitation.interest_groups.name,
-      slug: invitation.interest_groups.slug
-    } : undefined,
-    inviter_profile: invitation.profiles ? {
-      username: invitation.profiles.username,
-      full_name: invitation.profiles.full_name
-    } : undefined
-  }));
+  const transformedData = (data || []).map(invitation => {
+    const profile = profiles?.find(p => p.id === invitation.invited_by);
+    return {
+      ...invitation,
+      group: invitation.interest_groups ? {
+        name: invitation.interest_groups.name,
+        slug: invitation.interest_groups.slug
+      } : undefined,
+      inviter_profile: profile ? {
+        username: profile.username,
+        full_name: profile.full_name
+      } : undefined
+    };
+  });
 
   return transformedData as GroupInvitation[];
 };
@@ -365,8 +409,7 @@ export const getUserInvitations = async (userId: string): Promise<GroupInvitatio
     .from('group_invitations')
     .select(`
       *,
-      interest_groups!group_invitations_group_id_fkey(name, slug),
-      profiles!group_invitations_invited_by_fkey(username, full_name)
+      interest_groups(name, slug)
     `)
     .eq('invited_user_id', userId)
     .eq('status', 'pending')
@@ -377,18 +420,28 @@ export const getUserInvitations = async (userId: string): Promise<GroupInvitatio
     throw error;
   }
 
+  // Get inviter profiles separately
+  const inviterIds = data?.map(invitation => invitation.invited_by) || [];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', inviterIds);
+
   // Transform the data to match expected interface
-  const transformedData = (data || []).map(invitation => ({
-    ...invitation,
-    group: invitation.interest_groups ? {
-      name: invitation.interest_groups.name,
-      slug: invitation.interest_groups.slug
-    } : undefined,
-    inviter_profile: invitation.profiles ? {
-      username: invitation.profiles.username,
-      full_name: invitation.profiles.full_name
-    } : undefined
-  }));
+  const transformedData = (data || []).map(invitation => {
+    const profile = profiles?.find(p => p.id === invitation.invited_by);
+    return {
+      ...invitation,
+      group: invitation.interest_groups ? {
+        name: invitation.interest_groups.name,
+        slug: invitation.interest_groups.slug
+      } : undefined,
+      inviter_profile: profile ? {
+        username: profile.username,
+        full_name: profile.full_name
+      } : undefined
+    };
+  });
 
   return transformedData as GroupInvitation[];
 };
@@ -435,8 +488,7 @@ export const getGroupNotifications = async (userId: string): Promise<GroupNotifi
     .from('group_notifications')
     .select(`
       *,
-      interest_groups!group_notifications_group_id_fkey(name, slug),
-      profiles!group_notifications_created_by_fkey(username, full_name)
+      interest_groups(name, slug)
     `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
@@ -446,18 +498,28 @@ export const getGroupNotifications = async (userId: string): Promise<GroupNotifi
     throw error;
   }
 
+  // Get creator profiles separately
+  const creatorIds = data?.map(notification => notification.created_by).filter(Boolean) || [];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', creatorIds);
+
   // Transform the data to match expected interface
-  const transformedData = (data || []).map(notification => ({
-    ...notification,
-    group: notification.interest_groups ? {
-      name: notification.interest_groups.name,
-      slug: notification.interest_groups.slug
-    } : undefined,
-    creator_profile: notification.profiles ? {
-      username: notification.profiles.username,
-      full_name: notification.profiles.full_name
-    } : undefined
-  }));
+  const transformedData = (data || []).map(notification => {
+    const profile = profiles?.find(p => p.id === notification.created_by);
+    return {
+      ...notification,
+      group: notification.interest_groups ? {
+        name: notification.interest_groups.name,
+        slug: notification.interest_groups.slug
+      } : undefined,
+      creator_profile: profile ? {
+        username: profile.username,
+        full_name: profile.full_name
+      } : undefined
+    };
+  });
 
   return transformedData as GroupNotification[];
 };
@@ -478,10 +540,7 @@ export const markNotificationAsRead = async (notificationId: string, userId: str
 export const getGroupDiscoveries = async (groupId: string, userId?: string): Promise<GroupDiscovery[]> => {
   let query = supabase
     .from('group_discoveries')
-    .select(`
-      *,
-      profiles!group_discoveries_shared_by_fkey(username, full_name)
-    `)
+    .select('*')
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
 
@@ -499,6 +558,13 @@ export const getGroupDiscoveries = async (groupId: string, userId?: string): Pro
     
     userLikes = likesData?.map(like => like.discovery_id) || [];
   }
+
+  // Get sharer profiles separately
+  const sharerIds = data?.map(discovery => discovery.shared_by) || [];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', sharerIds);
 
   // Fetch entity previews for each discovery
   const discoveriesWithPreviews = await Promise.all(
@@ -565,13 +631,14 @@ export const getGroupDiscoveries = async (groupId: string, userId?: string): Pro
         console.error('Error fetching entity preview:', error);
       }
 
+      const profile = profiles?.find(p => p.id === discovery.shared_by);
       return {
         ...discovery,
         entity_preview,
         is_liked: userLikes.includes(discovery.id),
-        sharer_profile: discovery.profiles ? {
-          username: discovery.profiles.username,
-          full_name: discovery.profiles.full_name
+        sharer_profile: profile ? {
+          username: profile.username,
+          full_name: profile.full_name
         } : undefined
       } as GroupDiscovery;
     })

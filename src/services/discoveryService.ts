@@ -68,11 +68,7 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
     .from('discovery_comments')
     .select(`
       *,
-      profiles!discovery_comments_user_id_fkey(username, full_name),
-      replies:discovery_comments!discovery_comments_parent_comment_id_fkey(
-        *,
-        profiles!discovery_comments_user_id_fkey(username, full_name)
-      )
+      replies:discovery_comments!parent_comment_id(*)
     `)
     .eq('discovery_id', discoveryId)
     .is('parent_comment_id', null)
@@ -93,22 +89,41 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
     userLikes = likesData?.map(like => like.comment_id) || [];
   }
 
+  // Get all user IDs from comments and replies
+  const allUserIds = new Set<string>();
+  data?.forEach(comment => {
+    allUserIds.add(comment.user_id);
+    comment.replies?.forEach((reply: any) => allUserIds.add(reply.user_id));
+  });
+
+  // Get user profiles separately
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', Array.from(allUserIds));
+
   // Transform the data to match expected interface
-  const transformedData = (data || []).map(comment => ({
-    ...comment,
-    user_profile: comment.profiles ? {
-      username: comment.profiles.username,
-      full_name: comment.profiles.full_name
-    } : undefined,
-    is_liked: userLikes.includes(comment.id),
-    replies: comment.replies?.map((reply: any) => ({
-      ...reply,
-      user_profile: reply.profiles ? {
-        username: reply.profiles.username,
-        full_name: reply.profiles.full_name
-      } : undefined
-    }))
-  }));
+  const transformedData = (data || []).map(comment => {
+    const profile = profiles?.find(p => p.id === comment.user_id);
+    return {
+      ...comment,
+      user_profile: profile ? {
+        username: profile.username,
+        full_name: profile.full_name
+      } : undefined,
+      is_liked: userLikes.includes(comment.id),
+      replies: comment.replies?.map((reply: any) => {
+        const replyProfile = profiles?.find(p => p.id === reply.user_id);
+        return {
+          ...reply,
+          user_profile: replyProfile ? {
+            username: replyProfile.username,
+            full_name: replyProfile.full_name
+          } : undefined
+        };
+      })
+    };
+  });
 
   return transformedData;
 };
