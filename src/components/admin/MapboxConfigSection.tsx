@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { Save, MapPin } from 'lucide-react';
+import { Save, MapPin, ExternalLink } from 'lucide-react';
 import { mapboxConfigService, MapboxConfig } from '@/services/admin/mapboxConfigService';
 
 const MapboxConfigSection = () => {
@@ -71,10 +71,10 @@ const MapboxConfigSection = () => {
           Configuration Mapbox
         </CardTitle>
         <CardDescription>
-          Configurez l'intégration Mapbox pour la fonctionnalité de carte
+          Configurez l'intégration Mapbox pour la fonctionnalité de carte interactive
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="flex items-center space-x-2">
           <Switch
             id="mapbox-enabled"
@@ -94,18 +94,31 @@ const MapboxConfigSection = () => {
             onChange={(e) => setConfig(prev => ({ ...prev, token: e.target.value }))}
             disabled={!config.enabled}
           />
-          <p className="text-xs text-slate-500">
-            Obtenez votre token sur{' '}
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <span>Obtenez votre token sur</span>
             <a 
               href="https://account.mapbox.com/access-tokens/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="text-blue-600 hover:underline flex items-center gap-1"
             >
               Mapbox Account
+              <ExternalLink className="h-3 w-3" />
             </a>
-          </p>
+          </div>
         </div>
+
+        {config.enabled && config.token && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-green-700">
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm font-medium">Configuration active</span>
+            </div>
+            <p className="text-xs text-green-600 mt-1">
+              La carte Mapbox est maintenant disponible sur la page Explorer la carte
+            </p>
+          </div>
+        )}
 
         <div className="flex justify-end pt-4">
           <Button onClick={handleSave} disabled={saving}>

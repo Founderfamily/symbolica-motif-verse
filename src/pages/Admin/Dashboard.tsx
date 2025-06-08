@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
@@ -103,7 +104,7 @@ const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <p className="text-slate-600">
-                Configurez les paramètres généraux du système.
+                Configurez les paramètres généraux du système et Mapbox.
               </p>
               <a href="/admin/settings" className="text-amber-600 hover:underline">
                 Accéder aux paramètres système
