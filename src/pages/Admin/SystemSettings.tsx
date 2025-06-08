@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -9,11 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { AlertTriangle, Save, Database, Mail, Shield, Settings, Activity, Clock } from 'lucide-react';
+import { AlertTriangle, Save, Database, Mail, Shield, Settings, Activity, Clock, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import BackupManager from '@/components/admin/BackupManager';
 import SystemMonitoring from '@/components/admin/SystemMonitoring';
 import MaintenanceScheduler from '@/components/admin/MaintenanceScheduler';
+import MapboxConfigSection from '@/components/admin/MapboxConfigSection';
 
 interface SystemSettings {
   maintenanceMode: boolean;
@@ -159,10 +159,14 @@ const SystemSettings = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Général
+          </TabsTrigger>
+          <TabsTrigger value="mapbox" className="flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            Mapbox
           </TabsTrigger>
           <TabsTrigger value="monitoring" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
@@ -249,6 +253,10 @@ const SystemSettings = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="mapbox">
+          <MapboxConfigSection />
         </TabsContent>
 
         <TabsContent value="monitoring">
