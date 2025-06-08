@@ -12,8 +12,6 @@ export class GetAllCollectionsQuery {
    */
   async execute(): Promise<CollectionWithTranslations[]> {
     console.log('🚀 [GetAllCollectionsQuery] DÉBUT - Version simplifiée');
-    console.log('🌍 [GetAllCollectionsQuery] Browser:', navigator.userAgent);
-    console.log('🔧 [GetAllCollectionsQuery] Supabase client status:', !!supabase);
     
     try {
       // ÉTAPE 1: Récupérer toutes les collections
@@ -25,17 +23,10 @@ export class GetAllCollectionsQuery {
 
       if (collectionsError) {
         console.error('❌ [GetAllCollectionsQuery] ERREUR collections:', collectionsError);
-        console.error('❌ [GetAllCollectionsQuery] ERREUR détails:', {
-          message: collectionsError.message,
-          details: collectionsError.details,
-          hint: collectionsError.hint,
-          code: collectionsError.code
-        });
         throw collectionsError;
       }
 
       console.log('✅ [GetAllCollectionsQuery] Collections récupérées:', collectionsData?.length || 0);
-      console.log('📄 [GetAllCollectionsQuery] Première collection:', collectionsData?.[0]);
 
       if (!collectionsData || collectionsData.length === 0) {
         console.log('⚠️ [GetAllCollectionsQuery] Aucune collection trouvée');
@@ -54,7 +45,6 @@ export class GetAllCollectionsQuery {
       }
 
       console.log('✅ [GetAllCollectionsQuery] Traductions récupérées:', translationsData?.length || 0);
-      console.log('📄 [GetAllCollectionsQuery] Première traduction:', translationsData?.[0]);
 
       // ÉTAPE 3: Mapper les collections avec leurs traductions
       const collectionsWithTranslations: CollectionWithTranslations[] = collectionsData.map(collection => {
@@ -78,21 +68,13 @@ export class GetAllCollectionsQuery {
         totalCollections: collectionsWithTranslations.length,
         collectionsWithTranslations: collectionsWithTranslations.filter(c => c.collection_translations.length > 0).length,
         collectionsWithoutTranslations: collectionsWithTranslations.filter(c => c.collection_translations.length === 0).length,
-        featuredCollections: collectionsWithTranslations.filter(c => c.is_featured).length,
-        browser: navigator.userAgent.includes('Safari') ? 'Safari' : 'Chrome'
+        featuredCollections: collectionsWithTranslations.filter(c => c.is_featured).length
       });
 
       return collectionsWithTranslations;
 
     } catch (error) {
       console.error('💥 [GetAllCollectionsQuery] ERREUR CRITIQUE:', error);
-      console.error('💥 [GetAllCollectionsQuery] Error type:', typeof error);
-      console.error('💥 [GetAllCollectionsQuery] Error constructor:', error?.constructor?.name);
-      console.error('💥 [GetAllCollectionsQuery] Browser context:', {
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-        timestamp: new Date().toISOString()
-      });
       logger.error('Critical error in getAllCollectionsQuery', { error });
       throw error;
     }

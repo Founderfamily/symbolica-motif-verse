@@ -18,7 +18,6 @@ import Profile from '@/pages/Profile';
 import MapExplorer from '@/pages/MapExplorer';
 import AnalysisPage from '@/pages/AnalysisPage';
 import ContributionsPage from '@/pages/ContributionsPage';
-import ContributionDetail from '@/pages/ContributionDetail';
 import NewContribution from '@/pages/NewContribution';
 import LegalPage from '@/pages/LegalPage';
 import PrivacyPage from '@/pages/PrivacyPage';
@@ -82,7 +81,6 @@ function App() {
                 <Route path="/analysis" element={<AnalysisPage />} />
                 <Route path="/mcp-search" element={<MCPSearchPage />} />
                 <Route path="/contributions" element={<ContributionsPage />} />
-                <Route path="/contributions/:id" element={<ContributionDetail />} />
                 <Route path="/contribute" element={<NewContribution />} />
                 <Route path="/legal" element={<LegalPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
