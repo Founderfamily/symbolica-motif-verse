@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { GroupPost, PostComment, GroupMember, GroupInvitation, GroupNotification, GroupDiscovery } from '@/types/interest-groups';
+import { GroupPost, PostComment, GroupMember, GroupInvitation, GroupNotification, GroupDiscovery, GroupSymbol } from '@/types/interest-groups';
 
 export const checkGroupMembership = async (groupId: string, userId: string): Promise<boolean> => {
   const { data, error } = await supabase
@@ -689,3 +688,91 @@ export const sendGroupInvitation = async (groupId: string, invitedBy: string, in
 // Alias for post comments
 export const createComment = createPostComment;
 export const likeComment = likePostComment;
+
+export const getGroupSymbols = async (groupId: string): Promise<GroupSymbol[]> => {
+  const { data, error } = await supabase
+    .from('group_symbols')
+    .select(`
+      *,
+      symbols (
+        id,
+        name,
+        culture,
+        period,
+        description,
+        medium,
+        technique,
+        function
+      )
+    `)
+    .eq('group_id', groupId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  // Get user profiles separately
+  const userIds = data?.map(gs => gs.added_by) || [];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .in('id', userIds);
+
+  // Transform the data to match expected interface
+  const transformedData = (data || []).map(groupSymbol => {
+    const profile = profiles?.find(p => p.id === groupSymbol.added_by);
+    return {
+      ...groupSymbol,
+      symbol: groupSymbol.symbols,
+      added_by_profile: profile ? {
+        username: profile.username,
+        full_name: profile.full_name
+      } : undefined
+    };
+  });
+
+  return transformedData as GroupSymbol[];
+};
+
+export const addSymbolToGroup = async (groupId: string, symbolId: string, userId: string, notes?: string): Promise<void> => {
+  const { error } = await supabase
+    .from('group_symbols')
+    .insert([{ 
+      group_id: groupId, 
+      symbol_id: symbolId, 
+      added_by: userId,
+      notes: notes || null
+    }]);
+
+  if (error) {
+    throw error;
+  }
+};
+
+export const removeSymbolFromGroup = async (groupSymbolId: string, userId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('group_symbols')
+    .delete()
+    .eq('id', groupSymbolId)
+    .eq('added_by', userId);
+
+  if (error) {
+    throw error;
+  }
+};
+
+export const searchSymbolsForGroup = async (query: string): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('symbols')
+    .select('id, name, culture, period, description')
+    .or(`name.ilike.%${query}%,culture.ilike.%${query}%,description.ilike.%${query}%`)
+    .limit(10);
+
+  if (error) {
+    console.error('Error searching symbols:', error);
+    return [];
+  }
+
+  return data || [];
+};

@@ -212,3 +212,27 @@ export interface EntityPreview {
   culture?: string;
   period?: string;
 }
+
+// Interface pour les symboles de groupe
+export interface GroupSymbol {
+  id: string;
+  group_id: string;
+  symbol_id: string;
+  added_by: string;
+  created_at: string;
+  notes?: string | null;
+  symbol?: {
+    id: string;
+    name: string;
+    culture: string;
+    period: string;
+    description?: string;
+    medium?: string[];
+    technique?: string[];
+    function?: string[];
+  };
+  added_by_profile?: {
+    username: string;
+    full_name: string;
+  };
+}

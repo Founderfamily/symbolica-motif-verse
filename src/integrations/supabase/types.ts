@@ -903,6 +903,33 @@ export type Database = {
           },
         ]
       }
+      group_symbols: {
+        Row: {
+          added_by: string
+          created_at: string
+          group_id: string
+          id: string
+          notes: string | null
+          symbol_id: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          group_id: string
+          id?: string
+          notes?: string | null
+          symbol_id: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          notes?: string | null
+          symbol_id?: string
+        }
+        Relationships: []
+      }
       image_annotations: {
         Row: {
           annotation_data: Json

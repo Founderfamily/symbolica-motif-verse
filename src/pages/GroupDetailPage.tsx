@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, MessageCircle, Share2, UserPlus, Settings, ArrowLeft, Folder } from 'lucide-react';
+import { Users, MessageCircle, Share2, UserPlus, Settings, ArrowLeft, Folder, Eye } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { InterestGroup, GroupPost } from '@/types/interest-groups';
@@ -16,6 +17,7 @@ import GroupDiscussion from '@/components/community/GroupDiscussion';
 import EnhancedGroupDiscoveries from '@/components/community/EnhancedGroupDiscoveries';
 import GroupMembersList from '@/components/community/GroupMembersList';
 import GroupCollections from '@/components/community/GroupCollections';
+import GroupSymbols from '@/components/community/GroupSymbols';
 import InviteUsersDialog from '@/components/community/InviteUsersDialog';
 import RealTimeNotifications from '@/components/community/RealTimeNotifications';
 
@@ -259,6 +261,10 @@ const GroupDetailPage: React.FC = () => {
                 <Share2 className="h-4 w-4" />
                 <I18nText translationKey="community.discoveries">Discoveries</I18nText>
               </TabsTrigger>
+              <TabsTrigger value="symbols" className="gap-2">
+                <Eye className="h-4 w-4" />
+                <I18nText translationKey="community.symbols">Symboles</I18nText>
+              </TabsTrigger>
               <TabsTrigger value="collections" className="gap-2">
                 <Folder className="h-4 w-4" />
                 <I18nText translationKey="community.collections">Collections</I18nText>
@@ -280,6 +286,10 @@ const GroupDetailPage: React.FC = () => {
 
             <TabsContent value="discoveries">
               <EnhancedGroupDiscoveries groupId={group.id} isMember={isMember} />
+            </TabsContent>
+
+            <TabsContent value="symbols">
+              <GroupSymbols groupId={group.id} isMember={isMember} />
             </TabsContent>
 
             <TabsContent value="collections">
