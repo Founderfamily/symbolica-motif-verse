@@ -446,56 +446,47 @@ export async function createContribution(
 }
 
 // Mettre à jour le statut d'une contribution (pour les admins)
-export async function updateContributionStatus(
+export const updateContributionStatus = async (
   contributionId: string,
-  status: 'approved' | 'rejected',
-  reviewerId: string,
-  comment?: string
-): Promise<boolean> {
+  status: 'approved' | 'rejected' | 'pending',
+  reviewedBy: string,
+  reason?: string
+): Promise<boolean> => {
+  console.log('🔄 [ContributionService] Updating contribution status:', { contributionId, status, reviewedBy });
+  
   try {
-    const { error: statusError } = await supabase
+    const { error } = await supabase
       .from('user_contributions')
       .update({
-        status: status,
-        reviewed_by: reviewerId,
-        reviewed_at: new Date().toISOString()
+        status,
+        reviewed_by: reviewedBy,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .eq('id', contributionId);
 
-    if (statusError) throw statusError;
-
-    if (comment) {
-      const { error: commentError } = await supabase
-        .from('contribution_comments')
-        .insert({
-          contribution_id: contributionId,
-          user_id: reviewerId,
-          comment,
-          comment_translations: {
-            fr: comment,
-            en: comment
-          }
-        });
-
-      if (commentError) throw commentError;
+    if (error) {
+      console.error('❌ [ContributionService] Error updating status:', error);
+      throw error;
     }
 
-    toast({
-      title: `contributions.toast.statusUpdateSuccess`,
-      description: `contributions.toast.statusUpdateSuccess`,
-    });
+    // Ajouter un commentaire expliquant la décision
+    if (reason) {
+      await addContributionComment(contributionId, reviewedBy, reason);
+    }
 
+    // Si la contribution est approuvée, elle sera automatiquement convertie par le trigger
+    if (status === 'approved') {
+      console.log('✅ [ContributionService] Contribution approved - automatic conversion will be triggered');
+    }
+
+    console.log('✅ [ContributionService] Status updated successfully');
     return true;
-  } catch (error: any) {
-    console.error('Error updating contribution status:', error.message);
-    toast({
-      variant: "destructive",
-      title: "contributions.toast.errorUpdating",
-      description: error.message,
-    });
+  } catch (error) {
+    console.error('💥 [ContributionService] Failed to update status:', error);
     return false;
   }
-}
+};
 
 // Récupérer une contribution spécifique par ID
 export async function getContributionById(contributionId: string): Promise<CompleteContribution | null> {

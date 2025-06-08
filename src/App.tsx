@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
@@ -33,6 +32,7 @@ import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
 import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
 import SystemSettings from '@/pages/Admin/SystemSettings';
 import NotFound from '@/pages/NotFound';
+import ContributionConversionPage from '@/pages/Admin/ContributionConversionPage';
 
 import { initializationService } from '@/services/admin/initializationService';
 
@@ -94,6 +94,7 @@ function App() {
                 <Route path="/admin" element={<Dashboard />} />
                 <Route path="/admin/users" element={<UsersManagement />} />
                 <Route path="/admin/contributions" element={<ContributionsManagement />} />
+                <Route path="/admin/conversion" element={<ContributionConversionPage />} />
                 <Route path="/admin/symbols" element={<SymbolsManagement />} />
                 <Route path="/admin/collections" element={<CollectionsManagement />} />
                 <Route path="/admin/settings" element={<SystemSettings />} />

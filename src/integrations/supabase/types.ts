@@ -2275,6 +2275,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      convert_contribution_to_symbol: {
+        Args: { p_contribution_id: string }
+        Returns: string
+      }
       create_user_as_admin: {
         Args: {
           p_admin_id: string
@@ -2448,6 +2452,14 @@ export type Database = {
       process_ai_pattern_suggestions: {
         Args: { p_image_id: string; p_image_type?: string }
         Returns: string
+      }
+      process_existing_approved_contributions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          contribution_id: string
+          symbol_id: string
+          collection_found: boolean
+        }[]
       }
       toggle_user_ban: {
         Args: { p_user_id: string; p_admin_id: string; p_banned: boolean }
