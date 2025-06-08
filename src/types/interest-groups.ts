@@ -140,6 +140,8 @@ export interface GroupDiscovery {
     name?: string;
     image_url?: string;
     description?: string;
+    culture?: string;
+    period?: string;
   };
   is_liked?: boolean;
 }

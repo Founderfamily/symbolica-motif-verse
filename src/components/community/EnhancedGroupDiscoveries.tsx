@@ -460,8 +460,8 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
                           name: discovery.entity_preview.name || discovery.title,
                           description: discovery.entity_preview.description,
                           image_url: discovery.entity_preview.image_url,
-                          culture: discovery.entity_preview.culture || undefined,
-                          period: discovery.entity_preview.period || undefined
+                          culture: discovery.entity_preview.culture,
+                          period: discovery.entity_preview.period
                         }}
                         onNavigate={handleEntityNavigate}
                       />
