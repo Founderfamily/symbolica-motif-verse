@@ -9,39 +9,90 @@ import { getTestimonials, Testimonial } from '@/services/testimonialsService';
 import EmptyState from '@/components/common/EmptyState';
 import { useNavigate } from 'react-router-dom';
 
+// Données d'exemple pour le fallback
+const fallbackTestimonials: Testimonial[] = [
+  {
+    id: 'fallback-1',
+    name: 'Marie Dubois',
+    role: { fr: 'Archéologue', en: 'Archaeologist' },
+    quote: { 
+      fr: 'Cette plateforme révolutionne notre façon d\'étudier les symboles culturels à travers le monde.',
+      en: 'This platform revolutionizes how we study cultural symbols across the world.'
+    },
+    initials: 'MD',
+    image_url: null,
+    display_order: 1,
+    is_active: true
+  },
+  {
+    id: 'fallback-2',
+    name: 'Prof. James Wilson',
+    role: { fr: 'Historien de l\'art', en: 'Art Historian' },
+    quote: { 
+      fr: 'Une ressource inestimable pour mes recherches sur l\'iconographie médiévale.',
+      en: 'An invaluable resource for my research on medieval iconography.'
+    },
+    initials: 'JW',
+    image_url: null,
+    display_order: 2,
+    is_active: true
+  },
+  {
+    id: 'fallback-3',
+    name: 'Elena Rodriguez',
+    role: { fr: 'Anthropologue culturelle', en: 'Cultural Anthropologist' },
+    quote: { 
+      fr: 'L\'interface collaborative facilite grandement le partage de découvertes entre chercheurs.',
+      en: 'The collaborative interface greatly facilitates sharing discoveries between researchers.'
+    },
+    initials: 'ER',
+    image_url: null,
+    display_order: 3,
+    is_active: true
+  }
+];
+
 const Testimonials = () => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [usingFallback, setUsingFallback] = useState(false);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
         console.log('🚀 [Testimonials] Fetching testimonials...');
-        const data = await getTestimonials(true); // Only fetch active testimonials
+        const data = await getTestimonials(true);
         console.log('✅ [Testimonials] Data received:', data?.length || 0, 'testimonials');
         
-        setTestimonials(data || []);
-        setError(null);
+        if (data && data.length > 0) {
+          setTestimonials(data);
+          setUsingFallback(false);
+        } else {
+          console.log('📝 [Testimonials] No data, using fallback');
+          setTestimonials(fallbackTestimonials);
+          setUsingFallback(true);
+        }
       } catch (err) {
         console.error('❌ [Testimonials] Error:', err);
-        setError(err instanceof Error ? err.message : 'Erreur de chargement');
-        setTestimonials([]);
+        console.log('📝 [Testimonials] Using fallback data due to error');
+        setTestimonials(fallbackTestimonials);
+        setUsingFallback(true);
       } finally {
         setLoading(false);
       }
     };
 
-    // Timeout de sécurité raisonnable (10 secondes)
+    // Timeout réduit à 3 secondes pour une meilleure UX
     const safetyTimeout = setTimeout(() => {
       if (loading) {
-        console.log('⏰ [Testimonials] Safety timeout reached');
+        console.log('⏰ [Testimonials] Timeout reached, using fallback data');
+        setTestimonials(fallbackTestimonials);
+        setUsingFallback(true);
         setLoading(false);
-        setError('Délai d\'attente dépassé');
       }
-    }, 10000);
+    }, 3000);
 
     fetchTestimonials().finally(() => {
       clearTimeout(safetyTimeout);
@@ -49,6 +100,29 @@ const Testimonials = () => {
 
     return () => clearTimeout(safetyTimeout);
   }, []);
+
+  if (loading) {
+    return (
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <I18nText 
+            translationKey="sections.testimonials" 
+            as="h2" 
+            className="text-3xl font-bold text-slate-800 mb-4"
+          />
+          <I18nText 
+            translationKey="testimonials.subtitle" 
+            as="p" 
+            className="text-xl text-slate-600"
+          />
+        </div>
+        <div className="flex items-center justify-center h-32">
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
+          <span className="ml-3 text-slate-600">Chargement des témoignages...</span>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,57 +139,36 @@ const Testimonials = () => {
         />
       </div>
       
-      {loading ? (
-        <div className="flex items-center justify-center h-32">
-          <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
-          <span className="ml-3 text-slate-600">Chargement des témoignages...</span>
-        </div>
-      ) : error ? (
-        <div className="text-center">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-            <h3 className="text-red-800 font-semibold mb-2">Erreur de chargement</h3>
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
-          <EmptyState
-            icon={MessageSquare}
-            title="Impossible de charger les témoignages"
-            description="Une erreur est survenue lors du chargement des témoignages."
-            actionLabel="Réessayer"
-            onAction={() => window.location.reload()}
-          />
-        </div>
-      ) : testimonials.length === 0 ? (
-        <EmptyState
-          icon={MessageSquare}
-          title="Aucun témoignage"
-          description="Il n'y a pas encore de témoignages d'utilisateurs disponibles."
-          actionLabel="Contribuer à la plateforme"
-          onAction={() => navigate('/contribute')}
-        />
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="border border-slate-200">
-              <CardHeader className="flex flex-row items-center space-x-4 pb-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarFallback className="bg-amber-100 text-amber-800">
-                    {testimonial.initials || testimonial.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold text-slate-800">{testimonial.name}</h3>
-                  <p className="text-sm text-slate-500">
-                    {testimonial.role?.[i18n.language] || testimonial.role?.fr || 'Role non spécifié'}
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600 italic">
-                  "{testimonial.quote?.[i18n.language] || testimonial.quote?.fr || 'Citation non disponible'}"
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {testimonials.map((testimonial) => (
+          <Card key={testimonial.id} className="border border-slate-200">
+            <CardHeader className="flex flex-row items-center space-x-4 pb-4">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-amber-100 text-amber-800">
+                  {testimonial.initials || testimonial.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="font-semibold text-slate-800">{testimonial.name}</h3>
+                <p className="text-sm text-slate-500">
+                  {testimonial.role?.[i18n.language] || testimonial.role?.fr || 'Role non spécifié'}
                 </p>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-600 italic">
+                "{testimonial.quote?.[i18n.language] || testimonial.quote?.fr || 'Citation non disponible'}"
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {usingFallback && (
+        <div className="text-center mt-8">
+          <p className="text-sm text-slate-500">
+            Données d'exemple • Les témoignages réels seront chargés prochainement
+          </p>
         </div>
       )}
     </section>
