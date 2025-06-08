@@ -11,6 +11,7 @@ import { CollectionWithTranslations } from '../../types/collections';
 import { useCollectionFilters } from '../../hooks/useCollectionFilters';
 import { CollectionControls } from '../controls/CollectionControls';
 import { FilteredCollectionGrid } from '../grids/FilteredCollectionGrid';
+import { useCollectionTranslations } from '@/hooks/useCollectionTranslations';
 
 // Static collection type
 interface StaticCollection {
@@ -117,65 +118,26 @@ CollectionsErrorState.displayName = 'CollectionsErrorState';
 const CollectionCategories: React.FC = () => {
   const { currentLanguage } = useTranslation();
   const { data: collections = [], isLoading, error, refetch } = useCollections();
+  const { getTranslation } = useCollectionTranslations();
 
-  // LOGS DE DEBUG DÉTAILLÉS
-  console.log('🎯 [CollectionCategories] Rendu avec état détaillé:', {
+  // LOGS DE DEBUG SIMPLIFIÉS
+  console.log('🎯 [CollectionCategories] État actuel:', {
     collectionsCount: collections?.length || 0,
-    collectionsData: collections,
     isLoading,
     hasError: !!error,
-    errorMessage: error?.message,
-    errorStack: error?.stack,
-    collectionsType: typeof collections,
-    isArray: Array.isArray(collections)
+    errorMessage: error?.message
   });
 
-  // Log individuel de chaque collection pour debug
-  if (collections && collections.length > 0) {
-    collections.forEach((collection, index) => {
-      console.log(`📋 [CollectionCategories] Collection ${index + 1}:`, {
-        id: collection.id,
-        slug: collection.slug,
-        is_featured: collection.is_featured,
-        hasTranslations: collection.collection_translations?.length > 0,
-        translationsCount: collection.collection_translations?.length || 0,
-        translations: collection.collection_translations
-      });
-    });
-  }
+  const staticCollections = React.useMemo(() => getStaticCollections(currentLanguage), [currentLanguage]);
+  
+  // Logique simplifiée : utiliser les collections de la base si disponibles, sinon fallback statique
+  const hasValidCollections = collections && Array.isArray(collections) && collections.length > 0;
+  const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : staticCollections;
 
-  const getTranslation = React.useCallback((collection: CollectionWithTranslations, field: string) => {
-    if (!collection?.collection_translations || collection.collection_translations.length === 0) {
-      console.warn(`⚠️ Collection ${collection.id} sans traductions, utilisation fallback`);
-      if (field === 'title') {
-        return collection.slug?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Collection sans titre';
-      }
-      return 'Description non disponible';
-    }
-
-    // Find translation for current language first
-    const currentTranslation = collection.collection_translations.find(
-      (t: any) => t.language === currentLanguage
-    );
-    
-    if (currentTranslation?.[field] && currentTranslation[field].trim()) {
-      return currentTranslation[field];
-    }
-    
-    // If current language translation is missing or empty, use fallback language
-    const fallbackLang = currentLanguage === 'fr' ? 'en' : 'fr';
-    const fallbackTranslation = collection.collection_translations.find(
-      (t: any) => t.language === fallbackLang
-    );
-    
-    if (fallbackTranslation?.[field] && fallbackTranslation[field].trim()) {
-      return fallbackTranslation[field];
-    }
-    
-    return field === 'title' 
-      ? collection.slug?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Collection sans titre'
-      : 'Description non disponible';
-  }, [currentLanguage]);
+  console.log('📊 [CollectionCategories] Collections finales:', {
+    sourceType: hasValidCollections ? 'database' : 'static',
+    count: finalCollections.length
+  });
 
   // Function to get title from any collection type
   const getCollectionTitle = React.useCallback((collection: UnifiedCollection) => {
@@ -192,21 +154,6 @@ const CollectionCategories: React.FC = () => {
     }
     return getTranslation(collection, 'description');
   }, [getTranslation]);
-
-  // LOGIQUE CORRIGÉE : priorité aux données de la base, même sans traductions
-  const staticCollections = React.useMemo(() => getStaticCollections(currentLanguage), [currentLanguage]);
-  
-  // Utiliser les collections de la base si disponibles, sinon fallback statique
-  const hasValidCollections = collections && Array.isArray(collections) && collections.length > 0;
-  const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : staticCollections;
-
-  console.log('📊 [CollectionCategories] Collections finales analyse:', {
-    sourceType: hasValidCollections ? 'database' : 'static',
-    count: finalCollections.length,
-    rawCollectionsLength: collections?.length,
-    hasValidCollections,
-    finalCollectionsPreview: finalCollections.slice(0, 2)
-  });
 
   // Use filters hook
   const {
@@ -229,16 +176,11 @@ const CollectionCategories: React.FC = () => {
     return <CollectionsLoadingSkeleton />;
   }
 
-  // Error state - montrer l'erreur au lieu de masquer
+  // Error state
   if (error) {
     console.error('❌ [CollectionCategories] Affichage état d\'erreur:', error);
     return <CollectionsErrorState error={error} retry={() => refetch()} />;
   }
-
-  console.log('🎨 [CollectionCategories] Affichage des collections finales:', {
-    finalCollectionsCount: finalCollections.length,
-    filteredCount: filteredAndSortedCollections.length
-  });
 
   return (
     <div className="space-y-8">
@@ -247,7 +189,7 @@ const CollectionCategories: React.FC = () => {
         <div className="bg-blue-50 p-4 rounded-lg text-sm">
           <strong>Debug Collections:</strong> 
           {hasValidCollections 
-            ? `${collections.length} collections de la base (${collections.filter(c => c.collection_translations?.length > 0).length} avec traductions)`
+            ? `${collections.length} collections de la base`
             : `${staticCollections.length} collections statiques`
           }
         </div>
