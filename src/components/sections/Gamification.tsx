@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Award, Shield, Trophy, Users, Star, ChevronRight } from 'lucide-react';
+import { Award, Shield, Trophy, Users, Star, ChevronRight, UserPlus } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 const GamificationItem = ({
   icon: Icon,
@@ -23,21 +24,20 @@ const GamificationItem = ({
         <Icon className="h-6 w-6 text-amber-700" />
       </div>
       <h3 className="text-lg font-medium mb-2">
-        <I18nText translationKey={titleKey}>
-          {/* Fallback derived from the key */}
+        <I18nText translationKey={titleKey} ns="gamification">
           {titleKey.split('.').pop()?.replace(/([A-Z])/g, ' $1')}
         </I18nText>
       </h3>
       <p className="text-slate-600 mb-4">
-        <I18nText translationKey={descriptionKey}>
-          Features and gamification elements to enhance your experience.
+        <I18nText translationKey={descriptionKey} ns="gamification">
+          Fonctionnalités de gamification pour améliorer votre expérience.
         </I18nText>
       </p>
       {points !== undefined && (
         <div className="flex items-center text-amber-700 font-medium">
           <Star className="h-4 w-4 mr-1 fill-amber-500 stroke-amber-700" />
           <span>
-            {points} <I18nText translationKey="gamification.points">points</I18nText>
+            {points} <I18nText translationKey="points.points" ns="gamification">points</I18nText>
           </span>
         </div>
       )}
@@ -46,31 +46,31 @@ const GamificationItem = ({
 };
 
 const Gamification = () => {
-  const { t } = useTranslation();
+  const { user } = useAuth();
   
   const gamificationItems = [
     {
       icon: Trophy,
-      titleKey: "gamification.badges.title",
-      descriptionKey: "gamification.badges.description",
+      titleKey: "badges.title",
+      descriptionKey: "badges.description",
       points: 50
     },
     {
       icon: Shield,
-      titleKey: "gamification.points.title",
-      descriptionKey: "gamification.points.description",
+      titleKey: "points.title",
+      descriptionKey: "points.description",
       points: 25
     },
     {
       icon: Users,
-      titleKey: "gamification.leaderboard.title",
-      descriptionKey: "gamification.leaderboard.description",
+      titleKey: "leaderboard.title",
+      descriptionKey: "leaderboard.description",
       points: 100
     },
     {
       icon: Award,
-      titleKey: "gamification.achievements.title",
-      descriptionKey: "gamification.achievements.description",
+      titleKey: "achievements.title",
+      descriptionKey: "achievements.description",
       points: 75
     }
   ];
@@ -80,13 +80,13 @@ const Gamification = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">
-            <I18nText translationKey="gamification.title">
-              Earn Rewards for Contributions
+            <I18nText translationKey="title" ns="gamification">
+              Gagnez des récompenses pour vos contributions
             </I18nText>
           </h2>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            <I18nText translationKey="gamification.subtitle">
-              Join our community and earn points, badges and recognition
+            <I18nText translationKey="subtitle" ns="gamification">
+              Rejoignez notre communauté et gagnez des points, badges et reconnaissance
             </I18nText>
           </p>
         </div>
@@ -104,14 +104,24 @@ const Gamification = () => {
         </div>
         
         <div className="mt-12 text-center">
-          <Button asChild className="gap-2 bg-amber-600 hover:bg-amber-700">
-            <Link to="/profile">
-              <I18nText translationKey="gamification.viewYourProgress">
-                View Your Progress
-              </I18nText>
-              <ChevronRight className="h-4 w-4" />
-            </Link>
-          </Button>
+          {user ? (
+            <Button asChild className="gap-2 bg-amber-600 hover:bg-amber-700">
+              <Link to="/profile">
+                <I18nText translationKey="viewYourProgress" ns="gamification">
+                  Voir votre progression
+                </I18nText>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild className="gap-2 bg-amber-600 hover:bg-amber-700">
+              <Link to="/auth">
+                <UserPlus className="h-4 w-4" />
+                <span>S'inscrire pour gagner des récompenses</span>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </section>

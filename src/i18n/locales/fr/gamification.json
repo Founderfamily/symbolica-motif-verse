@@ -27,5 +27,16 @@
   "noBadgesYet": "Aucun badge gagné pour le moment",
   "startContributing": "Commencez à contribuer pour gagner votre premier badge !",
   "level": "Niveau {level}",
-  "xpToNextLevel": "{xp} XP jusqu'au niveau suivant"
+  "xpToNextLevel": "{xp} XP jusqu'au niveau suivant",
+  "noActivity": "Aucune activité récente",
+  "noRankingsYet": "Aucun classement disponible",
+  "moreBadges": "de plus",
+  "activity": {
+    "contribution": "A contribué : {title}",
+    "genericContribution": "A fait une contribution",
+    "exploredSymbol": "A exploré le symbole : {name}",
+    "genericExploration": "A exploré un symbole",
+    "comment": "A ajouté un commentaire",
+    "generic": "Activité récente"
+  }
 }

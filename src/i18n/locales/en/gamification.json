@@ -27,5 +27,16 @@
   "noBadgesYet": "No badges earned yet",
   "startContributing": "Start contributing to earn your first badge!",
   "level": "Level {level}",
-  "xpToNextLevel": "{xp} XP to next level"
+  "xpToNextLevel": "{xp} XP to next level",
+  "noActivity": "No recent activity",
+  "noRankingsYet": "No rankings available yet",
+  "moreBadges": "more",
+  "activity": {
+    "contribution": "Contributed: {title}",
+    "genericContribution": "Made a contribution",
+    "exploredSymbol": "Explored symbol: {name}",
+    "genericExploration": "Explored a symbol",
+    "comment": "Added a comment",
+    "generic": "Recent activity"
+  }
 }
