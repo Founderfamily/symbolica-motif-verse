@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { SymbolData } from '@/types/supabase';
 import { Input } from '@/components/ui/input';
@@ -8,12 +9,14 @@ import { Button } from '@/components/ui/button';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
 import { AdvancedFilters } from '@/components/search/AdvancedFilters';
 import { I18nText } from '@/components/ui/i18n-text';
-import { Search, FilterX, Database, Wifi, WifiOff } from 'lucide-react';
+import { Search, FilterX, Database, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useHybridSymbols } from '@/hooks/useHybridSymbols';
+import { useQueryClient } from '@tanstack/react-query';
 
 const SymbolsPage: React.FC = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     cultures: [] as string[],
@@ -23,7 +26,7 @@ const SymbolsPage: React.FC = () => {
     mediums: [] as string[],
   });
   
-  // Utilisation du système hybride
+  // Utilisation du système hybride corrigé
   const { symbols, isLoading, dataSource, filterValues } = useHybridSymbols();
   
   console.log('🔍 SymbolsPage - État:', { 
@@ -79,7 +82,12 @@ const SymbolsPage: React.FC = () => {
     setSearchTerm('');
   };
 
-  // Indicateur de source de données
+  // Fonction pour rafraîchir les données
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['symbols-api'] });
+  };
+
+  // Indicateur de source de données amélioré
   const DataSourceIndicator = () => {
     const getSourceConfig = () => {
       switch (dataSource) {
@@ -111,9 +119,20 @@ const SymbolsPage: React.FC = () => {
     const Icon = config.icon;
 
     return (
-      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
-        <Icon className="w-3 h-3" />
-        <span>{config.text}</span>
+      <div className="flex items-center gap-2">
+        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
+          <Icon className="w-3 h-3" />
+          <span>{config.text}</span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleRefresh}
+          className="h-7 w-7 p-0"
+          title="Actualiser les données"
+        >
+          <RefreshCw className="h-3 w-3" />
+        </Button>
       </div>
     );
   };
@@ -220,7 +239,7 @@ const SymbolsPage: React.FC = () => {
               <div className="text-center">
                 <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-slate-600">Chargement des symboles...</p>
-                <p className="text-xs text-slate-400 mt-2">Initialisation...</p>
+                <p className="text-xs text-slate-400 mt-2">Connexion à la base de données...</p>
               </div>
             </div>
           ) : (
@@ -236,7 +255,8 @@ const SymbolsPage: React.FC = () => {
                 </div>
                 
                 {dataSource === 'static' && (
-                  <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                  <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded flex items-center gap-1">
+                    <WifiOff className="w-3 h-3" />
                     Mode hors ligne
                   </div>
                 )}
