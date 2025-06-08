@@ -25,24 +25,15 @@ export const useTrendingSymbolsOptimized = ({ timeFrame, limit = 12 }: UseTrendi
       } catch (err) {
         console.error('❌ [useTrendingSymbolsOptimized] Error:', err);
         setError(err as Error);
-        setData([]);
+        // Fallback immédiat si erreur
+        const fallback = await trendingService.getTrendingSymbols(timeFrame, limit);
+        setData(fallback);
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Timeout de sécurité
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.warn('⚠️ [useTrendingSymbolsOptimized] Timeout - setting empty data');
-        setData([]);
-        setIsLoading(false);
-      }
-    }, 5000);
-
     loadData();
-
-    return () => clearTimeout(timeout);
   }, [timeFrame, limit]);
 
   return { data, isLoading, error };
@@ -74,22 +65,7 @@ export const useTrendingStatsOptimized = () => {
       }
     };
 
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.warn('⚠️ [useTrendingStatsOptimized] Stats timeout - using fallback');
-        setData({ 
-          symbolsCount: 20, 
-          contributionsCount: 0, 
-          collectionsCount: 48, 
-          newToday: 0 
-        });
-        setIsLoading(false);
-      }
-    }, 3000);
-
     loadData();
-
-    return () => clearTimeout(timeout);
   }, []);
 
   return { data, isLoading };
@@ -116,17 +92,7 @@ export const useTrendingCategoriesOptimized = () => {
       }
     };
 
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.warn('⚠️ [useTrendingCategoriesOptimized] Categories timeout');
-        setData([]);
-        setIsLoading(false);
-      }
-    }, 3000);
-
     loadData();
-
-    return () => clearTimeout(timeout);
   }, []);
 
   return { data, isLoading };
@@ -153,17 +119,7 @@ export const useRecentActivityOptimized = () => {
       }
     };
 
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.warn('⚠️ [useRecentActivityOptimized] Activity timeout');
-        setData([]);
-        setIsLoading(false);
-      }
-    }, 3000);
-
     loadData();
-
-    return () => clearTimeout(timeout);
   }, []);
 
   return { data, isLoading };

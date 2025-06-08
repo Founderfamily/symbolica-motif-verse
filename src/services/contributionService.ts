@@ -22,38 +22,37 @@ const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
 
 // Récupérer toutes les contributions approuvées
 export async function getApprovedContributions(): Promise<CompleteContribution[]> {
-  console.log('🔍 [ContributionService] Getting approved contributions with timeout...');
+  console.log('🔍 [ContributionService] Getting approved contributions...');
   
   try {
-    const query = supabase
+    const { data, error } = await supabase
       .from('user_contributions')
       .select(`
         *,
         profiles:user_id (username, full_name)
       `)
       .eq('status', 'approved')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-    const result = await withTimeout(query, 5000);
-
-    if (result.error) {
-      console.error('❌ [ContributionService] Error:', result.error);
+    if (error) {
+      console.error('❌ [ContributionService] Error:', error);
       return [];
     }
 
-    if (!result.data || result.data.length === 0) {
+    if (!data || data.length === 0) {
       console.log('📭 [ContributionService] No approved contributions found');
       return [];
     }
 
-    // Récupérer les détails pour chaque contribution avec timeout plus court
+    // Récupérer les détails pour chaque contribution
     const contributionsWithDetails = await Promise.all(
-      (result.data as any[]).slice(0, 10).map(async (contribution) => {
+      data.map(async (contribution) => {
         try {
           const [images, tags, comments] = await Promise.all([
-            withTimeout(getContributionImages(contribution.id), 2000).catch(() => []),
-            withTimeout(getContributionTags(contribution.id), 2000).catch(() => []),
-            withTimeout(getContributionComments(contribution.id), 2000).catch(() => [])
+            getContributionImages(contribution.id),
+            getContributionTags(contribution.id),
+            getContributionComments(contribution.id)
           ]);
 
           return {
@@ -86,35 +85,33 @@ export async function getApprovedContributions(): Promise<CompleteContribution[]
 
 // Récupérer les contributions d'un utilisateur
 export async function getUserContributions(userId: string): Promise<CompleteContribution[]> {
-  console.log('🔍 [ContributionService] Getting user contributions with timeout for user:', userId);
+  console.log('🔍 [ContributionService] Getting user contributions for user:', userId);
   
   try {
-    const query = supabase
+    const { data, error } = await supabase
       .from('user_contributions')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    const result = await withTimeout(query, 5000);
-
-    if (result.error) {
-      console.error('❌ [ContributionService] Error:', result.error);
+    if (error) {
+      console.error('❌ [ContributionService] Error:', error);
       return [];
     }
 
-    if (!result.data || result.data.length === 0) {
+    if (!data || data.length === 0) {
       console.log('📭 [ContributionService] No user contributions found');
       return [];
     }
 
-    // Récupérer les détails avec timeouts plus courts
+    // Récupérer les détails
     const contributionsWithDetails = await Promise.all(
-      (result.data as UserContribution[]).map(async (contribution) => {
+      data.map(async (contribution) => {
         try {
           const [images, tags, comments] = await Promise.all([
-            withTimeout(getContributionImages(contribution.id), 2000).catch(() => []),
-            withTimeout(getContributionTags(contribution.id), 2000).catch(() => []),
-            withTimeout(getContributionComments(contribution.id), 2000).catch(() => [])
+            getContributionImages(contribution.id),
+            getContributionTags(contribution.id),
+            getContributionComments(contribution.id)
           ]);
 
           return {
@@ -145,10 +142,10 @@ export async function getUserContributions(userId: string): Promise<CompleteCont
 
 // Récupérer les contributions en attente (pour les admins)
 export async function getPendingContributions(): Promise<CompleteContribution[]> {
-  console.log('🔍 [ContributionService] Getting pending contributions with timeout...');
+  console.log('🔍 [ContributionService] Getting pending contributions...');
   
   try {
-    const query = supabase
+    const { data, error } = await supabase
       .from('user_contributions')
       .select(`
         *,
@@ -157,26 +154,24 @@ export async function getPendingContributions(): Promise<CompleteContribution[]>
       .eq('status', 'pending')
       .order('created_at', { ascending: true });
 
-    const result = await withTimeout(query, 5000);
-
-    if (result.error) {
-      console.error('❌ [ContributionService] Error:', result.error);
+    if (error) {
+      console.error('❌ [ContributionService] Error:', error);
       return [];
     }
 
-    if (!result.data || result.data.length === 0) {
+    if (!data || data.length === 0) {
       console.log('📭 [ContributionService] No pending contributions found');
       return [];
     }
 
-    // Récupérer les détails avec timeouts
+    // Récupérer les détails
     const contributionsWithDetails = await Promise.all(
-      (result.data as any[]).map(async (contribution) => {
+      data.map(async (contribution) => {
         try {
           const [images, tags, comments] = await Promise.all([
-            withTimeout(getContributionImages(contribution.id), 2000).catch(() => []),
-            withTimeout(getContributionTags(contribution.id), 2000).catch(() => []),
-            withTimeout(getContributionComments(contribution.id), 2000).catch(() => [])
+            getContributionImages(contribution.id),
+            getContributionTags(contribution.id),
+            getContributionComments(contribution.id)
           ]);
 
           return {

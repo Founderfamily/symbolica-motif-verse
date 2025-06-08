@@ -33,40 +33,29 @@ export interface RecentActivity {
 }
 
 class TrendingService {
-  private timeout(ms: number) {
-    return new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout')), ms)
-    );
-  }
-
   async getTrendingSymbols(timeFrame: 'day' | 'week' | 'month' = 'week', limit = 12): Promise<TrendingSymbol[]> {
-    console.log('🔍 [TrendingService] Getting trending symbols with timeout...');
+    console.log('🔍 [TrendingService] Getting trending symbols...');
     
     try {
-      const query = supabase
+      const { data, error } = await supabase
         .from('symbols')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
 
-      const result = await Promise.race([
-        query,
-        this.timeout(3000)
-      ]);
+      console.log('📊 [TrendingService] Symbols query result:', { data, error });
 
-      console.log('📊 [TrendingService] Symbols query result:', result);
-
-      if ((result as any).error) {
-        console.error('❌ [TrendingService] Error fetching symbols:', (result as any).error);
+      if (error) {
+        console.error('❌ [TrendingService] Error fetching symbols:', error);
         return this.getFallbackSymbols();
       }
 
-      if (!(result as any).data || (result as any).data.length === 0) {
+      if (!data || data.length === 0) {
         console.log('⚠️ [TrendingService] No symbols found, using fallback');
         return this.getFallbackSymbols();
       }
 
-      const trendingSymbols: TrendingSymbol[] = (result as any).data.map((symbol: any, index: number) => ({
+      const trendingSymbols: TrendingSymbol[] = data.map((symbol: any, index: number) => ({
         id: symbol.id,
         name: symbol.name,
         culture: symbol.culture,
@@ -87,33 +76,26 @@ class TrendingService {
   }
 
   async getTrendingStats(): Promise<TrendingStats> {
-    console.log('📈 [TrendingService] Getting trending stats with timeout...');
+    console.log('📈 [TrendingService] Getting trending stats...');
     
     try {
-      const promises = [
+      const [symbolsResult, contributionsResult, collectionsResult] = await Promise.all([
         supabase.from('symbols').select('*', { count: 'exact', head: true }),
         supabase.from('user_contributions').select('*', { count: 'exact', head: true }),
         supabase.from('collections').select('*', { count: 'exact', head: true }),
-      ];
-
-      const results = await Promise.race([
-        Promise.all(promises),
-        this.timeout(2000)
       ]);
 
       const today = new Date().toISOString().split('T')[0];
-      const newTodayQuery = supabase.from('symbols').select('*', { count: 'exact', head: true }).gte('created_at', today);
-      
-      const newTodayResult = await Promise.race([
-        newTodayQuery,
-        this.timeout(1000)
-      ]);
+      const { data: newTodayData, error: newTodayError } = await supabase
+        .from('symbols')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', today);
 
       const stats: TrendingStats = {
-        symbolsCount: (results as any)[0].count || 20,
-        contributionsCount: (results as any)[1].count || 0,
-        collectionsCount: (results as any)[2].count || 48,
-        newToday: (newTodayResult as any).count || 0
+        symbolsCount: symbolsResult.count || 20,
+        contributionsCount: contributionsResult.count || 0,
+        collectionsCount: collectionsResult.count || 48,
+        newToday: newTodayData?.length || 0
       };
 
       console.log('✅ [TrendingService] Stats retrieved:', stats);
@@ -130,22 +112,17 @@ class TrendingService {
   }
 
   async getTrendingCategories(): Promise<TrendingCategory[]> {
-    console.log('🏷️ [TrendingService] Getting trending categories with timeout...');
+    console.log('🏷️ [TrendingService] Getting trending categories...');
     
     try {
-      const query = supabase.from('symbols').select('culture');
-      
-      const result = await Promise.race([
-        query,
-        this.timeout(2000)
-      ]);
+      const { data, error } = await supabase.from('symbols').select('culture');
 
-      if ((result as any).error || !(result as any).data || (result as any).data.length === 0) {
+      if (error || !data || data.length === 0) {
         console.log('⚠️ [TrendingService] No categories data, using fallback');
         return this.getFallbackCategories();
       }
 
-      const cultureCounts = (result as any).data.reduce((acc: Record<string, number>, symbol: any) => {
+      const cultureCounts = data.reduce((acc: Record<string, number>, symbol: any) => {
         acc[symbol.culture] = (acc[symbol.culture] || 0) + 1;
         return acc;
       }, {});
@@ -167,20 +144,19 @@ class TrendingService {
   }
 
   async getRecentActivity(): Promise<RecentActivity[]> {
-    console.log('🔔 [TrendingService] Getting recent activity with timeout...');
+    console.log('🔔 [TrendingService] Getting recent activity...');
     
     try {
-      const query = supabase.from('symbols').select('name, created_at').order('created_at', { ascending: false }).limit(5);
-      
-      const result = await Promise.race([
-        query,
-        this.timeout(2000)
-      ]);
+      const { data, error } = await supabase
+        .from('symbols')
+        .select('name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
 
       let activities: RecentActivity[] = [];
 
-      if ((result as any).data && (result as any).data.length > 0) {
-        activities.push(...(result as any).data.map((symbol: any) => ({
+      if (data && data.length > 0) {
+        activities.push(...data.map((symbol: any) => ({
           type: 'symbol' as const,
           message: `Nouveau symbole "${symbol.name}" ajouté`,
           timestamp: symbol.created_at

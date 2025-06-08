@@ -27,29 +27,19 @@ const Contributions = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [contributions, setContributions] = useState<CompleteContribution[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadContributions = async () => {
       if (!user) {
-        setLoading(false);
+        console.log('👤 [Contributions] No user, skipping contribution loading');
         return;
       }
       
       console.log('🔄 [Contributions] Starting to load contributions for user:', user.id);
       setLoading(true);
       setError(null);
-      
-      // Timeout de sécurité
-      const timeoutId = setTimeout(() => {
-        if (loading) {
-          console.warn('⚠️ [Contributions] Loading timeout - showing empty state');
-          setContributions([]);
-          setLoading(false);
-          setError('Timeout lors du chargement');
-        }
-      }, 8000);
 
       try {
         const data = await getUserContributions(user.id);
@@ -61,7 +51,6 @@ const Contributions = () => {
         setError('Erreur lors du chargement des contributions');
         setContributions([]);
       } finally {
-        clearTimeout(timeoutId);
         setLoading(false);
       }
     };
