@@ -35,13 +35,20 @@ const Hero = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-          <Button size="lg" className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-lg shadow-amber-600/20 transform hover:-translate-y-1 transition-all">
+          <Button 
+            size="lg" 
+            className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold px-8 py-4 rounded-full border-2 border-orange-800 shadow-lg transform hover:-translate-y-1 transition-all"
+          >
             <I18nText translationKey="hero.community">Rejoindre une communauté</I18nText> 
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Button size="lg" variant="outline" className="border-slate-400 text-slate-700 hover:bg-slate-50 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className="bg-white text-slate-700 font-semibold px-8 py-4 rounded-full border-2 border-slate-300 hover:bg-slate-50 hover:border-slate-400 shadow-lg transform hover:-translate-y-1 transition-all"
+          >
             <I18nText translationKey="hero.explore">Commencer l'exploration</I18nText> 
-            <MapPin className="ml-2 h-4 w-4 text-amber-600" />
+            <MapPin className="ml-2 h-4 w-4 text-orange-600" />
           </Button>
         </div>
       </div>
