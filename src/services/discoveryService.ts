@@ -68,10 +68,10 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
     .from('discovery_comments')
     .select(`
       *,
-      user_profile:profiles!discovery_comments_user_id_fkey(username, full_name),
-      replies:discovery_comments!parent_comment_id(
+      profiles!discovery_comments_user_id_fkey(username, full_name),
+      replies:discovery_comments!discovery_comments_parent_comment_id_fkey(
         *,
-        user_profile:profiles!discovery_comments_user_id_fkey(username, full_name)
+        profiles!discovery_comments_user_id_fkey(username, full_name)
       )
     `)
     .eq('discovery_id', discoveryId)
@@ -93,13 +93,24 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
     userLikes = likesData?.map(like => like.comment_id) || [];
   }
 
-  // Add is_liked property
-  const commentsWithLikes = (data || []).map(comment => ({
+  // Transform the data to match expected interface
+  const transformedData = (data || []).map(comment => ({
     ...comment,
-    is_liked: userLikes.includes(comment.id)
+    user_profile: comment.profiles ? {
+      username: comment.profiles.username,
+      full_name: comment.profiles.full_name
+    } : undefined,
+    is_liked: userLikes.includes(comment.id),
+    replies: comment.replies?.map((reply: any) => ({
+      ...reply,
+      user_profile: reply.profiles ? {
+        username: reply.profiles.username,
+        full_name: reply.profiles.full_name
+      } : undefined
+    }))
   }));
 
-  return commentsWithLikes;
+  return transformedData;
 };
 
 export const createDiscoveryComment = async (discoveryId: string, userId: string, content: string, parentCommentId: string | null = null): Promise<void> => {

@@ -44,7 +44,7 @@ export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
     .from('group_posts')
     .select(`
       *,
-      user_profile:profiles(username, full_name)
+      profiles!group_posts_user_id_fkey(username, full_name)
     `)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
@@ -53,7 +53,16 @@ export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
     throw error;
   }
 
-  return (data || []) as GroupPost[];
+  // Transform the data to match expected interface
+  const transformedData = (data || []).map(post => ({
+    ...post,
+    user_profile: post.profiles ? {
+      username: post.profiles.username,
+      full_name: post.profiles.full_name
+    } : undefined
+  }));
+
+  return transformedData as GroupPost[];
 };
 
 export const createGroupPost = async (groupId: string, userId: string, content: string): Promise<void> => {
@@ -132,10 +141,10 @@ export const getPostComments = async (postId: string, userId?: string): Promise<
     .from('post_comments')
     .select(`
       *,
-      user_profile:profiles(username, full_name),
-      replies:post_comments!parent_comment_id(
+      profiles!post_comments_user_id_fkey(username, full_name),
+      replies:post_comments!post_comments_parent_comment_id_fkey(
         *,
-        user_profile:profiles(username, full_name)
+        profiles!post_comments_user_id_fkey(username, full_name)
       )
     `)
     .eq('post_id', postId)
@@ -157,13 +166,24 @@ export const getPostComments = async (postId: string, userId?: string): Promise<
     userLikes = likesData?.map(like => like.comment_id) || [];
   }
 
-  // Add is_liked property
-  const commentsWithLikes = (data || []).map(comment => ({
+  // Transform the data to match expected interface
+  const transformedData = (data || []).map(comment => ({
     ...comment,
-    is_liked: userLikes.includes(comment.id)
+    user_profile: comment.profiles ? {
+      username: comment.profiles.username,
+      full_name: comment.profiles.full_name
+    } : undefined,
+    is_liked: userLikes.includes(comment.id),
+    replies: comment.replies?.map((reply: any) => ({
+      ...reply,
+      user_profile: reply.profiles ? {
+        username: reply.profiles.username,
+        full_name: reply.profiles.full_name
+      } : undefined
+    }))
   }));
 
-  return commentsWithLikes as PostComment[];
+  return transformedData as PostComment[];
 };
 
 export const createPostComment = async (postId: string, userId: string, content: string, parentCommentId: string | null = null): Promise<void> => {
@@ -270,7 +290,7 @@ export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> =
     .from('group_members')
     .select(`
       *,
-      profiles(
+      profiles!group_members_user_id_fkey(
         id,
         username,
         full_name
@@ -312,8 +332,8 @@ export const getGroupInvitations = async (groupId: string, userId: string): Prom
     .from('group_invitations')
     .select(`
       *,
-      group:interest_groups(name, slug),
-      inviter_profile:profiles(username, full_name)
+      interest_groups!group_invitations_group_id_fkey(name, slug),
+      profiles!group_invitations_invited_by_fkey(username, full_name)
     `)
     .eq('group_id', groupId)
     .eq('invited_user_id', userId)
@@ -324,7 +344,20 @@ export const getGroupInvitations = async (groupId: string, userId: string): Prom
     throw error;
   }
 
-  return data as GroupInvitation[];
+  // Transform the data to match expected interface
+  const transformedData = (data || []).map(invitation => ({
+    ...invitation,
+    group: invitation.interest_groups ? {
+      name: invitation.interest_groups.name,
+      slug: invitation.interest_groups.slug
+    } : undefined,
+    inviter_profile: invitation.profiles ? {
+      username: invitation.profiles.username,
+      full_name: invitation.profiles.full_name
+    } : undefined
+  }));
+
+  return transformedData as GroupInvitation[];
 };
 
 export const getUserInvitations = async (userId: string): Promise<GroupInvitation[]> => {
@@ -332,8 +365,8 @@ export const getUserInvitations = async (userId: string): Promise<GroupInvitatio
     .from('group_invitations')
     .select(`
       *,
-      group:interest_groups(name, slug),
-      inviter_profile:profiles(username, full_name)
+      interest_groups!group_invitations_group_id_fkey(name, slug),
+      profiles!group_invitations_invited_by_fkey(username, full_name)
     `)
     .eq('invited_user_id', userId)
     .eq('status', 'pending')
@@ -344,7 +377,20 @@ export const getUserInvitations = async (userId: string): Promise<GroupInvitatio
     throw error;
   }
 
-  return data as GroupInvitation[];
+  // Transform the data to match expected interface
+  const transformedData = (data || []).map(invitation => ({
+    ...invitation,
+    group: invitation.interest_groups ? {
+      name: invitation.interest_groups.name,
+      slug: invitation.interest_groups.slug
+    } : undefined,
+    inviter_profile: invitation.profiles ? {
+      username: invitation.profiles.username,
+      full_name: invitation.profiles.full_name
+    } : undefined
+  }));
+
+  return transformedData as GroupInvitation[];
 };
 
 export const respondToGroupInvitation = async (invitationId: string, userId: string, status: 'accepted' | 'declined'): Promise<void> => {
@@ -389,8 +435,8 @@ export const getGroupNotifications = async (userId: string): Promise<GroupNotifi
     .from('group_notifications')
     .select(`
       *,
-      group:interest_groups(name, slug),
-      creator_profile:profiles(username, full_name)
+      interest_groups!group_notifications_group_id_fkey(name, slug),
+      profiles!group_notifications_created_by_fkey(username, full_name)
     `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
@@ -400,7 +446,20 @@ export const getGroupNotifications = async (userId: string): Promise<GroupNotifi
     throw error;
   }
 
-  return data as GroupNotification[];
+  // Transform the data to match expected interface
+  const transformedData = (data || []).map(notification => ({
+    ...notification,
+    group: notification.interest_groups ? {
+      name: notification.interest_groups.name,
+      slug: notification.interest_groups.slug
+    } : undefined,
+    creator_profile: notification.profiles ? {
+      username: notification.profiles.username,
+      full_name: notification.profiles.full_name
+    } : undefined
+  }));
+
+  return transformedData as GroupNotification[];
 };
 
 export const markNotificationAsRead = async (notificationId: string, userId: string): Promise<void> => {
@@ -421,7 +480,7 @@ export const getGroupDiscoveries = async (groupId: string, userId?: string): Pro
     .from('group_discoveries')
     .select(`
       *,
-      sharer_profile:profiles(username, full_name)
+      profiles!group_discoveries_shared_by_fkey(username, full_name)
     `)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
@@ -509,7 +568,11 @@ export const getGroupDiscoveries = async (groupId: string, userId?: string): Pro
       return {
         ...discovery,
         entity_preview,
-        is_liked: userLikes.includes(discovery.id)
+        is_liked: userLikes.includes(discovery.id),
+        sharer_profile: discovery.profiles ? {
+          username: discovery.profiles.username,
+          full_name: discovery.profiles.full_name
+        } : undefined
       } as GroupDiscovery;
     })
   );

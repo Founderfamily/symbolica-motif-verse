@@ -25,7 +25,7 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
   const [filteredDiscoveries, setFilteredDiscoveries] = useState<GroupDiscovery[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedDiscovery, setExpandedDiscovery] = useState<string | null>(null);
-  const [comments, setComments] = useState<Record<string, DiscoveryComment[]>>({});
+  const [comments, setComments] = useState<Record<string, any[]>>({});
   const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
@@ -102,7 +102,7 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
     setLoadingComments(prev => ({ ...prev, [discoveryId]: true }));
     try {
       const commentsData = await getDiscoveryComments(discoveryId, auth?.user?.id);
-      setComments(prev => ({ ...prev, [discoveryId]: commentsData as DiscoveryComment[] }));
+      setComments(prev => ({ ...prev, [discoveryId]: commentsData }));
     } catch (error) {
       console.error('Error loading comments:', error);
       toast.error('Failed to load comments');
@@ -204,7 +204,7 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
           if (comment.replies) {
             return {
               ...comment,
-              replies: comment.replies.map(reply => 
+              replies: comment.replies.map((reply: any) => 
                 reply.id === commentId 
                   ? {
                       ...reply,
@@ -268,7 +268,7 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
     window.open(url, '_blank');
   };
 
-  const CommentItem: React.FC<{ comment: DiscoveryComment; discoveryId: string; isReply?: boolean }> = ({ comment, discoveryId, isReply = false }) => (
+  const CommentItem: React.FC<{ comment: any; discoveryId: string; isReply?: boolean }> = ({ comment, discoveryId, isReply = false }) => (
     <div className={`space-y-3 ${isReply ? 'ml-8 border-l-2 border-slate-200 pl-4' : ''}`}>
       <div className="flex space-x-3">
         <Avatar className="h-8 w-8">
@@ -350,7 +350,7 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
 
       {comment.replies && comment.replies.length > 0 && (
         <div className="space-y-3">
-          {comment.replies.map((reply) => (
+          {comment.replies.map((reply: any) => (
             <CommentItem key={reply.id} comment={reply} discoveryId={discoveryId} isReply={true} />
           ))}
         </div>
