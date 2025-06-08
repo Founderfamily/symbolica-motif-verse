@@ -445,6 +445,37 @@ export async function createContribution(
   }
 }
 
+// Ajouter un commentaire à une contribution
+export async function addContributionComment(
+  contributionId: string,
+  userId: string,
+  comment: string
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('contribution_comments')
+      .insert({
+        contribution_id: contributionId,
+        user_id: userId,
+        comment,
+        comment_translations: {
+          fr: comment,
+          en: comment
+        }
+      });
+
+    if (error) {
+      console.error('Error adding contribution comment:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Failed to add contribution comment:', error);
+    return false;
+  }
+}
+
 // Mettre à jour le statut d'une contribution (pour les admins)
 export const updateContributionStatus = async (
   contributionId: string,

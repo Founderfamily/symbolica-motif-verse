@@ -1,9 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, Bookmark, Hexagon, Map, FileText } from 'lucide-react';
+import { Users, TrendingUp, Bookmark, Hexagon, Map, FileText, ChevronDown, LayoutDashboard, RefreshCw, Star, Folder, Settings } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, Button, LayoutDashboard, Users as UsersIcon, FileText as FileTextIcon, RefreshCw as RefreshCwIcon, Star as StarIcon, Folder as FolderIcon, Settings as SettingsIcon, ChevronDown } from '@radix-ui/react-dropdown-menu';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 
 interface NavigationItem {
   name: string;
@@ -14,7 +20,7 @@ interface NavigationItem {
 
 export const NavigationItems: React.FC = () => {
   const auth = useAuth();
-  const isAdmin = auth?.user?.isAdmin;
+  const isAdmin = auth?.profile?.is_admin;
 
   // Menus de base accessibles à tous
   const baseNavigationItems: NavigationItem[] = [
@@ -94,37 +100,37 @@ export const NavigationItems: React.FC = () => {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/users" className="flex items-center">
-                <UsersIcon className="mr-2 h-4 w-4" />
+                <Users className="mr-2 h-4 w-4" />
                 Utilisateurs
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/contributions" className="flex items-center">
-                <FileTextIcon className="mr-2 h-4 w-4" />
+                <FileText className="mr-2 h-4 w-4" />
                 Contributions
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/conversion" className="flex items-center">
-                <RefreshCwIcon className="mr-2 h-4 w-4" />
+                <RefreshCw className="mr-2 h-4 w-4" />
                 Conversion Auto
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/symbols" className="flex items-center">
-                <StarIcon className="mr-2 h-4 w-4" />
+                <Star className="mr-2 h-4 w-4" />
                 Symboles
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/collections" className="flex items-center">
-                <FolderIcon className="mr-2 h-4 w-4" />
+                <Folder className="mr-2 h-4 w-4" />
                 Collections
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/settings" className="flex items-center">
-                <SettingsIcon className="mr-2 h-4 w-4" />
+                <Settings className="mr-2 h-4 w-4" />
                 Paramètres
               </Link>
             </DropdownMenuItem>
