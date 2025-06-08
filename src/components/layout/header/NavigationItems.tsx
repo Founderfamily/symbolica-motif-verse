@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users } from 'lucide-react';
+import { Users, TrendingUp } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -32,6 +32,11 @@ export const NavigationItems: React.FC = () => {
       href: '/community',
       icon: <Users className="h-4 w-4 inline mr-1" />,
       badge: 'New'
+    },
+    { 
+      name: 'Trending', 
+      href: '/trending',
+      icon: <TrendingUp className="h-4 w-4 inline mr-1" />
     }
   ];
 

@@ -1,0 +1,28 @@
+
+{
+  "title": "Trending",
+  "description": "Discover the most popular symbols, collections and discoveries from the community",
+  "popularSymbols": "Popular Symbols",
+  "categories": "Trending Categories",
+  "recentActivity": "Recent Activity",
+  "stats": {
+    "popularSymbols": "Popular symbols",
+    "newDiscoveries": "New discoveries",
+    "recentContributions": "Recent contributions",
+    "activeCollections": "Active collections"
+  },
+  "timeframes": {
+    "day": "24h",
+    "week": "7d",
+    "month": "30d"
+  },
+  "activity": {
+    "newSymbol": "New symbol added",
+    "collectionUpdated": "Collection updated",
+    "newContribution": "New contribution",
+    "commentAdded": "Comment added"
+  },
+  "noDataAvailable": "No data available at the moment",
+  "loadingStats": "Loading statistics...",
+  "errorLoadingData": "Error loading data"
+}
