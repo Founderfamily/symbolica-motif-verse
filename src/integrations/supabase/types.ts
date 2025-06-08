@@ -928,7 +928,29 @@ export type Database = {
           notes?: string | null
           symbol_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_group_symbols_added_by"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_group_symbols_group_id"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "interest_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_group_symbols_symbol_id"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       image_annotations: {
         Row: {

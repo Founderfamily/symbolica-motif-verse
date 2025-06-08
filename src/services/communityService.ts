@@ -694,7 +694,7 @@ export const getGroupSymbols = async (groupId: string): Promise<GroupSymbol[]> =
     .from('group_symbols')
     .select(`
       *,
-      symbols (
+      symbols!inner (
         id,
         name,
         culture,
