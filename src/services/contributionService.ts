@@ -25,12 +25,20 @@ export async function getApprovedContributions(): Promise<CompleteContribution[]
   console.log('🔍 [ContributionService] Getting approved contributions...');
   
   try {
+    // First check if there are any contributions at all
+    const { count } = await supabase
+      .from('user_contributions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'approved');
+
+    if (!count || count === 0) {
+      console.log('📭 [ContributionService] No approved contributions found');
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('user_contributions')
-      .select(`
-        *,
-        profiles:user_id (username, full_name)
-      `)
+      .select('*')
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
       .limit(10);
@@ -41,9 +49,17 @@ export async function getApprovedContributions(): Promise<CompleteContribution[]
     }
 
     if (!data || data.length === 0) {
-      console.log('📭 [ContributionService] No approved contributions found');
       return [];
     }
+
+    // Get user profiles separately
+    const userIds = [...new Set(data.map(c => c.user_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, full_name')
+      .in('id', userIds);
+
+    const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
     // Récupérer les détails pour chaque contribution
     const contributionsWithDetails = await Promise.all(
@@ -55,12 +71,17 @@ export async function getApprovedContributions(): Promise<CompleteContribution[]
             getContributionComments(contribution.id)
           ]);
 
+          const userProfile = profilesMap.get(contribution.user_id);
+
           return {
             ...contribution,
             images,
             tags,
             comments,
-            user_profile: contribution.profiles
+            user_profile: userProfile ? {
+              username: userProfile.username || '',
+              full_name: userProfile.full_name || ''
+            } : undefined
           } as CompleteContribution;
         } catch (err) {
           console.warn('⚠️ [ContributionService] Error loading details for contribution:', contribution.id);
@@ -69,7 +90,7 @@ export async function getApprovedContributions(): Promise<CompleteContribution[]
             images: [],
             tags: [],
             comments: [],
-            user_profile: contribution.profiles
+            user_profile: undefined
           } as CompleteContribution;
         }
       })
@@ -88,6 +109,17 @@ export async function getUserContributions(userId: string): Promise<CompleteCont
   console.log('🔍 [ContributionService] Getting user contributions for user:', userId);
   
   try {
+    // First check if user has any contributions
+    const { count } = await supabase
+      .from('user_contributions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (!count || count === 0) {
+      console.log('📭 [ContributionService] No user contributions found');
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('user_contributions')
       .select('*')
@@ -100,7 +132,6 @@ export async function getUserContributions(userId: string): Promise<CompleteCont
     }
 
     if (!data || data.length === 0) {
-      console.log('📭 [ContributionService] No user contributions found');
       return [];
     }
 
@@ -145,12 +176,20 @@ export async function getPendingContributions(): Promise<CompleteContribution[]>
   console.log('🔍 [ContributionService] Getting pending contributions...');
   
   try {
+    // First check if there are any pending contributions
+    const { count } = await supabase
+      .from('user_contributions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
+
+    if (!count || count === 0) {
+      console.log('📭 [ContributionService] No pending contributions found');
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('user_contributions')
-      .select(`
-        *,
-        profiles:user_id (username, full_name)
-      `)
+      .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: true });
 
@@ -160,9 +199,17 @@ export async function getPendingContributions(): Promise<CompleteContribution[]>
     }
 
     if (!data || data.length === 0) {
-      console.log('📭 [ContributionService] No pending contributions found');
       return [];
     }
+
+    // Get user profiles separately
+    const userIds = [...new Set(data.map(c => c.user_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, full_name')
+      .in('id', userIds);
+
+    const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
     // Récupérer les détails
     const contributionsWithDetails = await Promise.all(
@@ -174,18 +221,23 @@ export async function getPendingContributions(): Promise<CompleteContribution[]>
             getContributionComments(contribution.id)
           ]);
 
+          const userProfile = profilesMap.get(contribution.user_id);
+
           return {
             ...contribution,
             images,
             tags,
             comments,
-            user_profile: contribution.profiles || undefined,
+            user_profile: userProfile ? {
+              username: userProfile.username || '',
+              full_name: userProfile.full_name || ''
+            } : undefined,
             title_translations: contribution.title_translations as { [key: string]: string | null } | null,
             description_translations: contribution.description_translations as { [key: string]: string | null } | null,
             location_name_translations: contribution.location_name_translations as { [key: string]: string | null } | null,
             cultural_context_translations: contribution.cultural_context_translations as { [key: string]: string | null } | null,
             period_translations: contribution.period_translations as { [key: string]: string | null } | null
-          } as unknown as CompleteContribution;
+          } as CompleteContribution;
         } catch (err) {
           console.warn('⚠️ [ContributionService] Error loading details for contribution:', contribution.id);
           return {
@@ -193,8 +245,8 @@ export async function getPendingContributions(): Promise<CompleteContribution[]>
             images: [],
             tags: [],
             comments: [],
-            user_profile: contribution.profiles || undefined
-          } as unknown as CompleteContribution;
+            user_profile: undefined
+          } as CompleteContribution;
         }
       })
     );
@@ -244,15 +296,25 @@ export async function getContributionComments(contributionId: string): Promise<C
   try {
     const { data, error } = await supabase
       .from('contribution_comments')
-      .select(`
-        *,
-        profiles:user_id (username, full_name)
-      `)
+      .select('*')
       .eq('contribution_id', contributionId);
 
     if (error) throw error;
     
-    const transformedData = (data || []).map(item => {
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // Get user profiles for comments separately
+    const userIds = [...new Set(data.map(c => c.user_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, full_name')
+      .in('id', userIds);
+
+    const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+    
+    const transformedData = data.map(item => {
       const comment: ContributionComment = {
         id: item.id,
         contribution_id: item.contribution_id,
@@ -262,15 +324,12 @@ export async function getContributionComments(contributionId: string): Promise<C
         comment_translations: item.comment_translations as { [key: string]: string | null } | null
       };
       
-      if (item.profiles) {
-        const profiles = item.profiles as { username?: string; full_name?: string };
-        
-        if (profiles && typeof profiles === 'object') {
-          comment.profiles = {
-            username: profiles.username || '',
-            full_name: profiles.full_name || ''
-          };
-        }
+      const userProfile = profilesMap.get(item.user_id);
+      if (userProfile) {
+        comment.profiles = {
+          username: userProfile.username || '',
+          full_name: userProfile.full_name || ''
+        };
       }
       
       return comment;
@@ -443,14 +502,18 @@ export async function getContributionById(contributionId: string): Promise<Compl
   try {
     const { data, error } = await supabase
       .from('user_contributions')
-      .select(`
-        *,
-        profiles:user_id (username, full_name)
-      `)
+      .select('*')
       .eq('id', contributionId)
       .single();
 
     if (error) throw error;
+
+    // Get user profile separately
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, username, full_name')
+      .eq('id', data.user_id)
+      .single();
 
     const images = await getContributionImages(contributionId);
     const tags = await getContributionTags(contributionId);
@@ -461,13 +524,16 @@ export async function getContributionById(contributionId: string): Promise<Compl
       images,
       tags,
       comments,
-      user_profile: data.profiles || undefined,
+      user_profile: profile ? {
+        username: profile.username || '',
+        full_name: profile.full_name || ''
+      } : undefined,
       title_translations: data.title_translations as { [key: string]: string | null } | null,
       description_translations: data.description_translations as { [key: string]: string | null } | null,
       location_name_translations: data.location_name_translations as { [key: string]: string | null } | null,
       cultural_context_translations: data.cultural_context_translations as { [key: string]: string | null } | null,
       period_translations: data.period_translations as { [key: string]: string | null } | null
-    } as unknown as CompleteContribution;
+    } as CompleteContribution;
   } catch (error: any) {
     console.error('Error fetching contribution by ID:', error.message);
     return null;
