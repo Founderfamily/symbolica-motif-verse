@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { GroupPost, PostComment, GroupMember, GroupInvitation, GroupNotification, GroupDiscovery } from '@/types/interest-groups';
 
@@ -43,7 +44,7 @@ export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
     .from('group_posts')
     .select(`
       *,
-      user_profile:profiles(username, full_name)
+      user_profile:profiles!group_posts_user_id_fkey(username, full_name)
     `)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
@@ -131,10 +132,10 @@ export const getPostComments = async (postId: string, userId?: string): Promise<
     .from('post_comments')
     .select(`
       *,
-      user_profile:profiles(username, full_name),
-      replies:post_comments(
+      user_profile:profiles!post_comments_user_id_fkey(username, full_name),
+      replies:post_comments!parent_comment_id(
         *,
-        user_profile:profiles(username, full_name)
+        user_profile:profiles!post_comments_user_id_fkey(username, full_name)
       )
     `)
     .eq('post_id', postId)
@@ -269,7 +270,7 @@ export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> =
     .from('group_members')
     .select(`
       *,
-      profiles(
+      profiles!group_members_user_id_fkey(
         id,
         username,
         full_name
@@ -311,8 +312,8 @@ export const getGroupInvitations = async (groupId: string, userId: string): Prom
     .from('group_invitations')
     .select(`
       *,
-      group(name, slug),
-      inviter_profile:profiles!invited_by(username, full_name)
+      group:interest_groups!group_invitations_group_id_fkey(name, slug),
+      inviter_profile:profiles!group_invitations_invited_by_fkey(username, full_name)
     `)
     .eq('group_id', groupId)
     .eq('invited_user_id', userId)
@@ -320,6 +321,26 @@ export const getGroupInvitations = async (groupId: string, userId: string): Prom
 
   if (error) {
     console.error('Error fetching group invitations:', error);
+    throw error;
+  }
+
+  return data as GroupInvitation[];
+};
+
+export const getUserInvitations = async (userId: string): Promise<GroupInvitation[]> => {
+  const { data, error } = await supabase
+    .from('group_invitations')
+    .select(`
+      *,
+      group:interest_groups!group_invitations_group_id_fkey(name, slug),
+      inviter_profile:profiles!group_invitations_invited_by_fkey(username, full_name)
+    `)
+    .eq('invited_user_id', userId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching user invitations:', error);
     throw error;
   }
 
@@ -339,25 +360,37 @@ export const respondToGroupInvitation = async (invitationId: string, userId: str
   }
 
   if (status === 'accepted') {
-    // Also add the user to the group members
-    const { error: memberError } = await supabase
-      .from('group_members')
-      .insert([{ group_id: (await supabase.from('group_invitations').select('group_id').eq('id', invitationId).single()).data?.group_id, user_id: userId, role: 'member' }]);
+    // Get the group_id from the invitation
+    const { data: invitation } = await supabase
+      .from('group_invitations')
+      .select('group_id')
+      .eq('id', invitationId)
+      .single();
 
-    if (memberError) {
-      console.error('Error adding user to group members:', memberError);
-      throw memberError;
+    if (invitation) {
+      // Also add the user to the group members
+      const { error: memberError } = await supabase
+        .from('group_members')
+        .insert([{ group_id: invitation.group_id, user_id: userId, role: 'member' }]);
+
+      if (memberError) {
+        console.error('Error adding user to group members:', memberError);
+        throw memberError;
+      }
     }
   }
 };
+
+// Alias for backward compatibility
+export const respondToInvitation = respondToGroupInvitation;
 
 export const getGroupNotifications = async (userId: string): Promise<GroupNotification[]> => {
   const { data, error } = await supabase
     .from('group_notifications')
     .select(`
       *,
-      group(name, slug),
-      creator_profile:profiles!created_by(username, full_name)
+      group:interest_groups!group_notifications_group_id_fkey(name, slug),
+      creator_profile:profiles!group_notifications_created_by_fkey(username, full_name)
     `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
@@ -388,7 +421,7 @@ export const getGroupDiscoveries = async (groupId: string, userId?: string): Pro
     .from('group_discoveries')
     .select(`
       *,
-      sharer_profile:profiles!shared_by(username, full_name)
+      sharer_profile:profiles!group_discoveries_shared_by_fkey(username, full_name)
     `)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
@@ -484,15 +517,15 @@ export const getGroupDiscoveries = async (groupId: string, userId?: string): Pro
   return discoveriesWithPreviews;
 };
 
-export const getDiscoveryComments = async (discoveryId: string, userId?: string): Promise<GroupDiscovery[]> => {
+export const getDiscoveryComments = async (discoveryId: string, userId?: string): Promise<any[]> => {
   const { data, error } = await supabase
     .from('discovery_comments')
     .select(`
       *,
-      user_profile:profiles(username, full_name),
-      replies:discovery_comments(
+      user_profile:profiles!discovery_comments_user_id_fkey(username, full_name),
+      replies:discovery_comments!parent_comment_id(
         *,
-        user_profile:profiles(username, full_name)
+        user_profile:profiles!discovery_comments_user_id_fkey(username, full_name)
       )
     `)
     .eq('discovery_id', discoveryId)
@@ -507,7 +540,7 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
   let userLikes: string[] = [];
   if (userId) {
     const { data: likesData } = await supabase
-      .from('comment_likes')
+      .from('discovery_comment_likes')
       .select('comment_id')
       .eq('user_id', userId);
     
@@ -520,7 +553,7 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
     is_liked: userLikes.includes(comment.id)
   }));
 
-  return commentsWithLikes as GroupDiscovery[];
+  return commentsWithLikes;
 };
 
 export const createDiscoveryComment = async (discoveryId: string, userId: string, content: string, parentCommentId: string | null = null): Promise<void> => {
@@ -564,7 +597,7 @@ export const createDiscoveryComment = async (discoveryId: string, userId: string
 export const likeDiscoveryComment = async (commentId: string, userId: string): Promise<void> => {
   // First, check if the user has already liked the comment
   const { data: existingLike, error: likeCheckError } = await supabase
-    .from('comment_likes')
+    .from('discovery_comment_likes')
     .select('*')
     .eq('comment_id', commentId)
     .eq('user_id', userId);
@@ -577,7 +610,7 @@ export const likeDiscoveryComment = async (commentId: string, userId: string): P
   if (existingLike && existingLike.length > 0) {
     // User has already liked the comment, so unlike it (delete the like)
     const { error: deleteError } = await supabase
-      .from('comment_likes')
+      .from('discovery_comment_likes')
       .delete()
       .eq('comment_id', commentId)
       .eq('user_id', userId);
@@ -589,7 +622,7 @@ export const likeDiscoveryComment = async (commentId: string, userId: string): P
   } else {
     // User has not liked the comment, so add a like
     const { error: insertError } = await supabase
-      .from('comment_likes')
+      .from('discovery_comment_likes')
       .insert([{ comment_id: commentId, user_id: userId }]);
 
     if (insertError) {
@@ -600,7 +633,7 @@ export const likeDiscoveryComment = async (commentId: string, userId: string): P
 
   // After liking/unliking, update the likes_count in the discovery_comments table
   const { data: likesData, error: countError } = await supabase
-    .from('comment_likes')
+    .from('discovery_comment_likes')
     .select('*')
     .eq('comment_id', commentId);
 
@@ -621,3 +654,44 @@ export const likeDiscoveryComment = async (commentId: string, userId: string): P
     throw updateError;
   }
 };
+
+// Additional exports for missing functions
+export const shareDiscovery = async (groupId: string, userId: string, entityType: string, entityId: string, title: string, description?: string): Promise<void> => {
+  const { error } = await supabase
+    .from('group_discoveries')
+    .insert([{
+      group_id: groupId,
+      shared_by: userId,
+      entity_type: entityType,
+      entity_id: entityId,
+      title,
+      description
+    }]);
+
+  if (error) {
+    throw error;
+  }
+};
+
+export const searchUsersForInvitation = async (query: string): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, username, full_name')
+    .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
+    .limit(10);
+
+  if (error) {
+    console.error('Error searching users:', error);
+    return [];
+  }
+
+  return data || [];
+};
+
+export const sendGroupInvitation = async (groupId: string, invitedBy: string, invitees: { email?: string; userId?: string; message?: string }[]): Promise<void> => {
+  return inviteUsersToGroup(groupId, invitedBy, invitees);
+};
+
+// Alias for post comments
+export const createComment = createPostComment;
+export const likeComment = likePostComment;

@@ -1,316 +1,201 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { GroupDiscovery, DiscoveryComment, EntityPreview } from '@/types/interest-groups';
 
-/**
- * Like/unlike a discovery
- */
 export const likeDiscovery = async (discoveryId: string, userId: string): Promise<void> => {
-  try {
-    const { data: existingLike, error: checkError } = await supabase
+  // First, check if the user has already liked the discovery
+  const { data: existingLike, error: likeCheckError } = await supabase
+    .from('discovery_likes')
+    .select('*')
+    .eq('discovery_id', discoveryId)
+    .eq('user_id', userId);
+
+  if (likeCheckError) {
+    console.error('Error checking existing like:', likeCheckError);
+    throw likeCheckError;
+  }
+
+  if (existingLike && existingLike.length > 0) {
+    // User has already liked the discovery, so unlike it (delete the like)
+    const { error: deleteError } = await supabase
       .from('discovery_likes')
-      .select('id')
+      .delete()
       .eq('discovery_id', discoveryId)
-      .eq('user_id', userId)
-      .maybeSingle();
+      .eq('user_id', userId);
 
-    if (checkError) {
-      console.error('Error checking existing discovery like:', checkError);
-      throw new Error(`Failed to check like status: ${checkError.message}`);
+    if (deleteError) {
+      console.error('Error deleting like:', deleteError);
+      throw deleteError;
     }
+  } else {
+    // User has not liked the discovery, so add a like
+    const { error: insertError } = await supabase
+      .from('discovery_likes')
+      .insert([{ discovery_id: discoveryId, user_id: userId }]);
 
-    if (existingLike) {
-      const { error: deleteError } = await supabase
-        .from('discovery_likes')
-        .delete()
-        .eq('discovery_id', discoveryId)
-        .eq('user_id', userId);
-
-      if (deleteError) {
-        console.error('Error removing discovery like:', deleteError);
-        throw new Error(`Failed to unlike discovery: ${deleteError.message}`);
-      }
-    } else {
-      const { error: insertError } = await supabase
-        .from('discovery_likes')
-        .insert({
-          discovery_id: discoveryId,
-          user_id: userId
-        });
-
-      if (insertError) {
-        console.error('Error adding discovery like:', insertError);
-        throw new Error(`Failed to like discovery: ${insertError.message}`);
-      }
+    if (insertError) {
+      console.error('Error inserting like:', insertError);
+      throw insertError;
     }
-  } catch (error) {
-    console.error('Error in likeDiscovery service:', error);
+  }
+
+  // After liking/unliking, update the likes_count in the group_discoveries table
+  const { data: likesData, error: countError } = await supabase
+    .from('discovery_likes')
+    .select('*')
+    .eq('discovery_id', discoveryId);
+
+  if (countError) {
+    console.error('Error fetching likes count:', countError);
+    throw countError;
+  }
+
+  const likesCount = likesData.length;
+
+  const { error: updateError } = await supabase
+    .from('group_discoveries')
+    .update({ likes_count: likesCount })
+    .eq('id', discoveryId);
+
+  if (updateError) {
+    console.error('Error updating likes count in group_discoveries:', updateError);
+    throw updateError;
+  }
+};
+
+export const getDiscoveryComments = async (discoveryId: string, userId?: string) => {
+  const { data, error } = await supabase
+    .from('discovery_comments')
+    .select(`
+      *,
+      user_profile:profiles!discovery_comments_user_id_fkey(username, full_name),
+      replies:discovery_comments!parent_comment_id(
+        *,
+        user_profile:profiles!discovery_comments_user_id_fkey(username, full_name)
+      )
+    `)
+    .eq('discovery_id', discoveryId)
+    .is('parent_comment_id', null)
+    .order('created_at', { ascending: false });
+
+  if (error) {
     throw error;
   }
-};
 
-/**
- * Get discovery comments with user profiles and like status
- */
-export const getDiscoveryComments = async (discoveryId: string, userId?: string): Promise<DiscoveryComment[]> => {
-  try {
-    const { data: comments, error: commentsError } = await supabase
-      .from('discovery_comments')
-      .select('id, discovery_id, user_id, parent_comment_id, content, likes_count, created_at, updated_at, translations')
-      .eq('discovery_id', discoveryId)
-      .order('created_at', { ascending: true });
-
-    if (commentsError) {
-      console.error('Error fetching discovery comments:', commentsError);
-      return [];
-    }
-
-    if (!comments || comments.length === 0) return [];
-
-    const userIds = [...new Set(comments.map(comment => comment.user_id))];
-
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id, username, full_name')
-      .in('id', userIds);
-
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError);
-    }
-
-    // Get like status for each comment if user is provided
-    let userLikes: string[] = [];
-    if (userId) {
-      const commentIds = comments.map(c => c.id);
-      const { data: likes } = await supabase
-        .from('discovery_comment_likes')
-        .select('comment_id')
-        .eq('user_id', userId)
-        .in('comment_id', commentIds);
-      
-      userLikes = likes?.map(l => l.comment_id) || [];
-    }
-
-    const commentsWithProfiles = comments.map(comment => ({
-      ...comment,
-      user_profile: profiles?.find(p => p.id === comment.user_id) ? {
-        username: profiles.find(p => p.id === comment.user_id)?.username || 'Unknown',
-        full_name: profiles.find(p => p.id === comment.user_id)?.full_name || 'Unknown User'
-      } : {
-        username: 'Unknown',
-        full_name: 'Unknown User'
-      },
-      is_liked: userLikes.includes(comment.id)
-    } as DiscoveryComment));
-
-    const topLevelComments = commentsWithProfiles.filter(comment => !comment.parent_comment_id);
-    const childComments = commentsWithProfiles.filter(comment => comment.parent_comment_id);
-
-    return topLevelComments.map(comment => ({
-      ...comment,
-      replies: childComments.filter(child => child.parent_comment_id === comment.id)
-    }));
-  } catch (error) {
-    console.error('Error in getDiscoveryComments service:', error);
-    return [];
-  }
-};
-
-/**
- * Create a comment on a discovery
- */
-export const createDiscoveryComment = async (discoveryId: string, userId: string, content: string, parentCommentId?: string): Promise<void> => {
-  try {
-    const { error } = await supabase
-      .from('discovery_comments')
-      .insert({
-        discovery_id: discoveryId,
-        user_id: userId,
-        content: content.trim(),
-        parent_comment_id: parentCommentId || null
-      });
-
-    if (error) {
-      console.error('Error creating discovery comment:', error);
-      throw new Error(`Failed to create comment: ${error.message}`);
-    }
-  } catch (error) {
-    console.error('Error in createDiscoveryComment service:', error);
-    throw error;
-  }
-};
-
-/**
- * Like/unlike a discovery comment
- */
-export const likeDiscoveryComment = async (commentId: string, userId: string): Promise<void> => {
-  try {
-    const { data: existingLike, error: checkError } = await supabase
+  // Get user likes if user is provided
+  let userLikes: string[] = [];
+  if (userId) {
+    const { data: likesData } = await supabase
       .from('discovery_comment_likes')
-      .select('id')
-      .eq('comment_id', commentId)
-      .eq('user_id', userId)
-      .maybeSingle();
+      .select('comment_id')
+      .eq('user_id', userId);
+    
+    userLikes = likesData?.map(like => like.comment_id) || [];
+  }
 
-    if (checkError) {
-      console.error('Error checking existing discovery comment like:', checkError);
-      throw new Error(`Failed to check like status: ${checkError.message}`);
-    }
+  // Add is_liked property
+  const commentsWithLikes = (data || []).map(comment => ({
+    ...comment,
+    is_liked: userLikes.includes(comment.id)
+  }));
 
-    if (existingLike) {
-      const { error: deleteError } = await supabase
-        .from('discovery_comment_likes')
-        .delete()
-        .eq('comment_id', commentId)
-        .eq('user_id', userId);
+  return commentsWithLikes;
+};
 
-      if (deleteError) {
-        console.error('Error removing discovery comment like:', deleteError);
-        throw new Error(`Failed to unlike comment: ${deleteError.message}`);
-      }
-    } else {
-      const { error: insertError } = await supabase
-        .from('discovery_comment_likes')
-        .insert({
-          comment_id: commentId,
-          user_id: userId
-        });
+export const createDiscoveryComment = async (discoveryId: string, userId: string, content: string, parentCommentId: string | null = null): Promise<void> => {
+  const { error } = await supabase
+    .from('discovery_comments')
+    .insert([{ 
+      discovery_id: discoveryId, 
+      user_id: userId, 
+      content: content,
+      parent_comment_id: parentCommentId
+    }]);
 
-      if (insertError) {
-        console.error('Error adding discovery comment like:', insertError);
-        throw new Error(`Failed to like comment: ${insertError.message}`);
-      }
-    }
-  } catch (error) {
-    console.error('Error in likeDiscoveryComment service:', error);
+  if (error) {
     throw error;
   }
-};
 
-/**
- * Validate if an entity exists and get preview data
- */
-export const validateAndPreviewEntity = async (entityType: 'symbol' | 'collection' | 'contribution', entityId: string): Promise<EntityPreview | null> => {
-  try {
-    let data: any = null;
-    let error: any = null;
+  // After creating comment, update the comments_count in the group_discoveries table
+  const { data: commentsData, error: countError } = await supabase
+    .from('discovery_comments')
+    .select('*')
+    .eq('discovery_id', discoveryId);
 
-    switch (entityType) {
-      case 'symbol':
-        const symbolResult = await supabase
-          .from('symbols')
-          .select('id, name, description, culture, period')
-          .eq('id', entityId)
-          .maybeSingle();
-        data = symbolResult.data;
-        error = symbolResult.error;
-        break;
-      
-      case 'collection':
-        const collectionResult = await supabase
-          .from('collections')
-          .select('id, slug, created_at')
-          .eq('id', entityId)
-          .maybeSingle();
-        data = collectionResult.data;
-        error = collectionResult.error;
-        break;
-      
-      case 'contribution':
-        const contributionResult = await supabase
-          .from('user_contributions')
-          .select('id, title, description, cultural_context, period')
-          .eq('id', entityId)
-          .maybeSingle();
-        data = contributionResult.data;
-        error = contributionResult.error;
-        break;
-      
-      default:
-        throw new Error('Invalid entity type');
-    }
+  if (countError) {
+    console.error('Error fetching comments count:', countError);
+    throw countError;
+  }
 
-    if (error) {
-      console.error(`Error validating ${entityType}:`, error);
-      return null;
-    }
+  const commentsCount = commentsData.length;
 
-    if (!data) {
-      return null;
-    }
+  const { error: updateError } = await supabase
+    .from('group_discoveries')
+    .update({ comments_count: commentsCount })
+    .eq('id', discoveryId);
 
-    return {
-      id: data.id,
-      name: data.name || data.slug || data.title || `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} ${data.id.slice(0, 8)}`,
-      type: entityType,
-      description: data.description || data.cultural_context || undefined,
-      culture: data.culture || undefined,
-      period: data.period || undefined,
-      image_url: undefined // Could be enhanced to fetch actual images
-    };
-  } catch (error) {
-    console.error('Error in validateAndPreviewEntity service:', error);
-    return null;
+  if (updateError) {
+    console.error('Error updating comments count in group_discoveries:', updateError);
+    throw updateError;
   }
 };
 
-/**
- * Search entities by name or ID for autocomplete
- */
-export const searchEntities = async (query: string, entityType: 'symbol' | 'collection' | 'contribution', limit: number = 10): Promise<EntityPreview[]> => {
-  try {
-    let data: any[] = [];
-    let error: any = null;
+export const likeDiscoveryComment = async (commentId: string, userId: string): Promise<void> => {
+  // First, check if the user has already liked the comment
+  const { data: existingLike, error: likeCheckError } = await supabase
+    .from('discovery_comment_likes')
+    .select('*')
+    .eq('comment_id', commentId)
+    .eq('user_id', userId);
 
-    switch (entityType) {
-      case 'symbol':
-        const symbolResult = await supabase
-          .from('symbols')
-          .select('id, name, description, culture')
-          .or(`name.ilike.%${query}%,id.ilike.%${query}%`)
-          .limit(limit);
-        data = symbolResult.data || [];
-        error = symbolResult.error;
-        break;
-      
-      case 'collection':
-        const collectionResult = await supabase
-          .from('collections')
-          .select('id, slug')
-          .or(`slug.ilike.%${query}%,id.ilike.%${query}%`)
-          .limit(limit);
-        data = collectionResult.data || [];
-        error = collectionResult.error;
-        break;
-      
-      case 'contribution':
-        const contributionResult = await supabase
-          .from('user_contributions')
-          .select('id, title, description')
-          .or(`title.ilike.%${query}%,id.ilike.%${query}%`)
-          .limit(limit);
-        data = contributionResult.data || [];
-        error = contributionResult.error;
-        break;
-      
-      default:
-        return [];
+  if (likeCheckError) {
+    console.error('Error checking existing like:', likeCheckError);
+    throw likeCheckError;
+  }
+
+  if (existingLike && existingLike.length > 0) {
+    // User has already liked the comment, so unlike it (delete the like)
+    const { error: deleteError } = await supabase
+      .from('discovery_comment_likes')
+      .delete()
+      .eq('comment_id', commentId)
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      console.error('Error deleting like:', deleteError);
+      throw deleteError;
     }
+  } else {
+    // User has not liked the comment, so add a like
+    const { error: insertError } = await supabase
+      .from('discovery_comment_likes')
+      .insert([{ comment_id: commentId, user_id: userId }]);
 
-    if (error) {
-      console.error(`Error searching ${entityType}s:`, error);
-      return [];
+    if (insertError) {
+      console.error('Error inserting like:', insertError);
+      throw insertError;
     }
+  }
 
-    return data.map(item => ({
-      id: item.id,
-      name: item.name || item.slug || item.title || `${entityType} ${item.id.slice(0, 8)}`,
-      type: entityType,
-      description: item.description || undefined,
-      culture: item.culture || undefined
-    }));
-  } catch (error) {
-    console.error('Error in searchEntities service:', error);
-    return [];
+  // After liking/unliking, update the likes_count in the discovery_comments table
+  const { data: likesData, error: countError } = await supabase
+    .from('discovery_comment_likes')
+    .select('*')
+    .eq('comment_id', commentId);
+
+  if (countError) {
+    console.error('Error fetching likes count:', countError);
+    throw countError;
+  }
+
+  const likesCount = likesData.length;
+
+  const { error: updateError } = await supabase
+    .from('discovery_comments')
+    .update({ likes_count: likesCount })
+    .eq('id', commentId);
+
+  if (updateError) {
+    console.error('Error updating likes count in discovery_comments:', updateError);
+    throw updateError;
   }
 };
