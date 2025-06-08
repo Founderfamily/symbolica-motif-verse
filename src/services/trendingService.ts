@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface TrendingSymbol {
@@ -43,14 +42,14 @@ class TrendingService {
     console.log('🔍 [TrendingService] Getting trending symbols with timeout...');
     
     try {
-      const queryPromise = supabase
+      const query = supabase
         .from('symbols')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
 
       const result = await Promise.race([
-        queryPromise,
+        query,
         this.timeout(3000)
       ]);
 
@@ -102,8 +101,10 @@ class TrendingService {
       ]);
 
       const today = new Date().toISOString().split('T')[0];
+      const newTodayQuery = supabase.from('symbols').select('*', { count: 'exact', head: true }).gte('created_at', today);
+      
       const newTodayResult = await Promise.race([
-        supabase.from('symbols').select('*', { count: 'exact', head: true }).gte('created_at', today),
+        newTodayQuery,
         this.timeout(1000)
       ]);
 
@@ -131,8 +132,10 @@ class TrendingService {
     console.log('🏷️ [TrendingService] Getting trending categories with timeout...');
     
     try {
+      const query = supabase.from('symbols').select('culture');
+      
       const result = await Promise.race([
-        supabase.from('symbols').select('culture'),
+        query,
         this.timeout(2000)
       ]);
 
@@ -166,8 +169,10 @@ class TrendingService {
     console.log('🔔 [TrendingService] Getting recent activity with timeout...');
     
     try {
+      const query = supabase.from('symbols').select('name, created_at').order('created_at', { ascending: false }).limit(5);
+      
       const result = await Promise.race([
-        supabase.from('symbols').select('name, created_at').order('created_at', { ascending: false }).limit(5),
+        query,
         this.timeout(2000)
       ]);
 

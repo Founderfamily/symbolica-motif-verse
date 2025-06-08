@@ -25,17 +25,16 @@ export async function getApprovedContributions(): Promise<CompleteContribution[]
   console.log('🔍 [ContributionService] Getting approved contributions with timeout...');
   
   try {
-    const result = await withTimeout(
-      supabase
-        .from('user_contributions')
-        .select(`
-          *,
-          profiles:user_id (username, full_name)
-        `)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false }),
-      5000
-    );
+    const query = supabase
+      .from('user_contributions')
+      .select(`
+        *,
+        profiles:user_id (username, full_name)
+      `)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false });
+
+    const result = await withTimeout(query, 5000);
 
     if (result.error) {
       console.error('❌ [ContributionService] Error:', result.error);
@@ -90,14 +89,13 @@ export async function getUserContributions(userId: string): Promise<CompleteCont
   console.log('🔍 [ContributionService] Getting user contributions with timeout for user:', userId);
   
   try {
-    const result = await withTimeout(
-      supabase
-        .from('user_contributions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false }),
-      5000
-    );
+    const query = supabase
+      .from('user_contributions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    const result = await withTimeout(query, 5000);
 
     if (result.error) {
       console.error('❌ [ContributionService] Error:', result.error);
@@ -150,17 +148,16 @@ export async function getPendingContributions(): Promise<CompleteContribution[]>
   console.log('🔍 [ContributionService] Getting pending contributions with timeout...');
   
   try {
-    const result = await withTimeout(
-      supabase
-        .from('user_contributions')
-        .select(`
-          *,
-          profiles:user_id (username, full_name)
-        `)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: true }),
-      5000
-    );
+    const query = supabase
+      .from('user_contributions')
+      .select(`
+        *,
+        profiles:user_id (username, full_name)
+      `)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+
+    const result = await withTimeout(query, 5000);
 
     if (result.error) {
       console.error('❌ [ContributionService] Error:', result.error);
