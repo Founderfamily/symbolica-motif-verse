@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
@@ -99,59 +100,61 @@ const Community = () => {
             icon={Users}
             title="Aucun groupe communautaire"
             description="Il n'y a pas encore de groupes d'intérêt créés. Soyez le premier à créer une communauté thématique !"
-            actionLabel="Explorer d'autres sections"
-            onAction={() => navigate('/collections')}
+            actionLabel="Voir tous les groupes"
+            onAction={() => navigate('/community')}
             className="mb-12"
           />
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {groups.map((group, i) => (
-              <Card 
-                key={group.id} 
-                className={`border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden symbol-card ${culturalGradient('default')} cursor-pointer`}
-                onClick={() => navigate(`/groups/${group.slug}`)}
-              >
-                <div className="h-2 w-full bg-gradient-to-r from-blue-500 to-indigo-600"></div>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Avatar className="h-14 w-14 ring-2 ring-white shadow-md">
-                      <AvatarImage 
-                        src={group.banner_image || group.icon} 
-                        alt={group.name} 
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-lg">
-                        {group.name.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-semibold text-lg text-slate-800 line-clamp-1">
-                        {group.name}
-                      </p>
-                      <p className="text-sm text-slate-500 flex items-center">
-                        <Users className="h-3 w-3 mr-1 text-slate-400" /> 
-                        {group.members_count} <I18nText translationKey="stats.members" ns="community">membres</I18nText>
-                      </p>
+          <div className="mb-12" data-testid="community-groups">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {groups.map((group, i) => (
+                <Card 
+                  key={group.id} 
+                  className={`border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden symbol-card ${culturalGradient('default')} cursor-pointer`}
+                  onClick={() => navigate(`/groups/${group.slug}`)}
+                >
+                  <div className="h-2 w-full bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-14 w-14 ring-2 ring-white shadow-md">
+                        <AvatarImage 
+                          src={group.banner_image || group.icon} 
+                          alt={group.name} 
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-lg">
+                          {group.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-semibold text-lg text-slate-800 line-clamp-1">
+                          {group.name}
+                        </p>
+                        <p className="text-sm text-slate-500 flex items-center">
+                          <Users className="h-3 w-3 mr-1 text-slate-400" /> 
+                          {group.members_count} <I18nText translationKey="stats.members" ns="community">membres</I18nText>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  {group.description && (
-                    <p className="text-sm text-slate-600 mb-3 line-clamp-2">
-                      {group.description}
-                    </p>
-                  )}
-                  
-                  <div className="flex justify-between text-sm items-center">
-                    <span className="flex items-center gap-1 text-slate-600">
-                      <MapPin className="h-4 w-4 text-slate-500" />
-                      {group.discoveries_count} <I18nText translationKey="stats.discoveries" ns="community">découvertes</I18nText>
-                    </span>
-                    <span className="px-3 py-1.5 text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
-                      <I18nText translationKey="stats.join" ns="community">Voir</I18nText>
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    
+                    {group.description && (
+                      <p className="text-sm text-slate-600 mb-3 line-clamp-2">
+                        {group.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="flex items-center gap-1 text-slate-600">
+                        <MapPin className="h-4 w-4 text-slate-500" />
+                        {group.discoveries_count} <I18nText translationKey="stats.discoveries" ns="community">découvertes</I18nText>
+                      </span>
+                      <span className="px-3 py-1.5 text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
+                        <I18nText translationKey="stats.join" ns="community">Voir</I18nText>
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
         

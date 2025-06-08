@@ -1,74 +1,108 @@
 
-import React, { useState } from 'react';
-import SymbolList from '@/components/symbols/SymbolList';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Shuffle, Search, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import SymbolTriptych from '@/components/symbols/SymbolTriptych';
-import { useAuth } from '@/hooks/useAuth';
-import { Sparkles, Database } from 'lucide-react';
-import { useTranslation } from '@/i18n/useTranslation';
 import { I18nText } from '@/components/ui/i18n-text';
+import { EXPANDED_SYMBOLS } from '@/data/expandedSymbols';
 
-const SymbolTriptychSection: React.FC = () => {
-  const [selectedSymbolId, setSelectedSymbolId] = useState<string | null>(null);
-  const auth = useAuth();
-  const isAdmin = auth?.isAdmin || false;
-  const { t } = useTranslation();
+const SymbolTriptychSection = () => {
+  const [selectedSymbolId, setSelectedSymbolId] = useState<string>('triskele-1');
+  const [symbolIndex, setSymbolIndex] = useState(0);
+  const navigate = useNavigate();
+
+  // Fonction pour sélectionner un symbole aléatoire
+  const selectRandomSymbol = () => {
+    const randomIndex = Math.floor(Math.random() * EXPANDED_SYMBOLS.length);
+    const randomSymbol = EXPANDED_SYMBOLS[randomIndex];
+    setSelectedSymbolId(randomSymbol.id);
+    setSymbolIndex(randomIndex);
+  };
+
+  // Sélectionner un symbole aléatoire au chargement
+  useEffect(() => {
+    selectRandomSymbol();
+  }, []);
+
+  // Navigation vers la recherche
+  const handleExploreMore = () => {
+    navigate('/symbols');
+  };
 
   return (
-    <section className="relative mt-12 mb-20">
-      {/* Decorative background elements */}
-      <div className="absolute -z-10 inset-0 overflow-hidden">
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-200/20 rounded-full blur-3xl"></div>
-      </div>
-      
-      {/* Museum & community banner */}
-      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur shadow-2xl shadow-slate-200/50 px-6 py-3 rounded-full border border-slate-100 z-10 flex items-center space-x-6 animate-fade-in">
-        <div>
-          <p className="text-lg font-serif font-medium text-slate-800">
-            <span className="mr-1 inline-block">
-              <Sparkles className="w-4 h-4 text-amber-500 inline" />
-            </span>
-            <I18nText translationKey="sections.museumPortal" />
-          </p>
-          <p className="text-sm text-slate-600"><I18nText translationKey="sections.communityPortal" /></p>
+    <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="text-center mb-12">
+        <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 inline-block mb-2">
+          <I18nText translationKey="symbolTriptych" ns="sections">Analyse Symbolique</I18nText>
+        </span>
+        <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+          <I18nText translationKey="title" ns="symbolTriptych">Explorez en Détail</I18nText>
+        </h2>
+        <p className="text-center text-slate-600 mb-8 max-w-2xl mx-auto">
+          <I18nText translationKey="description" ns="symbolTriptych">
+            Découvrez l'évolution des symboles à travers le temps et les cultures
+          </I18nText>
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <Button 
+            onClick={selectRandomSymbol}
+            variant="outline"
+            className="bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300"
+          >
+            <Shuffle className="mr-2 h-4 w-4" />
+            <I18nText translationKey="randomSymbol" ns="symbolTriptych">Symbole Aléatoire</I18nText>
+          </Button>
+          <Button 
+            onClick={handleExploreMore}
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+          >
+            <Search className="mr-2 h-4 w-4" />
+            <I18nText translationKey="exploreMore" ns="symbolTriptych">Explorer Plus</I18nText>
+          </Button>
         </div>
-        {isAdmin ? (
-          <a href="/admin" className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full hover:shadow-md hover:shadow-blue-600/20 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-            <Database className="w-4 h-4" />
-            <I18nText translationKey="auth.admin" />
-          </a>
-        ) : (
-          <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-amber-600 rounded-full hover:shadow-md hover:shadow-amber-500/20 hover:-translate-y-0.5 transition-all">
-            <I18nText translationKey="sections.joinCommunity" />
-          </button>
-        )}
       </div>
 
-      {/* Main content */}
-      <div className="bg-white border border-slate-100 shadow-xl rounded-xl overflow-hidden pt-12 relative z-0">
-        <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-r from-amber-50 to-amber-100/50"></div>
-        
-        <div className="px-6 pb-8 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Sidebar with symbol list */}
-            <div className="md:col-span-1 border-r border-slate-200 pr-4 bg-slate-50/50 rounded-l-lg">
-              <h3 className="text-lg font-serif text-slate-800 mb-4 flex items-center">
-                <span className="w-1.5 h-5 bg-amber-500 rounded-full inline-block mr-2"></span>
-                <I18nText translationKey="navigation.symbols" />
-              </h3>
-              <div className="bg-white shadow-inner rounded-lg p-2">
-                <SymbolList 
-                  onSelectSymbol={setSelectedSymbolId} 
-                  selectedSymbolId={selectedSymbolId} 
-                />
+      <div className="grid lg:grid-cols-4 gap-8">
+        {/* Liste des symboles */}
+        <div className="lg:col-span-1">
+          <Card className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-5 w-5 text-amber-500" />
+                <h3 className="font-semibold text-slate-800">
+                  <I18nText translationKey="symbolCollection" ns="symbolTriptych">Collection de Symboles</I18nText>
+                </h3>
               </div>
-            </div>
-            
-            {/* Triptych display */}
-            <div className="md:col-span-3">
-              <SymbolTriptych symbolId={selectedSymbolId} />
-            </div>
-          </div>
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {EXPANDED_SYMBOLS.map((symbol, index) => (
+                  <button
+                    key={symbol.id}
+                    onClick={() => {
+                      setSelectedSymbolId(symbol.id);
+                      setSymbolIndex(index);
+                    }}
+                    className={`w-full text-left p-3 rounded-lg transition-all duration-200 border ${
+                      selectedSymbolId === symbol.id
+                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 text-blue-900'
+                        : 'hover:bg-slate-50 border-transparent text-slate-700 hover:text-slate-900'
+                    }`}
+                  >
+                    <div className="font-medium text-sm mb-1">{symbol.name}</div>
+                    <div className="text-xs opacity-75">
+                      {symbol.culture} • {symbol.period}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Triptych principal */}
+        <div className="lg:col-span-3">
+          <SymbolTriptych symbolId={selectedSymbolId} />
         </div>
       </div>
     </section>

@@ -1,0 +1,13 @@
+
+{
+  "title": "Explorez en Détail",
+  "description": "Découvrez l'évolution des symboles à travers le temps et les cultures",
+  "symbolCollection": "Collection de Symboles",
+  "randomSymbol": "Symbole Aléatoire",
+  "exploreMore": "Explorer Plus",
+  "original": "Image Originale",
+  "pattern": "Motif",
+  "reuse": "Réutilisation Moderne",
+  "imageError": "Erreur de chargement",
+  "imageErrorDesc": "Certaines images n'ont pas pu être chargées. Les images de fallback sont utilisées."
+}

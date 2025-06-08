@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, MapPin, BarChart3, Database, FileText } from 'lucide-react';
+import { ArrowRight, MapPin, BarChart3, Database, FileText, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
@@ -11,6 +11,13 @@ const Hero = () => {
 
   const handleCommunityClick = () => {
     navigate('/community');
+    // Scroll vers la section des groupes si on est déjà sur la page community
+    setTimeout(() => {
+      const groupsSection = document.querySelector('[data-testid="community-groups"]');
+      if (groupsSection) {
+        groupsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const handleExploreClick = () => {
@@ -52,7 +59,8 @@ const Hero = () => {
             onClick={handleCommunityClick}
             className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold px-8 py-4 rounded-full border-2 border-orange-800 shadow-lg transform hover:-translate-y-1 transition-all"
           >
-            <I18nText translationKey="hero.community">Explorer la communauté</I18nText> 
+            <Users className="mr-2 h-4 w-4" />
+            <I18nText translationKey="hero.community">Rejoindre la communauté</I18nText> 
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
           <Button 
