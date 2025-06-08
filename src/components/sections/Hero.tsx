@@ -1,10 +1,21 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { I18nText } from '@/components/ui/i18n-text';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleCommunityClick = () => {
+    navigate('/community');
+  };
+
+  const handleExploreClick = () => {
+    navigate('/symbols');
+  };
+
   return (
     <section className="relative pt-10 md:pt-16 px-4 md:px-8 max-w-7xl mx-auto">
       {/* Decorative background elements */}
@@ -37,6 +48,7 @@ const Hero = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
           <Button 
             size="lg" 
+            onClick={handleCommunityClick}
             className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold px-8 py-4 rounded-full border-2 border-orange-800 shadow-lg transform hover:-translate-y-1 transition-all"
           >
             <I18nText translationKey="hero.community">Rejoindre une communauté</I18nText> 
@@ -45,6 +57,7 @@ const Hero = () => {
           <Button 
             size="lg" 
             variant="outline" 
+            onClick={handleExploreClick}
             className="bg-white text-slate-700 font-semibold px-8 py-4 rounded-full border-2 border-slate-300 hover:bg-slate-50 hover:border-slate-400 shadow-lg transform hover:-translate-y-1 transition-all"
           >
             <I18nText translationKey="hero.explore">Commencer l'exploration</I18nText> 
