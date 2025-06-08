@@ -33,18 +33,35 @@ export const mapboxConfigService = {
         return null;
       }
 
-      const content = data.content as { fr?: string };
+      const content = data.content as { fr?: string | object };
       if (!content.fr) {
         console.log('⚠️ [MapboxConfig] No French content');
         return null;
       }
 
       try {
-        const config = JSON.parse(content.fr) as MapboxConfig;
+        let config: MapboxConfig;
+        
+        // Gérer les deux cas : chaîne JSON ou objet direct
+        if (typeof content.fr === 'string') {
+          console.log('🔧 [MapboxConfig] Parsing JSON string...');
+          config = JSON.parse(content.fr) as MapboxConfig;
+        } else {
+          console.log('🔧 [MapboxConfig] Using direct object...');
+          config = content.fr as MapboxConfig;
+        }
+        
+        // Valider que la configuration a les propriétés attendues
+        if (typeof config.enabled !== 'boolean' || typeof config.token !== 'string') {
+          console.error('❌ [MapboxConfig] Invalid config structure:', config);
+          return null;
+        }
+        
         console.log('✅ [MapboxConfig] Config loaded:', { enabled: config.enabled, hasToken: !!config.token });
         return config;
       } catch (parseError) {
         console.error('❌ [MapboxConfig] Failed to parse config:', parseError);
+        console.error('❌ [MapboxConfig] Raw content.fr:', content.fr);
         return null;
       }
     } catch (error) {
