@@ -192,31 +192,43 @@ export const likeDiscoveryComment = async (commentId: string, userId: string): P
  */
 export const validateAndPreviewEntity = async (entityType: 'symbol' | 'collection' | 'contribution', entityId: string): Promise<EntityPreview | null> => {
   try {
-    let tableName = '';
-    let selectFields = 'id, name';
-    
+    let data: any = null;
+    let error: any = null;
+
     switch (entityType) {
       case 'symbol':
-        tableName = 'symbols';
-        selectFields = 'id, name, description, culture, period';
+        const symbolResult = await supabase
+          .from('symbols')
+          .select('id, name, description, culture, period')
+          .eq('id', entityId)
+          .maybeSingle();
+        data = symbolResult.data;
+        error = symbolResult.error;
         break;
+      
       case 'collection':
-        tableName = 'collections';
-        selectFields = 'id, slug as name, created_at';
+        const collectionResult = await supabase
+          .from('collections')
+          .select('id, slug, created_at')
+          .eq('id', entityId)
+          .maybeSingle();
+        data = collectionResult.data;
+        error = collectionResult.error;
         break;
+      
       case 'contribution':
-        tableName = 'user_contributions';
-        selectFields = 'id, title as name, description, cultural_context, period';
+        const contributionResult = await supabase
+          .from('user_contributions')
+          .select('id, title, description, cultural_context, period')
+          .eq('id', entityId)
+          .maybeSingle();
+        data = contributionResult.data;
+        error = contributionResult.error;
         break;
+      
       default:
         throw new Error('Invalid entity type');
     }
-
-    const { data, error } = await supabase
-      .from(tableName)
-      .select(selectFields)
-      .eq('id', entityId)
-      .maybeSingle();
 
     if (error) {
       console.error(`Error validating ${entityType}:`, error);
@@ -229,7 +241,7 @@ export const validateAndPreviewEntity = async (entityType: 'symbol' | 'collectio
 
     return {
       id: data.id,
-      name: data.name || data.title || `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} ${data.id.slice(0, 8)}`,
+      name: data.name || data.slug || data.title || `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} ${data.id.slice(0, 8)}`,
       type: entityType,
       description: data.description || data.cultural_context || undefined,
       culture: data.culture || undefined,
@@ -247,42 +259,50 @@ export const validateAndPreviewEntity = async (entityType: 'symbol' | 'collectio
  */
 export const searchEntities = async (query: string, entityType: 'symbol' | 'collection' | 'contribution', limit: number = 10): Promise<EntityPreview[]> => {
   try {
-    let tableName = '';
-    let selectFields = 'id, name';
-    let nameField = 'name';
-    
+    let data: any[] = [];
+    let error: any = null;
+
     switch (entityType) {
       case 'symbol':
-        tableName = 'symbols';
-        selectFields = 'id, name, description, culture';
-        nameField = 'name';
+        const symbolResult = await supabase
+          .from('symbols')
+          .select('id, name, description, culture')
+          .or(`name.ilike.%${query}%,id.ilike.%${query}%`)
+          .limit(limit);
+        data = symbolResult.data || [];
+        error = symbolResult.error;
         break;
+      
       case 'collection':
-        tableName = 'collections';
-        selectFields = 'id, slug';
-        nameField = 'slug';
+        const collectionResult = await supabase
+          .from('collections')
+          .select('id, slug')
+          .or(`slug.ilike.%${query}%,id.ilike.%${query}%`)
+          .limit(limit);
+        data = collectionResult.data || [];
+        error = collectionResult.error;
         break;
+      
       case 'contribution':
-        tableName = 'user_contributions';
-        selectFields = 'id, title, description';
-        nameField = 'title';
+        const contributionResult = await supabase
+          .from('user_contributions')
+          .select('id, title, description')
+          .or(`title.ilike.%${query}%,id.ilike.%${query}%`)
+          .limit(limit);
+        data = contributionResult.data || [];
+        error = contributionResult.error;
         break;
+      
       default:
         return [];
     }
-
-    const { data, error } = await supabase
-      .from(tableName)
-      .select(selectFields)
-      .or(`${nameField}.ilike.%${query}%,id.ilike.%${query}%`)
-      .limit(limit);
 
     if (error) {
       console.error(`Error searching ${entityType}s:`, error);
       return [];
     }
 
-    return (data || []).map(item => ({
+    return data.map(item => ({
       id: item.id,
       name: item.name || item.slug || item.title || `${entityType} ${item.id.slice(0, 8)}`,
       type: entityType,
