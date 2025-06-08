@@ -38,16 +38,27 @@ const GroupCollections: React.FC<GroupCollectionsProps> = ({ groupId, isMember, 
     try {
       const { data, error } = await supabase
         .from('group_symbol_collections')
-        .select(`
-          *,
-          creator:profiles!created_by(username, full_name)
-        `)
+        .select('*')
         .eq('group_id', groupId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      setCollections(data || []);
+      // Transform the data to match our type expectations
+      const transformedData: GroupCollection[] = (data || []).map(item => ({
+        id: item.id,
+        group_id: item.group_id,
+        name: item.name,
+        description: item.description,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        created_by: item.created_by,
+        translations: typeof item.translations === 'object' && item.translations !== null 
+          ? item.translations as { en?: { name?: string; description?: string; }; fr?: { name?: string; description?: string; }; }
+          : { en: {}, fr: {} }
+      }));
+      
+      setCollections(transformedData);
     } catch (error) {
       console.error('Error loading collections:', error);
       toast.error('Failed to load collections');

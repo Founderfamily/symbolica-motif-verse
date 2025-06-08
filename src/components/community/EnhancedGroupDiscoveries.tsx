@@ -454,7 +454,15 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
                   {discovery.entity_preview && (
                     <div className="mb-4">
                       <EntityPreviewCard
-                        entity={discovery.entity_preview}
+                        entity={{
+                          id: discovery.entity_id,
+                          type: discovery.entity_type as 'symbol' | 'collection' | 'contribution',
+                          name: discovery.entity_preview.name || discovery.title,
+                          description: discovery.entity_preview.description,
+                          image_url: discovery.entity_preview.image_url,
+                          culture: discovery.entity_preview.culture,
+                          period: discovery.entity_preview.period
+                        }}
                         onNavigate={handleEntityNavigate}
                       />
                     </div>
