@@ -21,7 +21,7 @@ export const useHybridSymbols = (): UseHybridSymbolsReturn => {
 
   console.log('🔧 useHybridSymbols - État initial:', { dataSource, symbolsCount: symbols.length });
 
-  // Chargement prioritaire des données API
+  // Chargement des données API (optionnel)
   const { data: apiSymbols, isLoading: apiLoading, error: apiError, isSuccess } = useQuery({
     queryKey: ['symbols-api'],
     queryFn: async () => {
@@ -39,12 +39,12 @@ export const useHybridSymbols = (): UseHybridSymbolsReturn => {
       console.log('✅ Symboles API chargés:', data?.length || 0);
       return (data as unknown) as SymbolData[];
     },
-    retry: 2,
-    staleTime: 30 * 1000, // 30 secondes seulement pour avoir des données plus fraîches
-    gcTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1, // Moins de tentatives pour éviter les délais
+    staleTime: 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Logique de fusion privilégiant l'API
+  // Logique de fusion simplifiée - toujours commencer par les données statiques
   useEffect(() => {
     console.log('🔄 useHybridSymbols - Update logic:', { 
       isSuccess, 
@@ -53,43 +53,31 @@ export const useHybridSymbols = (): UseHybridSymbolsReturn => {
       apiLoading 
     });
 
-    if (isSuccess && apiSymbols) {
-      if (apiSymbols.length > 0) {
-        console.log('✅ Utilisation des données API en priorité');
-        
-        // Créer un Map pour éviter les doublons (priorité à l'API)
-        const symbolsMap = new Map<string, SymbolData>();
-        
-        // D'abord ajouter les symboles API (priorité absolue)
-        apiSymbols.forEach(symbol => {
-          symbolsMap.set(symbol.id, symbol);
-        });
-        
-        // Ensuite ajouter les symboles statiques SEULEMENT s'ils n'existent pas déjà
-        STATIC_SYMBOLS.forEach(symbol => {
-          if (!symbolsMap.has(symbol.id)) {
-            symbolsMap.set(symbol.id, symbol);
-          }
-        });
-        
-        const mergedSymbols = Array.from(symbolsMap.values());
-        setSymbols(mergedSymbols);
-        setDataSource('hybrid');
-        
-        console.log('✅ Données fusionnées avec priorité API:', mergedSymbols.length, 'symboles');
-      } else {
-        console.log('⚠️ API retourne des données vides, utilisation des données statiques');
-        setSymbols(STATIC_SYMBOLS);
-        setDataSource('static');
-      }
-    } else if (apiError) {
-      console.log('⚠️ API échouée, utilisation des données statiques uniquement');
-      setDataSource('static');
-      setSymbols(STATIC_SYMBOLS);
-    } else if (!apiLoading && !isSuccess && !apiError) {
-      // État initial - utiliser les données statiques en attendant
-      console.log('🚀 Initialisation avec données statiques en attendant l\'API');
-      setSymbols(STATIC_SYMBOLS);
+    // Toujours utiliser les symboles statiques avec leurs indices comme IDs
+    const staticSymbolsWithIndex = STATIC_SYMBOLS.map((symbol, index) => ({
+      ...symbol,
+      id: index.toString(), // Utiliser l'index comme ID principal
+      staticIndex: index // Garder une référence à l'index original
+    }));
+
+    if (isSuccess && apiSymbols && apiSymbols.length > 0) {
+      console.log('✅ Fusion des données statiques et API');
+      
+      // Ajouter les symboles de l'API qui ne sont pas déjà dans les statiques
+      const additionalSymbols = apiSymbols.filter(apiSymbol => 
+        !STATIC_SYMBOLS.some(staticSymbol => 
+          staticSymbol.name.toLowerCase() === apiSymbol.name.toLowerCase()
+        )
+      );
+      
+      const mergedSymbols = [...staticSymbolsWithIndex, ...additionalSymbols];
+      setSymbols(mergedSymbols);
+      setDataSource('hybrid');
+      
+      console.log('✅ Données fusionnées:', mergedSymbols.length, 'symboles');
+    } else {
+      console.log('🚀 Utilisation des données statiques uniquement');
+      setSymbols(staticSymbolsWithIndex);
       setDataSource('static');
     }
   }, [apiSymbols, apiError, apiLoading, isSuccess]);
@@ -118,7 +106,7 @@ export const useHybridSymbols = (): UseHybridSymbolsReturn => {
     ])].sort(),
   };
 
-  // isLoading est true seulement pendant le chargement initial de l'API
+  // isLoading est true seulement pendant le chargement initial si on n'a pas encore de données
   const isLoading = apiLoading && symbols.length === 0;
 
   console.log('📊 useHybridSymbols - État final:', { 

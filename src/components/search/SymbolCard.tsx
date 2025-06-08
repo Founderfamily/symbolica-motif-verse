@@ -7,7 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Info, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { Link } from 'react-router-dom';
-import { symbolMappingService } from '@/services/symbolMappingService';
 
 interface SymbolCardProps {
   symbol: SymbolData;
@@ -81,9 +80,8 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     return cultures[symbol.culture] || "hover:bg-gradient-to-br from-slate-50 to-slate-100 hover:border-slate-200";
   }, [symbol.culture]);
 
-  // Navigation cohérente : toujours utiliser l'ID du symbole tel qu'il est
+  // Navigation unifiée : utiliser l'ID du symbole (qui est maintenant l'index pour les statiques)
   const getSymbolLink = () => {
-    // Utiliser directement l'ID du symbole pour une navigation cohérente
     console.log(`SymbolCard: Navigation vers symbole "${symbol.name}" avec ID: ${symbol.id}`);
     return `/symbols/${symbol.id}`;
   };

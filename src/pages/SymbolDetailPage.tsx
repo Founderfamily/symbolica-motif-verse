@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft, Info, MapPin, Calendar, Share2, Tag, Palette, Hammer, Star, BookOpen, Clock } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { SYMBOLS } from '@/data/symbols';
 import { I18nText } from '@/components/ui/i18n-text';
 import { ShareButton } from '@/components/social/ShareButton';
 import { SymbolCollections } from '@/components/symbols/SymbolCollections';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { symbolMappingService } from '@/services/symbolMappingService';
 
 const SymbolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,74 +17,27 @@ const SymbolDetailPage: React.FC = () => {
 
   console.log(`SymbolDetailPage: ID reçu: ${id}`);
 
-  // Fonction améliorée pour trouver le symbole
+  // Fonction simplifiée pour trouver le symbole
   const findSymbol = (identifier: string) => {
     if (!identifier) return null;
 
     console.log(`SymbolDetailPage: Recherche du symbole "${identifier}"`);
 
-    // 1. Essayer de parser comme index numérique
+    // 1. Essayer de parser comme index numérique direct
     const numericIndex = parseInt(identifier, 10);
-    if (!isNaN(numericIndex) && numericIndex >= 0 && numericIndex < SYMBOLS.length) {
-      console.log(`SymbolDetailPage: Symbole trouvé par index ${numericIndex}:`, SYMBOLS[numericIndex].name);
-      return { symbol: SYMBOLS[numericIndex], index: numericIndex };
+    if (!isNaN(numericIndex)) {
+      const symbol = symbolMappingService.getSymbolByIndex(numericIndex);
+      if (symbol) {
+        console.log(`SymbolDetailPage: Symbole trouvé par index ${numericIndex}:`, symbol.name);
+        return { symbol, index: numericIndex };
+      }
     }
 
-    // 2. Créer un mapping nom -> index pour les symboles statiques
-    const nameToIndexMap: Record<string, number> = {};
-    SYMBOLS.forEach((symbol, index) => {
-      // Version originale du nom
-      nameToIndexMap[symbol.name.toLowerCase()] = index;
-      
-      // Version avec tirets
-      const slugVersion = symbol.name.toLowerCase()
-        .replace(/[éèê]/g, 'e')
-        .replace(/[àâ]/g, 'a')
-        .replace(/[ç]/g, 'c')
-        .replace(/[^a-z0-9]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
-      nameToIndexMap[slugVersion] = index;
-      
-      // Version avec espaces remplacés par des tirets
-      const simpleSlug = symbol.name.toLowerCase().replace(/\s+/g, '-');
-      nameToIndexMap[simpleSlug] = index;
-      
-      // Versions avec des suffixes numériques (compatibilité avec les anciens liens)
-      nameToIndexMap[`${slugVersion}-${index}`] = index;
-      nameToIndexMap[`${simpleSlug}-${index}`] = index;
-      
-      // Cas spéciaux pour certains symboles
-      if (symbol.name === "Dreamcatcher") {
-        nameToIndexMap["dreamcatcher-10"] = index;
-        nameToIndexMap["attrape-reves"] = index;
-      }
-      if (symbol.name === "Yin et Yang") {
-        nameToIndexMap["yin-yang"] = index;
-        nameToIndexMap["yin-et-yang"] = index;
-      }
-      if (symbol.name === "Nœud celtique") {
-        nameToIndexMap["noeud-celtique"] = index;
-        nameToIndexMap["nœud-celtique"] = index;
-      }
-    });
-
-    // 3. Chercher dans le mapping
-    const lowerIdentifier = identifier.toLowerCase();
-    if (nameToIndexMap[lowerIdentifier] !== undefined) {
-      const foundIndex = nameToIndexMap[lowerIdentifier];
-      console.log(`SymbolDetailPage: Symbole trouvé par nom/slug "${identifier}" à l'index ${foundIndex}:`, SYMBOLS[foundIndex].name);
-      return { symbol: SYMBOLS[foundIndex], index: foundIndex };
-    }
-
-    // 4. Recherche approximative (dernière chance)
-    for (let i = 0; i < SYMBOLS.length; i++) {
-      const symbol = SYMBOLS[i];
-      if (symbol.name.toLowerCase().includes(lowerIdentifier) || 
-          lowerIdentifier.includes(symbol.name.toLowerCase().replace(/\s+/g, '-'))) {
-        console.log(`SymbolDetailPage: Symbole trouvé par recherche approximative "${identifier}" à l'index ${i}:`, symbol.name);
-        return { symbol, index: i };
-      }
+    // 2. Rechercher par nom si ce n'est pas un index valide
+    const result = symbolMappingService.findSymbolByName(identifier);
+    if (result) {
+      console.log(`SymbolDetailPage: Symbole trouvé par nom "${identifier}":`, result.symbol.name);
+      return result;
     }
 
     console.log(`SymbolDetailPage: Aucun symbole trouvé pour "${identifier}"`);
@@ -95,7 +48,7 @@ const SymbolDetailPage: React.FC = () => {
   const symbol = result?.symbol || null;
   const symbolIndex = result?.index ?? -1;
 
-  // Redirection automatique pour les anciens liens
+  // Redirection automatique pour uniformiser l'URL avec l'index
   React.useEffect(() => {
     if (symbol && symbolIndex >= 0 && id !== symbolIndex.toString()) {
       console.log(`SymbolDetailPage: Redirection de "${id}" vers "${symbolIndex}"`);
@@ -103,10 +56,44 @@ const SymbolDetailPage: React.FC = () => {
     }
   }, [symbol, symbolIndex, id, navigate]);
 
+  // Fonctions pour les boutons et reste du composant
+
+  if (!symbol) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Card className="p-8 text-center max-w-md">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">
+            <I18nText translationKey="symbols.notFound">Symbole non trouvé</I18nText>
+          </h2>
+          <p className="text-slate-600 mb-4">
+            <I18nText translationKey="symbols.notFoundDesc">Le symbole que vous recherchez n'existe pas.</I18nText>
+          </p>
+          <p className="text-sm text-slate-500 mb-6">
+            ID recherché : "{id}"
+          </p>
+          <div className="space-y-2 mb-6">
+            <p className="text-xs text-slate-400">Symboles disponibles :</p>
+            <div className="max-h-32 overflow-y-auto text-xs text-slate-500">
+              {symbolMappingService.getAllStaticSymbols().slice(0, 5).map((s, i) => (
+                <div key={i}>#{i}: {s.name}</div>
+              ))}
+              {symbolMappingService.getAllStaticSymbols().length > 5 && (
+                <div>... et {symbolMappingService.getAllStaticSymbols().length - 5} autres</div>
+              )}
+            </div>
+          </div>
+          <Button onClick={() => navigate('/symbols')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            <I18nText translationKey="common.backToSymbols">Retour aux symboles</I18nText>
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   // Fonctions pour les boutons
   const handleExplore = () => {
     if (symbol) {
-      // Naviguer vers une page d'analyse ou d'exploration plus détaillée
       navigate(`/analysis?symbol=${symbolIndex}&name=${encodeURIComponent(symbol.name)}`);
     }
   };
@@ -133,37 +120,6 @@ const SymbolDetailPage: React.FC = () => {
     }
   };
 
-  if (!symbol) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="p-8 text-center max-w-md">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">
-            <I18nText translationKey="symbols.notFound">Symbole non trouvé</I18nText>
-          </h2>
-          <p className="text-slate-600 mb-4">
-            <I18nText translationKey="symbols.notFoundDesc">Le symbole que vous recherchez n'existe pas.</I18nText>
-          </p>
-          <p className="text-sm text-slate-500 mb-6">
-            ID recherché : "{id}"
-          </p>
-          <div className="space-y-2 mb-6">
-            <p className="text-xs text-slate-400">Symboles disponibles :</p>
-            <div className="max-h-32 overflow-y-auto text-xs text-slate-500">
-              {SYMBOLS.slice(0, 5).map((s, i) => (
-                <div key={i}>#{i}: {s.name}</div>
-              ))}
-              {SYMBOLS.length > 5 && <div>... et {SYMBOLS.length - 5} autres</div>}
-            </div>
-          </div>
-          <Button onClick={() => navigate('/symbols')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <I18nText translationKey="common.backToSymbols">Retour aux symboles</I18nText>
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -185,7 +141,7 @@ const SymbolDetailPage: React.FC = () => {
           <Card className="overflow-hidden">
             <AspectRatio ratio={1} className="bg-slate-100">
               <img
-                src={symbol.src}
+                src="/placeholder.svg"
                 alt={symbol.name}
                 className="object-cover w-full h-full"
                 onError={(e) => {
@@ -246,15 +202,15 @@ const SymbolDetailPage: React.FC = () => {
               <ShareButton
                 url={`${window.location.origin}/symbols/${symbolIndex}`}
                 title={`${symbol.name} - Symbole ${symbol.culture}`}
-                description={`Découvrez ce symbole de la culture ${symbol.culture} datant de ${symbol.period}`}
-                image={symbol.src}
+                description={`Découvrez ce symbole de la culture ${symbol?.culture} datant de ${symbol?.period}`}
+                image="/placeholder.svg"
                 className="flex-1"
               />
             </div>
           </div>
         </div>
 
-        {/* Sections détaillées enrichies */}
+        {/* Sections détaillées */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
           {/* Informations culturelles */}
           <Card className="p-6">
@@ -280,29 +236,14 @@ const SymbolDetailPage: React.FC = () => {
                 <p className="text-slate-900">{symbol.period}</p>
               </div>
 
-              {symbol.historical_context && (
-                <div>
-                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    Contexte historique
-                  </label>
-                  <p className="text-slate-900 text-sm leading-relaxed">{symbol.historical_context}</p>
-                </div>
-              )}
-
-              {symbol.significance && (
-                <div>
-                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
-                    <Star className="h-4 w-4" />
-                    Signification
-                  </label>
-                  <p className="text-slate-900 text-sm leading-relaxed">{symbol.significance}</p>
-                </div>
-              )}
+              <div>
+                <label className="text-sm font-medium text-slate-700">Index du symbole</label>
+                <p className="text-slate-900 text-sm">#{symbolIndex}</p>
+              </div>
             </div>
           </Card>
 
-          {/* Informations techniques et artistiques */}
+          {/* Informations techniques */}
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Palette className="h-5 w-5 text-amber-600" />
@@ -359,23 +300,11 @@ const SymbolDetailPage: React.FC = () => {
                   </div>
                 </div>
               )}
-
-              <div>
-                <label className="text-sm font-medium text-slate-700">Type d'image</label>
-                <p className="text-slate-900 text-sm">
-                  {symbol.isExternal ? 'Image externe' : 'Image locale'}
-                </p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-slate-700">Index du symbole</label>
-                <p className="text-slate-900 text-sm">#{symbolIndex}</p>
-              </div>
             </div>
           </Card>
         </div>
 
-        {/* Nouvelle section pour les collections associées */}
+        {/* Collections associées */}
         <div className="mt-12">
           <SymbolCollections 
             symbolId={symbolIndex} 

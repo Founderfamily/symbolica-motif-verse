@@ -13,7 +13,7 @@ const SymbolTriptychSection = () => {
   const [symbolIndex, setSymbolIndex] = useState(0);
   const navigate = useNavigate();
   
-  // Utiliser le système hybride comme la page des symboles
+  // Utiliser le système hybride simplifié
   const { symbols, isLoading } = useHybridSymbols();
 
   // Fonction pour sélectionner un symbole aléatoire
@@ -22,7 +22,7 @@ const SymbolTriptychSection = () => {
     
     const randomIndex = Math.floor(Math.random() * symbols.length);
     const randomSymbol = symbols[randomIndex];
-    setSelectedSymbolId(randomSymbol.id);
+    setSelectedSymbolId(randomSymbol.id); // Utiliser l'ID (qui est l'index pour les statiques)
     setSymbolIndex(randomIndex);
   };
 
