@@ -103,7 +103,7 @@ export const TrendingStatsCards: React.FC<TrendingStatsCardsProps> = ({ stats, i
                     stat.changeType === 'neutral' ? 'text-slate-500' : 'text-red-600'
                   }`}>
                     {stat.changeType === 'positive' && <ArrowUp className="w-3 h-3" />}
-                    {stat.changeType === 'negative' && <ArrowDown className="w-3 h-3" />}
+                    {stat.changeType === 'neutral' && <span className="w-3 h-3" />}
                     <span className="text-xs">{stat.change}</span>
                   </div>
                 </div>
