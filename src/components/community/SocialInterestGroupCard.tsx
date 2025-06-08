@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Calendar, Heart, UserPlus, Eye } from 'lucide-react';
+import { Users, Calendar, Heart, UserPlus, Eye, CheckCircle } from 'lucide-react';
 import { InterestGroup } from '@/types/interest-groups';
 import { ShareButton } from '@/components/social/ShareButton';
 import { GroupInviteDialog } from '@/components/social/GroupInviteDialog';
@@ -72,6 +72,52 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
     navigate(`/groups/${group.slug}`);
   };
 
+  const getButtonContent = () => {
+    if (loading) {
+      return {
+        variant: "outline" as const,
+        icon: <UserPlus className="w-4 h-4 mr-1" />,
+        text: "Chargement...",
+        disabled: true,
+        onClick: () => {},
+        className: "flex-1 bg-slate-50 text-slate-500 border-slate-200"
+      };
+    }
+
+    if (!user) {
+      return {
+        variant: "outline" as const,
+        icon: <UserPlus className="w-4 h-4 mr-1" />,
+        text: "Se connecter pour rejoindre",
+        disabled: false,
+        onClick: handleJoinGroup,
+        className: "flex-1 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 hover:border-amber-300 transition-colors"
+      };
+    }
+
+    if (isMember) {
+      return {
+        variant: "default" as const,
+        icon: <Eye className="w-4 h-4 mr-1" />,
+        text: "Voir le groupe",
+        disabled: false,
+        onClick: handleViewGroup,
+        className: "flex-1 bg-green-600 hover:bg-green-700 text-white border-green-600"
+      };
+    }
+
+    return {
+      variant: "default" as const,
+      icon: isJoining ? <UserPlus className="w-4 h-4 mr-1 animate-spin" /> : <UserPlus className="w-4 h-4 mr-1" />,
+      text: isJoining ? 'Adhésion...' : 'Rejoindre',
+      disabled: isJoining,
+      onClick: handleJoinGroup,
+      className: "flex-1 bg-amber-600 hover:bg-amber-700 text-white border-amber-600"
+    };
+  };
+
+  const buttonProps = getButtonContent();
+
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-sm overflow-hidden">
       <div className="relative">
@@ -90,6 +136,14 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
             className="bg-white/90 backdrop-blur-sm"
           />
         </div>
+        {isMember && (
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-green-600 text-white border-0">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Membre
+            </Badge>
+          </div>
+        )}
       </div>
 
       <CardHeader className="pb-3">
@@ -123,32 +177,16 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          {loading ? (
-            <Button variant="outline" size="sm" className="flex-1" disabled>
-              Chargement...
-            </Button>
-          ) : isMember ? (
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="flex-1"
-              onClick={handleViewGroup}
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              Voir le groupe
-            </Button>
-          ) : (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1"
-              onClick={handleJoinGroup}
-              disabled={isJoining}
-            >
-              <UserPlus className="w-4 h-4 mr-1" />
-              {isJoining ? 'Adhésion...' : 'Rejoindre'}
-            </Button>
-          )}
+          <Button 
+            variant={buttonProps.variant}
+            size="sm" 
+            className={buttonProps.className}
+            onClick={buttonProps.onClick}
+            disabled={buttonProps.disabled}
+          >
+            {buttonProps.icon}
+            {buttonProps.text}
+          </Button>
           
           <GroupInviteDialog
             groupId={group.id}
