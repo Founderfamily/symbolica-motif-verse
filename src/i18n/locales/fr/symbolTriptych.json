@@ -8,6 +8,10 @@
   "original": "Image Originale",
   "pattern": "Motif",
   "reuse": "Réutilisation Moderne",
+  "loading": "Chargement du symbole...",
+  "empty": "Aucun symbole sélectionné",
+  "error": "Erreur de chargement",
+  "errorDesc": "Impossible de charger les données du symbole. Veuillez réessayer.",
   "imageError": "Erreur de chargement",
   "imageErrorDesc": "Certaines images n'ont pas pu être chargées. Les images de fallback sont utilisées."
 }

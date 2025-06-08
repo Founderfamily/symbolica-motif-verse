@@ -8,6 +8,10 @@
   "original": "Original Image",
   "pattern": "Pattern",
   "reuse": "Modern Reuse",
+  "loading": "Loading symbol...",
+  "empty": "No symbol selected",
+  "error": "Error loading symbol",
+  "errorDesc": "Unable to load symbol data. Please try again.",
   "imageError": "Loading Error",
   "imageErrorDesc": "Some images could not be loaded. Fallback images are being used."
 }
