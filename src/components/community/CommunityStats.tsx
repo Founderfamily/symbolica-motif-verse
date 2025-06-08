@@ -1,18 +1,37 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, TrendingUp, Star } from 'lucide-react';
+import { Users, TrendingUp, Star, Activity } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { InterestGroup } from '@/types/interest-groups';
+import { useCommunityStats } from '@/hooks/useCommunityStats';
 
-interface CommunityStatsProps {
-  groups: InterestGroup[];
-}
+const CommunityStats: React.FC = () => {
+  const { data: stats, isLoading, error } = useCommunityStats();
 
-const CommunityStats: React.FC<CommunityStatsProps> = ({ groups }) => {
-  const totalMembers = groups.reduce((sum, group) => sum + group.members_count, 0);
-  const totalDiscoveries = groups.reduce((sum, group) => sum + group.discoveries_count, 0);
-  const totalGroups = groups.length;
+  console.log('📊 [CommunityStats] Stats data:', stats, 'Loading:', isLoading, 'Error:', error);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <Card key={index}>
+            <CardContent className="p-6">
+              <div className="animate-pulse">
+                <div className="h-4 bg-slate-200 rounded mb-3"></div>
+                <div className="h-8 bg-slate-200 rounded mb-2"></div>
+                <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('❌ [CommunityStats] Error loading stats:', error);
+    return null;
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -23,7 +42,7 @@ const CommunityStats: React.FC<CommunityStatsProps> = ({ groups }) => {
               <Users className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalGroups}</p>
+              <p className="text-2xl font-bold">{stats?.totalGroups || 0}</p>
               <p className="text-slate-600 text-sm">
                 <I18nText translationKey="community.stats.groups">Groupes d'Intérêt</I18nText>
               </p>
@@ -39,7 +58,7 @@ const CommunityStats: React.FC<CommunityStatsProps> = ({ groups }) => {
               <TrendingUp className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalMembers.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{stats?.totalMembers?.toLocaleString() || '0'}</p>
               <p className="text-slate-600 text-sm">
                 <I18nText translationKey="community.stats.members">Membres de la Communauté</I18nText>
               </p>
@@ -55,7 +74,7 @@ const CommunityStats: React.FC<CommunityStatsProps> = ({ groups }) => {
               <Star className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalDiscoveries.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{stats?.totalDiscoveries?.toLocaleString() || '0'}</p>
               <p className="text-slate-600 text-sm">
                 <I18nText translationKey="community.stats.discoveries">Découvertes Partagées</I18nText>
               </p>
