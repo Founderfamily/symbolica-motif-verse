@@ -26,7 +26,7 @@ export const communityStatsService = {
         setTimeout(() => reject(new Error('Community stats timeout')), 2000)
       );
 
-      const statsPromise = this.fetchStatsFromDatabase();
+      const statsPromise = communityStatsService.fetchStatsFromDatabase();
 
       const stats = await Promise.race([statsPromise, timeoutPromise]);
       
@@ -62,15 +62,15 @@ export const communityStatsService = {
 
     console.log('✅ [CommunityStatsService] Groups data:', groups?.length || 0);
 
-    // Calculer les totaux
+    // Calculer les totaux avec des vérifications pour éviter les erreurs TypeScript
     const totalGroups = groups?.length || 0;
-    const totalMembers = groups?.reduce((sum, group) => sum + (group.members_count || 0), 0) || 0;
-    const totalDiscoveries = groups?.reduce((sum, group) => sum + (group.discoveries_count || 0), 0) || 0;
+    const totalMembers = groups?.reduce((sum, group) => sum + (group?.members_count || 0), 0) || 0;
+    const totalDiscoveries = groups?.reduce((sum, group) => sum + (group?.discoveries_count || 0), 0) || 0;
 
     // Calculer les groupes actifs aujourd'hui
     const today = new Date().toISOString().split('T')[0];
     const activeGroupsToday = groups?.filter(group => 
-      group.created_at && group.created_at.startsWith(today)
+      group?.created_at && group.created_at.startsWith(today)
     ).length || 0;
 
     return {
