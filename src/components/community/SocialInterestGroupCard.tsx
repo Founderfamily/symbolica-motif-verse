@@ -1,22 +1,76 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Calendar, Heart } from 'lucide-react';
+import { Users, Calendar, Heart, UserPlus, Eye } from 'lucide-react';
 import { InterestGroup } from '@/types/interest-groups';
 import { ShareButton } from '@/components/social/ShareButton';
 import { GroupInviteDialog } from '@/components/social/GroupInviteDialog';
 import { LazyGroupImage } from './LazyGroupImage';
+import { checkGroupMembership, joinGroup } from '@/services/communityService';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface SocialInterestGroupCardProps {
   group: InterestGroup;
 }
 
 export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = ({ group }) => {
+  const [isMember, setIsMember] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const shareUrl = `${window.location.origin}/groups/${group.slug}`;
   const shareTitle = `Rejoignez le groupe "${group.name}" sur Cultural Heritage Symbols`;
   const shareDescription = group.description || `Découvrez et partagez des symboles culturels dans le groupe ${group.name}`;
+
+  useEffect(() => {
+    if (user) {
+      checkMembership();
+    } else {
+      setLoading(false);
+    }
+  }, [user, group.id]);
+
+  const checkMembership = async () => {
+    if (!user) return;
+    
+    try {
+      const membership = await checkGroupMembership(group.id, user.id);
+      setIsMember(membership);
+    } catch (error) {
+      console.error('Error checking membership:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinGroup = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    setIsJoining(true);
+    try {
+      await joinGroup(group.id, user.id);
+      setIsMember(true);
+      toast.success('Vous avez rejoint le groupe avec succès !');
+    } catch (error) {
+      console.error('Error joining group:', error);
+      toast.error('Erreur lors de l\'adhésion au groupe');
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const handleViewGroup = () => {
+    navigate(`/groups/${group.slug}`);
+  };
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-sm overflow-hidden">
@@ -69,14 +123,32 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => window.location.href = `/groups/${group.slug}`}
-          >
-            Rejoindre
-          </Button>
+          {loading ? (
+            <Button variant="outline" size="sm" className="flex-1" disabled>
+              Chargement...
+            </Button>
+          ) : isMember ? (
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="flex-1"
+              onClick={handleViewGroup}
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              Voir le groupe
+            </Button>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1"
+              onClick={handleJoinGroup}
+              disabled={isJoining}
+            >
+              <UserPlus className="w-4 h-4 mr-1" />
+              {isJoining ? 'Adhésion...' : 'Rejoindre'}
+            </Button>
+          )}
           
           <GroupInviteDialog
             groupId={group.id}

@@ -19,5 +19,13 @@
     "title": "Réalisations",
     "description": "Débloquez des réalisations spéciales en atteignant des jalons importants"
   },
-  "viewYourProgress": "Voir votre progression"
+  "viewYourProgress": "Voir votre progression",
+  "yourProgress": "Votre Progression",
+  "totalPoints": "Points totaux",
+  "contributions": "Contributions",
+  "recentBadges": "Badges récents",
+  "noBadgesYet": "Aucun badge gagné pour le moment",
+  "startContributing": "Commencez à contribuer pour gagner votre premier badge !",
+  "level": "Niveau {level}",
+  "xpToNextLevel": "{xp} XP jusqu'au niveau suivant"
 }

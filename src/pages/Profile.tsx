@@ -4,11 +4,15 @@ import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import ProfileEditor from '@/components/user/ProfileEditor';
+import UserStatsCard from '@/components/gamification/UserStatsCard';
+import LevelProgressBar from '@/components/gamification/LevelProgressBar';
 import { I18nText } from '@/components/ui/i18n-text';
+import { useGamification } from '@/hooks/useGamification';
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
   const { profile, isLoading, user } = useAuth();
+  const { userLevel, userPoints, loading: gamificationLoading } = useGamification();
 
   if (isLoading) {
     return (
@@ -21,7 +25,7 @@ export default function Profile() {
   // If no username in params, show current user's profile
   const isOwnProfile = !username || username === profile?.username || username === user?.id;
 
-  if (!profile && isOwnProfile) {
+  if (!user && isOwnProfile) {
     return (
       <div className="flex items-center justify-center h-64">
         <Card>
@@ -42,7 +46,7 @@ export default function Profile() {
     );
   }
 
-  const displayName = profile?.full_name || profile?.username || 'Utilisateur';
+  const displayName = profile?.full_name || profile?.username || user?.email || 'Utilisateur';
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -63,7 +67,41 @@ export default function Profile() {
       </div>
 
       {isOwnProfile ? (
-        <ProfileEditor />
+        <div className="space-y-6">
+          {/* Gamification Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <UserStatsCard />
+            {userLevel && !gamificationLoading && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <I18nText translationKey="gamification.yourProgress">
+                      Votre Progression
+                    </I18nText>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LevelProgressBar userLevel={userLevel} />
+                  {userPoints && (
+                    <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                      <div className="text-center">
+                        <div className="font-bold text-amber-600">{userPoints.total}</div>
+                        <div className="text-slate-600">Points totaux</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-green-600">{userPoints.contribution_points}</div>
+                        <div className="text-slate-600">Contributions</div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+          
+          {/* Profile Editor */}
+          <ProfileEditor />
+        </div>
       ) : (
         <Card>
           <CardHeader>

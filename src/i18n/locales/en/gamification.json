@@ -19,5 +19,13 @@
     "title": "Achievements",
     "description": "Unlock special achievements for reaching important milestones"
   },
-  "viewYourProgress": "View Your Progress"
+  "viewYourProgress": "View Your Progress",
+  "yourProgress": "Your Progress",
+  "totalPoints": "Total Points",
+  "contributions": "Contributions",
+  "recentBadges": "Recent Badges",
+  "noBadgesYet": "No badges earned yet",
+  "startContributing": "Start contributing to earn your first badge!",
+  "level": "Level {level}",
+  "xpToNextLevel": "{xp} XP to next level"
 }

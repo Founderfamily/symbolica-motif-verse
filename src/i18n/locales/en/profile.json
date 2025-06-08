@@ -43,5 +43,8 @@
     "collections": "Collections",
     "followers": "Followers",
     "following": "Following"
-  }
+  },
+  "level": "Level {level}",
+  "xpToNextLevel": "{xp} XP to next level",
+  "yourProgress": "Your Progress"
 }
