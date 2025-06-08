@@ -8,7 +8,6 @@ import { Loader2, BookOpen, ArrowRight } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useSymbolCollections } from '@/hooks/useSymbolCollections';
 import { useTranslation } from '@/i18n/useTranslation';
-import { symbolMappingService } from '@/services/symbolMappingService';
 
 interface SymbolCollectionsProps {
   symbolId: string | number;
@@ -23,19 +22,11 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
   const { i18n } = useTranslation();
   const { data: collections, isLoading, error } = useSymbolCollections(symbolId);
 
-  // Log pour debug étendu
+  // Log pour debug simplifié
   React.useEffect(() => {
-    console.log('=== DEBUG SymbolCollections Component ===');
+    console.log('=== DEBUG SymbolCollections Component (v3) ===');
     console.log('Props - symbolId:', symbolId, typeof symbolId);
     console.log('Props - symbolName:', symbolName);
-    console.log('isStaticSymbol:', symbolMappingService.isStaticSymbol(symbolId));
-    
-    if (symbolMappingService.isStaticSymbol(symbolId)) {
-      const mappedId = symbolMappingService.getCollectionQueryId(symbolId);
-      console.log('Mapped ID:', mappedId);
-      console.log('Available mappings:', symbolMappingService.getAvailableMappings());
-    }
-    
     console.log('Collections data:', collections);
     console.log('Loading state:', isLoading);
     console.log('Error state:', error);
@@ -80,19 +71,12 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
             </I18nText>
           </p>
           
-          {/* Informations de debug détaillées */}
+          {/* Informations de debug simplifiées */}
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-4 p-3 bg-red-50 rounded text-xs">
               <p className="font-bold text-red-700">Debug Info:</p>
               <p>Symbole ID: {symbolId}</p>
               <p>Type: {typeof symbolId}</p>
-              <p>Est statique: {symbolMappingService.isStaticSymbol(symbolId) ? 'Oui' : 'Non'}</p>
-              {symbolMappingService.isStaticSymbol(symbolId) && (
-                <>
-                  <p>ID mappé: {symbolMappingService.getCollectionQueryId(symbolId) || 'AUCUN'}</p>
-                  <p>Mappings disponibles: {Object.keys(symbolMappingService.getAvailableMappings()).join(', ')}</p>
-                </>
-              )}
               <p>Erreur: {error?.message || 'Inconnue'}</p>
             </div>
           )}
@@ -119,19 +103,12 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
             </I18nText>
           </p>
           
-          {/* Informations de debug détaillées */}
+          {/* Informations de debug simplifiées */}
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-4 p-3 bg-yellow-50 rounded text-xs">
               <p className="font-bold text-yellow-700">Debug Info (Aucune collection):</p>
               <p>Symbole ID: {symbolId}</p>
               <p>Type: {typeof symbolId}</p>
-              <p>Est statique: {symbolMappingService.isStaticSymbol(symbolId) ? 'Oui' : 'Non'}</p>
-              {symbolMappingService.isStaticSymbol(symbolId) && (
-                <>
-                  <p>ID mappé: {symbolMappingService.getCollectionQueryId(symbolId) || 'AUCUN'}</p>
-                  <p>Mappings disponibles: {Object.keys(symbolMappingService.getAvailableMappings()).join(', ')}</p>
-                </>
-              )}
               <p>Collections trouvées: {collections?.length || 0}</p>
             </div>
           )}
@@ -217,10 +194,6 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
           <div className="mt-2 p-2 bg-green-100 rounded text-xs">
             <p className="font-bold text-green-700">Debug Info (Succès):</p>
             <p>Symbole ID: {symbolId}</p>
-            <p>Est statique: {symbolMappingService.isStaticSymbol(symbolId) ? 'Oui' : 'Non'}</p>
-            {symbolMappingService.isStaticSymbol(symbolId) && (
-              <p>ID mappé: {symbolMappingService.getCollectionQueryId(symbolId)}</p>
-            )}
             <p>Collections trouvées: {collections.length}</p>
           </div>
         )}

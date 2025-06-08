@@ -2,47 +2,26 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CollectionWithTranslations } from '@/types/collections';
-import { symbolMappingService } from '@/services/symbolMappingService';
 
 /**
  * Hook pour récupérer les collections associées à un symbole
+ * Utilise maintenant une approche simplifiée basée sur les indices statiques
  */
 export const useSymbolCollections = (symbolId: string | number) => {
   return useQuery({
-    queryKey: ['symbol-collections-v2', symbolId, Date.now()], // Version mise à jour avec timestamp pour forcer le refresh
+    queryKey: ['symbol-collections-v3', symbolId], // Version mise à jour
     queryFn: async (): Promise<CollectionWithTranslations[]> => {
-      if (!symbolId) return [];
+      if (!symbolId && symbolId !== 0) return [];
 
-      console.log('=== DEBUG useSymbolCollections v2 ===');
+      console.log('=== DEBUG useSymbolCollections v3 (simplifié) ===');
       console.log('1. symbolId reçu:', symbolId, typeof symbolId);
 
-      // Déterminer l'ID à utiliser pour la requête
-      let queryId: string | null = null;
-      const symbolIdStr = symbolId.toString();
-      
-      console.log('2. symbolIdStr:', symbolIdStr);
-      console.log('3. isStaticSymbol test:', symbolMappingService.isStaticSymbol(symbolIdStr));
-      
-      if (symbolMappingService.isStaticSymbol(symbolIdStr)) {
-        // Pour les symboles statiques, utiliser l'ID mappé en base
-        queryId = symbolMappingService.getCollectionQueryId(symbolIdStr);
-        console.log('4. Symbole statique détecté');
-        console.log('5. ID mappé obtenu:', queryId);
-        
-        if (!queryId) {
-          console.log('6. ERREUR: Aucun mapping trouvé pour le symbole statique:', symbolIdStr);
-          return [];
-        }
-      } else {
-        // Pour les symboles de la base, utiliser l'ID directement
-        queryId = symbolIdStr;
-        console.log('4. Symbole de base détecté, utilisation de l\'ID:', queryId);
-      }
-
-      console.log('8. ID final pour la requête:', queryId);
+      // Convertir en string pour la requête
+      const queryId = symbolId.toString();
+      console.log('2. ID pour la requête:', queryId);
 
       try {
-        // Utiliser la syntaxe native Supabase avec jointures imbriquées (comme dans les collections)
+        // Requête directe avec l'ID (qui est maintenant toujours l'index statique)
         const { data, error } = await supabase
           .from('collection_symbols')
           .select(`
@@ -65,10 +44,10 @@ export const useSymbolCollections = (symbolId: string | number) => {
           `)
           .eq('symbol_id', queryId);
 
-        console.log('9. Requête Supabase terminée');
-        console.log('10. Error:', error);
-        console.log('11. Data reçue:', data);
-        console.log('12. Nombre de relations trouvées:', data?.length || 0);
+        console.log('3. Requête Supabase terminée');
+        console.log('4. Error:', error);
+        console.log('5. Data reçue:', data);
+        console.log('6. Nombre de relations trouvées:', data?.length || 0);
 
         if (error) {
           console.error('Error fetching symbol collections:', error);
@@ -76,7 +55,7 @@ export const useSymbolCollections = (symbolId: string | number) => {
         }
 
         if (!data || data.length === 0) {
-          console.log('13. Aucune collection trouvée pour ce symbole');
+          console.log('7. Aucune collection trouvée pour ce symbole');
           return [];
         }
 
@@ -93,8 +72,8 @@ export const useSymbolCollections = (symbolId: string | number) => {
             collection_translations: item.collections.collection_translations || []
           }));
 
-        console.log('14. Résultat final:', collectionsWithTranslations);
-        console.log('15. Nombre de collections avec traductions:', collectionsWithTranslations.length);
+        console.log('8. Résultat final:', collectionsWithTranslations);
+        console.log('9. Nombre de collections avec traductions:', collectionsWithTranslations.length);
         console.log('=== FIN DEBUG useSymbolCollections ===');
 
         return collectionsWithTranslations;
@@ -104,10 +83,8 @@ export const useSymbolCollections = (symbolId: string | number) => {
         throw error;
       }
     },
-    enabled: !!symbolId,
-    staleTime: 0, // Désactiver le cache pour debug
-    gcTime: 0, // Propriété corrigée : gcTime au lieu de cacheTime dans React Query v5
-    refetchOnMount: true,
-    refetchOnWindowFocus: true
+    enabled: (symbolId !== null && symbolId !== undefined),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
