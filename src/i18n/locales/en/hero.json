@@ -1,7 +1,12 @@
 
 {
   "heading": "Discover the world's symbolic heritage",
-  "subheading": "Explore, contribute and learn about cultural patterns through the ages",
-  "community": "Join a community of cultural enthusiasts",
-  "explore": "Start exploring"
+  "subheading": "Explore, contribute and learn about cultural symbols through the ages",
+  "community": "Explore the community",
+  "explore": "Start exploring", 
+  "features": {
+    "realTimeAnalytics": "Real-time analytics",
+    "hybridData": "Hybrid online/offline data",
+    "advancedReports": "Advanced reports available"
+  }
 }

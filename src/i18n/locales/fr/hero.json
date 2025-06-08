@@ -1,7 +1,12 @@
 
 {
   "heading": "Découvrez le patrimoine symbolique mondial",
-  "subheading": "Explorez, contribuez et apprenez sur les motifs culturels à travers les âges",
-  "community": "Rejoindre une communauté",
-  "explore": "Commencer l'exploration"
+  "subheading": "Explorez, contribuez et apprenez sur les symboles culturels à travers les âges",
+  "community": "Explorer la communauté",
+  "explore": "Commencer l'exploration",
+  "features": {
+    "realTimeAnalytics": "Analytics temps réel",
+    "hybridData": "Données hybrides en/hors ligne",
+    "advancedReports": "Rapports avancés disponibles"
+  }
 }
