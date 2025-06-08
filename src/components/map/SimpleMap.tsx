@@ -12,6 +12,42 @@ const SimpleMap: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Fonction pour attendre que Mapbox GL JS soit chargé
+  const waitForMapboxGL = (): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const checkMapbox = () => {
+        if ((window as any).mapboxgl) {
+          console.log('✅ [SimpleMap] Mapbox GL JS is now available');
+          resolve((window as any).mapboxgl);
+          return;
+        }
+        
+        console.log('⏳ [SimpleMap] Waiting for Mapbox GL JS to load...');
+      };
+
+      // Vérifier immédiatement
+      checkMapbox();
+      
+      // Si pas encore chargé, attendre avec un intervalle
+      let attempts = 0;
+      const maxAttempts = 50; // 10 secondes maximum (50 x 200ms)
+      
+      const interval = setInterval(() => {
+        attempts++;
+        
+        if ((window as any).mapboxgl) {
+          clearInterval(interval);
+          console.log('✅ [SimpleMap] Mapbox GL JS loaded after', attempts * 200, 'ms');
+          resolve((window as any).mapboxgl);
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          console.error('❌ [SimpleMap] Mapbox GL JS failed to load after 10 seconds');
+          reject(new Error('Mapbox GL JS failed to load'));
+        }
+      }, 200);
+    });
+  };
+
   useEffect(() => {
     // Vérifier si l'utilisateur est admin
     const checkAdminStatus = () => {
@@ -66,40 +102,50 @@ const SimpleMap: React.FC = () => {
       
       console.log(`📍 [SimpleMap] Loaded ${symbolLocations.length} symbol locations`);
 
-      // Initialiser Mapbox (version simplifiée)
-      if (mapContainerRef.current && (window as any).mapboxgl) {
-        (window as any).mapboxgl.accessToken = config.token;
+      // Attendre que Mapbox GL JS soit chargé avant d'initialiser la carte
+      try {
+        console.log('⏳ [SimpleMap] Waiting for Mapbox GL JS to be available...');
+        const mapboxgl = await waitForMapboxGL();
         
-        const map = new (window as any).mapboxgl.Map({
-          container: mapContainerRef.current,
-          style: 'mapbox://styles/mapbox/streets-v11',
-          center: [2.3522, 48.8566], // Paris par défaut
-          zoom: 6
-        });
+        // Initialiser Mapbox
+        if (mapContainerRef.current) {
+          mapboxgl.accessToken = config.token;
+          
+          const map = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [2.3522, 48.8566], // Paris par défaut
+            zoom: 6
+          });
 
-        // Ajouter les marqueurs
-        symbolLocations.forEach(location => {
-          const popup = new (window as any).mapboxgl.Popup().setHTML(
-            `<div class="p-2">
-              <h3 class="font-semibold text-sm">${location.name}</h3>
-              <p class="text-xs text-gray-600">${location.culture}</p>
-              ${location.description ? `<p class="text-xs mt-1">${location.description}</p>` : ''}
-            </div>`
-          );
+          // Ajouter les marqueurs
+          symbolLocations.forEach(location => {
+            const popup = new mapboxgl.Popup().setHTML(
+              `<div class="p-2">
+                <h3 class="font-semibold text-sm">${location.name}</h3>
+                <p class="text-xs text-gray-600">${location.culture}</p>
+                ${location.description ? `<p class="text-xs mt-1">${location.description}</p>` : ''}
+              </div>`
+            );
 
-          new (window as any).mapboxgl.Marker({
-            color: '#d97706' // Couleur ambrée pour correspondre au thème
-          })
-            .setLngLat([location.longitude, location.latitude])
-            .setPopup(popup)
-            .addTo(map);
-        });
+            new mapboxgl.Marker({
+              color: '#d97706' // Couleur ambrée pour correspondre au thème
+            })
+              .setLngLat([location.longitude, location.latitude])
+              .setPopup(popup)
+              .addTo(map);
+          });
 
-        console.log('🎯 [SimpleMap] Map initialized successfully');
-        setLoading(false);
-      } else {
-        console.error('❌ [SimpleMap] Mapbox GL JS not available');
-        setError('Mapbox n\'est pas disponible');
+          console.log('🎯 [SimpleMap] Map initialized successfully');
+          setLoading(false);
+        } else {
+          console.error('❌ [SimpleMap] Map container not available');
+          setError('Conteneur de carte non disponible');
+          setLoading(false);
+        }
+      } catch (mapboxError) {
+        console.error('❌ [SimpleMap] Mapbox GL JS loading error:', mapboxError);
+        setError('Mapbox GL JS n\'a pas pu être chargé. Vérifiez votre connexion internet.');
         setLoading(false);
       }
     } catch (err) {
