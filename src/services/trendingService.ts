@@ -33,88 +33,68 @@ export interface RecentActivity {
 }
 
 class TrendingService {
-  private cache = new Map<string, { data: any; timestamp: number }>();
-  private CACHE_DURATION = 2 * 60 * 1000; // 2 minutes pour des données plus fraîches
-
-  private getCacheKey(key: string, params?: any): string {
-    return `${key}_${JSON.stringify(params || {})}`;
-  }
-
-  private getFromCache<T>(key: string): T | null {
-    const cached = this.cache.get(key);
-    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
-      return cached.data;
-    }
-    return null;
-  }
-
-  private setCache(key: string, data: any): void {
-    this.cache.set(key, { data, timestamp: Date.now() });
-  }
-
   async getTrendingSymbols(timeFrame: 'day' | 'week' | 'month' = 'week', limit = 12): Promise<TrendingSymbol[]> {
-    const cacheKey = this.getCacheKey('trending_symbols', { timeFrame, limit });
-    const cached = this.getFromCache<TrendingSymbol[]>(cacheKey);
-    if (cached) return cached;
-
+    console.log('🔍 [TrendingService] Getting trending symbols...');
+    
     try {
+      // Simple query - just get the most recent symbols
       const { data: symbols, error } = await supabase
         .from('symbols')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
 
+      console.log('📊 [TrendingService] Symbols query result:', { symbols, error });
+
       if (error) {
-        console.error('Erreur lors de la récupération des symboles:', error);
+        console.error('❌ [TrendingService] Error fetching symbols:', error);
         return this.getFallbackSymbols();
       }
 
       if (!symbols || symbols.length === 0) {
+        console.log('⚠️ [TrendingService] No symbols found, using fallback');
         return this.getFallbackSymbols();
       }
 
-      // Algorithme adapté pour peu de données : score basé sur la date et position
-      const trendingSymbols: TrendingSymbol[] = symbols.map((symbol, index) => {
-        // Score élevé pour les plus récents, décroissant ensuite
-        const baseScore = Math.max(95 - index * 2, 60);
-        // Ajout d'un bonus aléatoire pour simuler l'engagement
-        const randomBonus = Math.random() * 10;
-        
-        return {
-          id: symbol.id,
-          name: symbol.name,
-          culture: symbol.culture,
-          period: symbol.period,
-          description: symbol.description,
-          created_at: symbol.created_at,
-          trending_score: Math.round((baseScore + randomBonus) * 10) / 10,
-          view_count: Math.floor(Math.random() * 200) + 50,
-          like_count: Math.floor(Math.random() * 50) + 10
-        };
-      });
+      // Simple scoring based on recency
+      const trendingSymbols: TrendingSymbol[] = symbols.map((symbol, index) => ({
+        id: symbol.id,
+        name: symbol.name,
+        culture: symbol.culture,
+        period: symbol.period,
+        description: symbol.description,
+        created_at: symbol.created_at,
+        trending_score: Math.max(100 - index * 5, 50),
+        view_count: Math.floor(Math.random() * 200) + 50,
+        like_count: Math.floor(Math.random() * 50) + 10
+      }));
 
-      this.setCache(cacheKey, trendingSymbols);
+      console.log('✅ [TrendingService] Successfully processed symbols:', trendingSymbols.length);
       return trendingSymbols;
     } catch (err) {
-      console.error('Erreur service trending:', err);
+      console.error('💥 [TrendingService] Exception in getTrendingSymbols:', err);
       return this.getFallbackSymbols();
     }
   }
 
   async getTrendingStats(): Promise<TrendingStats> {
-    const cacheKey = 'trending_stats';
-    const cached = this.getFromCache<TrendingStats>(cacheKey);
-    if (cached) return cached;
-
+    console.log('📈 [TrendingService] Getting trending stats...');
+    
     try {
-      // Récupérer les vraies statistiques
-      const [symbolsResult, contributionsResult, collectionsResult] = await Promise.allSettled([
-        supabase.from('symbols').select('*', { count: 'exact', head: true }),
-        supabase.from('user_contributions').select('*', { count: 'exact', head: true }),
-        supabase.from('collections').select('*', { count: 'exact', head: true })
-      ]);
+      // Get real counts with simple queries
+      const { count: symbolsCount } = await supabase
+        .from('symbols')
+        .select('*', { count: 'exact', head: true });
 
-      // Compter les nouveaux aujourd'hui
+      const { count: contributionsCount } = await supabase
+        .from('user_contributions')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: collectionsCount } = await supabase
+        .from('collections')
+        .select('*', { count: 'exact', head: true });
+
+      // Count new symbols today
       const today = new Date().toISOString().split('T')[0];
       const { count: newToday } = await supabase
         .from('symbols')
@@ -122,17 +102,17 @@ class TrendingService {
         .gte('created_at', today);
 
       const stats: TrendingStats = {
-        symbolsCount: symbolsResult.status === 'fulfilled' ? (symbolsResult.value.count || 0) : 0,
-        contributionsCount: contributionsResult.status === 'fulfilled' ? (contributionsResult.value.count || 0) : 0,
-        collectionsCount: collectionsResult.status === 'fulfilled' ? (collectionsResult.value.count || 0) : 0,
+        symbolsCount: symbolsCount || 0,
+        contributionsCount: contributionsCount || 0,
+        collectionsCount: collectionsCount || 0,
         newToday: newToday || 0
       };
 
-      this.setCache(cacheKey, stats);
+      console.log('✅ [TrendingService] Stats retrieved:', stats);
       return stats;
     } catch (err) {
-      console.error('Erreur stats trending:', err);
-      // Fallback avec les vraies données connues
+      console.error('💥 [TrendingService] Exception in getTrendingStats:', err);
+      // Return known fallback values
       return { 
         symbolsCount: 20,
         contributionsCount: 0, 
@@ -143,16 +123,15 @@ class TrendingService {
   }
 
   async getTrendingCategories(): Promise<TrendingCategory[]> {
-    const cacheKey = 'trending_categories';
-    const cached = this.getFromCache<TrendingCategory[]>(cacheKey);
-    if (cached) return cached;
-
+    console.log('🏷️ [TrendingService] Getting trending categories...');
+    
     try {
       const { data, error } = await supabase
         .from('symbols')
         .select('culture');
 
       if (error || !data || data.length === 0) {
+        console.log('⚠️ [TrendingService] No categories data, using fallback');
         return this.getFallbackCategories();
       }
 
@@ -166,39 +145,29 @@ class TrendingService {
         .map(([name, count]) => ({
           name,
           count: count as number,
-          trend: Math.random() > 0.6 ? 'up' : Math.random() > 0.3 ? 'stable' : 'down'
+          trend: 'up' as const
         }));
 
-      this.setCache(cacheKey, categories);
+      console.log('✅ [TrendingService] Categories processed:', categories.length);
       return categories;
     } catch (err) {
-      console.error('Erreur categories trending:', err);
+      console.error('💥 [TrendingService] Exception in getTrendingCategories:', err);
       return this.getFallbackCategories();
     }
   }
 
   async getRecentActivity(): Promise<RecentActivity[]> {
-    const cacheKey = 'recent_activity';
-    const cached = this.getFromCache<RecentActivity[]>(cacheKey);
-    if (cached) return cached;
-
+    console.log('🔔 [TrendingService] Getting recent activity...');
+    
     try {
-      // Essayer de récupérer de vraies activités récentes
       const { data: recentSymbols } = await supabase
         .from('symbols')
         .select('name, created_at')
         .order('created_at', { ascending: false })
-        .limit(3);
-
-      const { data: recentCollections } = await supabase
-        .from('collections')
-        .select('id, created_at')
-        .order('created_at', { ascending: false })
-        .limit(2);
+        .limit(5);
 
       let activities: RecentActivity[] = [];
 
-      // Ajouter les symboles récents
       if (recentSymbols && recentSymbols.length > 0) {
         activities.push(...recentSymbols.map(symbol => ({
           type: 'symbol' as const,
@@ -207,34 +176,22 @@ class TrendingService {
         })));
       }
 
-      // Ajouter les collections récentes
-      if (recentCollections && recentCollections.length > 0) {
-        activities.push(...recentCollections.map(collection => ({
-          type: 'collection' as const,
-          message: `Nouvelle collection créée`,
-          timestamp: collection.created_at
-        })));
-      }
-
-      // Si pas assez d'activités réelles, compléter avec des fallbacks
-      if (activities.length < 4) {
+      // Add some fallback activities if we don't have enough
+      if (activities.length < 3) {
         const fallbackActivities = this.getFallbackActivity();
-        activities.push(...fallbackActivities.slice(0, 6 - activities.length));
+        activities.push(...fallbackActivities.slice(0, 5 - activities.length));
       }
 
-      // Trier par date décroissante
-      activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-      this.setCache(cacheKey, activities.slice(0, 6));
-      return activities.slice(0, 6);
+      console.log('✅ [TrendingService] Activities processed:', activities.length);
+      return activities.slice(0, 5);
     } catch (err) {
-      console.error('Erreur activity trending:', err);
+      console.error('💥 [TrendingService] Exception in getRecentActivity:', err);
       return this.getFallbackActivity();
     }
   }
 
-  // Fallbacks avec des données réalistes pour une petite base
   private getFallbackSymbols(): TrendingSymbol[] {
+    console.log('🔄 [TrendingService] Using fallback symbols');
     return [
       {
         id: '1',
@@ -243,7 +200,7 @@ class TrendingService {
         period: 'Antiquité',
         description: 'Symbole à trois branches représentant les trois mondes',
         created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        trending_score: 92.5,
+        trending_score: 95,
         view_count: 156,
         like_count: 34
       },
@@ -254,7 +211,7 @@ class TrendingService {
         period: 'Néolithique',
         description: 'Motif spiralé retrouvé dans de nombreuses cultures anciennes',
         created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        trending_score: 87.2,
+        trending_score: 87,
         view_count: 123,
         like_count: 28
       }
@@ -290,22 +247,6 @@ class TrendingService {
         timestamp: new Date(now.getTime() - 90 * 60000).toISOString() 
       }
     ];
-  }
-
-  async trackView(entityType: 'symbol' | 'collection' | 'contribution', entityId: string): Promise<void> {
-    try {
-      await supabase.from('trending_metrics').insert({
-        entity_type: entityType,
-        entity_id: entityId,
-        metric_type: 'view'
-      });
-    } catch (err) {
-      console.error('Erreur tracking view:', err);
-    }
-  }
-
-  clearCache(): void {
-    this.cache.clear();
   }
 }
 

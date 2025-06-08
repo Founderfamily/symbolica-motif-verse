@@ -12,7 +12,10 @@ interface TrendingSymbolGridProps {
 }
 
 export const TrendingSymbolGrid: React.FC<TrendingSymbolGridProps> = ({ symbols, isLoading }) => {
+  console.log('🎨 [TrendingSymbolGrid] Rendering with:', { symbolsCount: symbols?.length, isLoading });
+
   if (isLoading) {
+    console.log('⏳ [TrendingSymbolGrid] Showing loading skeletons');
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {Array.from({ length: 8 }).map((_, index) => (
@@ -33,6 +36,7 @@ export const TrendingSymbolGrid: React.FC<TrendingSymbolGridProps> = ({ symbols,
   }
 
   if (!symbols || symbols.length === 0) {
+    console.log('📭 [TrendingSymbolGrid] No symbols to display');
     return (
       <div className="text-center py-16">
         <TrendingUp className="mx-auto h-16 w-16 text-slate-400 mb-6" />
@@ -70,12 +74,11 @@ export const TrendingSymbolGrid: React.FC<TrendingSymbolGridProps> = ({ symbols,
     );
   }
 
-  // Message d'encouragement si peu de symboles
-  const showEncouragement = symbols.length < 10;
+  console.log('✅ [TrendingSymbolGrid] Displaying', symbols.length, 'symbols');
 
   return (
     <div className="space-y-6">
-      {showEncouragement && (
+      {symbols.length < 10 && (
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <TrendingUp className="h-5 w-5 text-amber-600 mt-0.5" />

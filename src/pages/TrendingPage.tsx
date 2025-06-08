@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs } from '@/components/ui/tabs';
 import { TrendingStatsCards } from '@/components/trending/TrendingStatsCards';
 import { TrendingHeader } from '@/components/trending/TrendingHeader';
@@ -9,44 +9,77 @@ import { useTrendingSymbols, useTrendingStats, useTrendingCategories, useRecentA
 const TrendingPage = () => {
   const [timeFrame, setTimeFrame] = useState<'day' | 'week' | 'month'>('week');
 
-  // Hooks avec timeout et gestion d'erreur améliorée
-  const { data: trendingSymbols, isLoading: symbolsLoading, error: symbolsError } = useTrendingSymbols({
+  console.log('🎯 [TrendingPage] Component rendering with timeFrame:', timeFrame);
+
+  // Hooks with detailed logging
+  const symbolsQuery = useTrendingSymbols({
     timeFrame,
     limit: 12
   });
 
-  const { data: stats, isLoading: statsLoading, error: statsError } = useTrendingStats();
-  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useTrendingCategories();
-  const { data: activities = [], isLoading: activitiesLoading, error: activitiesError } = useRecentActivity();
+  const statsQuery = useTrendingStats();
+  const categoriesQuery = useTrendingCategories();
+  const activitiesQuery = useRecentActivity();
 
-  console.log('TrendingPage render:', {
-    timeFrame,
-    symbolsCount: trendingSymbols?.length,
-    symbolsLoading,
-    symbolsError: symbolsError?.message,
-    statsLoading,
-    categoriesLoading,
-    activitiesLoading,
-    stats
-  });
+  // Log all query states
+  useEffect(() => {
+    console.log('🔍 [TrendingPage] Query states:', {
+      symbols: {
+        isLoading: symbolsQuery.isLoading,
+        isFetching: symbolsQuery.isFetching,
+        error: symbolsQuery.error?.message,
+        dataLength: symbolsQuery.data?.length,
+        status: symbolsQuery.status
+      },
+      stats: {
+        isLoading: statsQuery.isLoading,
+        isFetching: statsQuery.isFetching,
+        error: statsQuery.error?.message,
+        data: statsQuery.data,
+        status: statsQuery.status
+      },
+      categories: {
+        isLoading: categoriesQuery.isLoading,
+        isFetching: categoriesQuery.isFetching,
+        error: categoriesQuery.error?.message,
+        dataLength: categoriesQuery.data?.length,
+        status: categoriesQuery.status
+      },
+      activities: {
+        isLoading: activitiesQuery.isLoading,
+        isFetching: activitiesQuery.isFetching,
+        error: activitiesQuery.error?.message,
+        dataLength: activitiesQuery.data?.length,
+        status: activitiesQuery.status
+      }
+    });
+  }, [
+    symbolsQuery.isLoading, symbolsQuery.isFetching, symbolsQuery.error, symbolsQuery.data,
+    statsQuery.isLoading, statsQuery.isFetching, statsQuery.error, statsQuery.data,
+    categoriesQuery.isLoading, categoriesQuery.isFetching, categoriesQuery.error, categoriesQuery.data,
+    activitiesQuery.isLoading, activitiesQuery.isFetching, activitiesQuery.error, activitiesQuery.data
+  ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 py-8">
         <TrendingHeader />
         
-        <TrendingStatsCards stats={stats} isLoading={statsLoading} />
+        <TrendingStatsCards stats={statsQuery.data} isLoading={statsQuery.isLoading} />
 
-        <Tabs value={timeFrame} onValueChange={(value) => setTimeFrame(value as any)}>
+        <Tabs value={timeFrame} onValueChange={(value) => {
+          console.log('🔄 [TrendingPage] Changing timeFrame to:', value);
+          setTimeFrame(value as any);
+        }}>
           <TrendingLayout
             timeFrame={timeFrame}
-            symbols={trendingSymbols}
-            symbolsLoading={symbolsLoading}
-            symbolsError={symbolsError}
-            categories={categories}
-            activities={activities}
-            categoriesLoading={categoriesLoading}
-            activitiesLoading={activitiesLoading}
+            symbols={symbolsQuery.data}
+            symbolsLoading={symbolsQuery.isLoading}
+            symbolsError={symbolsQuery.error}
+            categories={categoriesQuery.data || []}
+            activities={activitiesQuery.data || []}
+            categoriesLoading={categoriesQuery.isLoading}
+            activitiesLoading={activitiesQuery.isLoading}
           />
         </Tabs>
       </div>
