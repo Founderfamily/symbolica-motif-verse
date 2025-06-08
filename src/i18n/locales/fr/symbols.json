@@ -12,5 +12,15 @@
     "empty": "Ce symbole n'est dans aucune collection pour le moment.",
     "error": "Erreur lors du chargement des collections",
     "viewAll": "Voir toutes les collections"
+  },
+  "page": {
+    "title": "Tous les Symboles",
+    "description": "Explorez notre collection complète de symboles culturels du monde entier",
+    "filters": "Filtres",
+    "clearFilters": "Tout effacer",
+    "searchPlaceholder": "Rechercher des symboles...",
+    "activeFilters": "Filtres actifs",
+    "noFilters": "Aucun filtre actif",
+    "resultsCount": "{count} symboles trouvés"
   }
 }
