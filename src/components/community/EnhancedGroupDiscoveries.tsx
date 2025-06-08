@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, Share2, Plus, Eye, Folder, FileText, MessageCircle, Send, Reply, ExternalLink } from 'lucide-react';
+import { Heart, Share2, Plus, MessageCircle, Send, Reply, ExternalLink, Eye, Folder, FileText } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { GroupDiscovery, DiscoveryComment } from '@/types/interest-groups';
@@ -102,7 +102,7 @@ const EnhancedGroupDiscoveries: React.FC<EnhancedGroupDiscoveriesProps> = ({ gro
     setLoadingComments(prev => ({ ...prev, [discoveryId]: true }));
     try {
       const commentsData = await getDiscoveryComments(discoveryId, auth?.user?.id);
-      setComments(prev => ({ ...prev, [discoveryId]: commentsData }));
+      setComments(prev => ({ ...prev, [discoveryId]: commentsData as DiscoveryComment[] }));
     } catch (error) {
       console.error('Error loading comments:', error);
       toast.error('Failed to load comments');

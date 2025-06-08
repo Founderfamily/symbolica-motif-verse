@@ -44,7 +44,7 @@ export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
     .from('group_posts')
     .select(`
       *,
-      user_profile:profiles!group_posts_user_id_fkey(username, full_name)
+      user_profile:profiles(username, full_name)
     `)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
@@ -53,7 +53,7 @@ export const getGroupPosts = async (groupId: string): Promise<GroupPost[]> => {
     throw error;
   }
 
-  return data || [];
+  return (data || []) as GroupPost[];
 };
 
 export const createGroupPost = async (groupId: string, userId: string, content: string): Promise<void> => {
@@ -132,10 +132,10 @@ export const getPostComments = async (postId: string, userId?: string): Promise<
     .from('post_comments')
     .select(`
       *,
-      user_profile:profiles!post_comments_user_id_fkey(username, full_name),
+      user_profile:profiles(username, full_name),
       replies:post_comments!parent_comment_id(
         *,
-        user_profile:profiles!post_comments_user_id_fkey(username, full_name)
+        user_profile:profiles(username, full_name)
       )
     `)
     .eq('post_id', postId)
@@ -270,7 +270,7 @@ export const getGroupMembers = async (groupId: string): Promise<GroupMember[]> =
     .from('group_members')
     .select(`
       *,
-      profiles!group_members_user_id_fkey(
+      profiles(
         id,
         username,
         full_name
@@ -312,8 +312,8 @@ export const getGroupInvitations = async (groupId: string, userId: string): Prom
     .from('group_invitations')
     .select(`
       *,
-      group:interest_groups!group_invitations_group_id_fkey(name, slug),
-      inviter_profile:profiles!group_invitations_invited_by_fkey(username, full_name)
+      group:interest_groups(name, slug),
+      inviter_profile:profiles(username, full_name)
     `)
     .eq('group_id', groupId)
     .eq('invited_user_id', userId)
@@ -332,8 +332,8 @@ export const getUserInvitations = async (userId: string): Promise<GroupInvitatio
     .from('group_invitations')
     .select(`
       *,
-      group:interest_groups!group_invitations_group_id_fkey(name, slug),
-      inviter_profile:profiles!group_invitations_invited_by_fkey(username, full_name)
+      group:interest_groups(name, slug),
+      inviter_profile:profiles(username, full_name)
     `)
     .eq('invited_user_id', userId)
     .eq('status', 'pending')
@@ -389,8 +389,8 @@ export const getGroupNotifications = async (userId: string): Promise<GroupNotifi
     .from('group_notifications')
     .select(`
       *,
-      group:interest_groups!group_notifications_group_id_fkey(name, slug),
-      creator_profile:profiles!group_notifications_created_by_fkey(username, full_name)
+      group:interest_groups(name, slug),
+      creator_profile:profiles(username, full_name)
     `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
@@ -421,7 +421,7 @@ export const getGroupDiscoveries = async (groupId: string, userId?: string): Pro
     .from('group_discoveries')
     .select(`
       *,
-      sharer_profile:profiles!group_discoveries_shared_by_fkey(username, full_name)
+      sharer_profile:profiles(username, full_name)
     `)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
@@ -515,144 +515,6 @@ export const getGroupDiscoveries = async (groupId: string, userId?: string): Pro
   );
 
   return discoveriesWithPreviews;
-};
-
-export const getDiscoveryComments = async (discoveryId: string, userId?: string): Promise<any[]> => {
-  const { data, error } = await supabase
-    .from('discovery_comments')
-    .select(`
-      *,
-      user_profile:profiles!discovery_comments_user_id_fkey(username, full_name),
-      replies:discovery_comments!parent_comment_id(
-        *,
-        user_profile:profiles!discovery_comments_user_id_fkey(username, full_name)
-      )
-    `)
-    .eq('discovery_id', discoveryId)
-    .is('parent_comment_id', null)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  // Get user likes if user is provided
-  let userLikes: string[] = [];
-  if (userId) {
-    const { data: likesData } = await supabase
-      .from('discovery_comment_likes')
-      .select('comment_id')
-      .eq('user_id', userId);
-    
-    userLikes = likesData?.map(like => like.comment_id) || [];
-  }
-
-  // Add is_liked property
-  const commentsWithLikes = (data || []).map(comment => ({
-    ...comment,
-    is_liked: userLikes.includes(comment.id)
-  }));
-
-  return commentsWithLikes;
-};
-
-export const createDiscoveryComment = async (discoveryId: string, userId: string, content: string, parentCommentId: string | null = null): Promise<void> => {
-  const { error } = await supabase
-    .from('discovery_comments')
-    .insert([{ 
-      discovery_id: discoveryId, 
-      user_id: userId, 
-      content: content,
-      parent_comment_id: parentCommentId
-    }]);
-
-  if (error) {
-    throw error;
-  }
-
-  // After creating comment, update the comments_count in the group_discoveries table
-  const { data: commentsData, error: countError } = await supabase
-    .from('discovery_comments')
-    .select('*')
-    .eq('discovery_id', discoveryId);
-
-  if (countError) {
-    console.error('Error fetching comments count:', countError);
-    throw countError;
-  }
-
-  const commentsCount = commentsData.length;
-
-  const { error: updateError } = await supabase
-    .from('group_discoveries')
-    .update({ comments_count: commentsCount })
-    .eq('id', discoveryId);
-
-  if (updateError) {
-    console.error('Error updating comments count in group_discoveries:', updateError);
-    throw updateError;
-  }
-};
-
-export const likeDiscoveryComment = async (commentId: string, userId: string): Promise<void> => {
-  // First, check if the user has already liked the comment
-  const { data: existingLike, error: likeCheckError } = await supabase
-    .from('discovery_comment_likes')
-    .select('*')
-    .eq('comment_id', commentId)
-    .eq('user_id', userId);
-
-  if (likeCheckError) {
-    console.error('Error checking existing like:', likeCheckError);
-    throw likeCheckError;
-  }
-
-  if (existingLike && existingLike.length > 0) {
-    // User has already liked the comment, so unlike it (delete the like)
-    const { error: deleteError } = await supabase
-      .from('discovery_comment_likes')
-      .delete()
-      .eq('comment_id', commentId)
-      .eq('user_id', userId);
-
-    if (deleteError) {
-      console.error('Error deleting like:', deleteError);
-      throw deleteError;
-    }
-  } else {
-    // User has not liked the comment, so add a like
-    const { error: insertError } = await supabase
-      .from('discovery_comment_likes')
-      .insert([{ comment_id: commentId, user_id: userId }]);
-
-    if (insertError) {
-      console.error('Error inserting like:', insertError);
-      throw insertError;
-    }
-  }
-
-  // After liking/unliking, update the likes_count in the discovery_comments table
-  const { data: likesData, error: countError } = await supabase
-    .from('discovery_comment_likes')
-    .select('*')
-    .eq('comment_id', commentId);
-
-  if (countError) {
-    console.error('Error fetching likes count:', countError);
-    throw countError;
-  }
-
-  const likesCount = likesData.length;
-
-  const { error: updateError } = await supabase
-    .from('discovery_comments')
-    .update({ likes_count: likesCount })
-    .eq('id', commentId);
-
-  if (updateError) {
-    console.error('Error updating likes count in discovery_comments:', updateError);
-    throw updateError;
-  }
 };
 
 // Additional exports for missing functions

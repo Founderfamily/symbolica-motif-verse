@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { EntityPreview } from '@/types/interest-groups';
 
 export const likeDiscovery = async (discoveryId: string, userId: string): Promise<void> => {
   // First, check if the user has already liked the discovery
@@ -197,5 +198,161 @@ export const likeDiscoveryComment = async (commentId: string, userId: string): P
   if (updateError) {
     console.error('Error updating likes count in discovery_comments:', updateError);
     throw updateError;
+  }
+};
+
+export const validateAndPreviewEntity = async (entityType: string, entityId: string): Promise<EntityPreview | null> => {
+  try {
+    let preview: EntityPreview | null = null;
+    
+    switch (entityType) {
+      case 'symbol':
+        const { data: symbolData } = await supabase
+          .from('symbols')
+          .select('id, name, description, culture, period')
+          .eq('id', entityId)
+          .single();
+        
+        if (symbolData) {
+          preview = {
+            id: symbolData.id,
+            name: symbolData.name,
+            type: 'symbol',
+            description: symbolData.description,
+            culture: symbolData.culture,
+            period: symbolData.period
+          };
+        }
+        break;
+        
+      case 'collection':
+        const { data: collectionData } = await supabase
+          .from('collections')
+          .select(`
+            id,
+            slug,
+            collection_translations!inner(title, description)
+          `)
+          .eq('id', entityId)
+          .single();
+        
+        if (collectionData) {
+          const translation = collectionData.collection_translations?.[0];
+          preview = {
+            id: collectionData.id,
+            name: translation?.title || 'Untitled Collection',
+            type: 'collection',
+            description: translation?.description
+          };
+        }
+        break;
+        
+      case 'contribution':
+        const { data: contributionData } = await supabase
+          .from('user_contributions')
+          .select('id, title, description, cultural_context, period')
+          .eq('id', entityId)
+          .single();
+        
+        if (contributionData) {
+          preview = {
+            id: contributionData.id,
+            name: contributionData.title,
+            type: 'contribution',
+            description: contributionData.description,
+            culture: contributionData.cultural_context,
+            period: contributionData.period
+          };
+        }
+        break;
+    }
+    
+    return preview;
+  } catch (error) {
+    console.error('Error validating entity:', error);
+    return null;
+  }
+};
+
+export const searchEntities = async (query: string, entityType: string): Promise<EntityPreview[]> => {
+  const results: EntityPreview[] = [];
+  
+  try {
+    switch (entityType) {
+      case 'symbol':
+        const { data: symbols } = await supabase
+          .from('symbols')
+          .select('id, name, description, culture, period')
+          .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+          .limit(10);
+        
+        if (symbols) {
+          results.push(...symbols.map(symbol => ({
+            id: symbol.id,
+            name: symbol.name,
+            type: 'symbol' as const,
+            description: symbol.description,
+            culture: symbol.culture,
+            period: symbol.period
+          })));
+        }
+        break;
+        
+      case 'collection':
+        const { data: collections } = await supabase
+          .from('collections')
+          .select(`
+            id,
+            slug,
+            collection_translations!inner(title, description)
+          `)
+          .limit(10);
+        
+        if (collections) {
+          const filtered = collections.filter(collection => {
+            const translation = collection.collection_translations?.[0];
+            const title = translation?.title || '';
+            const description = translation?.description || '';
+            return title.toLowerCase().includes(query.toLowerCase()) || 
+                   description.toLowerCase().includes(query.toLowerCase());
+          });
+          
+          results.push(...filtered.map(collection => {
+            const translation = collection.collection_translations?.[0];
+            return {
+              id: collection.id,
+              name: translation?.title || 'Untitled Collection',
+              type: 'collection' as const,
+              description: translation?.description
+            };
+          }));
+        }
+        break;
+        
+      case 'contribution':
+        const { data: contributions } = await supabase
+          .from('user_contributions')
+          .select('id, title, description, cultural_context, period')
+          .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
+          .eq('status', 'approved')
+          .limit(10);
+        
+        if (contributions) {
+          results.push(...contributions.map(contribution => ({
+            id: contribution.id,
+            name: contribution.title,
+            type: 'contribution' as const,
+            description: contribution.description,
+            culture: contribution.cultural_context,
+            period: contribution.period
+          })));
+        }
+        break;
+    }
+    
+    return results;
+  } catch (error) {
+    console.error('Error searching entities:', error);
+    return [];
   }
 };

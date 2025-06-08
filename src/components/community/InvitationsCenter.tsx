@@ -4,14 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, Check, X, Clock } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Mail, CheckCircle, XCircle, Clock, Users } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { GroupInvitation } from '@/types/interest-groups';
-import { getUserInvitations, respondToInvitation, joinGroup } from '@/services/communityService';
+import { getUserInvitations, respondToGroupInvitation } from '@/services/communityService';
 import { toast } from 'sonner';
 
-const InvitationsCenter: React.FC = () => {
+interface InvitationsCenterProps {
+  onInvitationResponse?: (invitationId: string, status: 'accepted' | 'declined') => void;
+}
+
+const InvitationsCenter: React.FC<InvitationsCenterProps> = ({ onInvitationResponse }) => {
   const [invitations, setInvitations] = useState<GroupInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [responding, setResponding] = useState<string | null>(null);
@@ -37,28 +42,23 @@ const InvitationsCenter: React.FC = () => {
     }
   };
 
-  const handleRespond = async (invitationId: string, response: 'accepted' | 'declined') => {
+  const handleResponse = async (invitationId: string, status: 'accepted' | 'declined') => {
     if (!auth?.user) return;
 
     setResponding(invitationId);
     try {
-      await respondToInvitation(invitationId, response);
+      await respondToGroupInvitation(invitationId, auth.user.id, status);
       
-      // If accepted, also join the group
-      if (response === 'accepted') {
-        const invitation = invitations.find(inv => inv.id === invitationId);
-        if (invitation) {
-          await joinGroup(invitation.group_id, auth.user.id);
-        }
-      }
-
-      // Remove the invitation from the list
+      // Remove invitation from local state
       setInvitations(prev => prev.filter(inv => inv.id !== invitationId));
       
+      // Call callback if provided
+      onInvitationResponse?.(invitationId, status);
+      
       toast.success(
-        response === 'accepted' 
-          ? 'Invitation accepted! You have joined the group.' 
-          : 'Invitation declined.'
+        status === 'accepted' 
+          ? 'Invitation accepted successfully!' 
+          : 'Invitation declined'
       );
     } catch (error) {
       console.error('Error responding to invitation:', error);
@@ -88,17 +88,17 @@ const InvitationsCenter: React.FC = () => {
           <Mail className="h-5 w-5" />
           <I18nText translationKey="community.groupInvitations">Group Invitations</I18nText>
           {invitations.length > 0 && (
-            <Badge variant="destructive" className="text-xs">
+            <Badge variant="secondary" className="text-xs">
               {invitations.length}
             </Badge>
           )}
         </CardTitle>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="p-0">
         {loading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
+          <div className="space-y-4 p-4">
+            {[...Array(2)].map((_, i) => (
               <div key={i} className="flex space-x-3 animate-pulse">
                 <div className="h-10 w-10 bg-slate-200 rounded-full"></div>
                 <div className="flex-1">
@@ -109,53 +109,65 @@ const InvitationsCenter: React.FC = () => {
             ))}
           </div>
         ) : invitations.length > 0 ? (
-          <div className="space-y-4">
-            {invitations.map((invitation) => (
-              <div key={invitation.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-semibold">{invitation.group?.name}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Pending
-                      </Badge>
+          <ScrollArea className="h-[300px]">
+            <div className="space-y-1 p-4">
+              {invitations.map((invitation) => (
+                <div
+                  key={invitation.id}
+                  className="border rounded-lg p-4 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="h-4 w-4 text-blue-500" />
+                        <h4 className="font-medium text-slate-900">
+                          {invitation.group?.name || 'Unknown Group'}
+                        </h4>
+                      </div>
+                      
+                      <p className="text-sm text-slate-600 mb-2">
+                        Invited by {invitation.inviter_profile?.full_name || invitation.inviter_profile?.username || 'Unknown User'}
+                      </p>
+                      
+                      {invitation.message && (
+                        <p className="text-sm text-slate-700 italic mb-2">
+                          "{invitation.message}"
+                        </p>
+                      )}
+                      
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <Clock className="h-3 w-3" />
+                        Invited {new Date(invitation.created_at).toLocaleDateString()}
+                      </div>
                     </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleResponse(invitation.id, 'accepted')}
+                      disabled={responding === invitation.id}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      <I18nText translationKey="community.accept">Accept</I18nText>
+                    </Button>
                     
-                    {invitation.message && (
-                      <p className="text-sm text-slate-600 mb-3">"{invitation.message}"</p>
-                    )}
-                    
-                    <p className="text-xs text-slate-500">
-                      Received {new Date(invitation.created_at).toLocaleDateString()}
-                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResponse(invitation.id, 'declined')}
+                      disabled={responding === invitation.id}
+                      className="text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      <XCircle className="h-3 w-3 mr-1" />
+                      <I18nText translationKey="community.decline">Decline</I18nText>
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="flex gap-2 mt-3">
-                  <Button
-                    size="sm"
-                    onClick={() => handleRespond(invitation.id, 'accepted')}
-                    disabled={responding === invitation.id}
-                    className="flex-1"
-                  >
-                    <Check className="h-4 w-4 mr-1" />
-                    <I18nText translationKey="common.accept">Accept</I18nText>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleRespond(invitation.id, 'declined')}
-                    disabled={responding === invitation.id}
-                    className="flex-1"
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    <I18nText translationKey="common.decline">Decline</I18nText>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         ) : (
           <div className="text-center py-6">
             <Mail className="h-12 w-12 text-slate-400 mx-auto mb-4" />
