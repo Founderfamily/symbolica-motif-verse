@@ -91,9 +91,11 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
 
   // Get all user IDs from comments and replies
   const allUserIds = new Set<string>();
-  data?.forEach(comment => {
+  (data || []).forEach(comment => {
     allUserIds.add(comment.user_id);
-    comment.replies?.forEach((reply: any) => allUserIds.add(reply.user_id));
+    if (comment.replies && Array.isArray(comment.replies)) {
+      comment.replies.forEach((reply: any) => allUserIds.add(reply.user_id));
+    }
   });
 
   // Get user profiles separately
@@ -112,7 +114,7 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
         full_name: profile.full_name
       } : undefined,
       is_liked: userLikes.includes(comment.id),
-      replies: comment.replies?.map((reply: any) => {
+      replies: comment.replies && Array.isArray(comment.replies) ? comment.replies.map((reply: any) => {
         const replyProfile = profiles?.find(p => p.id === reply.user_id);
         return {
           ...reply,
@@ -121,7 +123,7 @@ export const getDiscoveryComments = async (discoveryId: string, userId?: string)
             full_name: replyProfile.full_name
           } : undefined
         };
-      })
+      }) : []
     };
   });
 
