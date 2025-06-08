@@ -1,28 +1,15 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { getAllCollectionsQuery } from '../services/api/queries/getAllCollectionsQuery';
-import { CollectionWithTranslations } from '../types/collections';
+// Main collections hooks - migrated to new architecture
+export { useCollectionsQuery as useCollections } from '@/features/collections/hooks/queries/useCollectionsQuery';
+export { useFeaturedCollectionsQuery as useFeaturedCollections } from '@/features/collections/hooks/queries/useFeaturedCollectionsQuery';
+export { useCollectionBySlugQuery as useCollection } from '@/features/collections/hooks/queries/useCollectionBySlugQuery';
+export { useCreateCollectionMutation as useCreateCollection } from '@/features/collections/hooks/mutations/useCreateCollectionMutation';
+export { useUpdateCollectionMutation as useUpdateCollection } from '@/features/collections/hooks/mutations/useUpdateCollectionMutation';
+export { useDeleteCollectionMutation as useDeleteCollection } from '@/features/collections/hooks/mutations/useDeleteCollectionMutation';
+export { useUpdateSymbolsOrderMutation as useUpdateSymbolsOrder } from '@/features/collections/hooks/mutations/useUpdateSymbolsOrderMutation';
 
-export const useCollections = () => {
-  console.log('🎯 [useCollections] Hook appelé');
-  
-  return useQuery({
-    queryKey: ['collections'],
-    queryFn: async (): Promise<CollectionWithTranslations[]> => {
-      console.log('🎯 [useCollections] Query function started');
-      try {
-        const result = await getAllCollectionsQuery.execute();
-        console.log('🎯 [useCollections] Query function success:', result?.length || 0);
-        return result;
-      } catch (error) {
-        console.error('🎯 [useCollections] Query function error:', error);
-        throw error;
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: (failureCount, error) => {
-      console.log('🎯 [useCollections] Retry attempt:', failureCount, error);
-      return failureCount < 2;
-    },
-  });
-};
+// Re-export query keys for external use
+export { COLLECTIONS_QUERY_KEYS } from '@/features/collections/hooks/queries/useCollectionsQuery';
+
+// Re-export collection categories hook
+export { useCollectionCategories } from '@/features/collections/hooks/useCollectionCategories';
