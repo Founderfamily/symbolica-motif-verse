@@ -1911,6 +1911,33 @@ export type Database = {
         }
         Relationships: []
       }
+      trending_metrics: {
+        Row: {
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          metric_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          metric_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metric_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -2220,6 +2247,14 @@ export type Database = {
         Args: { p_annotation_id: string }
         Returns: number
       }
+      calculate_trending_score: {
+        Args: {
+          p_entity_type: string
+          p_entity_id: string
+          p_timeframe_hours?: number
+        }
+        Returns: number
+      }
       check_user_achievements: {
         Args: { p_user_id: string }
         Returns: {
@@ -2319,6 +2354,20 @@ export type Database = {
           full_name: string
           contributions_count: number
           total_points: number
+        }[]
+      }
+      get_trending_symbols: {
+        Args: { p_limit?: number; p_timeframe_hours?: number }
+        Returns: {
+          id: string
+          name: string
+          culture: string
+          period: string
+          description: string
+          created_at: string
+          trending_score: number
+          view_count: number
+          like_count: number
         }[]
       }
       get_user_details_for_admin: {
