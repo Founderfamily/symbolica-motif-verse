@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
 import { TrendingCategory, RecentActivity } from '@/services/trendingService';
-import { TrendingUp, TrendingDown, Minus, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Clock, Sparkles } from 'lucide-react';
 
 interface TrendingSidebarProps {
   categories: TrendingCategory[];
@@ -65,7 +65,7 @@ export const TrendingSidebar: React.FC<TrendingSidebarProps> = ({
         <CardHeader className="pb-4">
           <CardTitle className="text-lg flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-amber-600" />
-            <I18nText translationKey="categories" ns="trending">Catégories Tendance</I18nText>
+            <I18nText translationKey="categories" ns="trending">Catégories Populaires</I18nText>
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -78,6 +78,13 @@ export const TrendingSidebar: React.FC<TrendingSidebarProps> = ({
                 </div>
               ))}
             </div>
+          ) : categories.length === 0 ? (
+            <div className="text-center py-6">
+              <Sparkles className="mx-auto h-8 w-8 text-slate-400 mb-3" />
+              <p className="text-sm text-slate-500">
+                Les catégories apparaîtront bientôt !
+              </p>
+            </div>
           ) : (
             <div className="space-y-3">
               {categories.map((category, index) => (
@@ -87,7 +94,9 @@ export const TrendingSidebar: React.FC<TrendingSidebarProps> = ({
                       <p className="font-medium text-sm text-slate-900">{category.name}</p>
                       {getTrendIcon(category.trend)}
                     </div>
-                    <p className="text-xs text-slate-500">{category.count.toLocaleString()} symboles</p>
+                    <p className="text-xs text-slate-500">
+                      {category.count.toLocaleString()} symbole{category.count > 1 ? 's' : ''}
+                    </p>
                   </div>
                   <Badge 
                     variant={category.trend === 'up' ? 'default' : category.trend === 'down' ? 'destructive' : 'secondary'}
@@ -120,6 +129,16 @@ export const TrendingSidebar: React.FC<TrendingSidebarProps> = ({
                 </div>
               ))}
             </div>
+          ) : activities.length === 0 ? (
+            <div className="text-center py-6">
+              <Clock className="mx-auto h-8 w-8 text-slate-400 mb-3" />
+              <p className="text-sm text-slate-500 mb-2">
+                Aucune activité récente
+              </p>
+              <p className="text-xs text-slate-400">
+                L'activité apparaîtra ici une fois que la communauté sera plus active
+              </p>
+            </div>
           ) : (
             <div className="space-y-3 text-sm">
               {activities.map((activity, index) => (
@@ -133,6 +152,23 @@ export const TrendingSidebar: React.FC<TrendingSidebarProps> = ({
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Encouragement pour petite communauté */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <p className="text-blue-900 font-medium mb-1 text-sm">
+                Communauté en croissance
+              </p>
+              <p className="text-blue-800 text-xs leading-relaxed">
+                Rejoignez une communauté passionnée qui découvre et partage des symboles du monde entier.
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

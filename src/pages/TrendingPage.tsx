@@ -9,24 +9,25 @@ import { useTrendingSymbols, useTrendingStats, useTrendingCategories, useRecentA
 const TrendingPage = () => {
   const [timeFrame, setTimeFrame] = useState<'day' | 'week' | 'month'>('week');
 
-  // Hooks avec gestion d'erreur améliorée
+  // Hooks avec timeout et gestion d'erreur améliorée
   const { data: trendingSymbols, isLoading: symbolsLoading, error: symbolsError } = useTrendingSymbols({
     timeFrame,
     limit: 12
   });
 
-  const { data: stats, isLoading: statsLoading } = useTrendingStats();
-  const { data: categories = [], isLoading: categoriesLoading } = useTrendingCategories();
-  const { data: activities = [], isLoading: activitiesLoading } = useRecentActivity();
+  const { data: stats, isLoading: statsLoading, error: statsError } = useTrendingStats();
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useTrendingCategories();
+  const { data: activities = [], isLoading: activitiesLoading, error: activitiesError } = useRecentActivity();
 
   console.log('TrendingPage render:', {
     timeFrame,
     symbolsCount: trendingSymbols?.length,
     symbolsLoading,
-    symbolsError,
+    symbolsError: symbolsError?.message,
     statsLoading,
     categoriesLoading,
-    activitiesLoading
+    activitiesLoading,
+    stats
   });
 
   return (
