@@ -2,15 +2,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { symbolGeolocationService, SymbolLocation } from '@/services/symbolGeolocationService';
 import { mapboxConfigService } from '@/services/admin/mapboxConfigService';
-import { MapPin, AlertTriangle } from 'lucide-react';
+import { MapPin, AlertTriangle, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const SimpleMap: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [locations, setLocations] = useState<SymbolLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // Vérifier si l'utilisateur est admin
+    const checkAdminStatus = () => {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          setIsAdmin(user?.is_admin || false);
+        } catch (e) {
+          console.log('No user data found');
+        }
+      }
+    };
+
+    checkAdminStatus();
     loadMapData();
   }, []);
 
@@ -21,9 +37,23 @@ const SimpleMap: React.FC = () => {
       // Vérifier si Mapbox est configuré
       const config = await mapboxConfigService.getConfig();
       
-      if (!config || !config.enabled || !config.token) {
-        console.log('❌ [SimpleMap] Mapbox not configured');
+      if (!config) {
+        console.log('❌ [SimpleMap] No Mapbox config found');
         setError('La carte n\'est pas configurée. Contactez l\'administrateur.');
+        setLoading(false);
+        return;
+      }
+
+      if (!config.enabled) {
+        console.log('❌ [SimpleMap] Mapbox disabled in config');
+        setError('La carte est désactivée. Contactez l\'administrateur.');
+        setLoading(false);
+        return;
+      }
+
+      if (!config.token) {
+        console.log('❌ [SimpleMap] No Mapbox token in config');
+        setError('Token Mapbox manquant. Contactez l\'administrateur.');
         setLoading(false);
         return;
       }
@@ -79,6 +109,12 @@ const SimpleMap: React.FC = () => {
     }
   };
 
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    loadMapData();
+  };
+
   if (loading) {
     return (
       <div className="w-full h-[500px] bg-slate-100 rounded-lg flex items-center justify-center">
@@ -97,6 +133,22 @@ const SimpleMap: React.FC = () => {
           <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Carte non disponible</h3>
           <p className="text-slate-600 mb-4">{error}</p>
+          
+          <div className="flex gap-2 justify-center mb-4">
+            <Button onClick={handleRetry} variant="outline" size="sm">
+              Réessayer
+            </Button>
+            {isAdmin && (
+              <Button 
+                onClick={() => window.location.href = '/admin/settings'}
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <Settings className="h-3 w-3" />
+                Configurer
+              </Button>
+            )}
+          </div>
           
           {locations.length > 0 && (
             <div className="space-y-3">

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { Save, MapPin, ExternalLink } from 'lucide-react';
+import { Save, MapPin, ExternalLink, AlertCircle, CheckCircle } from 'lucide-react';
 import { mapboxConfigService, MapboxConfig } from '@/services/admin/mapboxConfigService';
 
 const MapboxConfigSection = () => {
@@ -16,6 +16,7 @@ const MapboxConfigSection = () => {
   });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     loadConfig();
@@ -23,30 +24,83 @@ const MapboxConfigSection = () => {
 
   const loadConfig = async () => {
     try {
+      console.log('🔄 [MapboxConfigSection] Loading configuration...');
       const savedConfig = await mapboxConfigService.getConfig();
       if (savedConfig) {
         setConfig(savedConfig);
+        console.log('✅ [MapboxConfigSection] Configuration loaded successfully');
+      } else {
+        console.log('ℹ️ [MapboxConfigSection] No existing configuration found');
       }
     } catch (error) {
-      console.error('Error loading Mapbox config:', error);
+      console.error('❌ [MapboxConfigSection] Error loading config:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de chargement",
+        description: "Impossible de charger la configuration Mapbox.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleSave = async () => {
+    if (!config.enabled) {
+      setSaving(true);
+      try {
+        await mapboxConfigService.saveConfig(config);
+        setSaveStatus('success');
+        toast({
+          title: "Configuration sauvegardée",
+          description: "La carte Mapbox a été désactivée avec succès.",
+        });
+      } catch (error) {
+        console.error('❌ [MapboxConfigSection] Save error:', error);
+        setSaveStatus('error');
+        toast({
+          variant: "destructive",
+          title: "Erreur de sauvegarde",
+          description: "Impossible de sauvegarder la configuration Mapbox.",
+        });
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+
+    if (!config.token || !config.token.startsWith('pk.')) {
+      toast({
+        variant: "destructive",
+        title: "Token invalide",
+        description: "Veuillez entrer un token Mapbox valide (commence par pk.)",
+      });
+      return;
+    }
+
     setSaving(true);
+    setSaveStatus('idle');
+    
     try {
+      console.log('💾 [MapboxConfigSection] Saving configuration...');
       await mapboxConfigService.saveConfig(config);
+      setSaveStatus('success');
       toast({
         title: "Configuration sauvegardée",
         description: "La configuration Mapbox a été mise à jour avec succès.",
       });
+      
+      // Recharger la configuration pour vérifier
+      setTimeout(() => {
+        loadConfig();
+      }, 1000);
+      
     } catch (error) {
+      console.error('❌ [MapboxConfigSection] Save error:', error);
+      setSaveStatus('error');
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de sauvegarder la configuration Mapbox.",
+        title: "Erreur de sauvegarde",
+        description: error instanceof Error ? error.message : "Impossible de sauvegarder la configuration Mapbox.",
       });
     } finally {
       setSaving(false);
@@ -79,7 +133,10 @@ const MapboxConfigSection = () => {
           <Switch
             id="mapbox-enabled"
             checked={config.enabled}
-            onCheckedChange={(checked) => setConfig(prev => ({ ...prev, enabled: checked }))}
+            onCheckedChange={(checked) => {
+              setConfig(prev => ({ ...prev, enabled: checked }));
+              setSaveStatus('idle');
+            }}
           />
           <Label htmlFor="mapbox-enabled">Activer la carte Mapbox</Label>
         </div>
@@ -91,7 +148,10 @@ const MapboxConfigSection = () => {
             type="password"
             placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbFhYeSJ9..."
             value={config.token}
-            onChange={(e) => setConfig(prev => ({ ...prev, token: e.target.value }))}
+            onChange={(e) => {
+              setConfig(prev => ({ ...prev, token: e.target.value }));
+              setSaveStatus('idle');
+            }}
             disabled={!config.enabled}
           />
           <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -109,21 +169,61 @@ const MapboxConfigSection = () => {
         </div>
 
         {config.enabled && config.token && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-green-700">
-              <MapPin className="h-4 w-4" />
-              <span className="text-sm font-medium">Configuration active</span>
+          <div className={`border rounded-lg p-4 ${
+            saveStatus === 'success' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'
+          }`}>
+            <div className={`flex items-center gap-2 ${
+              saveStatus === 'success' ? 'text-green-700' : 'text-blue-700'
+            }`}>
+              {saveStatus === 'success' ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <MapPin className="h-4 w-4" />
+              )}
+              <span className="text-sm font-medium">
+                {saveStatus === 'success' ? 'Configuration sauvegardée' : 'Configuration prête'}
+              </span>
             </div>
-            <p className="text-xs text-green-600 mt-1">
-              La carte Mapbox est maintenant disponible sur la page Explorer la carte
+            <p className={`text-xs mt-1 ${
+              saveStatus === 'success' ? 'text-green-600' : 'text-blue-600'
+            }`}>
+              {saveStatus === 'success' 
+                ? 'La carte Mapbox est maintenant disponible sur la page Explorer la carte'
+                : 'Cliquez sur "Sauvegarder" pour activer la carte Mapbox'
+              }
+            </p>
+          </div>
+        )}
+
+        {saveStatus === 'error' && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-sm font-medium">Erreur de sauvegarde</span>
+            </div>
+            <p className="text-xs text-red-600 mt-1">
+              Impossible de sauvegarder la configuration. Vérifiez la console pour plus de détails.
             </p>
           </div>
         )}
 
         <div className="flex justify-end pt-4">
-          <Button onClick={handleSave} disabled={saving}>
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+          <Button 
+            onClick={handleSave} 
+            disabled={saving || (config.enabled && !config.token)}
+            className="min-w-[120px]"
+          >
+            {saving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Sauvegarde...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Sauvegarder
+              </>
+            )}
           </Button>
         </div>
       </CardContent>
