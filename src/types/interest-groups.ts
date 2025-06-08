@@ -103,7 +103,7 @@ export interface GroupNotification {
   id: string;
   user_id: string;
   group_id: string;
-  notification_type: 'new_post' | 'new_comment' | 'new_member' | 'invitation' | 'mention' | 'like' | 'reply';
+  notification_type: 'new_post' | 'new_comment' | 'new_member' | 'invitation' | 'mention' | 'like' | 'reply' | 'new_discovery' | 'new_discovery_comment' | 'discovery_like';
   entity_id?: string | null;
   title: string;
   message: string;
@@ -136,6 +136,31 @@ export interface GroupDiscovery {
     username: string;
     full_name: string;
   };
+  entity_preview?: {
+    name?: string;
+    image_url?: string;
+    description?: string;
+  };
+  is_liked?: boolean;
+}
+
+// Interface for discovery comments
+export interface DiscoveryComment {
+  id: string;
+  discovery_id: string;
+  user_id: string;
+  parent_comment_id?: string | null;
+  content: string;
+  likes_count: number;
+  created_at: string;
+  updated_at: string;
+  translations?: Json;
+  user_profile?: {
+    username: string;
+    full_name: string;
+  };
+  replies?: DiscoveryComment[];
+  is_liked?: boolean;
 }
 
 // Interface for group join requests
@@ -173,4 +198,15 @@ export interface GroupCollection {
       description?: string;
     };
   };
+}
+
+// Interface for entity preview in discoveries
+export interface EntityPreview {
+  id: string;
+  name: string;
+  type: 'symbol' | 'collection' | 'contribution';
+  description?: string;
+  image_url?: string;
+  culture?: string;
+  period?: string;
 }

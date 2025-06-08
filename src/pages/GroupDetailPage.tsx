@@ -14,7 +14,7 @@ import { getGroupBySlug } from '@/services/interestGroupService';
 import { checkGroupMembership, joinGroup, leaveGroup, getGroupPosts, createGroupPost, likePost, getGroupMembers } from '@/services/communityService';
 import { toast } from 'sonner';
 import GroupDiscussion from '@/components/community/GroupDiscussion';
-import GroupDiscoveries from '@/components/community/GroupDiscoveries';
+import EnhancedGroupDiscoveries from '@/components/community/EnhancedGroupDiscoveries';
 import GroupMembersList from '@/components/community/GroupMembersList';
 import InviteUsersDialog from '@/components/community/InviteUsersDialog';
 import RealTimeNotifications from '@/components/community/RealTimeNotifications';
@@ -275,7 +275,7 @@ const GroupDetailPage: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="discoveries">
-              <GroupDiscoveries groupId={group.id} isMember={isMember} />
+              <EnhancedGroupDiscoveries groupId={group.id} isMember={isMember} />
             </TabsContent>
 
             <TabsContent value="members">

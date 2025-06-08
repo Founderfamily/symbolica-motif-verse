@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Bell } from 'lucide-react';
+import { Bell, Share2, MessageCircle, Heart } from 'lucide-react';
 
 const RealTimeNotifications: React.FC = () => {
   const auth = useAuth();
@@ -29,10 +29,32 @@ const RealTimeNotifications: React.FC = () => {
           console.log('🔔 New notification received:', payload);
           const notification = payload.new;
           
+          // Déterminer l'icône basée sur le type de notification
+          let icon = <Bell className="h-4 w-4" />;
+          switch (notification.notification_type) {
+            case 'new_discovery':
+              icon = <Share2 className="h-4 w-4" />;
+              break;
+            case 'new_discovery_comment':
+              icon = <MessageCircle className="h-4 w-4" />;
+              break;
+            case 'discovery_like':
+              icon = <Heart className="h-4 w-4" />;
+              break;
+            case 'new_post':
+              icon = <MessageCircle className="h-4 w-4" />;
+              break;
+            case 'new_comment':
+              icon = <MessageCircle className="h-4 w-4" />;
+              break;
+            default:
+              icon = <Bell className="h-4 w-4" />;
+          }
+          
           // Afficher un toast pour la nouvelle notification
           toast(notification.title, {
             description: notification.message,
-            icon: <Bell className="h-4 w-4" />,
+            icon: icon,
             action: {
               label: 'View',
               onClick: () => {
@@ -64,6 +86,30 @@ const RealTimeNotifications: React.FC = () => {
         },
         (payload) => {
           console.log('💬 New comment created:', payload);
+          // Les notifications sont créées automatiquement par le trigger
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'group_discoveries',
+        },
+        (payload) => {
+          console.log('🔍 New discovery shared:', payload);
+          // Les notifications sont créées automatiquement par le trigger
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'discovery_comments',
+        },
+        (payload) => {
+          console.log('💬 New discovery comment created:', payload);
           // Les notifications sont créées automatiquement par le trigger
         }
       )

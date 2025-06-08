@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { GroupPost, GroupMember, PostComment, GroupInvitation, GroupNotification, GroupDiscovery, GroupJoinRequest } from '@/types/interest-groups';
 
@@ -480,9 +479,9 @@ export const shareDiscovery = async (groupId: string, sharedBy: string, entityTy
 };
 
 /**
- * Get group discoveries
+ * Get group discoveries with enhanced data including like status and entity previews
  */
-export const getGroupDiscoveries = async (groupId: string): Promise<GroupDiscovery[]> => {
+export const getGroupDiscoveries = async (groupId: string, userId?: string): Promise<GroupDiscovery[]> => {
   try {
     const { data: discoveries, error } = await supabase
       .from('group_discoveries')
@@ -508,6 +507,19 @@ export const getGroupDiscoveries = async (groupId: string): Promise<GroupDiscove
       console.error('Error fetching profiles:', profilesError);
     }
 
+    // Get like status for each discovery if user is provided
+    let userLikes: string[] = [];
+    if (userId) {
+      const discoveryIds = discoveries.map(d => d.id);
+      const { data: likes } = await supabase
+        .from('discovery_likes')
+        .select('discovery_id')
+        .eq('user_id', userId)
+        .in('discovery_id', discoveryIds);
+      
+      userLikes = likes?.map(l => l.discovery_id) || [];
+    }
+
     return discoveries.map(discovery => ({
       id: discovery.id,
       group_id: discovery.group_id,
@@ -525,7 +537,8 @@ export const getGroupDiscoveries = async (groupId: string): Promise<GroupDiscove
       } : {
         username: 'Unknown',
         full_name: 'Unknown User'
-      }
+      },
+      is_liked: userLikes.includes(discovery.id)
     }));
   } catch (error) {
     console.error('Error in getGroupDiscoveries service:', error);

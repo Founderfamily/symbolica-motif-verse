@@ -16,13 +16,13 @@ import { shareDiscovery } from '@/services/communityService';
 import { validateAndPreviewEntity, searchEntities } from '@/services/discoveryService';
 import { toast } from 'sonner';
 
-interface ShareDiscoveryDialogProps {
+interface EnhancedShareDiscoveryDialogProps {
   groupId: string;
   children: React.ReactNode;
   onDiscoveryShared?: () => void;
 }
 
-const ShareDiscoveryDialog: React.FC<ShareDiscoveryDialogProps> = ({ 
+const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> = ({ 
   groupId, 
   children, 
   onDiscoveryShared 
@@ -401,4 +401,4 @@ const ShareDiscoveryDialog: React.FC<ShareDiscoveryDialogProps> = ({
   );
 };
 
-export default ShareDiscoveryDialog;
+export default EnhancedShareDiscoveryDialog;

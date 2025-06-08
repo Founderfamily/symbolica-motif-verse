@@ -495,6 +495,86 @@ export type Database = {
         }
         Relationships: []
       }
+      discovery_comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovery_comments: {
+        Row: {
+          content: string
+          created_at: string
+          discovery_id: string
+          id: string
+          likes_count: number
+          parent_comment_id: string | null
+          translations: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          discovery_id: string
+          id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
+          translations?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          discovery_id?: string
+          id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
+          translations?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_comments_discovery_id_fkey"
+            columns: ["discovery_id"]
+            isOneToOne: false
+            referencedRelation: "group_discoveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discovery_likes: {
         Row: {
           created_at: string
