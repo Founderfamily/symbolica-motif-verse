@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp } from 'lucide-react';
+import { Users, TrendingUp, Bookmark, Hexagon, Map, FileText } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -20,23 +20,23 @@ export const NavigationItems: React.FC = () => {
     { 
       name: 'Symbols', 
       href: '/symbols',
-      icon: <I18nText translationKey="navigation.symbols">Symbols</I18nText>
+      icon: <Hexagon className="h-4 w-4 inline mr-2" />
     },
     { 
       name: 'Collections', 
       href: '/collections',
-      icon: <I18nText translationKey="navigation.collections">Collections</I18nText>
+      icon: <Bookmark className="h-4 w-4 inline mr-2" />
     },
     { 
       name: 'Community', 
       href: '/community',
-      icon: <Users className="h-4 w-4 inline mr-1" />,
+      icon: <Users className="h-4 w-4 inline mr-2" />,
       badge: 'New'
     },
     { 
       name: 'Trending', 
       href: '/trending',
-      icon: <TrendingUp className="h-4 w-4 inline mr-1" />
+      icon: <TrendingUp className="h-4 w-4 inline mr-2" />
     }
   ];
 
@@ -45,12 +45,12 @@ export const NavigationItems: React.FC = () => {
     { 
       name: 'Map', 
       href: '/map',
-      icon: <I18nText translationKey="navigation.map">Map</I18nText>
+      icon: <Map className="h-4 w-4 inline mr-2" />
     },
     { 
       name: 'Contributions', 
       href: '/contributions',
-      icon: <I18nText translationKey="navigation.contributions">Contributions</I18nText>
+      icon: <FileText className="h-4 w-4 inline mr-2" />
     }
   ] : [];
 
@@ -63,9 +63,12 @@ export const NavigationItems: React.FC = () => {
         <Link 
           key={item.name} 
           to={item.href} 
-          className="text-slate-600 hover:text-slate-900 transition-colors relative"
+          className="text-slate-600 hover:text-slate-900 transition-colors relative flex items-center font-medium"
         >
           {item.icon}
+          <I18nText translationKey={`navigation.${item.name.toLowerCase()}`} ns="header">
+            {item.name}
+          </I18nText>
           {item.badge && (
             <span className="absolute -top-2 -right-2 px-1 py-0.5 text-xs rounded-full text-white bg-amber-500">
               {item.badge}
