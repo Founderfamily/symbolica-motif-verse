@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface TrendingSymbol {
@@ -34,16 +33,23 @@ export interface RecentActivity {
 
 class TrendingService {
   async getTrendingSymbols(timeFrame: 'day' | 'week' | 'month' = 'week', limit = 12): Promise<TrendingSymbol[]> {
-    console.log('🔍 [TrendingService] Getting trending symbols...');
+    console.log('🔍 [TrendingService] Getting trending symbols with timeout...');
     
     try {
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Trending symbols timeout')), 1500)
+      );
+
+      const dataPromise = supabase
         .from('symbols')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
 
-      console.log('📊 [TrendingService] Symbols query result:', { data, error });
+      const { data, error } = await Promise.race([dataPromise, timeoutPromise]) as any;
+
+      console.log('📊 [TrendingService] Symbols query result:', { data: !!data, error: !!error });
 
       if (error) {
         console.error('❌ [TrendingService] Error fetching symbols:', error);
@@ -70,38 +76,60 @@ class TrendingService {
       console.log('✅ [TrendingService] Successfully processed symbols:', trendingSymbols.length);
       return trendingSymbols;
     } catch (err) {
-      console.error('💥 [TrendingService] Exception in getTrendingSymbols:', err);
+      console.error('💥 [TrendingService] Exception or timeout in getTrendingSymbols:', err);
       return this.getFallbackSymbols();
     }
   }
 
   async getTrendingStats(): Promise<TrendingStats> {
-    console.log('📈 [TrendingService] Getting trending stats...');
+    console.log('📈 [TrendingService] Getting trending stats with timeout...');
     
     try {
-      const [symbolsResult, contributionsResult, collectionsResult] = await Promise.all([
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Stats timeout')), 1000)
+      );
+
+      const statsPromise = Promise.all([
         supabase.from('symbols').select('*', { count: 'exact', head: true }),
         supabase.from('user_contributions').select('*', { count: 'exact', head: true }),
         supabase.from('collections').select('*', { count: 'exact', head: true }),
       ]);
 
+      const [symbolsResult, contributionsResult, collectionsResult] = await Promise.race([
+        statsPromise,
+        timeoutPromise
+      ]) as any;
+
       const today = new Date().toISOString().split('T')[0];
-      const { data: newTodayData, error: newTodayError } = await supabase
-        .from('symbols')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', today);
+      
+      // Quick timeout for new today query
+      const newTodayPromise = new Promise<any>((resolve, reject) => {
+        setTimeout(() => reject(new Error('New today timeout')), 500);
+      });
+      
+      let newTodayCount = 0;
+      try {
+        const newTodayData = await Promise.race([
+          supabase.from('symbols').select('*', { count: 'exact', head: true }).gte('created_at', today),
+          newTodayPromise
+        ]);
+        newTodayCount = (newTodayData as any)?.count || 0;
+      } catch (err) {
+        console.log('⚠️ [TrendingService] New today query timeout, using 0');
+      }
 
       const stats: TrendingStats = {
-        symbolsCount: symbolsResult.count || 20,
-        contributionsCount: contributionsResult.count || 0,
-        collectionsCount: collectionsResult.count || 48,
-        newToday: newTodayData?.length || 0
+        symbolsCount: symbolsResult?.count || 20,
+        contributionsCount: contributionsResult?.count || 0,
+        collectionsCount: collectionsResult?.count || 48,
+        newToday: newTodayCount
       };
 
       console.log('✅ [TrendingService] Stats retrieved:', stats);
       return stats;
     } catch (err) {
-      console.error('💥 [TrendingService] Exception in getTrendingStats:', err);
+      console.error('💥 [TrendingService] Exception or timeout in getTrendingStats:', err);
       return { 
         symbolsCount: 20,
         contributionsCount: 0, 
@@ -112,18 +140,26 @@ class TrendingService {
   }
 
   async getTrendingCategories(): Promise<TrendingCategory[]> {
-    console.log('🏷️ [TrendingService] Getting trending categories...');
+    console.log('🏷️ [TrendingService] Getting trending categories with timeout...');
     
     try {
-      const { data, error } = await supabase.from('symbols').select('culture');
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Categories timeout')), 1000)
+      );
+
+      const dataPromise = supabase.from('symbols').select('culture');
+      const { data, error } = await Promise.race([dataPromise, timeoutPromise]) as any;
 
       if (error || !data || data.length === 0) {
-        console.log('⚠️ [TrendingService] No categories data, using fallback');
+        console.log('⚠️ [TrendingService] No categories data or timeout, using fallback');
         return this.getFallbackCategories();
       }
 
       const cultureCounts = data.reduce((acc: Record<string, number>, symbol: any) => {
-        acc[symbol.culture] = (acc[symbol.culture] || 0) + 1;
+        if (symbol?.culture) {
+          acc[symbol.culture] = (acc[symbol.culture] || 0) + 1;
+        }
         return acc;
       }, {});
 
@@ -138,20 +174,27 @@ class TrendingService {
       console.log('✅ [TrendingService] Categories processed:', categories.length);
       return categories;
     } catch (err) {
-      console.error('💥 [TrendingService] Exception in getTrendingCategories:', err);
+      console.error('💥 [TrendingService] Exception or timeout in getTrendingCategories:', err);
       return this.getFallbackCategories();
     }
   }
 
   async getRecentActivity(): Promise<RecentActivity[]> {
-    console.log('🔔 [TrendingService] Getting recent activity...');
+    console.log('🔔 [TrendingService] Getting recent activity with timeout...');
     
     try {
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Activity timeout')), 1000)
+      );
+
+      const dataPromise = supabase
         .from('symbols')
         .select('name, created_at')
         .order('created_at', { ascending: false })
         .limit(5);
+
+      const { data, error } = await Promise.race([dataPromise, timeoutPromise]) as any;
 
       let activities: RecentActivity[] = [];
 
@@ -171,7 +214,7 @@ class TrendingService {
       console.log('✅ [TrendingService] Activities processed:', activities.length);
       return activities.slice(0, 5);
     } catch (err) {
-      console.error('💥 [TrendingService] Exception in getRecentActivity:', err);
+      console.error('💥 [TrendingService] Exception or timeout in getRecentActivity:', err);
       return this.getFallbackActivity();
     }
   }

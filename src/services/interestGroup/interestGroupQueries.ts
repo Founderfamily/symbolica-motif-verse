@@ -4,12 +4,17 @@ import { InterestGroup } from '@/types/interest-groups';
 import { sampleGroups } from './interestGroupSampleData';
 
 /**
- * Fetches a limited number of interest groups for display - with fallback data
+ * Fetches a limited number of interest groups for display - with fallback data and timeout
  */
 export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]> => {
   try {
-    console.log('🚀 [getInterestGroups] Fetching from Supabase...');
+    console.log('🚀 [getInterestGroups] Fetching from Supabase with timeout...');
     
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Interest groups timeout')), 1500)
+    );
+
     let query = supabase
       .from('interest_groups')
       .select('*')
@@ -19,7 +24,8 @@ export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]
       query = query.limit(limit);
     }
 
-    const { data, error } = await query;
+    const dataPromise = query;
+    const { data, error } = await Promise.race([dataPromise, timeoutPromise]) as any;
 
     if (error) {
       console.error('❌ [getInterestGroups] Supabase error:', error);
@@ -42,23 +48,30 @@ export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]
         : group.translations
     })) as InterestGroup[];
   } catch (error) {
-    console.error('❌ [getInterestGroups] Network error:', error);
+    console.error('❌ [getInterestGroups] Network error or timeout:', error);
     console.log('🔄 [getInterestGroups] Using sample data as fallback');
     return limit ? sampleGroups.slice(0, limit) : sampleGroups;
   }
 };
 
 /**
- * Fetches all interest groups - with fallback data
+ * Fetches all interest groups - with fallback data and timeout
  */
 export const getAllGroups = async (): Promise<InterestGroup[]> => {
   try {
-    console.log('🚀 [getAllGroups] Fetching from Supabase...');
+    console.log('🚀 [getAllGroups] Fetching from Supabase with timeout...');
     
-    const { data, error } = await supabase
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('All groups timeout')), 1500)
+    );
+    
+    const dataPromise = supabase
       .from('interest_groups')
       .select('*')
       .order('name');
+
+    const { data, error } = await Promise.race([dataPromise, timeoutPromise]) as any;
 
     if (error) {
       console.error('❌ [getAllGroups] Supabase error:', error);
@@ -81,7 +94,7 @@ export const getAllGroups = async (): Promise<InterestGroup[]> => {
         : group.translations
     })) as InterestGroup[];
   } catch (error) {
-    console.error('❌ [getAllGroups] Network error:', error);
+    console.error('❌ [getAllGroups] Network error or timeout:', error);
     console.log('🔄 [getAllGroups] Using sample data as fallback');
     return sampleGroups;
   }
