@@ -10,7 +10,7 @@ import {
 import { toast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 
-// Utility pour les timeouts
+// Utility pour les timeouts avec types Supabase corrects
 const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
   return Promise.race([
     promise,

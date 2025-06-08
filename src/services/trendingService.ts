@@ -108,10 +108,10 @@ class TrendingService {
       ]);
 
       const stats: TrendingStats = {
-        symbolsCount: results[0].count || 20,
-        contributionsCount: results[1].count || 0,
-        collectionsCount: results[2].count || 48,
-        newToday: newTodayResult.count || 0
+        symbolsCount: (results[0] as any).count || 20,
+        contributionsCount: (results[1] as any).count || 0,
+        collectionsCount: (results[2] as any).count || 48,
+        newToday: (newTodayResult as any).count || 0
       };
 
       console.log('✅ [TrendingService] Stats retrieved:', stats);
@@ -136,18 +136,18 @@ class TrendingService {
         this.timeout(2000)
       ]);
 
-      if (result.error || !result.data || result.data.length === 0) {
+      if ((result as any).error || !(result as any).data || (result as any).data.length === 0) {
         console.log('⚠️ [TrendingService] No categories data, using fallback');
         return this.getFallbackCategories();
       }
 
-      const cultureCounts = result.data.reduce((acc: Record<string, number>, symbol) => {
+      const cultureCounts = (result as any).data.reduce((acc: Record<string, number>, symbol: any) => {
         acc[symbol.culture] = (acc[symbol.culture] || 0) + 1;
         return acc;
       }, {});
 
       const categories: TrendingCategory[] = Object.entries(cultureCounts)
-        .sort(([, a], [, b]) => b - a)
+        .sort(([, a], [, b]) => (b as number) - (a as number))
         .map(([name, count]) => ({
           name,
           count: count as number,
@@ -173,8 +173,8 @@ class TrendingService {
 
       let activities: RecentActivity[] = [];
 
-      if (result.data && result.data.length > 0) {
-        activities.push(...result.data.map(symbol => ({
+      if ((result as any).data && (result as any).data.length > 0) {
+        activities.push(...(result as any).data.map((symbol: any) => ({
           type: 'symbol' as const,
           message: `Nouveau symbole "${symbol.name}" ajouté`,
           timestamp: symbol.created_at
