@@ -3,6 +3,7 @@ import { STATIC_SYMBOLS } from '@/data/staticSymbols';
 
 /**
  * Service pour mapper les symboles statiques vers leurs équivalents en base de données
+ * et gérer la cohérence entre les différents systèmes d'IDs
  */
 class SymbolMappingService {
   // Mapping manuel entre symboles statiques et IDs de la base de données
@@ -24,6 +25,16 @@ class SymbolMappingService {
     'triskele': '788ed8d5-c613-43f3-8bd7-c39ac09c42cd', // Sans suffixe
     'triskelion': '788ed8d5-c613-43f3-8bd7-c39ac09c42cd', // Nom alternatif
   };
+
+  // Mapping inverse pour retrouver l'ID statique depuis un UUID
+  private dbToStaticMapping: Record<string, string> = {};
+
+  constructor() {
+    // Construire le mapping inverse
+    Object.entries(this.staticToDbMapping).forEach(([staticId, dbId]) => {
+      this.dbToStaticMapping[dbId] = staticId;
+    });
+  }
 
   /**
    * Vérifie si un ID correspond à un symbole statique
@@ -56,6 +67,14 @@ class SymbolMappingService {
   }
 
   /**
+   * Vérifie si un ID correspond à un UUID de base de données
+   */
+  isDatabaseSymbol(symbolId: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(symbolId);
+  }
+
+  /**
    * Obtient l'ID de la base de données correspondant à un symbole statique
    */
   getDbIdForStaticSymbol(staticId: string): string | null {
@@ -66,6 +85,13 @@ class SymbolMappingService {
     console.log('getDbIdForStaticSymbol result:', result);
     
     return result;
+  }
+
+  /**
+   * Obtient l'ID statique correspondant à un UUID de base de données
+   */
+  getStaticIdForDbSymbol(dbId: string): string | null {
+    return this.dbToStaticMapping[dbId] || null;
   }
 
   /**
@@ -89,10 +115,33 @@ class SymbolMappingService {
   }
 
   /**
+   * Normalise un ID de symbole pour la navigation
+   * Retourne toujours un ID qui peut être utilisé dans l'URL
+   */
+  normalizeSymbolId(symbolId: string | number, preferDatabase = true): string {
+    const idStr = symbolId.toString();
+    
+    if (preferDatabase && this.isStaticSymbol(idStr)) {
+      const dbId = this.getDbIdForStaticSymbol(idStr);
+      return dbId || idStr;
+    }
+    
+    return idStr;
+  }
+
+  /**
    * Obtient les informations d'un symbole statique
    */
   getStaticSymbolInfo(staticId: string) {
     return STATIC_SYMBOLS.find(symbol => symbol.id === staticId);
+  }
+
+  /**
+   * Met à jour le mapping entre un symbole statique et un symbole de base de données
+   */
+  updateMapping(staticId: string, dbId: string) {
+    this.staticToDbMapping[staticId] = dbId;
+    this.dbToStaticMapping[dbId] = staticId;
   }
 
   /**

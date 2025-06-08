@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Info, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { Link } from 'react-router-dom';
-import { SYMBOLS } from '@/data/symbols';
+import { symbolMappingService } from '@/services/symbolMappingService';
 
 interface SymbolCardProps {
   symbol: SymbolData;
@@ -81,47 +81,10 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     return cultures[symbol.culture] || "hover:bg-gradient-to-br from-slate-50 to-slate-100 hover:border-slate-200";
   }, [symbol.culture]);
 
-  // Navigation améliorée: utiliser l'UUID pour les symboles de la base de données
+  // Navigation cohérente : toujours utiliser l'ID du symbole tel qu'il est
   const getSymbolLink = () => {
-    // Si le symbole a un UUID valide (format UUID), c'est probablement de la base de données
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(symbol.id);
-    
-    if (isUUID) {
-      console.log(`SymbolCard: Symbole "${symbol.name}" de la base de données, utilisation UUID ${symbol.id}`);
-      return `/symbols/${symbol.id}`;
-    }
-
-    // Sinon, essayer de trouver dans les données statiques
-    const findBestMatch = (searchName: string) => {
-      const normalizedSearch = searchName.toLowerCase().trim();
-      
-      // Recherche exacte d'abord
-      let bestMatchIndex = SYMBOLS.findIndex(s => 
-        s.name.toLowerCase() === normalizedSearch
-      );
-      
-      if (bestMatchIndex >= 0) {
-        return bestMatchIndex;
-      }
-      
-      // Recherche par correspondance partielle
-      bestMatchIndex = SYMBOLS.findIndex(s => {
-        const symbolName = s.name.toLowerCase();
-        return symbolName.includes(normalizedSearch) || normalizedSearch.includes(symbolName);
-      });
-      
-      return bestMatchIndex >= 0 ? bestMatchIndex : -1;
-    };
-
-    const staticSymbolIndex = findBestMatch(symbol.name);
-
-    if (staticSymbolIndex >= 0) {
-      console.log(`SymbolCard: Symbole "${symbol.name}" trouvé dans les données statiques à l'index ${staticSymbolIndex}`);
-      return `/symbols/${staticSymbolIndex}`;
-    }
-
-    // Dernier recours: utiliser l'ID tel quel
-    console.log(`SymbolCard: Symbole "${symbol.name}" navigation par défaut avec ID ${symbol.id}`);
+    // Utiliser directement l'ID du symbole pour une navigation cohérente
+    console.log(`SymbolCard: Navigation vers symbole "${symbol.name}" avec ID: ${symbol.id}`);
     return `/symbols/${symbol.id}`;
   };
   
