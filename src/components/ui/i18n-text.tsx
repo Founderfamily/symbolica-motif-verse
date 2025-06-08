@@ -21,7 +21,7 @@ export const I18nText = ({
   as: Component = 'span',
   children
 }: I18nTextProps) => {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   
   const translationParams = values || params;
   
@@ -37,11 +37,25 @@ export const I18nText = ({
   
   // Add data attribute for debugging in development
   const dataAttributes = process.env.NODE_ENV === 'development' 
-    ? { 'data-translation-key': translationKey, 'data-ns': ns }
+    ? { 
+        'data-translation-key': translationKey, 
+        'data-ns': ns,
+        'data-language': currentLanguage,
+        'data-translated': !isMissing ? 'true' : 'false'
+      }
+    : {};
+  
+  // Add visual indicator for missing translations in development
+  const devStyle = process.env.NODE_ENV === 'development' && isMissing && !children
+    ? { border: '1px solid red', backgroundColor: 'rgba(255,0,0,0.1)' }
     : {};
   
   return (
-    <Component className={className} {...dataAttributes}>
+    <Component 
+      className={className} 
+      style={devStyle}
+      {...dataAttributes}
+    >
       {displayText}
     </Component>
   );

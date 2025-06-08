@@ -22,12 +22,20 @@ export const useTranslation = () => {
       }
     }
     
+    // Debug logging in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔍 [Translation] Key: ${key}, Namespace: ${namespace || 'none'}, Language: ${i18n.language}`);
+    }
+    
     // Try translation with namespace first
     if (namespace) {
       const namespacedResult = originalT(translationKey, { ...options, ns: namespace });
       // Ensure we return a string
       const resultStr = typeof namespacedResult === 'string' ? namespacedResult : String(namespacedResult);
       if (resultStr !== translationKey && resultStr !== key) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`✅ [Translation] Found: ${resultStr}`);
+        }
         return resultStr;
       }
     }
@@ -37,12 +45,15 @@ export const useTranslation = () => {
     // Ensure we return a string
     const directResultStr = typeof directResult === 'string' ? directResult : String(directResult);
     if (directResultStr !== key) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`✅ [Translation] Fallback found: ${directResultStr}`);
+      }
       return directResultStr;
     }
     
     // If still no translation found, provide readable fallback
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`Missing translation: ${key} (namespace: ${namespace || 'none'}) for language: ${i18n.language}`);
+      console.warn(`⚠️ [Translation] Missing: ${key} (namespace: ${namespace || 'none'}) for language: ${i18n.language}`);
     }
     
     // Convert key to readable text as last resort
@@ -55,12 +66,18 @@ export const useTranslation = () => {
   const changeLanguage = (lng: string) => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
     i18n.changeLanguage(lng);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🌐 [Language] Changed to: ${lng}`);
+    }
   };
 
   // Reset to default language (French)
   const resetToDefaultLanguage = () => {
     localStorage.removeItem(LANGUAGE_STORAGE_KEY);
     i18n.changeLanguage('fr');
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🌐 [Language] Reset to French`);
+    }
   };
   
   return { 

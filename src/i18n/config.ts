@@ -54,6 +54,8 @@ import enGamification from './locales/en/gamification.json';
 import frGamification from './locales/fr/gamification.json';
 import enSymbols from './locales/en/symbols.json';
 import frSymbols from './locales/fr/symbols.json';
+import enSymbolTriptych from './locales/en/symbolTriptych.json';
+import frSymbolTriptych from './locales/fr/symbolTriptych.json';
 
 const resources = {
   en: {
@@ -80,7 +82,8 @@ const resources = {
     uploadTools: enUploadTools,
     testimonials: enTestimonials,
     gamification: enGamification,
-    symbols: enSymbols
+    symbols: enSymbols,
+    symbolTriptych: enSymbolTriptych
   },
   fr: {
     translation: frTranslations,
@@ -106,7 +109,8 @@ const resources = {
     uploadTools: frUploadTools,
     testimonials: frTestimonials,
     gamification: frGamification,
-    symbols: frSymbols
+    symbols: frSymbols,
+    symbolTriptych: frSymbolTriptych
   }
 };
 
