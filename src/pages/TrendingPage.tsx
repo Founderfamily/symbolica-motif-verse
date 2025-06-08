@@ -5,26 +5,26 @@ import { TrendingStatsCards } from '@/components/trending/TrendingStatsCards';
 import { TrendingHeader } from '@/components/trending/TrendingHeader';
 import { TrendingLayout } from '@/components/trending/TrendingLayout';
 import { 
-  useTrendingSymbolsDirect, 
-  useTrendingStatsDirect, 
-  useTrendingCategoriesDirect, 
-  useRecentActivityDirect 
-} from '@/hooks/useTrendingDirect';
+  useTrendingSymbolsOptimized, 
+  useTrendingStatsOptimized, 
+  useTrendingCategoriesOptimized, 
+  useRecentActivityOptimized 
+} from '@/hooks/useTrendingOptimized';
 
 const TrendingPage = () => {
   const [timeFrame, setTimeFrame] = useState<'day' | 'week' | 'month'>('week');
 
   console.log('🎯 [TrendingPage] Rendering with timeFrame:', timeFrame);
 
-  // Hooks directs simples sans React Query
-  const symbolsQuery = useTrendingSymbolsDirect({
+  // Hooks optimisés avec timeouts et fallbacks
+  const symbolsQuery = useTrendingSymbolsOptimized({
     timeFrame,
     limit: 12
   });
 
-  const statsQuery = useTrendingStatsDirect();
-  const categoriesQuery = useTrendingCategoriesDirect();
-  const activitiesQuery = useRecentActivityDirect();
+  const statsQuery = useTrendingStatsOptimized();
+  const categoriesQuery = useTrendingCategoriesOptimized();
+  const activitiesQuery = useRecentActivityOptimized();
 
   // Log des états actuels
   console.log('🔍 [TrendingPage] Current states:', {
