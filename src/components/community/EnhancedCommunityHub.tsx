@@ -94,7 +94,8 @@ const EnhancedCommunityHub: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-8">
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <CommunityStats groups={groups} />
+            {/* Correction : CommunityStats gère ses propres données */}
+            <CommunityStats />
             
             {/* Grille des groupes avec fonctionnalités sociales */}
             <div className="mt-8">

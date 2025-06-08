@@ -70,7 +70,8 @@ const OptimizedCommunityHub: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-8">
         {/* Main Content */}
         <div className="lg:col-span-3">
-          <CommunityStats groups={groups} />
+          {/* Correction : CommunityStats gère ses propres données */}
+          <CommunityStats />
           
           <OptimizedCommunityTabs
             groups={groups}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { I18nText } from '@/components/ui/i18n-text';
 import CommunityStats from '@/components/community/CommunityStats';
@@ -66,13 +67,15 @@ const CommunityHub: React.FC = () => {
           </p>
         </div>
 
-        {/* Stats - Ne plus passer de props, le composant gère ses propres données */}
+        {/* Stats - Le composant gère ses propres données */}
         <CommunityStats />
 
-        {/* Tabs */}
+        {/* Tabs - Correction de l'interface */}
         <CommunityTabs 
+          groups={groups}
+          loading={loading}
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          onTabChange={setActiveTab}
         />
 
         {/* Content */}
