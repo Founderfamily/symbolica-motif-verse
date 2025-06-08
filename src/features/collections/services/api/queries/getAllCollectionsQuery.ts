@@ -11,7 +11,7 @@ export class GetAllCollectionsQuery {
    * Récupère toutes les collections avec leurs traductions
    */
   async execute(): Promise<CollectionWithTranslations[]> {
-    console.log('🚀 [GetAllCollectionsQuery] DÉBUT - Version corrigée');
+    console.log('🚀 [GetAllCollectionsQuery] DÉBUT - Version corrigée pour jointure');
     
     try {
       // Test de base simple d'abord
@@ -28,9 +28,9 @@ export class GetAllCollectionsQuery {
       
       console.log('✅ [GetAllCollectionsQuery] Test basique OK:', testData?.length || 0, 'collections');
 
-      // Requête principale avec collection_id inclus dans les traductions
+      // Requête principale avec LEFT JOIN au lieu de INNER JOIN
       const startTime = Date.now();
-      console.log('🔍 [GetAllCollectionsQuery] Exécution requête principale...');
+      console.log('🔍 [GetAllCollectionsQuery] Exécution requête principale avec LEFT JOIN...');
       
       const { data, error } = await supabase
         .from('collections')
@@ -41,7 +41,7 @@ export class GetAllCollectionsQuery {
           created_at,
           updated_at,
           created_by,
-          collection_translations!inner (
+          collection_translations (
             id,
             collection_id,
             language,
@@ -73,28 +73,32 @@ export class GetAllCollectionsQuery {
         return [];
       }
       
-      // Transformation avec validation stricte
+      // Transformation avec validation stricte et gestion défensive des traductions
       const transformedData: CollectionWithTranslations[] = data
         .filter(collection => {
-          const isValid = collection && collection.slug && collection.collection_translations;
+          const isValid = collection && collection.slug;
           if (!isValid) {
             console.warn('⚠️ [GetAllCollectionsQuery] Collection invalide filtrée:', collection?.id);
           }
           return isValid;
         })
         .map(collection => {
+          // Gestion défensive : s'assurer qu'on a un tableau de traductions
+          const translations = Array.isArray(collection.collection_translations) 
+            ? collection.collection_translations 
+            : [];
+          
           const result = {
             ...collection,
-            collection_translations: Array.isArray(collection.collection_translations) 
-              ? collection.collection_translations 
-              : []
+            collection_translations: translations
           };
           
           console.log(`✅ [GetAllCollectionsQuery] Collection transformée:`, {
             id: result.id,
             slug: result.slug,
             is_featured: result.is_featured,
-            translationsCount: result.collection_translations.length
+            translationsCount: result.collection_translations.length,
+            hasTranslations: result.collection_translations.length > 0
           });
           
           return result;
@@ -103,6 +107,7 @@ export class GetAllCollectionsQuery {
       console.log('🎉 [GetAllCollectionsQuery] SUCCÈS FINAL:', {
         collectionsTotal: transformedData.length,
         collectionsAvecTraductions: transformedData.filter(c => c.collection_translations.length > 0).length,
+        collectionsSansTraductions: transformedData.filter(c => c.collection_translations.length === 0).length,
         collectionsEnVedette: transformedData.filter(c => c.is_featured).length
       });
       

@@ -6,8 +6,13 @@ export const useCollectionTranslations = () => {
   const { currentLanguage } = useTranslation();
 
   const getTranslation = (collection: CollectionWithTranslations, field: 'title' | 'description'): string => {
-    if (!collection?.collection_translations) {
-      return '';
+    if (!collection?.collection_translations || collection.collection_translations.length === 0) {
+      // Fallback pour les collections sans traductions
+      console.warn(`⚠️ Collection ${collection.id} n'a pas de traductions, utilisation de fallback`);
+      if (field === 'title') {
+        return collection.slug?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Collection sans titre';
+      }
+      return 'Description non disponible';
     }
 
     // Find translation for current language first
@@ -29,7 +34,12 @@ export const useCollectionTranslations = () => {
       return fallbackTranslation[field];
     }
     
-    return '';
+    // Fallback final basé sur le slug pour le titre
+    if (field === 'title') {
+      return collection.slug?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Collection sans titre';
+    }
+    
+    return 'Description non disponible';
   };
 
   return { getTranslation };

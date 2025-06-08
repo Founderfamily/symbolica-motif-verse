@@ -118,16 +118,39 @@ const CollectionCategories: React.FC = () => {
   const { currentLanguage } = useTranslation();
   const { data: collections = [], isLoading, error, refetch } = useCollections();
 
-  console.log('🎯 [CollectionCategories] Rendu avec:', {
+  // LOGS DE DEBUG DÉTAILLÉS
+  console.log('🎯 [CollectionCategories] Rendu avec état détaillé:', {
     collectionsCount: collections?.length || 0,
+    collectionsData: collections,
     isLoading,
     hasError: !!error,
-    errorMessage: error?.message
+    errorMessage: error?.message,
+    errorStack: error?.stack,
+    collectionsType: typeof collections,
+    isArray: Array.isArray(collections)
   });
 
+  // Log individuel de chaque collection pour debug
+  if (collections && collections.length > 0) {
+    collections.forEach((collection, index) => {
+      console.log(`📋 [CollectionCategories] Collection ${index + 1}:`, {
+        id: collection.id,
+        slug: collection.slug,
+        is_featured: collection.is_featured,
+        hasTranslations: collection.collection_translations?.length > 0,
+        translationsCount: collection.collection_translations?.length || 0,
+        translations: collection.collection_translations
+      });
+    });
+  }
+
   const getTranslation = React.useCallback((collection: CollectionWithTranslations, field: string) => {
-    if (!collection?.collection_translations) {
-      return '';
+    if (!collection?.collection_translations || collection.collection_translations.length === 0) {
+      console.warn(`⚠️ Collection ${collection.id} sans traductions, utilisation fallback`);
+      if (field === 'title') {
+        return collection.slug?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Collection sans titre';
+      }
+      return 'Description non disponible';
     }
 
     // Find translation for current language first
@@ -149,7 +172,9 @@ const CollectionCategories: React.FC = () => {
       return fallbackTranslation[field];
     }
     
-    return '';
+    return field === 'title' 
+      ? collection.slug?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Collection sans titre'
+      : 'Description non disponible';
   }, [currentLanguage]);
 
   // Function to get title from any collection type
@@ -168,16 +193,19 @@ const CollectionCategories: React.FC = () => {
     return getTranslation(collection, 'description');
   }, [getTranslation]);
 
-  // LOGIQUE CORRIGÉE : priorité aux données de la base
+  // LOGIQUE CORRIGÉE : priorité aux données de la base, même sans traductions
   const staticCollections = React.useMemo(() => getStaticCollections(currentLanguage), [currentLanguage]);
   
   // Utiliser les collections de la base si disponibles, sinon fallback statique
   const hasValidCollections = collections && Array.isArray(collections) && collections.length > 0;
   const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : staticCollections;
 
-  console.log('📊 [CollectionCategories] Collections finales:', {
+  console.log('📊 [CollectionCategories] Collections finales analyse:', {
     sourceType: hasValidCollections ? 'database' : 'static',
-    count: finalCollections.length
+    count: finalCollections.length,
+    rawCollectionsLength: collections?.length,
+    hasValidCollections,
+    finalCollectionsPreview: finalCollections.slice(0, 2)
   });
 
   // Use filters hook
@@ -197,20 +225,31 @@ const CollectionCategories: React.FC = () => {
 
   // Loading state
   if (isLoading) {
+    console.log('⏳ [CollectionCategories] Affichage état de chargement');
     return <CollectionsLoadingSkeleton />;
   }
 
   // Error state - montrer l'erreur au lieu de masquer
   if (error) {
+    console.error('❌ [CollectionCategories] Affichage état d\'erreur:', error);
     return <CollectionsErrorState error={error} retry={() => refetch()} />;
   }
+
+  console.log('🎨 [CollectionCategories] Affichage des collections finales:', {
+    finalCollectionsCount: finalCollections.length,
+    filteredCount: filteredAndSortedCollections.length
+  });
 
   return (
     <div className="space-y-8">
       {/* Debug info en développement */}
       {process.env.NODE_ENV === 'development' && (
         <div className="bg-blue-50 p-4 rounded-lg text-sm">
-          <strong>Debug:</strong> {hasValidCollections ? `${collections.length} collections de la base` : `${staticCollections.length} collections statiques`}
+          <strong>Debug Collections:</strong> 
+          {hasValidCollections 
+            ? `${collections.length} collections de la base (${collections.filter(c => c.collection_translations?.length > 0).length} avec traductions)`
+            : `${staticCollections.length} collections statiques`
+          }
         </div>
       )}
 
