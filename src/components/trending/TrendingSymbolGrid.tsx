@@ -3,7 +3,8 @@ import React from 'react';
 import { TrendingSymbol } from '@/services/trendingService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Heart } from 'lucide-react';
+import { Eye, Heart, TrendingUp } from 'lucide-react';
+import { I18nText } from '@/components/ui/i18n-text';
 
 interface TrendingSymbolGridProps {
   symbols: TrendingSymbol[];
@@ -34,7 +35,17 @@ export const TrendingSymbolGrid: React.FC<TrendingSymbolGridProps> = ({ symbols,
   if (!symbols || symbols.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-600">Aucun symbole tendance disponible pour le moment</p>
+        <TrendingUp className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+        <p className="text-slate-600 text-lg mb-2">
+          <I18nText translationKey="noSymbolsAvailable" ns="trending">
+            Aucun symbole tendance disponible pour le moment
+          </I18nText>
+        </p>
+        <p className="text-slate-500 text-sm">
+          <I18nText translationKey="checkBackLater" ns="trending">
+            Revenez bientôt pour découvrir les dernières tendances
+          </I18nText>
+        </p>
       </div>
     );
   }
@@ -42,17 +53,20 @@ export const TrendingSymbolGrid: React.FC<TrendingSymbolGridProps> = ({ symbols,
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {symbols.map((symbol, index) => (
-        <Card key={symbol.id} className="hover:shadow-lg transition-all cursor-pointer group">
+        <Card key={symbol.id} className="hover:shadow-lg transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-amber-400">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-lg font-semibold text-slate-900 group-hover:text-amber-600 transition-colors">
+              <div className="flex-1">
+                <CardTitle className="text-lg font-semibold text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-1">
                   {symbol.name}
                 </CardTitle>
-                <p className="text-sm text-slate-500">{symbol.culture} • {symbol.period}</p>
+                <p className="text-sm text-slate-500 mt-1">
+                  {symbol.culture} • {symbol.period}
+                </p>
               </div>
               {index < 3 && (
-                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                <Badge variant="secondary" className="bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border-amber-200 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
                   #{index + 1}
                 </Badge>
               )}
@@ -61,24 +75,31 @@ export const TrendingSymbolGrid: React.FC<TrendingSymbolGridProps> = ({ symbols,
           <CardContent>
             <div className="space-y-3">
               {symbol.description && (
-                <p className="text-sm text-slate-600 line-clamp-2">
+                <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
                   {symbol.description}
                 </p>
               )}
               
-              <div className="flex items-center justify-between text-sm text-slate-500">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <div className="flex items-center gap-4 text-sm text-slate-500">
+                  <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
                     <Eye className="w-4 h-4" />
-                    <span>{symbol.view_count}</span>
+                    <span>{symbol.view_count.toLocaleString()}</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 hover:text-red-600 transition-colors">
                     <Heart className="w-4 h-4" />
-                    <span>{symbol.like_count}</span>
+                    <span>{symbol.like_count.toLocaleString()}</span>
                   </div>
                 </div>
-                <Badge variant="outline" className="text-xs">
-                  Score: {symbol.trending_score}
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs font-medium ${
+                    symbol.trending_score >= 90 ? 'border-green-200 text-green-700 bg-green-50' :
+                    symbol.trending_score >= 70 ? 'border-amber-200 text-amber-700 bg-amber-50' :
+                    'border-slate-200 text-slate-600 bg-slate-50'
+                  }`}
+                >
+                  {symbol.trending_score.toFixed(1)}
                 </Badge>
               </div>
             </div>

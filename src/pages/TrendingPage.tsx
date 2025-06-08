@@ -9,7 +9,7 @@ import { useTrendingSymbols, useTrendingStats, useTrendingCategories, useRecentA
 const TrendingPage = () => {
   const [timeFrame, setTimeFrame] = useState<'day' | 'week' | 'month'>('week');
 
-  // Hooks optimisés avec gestion d'erreur et cache
+  // Hooks avec gestion d'erreur améliorée
   const { data: trendingSymbols, isLoading: symbolsLoading, error: symbolsError } = useTrendingSymbols({
     timeFrame,
     limit: 12
@@ -19,8 +19,18 @@ const TrendingPage = () => {
   const { data: categories = [], isLoading: categoriesLoading } = useTrendingCategories();
   const { data: activities = [], isLoading: activitiesLoading } = useRecentActivity();
 
+  console.log('TrendingPage render:', {
+    timeFrame,
+    symbolsCount: trendingSymbols?.length,
+    symbolsLoading,
+    symbolsError,
+    statsLoading,
+    categoriesLoading,
+    activitiesLoading
+  });
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 py-8">
         <TrendingHeader />
         
