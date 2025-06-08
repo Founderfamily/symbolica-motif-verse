@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save, Upload, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -20,6 +19,7 @@ const SymbolEditor = () => {
   const [symbol, setSymbol] = useState<any>(null);
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     culture: '',
@@ -54,23 +54,30 @@ const SymbolEditor = () => {
 
     const fetchSymbolData = async () => {
       try {
+        console.log('🔍 Chargement des données du symbole:', id);
+        
         const { data: symbolData, error: symbolError } = await supabase
           .from('symbols')
           .select('*')
           .eq('id', id)
           .single();
 
-        if (symbolError) throw symbolError;
+        if (symbolError) {
+          console.error('❌ Erreur lors du chargement du symbole:', symbolError);
+          throw symbolError;
+        }
 
+        console.log('✅ Données du symbole chargées:', symbolData);
+        
         setSymbol(symbolData);
         setFormData({
-          name: symbolData.name,
-          culture: symbolData.culture,
-          period: symbolData.period,
+          name: symbolData.name || '',
+          culture: symbolData.culture || '',
+          period: symbolData.period || '',
           description: symbolData.description || '',
-          medium: symbolData.medium || [],
-          technique: symbolData.technique || [],
-          function: symbolData.function || [],
+          medium: Array.isArray(symbolData.medium) ? symbolData.medium : [],
+          technique: Array.isArray(symbolData.technique) ? symbolData.technique : [],
+          function: Array.isArray(symbolData.function) ? symbolData.function : [],
         });
 
         const { data: imagesData, error: imagesError } = await supabase
@@ -78,10 +85,15 @@ const SymbolEditor = () => {
           .select('*')
           .eq('symbol_id', id);
 
-        if (imagesError) throw imagesError;
+        if (imagesError) {
+          console.error('❌ Erreur lors du chargement des images:', imagesError);
+          throw imagesError;
+        }
+
+        console.log('✅ Images chargées:', imagesData?.length || 0);
         setImages(imagesData || []);
       } catch (error) {
-        console.error('Error fetching symbol data:', error);
+        console.error('❌ Erreur lors du chargement des données du symbole:', error);
         toast.error('Erreur lors du chargement des données du symbole');
         navigate('/admin/symbols');
       } finally {
@@ -94,10 +106,12 @@ const SymbolEditor = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    console.log('📝 Modification du champ:', name, '=', value);
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleArrayFieldChange = (field: 'medium' | 'technique' | 'function', value: string, checked: boolean) => {
+    console.log('🔄 Modification du champ tableau:', field, value, checked);
     setFormData(prev => ({
       ...prev,
       [field]: checked 
@@ -108,30 +122,80 @@ const SymbolEditor = () => {
 
   const handleSave = async () => {
     try {
+      setSaving(true);
+      console.log('💾 Début de la sauvegarde avec les données:', formData);
+
+      // Validation des champs requis
+      if (!formData.name.trim()) {
+        toast.error('Le nom du symbole est requis');
+        return;
+      }
+
+      if (!formData.culture.trim()) {
+        toast.error('La culture est requise');
+        return;
+      }
+
+      if (!formData.period.trim()) {
+        toast.error('La période est requise');
+        return;
+      }
+
+      // Préparer les données pour la sauvegarde
+      const dataToSave = {
+        name: formData.name.trim(),
+        culture: formData.culture.trim(),
+        period: formData.period.trim(),
+        description: formData.description.trim() || null,
+        medium: formData.medium.length > 0 ? formData.medium : null,
+        technique: formData.technique.length > 0 ? formData.technique : null,
+        function: formData.function.length > 0 ? formData.function : null,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('📋 Données préparées pour la sauvegarde:', dataToSave);
+
       if (isNewSymbol) {
         const { data, error } = await supabase
           .from('symbols')
-          .insert([formData])
+          .insert([dataToSave])
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Erreur lors de la création:', error);
+          throw error;
+        }
 
+        console.log('✅ Symbole créé avec succès:', data);
         toast.success('Symbole créé avec succès');
         navigate(`/admin/symbols/${data.id}/edit`);
       } else {
-        const { error } = await supabase
+        console.log('🔄 Mise à jour du symbole avec ID:', id);
+        
+        const { data, error } = await supabase
           .from('symbols')
-          .update(formData)
-          .eq('id', id);
+          .update(dataToSave)
+          .eq('id', id)
+          .select()
+          .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Erreur lors de la mise à jour:', error);
+          throw error;
+        }
 
+        console.log('✅ Symbole mis à jour avec succès:', data);
         toast.success('Symbole mis à jour avec succès');
+        
+        // Recharger les données pour vérifier la sauvegarde
+        setSymbol(data);
       }
-    } catch (error) {
-      console.error('Error saving symbol:', error);
-      toast.error('Erreur lors de la sauvegarde');
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la sauvegarde:', error);
+      toast.error(`Erreur lors de la sauvegarde: ${error.message || 'Erreur inconnue'}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -140,6 +204,8 @@ const SymbolEditor = () => {
     if (!file || isNewSymbol) return;
 
     try {
+      console.log('📷 Début du téléchargement d\'image:', file.name);
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `symbols/${id}/${fileName}`;
@@ -148,11 +214,16 @@ const SymbolEditor = () => {
         .from('symbol-images')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('❌ Erreur lors du téléchargement:', uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('symbol-images')
         .getPublicUrl(filePath);
+
+      console.log('🔗 URL publique générée:', publicUrl);
 
       const { error: insertError } = await supabase
         .from('symbol_images')
@@ -165,8 +236,12 @@ const SymbolEditor = () => {
           }
         ]);
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('❌ Erreur lors de l\'insertion en base:', insertError);
+        throw insertError;
+      }
 
+      // Recharger les images
       const { data: imagesData } = await supabase
         .from('symbol_images')
         .select('*')
@@ -174,9 +249,9 @@ const SymbolEditor = () => {
 
       setImages(imagesData || []);
       toast.success('Image ajoutée avec succès');
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Erreur lors du téléchargement de l\'image');
+    } catch (error: any) {
+      console.error('❌ Erreur lors du téléchargement de l\'image:', error);
+      toast.error(`Erreur lors du téléchargement de l'image: ${error.message}`);
     }
   };
 
@@ -191,8 +266,8 @@ const SymbolEditor = () => {
 
       setImages(prev => prev.filter(img => img.id !== imageId));
       toast.success('Image supprimée avec succès');
-    } catch (error) {
-      console.error('Error deleting image:', error);
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la suppression de l\'image:', error);
       toast.error('Erreur lors de la suppression de l\'image');
     }
   };
@@ -225,35 +300,38 @@ const SymbolEditor = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="name">Nom</Label>
+                <Label htmlFor="name">Nom *</Label>
                 <Input
                   id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   required
+                  placeholder="Nom du symbole"
                 />
               </div>
 
               <div>
-                <Label htmlFor="culture">Culture</Label>
+                <Label htmlFor="culture">Culture *</Label>
                 <Input
                   id="culture"
                   name="culture"
                   value={formData.culture}
                   onChange={handleInputChange}
                   required
+                  placeholder="Culture d'origine"
                 />
               </div>
 
               <div>
-                <Label htmlFor="period">Période</Label>
+                <Label htmlFor="period">Période *</Label>
                 <Input
                   id="period"
                   name="period"
                   value={formData.period}
                   onChange={handleInputChange}
                   required
+                  placeholder="Période historique"
                 />
               </div>
 
@@ -265,6 +343,7 @@ const SymbolEditor = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
+                  placeholder="Description du symbole"
                 />
               </div>
             </CardContent>
@@ -276,7 +355,7 @@ const SymbolEditor = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label>Matériaux</Label>
+                <Label>Matériaux ({formData.medium.length} sélectionné{formData.medium.length > 1 ? 's' : ''})</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {mediumOptions.map((option) => (
                     <div key={option} className="flex items-center space-x-2">
@@ -296,7 +375,7 @@ const SymbolEditor = () => {
               </div>
 
               <div>
-                <Label>Techniques</Label>
+                <Label>Techniques ({formData.technique.length} sélectionné{formData.technique.length > 1 ? 's' : ''})</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {techniqueOptions.map((option) => (
                     <div key={option} className="flex items-center space-x-2">
@@ -316,7 +395,7 @@ const SymbolEditor = () => {
               </div>
 
               <div>
-                <Label>Fonctions</Label>
+                <Label>Fonctions ({formData.function.length} sélectionné{formData.function.length > 1 ? 's' : ''})</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {functionOptions.map((option) => (
                     <div key={option} className="flex items-center space-x-2">
@@ -344,9 +423,22 @@ const SymbolEditor = () => {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button onClick={handleSave} className="w-full">
-                <Save className="w-4 h-4 mr-2" />
-                {isNewSymbol ? 'Créer le symbole' : 'Sauvegarder'}
+              <Button 
+                onClick={handleSave} 
+                className="w-full" 
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Sauvegarde...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    {isNewSymbol ? 'Créer le symbole' : 'Sauvegarder'}
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
@@ -354,7 +446,7 @@ const SymbolEditor = () => {
           {!isNewSymbol && (
             <Card>
               <CardHeader>
-                <CardTitle>Images du symbole</CardTitle>
+                <CardTitle>Images du symbole ({images.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
