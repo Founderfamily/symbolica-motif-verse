@@ -28,62 +28,57 @@ export const DuplicateCollectionsManager: React.FC = () => {
     try {
       setLoading(true);
       
-      // Requête pour trouver les doublons potentiels
-      const { data, error } = await supabase.rpc('get_duplicate_collections');
-      
-      if (error) {
-        // Si la fonction n'existe pas, utilisons une requête directe
-        const { data: duplicatesData, error: queryError } = await supabase
-          .from('collection_translations')
-          .select(`
-            title,
-            language,
-            collections!inner (
-              id,
-              slug,
-              is_featured
-            )
-          `);
+      // Récupérer toutes les collections avec leurs traductions
+      const { data: collectionsData, error } = await supabase
+        .from('collection_translations')
+        .select(`
+          title,
+          language,
+          collections!inner (
+            id,
+            slug,
+            is_featured
+          )
+        `);
 
-        if (queryError) throw queryError;
+      if (error) throw error;
 
-        // Grouper par titre et langue
-        const groupedDuplicates = duplicatesData?.reduce((acc, item) => {
-          const key = `${item.title}-${item.language}`;
-          if (!acc[key]) {
-            acc[key] = {
-              title: item.title,
-              language: item.language,
-              collections: []
-            };
-          }
-          acc[key].collections.push({
-            id: item.collections.id,
-            slug: item.collections.slug,
-            symbol_count: 0, // Will be populated separately
-            is_featured: item.collections.is_featured
-          });
-          return acc;
-        }, {} as Record<string, DuplicateGroup>);
-
-        // Filtrer seulement les vrais doublons (plus d'une collection)
-        const duplicateGroups = Object.values(groupedDuplicates || {})
-          .filter(group => group.collections.length > 1);
-
-        // Récupérer le nombre de symboles pour chaque collection
-        for (const group of duplicateGroups) {
-          for (const collection of group.collections) {
-            const { count } = await supabase
-              .from('collection_symbols')
-              .select('*', { count: 'exact', head: true })
-              .eq('collection_id', collection.id);
-            
-            collection.symbol_count = count || 0;
-          }
+      // Grouper par titre et langue pour trouver les doublons
+      const groupedByTitleAndLang = collectionsData?.reduce((acc, item) => {
+        const key = `${item.title.toLowerCase().trim()}-${item.language}`;
+        if (!acc[key]) {
+          acc[key] = {
+            title: item.title,
+            language: item.language,
+            collections: []
+          };
         }
+        acc[key].collections.push({
+          id: item.collections.id,
+          slug: item.collections.slug,
+          symbol_count: 0, // Will be populated separately
+          is_featured: item.collections.is_featured
+        });
+        return acc;
+      }, {} as Record<string, DuplicateGroup>);
 
-        setDuplicates(duplicateGroups);
+      // Filtrer seulement les vrais doublons (plus d'une collection)
+      const duplicateGroups = Object.values(groupedByTitleAndLang || {})
+        .filter(group => group.collections.length > 1);
+
+      // Récupérer le nombre de symboles pour chaque collection
+      for (const group of duplicateGroups) {
+        for (const collection of group.collections) {
+          const { count } = await supabase
+            .from('collection_symbols')
+            .select('*', { count: 'exact', head: true })
+            .eq('collection_id', collection.id);
+          
+          collection.symbol_count = count || 0;
+        }
       }
+
+      setDuplicates(duplicateGroups);
     } catch (error) {
       console.error('Erreur lors de la récupération des doublons:', error);
       toast.error('Erreur lors de la récupération des doublons');
@@ -109,20 +104,47 @@ export const DuplicateCollectionsManager: React.FC = () => {
       const collectionsToMerge = group.collections.filter(c => c.id !== targetCollection.id);
 
       for (const collection of collectionsToMerge) {
-        // Transférer les symboles
-        const { error: updateError } = await supabase
+        // Récupérer la position maximale actuelle dans la collection cible
+        const { data: maxPositionData } = await supabase
           .from('collection_symbols')
-          .update({ 
-            collection_id: targetCollection.id,
-            position: supabase.sql`position + (
-              SELECT COALESCE(MAX(position), 0) 
-              FROM collection_symbols 
-              WHERE collection_id = ${targetCollection.id}
-            )`
-          })
+          .select('position')
+          .eq('collection_id', targetCollection.id)
+          .order('position', { ascending: false })
+          .limit(1);
+
+        const maxPosition = maxPositionData?.[0]?.position || 0;
+
+        // Récupérer tous les symboles à transférer avec leurs positions
+        const { data: symbolsToTransfer, error: fetchError } = await supabase
+          .from('collection_symbols')
+          .select('symbol_id, position')
+          .eq('collection_id', collection.id)
+          .order('position');
+
+        if (fetchError) throw fetchError;
+
+        // Supprimer les anciens liens
+        const { error: deleteError } = await supabase
+          .from('collection_symbols')
+          .delete()
           .eq('collection_id', collection.id);
 
-        if (updateError) throw updateError;
+        if (deleteError) throw deleteError;
+
+        // Créer les nouveaux liens avec des positions mises à jour
+        if (symbolsToTransfer && symbolsToTransfer.length > 0) {
+          const newLinks = symbolsToTransfer.map((symbol, index) => ({
+            collection_id: targetCollection.id,
+            symbol_id: symbol.symbol_id,
+            position: maxPosition + index + 1
+          }));
+
+          const { error: insertError } = await supabase
+            .from('collection_symbols')
+            .insert(newLinks);
+
+          if (insertError) throw insertError;
+        }
 
         // Supprimer les traductions
         const { error: deleteTransError } = await supabase
