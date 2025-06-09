@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import Layout from '@/components/layout/Layout';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { AuthProvider } from '@/hooks/useAuth';
 
 // Import pages
 import HomePage from '@/pages/HomePage';
@@ -58,62 +59,64 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <ErrorBoundary>
-          <Layout>
-            <Routes>
-              {/* Main pages */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/symbols" element={<SymbolsPage />} />
-              <Route path="/symbols/:id" element={<SymbolDetailPage />} />
-              <Route path="/collections" element={<CollectionsPage />} />
-              <Route path="/collections/:slug" element={<CollectionDetailPage />} />
-              <Route path="/quests" element={<QuestsPage />} />
-              <Route path="/quests/:questId" element={<QuestDetailPage />} />
-              <Route path="/community" element={<CommunityPage />} />
-              <Route path="/community/groups/:groupId" element={<GroupDetailPage />} />
+      <AuthProvider>
+        <Router>
+          <ErrorBoundary>
+            <Layout>
+              <Routes>
+                {/* Main pages */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/symbols" element={<SymbolsPage />} />
+                <Route path="/symbols/:id" element={<SymbolDetailPage />} />
+                <Route path="/collections" element={<CollectionsPage />} />
+                <Route path="/collections/:slug" element={<CollectionDetailPage />} />
+                <Route path="/quests" element={<QuestsPage />} />
+                <Route path="/quests/:questId" element={<QuestDetailPage />} />
+                <Route path="/community" element={<CommunityPage />} />
+                <Route path="/community/groups/:groupId" element={<GroupDetailPage />} />
 
-              {/* Contributions */}
-              <Route path="/contributions" element={<ContributionsPage />} />
-              <Route path="/contributions/new" element={<NewContribution />} />
-              <Route path="/contributions/:id" element={<ContributionDetail />} />
+                {/* Contributions */}
+                <Route path="/contributions" element={<ContributionsPage />} />
+                <Route path="/contributions/new" element={<NewContribution />} />
+                <Route path="/contributions/:id" element={<ContributionDetail />} />
 
-              {/* User pages */}
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/users/:userId" element={<UserProfilePage />} />
+                {/* User pages */}
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/users/:userId" element={<UserProfilePage />} />
 
-              {/* Admin pages */}
-              <Route path="/admin" element={<Dashboard />} />
-              <Route path="/admin/users" element={<UsersManagement />} />
-              <Route path="/admin/contributions" element={<ContributionsManagement />} />
-              <Route path="/admin/symbols" element={<SymbolsManagement />} />
-              <Route path="/admin/collections" element={<CollectionsManagement />} />
-              <Route path="/admin/content" element={<ContentManagement />} />
-              <Route path="/admin/analysis-examples" element={<AnalysisExamplesManagement />} />
-              <Route path="/admin/settings" element={<SystemSettings />} />
+                {/* Admin pages */}
+                <Route path="/admin" element={<Dashboard />} />
+                <Route path="/admin/users" element={<UsersManagement />} />
+                <Route path="/admin/contributions" element={<ContributionsManagement />} />
+                <Route path="/admin/symbols" element={<SymbolsManagement />} />
+                <Route path="/admin/collections" element={<CollectionsManagement />} />
+                <Route path="/admin/content" element={<ContentManagement />} />
+                <Route path="/admin/analysis-examples" element={<AnalysisExamplesManagement />} />
+                <Route path="/admin/settings" element={<SystemSettings />} />
 
-              {/* Specialized pages */}
-              <Route path="/analysis" element={<AnalysisPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/trending" element={<TrendingPage />} />
-              <Route path="/map" element={<MapExplorer />} />
-              <Route path="/roadmap" element={<RoadmapPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              
-              {/* Legal pages */}
-              <Route path="/legal" element={<LegalPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-              <Route path="/terms" element={<TermsPage />} />
+                {/* Specialized pages */}
+                <Route path="/analysis" element={<AnalysisPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/trending" element={<TrendingPage />} />
+                <Route path="/map" element={<MapExplorer />} />
+                <Route path="/roadmap" element={<RoadmapPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                
+                {/* Legal pages */}
+                <Route path="/legal" element={<LegalPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
 
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-        </ErrorBoundary>
-        <Toaster />
-      </Router>
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          </ErrorBoundary>
+          <Toaster />
+        </Router>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
