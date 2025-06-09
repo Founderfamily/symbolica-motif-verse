@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, Bookmark, Hexagon, Map, FileText, ChevronDown, LayoutDashboard, RefreshCw, Star, Folder, Settings, MapPin } from 'lucide-react';
+import { Users, TrendingUp, Bookmark, Hexagon, Map, FileText, ChevronDown, LayoutDashboard, RefreshCw, Star, Folder, Settings, MapPin, BarChart3, Brain, Building2 } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
 interface NavigationItem {
@@ -171,6 +172,34 @@ export const NavigationItems: React.FC = () => {
               <Link to="/admin/settings" className="flex items-center">
                 <Settings className="mr-2 h-4 w-4" />
                 Paramètres
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+            {/* Tools Section */}
+            <DropdownMenuItem asChild>
+              <Link to="/analysis" className="flex items-center">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                <I18nText translationKey="navigation.analysis" ns="header">Analyse</I18nText>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/mcp-search" className="flex items-center relative">
+                <Brain className="mr-2 h-4 w-4 text-purple-600" />
+                <span>MCP Search</span>
+                <span className="absolute -top-2 -right-2 px-1 py-0.5 text-xs rounded-full text-white bg-purple-500">
+                  AI
+                </span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/enterprise" className="flex items-center relative">
+                <Building2 className="mr-2 h-4 w-4" />
+                <span>Enterprise</span>
+                <span className="absolute -top-2 -right-2 px-1 py-0.5 text-xs rounded-full text-white bg-amber-500">
+                  New
+                </span>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
