@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Save, Upload, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Trash2, Eye, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SymbolEditor = () => {
@@ -196,6 +195,13 @@ const SymbolEditor = () => {
       toast.error(`Erreur lors de la sauvegarde: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleViewSymbol = () => {
+    if (id && !isNewSymbol) {
+      // Ouvrir dans un nouvel onglet pour permettre de revenir facilement à l'administration
+      window.open(`/symbols/${id}`, '_blank');
     }
   };
 
@@ -422,7 +428,7 @@ const SymbolEditor = () => {
             <CardHeader>
               <CardTitle>Actions</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <Button 
                 onClick={handleSave} 
                 className="w-full" 
@@ -440,6 +446,19 @@ const SymbolEditor = () => {
                   </>
                 )}
               </Button>
+
+              {/* Nouveau bouton pour voir le symbole en frontend */}
+              {!isNewSymbol && id && (
+                <Button 
+                  onClick={handleViewSymbol}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Voir le symbole
+                  <ExternalLink className="w-3 h-3 ml-2" />
+                </Button>
+              )}
             </CardContent>
           </Card>
 
