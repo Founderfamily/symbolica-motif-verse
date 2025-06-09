@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,11 +12,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageGalleryEditor } from './ImageGalleryEditor';
 import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
+import { CollectionSelector } from './CollectionSelector';
 
 interface SymbolEditModalProps {
   symbol: SymbolData;
   onSymbolUpdated: (updatedSymbol: SymbolData) => void;
   trigger?: React.ReactNode;
+}
+
+interface Collection {
+  id: string;
+  slug: string;
+  collection_translations: Array<{
+    language: string;
+    title: string;
+    description?: string;
+  }>;
 }
 
 export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
@@ -39,6 +49,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
     function: symbol.function || []
   });
   const [saving, setSaving] = useState(false);
+  const [selectedCollections, setSelectedCollections] = useState<Collection[]>([]);
   
   // Champs de texte pour la saisie par virgules
   const [tagsInput, setTagsInput] = useState('');
@@ -57,6 +68,44 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
     }
   }, [symbolImages]);
 
+  // Charger les collections associées au symbole
+  React.useEffect(() => {
+    const fetchSymbolCollections = async () => {
+      if (!symbol.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('collection_symbols')
+          .select(`
+            collections (
+              id,
+              slug,
+              collection_translations (
+                language,
+                title,
+                description
+              )
+            )
+          `)
+          .eq('symbol_id', symbol.id);
+
+        if (error) throw error;
+        
+        const collections = data
+          ?.filter(item => item.collections)
+          .map(item => item.collections) || [];
+        
+        setSelectedCollections(collections);
+      } catch (error) {
+        console.error('Erreur lors du chargement des collections:', error);
+      }
+    };
+
+    if (open) {
+      fetchSymbolCollections();
+    }
+  }, [symbol.id, open]);
+
   // Fonction pour parser les valeurs séparées par des virgules
   const parseCommaSeparatedValues = (input: string): string[] => {
     if (!input.trim()) return [];
@@ -64,7 +113,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
       .split(',')
       .map(item => item.trim())
       .filter(item => item.length > 0)
-      .filter((item, index, array) => array.indexOf(item) === index); // Éviter les doublons
+      .filter((item, index, array) => array.indexOf(item) === index);
   };
 
   // Fonction pour ajouter des valeurs depuis l'input texte
@@ -84,6 +133,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Sauvegarder les informations du symbole
       const { data, error } = await supabase
         .from('symbols')
         .update({
@@ -105,6 +155,9 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
 
       if (error) throw error;
 
+      // Sauvegarder les associations de collections
+      await saveCollectionAssociations();
+
       onSymbolUpdated(data);
       setOpen(false);
       toast.success('Symbole mis à jour avec succès');
@@ -113,6 +166,34 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
       toast.error('Erreur lors de la mise à jour du symbole');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveCollectionAssociations = async () => {
+    try {
+      // Supprimer les anciennes associations
+      await supabase
+        .from('collection_symbols')
+        .delete()
+        .eq('symbol_id', symbol.id);
+
+      // Ajouter les nouvelles associations
+      if (selectedCollections.length > 0) {
+        const associations = selectedCollections.map((collection, index) => ({
+          collection_id: collection.id,
+          symbol_id: symbol.id,
+          position: index + 1
+        }));
+
+        const { error } = await supabase
+          .from('collection_symbols')
+          .insert(associations);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde des collections:', error);
+      throw error;
     }
   };
 
@@ -125,7 +206,6 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
 
   const handleImagesUpdated = (updatedImages: SymbolImage[]) => {
     setLocalImages(updatedImages);
-    // Optionnel: rafraîchir les données depuis la base
     refetchImages();
   };
 
@@ -195,6 +275,13 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   />
                 </div>
+
+                {/* Collections */}
+                <CollectionSelector
+                  symbolId={symbol.id}
+                  selectedCollections={selectedCollections}
+                  onCollectionsChange={setSelectedCollections}
+                />
               </div>
 
               {/* Informations détaillées */}
@@ -224,7 +311,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                   <Label>Tags</Label>
                   <div className="flex gap-2 mb-2">
                     <Input
-                      placeholder="Ex: Bois, Pierre, Cuir, Coquillage, Céramique"
+                      placeholder="Ex: Spirituel, Protection, Harmonie"
                       value={tagsInput}
                       onChange={(e) => setTagsInput(e.target.value)}
                       onKeyPress={(e) => {
@@ -264,7 +351,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                 <Label>Supports</Label>
                 <div className="flex gap-2 mb-2">
                   <Input
-                    placeholder="Ex: Bois, Pierre, Cuir..."
+                    placeholder="Ex: Bois, Pierre, Cuir, Coquillage, Céramique"
                     value={mediumInput}
                     onChange={(e) => setMediumInput(e.target.value)}
                     onKeyPress={(e) => {
@@ -300,7 +387,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                 <Label>Techniques</Label>
                 <div className="flex gap-2 mb-2">
                   <Input
-                    placeholder="Ex: Sculpture, Gravure..."
+                    placeholder="Ex: Sculpture, Gravure, Peinture, Tissage"
                     value={techniqueInput}
                     onChange={(e) => setTechniqueInput(e.target.value)}
                     onKeyPress={(e) => {
@@ -336,7 +423,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                 <Label>Fonctions</Label>
                 <div className="flex gap-2 mb-2">
                   <Input
-                    placeholder="Ex: Religieux, Décoratif..."
+                    placeholder="Ex: Religieux, Décoratif, Protecteur, Rituel"
                     value={functionInput}
                     onChange={(e) => setFunctionInput(e.target.value)}
                     onKeyPress={(e) => {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +9,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Save, Upload, Trash2, Eye, ExternalLink, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { CollectionSelector } from '@/components/admin/CollectionSelector';
+
+interface Collection {
+  id: string;
+  slug: string;
+  collection_translations: Array<{
+    language: string;
+    title: string;
+    description?: string;
+  }>;
+}
 
 const SymbolEditor = () => {
   const { id } = useParams();
@@ -20,6 +30,7 @@ const SymbolEditor = () => {
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [selectedCollections, setSelectedCollections] = useState<Collection[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     culture: '',
@@ -68,6 +79,31 @@ const SymbolEditor = () => {
           technique: Array.isArray(symbolData.technique) ? symbolData.technique : [],
           function: Array.isArray(symbolData.function) ? symbolData.function : [],
         });
+
+        // Charger les collections associées
+        const { data: collectionsData, error: collectionsError } = await supabase
+          .from('collection_symbols')
+          .select(`
+            collections (
+              id,
+              slug,
+              collection_translations (
+                language,
+                title,
+                description
+              )
+            )
+          `)
+          .eq('symbol_id', id);
+
+        if (collectionsError) {
+          console.error('❌ Erreur lors du chargement des collections:', collectionsError);
+        } else {
+          const collections = collectionsData
+            ?.filter(item => item.collections)
+            .map(item => item.collections) || [];
+          setSelectedCollections(collections);
+        }
 
         const { data: imagesData, error: imagesError } = await supabase
           .from('symbol_images')
@@ -130,6 +166,34 @@ const SymbolEditor = () => {
     }));
   };
 
+  const saveCollectionAssociations = async (symbolId: string) => {
+    try {
+      // Supprimer les anciennes associations
+      await supabase
+        .from('collection_symbols')
+        .delete()
+        .eq('symbol_id', symbolId);
+
+      // Ajouter les nouvelles associations
+      if (selectedCollections.length > 0) {
+        const associations = selectedCollections.map((collection, index) => ({
+          collection_id: collection.id,
+          symbol_id: symbolId,
+          position: index + 1
+        }));
+
+        const { error } = await supabase
+          .from('collection_symbols')
+          .insert(associations);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde des collections:', error);
+      throw error;
+    }
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -178,6 +242,10 @@ const SymbolEditor = () => {
         }
 
         console.log('✅ Symbole créé avec succès:', data);
+        
+        // Sauvegarder les associations de collections
+        await saveCollectionAssociations(data.id);
+        
         toast.success('Symbole créé avec succès');
         navigate(`/admin/symbols/${data.id}/edit`);
       } else {
@@ -196,6 +264,10 @@ const SymbolEditor = () => {
         }
 
         console.log('✅ Symbole mis à jour avec succès:', data);
+        
+        // Sauvegarder les associations de collections
+        await saveCollectionAssociations(id!);
+        
         toast.success('Symbole mis à jour avec succès');
         
         // Recharger les données pour vérifier la sauvegarde
@@ -363,6 +435,13 @@ const SymbolEditor = () => {
                   placeholder="Description du symbole"
                 />
               </div>
+
+              {/* Collections */}
+              <CollectionSelector
+                symbolId={isNewSymbol ? undefined : id}
+                selectedCollections={selectedCollections}
+                onCollectionsChange={setSelectedCollections}
+              />
             </CardContent>
           </Card>
 
