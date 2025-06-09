@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MapPin, Calendar, Palette, Sparkles, ExternalLink } from 'lucide-react';
 import { SymbolData } from '@/types/supabase';
-import { getSymbolImagePath, getCultureFallbackImage } from '@/utils/symbolImageMapping';
+import { getSymbolImagePath, getCultureFallbackImage, checkImageExists } from '@/utils/symbolImageMapping';
 
 interface ModernSymbolDetailsProps {
   symbol: SymbolData;
@@ -15,6 +15,26 @@ interface ModernSymbolDetailsProps {
 const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => {
   const mainImagePath = getSymbolImagePath(symbol);
   const cultureImagePath = getCultureFallbackImage(symbol.culture);
+
+  // Gestionnaire d'erreur d'image amélioré
+  const handleImageError = async (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    const originalSrc = img.src;
+    
+    console.warn(`❌ Échec de chargement pour ${symbol.name}: ${originalSrc}`);
+    
+    if (originalSrc !== cultureImagePath) {
+      console.log(`🔄 Tentative de fallback pour ${symbol.name}: ${cultureImagePath}`);
+      const exists = await checkImageExists(cultureImagePath);
+      if (exists) {
+        img.src = cultureImagePath;
+        return;
+      }
+    }
+    
+    console.log(`📷 Utilisation du placeholder pour ${symbol.name}`);
+    img.src = '/placeholder.svg';
+  };
 
   return (
     <Card className="w-full max-w-4xl mx-auto border-2 border-slate-200 shadow-xl">
@@ -28,16 +48,23 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
                 src={mainImagePath}
                 alt={`${symbol.name} - Original`}
                 className="w-full h-64 object-cover"
-                onError={(e) => {
-                  console.warn(`Main image failed for symbol: ${symbol.name}`);
-                  e.currentTarget.src = cultureImagePath;
-                }}
+                onError={handleImageError}
+                onLoad={() => console.log(`✅ Image principale chargée: ${symbol.name}`)}
               />
               <div className="absolute top-3 left-3">
                 <Badge className="bg-blue-600 text-white">
                   Motif Original
                 </Badge>
               </div>
+              
+              {/* Debug badge */}
+              {process.env.NODE_ENV === 'development' && mainImagePath === '/placeholder.svg' && (
+                <div className="absolute top-3 right-3">
+                  <Badge variant="destructive" className="text-xs">
+                    No Image Found
+                  </Badge>
+                </div>
+              )}
             </div>
 
             {/* Mini-galerie Motif & Moderne */}
@@ -48,9 +75,7 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
                   alt={`${symbol.name} - Motif`}
                   className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300"
                   style={{ filter: 'sepia(0.3) saturate(1.2)' }}
-                  onError={(e) => {
-                    e.currentTarget.src = cultureImagePath;
-                  }}
+                  onError={handleImageError}
                 />
                 <div className="absolute inset-0 bg-blue-500/20 group-hover:bg-blue-500/30 transition-colors duration-300" />
                 <div className="absolute bottom-1 left-1">
@@ -66,9 +91,7 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
                   alt={`${symbol.name} - Moderne`}
                   className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300"
                   style={{ filter: 'contrast(1.2) brightness(1.1)' }}
-                  onError={(e) => {
-                    e.currentTarget.src = cultureImagePath;
-                  }}
+                  onError={handleImageError}
                 />
                 <div className="absolute inset-0 bg-green-500/20 group-hover:bg-green-500/30 transition-colors duration-300" />
                 <div className="absolute bottom-1 left-1">
