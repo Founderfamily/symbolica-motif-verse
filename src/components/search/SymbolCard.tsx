@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useToast } from '@/hooks/use-toast';
 import { Info, AlertCircle, Wifi, WifiOff } from 'lucide-react';
-import { useSymbolImages } from '@/hooks/useSymbolImages';
+import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { Link } from 'react-router-dom';
 
 interface SymbolCardProps {
@@ -18,12 +18,14 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
   const [isHovered, setIsHovered] = React.useState(false);
   const { toast } = useToast();
   
-  // Obtenir les images du symbole
-  const { images, imageErrors } = useSymbolImages(symbol.id);
-  const patternImage = images?.pattern;
-  const originalImage = images?.original;
+  // Obtenir les images du symbole depuis Supabase
+  const { data: images } = useSymbolImages(symbol.id);
+  const primaryImage = React.useMemo(() => {
+    if (!images || images.length === 0) return null;
+    return images.find(img => img.image_type === 'original') || images[0];
+  }, [images]);
   
-  // Images de fallback locales étendues
+  // Images de fallback locales
   const PLACEHOLDER = "/placeholder.svg";
   
   const symbolToLocalImage: Record<string, string> = React.useMemo(() => ({
@@ -43,11 +45,11 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
   
   // Déterminer la source d'image avec fallbacks
   const imageSource = React.useMemo(() => {
-    if (!error && (patternImage?.image_url || originalImage?.image_url)) {
-      return patternImage?.image_url || originalImage?.image_url;
+    if (!error && primaryImage?.image_url) {
+      return primaryImage.image_url;
     }
     return symbolToLocalImage[symbol.name] || PLACEHOLDER;
-  }, [error, patternImage, originalImage, symbolToLocalImage, symbol.name]);
+  }, [error, primaryImage, symbolToLocalImage, symbol.name]);
   
   // Déterminer si l'image vient d'une source locale ou distante
   const isLocalImage = imageSource.startsWith('/') || imageSource === PLACEHOLDER;
@@ -80,9 +82,9 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     return cultures[symbol.culture] || "hover:bg-gradient-to-br from-slate-50 to-slate-100 hover:border-slate-200";
   }, [symbol.culture]);
 
-  // Navigation unifiée : utiliser l'ID du symbole (qui est maintenant l'index pour les statiques)
+  // Navigation directe vers l'UUID du symbole
   const getSymbolLink = () => {
-    console.log(`SymbolCard: Navigation vers symbole "${symbol.name}" avec ID: ${symbol.id}`);
+    console.log(`SymbolCard: Navigation vers symbole "${symbol.name}" avec UUID: ${symbol.id}`);
     return `/symbols/${symbol.id}`;
   };
   
@@ -147,7 +149,7 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
             </div>
           </div>
           
-          {/* Tags optionnels */}
+          {/* Tags */}
           {symbol.tags && symbol.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {symbol.tags.slice(0, 2).map((tag, index) => (

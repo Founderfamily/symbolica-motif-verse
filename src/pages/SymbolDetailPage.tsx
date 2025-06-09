@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,56 +10,56 @@ import { ShareButton } from '@/components/social/ShareButton';
 import { SymbolCollections } from '@/components/symbols/SymbolCollections';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { symbolMappingService } from '@/services/symbolMappingService';
+import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
+import { supabaseSymbolService } from '@/services/supabaseSymbolService';
 
 const SymbolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  console.log(`SymbolDetailPage: ID reçu: ${id}`);
+  // Gestion de la rétrocompatibilité pour les anciens liens avec indices
+  const resolvedId = React.useMemo(() => {
+    if (!id) return null;
 
-  // Fonction simplifiée pour trouver le symbole
-  const findSymbol = (identifier: string) => {
-    if (!identifier) return null;
+    // Si c'est déjà un UUID valide, l'utiliser tel quel
+    if (supabaseSymbolService.isValidUuid(id)) {
+      return id;
+    }
 
-    console.log(`SymbolDetailPage: Recherche du symbole "${identifier}"`);
-
-    // 1. Essayer de parser comme index numérique direct
-    const numericIndex = parseInt(identifier, 10);
+    // Sinon, essayer de convertir l'ancien index en UUID
+    const numericIndex = parseInt(id, 10);
     if (!isNaN(numericIndex)) {
-      const symbol = symbolMappingService.getSymbolByIndex(numericIndex);
-      if (symbol) {
-        console.log(`SymbolDetailPage: Symbole trouvé par index ${numericIndex}:`, symbol.name);
-        return { symbol, index: numericIndex };
+      const legacyUuid = supabaseSymbolService.getLegacyUuidFromIndex(numericIndex);
+      if (legacyUuid) {
+        // Rediriger automatiquement vers la nouvelle URL avec UUID
+        navigate(`/symbols/${legacyUuid}`, { replace: true });
+        return legacyUuid;
       }
     }
 
-    // 2. Rechercher par nom si ce n'est pas un index valide
-    const result = symbolMappingService.findSymbolByName(identifier);
-    if (result) {
-      console.log(`SymbolDetailPage: Symbole trouvé par nom "${identifier}":`, result.symbol.name);
-      return result;
-    }
-
-    console.log(`SymbolDetailPage: Aucun symbole trouvé pour "${identifier}"`);
     return null;
-  };
+  }, [id, navigate]);
 
-  const result = findSymbol(id || '');
-  const symbol = result?.symbol || null;
-  const symbolIndex = result?.index ?? -1;
+  // Requêtes pour récupérer les données du symbole
+  const { data: symbol, isLoading: symbolLoading, error: symbolError } = useSymbolById(resolvedId || undefined);
+  const { data: images, isLoading: imagesLoading } = useSymbolImages(resolvedId || undefined);
 
-  // Redirection automatique pour uniformiser l'URL avec l'index
-  React.useEffect(() => {
-    if (symbol && symbolIndex >= 0 && id !== symbolIndex.toString()) {
-      console.log(`SymbolDetailPage: Redirection de "${id}" vers "${symbolIndex}"`);
-      navigate(`/symbols/${symbolIndex}`, { replace: true });
-    }
-  }, [symbol, symbolIndex, id, navigate]);
+  // Trouver l'image principale
+  const primaryImage = React.useMemo(() => {
+    if (!images || images.length === 0) return null;
+    return images.find(img => img.image_type === 'original') || images[0];
+  }, [images]);
 
-  // Fonctions pour les boutons et reste du composant
+  // États de chargement et d'erreur
+  if (symbolLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+      </div>
+    );
+  }
 
-  if (!symbol) {
+  if (symbolError || !symbol) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Card className="p-8 text-center max-w-md">
@@ -71,17 +72,6 @@ const SymbolDetailPage: React.FC = () => {
           <p className="text-sm text-slate-500 mb-6">
             ID recherché : "{id}"
           </p>
-          <div className="space-y-2 mb-6">
-            <p className="text-xs text-slate-400">Symboles disponibles :</p>
-            <div className="max-h-32 overflow-y-auto text-xs text-slate-500">
-              {symbolMappingService.getAllStaticSymbols().slice(0, 5).map((s, i) => (
-                <div key={i}>#{i}: {s.name}</div>
-              ))}
-              {symbolMappingService.getAllStaticSymbols().length > 5 && (
-                <div>... et {symbolMappingService.getAllStaticSymbols().length - 5} autres</div>
-              )}
-            </div>
-          </div>
           <Button onClick={() => navigate('/symbols')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             <I18nText translationKey="common.backToSymbols">Retour aux symboles</I18nText>
@@ -91,17 +81,15 @@ const SymbolDetailPage: React.FC = () => {
     );
   }
 
-  // Fonctions pour les boutons
+  // Fonctions pour les actions
   const handleExplore = () => {
-    if (symbol) {
-      navigate(`/analysis?symbol=${symbolIndex}&name=${encodeURIComponent(symbol.name)}`);
-    }
+    navigate(`/analysis?symbol=${symbol.id}&name=${encodeURIComponent(symbol.name)}`);
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/symbols/${symbolIndex}`;
-    const title = `${symbol?.name} - Symbole ${symbol?.culture}`;
-    const description = `Découvrez ce symbole de la culture ${symbol?.culture} datant de ${symbol?.period}`;
+    const url = `${window.location.origin}/symbols/${symbol.id}`;
+    const title = `${symbol.name} - Symbole ${symbol.culture}`;
+    const description = `Découvrez ce symbole de la culture ${symbol.culture} datant de ${symbol.period}`;
     
     try {
       if (navigator.share) {
@@ -140,15 +128,21 @@ const SymbolDetailPage: React.FC = () => {
           {/* Image du symbole */}
           <Card className="overflow-hidden">
             <AspectRatio ratio={1} className="bg-slate-100">
-              <img
-                src="/placeholder.svg"
-                alt={symbol.name}
-                className="object-cover w-full h-full"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder.svg';
-                }}
-              />
+              {imagesLoading ? (
+                <div className="flex items-center justify-center w-full h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                </div>
+              ) : (
+                <img
+                  src={primaryImage?.image_url || '/placeholder.svg'}
+                  alt={symbol.name}
+                  className="object-cover w-full h-full"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
+                />
+              )}
             </AspectRatio>
           </Card>
 
@@ -169,11 +163,33 @@ const SymbolDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Description enrichie */}
+              {/* Description */}
               {symbol.description && (
-                <p className="text-slate-700 text-lg leading-relaxed">
+                <p className="text-slate-700 text-lg leading-relaxed mb-4">
                   {symbol.description}
                 </p>
+              )}
+
+              {/* Signification */}
+              {symbol.significance && (
+                <div className="mb-4">
+                  <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                    <Star className="h-4 w-4 text-amber-600" />
+                    Signification
+                  </h3>
+                  <p className="text-slate-700">{symbol.significance}</p>
+                </div>
+              )}
+
+              {/* Contexte historique */}
+              {symbol.historical_context && (
+                <div className="mb-4">
+                  <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-amber-600" />
+                    Contexte historique
+                  </h3>
+                  <p className="text-slate-700">{symbol.historical_context}</p>
+                </div>
               )}
             </div>
 
@@ -194,16 +210,16 @@ const SymbolDetailPage: React.FC = () => {
               </div>
             )}
 
-            {/* Actions fonctionnelles */}
+            {/* Actions */}
             <div className="flex gap-4">
               <Button onClick={handleExplore} className="flex-1">
                 <I18nText translationKey="common.explore">Explorer</I18nText>
               </Button>
               <ShareButton
-                url={`${window.location.origin}/symbols/${symbolIndex}`}
+                url={`${window.location.origin}/symbols/${symbol.id}`}
                 title={`${symbol.name} - Symbole ${symbol.culture}`}
-                description={`Découvrez ce symbole de la culture ${symbol?.culture} datant de ${symbol?.period}`}
-                image="/placeholder.svg"
+                description={`Découvrez ce symbole de la culture ${symbol.culture} datant de ${symbol.period}`}
+                image={primaryImage?.image_url || '/placeholder.svg'}
                 className="flex-1"
               />
             </div>
@@ -237,8 +253,8 @@ const SymbolDetailPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-slate-700">Index du symbole</label>
-                <p className="text-slate-900 text-sm">#{symbolIndex}</p>
+                <label className="text-sm font-medium text-slate-700">UUID du symbole</label>
+                <p className="text-slate-900 text-sm font-mono">{symbol.id}</p>
               </div>
             </div>
           </Card>
@@ -300,6 +316,31 @@ const SymbolDetailPage: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Galerie d'images supplémentaires */}
+              {images && images.length > 1 && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Images ({images.length})
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {images.slice(0, 4).map((image, index) => (
+                      <div key={image.id} className="aspect-square">
+                        <img
+                          src={image.image_url}
+                          alt={image.title || symbol.name}
+                          className="w-full h-full object-cover rounded border"
+                        />
+                      </div>
+                    ))}
+                    {images.length > 4 && (
+                      <div className="aspect-square flex items-center justify-center bg-slate-100 rounded border text-slate-500 text-sm">
+                        +{images.length - 4} images
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         </div>
@@ -307,7 +348,7 @@ const SymbolDetailPage: React.FC = () => {
         {/* Collections associées */}
         <div className="mt-12">
           <SymbolCollections 
-            symbolId={symbolIndex} 
+            symbolId={symbol.id} 
             symbolName={symbol.name}
           />
         </div>

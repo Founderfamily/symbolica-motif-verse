@@ -5,23 +5,23 @@ import { CollectionWithTranslations } from '@/types/collections';
 
 /**
  * Hook pour récupérer les collections associées à un symbole
- * Utilise maintenant une approche simplifiée basée sur les indices statiques
+ * Maintenant utilise directement les UUIDs Supabase
  */
 export const useSymbolCollections = (symbolId: string | number) => {
   return useQuery({
-    queryKey: ['symbol-collections-v3', symbolId], // Version mise à jour
+    queryKey: ['symbol-collections-v4', symbolId], // Version mise à jour
     queryFn: async (): Promise<CollectionWithTranslations[]> => {
       if (!symbolId && symbolId !== 0) return [];
 
-      console.log('=== DEBUG useSymbolCollections v3 (simplifié) ===');
+      console.log('=== DEBUG useSymbolCollections v4 (Supabase unifié) ===');
       console.log('1. symbolId reçu:', symbolId, typeof symbolId);
 
-      // Convertir en string pour la requête
+      // Convertir en string pour la requête (les UUIDs sont des strings)
       const queryId = symbolId.toString();
       console.log('2. ID pour la requête:', queryId);
 
       try {
-        // Requête directe avec l'ID (qui est maintenant toujours l'index statique)
+        // Requête directe avec l'UUID Supabase
         const { data, error } = await supabase
           .from('collection_symbols')
           .select(`

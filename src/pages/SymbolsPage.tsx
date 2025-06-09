@@ -1,271 +1,132 @@
 
 import React, { useState } from 'react';
-import { SymbolData } from '@/types/supabase';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { SearchFilters } from '@/components/search/SearchFilters';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
-import { AdvancedFilters } from '@/components/search/AdvancedFilters';
+import { useAllSymbols, useSearchSymbols } from '@/hooks/useSupabaseSymbols';
+import { Card } from '@/components/ui/card';
 import { I18nText } from '@/components/ui/i18n-text';
-import { Search, FilterX, Database, Wifi, WifiOff, RefreshCw } from 'lucide-react';
-import { useTranslation } from '@/i18n/useTranslation';
-import { useHybridSymbols } from '@/hooks/useHybridSymbols';
-import { useQueryClient } from '@tanstack/react-query';
 
 const SymbolsPage: React.FC = () => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
-    cultures: [] as string[],
-    periods: [] as string[],
-    functions: [] as string[],
-    techniques: [] as string[],
-    mediums: [] as string[],
-  });
-  
-  // Utilisation du système hybride corrigé
-  const { symbols, isLoading, dataSource, filterValues } = useHybridSymbols();
-  
-  console.log('🔍 SymbolsPage - État:', { 
-    isLoading, 
-    dataSource, 
-    symbolsCount: symbols.length,
-    searchTerm,
-    activeFilters: Object.values(filters).flat().length
-  });
-  
-  // Filtrage des symboles
-  const filteredSymbols = symbols.filter(symbol => {
-    // Recherche textuelle
-    const matchesSearch = searchTerm === '' || 
-      symbol.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      symbol.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      symbol.culture.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      symbol.period.toLowerCase().includes(searchTerm.toLowerCase());
-      
-    // Filtres
-    const matchesCulture = filters.cultures.length === 0 || 
-      filters.cultures.includes(symbol.culture);
-      
-    const matchesPeriod = filters.periods.length === 0 || 
-      filters.periods.includes(symbol.period);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCulture, setSelectedCulture] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-    const matchesFunction = filters.functions.length === 0 ||
-      (symbol.function && symbol.function.some(f => filters.functions.includes(f)));
+  // Récupérer tous les symboles ou les résultats de recherche
+  const { data: allSymbols, isLoading: allSymbolsLoading } = useAllSymbols();
+  const { data: searchResults, isLoading: searchLoading } = useSearchSymbols(
+    searchQuery || undefined,
+    selectedCulture || undefined, 
+    selectedPeriod || undefined,
+    selectedTags.length > 0 ? selectedTags : undefined
+  );
 
-    const matchesTechnique = filters.techniques.length === 0 ||
-      (symbol.technique && symbol.technique.some(t => filters.techniques.includes(t)));
+  // Déterminer quelles données utiliser
+  const hasActiveFilters = searchQuery || selectedCulture || selectedPeriod || selectedTags.length > 0;
+  const symbols = hasActiveFilters ? (searchResults || []) : (allSymbols || []);
+  const isLoading = hasActiveFilters ? searchLoading : allSymbolsLoading;
 
-    const matchesMedium = filters.mediums.length === 0 ||
-      (symbol.medium && symbol.medium.some(m => filters.mediums.includes(m)));
-      
-    return matchesSearch && matchesCulture && matchesPeriod && matchesFunction && matchesTechnique && matchesMedium;
-  });
-  
-  // Gestion des filtres
-  const handleFilterChange = (type: keyof typeof filters, value: string[]) => {
-    setFilters(prev => ({ ...prev, [type]: value }));
-  };
-  
-  // Réinitialisation des filtres
-  const clearFilters = () => {
-    setFilters({ 
-      cultures: [], 
-      periods: [], 
-      functions: [], 
-      techniques: [], 
-      mediums: [] 
-    });
-    setSearchTerm('');
-  };
-
-  // Fonction pour rafraîchir les données
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['symbols-api'] });
-  };
-
-  // Indicateur de source de données amélioré
-  const DataSourceIndicator = () => {
-    const getSourceConfig = () => {
-      switch (dataSource) {
-        case 'static':
-          return {
-            icon: WifiOff,
-            text: 'Données locales',
-            color: 'text-amber-600 bg-amber-50',
-            description: 'Affichage des données statiques'
-          };
-        case 'hybrid':
-          return {
-            icon: Database,
-            text: 'Données complètes',
-            color: 'text-green-600 bg-green-50',
-            description: 'Données locales + base de données'
-          };
-        case 'api':
-          return {
-            icon: Wifi,
-            text: 'Base de données',
-            color: 'text-blue-600 bg-blue-50',
-            description: 'Données de la base de données'
-          };
-      }
-    };
-
-    const config = getSourceConfig();
-    const Icon = config.icon;
-
-    return (
-      <div className="flex items-center gap-2">
-        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
-          <Icon className="w-3 h-3" />
-          <span>{config.text}</span>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleRefresh}
-          className="h-7 w-7 p-0"
-          title="Actualiser les données"
-        >
-          <RefreshCw className="h-3 w-3" />
-        </Button>
-      </div>
-    );
-  };
-  
   return (
-    <div className="container mx-auto p-4 pt-12 pb-20">
-      <Separator className="mb-8 mt-2" />
-      
-      <div className="flex flex-col justify-between items-start gap-6 mb-8">
-        <div>
-          <div className="flex items-center gap-4 mb-2">
-            <h1 className="text-3xl font-bold text-slate-900">
-              <I18nText translationKey="symbols.page.title">Tous les Symboles</I18nText>
-            </h1>
-            <DataSourceIndicator />
-          </div>
-          <p className="text-slate-600">
-            <I18nText translationKey="symbols.page.description">
-              Explorez notre collection complète de symboles culturels du monde entier
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">
+            <I18nText translationKey="symbols.title">Explorez les Symboles</I18nText>
+          </h1>
+          <p className="text-slate-600 text-lg">
+            <I18nText translationKey="symbols.subtitle">
+              Découvrez la richesse des symboles à travers les cultures et les époques
             </I18nText>
           </p>
         </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Sidebar avec filtres */}
-        <div className="md:col-span-1">
-          <Card className="p-4">
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-slate-900">
-                  <I18nText translationKey="symbols.page.filters">Filtres</I18nText>
-                </h3>
-                {(Object.values(filters).some(arr => arr.length > 0)) && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={clearFilters}
-                    className="h-8 text-xs flex items-center gap-1 text-slate-500"
-                  >
-                    <FilterX className="w-3 h-3" />
-                    <I18nText translationKey="symbols.page.clearFilters">Tout effacer</I18nText>
-                  </Button>
-                )}
-              </div>
-              
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                <Input
-                  placeholder={t('symbols.page.searchPlaceholder', 'Rechercher des symboles...')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-            </div>
-            
-            <AdvancedFilters 
-              cultures={filterValues.cultures}
-              periods={filterValues.periods}
-              functions={filterValues.functions}
-              techniques={filterValues.techniques}
-              mediums={filterValues.mediums}
-              selectedFilters={filters}
-              onFilterChange={handleFilterChange}
-            />
-          </Card>
-          
-          <Card className="p-4 mt-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium text-slate-900">
-                <I18nText translationKey="symbols.page.activeFilters">Filtres actifs</I18nText>
-              </h3>
-            </div>
-            
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(filters).map(([type, values]) =>
-                values.map(value => (
-                  <Badge key={`${type}-${value}`} variant="secondary" className="flex gap-1">
-                    {value}
-                    <button 
-                      onClick={() => handleFilterChange(type as keyof typeof filters, values.filter(v => v !== value))}
-                      className="ml-1 text-xs hover:text-red-500"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))
+
+        {/* Filtres de recherche */}
+        <Card className="mb-8">
+          <SearchFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedCulture={selectedCulture}
+            onCultureChange={setSelectedCulture}
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
+            selectedTags={selectedTags}
+            onTagsChange={setSelectedTags}
+          />
+        </Card>
+
+        {/* Résultats */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-slate-900">
+              {hasActiveFilters ? (
+                <I18nText translationKey="symbols.searchResults">
+                  Résultats de recherche
+                </I18nText>
+              ) : (
+                <I18nText translationKey="symbols.allSymbols">
+                  Tous les symboles
+                </I18nText>
               )}
-              
-              {Object.values(filters).every(arr => arr.length === 0) && (
-                <span className="text-sm text-slate-500">
-                  <I18nText translationKey="symbols.page.noFilters">Aucun filtre actif</I18nText>
-                </span>
+            </h2>
+            <span className="text-sm text-slate-500">
+              {isLoading ? (
+                <I18nText translationKey="common.loading">Chargement...</I18nText>
+              ) : (
+                <>
+                  {symbols.length} 
+                  {symbols.length <= 1 ? (
+                    <I18nText translationKey="symbols.symbolCount.singular"> symbole</I18nText>
+                  ) : (
+                    <I18nText translationKey="symbols.symbolCount.plural"> symboles</I18nText>
+                  )}
+                </>
               )}
-            </div>
-          </Card>
+            </span>
+          </div>
         </div>
-        
-        {/* Zone de contenu principal */}
-        <div className="md:col-span-3">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="text-center">
-                <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-slate-600">Chargement des symboles...</p>
-                <p className="text-xs text-slate-400 mt-2">Connexion à la base de données...</p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="mb-4 px-2 flex justify-between items-center">
-                <div className="text-slate-600">
-                  <I18nText 
-                    translationKey="symbols.page.resultsCount" 
-                    params={{ count: filteredSymbols.length }}
-                  >
-                    {filteredSymbols.length} symboles trouvés
-                  </I18nText>
+
+        {/* Grille de symboles */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+          </div>
+        ) : (
+          <SymbolGrid symbols={symbols} />
+        )}
+
+        {/* Statistiques */}
+        {!isLoading && symbols.length > 0 && (
+          <Card className="mt-8 p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">
+              <I18nText translationKey="symbols.statistics">Statistiques</I18nText>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-amber-600">{symbols.length}</div>
+                <div className="text-sm text-slate-500">
+                  <I18nText translationKey="symbols.stats.total">Symboles au total</I18nText>
                 </div>
-                
-                {dataSource === 'static' && (
-                  <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded flex items-center gap-1">
-                    <WifiOff className="w-3 h-3" />
-                    Mode hors ligne
-                  </div>
-                )}
               </div>
-              
-              <SymbolGrid symbols={filteredSymbols} />
-            </>
-          )}
-        </div>
+              <div>
+                <div className="text-2xl font-bold text-amber-600">
+                  {new Set(symbols.map(s => s.culture)).size}
+                </div>
+                <div className="text-sm text-slate-500">
+                  <I18nText translationKey="symbols.stats.cultures">Cultures représentées</I18nText>
+                </div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-amber-600">
+                  {new Set(symbols.map(s => s.period)).size}
+                </div>
+                <div className="text-sm text-slate-500">
+                  <I18nText translationKey="symbols.stats.periods">Périodes historiques</I18nText>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );
