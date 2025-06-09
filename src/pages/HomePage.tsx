@@ -7,9 +7,7 @@ import SymbolDiscoverySection from '@/components/sections/SymbolDiscoverySection
 import Features from '@/components/sections/Features';
 import HowItWorks from '@/components/sections/HowItWorks';
 import Community from '@/components/sections/Community';
-import UploadTools from '@/components/sections/UploadTools';
 import Testimonials from '@/components/sections/Testimonials';
-import RoadmapSection from '@/components/sections/RoadmapSection';
 import Gamification from '@/components/sections/Gamification';
 import CallToAction from '@/components/sections/CallToAction';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
@@ -88,20 +86,10 @@ const HomePage: React.FC = () => {
       
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'UploadTools')
-        }
-      >
-        <div className="py-16 bg-slate-50/50">
-          <UploadTools />
-        </div>
-      </ErrorBoundary>
-      
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'Community')
         }
       >
-        <div className="py-16">
+        <div className="py-16 bg-slate-50/50">
           <Community />
         </div>
       </ErrorBoundary>
@@ -111,7 +99,7 @@ const HomePage: React.FC = () => {
           ErrorHandler.handleComponentError(error, errorInfo, 'Gamification')
         }
       >
-        <div className="py-16 bg-slate-50/50">
+        <div className="py-16">
           <Gamification />
         </div>
       </ErrorBoundary>
@@ -121,17 +109,9 @@ const HomePage: React.FC = () => {
           ErrorHandler.handleComponentError(error, errorInfo, 'Testimonials')
         }
       >
-        <div className="py-16">
+        <div className="py-16 bg-slate-50/50">
           <Testimonials />
         </div>
-      </ErrorBoundary>
-      
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'RoadmapSection')
-        }
-      >
-        <RoadmapSection />
       </ErrorBoundary>
       
       <ErrorBoundary 
