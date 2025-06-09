@@ -17,12 +17,11 @@ export const symbolToImageMap: Record<string, string> = {
   'Seigaiha': 'seigaiha.png',
   'Art aborigène': 'aboriginal.png',
   'Motif viking': 'viking.png',
-  'Viking': 'viking.png',
   'Arabesque': 'arabesque.png',
   'Motif aztèque': 'aztec.png',
   'Aztèque': 'aztec.png',
   
-  // Fallbacks par culture
+  // Fallbacks par culture (sans doublons)
   'Celtique': 'triskelion.png',
   'Celtic': 'triskelion.png',
   'Française': 'fleur-de-lys.png',
@@ -38,11 +37,9 @@ export const symbolToImageMap: Record<string, string> = {
   'Aborigène': 'aboriginal.png',
   'Aboriginal': 'aboriginal.png',
   'Nordique': 'viking.png',
-  'Viking': 'viking.png',
   'Islamique': 'arabesque.png',
   'Islamic': 'arabesque.png',
-  'Mésoaméricaine': 'aztec.png',
-  'Aztec': 'aztec.png'
+  'Mésoaméricaine': 'aztec.png'
 };
 
 // Fonction pour obtenir le chemin de l'image d'un symbole
@@ -117,7 +114,6 @@ export function getCultureFallbackImage(culture: string): string {
     'Aborigène': 'aboriginal.png',
     'Aboriginal': 'aboriginal.png',
     'Nordique': 'viking.png',
-    'Viking': 'viking.png',
     'Islamique': 'arabesque.png',
     'Islamic': 'arabesque.png',
     'Mésoaméricaine': 'aztec.png',
