@@ -163,8 +163,12 @@ const CreativeCommunity = () => {
                       alt={contribution.symbol}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling!.style.display = 'flex';
+                        const imgElement = e.currentTarget as HTMLImageElement;
+                        const fallbackElement = imgElement.nextElementSibling as HTMLElement;
+                        imgElement.style.display = 'none';
+                        if (fallbackElement) {
+                          fallbackElement.style.display = 'flex';
+                        }
                       }}
                     />
                     <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 rounded-lg hidden items-center justify-center">
