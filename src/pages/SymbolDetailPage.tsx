@@ -11,7 +11,7 @@ import { SymbolCollections } from '@/components/symbols/SymbolCollections';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
-import { supabaseSymbolService } from '@/services/supabaseSymbolService';
+import { SupabaseSymbolService } from '@/services/supabaseSymbolService';
 
 const SymbolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,14 +22,14 @@ const SymbolDetailPage: React.FC = () => {
     if (!id) return null;
 
     // Si c'est déjà un UUID valide, l'utiliser tel quel
-    if (supabaseSymbolService.isValidUuid(id)) {
+    if (SupabaseSymbolService.isValidUuid(id)) {
       return id;
     }
 
     // Sinon, essayer de convertir l'ancien index en UUID
     const numericIndex = parseInt(id, 10);
     if (!isNaN(numericIndex)) {
-      const legacyUuid = supabaseSymbolService.getLegacyUuidFromIndex(numericIndex);
+      const legacyUuid = SupabaseSymbolService.getLegacyUuidFromIndex(numericIndex);
       if (legacyUuid) {
         // Rediriger automatiquement vers la nouvelle URL avec UUID
         navigate(`/symbols/${legacyUuid}`, { replace: true });
