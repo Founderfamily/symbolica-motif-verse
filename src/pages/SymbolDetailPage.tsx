@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { SymbolCollections } from '@/components/symbols/SymbolCollections';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
+import { AdminFloatingEditButton } from '@/components/admin/AdminFloatingEditButton';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -63,8 +63,23 @@ const SymbolDetailPage: React.FC = () => {
   }, [id, navigate]);
 
   // Requêtes pour récupérer les données du symbole
-  const { data: symbol, isLoading: symbolLoading, error: symbolError } = useSymbolById(resolvedId || undefined);
+  const { data: symbol, isLoading: symbolLoading, error: symbolError, refetch } = useSymbolById(resolvedId || undefined);
   const { data: images, isLoading: imagesLoading } = useSymbolImages(resolvedId || undefined);
+
+  // État local pour le symbole (pour les mises à jour en temps réel)
+  const [currentSymbol, setCurrentSymbol] = React.useState<typeof symbol>(symbol);
+
+  // Mettre à jour le symbole local quand les données changent
+  React.useEffect(() => {
+    setCurrentSymbol(symbol);
+  }, [symbol]);
+
+  // Handler pour les mises à jour du symbole
+  const handleSymbolUpdated = (updatedSymbol: typeof symbol) => {
+    setCurrentSymbol(updatedSymbol);
+    // Optionnel: refetch pour s'assurer que les données sont à jour
+    refetch();
+  };
 
   // Trouver l'image principale
   const primaryImage = React.useMemo(() => {
@@ -103,15 +118,40 @@ const SymbolDetailPage: React.FC = () => {
     );
   }
 
+  // Utiliser currentSymbol au lieu de symbol pour l'affichage
+  const displaySymbol = currentSymbol || symbol;
+
+  if (!displaySymbol) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Card className="p-8 text-center max-w-md">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">
+            <I18nText translationKey="symbols.notFound">Symbole non trouvé</I18nText>
+          </h2>
+          <p className="text-slate-600 mb-4">
+            <I18nText translationKey="symbols.notFoundDesc">Le symbole que vous recherchez n'existe pas.</I18nText>
+          </p>
+          <p className="text-sm text-slate-500 mb-6">
+            ID recherché : "{id}"
+          </p>
+          <Button onClick={() => navigate('/symbols')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            <I18nText translationKey="common.backToSymbols">Retour aux symboles</I18nText>
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   // Fonctions pour les actions
   const handleExplore = () => {
-    navigate(`/analysis?symbol=${symbol.id}&name=${encodeURIComponent(symbol.name)}`);
+    navigate(`/analysis?symbol=${displaySymbol.id}&name=${encodeURIComponent(displaySymbol.name)}`);
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/symbols/${symbol.id}`;
-    const title = `${symbol.name} - Symbole ${symbol.culture}`;
-    const description = `Découvrez ce symbole de la culture ${symbol.culture} datant de ${symbol.period}`;
+    const url = `${window.location.origin}/symbols/${displaySymbol.id}`;
+    const title = `${displaySymbol.name} - Symbole ${displaySymbol.culture}`;
+    const description = `Découvrez ce symbole de la culture ${displaySymbol.culture} datant de ${displaySymbol.period}`;
     
     try {
       if (navigator.share) {
@@ -157,7 +197,7 @@ const SymbolDetailPage: React.FC = () => {
               ) : (
                 <img
                   src={primaryImage?.image_url || '/placeholder.svg'}
-                  alt={symbol.name}
+                  alt={displaySymbol.name}
                   className="object-cover w-full h-full"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -172,58 +212,58 @@ const SymbolDetailPage: React.FC = () => {
           <div className="space-y-6">
             <div>
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
-                {symbol.name}
+                {displaySymbol.name}
               </h1>
               <div className="flex items-center gap-4 text-slate-600 mb-4">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  <span>{symbol.culture}</span>
+                  <span>{displaySymbol.culture}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span>{symbol.period}</span>
+                  <span>{displaySymbol.period}</span>
                 </div>
               </div>
 
               {/* Description */}
-              {symbol.description && (
+              {displaySymbol.description && (
                 <p className="text-slate-700 text-lg leading-relaxed mb-4">
-                  {symbol.description}
+                  {displaySymbol.description}
                 </p>
               )}
 
               {/* Signification */}
-              {symbol.significance && (
+              {displaySymbol.significance && (
                 <div className="mb-4">
                   <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
                     <Star className="h-4 w-4 text-amber-600" />
                     Signification
                   </h3>
-                  <p className="text-slate-700">{symbol.significance}</p>
+                  <p className="text-slate-700">{displaySymbol.significance}</p>
                 </div>
               )}
 
               {/* Contexte historique */}
-              {symbol.historical_context && (
+              {displaySymbol.historical_context && (
                 <div className="mb-4">
                   <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
                     <Clock className="h-4 w-4 text-amber-600" />
                     Contexte historique
                   </h3>
-                  <p className="text-slate-700">{symbol.historical_context}</p>
+                  <p className="text-slate-700">{displaySymbol.historical_context}</p>
                 </div>
               )}
             </div>
 
             {/* Tags */}
-            {symbol.tags && symbol.tags.length > 0 && (
+            {displaySymbol.tags && displaySymbol.tags.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Tag className="h-4 w-4 text-amber-600" />
                   <span className="font-medium text-slate-700">Tags</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {symbol.tags.map((tag, index) => (
+                  {displaySymbol.tags.map((tag, index) => (
                     <Badge key={index} variant="secondary" className="bg-amber-100 text-amber-800">
                       {tag}
                     </Badge>
@@ -238,9 +278,9 @@ const SymbolDetailPage: React.FC = () => {
                 <I18nText translationKey="common.explore">Explorer</I18nText>
               </Button>
               <ShareButton
-                url={`${window.location.origin}/symbols/${symbol.id}`}
-                title={`${symbol.name} - Symbole ${symbol.culture}`}
-                description={`Découvrez ce symbole de la culture ${symbol.culture} datant de ${symbol.period}`}
+                url={`${window.location.origin}/symbols/${displaySymbol.id}`}
+                title={`${displaySymbol.name} - Symbole ${displaySymbol.culture}`}
+                description={`Découvrez ce symbole de la culture ${displaySymbol.culture} datant de ${displaySymbol.period}`}
                 image={primaryImage?.image_url || '/placeholder.svg'}
                 className="flex-1"
               />
@@ -264,19 +304,19 @@ const SymbolDetailPage: React.FC = () => {
                 <label className="text-sm font-medium text-slate-700">
                   <I18nText translationKey="symbols.culture">Culture</I18nText>
                 </label>
-                <p className="text-slate-900">{symbol.culture}</p>
+                <p className="text-slate-900">{displaySymbol.culture}</p>
               </div>
               
               <div>
                 <label className="text-sm font-medium text-slate-700">
                   <I18nText translationKey="symbols.period">Période</I18nText>
                 </label>
-                <p className="text-slate-900">{symbol.period}</p>
+                <p className="text-slate-900">{displaySymbol.period}</p>
               </div>
 
               <div>
                 <label className="text-sm font-medium text-slate-700">UUID du symbole</label>
-                <p className="text-slate-900 text-sm font-mono">{symbol.id}</p>
+                <p className="text-slate-900 text-sm font-mono">{displaySymbol.id}</p>
               </div>
             </div>
           </Card>
@@ -291,14 +331,14 @@ const SymbolDetailPage: React.FC = () => {
             </div>
             
             <div className="space-y-4">
-              {symbol.function && symbol.function.length > 0 && (
+              {displaySymbol.function && displaySymbol.function.length > 0 && (
                 <div>
                   <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
                     <BookOpen className="h-4 w-4" />
                     Fonctions
                   </label>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {symbol.function.map((func, index) => (
+                    {displaySymbol.function.map((func, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {func}
                       </Badge>
@@ -307,14 +347,14 @@ const SymbolDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {symbol.medium && symbol.medium.length > 0 && (
+              {displaySymbol.medium && displaySymbol.medium.length > 0 && (
                 <div>
                   <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
                     <Palette className="h-4 w-4" />
                     Supports utilisés
                   </label>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {symbol.medium.map((med, index) => (
+                    {displaySymbol.medium.map((med, index) => (
                       <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-700">
                         {med}
                       </Badge>
@@ -323,14 +363,14 @@ const SymbolDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {symbol.technique && symbol.technique.length > 0 && (
+              {displaySymbol.technique && displaySymbol.technique.length > 0 && (
                 <div>
                   <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
                     <Hammer className="h-4 w-4" />
                     Techniques
                   </label>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {symbol.technique.map((tech, index) => (
+                    {displaySymbol.technique.map((tech, index) => (
                       <Badge key={index} variant="outline" className="text-xs bg-green-50 text-green-700">
                         {tech}
                       </Badge>
@@ -350,7 +390,7 @@ const SymbolDetailPage: React.FC = () => {
                       <div key={image.id} className="aspect-square">
                         <img
                           src={image.image_url}
-                          alt={image.title || symbol.name}
+                          alt={image.title || displaySymbol.name}
                           className="w-full h-full object-cover rounded border"
                         />
                       </div>
@@ -370,11 +410,17 @@ const SymbolDetailPage: React.FC = () => {
         {/* Collections associées */}
         <div className="mt-12">
           <SymbolCollections 
-            symbolId={symbol.id} 
-            symbolName={symbol.name}
+            symbolId={displaySymbol.id} 
+            symbolName={displaySymbol.name}
           />
         </div>
       </div>
+
+      {/* Bouton d'édition flottant pour les admins */}
+      <AdminFloatingEditButton
+        symbol={displaySymbol}
+        onSymbolUpdated={handleSymbolUpdated}
+      />
     </div>
   );
 };
