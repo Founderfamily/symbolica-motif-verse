@@ -4,13 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Sparkles, Palette, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { I18nText } from '@/components/ui/i18n-text';
-import ModernSymbolGallery from '@/components/symbols/ModernSymbolGallery';
-import ModernSymbolDetails from '@/components/symbols/ModernSymbolDetails';
+import { SymbolGrid } from '@/components/search/SymbolGrid';
 import { SymbolData } from '@/types/supabase';
+import { useAllSymbols } from '@/hooks/useSupabaseSymbols';
 
 const SymbolTriptychSection = () => {
   const [selectedSymbol, setSelectedSymbol] = useState<SymbolData | null>(null);
   const navigate = useNavigate();
+  const { data: symbols, isLoading } = useAllSymbols();
 
   const handleExploreMore = () => {
     navigate('/symbols');
@@ -62,12 +63,18 @@ const SymbolTriptychSection = () => {
         </div>
       </div>
 
-      {/* Galerie moderne */}
+      {/* Galerie moderne utilisant SymbolGrid qui fonctionne */}
       <div className="mb-12">
-        <ModernSymbolGallery onSymbolSelect={handleSymbolSelect} />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+          </div>
+        ) : (
+          <SymbolGrid symbols={symbols?.slice(0, 6) || []} />
+        )}
       </div>
 
-      {/* Détails du symbole sélectionné */}
+      {/* Détails du symbole sélectionné - version simplifiée */}
       {selectedSymbol && (
         <div className="mt-12">
           <div className="text-center mb-6">
@@ -78,7 +85,15 @@ const SymbolTriptychSection = () => {
               Explorez les détails et les inspirations de ce symbole
             </p>
           </div>
-          <ModernSymbolDetails symbol={selectedSymbol} />
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-lg">
+            <div className="text-center">
+              <h4 className="text-xl font-semibold text-slate-800 mb-2">{selectedSymbol.name}</h4>
+              <p className="text-slate-600 mb-4">{selectedSymbol.culture} • {selectedSymbol.period}</p>
+              {selectedSymbol.description && (
+                <p className="text-slate-700">{selectedSymbol.description}</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
