@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -13,7 +12,8 @@ import {
   Lock,
   MessageCircle,
   Trophy,
-  Flag
+  Flag,
+  History
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuestById, useQuestProgress, useJoinQuest } from '@/hooks/useQuests';
+import HistoricalContextPanel from '@/components/quests/HistoricalContextPanel';
 
 const QuestDetailPage = () => {
   const { questId } = useParams<{ questId: string }>();
@@ -53,6 +54,8 @@ const QuestDetailPage = () => {
   const completedClues = progress?.filter(p => p.validated).length || 0;
   const totalClues = quest.clues?.length || 0;
   const progressPercentage = totalClues > 0 ? (completedClues / totalClues) * 100 : 0;
+
+  const isHistoricalQuest = ['templar', 'lost_civilization', 'grail'].includes(quest.quest_type);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
@@ -88,12 +91,28 @@ const QuestDetailPage = () => {
                    quest.quest_type === 'lost_civilization' ? 'Civilisation Perdue' :
                    'Personnalisée'}
                 </Badge>
+                {isHistoricalQuest && (
+                  <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                    <History className="w-3 h-3 mr-1" />
+                    Basé sur l'Histoire
+                  </Badge>
+                )}
               </div>
               
               <h1 className="text-4xl font-bold text-slate-800 mb-4">{quest.title}</h1>
               <p className="text-lg text-slate-600 mb-6">{quest.description}</p>
               
-              {quest.story_background && (
+              {/* Historical Context Panel for historical quests */}
+              {isHistoricalQuest && (
+                <div className="mb-6">
+                  <HistoricalContextPanel
+                    questType={quest.quest_type as 'templar' | 'lost_civilization' | 'grail'}
+                    storyBackground={quest.story_background}
+                  />
+                </div>
+              )}
+              
+              {quest.story_background && !isHistoricalQuest && (
                 <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200">
                   <h3 className="text-xl font-semibold text-amber-800 mb-3">Contexte Historique</h3>
                   <p className="text-amber-700">{quest.story_background}</p>
@@ -230,7 +249,7 @@ const QuestDetailPage = () => {
                             {clue.location && (
                               <div className="flex items-center gap-2 text-sm text-slate-600">
                                 <MapPin className="w-4 h-4" />
-                                <span>Zone géographique définie</span>
+                                <span>Zone géographique définie ({clue.location.radius}m de rayon)</span>
                               </div>
                             )}
                             
