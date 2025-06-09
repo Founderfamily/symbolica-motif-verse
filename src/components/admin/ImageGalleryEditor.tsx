@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Star, StarOff, Edit, Save, Cancel, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Star, StarOff, Edit, Save, Trash2, Image as ImageIcon } from 'lucide-react';
 import { SymbolImage } from '@/types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -256,7 +255,7 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
                             Sauver
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => setEditingImage(null)}>
-                            <Cancel className="h-3 w-3 mr-1" />
+                            <X className="h-3 w-3 mr-1" />
                             Annuler
                           </Button>
                         </div>
