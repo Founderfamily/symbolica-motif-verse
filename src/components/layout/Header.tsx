@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NavigationItems } from './header/NavigationItems';
-import { SearchBar } from './header/SearchBar';
 import { UserMenu } from './header/UserMenu';
 import { AuthButtons } from './header/AuthButtons';
 import { I18nText } from '@/components/ui/i18n-text';
@@ -35,11 +34,8 @@ const Header: React.FC = () => {
             <NavigationItems />
           </div>
 
-          {/* Search, Notifications, Language Selector, and User Menu */}
-          <div className="flex items-center space-x-4">
-            {/* Search Bar */}
-            <SearchBar />
-
+          {/* Right side: Notifications, Language Selector, and User Menu */}
+          <div className="flex items-center space-x-3">
             {/* Notifications - only for authenticated users */}
             {auth?.user && <NotificationCenter />}
 
