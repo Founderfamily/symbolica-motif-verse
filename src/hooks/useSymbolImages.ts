@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { SymbolData, SymbolImage } from '@/types/supabase';
-import { EXPANDED_SYMBOLS } from '@/data/expandedSymbols';
+import { symbolMappingService } from '@/services/symbolMappingService';
 
 export const useSymbolImages = (symbolId: string | null) => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -57,8 +57,18 @@ export const useSymbolImages = (symbolId: string | null) => {
       reuse: false
     });
 
-    // Find symbol in EXPANDED_SYMBOLS
-    const foundSymbol = EXPANDED_SYMBOLS.find(s => s.id === symbolId);
+    // Convert symbolId to index and get symbol from static data
+    const numericIndex = parseInt(symbolId, 10);
+    let foundSymbol = null;
+    
+    if (!isNaN(numericIndex)) {
+      // Get symbol by index
+      foundSymbol = symbolMappingService.getSymbolByIndex(numericIndex);
+    } else {
+      // Try to find by name
+      const result = symbolMappingService.findSymbolByName(symbolId);
+      foundSymbol = result?.symbol || null;
+    }
     
     if (!foundSymbol) {
       console.error('❌ [useSymbolImages] Symbol not found:', symbolId);
@@ -69,8 +79,22 @@ export const useSymbolImages = (symbolId: string | null) => {
 
     console.log('✅ [useSymbolImages] Symbol found:', foundSymbol.name);
     
-    // Set symbol data
-    setSymbol(foundSymbol);
+    // Convert static symbol to SymbolData format
+    const symbolData: SymbolData = {
+      id: symbolId,
+      name: foundSymbol.name,
+      culture: foundSymbol.culture,
+      period: foundSymbol.period,
+      description: foundSymbol.description,
+      function: foundSymbol.function || [],
+      technique: foundSymbol.technique || [],
+      medium: foundSymbol.medium || [],
+      created_at: '',
+      updated_at: '',
+      translations: {}
+    };
+    
+    setSymbol(symbolData);
     
     // Get image path for this symbol
     const imagePath = getImagePath(foundSymbol.name);

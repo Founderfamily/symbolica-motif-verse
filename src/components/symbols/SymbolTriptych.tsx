@@ -39,12 +39,9 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
   // Calculate total image errors
   const totalErrors = Object.values(imageErrors).filter(Boolean).length;
   
-  // Get translated symbol data
-  const getSymbolTranslation = (field: 'name' | 'culture' | 'period' | 'description') => {
-    if (symbol.translations && symbol.translations[currentLanguage]?.[field]) {
-      return symbol.translations[currentLanguage][field];
-    }
-    return symbol[field];
+  // Get symbol data (no complex translation since we're using static data)
+  const getSymbolField = (field: 'name' | 'culture' | 'period' | 'description') => {
+    return symbol[field] || '';
   };
   
   const renderImage = (type: ImageType) => {
@@ -62,7 +59,7 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
         type={type}
         title={translatedTitle}
         hasError={imageErrors[type]}
-        symbolName={getSymbolTranslation('name') || ''}
+        symbolName={getSymbolField('name')}
         onError={() => handleImageError(type)}
         currentLanguage={currentLanguage}
       />
@@ -76,16 +73,16 @@ const SymbolTriptych: React.FC<SymbolTriptychProps> = ({ symbolId }) => {
       
       <div className="mb-6 border-b border-slate-100 pb-4">
         <h2 className="text-2xl font-serif bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-          {getSymbolTranslation('name')}
+          {getSymbolField('name')}
         </h2>
         {symbol && (
           <p className="text-sm text-slate-600 mt-1 flex items-center">
             <span className="inline-block w-3 h-3 rounded-full mr-2" style={{background: `var(--color-${symbol.culture.toLowerCase()})`}}></span>
-            {getSymbolTranslation('culture')} · {getSymbolTranslation('period')}
+            {getSymbolField('culture')} · {getSymbolField('period')}
           </p>
         )}
-        {getSymbolTranslation('description') && (
-          <p className="text-slate-700 mt-3 leading-relaxed">{getSymbolTranslation('description')}</p>
+        {getSymbolField('description') && (
+          <p className="text-slate-700 mt-3 leading-relaxed">{getSymbolField('description')}</p>
         )}
       </div>
       
