@@ -71,14 +71,14 @@ export function getSymbolImagePath(symbol: SymbolData): string {
   
   // 1. Essayer avec le nom exact du symbole
   if (symbolToImageMap[symbol.name]) {
-    const imagePath = `/images/symbols/${symbolToImageMap[symbol.name]}`;
+    const imagePath = `/images/${symbolToImageMap[symbol.name]}`;
     console.log(`✅ Image trouvée par nom exact: ${imagePath}`);
     return imagePath;
   }
   
   // 2. Essayer avec la culture
   if (symbolToImageMap[symbol.culture]) {
-    const imagePath = `/images/symbols/${symbolToImageMap[symbol.culture]}`;
+    const imagePath = `/images/${symbolToImageMap[symbol.culture]}`;
     console.log(`✅ Image trouvée par culture: ${imagePath}`);
     return imagePath;
   }
@@ -112,7 +112,7 @@ export function getSymbolImagePath(symbol: SymbolData): string {
     if (cleanName.includes(cleanKey) || cleanKey.includes(cleanName) ||
         symbol.name.toLowerCase().includes(key.toLowerCase()) ||
         key.toLowerCase().includes(symbol.name.toLowerCase())) {
-      const imagePath = `/images/symbols/${imageName}`;
+      const imagePath = `/images/${imageName}`;
       console.log(`✅ Image trouvée par correspondance partielle (${key}): ${imagePath}`);
       return imagePath;
     }
@@ -124,7 +124,7 @@ export function getSymbolImagePath(symbol: SymbolData): string {
     if (word.length > 2) { // Éviter les mots trop courts
       for (const [key, imageName] of Object.entries(symbolToImageMap)) {
         if (key.toLowerCase().includes(word) || word.includes(key.toLowerCase())) {
-          const imagePath = `/images/symbols/${imageName}`;
+          const imagePath = `/images/${imageName}`;
           console.log(`✅ Image trouvée par mot-clé "${word}" (${key}): ${imagePath}`);
           return imagePath;
         }
@@ -137,7 +137,7 @@ export function getSymbolImagePath(symbol: SymbolData): string {
   for (const word of cultureWords) {
     if (word.length > 3) {
       if (symbolToImageMap[word]) {
-        const imagePath = `/images/symbols/${symbolToImageMap[word]}`;
+        const imagePath = `/images/${symbolToImageMap[word]}`;
         console.log(`✅ Image trouvée par mot de culture "${word}": ${imagePath}`);
         return imagePath;
       }
@@ -196,7 +196,7 @@ export function getCultureFallbackImage(culture: string): string {
     'Egyptian': 'fleur-de-lys.png'
   };
   
-  const fallbackImage = cultureMap[culture] ? `/images/symbols/${cultureMap[culture]}` : '/placeholder.svg';
+  const fallbackImage = cultureMap[culture] ? `/images/${cultureMap[culture]}` : '/placeholder.svg';
   console.log(`🔄 Fallback trouvé: ${fallbackImage}`);
   return fallbackImage;
 }
