@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, TrendingUp, Bookmark, Hexagon, Map, FileText, ChevronDown, LayoutDashboard, RefreshCw, Star, Folder, Settings } from 'lucide-react';
+import { Users, TrendingUp, Bookmark, Hexagon, Map, FileText, ChevronDown, LayoutDashboard, RefreshCw, Star, Folder, Settings, MapPin } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,11 @@ export const NavigationItems: React.FC = () => {
       name: 'Trending', 
       href: '/trending',
       icon: <TrendingUp className="h-4 w-4 inline mr-2" />
+    },
+    { 
+      name: 'Roadmap', 
+      href: '/roadmap',
+      icon: <MapPin className="h-4 w-4 inline mr-2" />
     }
   ];
 

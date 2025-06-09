@@ -1,8 +1,8 @@
 
 {
-  "title": "Feuille de Route",
+  "title": "Feuille de Route de Développement",
   "subtitle": "Découvrez Ce Qui Arrive Ensuite",
-  "description": "Suivez notre progression de développement et les fonctionnalités à venir",
+  "description": "Suivez notre progression de développement et les fonctionnalités à venir. Nous avons accompli des jalons incroyables avec plus de 500 commits et continuons à construire l'avenir de la recherche sur les symboles culturels.",
   "quarters": {
     "q1": "T1 2025",
     "q2": "T2 2025",
@@ -26,7 +26,7 @@
   "features": {
     "coreStabilization": {
       "title": "Stabilisation de la Plateforme",
-      "description": "Système d'authentification complet, gestion des collections et tableau de bord admin"
+      "description": "Système d'authentification complet, gestion des collections et tableau de bord admin avec plus de 500 commits de développement"
     },
     "performanceOptimization": {
       "title": "Optimisation des Performances",
@@ -58,5 +58,9 @@
     }
   },
   "viewMore": "Voir Plus de Détails",
-  "lastUpdated": "Dernière Mise à Jour"
+  "lastUpdated": "Dernière Mise à Jour",
+  "milestone": {
+    "title": "Jalon Majeur Atteint !",
+    "description": "Symbolica a dépassé les 500 commits représentant une plateforme mature et stable avec des fonctionnalités complètes."
+  }
 }

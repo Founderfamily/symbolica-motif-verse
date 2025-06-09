@@ -12,6 +12,7 @@ import CollectionDetailPage from '@/pages/CollectionDetailPage';
 import CommunityPage from '@/pages/CommunityPage';
 import GroupDetailPage from '@/pages/GroupDetailPage';
 import TrendingPage from '@/pages/TrendingPage';
+import RoadmapPage from '@/pages/RoadmapPage';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import MapExplorer from '@/pages/MapExplorer';
@@ -66,6 +67,7 @@ function App() {
                 <Route path="/community" element={<CommunityPage />} />
                 <Route path="/groups/:slug" element={<GroupDetailPage />} />
                 <Route path="/trending" element={<TrendingPage />} />
+                <Route path="/roadmap" element={<RoadmapPage />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/:username" element={<Profile />} />

@@ -6,6 +6,7 @@
     "collections": "Collections",
     "community": "Communauté",
     "trending": "Tendances",
+    "roadmap": "Roadmap",
     "analysis": "Analyse",
     "map": "Carte",
     "tools": "Outils",
@@ -13,7 +14,7 @@
     "contributions": "Contributions",
     "auth": "Connexion",
     "profile": "Profil",
-    "admin": "Administration",
+    "admin": "Admin",
     "logout": "Déconnexion"
   },
   "search": {
@@ -21,13 +22,13 @@
     "button": "Rechercher"
   },
   "language": {
-    "switch": "Changer de Langue",
+    "switch": "Changer de langue",
     "french": "Français",
     "english": "English"
   },
-  "myAccount": "Mon Compte",
+  "myAccount": "Mon compte",
   "profile": "Profil",
   "contribute": "Contribuer",
-  "adminDashboard": "Tableau de Bord Admin",
-  "logout": "Se Déconnecter"
+  "adminDashboard": "Tableau de bord admin",
+  "logout": "Se déconnecter"
 }
