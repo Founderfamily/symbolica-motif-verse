@@ -23,72 +23,105 @@ export const NavigationItems: React.FC = () => {
   const auth = useAuth();
   const isAdmin = auth?.profile?.is_admin;
 
-  // Menus de base accessibles à tous
-  const baseNavigationItems: NavigationItem[] = [
-    { 
-      name: 'Symbols', 
-      href: '/symbols',
-      icon: <Hexagon className="h-4 w-4 inline mr-2" />
-    },
-    { 
-      name: 'Collections', 
-      href: '/collections',
-      icon: <Bookmark className="h-4 w-4 inline mr-2" />
-    },
-    { 
-      name: 'Community', 
-      href: '/community',
-      icon: <Users className="h-4 w-4 inline mr-2" />,
-      badge: 'New'
-    },
-    { 
-      name: 'Trending', 
-      href: '/trending',
-      icon: <TrendingUp className="h-4 w-4 inline mr-2" />
-    },
-    { 
-      name: 'Roadmap', 
-      href: '/roadmap',
-      icon: <MapPin className="h-4 w-4 inline mr-2" />
-    }
-  ];
-
-  // Menus supplémentaires pour les utilisateurs connectés
-  const userNavigationItems: NavigationItem[] = auth?.user ? [
-    { 
-      name: 'Map', 
-      href: '/map',
-      icon: <Map className="h-4 w-4 inline mr-2" />
-    },
-    { 
-      name: 'Contributions', 
-      href: '/contributions',
-      icon: <FileText className="h-4 w-4 inline mr-2" />
-    }
-  ] : [];
-
-  // Combiner les éléments de navigation
-  const navigationItems = [...baseNavigationItems, ...userNavigationItems];
-
   return (
     <nav className="hidden md:flex space-x-6">
-      {navigationItems.map((item) => (
+      {/* Symbols Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="text-slate-600 hover:text-slate-900 font-medium">
+            <Hexagon className="h-4 w-4 inline mr-2" />
+            <I18nText translationKey="navigation.symbols" ns="header">
+              Symbols
+            </I18nText>
+            <ChevronDown className="ml-1 h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem asChild>
+            <Link to="/symbols" className="flex items-center">
+              <Hexagon className="mr-2 h-4 w-4" />
+              <I18nText translationKey="navigation.symbols" ns="header">
+                Symbols
+              </I18nText>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/collections" className="flex items-center">
+              <Bookmark className="mr-2 h-4 w-4" />
+              <I18nText translationKey="navigation.collections" ns="header">
+                Collections
+              </I18nText>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Community Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="text-slate-600 hover:text-slate-900 font-medium relative">
+            <Users className="h-4 w-4 inline mr-2" />
+            <I18nText translationKey="navigation.community" ns="header">
+              Community
+            </I18nText>
+            <ChevronDown className="ml-1 h-4 w-4" />
+            <span className="absolute -top-2 -right-2 px-1 py-0.5 text-xs rounded-full text-white bg-amber-500">
+              New
+            </span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem asChild>
+            <Link to="/community" className="flex items-center">
+              <Users className="mr-2 h-4 w-4" />
+              <I18nText translationKey="navigation.community" ns="header">
+                Community
+              </I18nText>
+            </Link>
+          </DropdownMenuItem>
+          {auth?.user && (
+            <DropdownMenuItem asChild>
+              <Link to="/contributions" className="flex items-center">
+                <FileText className="mr-2 h-4 w-4" />
+                <I18nText translationKey="navigation.contributions" ns="header">
+                  Contributions
+                </I18nText>
+              </Link>
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem asChild>
+            <Link to="/trending" className="flex items-center">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              <I18nText translationKey="navigation.trending" ns="header">
+                Trending
+              </I18nText>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/roadmap" className="flex items-center">
+              <MapPin className="mr-2 h-4 w-4" />
+              <I18nText translationKey="navigation.roadmap" ns="header">
+                Roadmap
+              </I18nText>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Map - only for authenticated users */}
+      {auth?.user && (
         <Link 
-          key={item.name} 
-          to={item.href} 
+          to="/map" 
           className="text-slate-600 hover:text-slate-900 transition-colors relative flex items-center font-medium"
         >
-          {item.icon}
-          <I18nText translationKey={`navigation.${item.name.toLowerCase()}`} ns="header">
-            {item.name}
+          <Map className="h-4 w-4 inline mr-2" />
+          <I18nText translationKey="navigation.map" ns="header">
+            Map
           </I18nText>
-          {item.badge && (
-            <span className="absolute -top-2 -right-2 px-1 py-0.5 text-xs rounded-full text-white bg-amber-500">
-              {item.badge}
-            </span>
-          )}
         </Link>
-      ))}
+      )}
+
+      {/* Admin Dropdown - only for admins */}
       {isAdmin && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
