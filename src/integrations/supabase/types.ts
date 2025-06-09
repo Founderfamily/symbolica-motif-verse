@@ -604,6 +604,47 @@ export type Database = {
           },
         ]
       }
+      evidence_validations: {
+        Row: {
+          comment: string | null
+          confidence_score: number | null
+          created_at: string | null
+          evidence_id: string
+          expertise_level: string | null
+          id: string
+          validator_id: string
+          vote_type: string
+        }
+        Insert: {
+          comment?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          evidence_id: string
+          expertise_level?: string | null
+          id?: string
+          validator_id: string
+          vote_type: string
+        }
+        Update: {
+          comment?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          evidence_id?: string
+          expertise_level?: string | null
+          id?: string
+          validator_id?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_validations_evidence_id_fkey"
+            columns: ["evidence_id"]
+            isOneToOne: false
+            referencedRelation: "quest_evidence"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_discoveries: {
         Row: {
           comments_count: number
@@ -1402,6 +1443,302 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_discussion_replies: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          discussion_id: string
+          id: string
+          likes_count: number | null
+          reply_to_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          discussion_id: string
+          id?: string
+          likes_count?: number | null
+          reply_to_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          discussion_id?: string
+          id?: string
+          likes_count?: number | null
+          reply_to_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_discussion_replies_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "quest_discussions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_discussion_replies_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "quest_discussion_replies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_discussions: {
+        Row: {
+          clue_index: number | null
+          created_at: string | null
+          created_by: string
+          id: string
+          last_activity_at: string | null
+          location_id: string | null
+          locked: boolean | null
+          pinned: boolean | null
+          quest_id: string
+          replies_count: number | null
+          title: string
+          topic_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          clue_index?: number | null
+          created_at?: string | null
+          created_by: string
+          id?: string
+          last_activity_at?: string | null
+          location_id?: string | null
+          locked?: boolean | null
+          pinned?: boolean | null
+          quest_id: string
+          replies_count?: number | null
+          title: string
+          topic_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          clue_index?: number | null
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          last_activity_at?: string | null
+          location_id?: string | null
+          locked?: boolean | null
+          pinned?: boolean | null
+          quest_id?: string
+          replies_count?: number | null
+          title?: string
+          topic_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_discussions_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_documents: {
+        Row: {
+          author: string | null
+          created_at: string | null
+          credibility_score: number | null
+          date_created: string | null
+          description: string | null
+          document_type: string
+          document_url: string | null
+          id: string
+          quest_id: string
+          source: string | null
+          title: string
+          translations: Json | null
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          author?: string | null
+          created_at?: string | null
+          credibility_score?: number | null
+          date_created?: string | null
+          description?: string | null
+          document_type: string
+          document_url?: string | null
+          id?: string
+          quest_id: string
+          source?: string | null
+          title: string
+          translations?: Json | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          author?: string | null
+          created_at?: string | null
+          credibility_score?: number | null
+          date_created?: string | null
+          description?: string | null
+          document_type?: string
+          document_url?: string | null
+          id?: string
+          quest_id?: string
+          source?: string | null
+          title?: string
+          translations?: Json | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_documents_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_evidence: {
+        Row: {
+          clue_index: number | null
+          created_at: string | null
+          description: string | null
+          evidence_type: string
+          id: string
+          image_url: string | null
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          metadata: Json | null
+          quest_id: string
+          submitted_by: string
+          title: string
+          updated_at: string | null
+          validation_count: number | null
+          validation_score: number | null
+          validation_status: string | null
+        }
+        Insert: {
+          clue_index?: number | null
+          created_at?: string | null
+          description?: string | null
+          evidence_type: string
+          id?: string
+          image_url?: string | null
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          metadata?: Json | null
+          quest_id: string
+          submitted_by: string
+          title: string
+          updated_at?: string | null
+          validation_count?: number | null
+          validation_score?: number | null
+          validation_status?: string | null
+        }
+        Update: {
+          clue_index?: number | null
+          created_at?: string | null
+          description?: string | null
+          evidence_type?: string
+          id?: string
+          image_url?: string | null
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          metadata?: Json | null
+          quest_id?: string
+          submitted_by?: string
+          title?: string
+          updated_at?: string | null
+          validation_count?: number | null
+          validation_score?: number | null
+          validation_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_evidence_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_locations: {
+        Row: {
+          added_by: string | null
+          created_at: string | null
+          current_status: string | null
+          description: string | null
+          historical_significance: string | null
+          id: string
+          images: Json | null
+          latitude: number
+          location_type: string
+          longitude: number
+          name: string
+          quest_id: string
+          sources: Json | null
+          updated_at: string | null
+          verified: boolean | null
+          verified_by: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string | null
+          current_status?: string | null
+          description?: string | null
+          historical_significance?: string | null
+          id?: string
+          images?: Json | null
+          latitude: number
+          location_type: string
+          longitude: number
+          name: string
+          quest_id: string
+          sources?: Json | null
+          updated_at?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string | null
+          current_status?: string | null
+          description?: string | null
+          historical_significance?: string | null
+          id?: string
+          images?: Json | null
+          latitude?: number
+          location_type?: string
+          longitude?: number
+          name?: string
+          quest_id?: string
+          sources?: Json | null
+          updated_at?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_locations_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quest_participants: {
         Row: {
           id: string
@@ -1588,6 +1925,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "quest_teams_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_theories: {
+        Row: {
+          author_id: string
+          community_score: number | null
+          confidence_level: number | null
+          created_at: string | null
+          description: string
+          id: string
+          quest_id: string
+          status: string | null
+          supporting_evidence: Json | null
+          theory_type: string | null
+          title: string
+          updated_at: string | null
+          votes_count: number | null
+        }
+        Insert: {
+          author_id: string
+          community_score?: number | null
+          confidence_level?: number | null
+          created_at?: string | null
+          description: string
+          id?: string
+          quest_id: string
+          status?: string | null
+          supporting_evidence?: Json | null
+          theory_type?: string | null
+          title: string
+          updated_at?: string | null
+          votes_count?: number | null
+        }
+        Update: {
+          author_id?: string
+          community_score?: number | null
+          confidence_level?: number | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          quest_id?: string
+          status?: string | null
+          supporting_evidence?: Json | null
+          theory_type?: string | null
+          title?: string
+          updated_at?: string | null
+          votes_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_theories_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "treasure_quests"
@@ -2122,6 +2515,41 @@ export type Database = {
         }
         Relationships: []
       }
+      theory_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          reasoning: string | null
+          theory_id: string
+          vote_type: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reasoning?: string | null
+          theory_id: string
+          vote_type: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reasoning?: string | null
+          theory_id?: string
+          vote_type?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_votes_theory_id_fkey"
+            columns: ["theory_id"]
+            isOneToOne: false
+            referencedRelation: "quest_theories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       treasure_quests: {
         Row: {
           clues: Json | null
@@ -2379,6 +2807,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_expertise: {
+        Row: {
+          created_at: string | null
+          credentials: string | null
+          expertise_area: string
+          id: string
+          level: string
+          user_id: string
+          verified: boolean | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credentials?: string | null
+          expertise_area: string
+          id?: string
+          level: string
+          user_id: string
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credentials?: string | null
+          expertise_area?: string
+          id?: string
+          level?: string
+          user_id?: string
+          verified?: boolean | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       user_follows: {
         Row: {
           created_at: string
@@ -2522,6 +2983,10 @@ export type Database = {
       }
       calculate_annotation_validation_score: {
         Args: { p_annotation_id: string }
+        Returns: number
+      }
+      calculate_evidence_validation_score: {
+        Args: { p_evidence_id: string }
         Returns: number
       }
       calculate_quest_completion: {
