@@ -36,13 +36,12 @@ export interface SymbolImage {
   title: string | null;
   description: string | null;
   created_at: string | null;
+  updated_at: string | null;
+  uploaded_by: string | null;
   // New fields
   location: string | null;
   source: string | null;
   tags: string[] | null;
-  // Add missing property for static data compatibility
-  uploaded_by?: string | null;
-  updated_at?: string | null;
   translations?: {
     [language: string]: {
       title?: string;

@@ -1502,6 +1502,8 @@ export type Database = {
           tags: string[] | null
           title: string | null
           translations: Json | null
+          updated_at: string | null
+          uploaded_by: string | null
         }
         Insert: {
           created_at?: string | null
@@ -1515,6 +1517,8 @@ export type Database = {
           tags?: string[] | null
           title?: string | null
           translations?: Json | null
+          updated_at?: string | null
+          uploaded_by?: string | null
         }
         Update: {
           created_at?: string | null
@@ -1528,6 +1532,8 @@ export type Database = {
           tags?: string[] | null
           title?: string | null
           translations?: Json | null
+          updated_at?: string | null
+          uploaded_by?: string | null
         }
         Relationships: [
           {

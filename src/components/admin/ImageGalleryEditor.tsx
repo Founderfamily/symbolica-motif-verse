@@ -34,6 +34,13 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
     try {
       setUploading(true);
       
+      // Vérifier que l'utilisateur est connecté
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        toast.error('Vous devez être connecté pour uploader des images');
+        return;
+      }
+      
       // Créer un nom de fichier unique
       const fileExt = file.name.split('.').pop();
       const fileName = `${symbolId}/${Date.now()}.${fileExt}`;
@@ -59,7 +66,7 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
           image_type: 'original',
           title: file.name,
           description: null,
-          uploaded_by: (await supabase.auth.getUser()).data.user?.id
+          uploaded_by: user.id
         })
         .select()
         .single();
@@ -119,7 +126,8 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
         .update({
           title: editingData.title,
           description: editingData.description,
-          image_type: editingData.image_type
+          image_type: editingData.image_type,
+          updated_at: new Date().toISOString()
         })
         .eq('id', imageId)
         .select()
