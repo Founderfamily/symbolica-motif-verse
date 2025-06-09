@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,33 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MapPin, Calendar, Palette, Sparkles, ExternalLink } from 'lucide-react';
 import { SymbolData } from '@/types/supabase';
-import { getSymbolImagePath, getCultureFallbackImage, checkImageExists } from '@/utils/symbolImageMapping';
+import { symbolToLocalImage } from '@/utils/symbolImageMapping';
 
 interface ModernSymbolDetailsProps {
   symbol: SymbolData;
 }
 
 const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => {
-  const mainImagePath = getSymbolImagePath(symbol);
-  const cultureImagePath = getCultureFallbackImage(symbol.culture);
+  // Utiliser directement le mapping statique
+  const imagePath = symbolToLocalImage[symbol.name] || '/placeholder.svg';
 
-  // Gestionnaire d'erreur d'image amélioré
-  const handleImageError = async (e: React.SyntheticEvent<HTMLImageElement>) => {
+  // Gestionnaire d'erreur d'image simplifié
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
-    const originalSrc = img.src;
-    
-    console.warn(`❌ Échec de chargement pour ${symbol.name}: ${originalSrc}`);
-    
-    if (originalSrc !== cultureImagePath) {
-      console.log(`🔄 Tentative de fallback pour ${symbol.name}: ${cultureImagePath}`);
-      const exists = await checkImageExists(cultureImagePath);
-      if (exists) {
-        img.src = cultureImagePath;
-        return;
-      }
-    }
-    
-    console.log(`📷 Utilisation du placeholder pour ${symbol.name}`);
+    console.warn(`❌ Échec de chargement pour ${symbol.name}`);
     img.src = '/placeholder.svg';
   };
 
@@ -45,7 +31,7 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
             {/* Image principale */}
             <div className="relative rounded-xl overflow-hidden shadow-lg">
               <img
-                src={mainImagePath}
+                src={imagePath}
                 alt={`${symbol.name} - Original`}
                 className="w-full h-64 object-cover"
                 onError={handleImageError}
@@ -58,7 +44,7 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
               </div>
               
               {/* Debug badge */}
-              {process.env.NODE_ENV === 'development' && mainImagePath === '/placeholder.svg' && (
+              {process.env.NODE_ENV === 'development' && imagePath === '/placeholder.svg' && (
                 <div className="absolute top-3 right-3">
                   <Badge variant="destructive" className="text-xs">
                     No Image Found
@@ -71,7 +57,7 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
             <div className="grid grid-cols-2 gap-3">
               <div className="relative rounded-lg overflow-hidden shadow-md group cursor-pointer">
                 <img
-                  src={mainImagePath}
+                  src={imagePath}
                   alt={`${symbol.name} - Motif`}
                   className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300"
                   style={{ filter: 'sepia(0.3) saturate(1.2)' }}
@@ -87,7 +73,7 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
 
               <div className="relative rounded-lg overflow-hidden shadow-md group cursor-pointer">
                 <img
-                  src={mainImagePath}
+                  src={imagePath}
                   alt={`${symbol.name} - Moderne`}
                   className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300"
                   style={{ filter: 'contrast(1.2) brightness(1.1)' }}

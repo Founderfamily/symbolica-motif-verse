@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Search, Filter, Heart, Share2, Eye, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useHybridSymbols } from '@/hooks/useHybridSymbols';
 import { useTranslation } from '@/i18n/useTranslation';
 import { SymbolData } from '@/types/supabase';
-import { getSymbolImagePath, debugSymbolImages, checkImageExists } from '@/utils/symbolImageMapping';
+import { symbolToLocalImage, debugSymbolImages } from '@/utils/symbolImageMapping';
 
 interface ModernSymbolGalleryProps {
   onSymbolSelect?: (symbol: SymbolData) => void;
@@ -61,27 +60,10 @@ const ModernSymbolGallery: React.FC<ModernSymbolGalleryProps> = ({ onSymbolSelec
     return () => clearInterval(interval);
   }, [filteredSymbols.length]);
 
-  // Gestionnaire d'erreur d'image amélioré
-  const handleImageError = async (e: React.SyntheticEvent<HTMLImageElement>, symbol: SymbolData) => {
+  // Gestionnaire d'erreur d'image simplifié
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>, symbol: SymbolData) => {
     const img = e.currentTarget;
-    const originalSrc = img.src;
-    
-    console.warn(`❌ Échec de chargement pour ${symbol.name}: ${originalSrc}`);
-    
-    // Essayer le fallback par culture
-    const fallbackPath = `/images/symbols/${symbol.culture.toLowerCase()}.png`;
-    
-    if (originalSrc !== fallbackPath) {
-      console.log(`🔄 Tentative de fallback pour ${symbol.name}: ${fallbackPath}`);
-      const exists = await checkImageExists(fallbackPath);
-      if (exists) {
-        img.src = fallbackPath;
-        return;
-      }
-    }
-    
-    // Utiliser le placeholder final
-    console.log(`📷 Utilisation du placeholder pour ${symbol.name}`);
+    console.warn(`❌ Échec de chargement pour ${symbol.name}`);
     img.src = '/placeholder.svg';
   };
 
@@ -166,7 +148,8 @@ const ModernSymbolGallery: React.FC<ModernSymbolGalleryProps> = ({ onSymbolSelec
             style={{ transform: `translateX(-${currentIndex * 33.333}%)` }}
           >
             {filteredSymbols.map((symbol, index) => {
-              const imagePath = getSymbolImagePath(symbol);
+              // Utiliser directement le mapping statique
+              const imagePath = symbolToLocalImage[symbol.name] || '/placeholder.svg';
               
               return (
                 <div
