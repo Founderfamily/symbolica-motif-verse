@@ -21,10 +21,30 @@ export const historicalQuestService = {
         return { success: true, message: 'All quests already exist' };
       }
       
+      // Convert quests to database format
+      const questsForDb = newQuests.map(quest => ({
+        title: quest.title,
+        description: quest.description,
+        story_background: quest.story_background,
+        quest_type: quest.quest_type,
+        difficulty_level: quest.difficulty_level,
+        max_participants: quest.max_participants,
+        min_participants: quest.min_participants,
+        status: quest.status,
+        start_date: quest.start_date,
+        end_date: quest.end_date,
+        reward_points: quest.reward_points,
+        special_rewards: quest.special_rewards as any,
+        clues: quest.clues as any,
+        target_symbols: quest.target_symbols,
+        created_by: quest.created_by,
+        translations: quest.translations as any
+      }));
+      
       // Insert new quests
       const { data, error } = await supabase
         .from('treasure_quests')
-        .insert(newQuests)
+        .insert(questsForDb)
         .select();
       
       if (error) {
