@@ -23,20 +23,20 @@ export const symbolToImageMap: Record<string, string> = {
   'Aztèque': 'aztec.png',
   
   // Nouveaux symboles identifiés dans la base
-  'Yin et Yang': 'mandala.png', // fallback temporaire
-  'Om': 'mandala.png', // fallback temporaire
-  'Hamsa': 'arabesque.png', // fallback temporaire
-  'Ankh': 'fleur-de-lys.png', // fallback temporaire
+  'Yin et Yang': 'mandala.png',
+  'Om': 'mandala.png',
+  'Hamsa': 'arabesque.png',
+  'Ankh': 'fleur-de-lys.png',
   'Croix celtique': 'triskelion.png',
-  'Ouroboros': 'greek-meander.png', // fallback temporaire
-  'Arbre de Vie': 'triskelion.png', // fallback temporaire
+  'Ouroboros': 'greek-meander.png',
+  'Arbre de Vie': 'triskelion.png',
   'Nœud celtique': 'triskelion.png',
-  'Pentagramme': 'greek-meander.png', // fallback temporaire
-  'Caducée': 'greek-meander.png', // fallback temporaire
-  'Scarabée': 'adinkra.png', // fallback temporaire
+  'Pentagramme': 'greek-meander.png',
+  'Caducée': 'greek-meander.png',
+  'Scarabée': 'adinkra.png',
   'Lotus': 'mandala.png',
   'Dragon chinois': 'seigaiha.png',
-  'Œil d\'Horus': 'adinkra.png', // fallback temporaire
+  'Œil d\'Horus': 'adinkra.png',
   'Spirale': 'triskelion.png',
   
   // Fallbacks par culture (sans doublons)
@@ -61,8 +61,8 @@ export const symbolToImageMap: Record<string, string> = {
   'Mésoaméricaine': 'aztec.png',
   'Chinoise': 'seigaiha.png',
   'Chinese': 'seigaiha.png',
-  'Égyptienne': 'fleur-de-lys.png', // fallback temporaire
-  'Egyptian': 'fleur-de-lys.png' // fallback temporaire
+  'Égyptienne': 'fleur-de-lys.png',
+  'Egyptian': 'fleur-de-lys.png'
 };
 
 // Fonction pour obtenir le chemin de l'image d'un symbole avec debug
@@ -71,14 +71,14 @@ export function getSymbolImagePath(symbol: SymbolData): string {
   
   // 1. Essayer avec le nom exact du symbole
   if (symbolToImageMap[symbol.name]) {
-    const imagePath = `/images/${symbolToImageMap[symbol.name]}`;
+    const imagePath = `/images/symbols/${symbolToImageMap[symbol.name]}`;
     console.log(`✅ Image trouvée par nom exact: ${imagePath}`);
     return imagePath;
   }
   
   // 2. Essayer avec la culture
   if (symbolToImageMap[symbol.culture]) {
-    const imagePath = `/images/${symbolToImageMap[symbol.culture]}`;
+    const imagePath = `/images/symbols/${symbolToImageMap[symbol.culture]}`;
     console.log(`✅ Image trouvée par culture: ${imagePath}`);
     return imagePath;
   }
@@ -112,7 +112,7 @@ export function getSymbolImagePath(symbol: SymbolData): string {
     if (cleanName.includes(cleanKey) || cleanKey.includes(cleanName) ||
         symbol.name.toLowerCase().includes(key.toLowerCase()) ||
         key.toLowerCase().includes(symbol.name.toLowerCase())) {
-      const imagePath = `/images/${imageName}`;
+      const imagePath = `/images/symbols/${imageName}`;
       console.log(`✅ Image trouvée par correspondance partielle (${key}): ${imagePath}`);
       return imagePath;
     }
@@ -124,7 +124,7 @@ export function getSymbolImagePath(symbol: SymbolData): string {
     if (word.length > 2) { // Éviter les mots trop courts
       for (const [key, imageName] of Object.entries(symbolToImageMap)) {
         if (key.toLowerCase().includes(word) || word.includes(key.toLowerCase())) {
-          const imagePath = `/images/${imageName}`;
+          const imagePath = `/images/symbols/${imageName}`;
           console.log(`✅ Image trouvée par mot-clé "${word}" (${key}): ${imagePath}`);
           return imagePath;
         }
@@ -137,7 +137,7 @@ export function getSymbolImagePath(symbol: SymbolData): string {
   for (const word of cultureWords) {
     if (word.length > 3) {
       if (symbolToImageMap[word]) {
-        const imagePath = `/images/${symbolToImageMap[word]}`;
+        const imagePath = `/images/symbols/${symbolToImageMap[word]}`;
         console.log(`✅ Image trouvée par mot de culture "${word}": ${imagePath}`);
         return imagePath;
       }
@@ -196,7 +196,7 @@ export function getCultureFallbackImage(culture: string): string {
     'Egyptian': 'fleur-de-lys.png'
   };
   
-  const fallbackImage = cultureMap[culture] ? `/images/${cultureMap[culture]}` : '/placeholder.svg';
+  const fallbackImage = cultureMap[culture] ? `/images/symbols/${cultureMap[culture]}` : '/placeholder.svg';
   console.log(`🔄 Fallback trouvé: ${fallbackImage}`);
   return fallbackImage;
 }
