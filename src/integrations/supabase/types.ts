@@ -1402,6 +1402,199 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_participants: {
+        Row: {
+          id: string
+          joined_at: string | null
+          quest_id: string
+          role: string | null
+          status: string | null
+          team_name: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string | null
+          quest_id: string
+          role?: string | null
+          status?: string | null
+          team_name?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string | null
+          quest_id?: string
+          role?: string | null
+          status?: string | null
+          team_name?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_participants_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_progress: {
+        Row: {
+          clue_index: number
+          discovered_at: string | null
+          discovery_data: Json | null
+          id: string
+          points_earned: number | null
+          quest_id: string
+          user_id: string
+          validated: boolean | null
+          validated_by: string | null
+        }
+        Insert: {
+          clue_index: number
+          discovered_at?: string | null
+          discovery_data?: Json | null
+          id?: string
+          points_earned?: number | null
+          quest_id: string
+          user_id: string
+          validated?: boolean | null
+          validated_by?: string | null
+        }
+        Update: {
+          clue_index?: number
+          discovered_at?: string | null
+          discovery_data?: Json | null
+          id?: string
+          points_earned?: number | null
+          quest_id?: string
+          user_id?: string
+          validated?: boolean | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_progress_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_rewards: {
+        Row: {
+          awarded_at: string | null
+          claimed: boolean | null
+          id: string
+          quest_id: string
+          reward_data: Json
+          reward_type: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string | null
+          claimed?: boolean | null
+          id?: string
+          quest_id: string
+          reward_data: Json
+          reward_type: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string | null
+          claimed?: boolean | null
+          id?: string
+          quest_id?: string
+          reward_data?: Json
+          reward_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_rewards_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_team_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          message_type: string | null
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          message_type?: string | null
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          message_type?: string | null
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_team_messages_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "quest_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_teams: {
+        Row: {
+          created_at: string | null
+          id: string
+          leader_id: string
+          quest_id: string
+          team_color: string | null
+          team_motto: string | null
+          team_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          leader_id: string
+          quest_id: string
+          team_color?: string | null
+          team_motto?: string | null
+          team_name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          leader_id?: string
+          quest_id?: string
+          team_color?: string | null
+          team_motto?: string | null
+          team_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_teams_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roadmap_items: {
         Row: {
           created_at: string | null
@@ -1929,6 +2122,72 @@ export type Database = {
         }
         Relationships: []
       }
+      treasure_quests: {
+        Row: {
+          clues: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          difficulty_level: string
+          end_date: string | null
+          id: string
+          max_participants: number | null
+          min_participants: number | null
+          quest_type: string
+          reward_points: number | null
+          special_rewards: Json | null
+          start_date: string | null
+          status: string
+          story_background: string | null
+          target_symbols: string[] | null
+          title: string
+          translations: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          clues?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          difficulty_level?: string
+          end_date?: string | null
+          id?: string
+          max_participants?: number | null
+          min_participants?: number | null
+          quest_type?: string
+          reward_points?: number | null
+          special_rewards?: Json | null
+          start_date?: string | null
+          status?: string
+          story_background?: string | null
+          target_symbols?: string[] | null
+          title: string
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          clues?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          difficulty_level?: string
+          end_date?: string | null
+          id?: string
+          max_participants?: number | null
+          min_participants?: number | null
+          quest_type?: string
+          reward_points?: number | null
+          special_rewards?: Json | null
+          start_date?: string | null
+          status?: string
+          story_background?: string | null
+          target_symbols?: string[] | null
+          title?: string
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       trending_metrics: {
         Row: {
           created_at: string | null
@@ -2263,6 +2522,10 @@ export type Database = {
       }
       calculate_annotation_validation_score: {
         Args: { p_annotation_id: string }
+        Returns: number
+      }
+      calculate_quest_completion: {
+        Args: { p_quest_id: string; p_user_id: string }
         Returns: number
       }
       calculate_trending_score: {

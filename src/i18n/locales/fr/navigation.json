@@ -3,49 +3,12 @@
   "home": "Accueil",
   "symbols": "Symboles",
   "collections": "Collections",
+  "quests": "Quêtes",
   "community": "Communauté",
-  "contribute": "Contribuer",
-  "analysis": "Analyse",
-  "map": "Carte",
-  "trending": "Tendances",
+  "about": "À propos",
   "search": "Recherche",
-  "about": "À Propos",
-  "contact": "Contact",
-  "legal": "Mentions Légales",
-  "privacy": "Confidentialité",
-  "terms": "Conditions",
-  "footer": {
-    "followUs": "Suivez-Nous",
-    "newsletter": "Newsletter",
-    "support": "Support",
-    "company": "Entreprise",
-    "product": "Produit",
-    "legal": "Légal"
-  },
-  "meta": {
-    "home": {
-      "title": "Explorateur de Symboles Culturels - Découvrez le Patrimoine Mondial",
-      "description": "Explorez et découvrez les symboles culturels du monde entier. Rejoignez notre communauté de passionnés de patrimoine culturel."
-    },
-    "symbols": {
-      "title": "Explorateur de Symboles - Parcourez les Symboles Culturels",
-      "description": "Parcourez et explorez les symboles culturels de différentes civilisations et périodes historiques."
-    },
-    "collections": {
-      "title": "Collections Culturelles - Ensembles de Symboles Organisés",
-      "description": "Découvrez des collections organisées de symboles culturels classés par thèmes, régions et périodes historiques."
-    },
-    "community": {
-      "title": "Communauté Culturelle - Connectez-vous avec des Passionnés",
-      "description": "Rejoignez notre communauté de passionnés de patrimoine culturel et partagez vos découvertes."
-    },
-    "search": {
-      "title": "Recherche de Symboles - Trouvez le Patrimoine Culturel",
-      "description": "Recherchez dans notre vaste base de données de symboles culturels et d'éléments de patrimoine."
-    },
-    "trending": {
-      "title": "Symboles Tendances - Découvertes Populaires",
-      "description": "Découvrez les symboles culturels les plus populaires et tendances dans notre communauté."
-    }
-  }
+  "profile": "Profil",
+  "admin": "Administration",
+  "login": "Connexion",
+  "logout": "Déconnexion"
 }
