@@ -11,7 +11,29 @@ import { SymbolCollections } from '@/components/symbols/SymbolCollections';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
-import { SupabaseSymbolService } from '@/services/supabaseSymbolService';
+
+// Helper functions for legacy UUID mapping
+const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
+  0: '550e8400-e29b-41d4-a716-446655440001', // Triskèle Celtique
+  1: '550e8400-e29b-41d4-a716-446655440002', // Fleur de Lys
+  2: '550e8400-e29b-41d4-a716-446655440003', // Mandala
+  3: '550e8400-e29b-41d4-a716-446655440004', // Méandre Grec
+  4: '550e8400-e29b-41d4-a716-446655440005', // Symbole Adinkra
+  5: '550e8400-e29b-41d4-a716-446655440006', // Motif Seigaiha
+  6: '550e8400-e29b-41d4-a716-446655440007', // Yin Yang
+  7: '550e8400-e29b-41d4-a716-446655440008', // Ankh
+  8: '550e8400-e29b-41d4-a716-446655440009', // Hamsa
+  9: '550e8400-e29b-41d4-a716-446655440010', // Attrape-rêves
+};
+
+const isValidUuid = (str: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+};
+
+const getLegacyUuidFromIndex = (index: number): string | null => {
+  return LEGACY_INDEX_TO_UUID_MAP[index] || null;
+};
 
 const SymbolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,14 +44,14 @@ const SymbolDetailPage: React.FC = () => {
     if (!id) return null;
 
     // Si c'est déjà un UUID valide, l'utiliser tel quel
-    if (SupabaseSymbolService.isValidUuid(id)) {
+    if (isValidUuid(id)) {
       return id;
     }
 
     // Sinon, essayer de convertir l'ancien index en UUID
     const numericIndex = parseInt(id, 10);
     if (!isNaN(numericIndex)) {
-      const legacyUuid = SupabaseSymbolService.getLegacyUuidFromIndex(numericIndex);
+      const legacyUuid = getLegacyUuidFromIndex(numericIndex);
       if (legacyUuid) {
         // Rediriger automatiquement vers la nouvelle URL avec UUID
         navigate(`/symbols/${legacyUuid}`, { replace: true });
