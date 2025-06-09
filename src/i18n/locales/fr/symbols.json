@@ -1,5 +1,19 @@
 
 {
+  "title": "Explorez les Symboles",
+  "subtitle": "Découvrez la richesse des symboles à travers les cultures et les époques",
+  "allSymbols": "Tous les symboles",
+  "searchResults": "Résultats de recherche",
+  "statistics": "Statistiques",
+  "stats": {
+    "total": "Symboles au total",
+    "cultures": "Cultures représentées",
+    "periods": "Périodes historiques"
+  },
+  "symbolCount": {
+    "singular": " symbole",
+    "plural": " symboles"
+  },
   "notFound": "Symbole non trouvé",
   "notFoundDesc": "Le symbole que vous recherchez n'existe pas.",
   "culture": "Culture",
