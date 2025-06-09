@@ -1,139 +1,130 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shuffle, Search, Sparkles } from 'lucide-react';
+import { Search, Sparkles, Palette, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import SymbolTriptych from '@/components/symbols/SymbolTriptych';
 import { I18nText } from '@/components/ui/i18n-text';
-import { useHybridSymbols } from '@/hooks/useHybridSymbols';
+import ModernSymbolGallery from '@/components/symbols/ModernSymbolGallery';
+import ModernSymbolDetails from '@/components/symbols/ModernSymbolDetails';
+import { SymbolData } from '@/types/supabase';
 
 const SymbolTriptychSection = () => {
-  const [selectedSymbolId, setSelectedSymbolId] = useState<string | null>(null);
-  const [symbolIndex, setSymbolIndex] = useState(0);
+  const [selectedSymbol, setSelectedSymbol] = useState<SymbolData | null>(null);
   const navigate = useNavigate();
-  
-  // Utiliser le système hybride simplifié
-  const { symbols, isLoading } = useHybridSymbols();
 
-  // Fonction pour sélectionner un symbole aléatoire
-  const selectRandomSymbol = () => {
-    if (symbols.length === 0) return;
-    
-    const randomIndex = Math.floor(Math.random() * symbols.length);
-    const randomSymbol = symbols[randomIndex];
-    setSelectedSymbolId(randomSymbol.id); // Utiliser l'ID (qui est l'index pour les statiques)
-    setSymbolIndex(randomIndex);
-  };
-
-  // Sélectionner un symbole aléatoire au chargement une fois les données disponibles
-  useEffect(() => {
-    if (symbols.length > 0 && !selectedSymbolId) {
-      selectRandomSymbol();
-    }
-  }, [symbols, selectedSymbolId]);
-
-  // Navigation vers la recherche
   const handleExploreMore = () => {
     navigate('/symbols');
   };
 
-  // Navigation vers le détail d'un symbole
-  const handleSymbolNavigation = (symbolId: string) => {
-    navigate(`/symbols/${symbolId}`);
+  const handleSymbolSelect = (symbol: SymbolData) => {
+    setSelectedSymbol(symbol);
   };
 
-  if (isLoading) {
-    return (
-      <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Chargement des symboles...</p>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto">
+    <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
       <div className="text-center mb-12">
-        <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 inline-block mb-2">
-          <I18nText translationKey="symbolTriptych" ns="sections">Analyse Symbolique</I18nText>
+        <span className="px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-orange-200 text-amber-800 inline-block mb-4">
+          <I18nText translationKey="symbolTriptych" ns="sections">Galerie Moderne</I18nText>
         </span>
-        <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-          <I18nText translationKey="title" ns="symbolTriptych">Explorez en Détail</I18nText>
+        <h2 className="text-5xl font-bold mb-6 text-center bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+          <I18nText translationKey="title" ns="symbolTriptych">Motifs & Inspirations</I18nText>
         </h2>
-        <p className="text-center text-slate-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-center text-slate-600 mb-8 max-w-3xl mx-auto text-lg leading-relaxed">
           <I18nText translationKey="description" ns="symbolTriptych">
-            Découvrez l'évolution des symboles à travers le temps et les cultures
+            Découvrez l'évolution des symboles ancestraux vers leurs réinterprétations modernes
           </I18nText>
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <Button 
-            onClick={selectRandomSymbol}
-            variant="outline"
-            className="bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300"
-            disabled={symbols.length === 0}
-          >
-            <Shuffle className="mr-2 h-4 w-4" />
-            <I18nText translationKey="randomSymbol" ns="symbolTriptych">Symbole Aléatoire</I18nText>
-          </Button>
+
+        {/* Indicateurs visuels */}
+        <div className="flex flex-wrap justify-center gap-6 mb-8">
+          <div className="flex items-center space-x-2 text-blue-600">
+            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <span className="text-sm font-medium">Motifs Traditionnels</span>
+          </div>
+          <div className="flex items-center space-x-2 text-green-600">
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span className="text-sm font-medium">Réutilisations Modernes</span>
+          </div>
+          <div className="flex items-center space-x-2 text-amber-600">
+            <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+            <span className="text-sm font-medium">Inspirations Contemporaines</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <Button 
             onClick={handleExploreMore}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Search className="mr-2 h-4 w-4" />
-            <I18nText translationKey="exploreMore" ns="symbolTriptych">Explorer Plus</I18nText>
+            <Search className="mr-2 h-5 w-5" />
+            <I18nText translationKey="exploreMore" ns="symbolTriptych">Explorer la Collection</I18nText>
           </Button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-8">
-        {/* Liste des symboles */}
-        <div className="lg:col-span-1">
-          <Card className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="h-5 w-5 text-amber-500" />
-                <h3 className="font-semibold text-slate-800">
-                  <I18nText translationKey="symbolCollection" ns="symbolTriptych">Collection de Symboles</I18nText>
-                </h3>
-              </div>
-              <div className="space-y-2 max-h-80 overflow-y-auto">
-                {symbols.slice(0, 20).map((symbol, index) => (
-                  <button
-                    key={symbol.id}
-                    onClick={() => {
-                      setSelectedSymbolId(symbol.id);
-                      setSymbolIndex(index);
-                    }}
-                    onDoubleClick={() => handleSymbolNavigation(symbol.id)}
-                    className={`w-full text-left p-3 rounded-lg transition-all duration-200 border ${
-                      selectedSymbolId === symbol.id
-                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 text-blue-900'
-                        : 'hover:bg-slate-50 border-transparent text-slate-700 hover:text-slate-900'
-                    }`}
-                    title="Double-cliquez pour voir les détails"
-                  >
-                    <div className="font-medium text-sm mb-1">{symbol.name}</div>
-                    <div className="text-xs opacity-75">
-                      {symbol.culture} • {symbol.period}
-                    </div>
-                  </button>
-                ))}
-                {symbols.length === 0 && (
-                  <div className="text-center py-4 text-slate-500">
-                    <p className="text-sm">Aucun symbole disponible</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+      {/* Galerie moderne */}
+      <div className="mb-12">
+        <ModernSymbolGallery onSymbolSelect={handleSymbolSelect} />
+      </div>
+
+      {/* Détails du symbole sélectionné */}
+      {selectedSymbol && (
+        <div className="mt-12">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold text-slate-800 mb-2">
+              Zoom sur: {selectedSymbol.name}
+            </h3>
+            <p className="text-slate-600">
+              Explorez les détails et les inspirations de ce symbole
+            </p>
+          </div>
+          <ModernSymbolDetails symbol={selectedSymbol} />
+        </div>
+      )}
+
+      {/* Section d'inspiration */}
+      <div className="mt-16 bg-gradient-to-br from-slate-50 to-white rounded-3xl p-8 border border-slate-200">
+        <div className="text-center mb-8">
+          <h3 className="text-3xl font-bold text-slate-800 mb-4 flex items-center justify-center gap-3">
+            <Palette className="h-8 w-8 text-amber-500" />
+            Du Traditionnel au Moderne
+          </h3>
+          <p className="text-slate-600 max-w-2xl mx-auto">
+            Chaque symbole raconte une histoire millénaire qui continue d'inspirer 
+            les créateurs contemporains dans l'art, le design et l'architecture.
+          </p>
         </div>
 
-        {/* Triptych principal */}
-        <div className="lg:col-span-3">
-          <SymbolTriptych symbolId={selectedSymbolId} />
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="text-center p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="h-6 w-6 text-blue-600" />
+            </div>
+            <h4 className="font-semibold text-slate-800 mb-2">Patrimoine Ancestral</h4>
+            <p className="text-sm text-slate-600">
+              Préservation des techniques et significations originelles
+            </p>
+          </div>
+
+          <div className="text-center p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Zap className="h-6 w-6 text-green-600" />
+            </div>
+            <h4 className="font-semibold text-slate-800 mb-2">Innovation Moderne</h4>
+            <p className="text-sm text-slate-600">
+              Réinterprétation créative dans les nouveaux médias
+            </p>
+          </div>
+
+          <div className="text-center p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Palette className="h-6 w-6 text-amber-600" />
+            </div>
+            <h4 className="font-semibold text-slate-800 mb-2">Fusion Créative</h4>
+            <p className="text-sm text-slate-600">
+              Synthèse harmonieuse entre tradition et modernité
+            </p>
+          </div>
         </div>
       </div>
     </section>
