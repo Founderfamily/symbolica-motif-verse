@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { TreasureQuest, QuestParticipant, QuestProgress } from '@/types/quests';
+import { TreasureQuest, QuestParticipant, QuestProgress, QuestClue } from '@/types/quests';
 
 export const useQuests = () => {
   return useQuery({
@@ -13,7 +13,15 @@ export const useQuests = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as TreasureQuest[];
+      
+      // Convertir les données Supabase vers nos types TypeScript
+      return data?.map(quest => ({
+        ...quest,
+        clues: (quest.clues as any) || [],
+        special_rewards: quest.special_rewards || [],
+        target_symbols: quest.target_symbols || [],
+        translations: quest.translations || { en: {}, fr: {} }
+      })) as TreasureQuest[];
     }
   });
 };
@@ -29,7 +37,14 @@ export const useActiveQuests = () => {
         .order('start_date', { ascending: true });
       
       if (error) throw error;
-      return data as TreasureQuest[];
+      
+      return data?.map(quest => ({
+        ...quest,
+        clues: (quest.clues as any) || [],
+        special_rewards: quest.special_rewards || [],
+        target_symbols: quest.target_symbols || [],
+        translations: quest.translations || { en: {}, fr: {} }
+      })) as TreasureQuest[];
     }
   });
 };
@@ -45,7 +60,14 @@ export const useQuestById = (questId: string) => {
         .single();
       
       if (error) throw error;
-      return data as TreasureQuest;
+      
+      return {
+        ...data,
+        clues: (data.clues as any) || [],
+        special_rewards: data.special_rewards || [],
+        target_symbols: data.target_symbols || [],
+        translations: data.translations || { en: {}, fr: {} }
+      } as TreasureQuest;
     },
     enabled: !!questId
   });

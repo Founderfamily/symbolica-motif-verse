@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Treasure, 
+  Trophy, 
   Users, 
   Clock, 
   Star, 
@@ -35,7 +35,7 @@ const QuestsPage = () => {
     templar: Sword,
     lost_civilization: Scroll,
     grail: Crown,
-    custom: Treasure
+    custom: Trophy
   };
 
   const questTypeLabels = {
@@ -94,7 +94,7 @@ const QuestsPage = () => {
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
             <Badge className="px-6 py-3 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border-amber-200 text-lg">
-              <Treasure className="w-5 h-5 mr-2" />
+              <Trophy className="w-5 h-5 mr-2" />
               Quêtes de Trésors
             </Badge>
           </div>
@@ -258,7 +258,7 @@ const QuestsPage = () => {
 
         {filteredQuests?.length === 0 && (
           <div className="text-center py-16">
-            <Treasure className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <Trophy className="w-16 h-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-600 mb-2">Aucune quête trouvée</h3>
             <p className="text-slate-500">Essayez de modifier vos filtres ou créez une nouvelle quête.</p>
           </div>

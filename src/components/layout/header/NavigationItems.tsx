@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { I18nText } from '@/components/ui/i18n-text';
 
-const NavigationItems = () => {
+export const NavigationItems = () => {
   const location = useLocation();
   
   const navigation = [
