@@ -280,5 +280,5 @@ html {
 }
 
 .hover-glow {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-current/25;
+  @apply transition-all duration-300 hover:shadow-lg hover:shadow-slate-300/25;
 }
