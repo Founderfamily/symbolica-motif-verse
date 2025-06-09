@@ -1699,10 +1699,14 @@ export type Database = {
           culture: string
           description: string | null
           function: string[] | null
+          historical_context: string | null
           id: string
           medium: string[] | null
           name: string
           period: string
+          related_symbols: string[] | null
+          significance: string | null
+          tags: string[] | null
           technique: string[] | null
           translations: Json | null
           updated_at: string | null
@@ -1712,10 +1716,14 @@ export type Database = {
           culture: string
           description?: string | null
           function?: string[] | null
+          historical_context?: string | null
           id?: string
           medium?: string[] | null
           name: string
           period: string
+          related_symbols?: string[] | null
+          significance?: string | null
+          tags?: string[] | null
           technique?: string[] | null
           translations?: Json | null
           updated_at?: string | null
@@ -1725,10 +1733,14 @@ export type Database = {
           culture?: string
           description?: string | null
           function?: string[] | null
+          historical_context?: string | null
           id?: string
           medium?: string[] | null
           name?: string
           period?: string
+          related_symbols?: string[] | null
+          significance?: string | null
+          tags?: string[] | null
           technique?: string[] | null
           translations?: Json | null
           updated_at?: string | null

@@ -13,7 +13,7 @@ export interface SymbolData {
   medium?: string[] | null;
   technique?: string[] | null;
   function?: string[] | null;
-  // Add missing properties for static data compatibility
+  // Nouvelles colonnes ajoutées
   significance?: string | null;
   historical_context?: string | null;
   related_symbols?: string[] | null;
