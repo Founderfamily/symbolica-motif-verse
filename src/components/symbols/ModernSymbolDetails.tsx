@@ -6,12 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MapPin, Calendar, Palette, Sparkles, ExternalLink } from 'lucide-react';
 import { SymbolData } from '@/types/supabase';
+import { getSymbolImagePath, getCultureFallbackImage } from '@/utils/symbolImageMapping';
 
 interface ModernSymbolDetailsProps {
   symbol: SymbolData;
 }
 
 const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => {
+  const mainImagePath = getSymbolImagePath(symbol);
+  const cultureImagePath = getCultureFallbackImage(symbol.culture);
+
   return (
     <Card className="w-full max-w-4xl mx-auto border-2 border-slate-200 shadow-xl">
       <CardContent className="p-0">
@@ -21,11 +25,12 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
             {/* Image principale */}
             <div className="relative rounded-xl overflow-hidden shadow-lg">
               <img
-                src={`/images/symbols/${symbol.name.toLowerCase().replace(/\s+/g, '-')}.png`}
+                src={mainImagePath}
                 alt={`${symbol.name} - Original`}
                 className="w-full h-64 object-cover"
                 onError={(e) => {
-                  e.currentTarget.src = '/placeholder.svg';
+                  console.warn(`Main image failed for symbol: ${symbol.name}`);
+                  e.currentTarget.src = cultureImagePath;
                 }}
               />
               <div className="absolute top-3 left-3">
@@ -39,12 +44,12 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
             <div className="grid grid-cols-2 gap-3">
               <div className="relative rounded-lg overflow-hidden shadow-md group cursor-pointer">
                 <img
-                  src={`/images/symbols/${symbol.name.toLowerCase().replace(/\s+/g, '-')}.png`}
+                  src={mainImagePath}
                   alt={`${symbol.name} - Motif`}
                   className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300"
                   style={{ filter: 'sepia(0.3) saturate(1.2)' }}
                   onError={(e) => {
-                    e.currentTarget.src = '/placeholder.svg';
+                    e.currentTarget.src = cultureImagePath;
                   }}
                 />
                 <div className="absolute inset-0 bg-blue-500/20 group-hover:bg-blue-500/30 transition-colors duration-300" />
@@ -57,12 +62,12 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
 
               <div className="relative rounded-lg overflow-hidden shadow-md group cursor-pointer">
                 <img
-                  src={`/images/symbols/${symbol.name.toLowerCase().replace(/\s+/g, '-')}.png`}
+                  src={mainImagePath}
                   alt={`${symbol.name} - Moderne`}
                   className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300"
                   style={{ filter: 'contrast(1.2) brightness(1.1)' }}
                   onError={(e) => {
-                    e.currentTarget.src = '/placeholder.svg';
+                    e.currentTarget.src = cultureImagePath;
                   }}
                 />
                 <div className="absolute inset-0 bg-green-500/20 group-hover:bg-green-500/30 transition-colors duration-300" />
@@ -151,29 +156,40 @@ const ModernSymbolDetails: React.FC<ModernSymbolDetailsProps> = ({ symbol }) => 
             <Separator />
 
             {/* Métadonnées supplémentaires */}
-            {(symbol.tags || symbol.significance) && (
-              <div className="space-y-3">
-                {symbol.significance && (
-                  <div>
-                    <h4 className="font-medium text-slate-700 text-sm mb-1">Signification</h4>
-                    <p className="text-xs text-slate-600">{symbol.significance}</p>
+            <div className="space-y-3">
+              {symbol.significance && (
+                <div>
+                  <h4 className="font-medium text-slate-700 text-sm mb-1">Signification</h4>
+                  <p className="text-xs text-slate-600">{symbol.significance}</p>
+                </div>
+              )}
+              
+              {symbol.tags && symbol.tags.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-slate-700 text-sm mb-2">Tags</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {symbol.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
-                )}
-                
-                {symbol.tags && symbol.tags.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-slate-700 text-sm mb-2">Tags</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {symbol.tags.map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
+                </div>
+              )}
+
+              {(symbol.function && symbol.function.length > 0) && (
+                <div>
+                  <h4 className="font-medium text-slate-700 text-sm mb-2">Fonctions</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {symbol.function.map((func, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {func}
+                      </Badge>
+                    ))}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

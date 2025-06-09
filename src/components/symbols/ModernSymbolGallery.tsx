@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useHybridSymbols } from '@/hooks/useHybridSymbols';
 import { useTranslation } from '@/i18n/useTranslation';
 import { SymbolData } from '@/types/supabase';
+import { getSymbolImagePath } from '@/utils/symbolImageMapping';
 
 interface ModernSymbolGalleryProps {
   onSymbolSelect?: (symbol: SymbolData) => void;
@@ -151,10 +152,11 @@ const ModernSymbolGallery: React.FC<ModernSymbolGalleryProps> = ({ onSymbolSelec
                     {/* Image principale */}
                     <div className="relative h-48 overflow-hidden rounded-t-lg">
                       <img
-                        src={`/images/symbols/${symbol.name.toLowerCase().replace(/\s+/g, '-')}.png`}
+                        src={getSymbolImagePath(symbol)}
                         alt={symbol.name}
                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                         onError={(e) => {
+                          console.warn(`Image failed to load for symbol: ${symbol.name}`);
                           e.currentTarget.src = '/placeholder.svg';
                         }}
                       />
