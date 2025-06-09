@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Info, MapPin, Calendar, Share2, Tag, Palette, Hammer, Star, BookOpen, Clock } from 'lucide-react';
+import { ArrowLeft, Info, MapPin, Calendar, Share2, Tag, Palette, Hammer, Star, BookOpen, Clock, Images } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { I18nText } from '@/components/ui/i18n-text';
 import { ShareButton } from '@/components/social/ShareButton';
@@ -64,7 +64,7 @@ const SymbolDetailPage: React.FC = () => {
 
   // Requêtes pour récupérer les données du symbole
   const { data: symbol, isLoading: symbolLoading, error: symbolError, refetch } = useSymbolById(resolvedId || undefined);
-  const { data: images, isLoading: imagesLoading } = useSymbolImages(resolvedId || undefined);
+  const { data: images, isLoading: imagesLoading, refetch: refetchImages } = useSymbolImages(resolvedId || undefined);
 
   // État local pour le symbole (pour les mises à jour en temps réel)
   const [currentSymbol, setCurrentSymbol] = React.useState<typeof symbol>(symbol);
@@ -77,8 +77,9 @@ const SymbolDetailPage: React.FC = () => {
   // Handler pour les mises à jour du symbole
   const handleSymbolUpdated = (updatedSymbol: typeof symbol) => {
     setCurrentSymbol(updatedSymbol);
-    // Optionnel: refetch pour s'assurer que les données sont à jour
+    // Refetch pour s'assurer que les données sont à jour, y compris les images
     refetch();
+    refetchImages();
   };
 
   // Trouver l'image principale
@@ -321,7 +322,7 @@ const SymbolDetailPage: React.FC = () => {
             </div>
           </Card>
 
-          {/* Informations techniques */}
+          {/* Informations techniques avec galerie d'images améliorée */}
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Palette className="h-5 w-5 text-amber-600" />
@@ -379,25 +380,58 @@ const SymbolDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Galerie d'images supplémentaires */}
-              {images && images.length > 1 && (
+              {/* Galerie d'images améliorée */}
+              {images && images.length > 0 && (
                 <div>
-                  <label className="text-sm font-medium text-slate-700 mb-2 block">
-                    Images ({images.length})
+                  <label className="text-sm font-medium text-slate-700 mb-2 block flex items-center gap-2">
+                    <Images className="h-4 w-4" />
+                    Galerie d'images ({images.length})
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {images.slice(0, 4).map((image, index) => (
-                      <div key={image.id} className="aspect-square">
+                  <div className="space-y-3">
+                    {/* Image principale en grand */}
+                    {primaryImage && (
+                      <div className="aspect-video bg-slate-100 rounded border overflow-hidden">
                         <img
-                          src={image.image_url}
-                          alt={image.title || displaySymbol.name}
-                          className="w-full h-full object-cover rounded border"
+                          src={primaryImage.image_url}
+                          alt={primaryImage.title || displaySymbol.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg';
+                          }}
                         />
                       </div>
-                    ))}
-                    {images.length > 4 && (
-                      <div className="aspect-square flex items-center justify-center bg-slate-100 rounded border text-slate-500 text-sm">
-                        +{images.length - 4} images
+                    )}
+                    
+                    {/* Miniatures des autres images */}
+                    {images.length > 1 && (
+                      <div className="grid grid-cols-4 gap-2">
+                        {images.slice(0, 8).map((image, index) => (
+                          <div key={image.id} className="aspect-square bg-slate-100 rounded border overflow-hidden">
+                            <img
+                              src={image.image_url}
+                              alt={image.title || displaySymbol.name}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                              title={image.title || 'Image du symbole'}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/placeholder.svg';
+                              }}
+                            />
+                            {image.image_type !== 'original' && (
+                              <div className="absolute bottom-1 right-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {image.image_type === 'pattern' ? 'Motif' : 'Réut.'}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {images.length > 8 && (
+                          <div className="aspect-square flex items-center justify-center bg-slate-100 rounded border text-slate-500 text-sm">
+                            +{images.length - 8}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
