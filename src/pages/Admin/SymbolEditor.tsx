@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Save, Upload, Trash2, Eye, ExternalLink } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Save, Upload, Trash2, Eye, ExternalLink, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SymbolEditor = () => {
@@ -29,21 +30,10 @@ const SymbolEditor = () => {
     function: [] as string[],
   });
 
-  // Options pour les nouveaux champs
-  const mediumOptions = [
-    'Pierre', 'Bois', 'Métal', 'Textile', 'Céramique', 'Verre', 
-    'Papier', 'Parchemin', 'Os', 'Ivoire', 'Coquillage', 'Cuir'
-  ];
-
-  const techniqueOptions = [
-    'Sculpture', 'Gravure', 'Peinture', 'Tissage', 'Broderie', 
-    'Forge', 'Moulage', 'Incision', 'Relief', 'Dorure', 'Émaillage'
-  ];
-
-  const functionOptions = [
-    'Religieux', 'Décoratif', 'Protecteur', 'Rituel', 'Commercial', 
-    'Identitaire', 'Narratif', 'Politique', 'Funéraire', 'Thérapeutique'
-  ];
+  // Champs de texte pour la saisie par virgules
+  const [mediumInput, setMediumInput] = useState('');
+  const [techniqueInput, setTechniqueInput] = useState('');
+  const [functionInput, setFunctionInput] = useState('');
 
   useEffect(() => {
     if (isNewSymbol) {
@@ -109,13 +99,34 @@ const SymbolEditor = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleArrayFieldChange = (field: 'medium' | 'technique' | 'function', value: string, checked: boolean) => {
-    console.log('🔄 Modification du champ tableau:', field, value, checked);
+  // Fonction pour parser les valeurs séparées par des virgules
+  const parseCommaSeparatedValues = (input: string): string[] => {
+    if (!input.trim()) return [];
+    return input
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+      .filter((item, index, array) => array.indexOf(item) === index); // Éviter les doublons
+  };
+
+  // Fonction pour ajouter des valeurs depuis l'input texte
+  const addValuesFromInput = (field: 'medium' | 'technique' | 'function', input: string, setInput: (value: string) => void) => {
+    const newValues = parseCommaSeparatedValues(input);
+    if (newValues.length > 0) {
+      const currentValues = formData[field];
+      const updatedValues = [...currentValues, ...newValues].filter((item, index, array) => array.indexOf(item) === index);
+      setFormData(prev => ({
+        ...prev,
+        [field]: updatedValues
+      }));
+      setInput('');
+    }
+  };
+
+  const removeFromArray = (field: 'medium' | 'technique' | 'function', index: number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: checked 
-        ? [...prev[field], value]
-        : prev[field].filter(item => item !== value)
+      [field]: prev[field].filter((_, i) => i !== index)
     }));
   };
 
@@ -362,60 +373,108 @@ const SymbolEditor = () => {
             <CardContent className="space-y-6">
               <div>
                 <Label>Matériaux ({formData.medium.length} sélectionné{formData.medium.length > 1 ? 's' : ''})</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {mediumOptions.map((option) => (
-                    <div key={option} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`medium-${option}`}
-                        checked={formData.medium.includes(option)}
-                        onCheckedChange={(checked) => 
-                          handleArrayFieldChange('medium', option, checked as boolean)
-                        }
+                <div className="flex gap-2 mb-2">
+                  <Input
+                    placeholder="Ex: Bois, Pierre, Cuir, Coquillage, Céramique"
+                    value={mediumInput}
+                    onChange={(e) => setMediumInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addValuesFromInput('medium', mediumInput, setMediumInput);
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addValuesFromInput('medium', mediumInput, setMediumInput)}
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {formData.medium.map((medium, index) => (
+                    <Badge key={index} variant="outline" className="gap-1 text-xs">
+                      {medium}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => removeFromArray('medium', index)}
                       />
-                      <Label htmlFor={`medium-${option}`} className="text-sm">
-                        {option}
-                      </Label>
-                    </div>
+                    </Badge>
                   ))}
                 </div>
               </div>
 
               <div>
                 <Label>Techniques ({formData.technique.length} sélectionné{formData.technique.length > 1 ? 's' : ''})</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {techniqueOptions.map((option) => (
-                    <div key={option} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`technique-${option}`}
-                        checked={formData.technique.includes(option)}
-                        onCheckedChange={(checked) => 
-                          handleArrayFieldChange('technique', option, checked as boolean)
-                        }
+                <div className="flex gap-2 mb-2">
+                  <Input
+                    placeholder="Ex: Sculpture, Gravure, Peinture, Tissage"
+                    value={techniqueInput}
+                    onChange={(e) => setTechniqueInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addValuesFromInput('technique', techniqueInput, setTechniqueInput);
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addValuesFromInput('technique', techniqueInput, setTechniqueInput)}
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {formData.technique.map((technique, index) => (
+                    <Badge key={index} variant="outline" className="gap-1 text-xs bg-green-50 text-green-700">
+                      {technique}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => removeFromArray('technique', index)}
                       />
-                      <Label htmlFor={`technique-${option}`} className="text-sm">
-                        {option}
-                      </Label>
-                    </div>
+                    </Badge>
                   ))}
                 </div>
               </div>
 
               <div>
                 <Label>Fonctions ({formData.function.length} sélectionné{formData.function.length > 1 ? 's' : ''})</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {functionOptions.map((option) => (
-                    <div key={option} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`function-${option}`}
-                        checked={formData.function.includes(option)}
-                        onCheckedChange={(checked) => 
-                          handleArrayFieldChange('function', option, checked as boolean)
-                        }
+                <div className="flex gap-2 mb-2">
+                  <Input
+                    placeholder="Ex: Religieux, Décoratif, Protecteur, Rituel"
+                    value={functionInput}
+                    onChange={(e) => setFunctionInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addValuesFromInput('function', functionInput, setFunctionInput);
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addValuesFromInput('function', functionInput, setFunctionInput)}
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {formData.function.map((func, index) => (
+                    <Badge key={index} variant="outline" className="gap-1 text-xs">
+                      {func}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => removeFromArray('function', index)}
                       />
-                      <Label htmlFor={`function-${option}`} className="text-sm">
-                        {option}
-                      </Label>
-                    </div>
+                    </Badge>
                   ))}
                 </div>
               </div>

@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Save, X, Plus, Images } from 'lucide-react';
+import { Edit, Save, X, Images } from 'lucide-react';
 import { SymbolData, SymbolImage } from '@/types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -39,10 +39,12 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
     function: symbol.function || []
   });
   const [saving, setSaving] = useState(false);
-  const [newTag, setNewTag] = useState('');
-  const [newMedium, setNewMedium] = useState('');
-  const [newTechnique, setNewTechnique] = useState('');
-  const [newFunction, setNewFunction] = useState('');
+  
+  // Champs de texte pour la saisie par virgules
+  const [tagsInput, setTagsInput] = useState('');
+  const [mediumInput, setMediumInput] = useState('');
+  const [techniqueInput, setTechniqueInput] = useState('');
+  const [functionInput, setFunctionInput] = useState('');
 
   // Récupérer les images du symbole
   const { data: symbolImages, refetch: refetchImages } = useSymbolImages(symbol.id);
@@ -54,6 +56,30 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
       setLocalImages(symbolImages);
     }
   }, [symbolImages]);
+
+  // Fonction pour parser les valeurs séparées par des virgules
+  const parseCommaSeparatedValues = (input: string): string[] => {
+    if (!input.trim()) return [];
+    return input
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+      .filter((item, index, array) => array.indexOf(item) === index); // Éviter les doublons
+  };
+
+  // Fonction pour ajouter des valeurs depuis l'input texte
+  const addValuesFromInput = (field: string, input: string, setInput: (value: string) => void) => {
+    const newValues = parseCommaSeparatedValues(input);
+    if (newValues.length > 0) {
+      const currentValues = formData[field as keyof typeof formData] as string[];
+      const updatedValues = [...currentValues, ...newValues].filter((item, index, array) => array.indexOf(item) === index);
+      setFormData(prev => ({
+        ...prev,
+        [field]: updatedValues
+      }));
+      setInput('');
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -87,16 +113,6 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
       toast.error('Erreur lors de la mise à jour du symbole');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const addToArray = (field: string, value: string, setter: (value: string) => void) => {
-    if (value.trim() && !formData[field as keyof typeof formData]?.includes(value.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        [field]: [...(prev[field as keyof typeof formData] as string[]), value.trim()]
-      }));
-      setter('');
     }
   };
 
@@ -203,23 +219,28 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                   />
                 </div>
 
-                {/* Tags */}
+                {/* Tags avec saisie par virgules */}
                 <div>
                   <Label>Tags</Label>
                   <div className="flex gap-2 mb-2">
                     <Input
-                      placeholder="Nouveau tag"
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addToArray('tags', newTag, setNewTag)}
+                      placeholder="Ex: Bois, Pierre, Cuir, Coquillage, Céramique"
+                      value={tagsInput}
+                      onChange={(e) => setTagsInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addValuesFromInput('tags', tagsInput, setTagsInput);
+                        }
+                      }}
                     />
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => addToArray('tags', newTag, setNewTag)}
+                      onClick={() => addValuesFromInput('tags', tagsInput, setTagsInput)}
                     >
-                      <Plus className="h-4 w-4" />
+                      Ajouter
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-1">
@@ -237,24 +258,29 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
               </div>
             </div>
 
-            {/* Supports, Techniques, Fonctions */}
+            {/* Supports, Techniques, Fonctions avec saisie par virgules */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>Supports</Label>
                 <div className="flex gap-2 mb-2">
                   <Input
-                    placeholder="Nouveau support"
-                    value={newMedium}
-                    onChange={(e) => setNewMedium(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addToArray('medium', newMedium, setNewMedium)}
+                    placeholder="Ex: Bois, Pierre, Cuir..."
+                    value={mediumInput}
+                    onChange={(e) => setMediumInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addValuesFromInput('medium', mediumInput, setMediumInput);
+                      }
+                    }}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => addToArray('medium', newMedium, setNewMedium)}
+                    onClick={() => addValuesFromInput('medium', mediumInput, setMediumInput)}
                   >
-                    <Plus className="h-4 w-4" />
+                    Ajouter
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-1">
@@ -274,18 +300,23 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                 <Label>Techniques</Label>
                 <div className="flex gap-2 mb-2">
                   <Input
-                    placeholder="Nouvelle technique"
-                    value={newTechnique}
-                    onChange={(e) => setNewTechnique(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addToArray('technique', newTechnique, setNewTechnique)}
+                    placeholder="Ex: Sculpture, Gravure..."
+                    value={techniqueInput}
+                    onChange={(e) => setTechniqueInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addValuesFromInput('technique', techniqueInput, setTechniqueInput);
+                      }
+                    }}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => addToArray('technique', newTechnique, setNewTechnique)}
+                    onClick={() => addValuesFromInput('technique', techniqueInput, setTechniqueInput)}
                   >
-                    <Plus className="h-4 w-4" />
+                    Ajouter
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-1">
@@ -305,18 +336,23 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                 <Label>Fonctions</Label>
                 <div className="flex gap-2 mb-2">
                   <Input
-                    placeholder="Nouvelle fonction"
-                    value={newFunction}
-                    onChange={(e) => setNewFunction(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addToArray('function', newFunction, setNewFunction)}
+                    placeholder="Ex: Religieux, Décoratif..."
+                    value={functionInput}
+                    onChange={(e) => setFunctionInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addValuesFromInput('function', functionInput, setFunctionInput);
+                      }
+                    }}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => addToArray('function', newFunction, setNewFunction)}
+                    onClick={() => addValuesFromInput('function', functionInput, setFunctionInput)}
                   >
-                    <Plus className="h-4 w-4" />
+                    Ajouter
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-1">
