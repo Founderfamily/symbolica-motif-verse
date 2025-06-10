@@ -70,7 +70,7 @@ class QuestEnrichmentService {
       case 'target_symbols':
         return `Suggère des symboles pertinents pour cette quête "${title}" (${questType}).
         
-        Symboles actuels : ${JSON.stringify(currentValue)}
+        Symboles actuels : ${Array.isArray(currentValue) ? currentValue.join(', ') : currentValue}
         Contexte : ${questContext.story_background || 'Non défini'}
         
         Suggère 3-5 symboles historiquement appropriés :
@@ -123,7 +123,7 @@ class QuestEnrichmentService {
           confidence = 70;
         }
       } else if (request.field === 'target_symbols') {
-        // Nettoyer la liste de symboles
+        // Nettoyer la liste de symboles et retourner un array
         enrichedValue = response.content
           .split(',')
           .map(s => s.trim())
@@ -148,12 +148,27 @@ class QuestEnrichmentService {
 
   async saveEnrichedQuest(questId: string, updates: Partial<TreasureQuest>): Promise<void> {
     try {
+      // Préparer les données pour Supabase en convertissant les types complexes
+      const supabaseUpdates: any = {
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+
+      // Convertir les clues en JSON si nécessaire
+      if (updates.clues) {
+        supabaseUpdates.clues = JSON.stringify(updates.clues);
+      }
+
+      // Convertir target_symbols en array de strings
+      if (updates.target_symbols) {
+        supabaseUpdates.target_symbols = Array.isArray(updates.target_symbols) 
+          ? updates.target_symbols 
+          : [updates.target_symbols];
+      }
+
       const { error } = await supabase
         .from('treasure_quests')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(supabaseUpdates)
         .eq('id', questId);
 
       if (error) {

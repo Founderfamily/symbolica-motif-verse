@@ -82,6 +82,16 @@ const QuestEnrichmentEditor = () => {
     }
   };
 
+  const formatFieldValue = (field: keyof TreasureQuest, value: any): string => {
+    if (field === 'target_symbols' && Array.isArray(value)) {
+      return value.join(', ');
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value, null, 2);
+    }
+    return String(value || '');
+  };
+
   const renderFieldEditor = (
     field: keyof TreasureQuest,
     label: string,
@@ -91,6 +101,7 @@ const QuestEnrichmentEditor = () => {
     const history = getFieldHistory(selectedQuest?.id || '', field);
     const hasChanges = editedQuest[field] !== selectedQuest?.[field];
     const isCurrentlyEnriching = enrichingField === field;
+    const fieldValue = editedQuest[field] || '';
 
     return (
       <Card className="mb-4">
@@ -120,14 +131,32 @@ const QuestEnrichmentEditor = () => {
           <div className="space-y-3">
             {isTextArea ? (
               <Textarea
-                value={typeof editedQuest[field] === 'string' ? editedQuest[field] : JSON.stringify(editedQuest[field], null, 2)}
-                onChange={(e) => setEditedQuest(prev => ({ ...prev, [field]: e.target.value }))}
+                value={formatFieldValue(field, fieldValue)}
+                onChange={(e) => {
+                  let newValue: any = e.target.value;
+                  
+                  // Traitement spécial pour target_symbols
+                  if (field === 'target_symbols') {
+                    newValue = e.target.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                  }
+                  
+                  // Traitement spécial pour clues (JSON)
+                  if (field === 'clues') {
+                    try {
+                      newValue = JSON.parse(e.target.value);
+                    } catch {
+                      newValue = e.target.value;
+                    }
+                  }
+                  
+                  setEditedQuest(prev => ({ ...prev, [field]: newValue }));
+                }}
                 rows={field === 'clues' ? 8 : 4}
                 className="font-mono text-sm"
               />
             ) : (
               <div className="p-3 border rounded bg-muted font-mono text-sm">
-                {JSON.stringify(editedQuest[field], null, 2)}
+                {formatFieldValue(field, fieldValue)}
               </div>
             )}
             
@@ -237,8 +266,7 @@ const QuestEnrichmentEditor = () => {
           {renderFieldEditor(
             'target_symbols',
             'Symboles Cibles',
-            'Symboles pertinents pour cette quête (liste)',
-            false
+            'Symboles pertinents pour cette quête (séparés par des virgules)'
           )}
         </div>
       )}

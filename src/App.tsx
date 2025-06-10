@@ -5,7 +5,7 @@ import Layout from '@/components/layout/Layout';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { AuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from 'next-themes';
-import ProtectedRoute from '@/components/common/ProtectedRoute';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 // Import pages
 import HomePage from '@/pages/HomePage';
@@ -100,9 +100,9 @@ function App() {
                   <Route path="/users/:userId" element={<UserProfilePage />} />
 
                   {/* Admin pages */}
-                  <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Dashboard /></ProtectedRoute>} />
-                  <Route path="/admin/master-explorer" element={<ProtectedRoute requiredRole="admin"><MasterExplorer /></ProtectedRoute>} />
-                  <Route path="/admin/quest-enrichment" element={<ProtectedRoute requiredRole="admin"><QuestEnrichmentPage /></ProtectedRoute>} />
+                  <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                  <Route path="/admin/master-explorer" element={<ProtectedRoute><MasterExplorer /></ProtectedRoute>} />
+                  <Route path="/admin/quest-enrichment" element={<ProtectedRoute><QuestEnrichmentPage /></ProtectedRoute>} />
                   <Route path="/admin/users" element={<UsersManagement />} />
                   <Route path="/admin/contributions" element={<ContributionsManagement />} />
                   <Route path="/admin/contributions/moderation" element={<ContributionsModerationPage />} />
