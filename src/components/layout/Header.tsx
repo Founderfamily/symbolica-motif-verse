@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
-import { NavigationItems } from './header/NavigationItems';
+import NavigationItems from './header/NavigationItems';
 import { UserMenu } from './header/UserMenu';
 import { AuthButtons } from './header/AuthButtons';
 import { I18nText } from '@/components/ui/i18n-text';

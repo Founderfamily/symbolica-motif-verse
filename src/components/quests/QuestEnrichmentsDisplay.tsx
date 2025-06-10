@@ -16,12 +16,31 @@ import {
   User
 } from 'lucide-react';
 
+interface QuestEnrichment {
+  id: string;
+  quest_id: string;
+  enriched_by: string;
+  enrichment_type: string;
+  enrichment_data: Record<string, any>;
+  title: string;
+  description?: string;
+  source_url?: string;
+  credibility_score: number;
+  is_official: boolean;
+  created_at: string;
+  updated_at: string;
+  enricher?: {
+    username?: string;
+    full_name?: string;
+  };
+}
+
 interface QuestEnrichmentsDisplayProps {
   questId: string;
 }
 
 const QuestEnrichmentsDisplay: React.FC<QuestEnrichmentsDisplayProps> = ({ questId }) => {
-  const [enrichments, setEnrichments] = useState<any[]>([]);
+  const [enrichments, setEnrichments] = useState<QuestEnrichment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -35,6 +54,7 @@ const QuestEnrichmentsDisplay: React.FC<QuestEnrichmentsDisplayProps> = ({ quest
       setEnrichments(data || []);
     } catch (error) {
       console.error('Error loading enrichments:', error);
+      setEnrichments([]);
     } finally {
       setIsLoading(false);
     }
@@ -97,12 +117,12 @@ const QuestEnrichmentsDisplay: React.FC<QuestEnrichmentsDisplayProps> = ({ quest
   }
 
   // Grouper par type
-  const groupedEnrichments = enrichments.reduce((acc, enrichment) => {
+  const groupedEnrichments = enrichments.reduce((acc: Record<string, QuestEnrichment[]>, enrichment) => {
     const type = enrichment.enrichment_type;
     if (!acc[type]) acc[type] = [];
     acc[type].push(enrichment);
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {});
 
   return (
     <div className="space-y-6">
