@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -35,6 +34,7 @@ import SystemSettings from '@/pages/Admin/SystemSettings';
 import ContentManagement from '@/pages/Admin/ContentManagement';
 import AnalysisExamplesManagement from '@/pages/Admin/AnalysisExamplesManagement';
 import MasterExplorer from '@/pages/Admin/MasterExplorer';
+import ContributionsModerationPage from '@/pages/Admin/ContributionsModerationPage';
 
 // Other specialized pages
 import AnalysisPage from '@/pages/AnalysisPage';
@@ -51,6 +51,7 @@ import TermsPage from '@/pages/TermsPage';
 import EnterprisePage from '@/pages/EnterprisePage';
 import MCPSearchPage from '@/pages/MCPSearchPage';
 import MobileAppPage from '@/pages/MobileApp';
+import SymbolExplorer from '@/pages/SymbolExplorer';
 
 import './App.css';
 
@@ -76,6 +77,7 @@ function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/symbols" element={<SymbolsPage />} />
                 <Route path="/symbols/:id" element={<SymbolDetailPage />} />
+                <Route path="/symbol-explorer" element={<SymbolExplorer />} />
                 <Route path="/collections" element={<CollectionsPage />} />
                 <Route path="/collections/:slug" element={<CollectionDetailPage />} />
                 <Route path="/quests" element={<QuestsPage />} />
@@ -97,6 +99,7 @@ function App() {
                 <Route path="/admin" element={<Dashboard />} />
                 <Route path="/admin/users" element={<UsersManagement />} />
                 <Route path="/admin/contributions" element={<ContributionsManagement />} />
+                <Route path="/admin/contributions/moderation" element={<ContributionsModerationPage />} />
                 <Route path="/admin/symbols" element={<SymbolsManagement />} />
                 <Route path="/admin/collections" element={<CollectionsManagement />} />
                 <Route path="/admin/content" element={<ContentManagement />} />

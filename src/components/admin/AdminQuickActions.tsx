@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { I18nText } from '@/components/ui/i18n-text';
-import { Users, CheckCircle, Clock, Settings, Crown } from 'lucide-react';
+import { Users, CheckCircle, Clock, Settings, Crown, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AdminStats } from '@/services/admin/statsService';
 
@@ -35,7 +35,8 @@ const QuickActionCard = ({
               color.includes('amber') ? 'text-amber-600' : 
               color.includes('purple') ? 'text-purple-600' : 
               color.includes('green') ? 'text-green-600' : 
-              color.includes('orange') ? 'text-orange-600' : 'text-green-600'}`} />
+              color.includes('orange') ? 'text-orange-600' : 
+              color.includes('red') ? 'text-red-600' : 'text-green-600'}`} />
           </div>
           <div>
             <p className="font-medium">{title}</p>
@@ -55,7 +56,7 @@ const QuickActionCard = ({
 
 export default function AdminQuickActions({ stats, loading }: AdminQuickActionsProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
       <QuickActionCard
         to="/admin/users"
         icon={Users}
@@ -72,6 +73,15 @@ export default function AdminQuickActions({ stats, loading }: AdminQuickActionsP
         description={`${stats?.pendingContributions || 0} en attente`}
         loading={loading}
         color="bg-amber-100"
+      />
+
+      <QuickActionCard
+        to="/admin/contributions/moderation"
+        icon={AlertTriangle}
+        title="Modération"
+        description="Gérer les signalements"
+        loading={loading}
+        color="bg-red-100"
       />
 
       <QuickActionCard
