@@ -9,7 +9,7 @@ import AdminWelcomeCard from '@/components/admin/AdminWelcomeCard';
 import AdminQuickActions from '@/components/admin/AdminQuickActions';
 import StatsOverview from '@/components/admin/StatsOverview';
 import DashboardSystemWidgets from '@/components/admin/DashboardSystemWidgets';
-import { AdminStats, getAdminStats } from '@/services/admin/statsService';
+import { AdminStats, adminStatsService } from '@/services/admin/statsService';
 
 const Dashboard: React.FC = () => {
   const { user, isAdmin, profile } = useAuth();
@@ -22,7 +22,7 @@ const Dashboard: React.FC = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const adminStats = await getAdminStats();
+      const adminStats = await adminStatsService.getDashboardStats();
       setStats(adminStats);
     } catch (error) {
       console.error('Error fetching admin stats:', error);
