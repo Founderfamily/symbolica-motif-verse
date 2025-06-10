@@ -19,6 +19,29 @@ export interface QuestEnrichmentResponse {
 }
 
 class QuestEnrichmentService {
+  private cleanAIResponse(content: string): string {
+    if (!content) return content;
+    
+    // Remove asterisks and bullet points
+    let cleaned = content
+      .replace(/^\s*\*\s+/gm, '') // Remove asterisks at start of lines
+      .replace(/^\s*-\s+/gm, '') // Remove dashes at start of lines
+      .replace(/^\s*•\s+/gm, '') // Remove bullet points at start of lines
+      .replace(/\*\s+/g, '') // Remove asterisks followed by spaces
+      .replace(/\s+\*/g, '') // Remove asterisks preceded by spaces
+      .replace(/\*{2,}/g, '') // Remove multiple asterisks
+      .replace(/^\s*[\d]+\.\s+/gm, '') // Remove numbered lists
+      .trim();
+    
+    // Clean up extra spaces and line breaks
+    cleaned = cleaned
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove triple line breaks
+      .replace(/\s{3,}/g, ' ') // Replace multiple spaces with single space
+      .trim();
+    
+    return cleaned;
+  }
+
   private generatePrompt(request: QuestEnrichmentRequest): string {
     const { field, currentValue, questContext } = request;
     const questType = questContext.quest_type || 'templar';
@@ -27,33 +50,25 @@ class QuestEnrichmentService {
 
     switch (field) {
       case 'story_background':
-        return `En tant qu'historien expert des ${period}, enrichis le contexte historique de cette quête : "${title}".
+        return `En tant qu'historien expert des ${period}, enrichis le contexte historique de cette quête intitulée "${title}".
         
         Contexte actuel : ${currentValue || 'Aucun contexte défini'}
         Type de quête : ${questType}
         
-        Fournis un contexte historique riche et précis avec :
-        - Les événements historiques pertinents
-        - Les personnages clés de l'époque
-        - Les enjeux sociopolitiques
-        - Les détails culturels authentiques
+        Écris un contexte historique riche et précis en incluant les événements historiques pertinents, les personnages clés de l'époque, les enjeux sociopolitiques et les détails culturels authentiques. Rédige un texte fluide et narratif sans utiliser de listes à puces, d'astérisques ou de tirets. Le texte doit être captivant mais historiquement précis, d'environ 800 mots maximum.
         
-        Réponds en français, style narratif captivant mais historiquement précis (maximum 800 mots).`;
+        Réponds uniquement avec le texte enrichi, sans formatage markdown ni listes.`;
 
       case 'description':
-        return `Améliore la description de cette quête historique : "${title}".
+        return `Améliore la description de cette quête historique intitulée "${title}".
         
         Description actuelle : ${currentValue || 'Aucune description'}
         Type : ${questType}
         Contexte : ${questContext.story_background || 'Non défini'}
         
-        Crée une description engageante qui :
-        - Capture l'essence de la quête
-        - Motivera les participants
-        - Reste fidèle au contexte historique
-        - Fait 2-3 paragraphes maximum
+        Crée une description engageante qui capture l'essence de la quête, motivera les participants et reste fidèle au contexte historique. La description doit faire 2 à 3 paragraphes maximum avec un ton mystérieux et captivant.
         
-        Réponds en français, ton mystérieux et captivant.`;
+        Écris uniquement le texte de la description, sans utiliser de listes, d'astérisques ou de formatage spécial. Utilise un style narratif fluide en français.`;
 
       case 'clues':
         return `Enrichis les indices de cette quête "${title}" (${questType}).
@@ -61,13 +76,9 @@ class QuestEnrichmentService {
         Indices actuels : ${JSON.stringify(currentValue, null, 2)}
         Contexte : ${questContext.story_background || 'Non défini'}
         
-        Pour chaque indice, améliore :
-        - La description (plus immersive)
-        - Le hint (plus cryptique mais résolvable)
-        - Les détails historiques authentiques
+        Pour chaque indice, améliore la description en la rendant plus immersive, rends le hint plus cryptique mais résolvable, et ajoute des détails historiques authentiques. Conserve exactement la même structure JSON mais enrichis uniquement le contenu textuel.
         
-        Garde la même structure JSON mais enrichis le contenu.
-        Réponds uniquement avec le JSON enrichi, sans explication supplémentaire.`;
+        Réponds uniquement avec le JSON enrichi, sans explication supplémentaire ni formatage markdown.`;
 
       case 'target_symbols':
         return `Suggère des symboles pertinents pour cette quête "${title}" (${questType}).
@@ -75,16 +86,12 @@ class QuestEnrichmentService {
         Symboles actuels : ${Array.isArray(currentValue) ? currentValue.join(', ') : currentValue}
         Contexte : ${questContext.story_background || 'Non défini'}
         
-        Suggère 3-5 symboles historiquement appropriés :
-        - Croix templières, sceaux, emblèmes
-        - Symboles de l'époque concernée
-        - Éléments architecturaux typiques
-        - Marques de guildes ou ordres
+        Suggère entre 3 et 5 symboles historiquement appropriés comme les croix templières, sceaux, emblèmes, symboles de l'époque concernée, éléments architecturaux typiques ou marques de guildes et ordres.
         
-        Réponds avec une liste de noms de symboles séparés par des virgules, sans explication.`;
+        Réponds avec une liste de noms de symboles séparés par des virgules, sans explication ni formatage spécial.`;
 
       default:
-        return `Aide à enrichir le champ ${field} pour la quête "${title}".`;
+        return `Aide à enrichir le champ ${field} pour la quête "${title}". Réponds avec un texte fluide sans utiliser d'astérisques, de listes à puces ou de formatage markdown.`;
     }
   }
 
@@ -117,15 +124,22 @@ class QuestEnrichmentService {
       let enrichedValue: any = response.content;
       let confidence = this.calculateConfidence(provider, request.field);
 
+      // Nettoyage des astérisques et formatage indésirable
+      if (typeof enrichedValue === 'string') {
+        enrichedValue = this.cleanAIResponse(enrichedValue);
+      }
+
       // Post-traitement selon le type de champ
       if (request.field === 'clues') {
         try {
-          enrichedValue = JSON.parse(response.content!);
+          const cleanedContent = this.cleanAIResponse(response.content!);
+          enrichedValue = JSON.parse(cleanedContent);
         } catch {
           confidence = Math.max(50, confidence - 20);
         }
       } else if (request.field === 'target_symbols') {
-        enrichedValue = response.content!
+        const cleanedContent = this.cleanAIResponse(response.content!);
+        enrichedValue = cleanedContent
           .split(',')
           .map((s: string) => s.trim())
           .filter((s: string) => s.length > 0);
