@@ -41,7 +41,7 @@ export const historicalQuestService = {
         };
       }
       
-      // Convert quests to database format
+      // Convert quests to database format, excluding created_by to avoid foreign key issues
       const questsForDb = newQuests.map(quest => ({
         title: quest.title,
         description: quest.description,
@@ -57,8 +57,8 @@ export const historicalQuestService = {
         special_rewards: quest.special_rewards as any,
         clues: quest.clues as any,
         target_symbols: quest.target_symbols,
-        created_by: quest.created_by,
         translations: quest.translations as any
+        // Note: created_by is intentionally excluded to avoid foreign key constraint violations
       }));
       
       console.log(`Attempting to insert ${questsForDb.length} new quests`);
