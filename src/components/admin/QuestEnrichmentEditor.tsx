@@ -21,6 +21,7 @@ const QuestEnrichmentEditor = () => {
   const [editedQuest, setEditedQuest] = useState<Partial<TreasureQuest>>({});
   const [enrichingField, setEnrichingField] = useState<string | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<AIProvider>('deepseek');
+  const [lastEnrichmentError, setLastEnrichmentError] = useState<string | null>(null);
 
   const availableProviders = MCPService.getAvailableProviders();
 
@@ -39,6 +40,8 @@ const QuestEnrichmentEditor = () => {
     if (!selectedQuest) return;
     
     setEnrichingField(field);
+    setLastEnrichmentError(null);
+    
     try {
       const response = await enrichField({
         questId: selectedQuest.id,
@@ -48,12 +51,17 @@ const QuestEnrichmentEditor = () => {
         provider: selectedProvider
       });
 
-      setEditedQuest(prev => ({
-        ...prev,
-        [field]: response.enrichedValue
-      }));
+      if (response.success) {
+        setEditedQuest(prev => ({
+          ...prev,
+          [field]: response.enrichedValue
+        }));
+      } else {
+        setLastEnrichmentError(response.error || 'Erreur d\'enrichissement');
+      }
     } catch (error) {
       console.error('Erreur d\'enrichissement:', error);
+      setLastEnrichmentError(error.message || 'Erreur inconnue');
     } finally {
       setEnrichingField(null);
     }
@@ -95,11 +103,10 @@ const QuestEnrichmentEditor = () => {
       if (field === 'clues') {
         if (typeof value === 'string') {
           try {
-            // Essayer de parser pour valider
-            JSON.parse(value);
-            return value;
+            const parsed = JSON.parse(value);
+            return JSON.stringify(parsed, null, 2);
           } catch {
-            return JSON.stringify(value, null, 2);
+            return value;
           }
         }
         if (typeof value === 'object' && value !== null) {
@@ -126,7 +133,6 @@ const QuestEnrichmentEditor = () => {
         try {
           processedValue = JSON.parse(newValue);
         } catch {
-          // Si ce n'est pas du JSON valide, garder la chaîne
           processedValue = newValue;
         }
       }
@@ -185,6 +191,12 @@ const QuestEnrichmentEditor = () => {
             ) : (
               <div className="p-3 border rounded bg-muted font-mono text-sm">
                 {formatFieldValue(field, fieldValue)}
+              </div>
+            )}
+            
+            {lastEnrichmentError && enrichingField === field && (
+              <div className="p-3 border border-red-200 rounded bg-red-50 text-red-700 text-sm">
+                <strong>Erreur d'enrichissement:</strong> {lastEnrichmentError}
               </div>
             )}
             
