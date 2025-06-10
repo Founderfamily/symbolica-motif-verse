@@ -147,6 +147,20 @@ const Dashboard: React.FC = () => {
 
               <Card className="hover:shadow-md transition-shadow">
                 <CardHeader>
+                  <CardTitle>Outils Avancés</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-600 mb-4">
+                    Accédez aux outils d'analyse, IA et cartographie avancés.
+                  </p>
+                  <a href="/admin/content" className="text-amber-600 hover:underline">
+                    Accéder aux outils avancés
+                  </a>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-md transition-shadow">
+                <CardHeader>
                   <CardTitle>Paramètres Système</CardTitle>
                 </CardHeader>
                 <CardContent>

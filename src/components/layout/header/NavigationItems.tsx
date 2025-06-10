@@ -3,7 +3,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { I18nText } from '@/components/ui/i18n-text';
-import { ToolsDropdown } from './ToolsDropdown';
 import { useAuth } from '@/hooks/useAuth';
 
 export const NavigationItems = () => {
@@ -37,9 +36,6 @@ export const NavigationItems = () => {
           </I18nText>
         </Link>
       ))}
-
-      {/* Tools Dropdown pour les admins */}
-      <ToolsDropdown />
 
       {/* Menu Admin pour les administrateurs */}
       {isAdmin && (

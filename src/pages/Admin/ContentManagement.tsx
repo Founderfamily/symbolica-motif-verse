@@ -5,6 +5,7 @@ import ContentSectionsEditor from '@/components/admin/content/ContentSectionsEdi
 import TestimonialsEditor from '@/components/admin/content/TestimonialsEditor';
 import RoadmapEditor from '@/components/admin/content/RoadmapEditor';
 import PartnersEditor from '@/components/admin/content/PartnersEditor';
+import AdvancedToolsEditor from '@/components/admin/content/AdvancedToolsEditor';
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState("sections");
@@ -13,15 +14,16 @@ const ContentManagement = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Gestion du contenu</h1>
-        <p className="text-slate-500">Modifiez le contenu de la page d'accueil</p>
+        <p className="text-slate-500">Modifiez le contenu de la page d'accueil et gérez les outils avancés</p>
       </div>
       
       <Tabs defaultValue="sections" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 mb-8">
+        <TabsList className="grid grid-cols-5 mb-8">
           <TabsTrigger value="sections">Sections principales</TabsTrigger>
           <TabsTrigger value="testimonials">Témoignages</TabsTrigger>
           <TabsTrigger value="roadmap">Feuille de route</TabsTrigger>
           <TabsTrigger value="partners">Partenaires</TabsTrigger>
+          <TabsTrigger value="tools">Outils Avancés</TabsTrigger>
         </TabsList>
         
         <TabsContent value="sections" className="space-y-4">
@@ -38,6 +40,10 @@ const ContentManagement = () => {
         
         <TabsContent value="partners" className="space-y-4">
           <PartnersEditor />
+        </TabsContent>
+        
+        <TabsContent value="tools" className="space-y-4">
+          <AdvancedToolsEditor />
         </TabsContent>
       </Tabs>
     </div>
