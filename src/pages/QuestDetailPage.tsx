@@ -15,7 +15,8 @@ import {
   Trophy,
   Flag,
   History,
-  Search
+  Search,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -31,13 +32,22 @@ const QuestDetailPage = () => {
   const [selectedClue, setSelectedClue] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'overview' | 'investigation'>('overview');
   
-  const { data: quest, isLoading } = useQuestById(questId!);
+  // Ajout de logs de debug
+  console.log('QuestDetailPage - questId from params:', questId);
+  
+  const { data: quest, isLoading, error } = useQuestById(questId!);
   const { data: progress } = useQuestProgress(questId!);
   const joinQuestMutation = useJoinQuest();
+
+  // Ajout de logs de debug
+  console.log('QuestDetailPage - quest data:', quest);
+  console.log('QuestDetailPage - loading state:', isLoading);
+  console.log('QuestDetailPage - error state:', error);
 
   const handleJoinQuest = async () => {
     if (!questId) return;
     try {
+      console.log('Attempting to join quest:', questId);
       await joinQuestMutation.mutateAsync({ questId });
       // Basculer automatiquement vers l'interface d'enquête après inscription
       setViewMode('investigation');
@@ -46,12 +56,86 @@ const QuestDetailPage = () => {
     }
   };
 
-  if (isLoading || !quest) {
+  // Gestion d'erreur améliorée
+  if (error) {
+    console.error('Error loading quest:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <Link to="/quests">
+              <Button variant="outline" className="mb-4">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Retour aux quêtes
+              </Button>
+            </Link>
+          </div>
+          
+          <Card className="p-8 text-center">
+            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-slate-800 mb-4">Erreur de chargement</h1>
+            <p className="text-slate-600 mb-4">
+              Impossible de charger les détails de cette quête.
+            </p>
+            <p className="text-sm text-slate-500 mb-6">
+              ID de la quête : {questId || 'non défini'}
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Link to="/quests">
+                <Button variant="outline">Retour aux quêtes</Button>
+              </Link>
+              <Button onClick={() => window.location.reload()}>
+                Réessayer
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
           <p className="text-slate-600">Chargement de la quête...</p>
+          <p className="text-sm text-slate-500 mt-2">ID: {questId}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Vérification si la quête n'existe pas
+  if (!quest) {
+    console.warn('Quest not found for ID:', questId);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <Link to="/quests">
+              <Button variant="outline" className="mb-4">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Retour aux quêtes
+              </Button>
+            </Link>
+          </div>
+          
+          <Card className="p-8 text-center">
+            <Search className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-slate-800 mb-4">Quête introuvable</h1>
+            <p className="text-slate-600 mb-4">
+              Cette quête n'existe pas ou n'est plus disponible.
+            </p>
+            <p className="text-sm text-slate-500 mb-6">
+              ID recherché : {questId || 'non défini'}
+            </p>
+            <Link to="/quests">
+              <Button className="bg-amber-600 hover:bg-amber-700">
+                Découvrir d'autres quêtes
+              </Button>
+            </Link>
+          </Card>
         </div>
       </div>
     );
@@ -62,6 +146,8 @@ const QuestDetailPage = () => {
   const progressPercentage = totalClues > 0 ? (completedClues / totalClues) * 100 : 0;
 
   const isHistoricalQuest = ['templar', 'lost_civilization', 'grail'].includes(quest.quest_type);
+
+  console.log('QuestDetailPage - Rendering quest:', quest.title);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
@@ -130,7 +216,7 @@ const QuestDetailPage = () => {
                   {isHistoricalQuest && (
                     <div className="mb-6">
                       <HistoricalContextPanel
-                        questType={quest.quest_type as 'templar' | 'lost_civilization' | 'grail'}
+                        questType={quest.quest_type as 'templar' | 'lost_civilization' | 'graal'}
                         storyBackground={quest.story_background}
                       />
                     </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -15,7 +16,8 @@ import {
   Plus,
   History,
   Globe,
-  BookOpen
+  BookOpen,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -30,10 +32,16 @@ const QuestsPage = () => {
   const [filterType, setFilterType] = useState<string>('all');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
   const [isPopulating, setIsPopulating] = useState(false);
+  const [populationResult, setPopulationResult] = useState<{success: boolean, message: string} | null>(null);
   
-  const { data: allQuests, isLoading, refetch } = useQuests();
+  const { data: allQuests, isLoading, refetch, error } = useQuests();
   const { data: activeQuests } = useActiveQuests();
   const joinQuestMutation = useJoinQuest();
+
+  // Logs de debug
+  console.log('QuestsPage - All quests:', allQuests);
+  console.log('QuestsPage - Loading state:', isLoading);
+  console.log('QuestsPage - Error state:', error);
 
   const questTypeIcons = {
     templar: Sword,
@@ -45,7 +53,7 @@ const QuestsPage = () => {
   const questTypeLabels = {
     templar: 'Templiers',
     lost_civilization: 'Civilisation Perdue',
-    grail: 'Quête du Graal',
+    graal: 'Quête du Graal',
     custom: 'Personnalisée'
   };
 
@@ -65,16 +73,24 @@ const QuestsPage = () => {
 
   const handlePopulateQuests = async () => {
     setIsPopulating(true);
+    setPopulationResult(null);
     try {
+      console.log('Starting quest population...');
       const result = await historicalQuestService.populateHistoricalQuests();
+      console.log('Population result:', result);
+      
+      setPopulationResult(result);
+      
       if (result.success) {
-        console.log('Quests populated successfully:', result.message);
-        refetch(); // Refresh the quests list
-      } else {
-        console.error('Failed to populate quests:', result.error);
+        console.log('Quests populated successfully, refreshing list...');
+        await refetch(); // Refresh the quests list
       }
     } catch (error) {
       console.error('Error populating quests:', error);
+      setPopulationResult({
+        success: false,
+        message: 'Erreur lors du chargement: ' + (error instanceof Error ? error.message : 'Erreur inconnue')
+      });
     } finally {
       setIsPopulating(false);
     }
@@ -82,6 +98,7 @@ const QuestsPage = () => {
 
   const handleJoinQuest = async (questId: string) => {
     try {
+      console.log('Attempting to join quest:', questId);
       await joinQuestMutation.mutateAsync({ questId });
     } catch (error) {
       console.error('Erreur lors de l\'inscription:', error);
@@ -99,12 +116,34 @@ const QuestsPage = () => {
 
   // Separate historical quests from custom ones
   const historicalQuests = filteredQuests?.filter(quest => 
-    ['templar', 'lost_civilization', 'grail'].includes(quest.quest_type)
+    ['templar', 'lost_civilization', 'graal'].includes(quest.quest_type)
   ) || [];
   
   const customQuests = filteredQuests?.filter(quest => 
     quest.quest_type === 'custom'
   ) || [];
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="p-8 text-center">
+            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-slate-800 mb-4">Erreur de chargement</h1>
+            <p className="text-slate-600 mb-4">
+              Impossible de charger la liste des quêtes.
+            </p>
+            <p className="text-sm text-slate-500 mb-6">
+              {error instanceof Error ? error.message : 'Erreur inconnue'}
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -182,7 +221,7 @@ const QuestsPage = () => {
               <option value="all">Tous les types</option>
               <option value="templar">Templiers</option>
               <option value="lost_civilization">Civilisation Perdue</option>
-              <option value="grail">Quête du Graal</option>
+              <option value="graal">Quête du Graal</option>
               <option value="custom">Personnalisée</option>
             </select>
             
@@ -212,6 +251,20 @@ const QuestsPage = () => {
               Créer une Quête
             </Button>
           </div>
+          
+          {/* Résultat de population */}
+          {populationResult && (
+            <div className={`mt-4 p-4 rounded-lg ${
+              populationResult.success 
+                ? 'bg-green-50 border border-green-200 text-green-800'
+                : 'bg-red-50 border border-red-200 text-red-800'
+            }`}>
+              <p className="font-medium">
+                {populationResult.success ? '✅ ' : '❌ '}
+                {populationResult.message}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Section des quêtes historiques */}
@@ -232,7 +285,7 @@ const QuestsPage = () => {
                     <div className="relative">
                       <div className={`p-6 bg-gradient-to-br ${
                         quest.quest_type === 'templar' ? 'from-red-500 to-red-700' :
-                        quest.quest_type === 'grail' ? 'from-purple-500 to-purple-700' :
+                        quest.quest_type === 'graal' ? 'from-purple-500 to-purple-700' :
                         quest.quest_type === 'lost_civilization' ? 'from-blue-500 to-blue-700' :
                         'from-amber-500 to-amber-700'
                       } text-white`}>
@@ -251,6 +304,13 @@ const QuestsPage = () => {
                           <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                             <History className="w-3 h-3 mr-1" />
                             Basé sur l'Histoire
+                          </Badge>
+                        </div>
+                        
+                        {/* Debug: Affichage de l'ID */}
+                        <div className="mt-2">
+                          <Badge variant="secondary" className="bg-black/20 text-white/70 border-white/20 text-xs">
+                            ID: {quest.id.slice(0, 8)}...
                           </Badge>
                         </div>
                       </div>
@@ -301,7 +361,11 @@ const QuestsPage = () => {
                       {/* Actions */}
                       <div className="flex gap-3">
                         <Link to={`/quests/${quest.id}`} className="flex-1">
-                          <Button variant="outline" className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50">
+                          <Button 
+                            variant="outline" 
+                            className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50"
+                            onClick={() => console.log('Navigating to quest:', quest.id)}
+                          >
                             Voir détails
                           </Button>
                         </Link>
