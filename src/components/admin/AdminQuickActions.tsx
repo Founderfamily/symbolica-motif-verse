@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { I18nText } from '@/components/ui/i18n-text';
-import { Users, CheckCircle, Clock, Settings } from 'lucide-react';
+import { Users, CheckCircle, Clock, Settings, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AdminStats } from '@/services/admin/statsService';
 
@@ -33,7 +33,9 @@ const QuickActionCard = ({
           <div className={`p-2 ${color} rounded-lg group-hover:bg-opacity-80 transition-colors`}>
             <Icon className={`h-5 w-5 ${color.includes('blue') ? 'text-blue-600' : 
               color.includes('amber') ? 'text-amber-600' : 
-              color.includes('purple') ? 'text-purple-600' : 'text-green-600'}`} />
+              color.includes('purple') ? 'text-purple-600' : 
+              color.includes('green') ? 'text-green-600' : 
+              color.includes('orange') ? 'text-orange-600' : 'text-green-600'}`} />
           </div>
           <div>
             <p className="font-medium">{title}</p>
@@ -53,7 +55,7 @@ const QuickActionCard = ({
 
 export default function AdminQuickActions({ stats, loading }: AdminQuickActionsProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       <QuickActionCard
         to="/admin/users"
         icon={Users}
@@ -88,6 +90,15 @@ export default function AdminQuickActions({ stats, loading }: AdminQuickActionsP
         description="Configuration système"
         loading={loading}
         color="bg-green-100"
+      />
+
+      <QuickActionCard
+        to="/admin/master-explorer"
+        icon={Crown}
+        title="Master Explorer"
+        description="Enrichissement des quêtes"
+        loading={loading}
+        color="bg-orange-100"
       />
     </div>
   );
