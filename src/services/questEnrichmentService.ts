@@ -19,6 +19,41 @@ export interface QuestEnrichmentResponse {
   error?: string;
 }
 
+function validateCluesFormat(clues: any): boolean {
+  if (!Array.isArray(clues)) {
+    return false;
+  }
+  
+  return clues.every(clue => 
+    typeof clue === 'object' &&
+    clue !== null &&
+    typeof clue.id === 'number' &&
+    typeof clue.description === 'string' &&
+    typeof clue.hint === 'string' &&
+    clue.description.length > 0 &&
+    clue.hint.length > 0
+  );
+}
+
+function createValidCluesFallback(originalValue: any): QuestClue[] {
+  if (Array.isArray(originalValue) && validateCluesFormat(originalValue)) {
+    return originalValue;
+  }
+  
+  return [
+    {
+      id: 1,
+      title: "Premier indice",
+      description: "Un symbole ancien gravé dans la pierre révèle les secrets du passé",
+      hint: "Cherchez les marques laissées par ceux qui vous ont précédés",
+      location: { latitude: 0, longitude: 0, radius: 100 },
+      validation_type: 'symbol' as const,
+      validation_data: {},
+      points: 10
+    }
+  ];
+}
+
 class QuestEnrichmentService {
   async enrichField(request: QuestEnrichmentRequest): Promise<QuestEnrichmentResponse> {
     try {
@@ -45,6 +80,14 @@ class QuestEnrichmentService {
 
       if (!data || !data.success) {
         throw new Error(data?.error || 'Erreur inconnue lors de l\'enrichissement');
+      }
+
+      // Validation supplémentaire côté client pour les clues
+      if (request.field === 'clues') {
+        if (!validateCluesFormat(data.enrichedValue)) {
+          console.warn('Format de clues invalide reçu de l\'IA, utilisation du fallback');
+          throw new Error('Format JSON des indices invalide');
+        }
       }
 
       return {
@@ -78,18 +121,7 @@ class QuestEnrichmentService {
         break;
         
       case 'clues':
-        if (!currentValue || !Array.isArray(currentValue)) {
-          fallbackValue = [
-            {
-              id: 1,
-              description: "Un symbole ancien gravé dans la pierre",
-              hint: "Cherchez les marques laissées par ceux qui vous ont précédés",
-              location: "Entrée principale"
-            }
-          ];
-        } else {
-          fallbackValue = currentValue;
-        }
+        fallbackValue = createValidCluesFallback(currentValue);
         break;
         
       case 'target_symbols':
@@ -107,7 +139,8 @@ class QuestEnrichmentService {
       suggestions: [
         'Mode hors ligne - contenu par défaut',
         `Erreur: ${errorMessage}`,
-        'Reconnectez-vous pour un enrichissement IA'
+        'Reconnectez-vous pour un enrichissement IA',
+        field === 'clues' ? 'Format JSON garanti' : 'Contenu de secours'
       ],
       confidence: 50,
       provider: 'fallback',
@@ -124,7 +157,12 @@ class QuestEnrichmentService {
       };
 
       if (updates.clues) {
-        supabaseUpdates.clues = JSON.stringify(updates.clues);
+        // Validation finale avant sauvegarde
+        if (Array.isArray(updates.clues) && validateCluesFormat(updates.clues)) {
+          supabaseUpdates.clues = JSON.stringify(updates.clues);
+        } else {
+          throw new Error('Format des indices invalide pour la sauvegarde');
+        }
       }
 
       if (updates.target_symbols) {

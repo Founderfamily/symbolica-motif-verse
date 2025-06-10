@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -60,18 +59,34 @@ function generatePrompt(request: EnrichmentRequest): string {
       Réponds en français, ton mystérieux et captivant.`;
 
     case 'clues':
-      return `Enrichis et améliore ces indices de quête pour "${title}" (${questType}).
+      return `Tu dois enrichir les indices de cette quête "${title}" (${questType}).
       
       Indices actuels : ${JSON.stringify(currentValue, null, 2)}
       Contexte : ${questContext.story_background || 'Non défini'}
       
-      Pour chaque indice, réécris complètement :
-      - description : Plus immersive et détaillée historiquement
-      - hint : Plus cryptique mais résolvable, avec références historiques
-      - Ajoute des détails sur l'époque et le lieu
+      INSTRUCTIONS CRITIQUES :
+      1. Tu DOIS répondre UNIQUEMENT avec un JSON valide, rien d'autre
+      2. Pas de texte avant ou après le JSON
+      3. Pas d'explication, pas de commentaire
+      4. Structure OBLIGATOIRE pour chaque indice :
+      {
+        "id": number,
+        "description": "string (description immersive et détaillée)",
+        "hint": "string (indice cryptique mais résolvable)"
+      }
       
-      Garde la même structure JSON mais avec un contenu complètement renouvelé.
-      Réponds uniquement avec le JSON enrichi, sans explication supplémentaire.`;
+      Améliore chaque indice en gardant la même structure JSON mais avec :
+      - description : Plus immersive, détaillée historiquement, authentique à l'époque
+      - hint : Plus cryptique mais résolvable, avec références historiques subtiles
+      
+      RÉPONDS UNIQUEMENT AVEC LE JSON, exemple :
+      [
+        {
+          "id": 1,
+          "description": "Description enrichie...",
+          "hint": "Indice cryptique..."
+        }
+      ]`;
 
     case 'target_symbols':
       return `Suggère des symboles historiquement appropriés pour cette quête "${title}" (${questType}).
@@ -105,6 +120,51 @@ function getQuestPeriod(questType: string): string {
   }
 }
 
+function extractJsonFromText(text: string): any {
+  try {
+    // Nettoyer le texte et chercher le JSON
+    const cleanText = text.trim();
+    
+    // Essayer de parser directement
+    try {
+      return JSON.parse(cleanText);
+    } catch {
+      // Chercher un array JSON dans le texte
+      const arrayMatch = cleanText.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        return JSON.parse(arrayMatch[0]);
+      }
+      
+      // Chercher un objet JSON dans le texte
+      const objectMatch = cleanText.match(/\{[\s\S]*\}/);
+      if (objectMatch) {
+        return JSON.parse(objectMatch[0]);
+      }
+      
+      throw new Error('No valid JSON found');
+    }
+  } catch (error) {
+    console.error('Failed to extract JSON:', error);
+    throw new Error('Invalid JSON format in AI response');
+  }
+}
+
+function validateCluesStructure(clues: any): boolean {
+  if (!Array.isArray(clues)) {
+    return false;
+  }
+  
+  return clues.every(clue => 
+    typeof clue === 'object' &&
+    clue !== null &&
+    typeof clue.id === 'number' &&
+    typeof clue.description === 'string' &&
+    typeof clue.hint === 'string' &&
+    clue.description.length > 0 &&
+    clue.hint.length > 0
+  );
+}
+
 async function callDeepSeek(prompt: string): Promise<string> {
   if (!deepseekApiKey) throw new Error('DeepSeek API key not configured');
   
@@ -119,7 +179,7 @@ async function callDeepSeek(prompt: string): Promise<string> {
       messages: [
         {
           role: 'system',
-          content: 'Tu es un expert historien spécialisé dans les symboles et traditions culturelles médiévales. Tu crées du contenu original et authentique.'
+          content: 'Tu es un expert historien spécialisé dans les symboles et traditions culturelles médiévales. Tu crées du contenu original et authentique. Quand on te demande du JSON, tu réponds UNIQUEMENT avec du JSON valide, sans aucun texte supplémentaire.'
         },
         {
           role: 'user',
@@ -153,7 +213,7 @@ async function callOpenAI(prompt: string): Promise<string> {
       messages: [
         {
           role: 'system',
-          content: 'Tu es un expert en histoire médiévale et en création de contenu narratif. Tu produis du contenu original et captivant.'
+          content: 'Tu es un expert en histoire médiévale et en création de contenu narratif. Tu produis du contenu original et captivant. Pour les demandes JSON, tu réponds exclusivement avec du JSON valide.'
         },
         {
           role: 'user',
@@ -189,7 +249,7 @@ async function callAnthropic(prompt: string): Promise<string> {
       messages: [
         {
           role: 'user',
-          content: `Tu es un expert en histoire et en création de quêtes narratives. ${prompt}`
+          content: `Tu es un expert en histoire et en création de quêtes narratives. Pour les demandes JSON, réponds uniquement avec du JSON valide. ${prompt}`
         }
       ]
     })
@@ -261,10 +321,17 @@ serve(async (req) => {
     // Traitement spécial pour les différents types de champs
     if (request.field === 'clues') {
       try {
-        enrichedValue = JSON.parse(content);
-      } catch (e) {
-        console.warn('Failed to parse JSON clues, keeping as string');
-        enrichedValue = request.currentValue; // Fallback vers la valeur actuelle
+        const extractedJson = extractJsonFromText(content);
+        
+        if (!validateCluesStructure(extractedJson)) {
+          throw new Error('Invalid clues structure: missing required fields (id, description, hint)');
+        }
+        
+        enrichedValue = extractedJson;
+        console.log('Successfully parsed and validated clues JSON');
+      } catch (error) {
+        console.error('Failed to parse clues JSON:', error.message);
+        throw new Error(`Invalid JSON format for clues: ${error.message}`);
       }
     } else if (request.field === 'target_symbols') {
       enrichedValue = content.split(',').map(s => s.trim()).filter(s => s.length > 0);
@@ -281,7 +348,7 @@ serve(async (req) => {
         `Contenu enrichi avec ${usedProvider}`,
         'Vérifiez la cohérence historique',
         'Adaptez selon vos besoins',
-        request.field === 'clues' ? 'JSON validé' : 'Contenu original créé'
+        request.field === 'clues' ? 'Structure JSON validée' : 'Contenu original créé'
       ],
       timestamp: new Date().toISOString(),
       processingTime: Date.now() - startTime

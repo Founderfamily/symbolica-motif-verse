@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Brain, Save, RotateCcw, Sparkles, Clock, CheckCircle, Settings } from 'lucide-react';
+import { Brain, Save, RotateCcw, Sparkles, Clock, CheckCircle, Settings, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useQuests } from '@/hooks/useQuests';
 import { useQuestEnrichment } from '@/hooks/useQuestEnrichment';
 import { TreasureQuest } from '@/types/quests';
@@ -22,6 +22,7 @@ const QuestEnrichmentEditor = () => {
   const [enrichingField, setEnrichingField] = useState<string | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<AIProvider>('deepseek');
   const [lastEnrichmentError, setLastEnrichmentError] = useState<string | null>(null);
+  const [jsonValidationStatus, setJsonValidationStatus] = useState<{[key: string]: boolean}>({});
 
   const availableProviders = MCPService.getAvailableProviders();
 
@@ -35,6 +36,36 @@ const QuestEnrichmentEditor = () => {
       }
     }
   }, [selectedQuestId, quests]);
+
+  // Valider le JSON des clues
+  const validateCluesJson = (value: any): boolean => {
+    try {
+      let clues = value;
+      if (typeof value === 'string') {
+        clues = JSON.parse(value);
+      }
+      
+      return Array.isArray(clues) && clues.every(clue => 
+        typeof clue === 'object' &&
+        clue !== null &&
+        typeof clue.id === 'number' &&
+        typeof clue.description === 'string' &&
+        typeof clue.hint === 'string' &&
+        clue.description.length > 0 &&
+        clue.hint.length > 0
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  // Mettre à jour le statut de validation JSON
+  useEffect(() => {
+    if (editedQuest.clues) {
+      const isValid = validateCluesJson(editedQuest.clues);
+      setJsonValidationStatus(prev => ({ ...prev, clues: isValid }));
+    }
+  }, [editedQuest.clues]);
 
   const handleEnrichField = async (field: keyof TreasureQuest) => {
     if (!selectedQuest) return;
@@ -87,11 +118,19 @@ const QuestEnrichmentEditor = () => {
   const handleSaveQuest = async () => {
     if (!selectedQuest || !editedQuest) return;
     
+    // Validation finale pour les clues
+    if (editedQuest.clues && !validateCluesJson(editedQuest.clues)) {
+      setLastEnrichmentError('Format JSON des indices invalide. Impossible de sauvegarder.');
+      return;
+    }
+    
     try {
       await saveQuest(selectedQuest.id, editedQuest);
       setSelectedQuest({ ...selectedQuest, ...editedQuest } as TreasureQuest);
+      setLastEnrichmentError(null);
     } catch (error) {
       console.error('Erreur de sauvegarde:', error);
+      setLastEnrichmentError('Erreur lors de la sauvegarde');
     }
   };
 
@@ -154,13 +193,29 @@ const QuestEnrichmentEditor = () => {
     const hasChanges = editedQuest[field] !== selectedQuest?.[field];
     const isCurrentlyEnriching = enrichingField === field;
     const fieldValue = editedQuest[field] || '';
+    const isJsonField = field === 'clues';
+    const isJsonValid = isJsonField ? jsonValidationStatus[field] !== false : true;
 
     return (
       <Card className="mb-4">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-lg">{label}</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                {label}
+                {isJsonField && (
+                  <div className="flex items-center gap-1">
+                    {isJsonValid ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {isJsonValid ? 'JSON valide' : 'JSON invalide'}
+                    </span>
+                  </div>
+                )}
+              </CardTitle>
               <p className="text-sm text-muted-foreground">{description}</p>
             </div>
             <div className="flex gap-2">
@@ -186,11 +241,21 @@ const QuestEnrichmentEditor = () => {
                 value={formatFieldValue(field, fieldValue)}
                 onChange={(e) => handleFieldChange(field, e.target.value)}
                 rows={field === 'clues' ? 8 : 4}
-                className="font-mono text-sm"
+                className={`font-mono text-sm ${!isJsonValid && isJsonField ? 'border-red-300 bg-red-50' : ''}`}
               />
             ) : (
               <div className="p-3 border rounded bg-muted font-mono text-sm">
                 {formatFieldValue(field, fieldValue)}
+              </div>
+            )}
+            
+            {!isJsonValid && isJsonField && (
+              <div className="p-3 border border-red-200 rounded bg-red-50 text-red-700 text-sm">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <strong>Format JSON invalide</strong>
+                </div>
+                <p className="mt-1">Les indices doivent être un array d'objets avec les champs : id (number), description (string), hint (string)</p>
               </div>
             )}
             
@@ -271,7 +336,7 @@ const QuestEnrichmentEditor = () => {
           {selectedQuest && (
             <Button
               onClick={handleSaveQuest}
-              disabled={isSaving}
+              disabled={isSaving || !Object.values(jsonValidationStatus).every(Boolean)}
               className="gap-2"
             >
               <Save className="h-4 w-4" />
@@ -335,7 +400,7 @@ const QuestEnrichmentEditor = () => {
           {renderFieldEditor(
             'clues',
             'Indices de la Quête',
-            'Liste des indices au format JSON avec descriptions et hints'
+            'Liste des indices au format JSON strict avec id, description et hint'
           )}
 
           {renderFieldEditor(
