@@ -55,6 +55,13 @@ export const useAuth = () => {
       }
 
       if (profileData) {
+        // Get avatar_url from profiles table separately since it's not in the view
+        const { data: profileDetails } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', userId)
+          .single();
+
         setProfile({
           id: profileData.id,
           username: profileData.username,
@@ -70,7 +77,7 @@ export const useAuth = () => {
           specialization: profileData.specialization,
           credentials: profileData.credentials,
           bio: profileData.bio,
-          avatar_url: profileData.avatar_url
+          avatar_url: profileDetails?.avatar_url
         });
       }
     } catch (error) {
