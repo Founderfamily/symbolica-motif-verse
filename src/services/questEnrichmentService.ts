@@ -110,7 +110,7 @@ class QuestEnrichmentService {
         throw new Error(response.error || 'Erreur lors de l\'enrichissement');
       }
 
-      let enrichedValue = response.content;
+      let enrichedValue: any = response.content;
       let confidence = 85;
 
       // Post-traitement selon le type de champ
@@ -126,8 +126,8 @@ class QuestEnrichmentService {
         // Nettoyer la liste de symboles et retourner un array
         enrichedValue = response.content
           .split(',')
-          .map(s => s.trim())
-          .filter(s => s.length > 0);
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0);
       }
 
       return {
