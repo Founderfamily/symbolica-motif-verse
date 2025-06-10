@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { questEnrichmentService, QuestEnrichmentRequest, QuestEnrichmentResponse } from '@/services/questEnrichmentService';
+import { questEnrichmentService, QuestEnrichmentRequest, QuestEnrichmentResponse } from '@/services/questEnrichment';
 import { TreasureQuest } from '@/types/quests';
 import { toast } from 'sonner';
 
