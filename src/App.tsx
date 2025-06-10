@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -24,7 +23,6 @@ import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import UserProfilePage from '@/pages/UserProfilePage';
 import NotFound from '@/pages/NotFound';
-import MasterExplorerPage from '@/pages/MasterExplorerPage';
 
 // Admin pages
 import Dashboard from '@/pages/Admin/Dashboard';
@@ -87,9 +85,6 @@ function App() {
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/users/:userId" element={<UserProfilePage />} />
-
-                {/* Master Explorer */}
-                <Route path="/master-explorer" element={<MasterExplorerPage />} />
 
                 {/* Admin pages */}
                 <Route path="/admin" element={<Dashboard />} />
