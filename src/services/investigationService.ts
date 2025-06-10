@@ -13,7 +13,7 @@ export const investigationService = {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as QuestDocument[] };
     } catch (error) {
       console.error('Error fetching quest documents:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -29,7 +29,7 @@ export const investigationService = {
         .single();
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as QuestDocument };
     } catch (error) {
       console.error('Error uploading document:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -49,7 +49,7 @@ export const investigationService = {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as (QuestEvidence & { submitted_by_profile?: any })[] };
     } catch (error) {
       console.error('Error fetching quest evidence:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -65,7 +65,7 @@ export const investigationService = {
         .single();
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as QuestEvidence };
     } catch (error) {
       console.error('Error submitting evidence:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -74,11 +74,14 @@ export const investigationService = {
 
   async validateEvidence(evidenceId: string, voteType: 'validate' | 'dispute' | 'reject', comment?: string, expertiseLevel: string = 'amateur') {
     try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('evidence_validations')
         .insert({
           evidence_id: evidenceId,
-          validator_id: (await supabase.auth.getUser()).data.user?.id,
+          validator_id: user.user.id,
           vote_type: voteType,
           comment,
           expertise_level: expertiseLevel,
@@ -105,7 +108,7 @@ export const investigationService = {
         .order('name');
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as QuestLocation[] };
     } catch (error) {
       console.error('Error fetching quest locations:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -121,7 +124,7 @@ export const investigationService = {
         .single();
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as QuestLocation };
     } catch (error) {
       console.error('Error adding quest location:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -147,7 +150,7 @@ export const investigationService = {
         .order('last_activity_at', { ascending: false });
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as (QuestDiscussion & { created_by_profile?: any })[] };
     } catch (error) {
       console.error('Error fetching quest discussions:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -163,7 +166,7 @@ export const investigationService = {
         .single();
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as QuestDiscussion };
     } catch (error) {
       console.error('Error creating discussion:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -184,7 +187,7 @@ export const investigationService = {
         .order('community_score', { ascending: false });
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as (QuestTheory & { author_profile?: any })[] };
     } catch (error) {
       console.error('Error fetching quest theories:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -200,7 +203,7 @@ export const investigationService = {
         .single();
       
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as QuestTheory };
     } catch (error) {
       console.error('Error creating theory:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
