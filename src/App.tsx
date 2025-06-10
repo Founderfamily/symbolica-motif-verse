@@ -33,7 +33,6 @@ import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
 import SystemSettings from '@/pages/Admin/SystemSettings';
 import ContentManagement from '@/pages/Admin/ContentManagement';
 import AnalysisExamplesManagement from '@/pages/Admin/AnalysisExamplesManagement';
-import MasterExplorerPage from '@/pages/Admin/MasterExplorerPage';
 
 // Other specialized pages
 import AnalysisPage from '@/pages/AnalysisPage';
@@ -96,7 +95,6 @@ function App() {
                 <Route path="/admin/content" element={<ContentManagement />} />
                 <Route path="/admin/analysis-examples" element={<AnalysisExamplesManagement />} />
                 <Route path="/admin/settings" element={<SystemSettings />} />
-                <Route path="/admin/master-explorer" element={<MasterExplorerPage />} />
 
                 {/* Specialized pages */}
                 <Route path="/analysis" element={<AnalysisPage />} />
