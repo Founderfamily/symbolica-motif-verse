@@ -1,29 +1,38 @@
 
+
+
 export interface UserProfile {
   id: string;
-  username?: string;
-  full_name?: string;
-  is_admin?: boolean;
-  is_banned?: boolean;
-  created_at?: string;
-  updated_at?: string;
-  last_activity?: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url?: string | null;
+  is_admin?: boolean | null;
+  created_at?: string | null;
+  updated_at?: string | null;
   contributions_count?: number;
+  symbols_count?: number;
   verified_uploads?: number;
-  bio?: string;
-  location?: string;
-  website?: string;
-  favorite_cultures?: string[];
-  total_points?: number;
+  favorite_cultures?: string[] | null;
+  bio?: string | null;
+  location?: string | null;
+  website?: string | null;
+  email_verified?: boolean | null;
+  // Add missing properties for compatibility
+  email?: string | null;
+  user_metadata?: Record<string, any> | null;
+  is_banned?: boolean;
+  // Social features from userService
   followers_count?: number;
   following_count?: number;
-  avatar_url?: string;
-  
-  // Extended fields for Master Explorer system
-  roles?: string[];
-  highest_role?: string;
-  is_master_explorer?: boolean;
-  expertise_areas?: string[];
-  specialization?: string;
-  credentials?: string;
+  // Admin features
+  total_points?: number;
+  last_activity?: string | null;
 }
+
+export interface AuthState {
+  isLoading: boolean;
+  user: UserProfile | null;
+  error: string | null;
+}
+
+
