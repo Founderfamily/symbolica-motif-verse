@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -136,9 +135,12 @@ const QuestEnrichmentEditor = () => {
 
   const formatFieldValue = (field: keyof TreasureQuest, value: any): string => {
     try {
+      // Gestion spéciale pour target_symbols (array vers chaîne séparée par virgules)
       if (field === 'target_symbols' && Array.isArray(value)) {
         return value.join(', ');
       }
+      
+      // Gestion spéciale pour clues (formatage JSON uniquement)
       if (field === 'clues') {
         if (typeof value === 'string') {
           try {
@@ -152,9 +154,8 @@ const QuestEnrichmentEditor = () => {
           return JSON.stringify(value, null, 2);
         }
       }
-      if (typeof value === 'object' && value !== null) {
-        return JSON.stringify(value, null, 2);
-      }
+      
+      // Pour tous les autres champs, retourner comme chaîne simple
       return String(value || '');
     } catch (error) {
       console.error('Error formatting field value:', error);
