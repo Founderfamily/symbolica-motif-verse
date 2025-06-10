@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Crown, MapPin, Search, Users, BarChart3, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Crown, MapPin, Search, Users, BarChart3, CheckCircle, Clock, AlertTriangle, Brain } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface MasterExplorerStats {
@@ -181,15 +180,16 @@ const MasterExplorer: React.FC = () => {
                 Analysez et enrichissez les quêtes existantes avec des données historiques avancées.
               </p>
               <div className="space-y-2">
-                <Link to="/analysis">
+                <Link to="/admin/quest-enrichment">
                   <Button className="w-full" variant="default">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Accéder à l'analyse
+                    <Brain className="h-4 w-4 mr-2" />
+                    Enrichir avec IA (MCP)
                   </Button>
                 </Link>
-                <Link to="/quests">
+                <Link to="/analysis">
                   <Button className="w-full" variant="outline">
-                    Gérer les quêtes
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Accéder à l'analyse
                   </Button>
                 </Link>
               </div>
