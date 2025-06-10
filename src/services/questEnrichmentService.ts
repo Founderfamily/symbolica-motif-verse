@@ -22,21 +22,24 @@ class QuestEnrichmentService {
   private cleanAIResponse(content: string): string {
     if (!content) return content;
     
-    // Remove asterisks and bullet points
+    // Nettoyer les astérisques, puces et formatage indésirable
     let cleaned = content
-      .replace(/^\s*\*\s+/gm, '') // Remove asterisks at start of lines
-      .replace(/^\s*-\s+/gm, '') // Remove dashes at start of lines
-      .replace(/^\s*•\s+/gm, '') // Remove bullet points at start of lines
-      .replace(/\*\s+/g, '') // Remove asterisks followed by spaces
-      .replace(/\s+\*/g, '') // Remove asterisks preceded by spaces
-      .replace(/\*{2,}/g, '') // Remove multiple asterisks
-      .replace(/^\s*[\d]+\.\s+/gm, '') // Remove numbered lists
+      .replace(/^\s*\*+\s*/gm, '') // Astérisques en début de ligne
+      .replace(/\*+\s*/g, '') // Astérisques suivis d'espaces
+      .replace(/\s+\*+/g, '') // Astérisques précédés d'espaces
+      .replace(/\*{2,}/g, '') // Astérisques multiples
+      .replace(/^\s*-\s+/gm, '') // Tirets en début de ligne
+      .replace(/^\s*•\s+/gm, '') // Puces en début de ligne
+      .replace(/^\s*[\d]+\.\s+/gm, '') // Listes numérotées
+      .replace(/#+\s*/g, '') // Titres markdown
+      .replace(/`{1,3}/g, '') // Code markdown
       .trim();
     
-    // Clean up extra spaces and line breaks
+    // Nettoyer les espaces et sauts de ligne excessifs
     cleaned = cleaned
-      .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove triple line breaks
-      .replace(/\s{3,}/g, ' ') // Replace multiple spaces with single space
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Triple retours à la ligne
+      .replace(/\s{3,}/g, ' ') // Espaces multiples
+      .replace(/^\s+|\s+$/gm, '') // Espaces en début/fin de ligne
       .trim();
     
     return cleaned;
@@ -55,9 +58,11 @@ class QuestEnrichmentService {
         Contexte actuel : ${currentValue || 'Aucun contexte défini'}
         Type de quête : ${questType}
         
-        Écris un contexte historique riche et précis en incluant les événements historiques pertinents, les personnages clés de l'époque, les enjeux sociopolitiques et les détails culturels authentiques. Rédige un texte fluide et narratif sans utiliser de listes à puces, d'astérisques ou de tirets. Le texte doit être captivant mais historiquement précis, d'environ 800 mots maximum.
+        Écris un contexte historique riche et précis en incluant les événements historiques pertinents, les personnages clés de l'époque, les enjeux sociopolitiques et les détails culturels authentiques. 
         
-        Réponds uniquement avec le texte enrichi, sans formatage markdown ni listes.`;
+        IMPORTANT : Écris uniquement un texte fluide et narratif. N'utilise aucun formatage comme des astérisques, des tirets, des puces, des listes numérotées ou des titres. Rédige environ 800 mots maximum en paragraphes continus.
+        
+        Réponds uniquement avec le texte enrichi en français, sans aucun formatage.`;
 
       case 'description':
         return `Améliore la description de cette quête historique intitulée "${title}".
@@ -66,9 +71,11 @@ class QuestEnrichmentService {
         Type : ${questType}
         Contexte : ${questContext.story_background || 'Non défini'}
         
-        Crée une description engageante qui capture l'essence de la quête, motivera les participants et reste fidèle au contexte historique. La description doit faire 2 à 3 paragraphes maximum avec un ton mystérieux et captivant.
+        Crée une description engageante qui capture l'essence de la quête et motivera les participants tout en restant fidèle au contexte historique. 
         
-        Écris uniquement le texte de la description, sans utiliser de listes, d'astérisques ou de formatage spécial. Utilise un style narratif fluide en français.`;
+        IMPORTANT : Écris uniquement un texte fluide de 2 à 3 paragraphes maximum avec un ton mystérieux et captivant. N'utilise aucun formatage, aucune liste, aucun astérisque, aucun tiret. Utilise un style narratif fluide en français.
+        
+        Réponds uniquement avec le texte de la description.`;
 
       case 'clues':
         return `Enrichis les indices de cette quête "${title}" (${questType}).
@@ -78,7 +85,7 @@ class QuestEnrichmentService {
         
         Pour chaque indice, améliore la description en la rendant plus immersive, rends le hint plus cryptique mais résolvable, et ajoute des détails historiques authentiques. Conserve exactement la même structure JSON mais enrichis uniquement le contenu textuel.
         
-        Réponds uniquement avec le JSON enrichi, sans explication supplémentaire ni formatage markdown.`;
+        IMPORTANT : Réponds uniquement avec le JSON enrichi, sans explication supplémentaire, sans formatage markdown, sans astérisques ni puces dans le contenu des descriptions.`;
 
       case 'target_symbols':
         return `Suggère des symboles pertinents pour cette quête "${title}" (${questType}).
@@ -88,7 +95,7 @@ class QuestEnrichmentService {
         
         Suggère entre 3 et 5 symboles historiquement appropriés comme les croix templières, sceaux, emblèmes, symboles de l'époque concernée, éléments architecturaux typiques ou marques de guildes et ordres.
         
-        Réponds avec une liste de noms de symboles séparés par des virgules, sans explication ni formatage spécial.`;
+        IMPORTANT : Réponds avec une liste de noms de symboles séparés par des virgules, sans explication, sans formatage, sans astérisques.`;
 
       default:
         return `Aide à enrichir le champ ${field} pour la quête "${title}". Réponds avec un texte fluide sans utiliser d'astérisques, de listes à puces ou de formatage markdown.`;
@@ -124,7 +131,7 @@ class QuestEnrichmentService {
       let enrichedValue: any = response.content;
       let confidence = this.calculateConfidence(provider, request.field);
 
-      // Nettoyage des astérisques et formatage indésirable
+      // Nettoyage systématique des réponses
       if (typeof enrichedValue === 'string') {
         enrichedValue = this.cleanAIResponse(enrichedValue);
       }
@@ -134,7 +141,8 @@ class QuestEnrichmentService {
         try {
           const cleanedContent = this.cleanAIResponse(response.content!);
           enrichedValue = JSON.parse(cleanedContent);
-        } catch {
+        } catch (parseError) {
+          console.warn('Erreur de parsing JSON pour les indices:', parseError);
           confidence = Math.max(50, confidence - 20);
         }
       } else if (request.field === 'target_symbols') {
