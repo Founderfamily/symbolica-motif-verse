@@ -106,43 +106,26 @@ export const masterExplorerService = {
     }
 
     try {
-      // Utiliser une requête SQL directe pour éviter les problèmes de types
-      const { data, error } = await supabase.rpc('enrichment_insert', {
-        p_quest_id: enrichment.questId,
-        p_enriched_by: user.user.id,
-        p_enrichment_type: enrichment.enrichmentType,
-        p_title: enrichment.title,
-        p_description: enrichment.description || null,
-        p_source_url: enrichment.sourceUrl || null,
-        p_credibility_score: enrichment.credibilityScore || 1.0,
-        p_is_official: enrichment.isOfficial || true,
-        p_enrichment_data: enrichment.enrichmentData || {}
-      });
+      // Utiliser une insertion directe dans la table quest_enrichments
+      const { data, error } = await (supabase as any)
+        .from('quest_enrichments')
+        .insert({
+          quest_id: enrichment.questId,
+          enriched_by: user.user.id,
+          enrichment_type: enrichment.enrichmentType,
+          title: enrichment.title,
+          description: enrichment.description || null,
+          source_url: enrichment.sourceUrl || null,
+          credibility_score: enrichment.credibilityScore || 1.0,
+          is_official: enrichment.isOfficial || true,
+          enrichment_data: enrichment.enrichmentData || {}
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Error enriching quest:', error);
-        // Fallback: essayer avec une requête directe
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('quest_enrichments' as any)
-          .insert({
-            quest_id: enrichment.questId,
-            enriched_by: user.user.id,
-            enrichment_type: enrichment.enrichmentType,
-            title: enrichment.title,
-            description: enrichment.description,
-            source_url: enrichment.sourceUrl,
-            credibility_score: enrichment.credibilityScore || 1.0,
-            is_official: enrichment.isOfficial || true,
-            enrichment_data: enrichment.enrichmentData || {}
-          })
-          .select()
-          .single();
-
-        if (fallbackError) {
-          throw fallbackError;
-        }
-        console.log('Quest enriched successfully (fallback):', fallbackData);
-        return fallbackData;
+        throw error;
       }
 
       console.log('Quest enriched successfully:', data);
@@ -271,7 +254,7 @@ export const masterExplorerService = {
     const enrichments = [];
 
     // Ajouter les preuves
-    if (contentToAdd.evidence) {
+    if (contentToAdd.evidence && Array.isArray(contentToAdd.evidence)) {
       for (const evidence of contentToAdd.evidence) {
         enrichments.push(this.enrichQuest({
           questId,
@@ -282,7 +265,7 @@ export const masterExplorerService = {
     }
 
     // Ajouter les documents
-    if (contentToAdd.documents) {
+    if (contentToAdd.documents && Array.isArray(contentToAdd.documents)) {
       for (const document of contentToAdd.documents) {
         enrichments.push(this.enrichQuest({
           questId,
@@ -293,7 +276,7 @@ export const masterExplorerService = {
     }
 
     // Ajouter les guidances
-    if (contentToAdd.guidance) {
+    if (contentToAdd.guidance && Array.isArray(contentToAdd.guidance)) {
       for (const guidance of contentToAdd.guidance) {
         enrichments.push(this.enrichQuest({
           questId,
