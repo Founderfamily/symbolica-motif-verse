@@ -1,7 +1,8 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { questEnrichmentService, QuestEnrichmentRequest, QuestEnrichmentResponse } from '@/services/questEnrichment';
+import { questEnrichmentService } from '@/services/questEnrichment/questEnrichmentService';
+import { QuestEnrichmentRequest, QuestEnrichmentResponse } from '@/services/questEnrichment/types';
 import { TreasureQuest } from '@/types/quests';
 import { toast } from 'sonner';
 
@@ -35,7 +36,7 @@ export const useQuestEnrichment = () => {
       })));
     },
     onError: (error, variables) => {
-      console.error('Erreur d\'enrichissement:', error);
+      console.error('Erreur enrichissement:', error);
       const providerName = variables.provider || 'IA';
       toast.error(`Erreur lors de l'enrichissement avec ${providerName}`);
     }
@@ -51,7 +52,7 @@ export const useQuestEnrichment = () => {
       queryClient.invalidateQueries({ queryKey: ['quest'] });
     },
     onError: (error) => {
-      console.error('Erreur de sauvegarde:', error);
+      console.error('Erreur sauvegarde:', error);
       toast.error('Erreur lors de la sauvegarde');
     }
   });

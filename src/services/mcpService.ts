@@ -19,65 +19,39 @@ export interface MCPSearchResponse {
 
 export class MCPService {
   static async search(query: string, provider: AIProvider = 'deepseek'): Promise<MCPSearchResponse> {
-    const sanitizedQuery = this.sanitizeInput(query);
-    
-    if (!sanitizedQuery || sanitizedQuery.trim().length === 0) {
+    if (!query || query.trim().length === 0) {
       throw new Error('Query cannot be empty');
     }
     
-    if (sanitizedQuery.length > 2000) {
+    if (query.length > 2000) {
       throw new Error('Query too long');
     }
 
-    console.log('Appel MCP avec:', {
-      provider,
-      queryLength: sanitizedQuery.length,
-      queryPreview: sanitizedQuery.substring(0, 100) + '...'
-    });
+    console.log('Appel MCP:', { provider, queryLength: query.length });
 
     try {
       const { data, error } = await supabase.functions.invoke('mcp-search', {
-        body: { query: sanitizedQuery, provider }
+        body: { query: query.trim(), provider }
       });
 
       if (error) {
-        console.error('Erreur Supabase lors de l\'appel MCP:', {
-          error,
-          provider,
-          message: error.message
-        });
-        throw new Error(`Erreur de service: ${error.message || 'Service temporairement indisponible'}`);
+        console.error('Erreur Supabase MCP:', error);
+        throw new Error(`Erreur de service: ${error.message || 'Service indisponible'}`);
       }
 
       if (!data) {
         throw new Error('Aucune donnée reçue du service MCP');
       }
 
-      console.log('Réponse MCP brute:', {
-        success: data.success,
-        hasContent: !!data.content,
-        provider: data.provider,
-        error: data.error
-      });
-
       return data;
     } catch (error) {
-      console.error('Erreur lors de l\'appel MCP:', {
-        error: error.message,
-        provider,
-        originalError: error
-      });
+      console.error('Erreur appel MCP:', error);
       
-      // Distinguer les types d'erreurs
       if (error.message?.includes('Function not found')) {
-        throw new Error('Service d\'enrichissement non disponible. Veuillez contacter l\'administrateur.');
+        throw new Error('Service d\'enrichissement non disponible');
       }
       
-      if (error.message?.includes('network') || error.message?.includes('timeout')) {
-        throw new Error('Problème de connexion. Veuillez réessayer dans quelques instants.');
-      }
-      
-      throw new Error(`Erreur du service d'enrichissement: ${error.message}`);
+      throw new Error(`Erreur du service: ${error.message}`);
     }
   }
 
@@ -96,15 +70,5 @@ export class MCPService {
       default:
         return provider;
     }
-  }
-
-  private static sanitizeInput(input: string): string {
-    if (!input) return '';
-    
-    return input
-      .replace(/[<>]/g, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+=/gi, '')
-      .trim();
   }
 }
