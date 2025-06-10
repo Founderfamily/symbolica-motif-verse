@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -45,6 +46,11 @@ import ContactPage from '@/pages/ContactPage';
 import LegalPage from '@/pages/LegalPage';
 import PrivacyPage from '@/pages/PrivacyPage';
 import TermsPage from '@/pages/TermsPage';
+
+// Advanced pages - Previously missing routes
+import EnterprisePage from '@/pages/EnterprisePage';
+import MCPSearchPage from '@/pages/MCPSearchPage';
+import MobileAppPage from '@/pages/MobileApp';
 
 import './App.css';
 
@@ -105,6 +111,11 @@ function App() {
                 <Route path="/map" element={<MapExplorer />} />
                 <Route path="/roadmap" element={<RoadmapPage />} />
                 <Route path="/contact" element={<ContactPage />} />
+                
+                {/* Advanced features - Previously missing routes */}
+                <Route path="/enterprise" element={<EnterprisePage />} />
+                <Route path="/mcp-search" element={<MCPSearchPage />} />
+                <Route path="/mobile" element={<MobileAppPage />} />
                 
                 {/* Legal pages */}
                 <Route path="/legal" element={<LegalPage />} />
