@@ -5,8 +5,16 @@ import { questEnrichmentService, QuestEnrichmentRequest, QuestEnrichmentResponse
 import { TreasureQuest } from '@/types/quests';
 import { toast } from 'sonner';
 
+interface EnrichmentHistoryItem {
+  original: any;
+  enriched: any;
+  timestamp: Date;
+  confidence: number;
+  provider: string;
+}
+
 export const useQuestEnrichment = () => {
-  const [enrichmentHistory, setEnrichmentHistory] = useState<Map<string, any>>(new Map());
+  const [enrichmentHistory, setEnrichmentHistory] = useState<Map<string, EnrichmentHistoryItem>>(new Map());
   const queryClient = useQueryClient();
 
   const enrichmentMutation = useMutation({
@@ -14,20 +22,22 @@ export const useQuestEnrichment = () => {
       return questEnrichmentService.enrichField(request);
     },
     onSuccess: (data, variables) => {
-      toast.success(`Champ "${variables.field}" enrichi avec succès`);
+      const providerName = data.provider || variables.provider || 'IA';
+      toast.success(`Champ "${variables.field}" enrichi avec ${providerName}`);
       
-      // Sauvegarder l'historique
       const key = `${variables.questId}-${variables.field}`;
       setEnrichmentHistory(prev => new Map(prev.set(key, {
         original: variables.currentValue,
         enriched: data.enrichedValue,
         timestamp: new Date(),
-        confidence: data.confidence
+        confidence: data.confidence,
+        provider: data.provider
       })));
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       console.error('Erreur d\'enrichissement:', error);
-      toast.error('Erreur lors de l\'enrichissement avec l\'IA');
+      const providerName = variables.provider || 'IA';
+      toast.error(`Erreur lors de l'enrichissement avec ${providerName}`);
     }
   });
 
@@ -54,7 +64,7 @@ export const useQuestEnrichment = () => {
     return saveMutation.mutateAsync({ questId, updates });
   };
 
-  const getFieldHistory = (questId: string, field: string) => {
+  const getFieldHistory = (questId: string, field: string): EnrichmentHistoryItem | undefined => {
     return enrichmentHistory.get(`${questId}-${field}`);
   };
 

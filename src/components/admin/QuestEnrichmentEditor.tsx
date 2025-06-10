@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,10 +5,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Brain, Save, RotateCcw, Sparkles, Clock, CheckCircle } from 'lucide-react';
+import { Brain, Save, RotateCcw, Sparkles, Clock, CheckCircle, Settings } from 'lucide-react';
 import { useQuests } from '@/hooks/useQuests';
 import { useQuestEnrichment } from '@/hooks/useQuestEnrichment';
 import { TreasureQuest } from '@/types/quests';
+import { MCPService, AIProvider } from '@/services/mcpService';
 
 const QuestEnrichmentEditor = () => {
   const { data: quests, isLoading } = useQuests();
@@ -19,6 +19,9 @@ const QuestEnrichmentEditor = () => {
   const [selectedQuest, setSelectedQuest] = useState<TreasureQuest | null>(null);
   const [editedQuest, setEditedQuest] = useState<Partial<TreasureQuest>>({});
   const [enrichingField, setEnrichingField] = useState<string | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('deepseek');
+
+  const availableProviders = MCPService.getAvailableProviders();
 
   // Mettre à jour la quête sélectionnée
   useEffect(() => {
@@ -40,7 +43,8 @@ const QuestEnrichmentEditor = () => {
         questId: selectedQuest.id,
         field: field as any,
         currentValue: editedQuest[field] || selectedQuest[field],
-        questContext: editedQuest
+        questContext: editedQuest,
+        provider: selectedProvider
       });
 
       setEditedQuest(prev => ({
@@ -115,7 +119,7 @@ const QuestEnrichmentEditor = () => {
               {history && (
                 <Badge variant="secondary" className="gap-1">
                   <Clock className="h-3 w-3" />
-                  Enrichi
+                  Enrichi ({history.provider})
                 </Badge>
               )}
               {hasChanges && (
@@ -135,12 +139,10 @@ const QuestEnrichmentEditor = () => {
                 onChange={(e) => {
                   let newValue: any = e.target.value;
                   
-                  // Traitement spécial pour target_symbols
                   if (field === 'target_symbols') {
                     newValue = e.target.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
                   }
                   
-                  // Traitement spécial pour clues (JSON)
                   if (field === 'clues') {
                     try {
                       newValue = JSON.parse(e.target.value);
@@ -169,7 +171,7 @@ const QuestEnrichmentEditor = () => {
                 className="gap-2"
               >
                 <Brain className="h-4 w-4" />
-                {isCurrentlyEnriching ? 'Enrichissement...' : 'Enrichir avec IA'}
+                {isCurrentlyEnriching ? 'Enrichissement...' : `Enrichir avec ${MCPService.getProviderDisplayName(selectedProvider)}`}
               </Button>
               
               {hasChanges && (
@@ -188,7 +190,7 @@ const QuestEnrichmentEditor = () => {
             {history && (
               <div className="text-xs text-muted-foreground">
                 Enrichi le {history.timestamp.toLocaleString()} 
-                (Confiance: {history.confidence}%)
+                avec {history.provider} (Confiance: {history.confidence}%)
               </div>
             )}
           </div>
@@ -207,21 +209,56 @@ const QuestEnrichmentEditor = () => {
         <div>
           <h2 className="text-2xl font-bold">Enrichissement de Quêtes avec IA</h2>
           <p className="text-muted-foreground">
-            Utilisez MCP + DeepSeek pour enrichir automatiquement le contenu de vos quêtes
+            Utilisez différents providers IA pour enrichir automatiquement le contenu de vos quêtes
           </p>
         </div>
         
-        {selectedQuest && (
-          <Button
-            onClick={handleSaveQuest}
-            disabled={isSaving}
-            className="gap-2"
-          >
-            <Save className="h-4 w-4" />
-            {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-          </Button>
-        )}
+        <div className="flex gap-3">
+          <div className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            <Select value={selectedProvider} onValueChange={(value: AIProvider) => setSelectedProvider(value)}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {availableProviders.map((provider) => (
+                  <SelectItem key={provider} value={provider}>
+                    {MCPService.getProviderDisplayName(provider)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {selectedQuest && (
+            <Button
+              onClick={handleSaveQuest}
+              disabled={isSaving}
+              className="gap-2"
+            >
+              <Save className="h-4 w-4" />
+              {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Provider Info Card */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-4">
+            <Brain className="h-8 w-8 text-blue-600" />
+            <div>
+              <h3 className="font-semibold">Provider IA actuel : {MCPService.getProviderDisplayName(selectedProvider)}</h3>
+              <p className="text-sm text-muted-foreground">
+                {selectedProvider === 'deepseek' && 'Spécialisé dans l\'analyse historique et culturelle détaillée'}
+                {selectedProvider === 'openai' && 'Excellent pour la génération créative et la restructuration de contenu'}
+                {selectedProvider === 'anthropic' && 'Optimal pour la précision historique et la cohérence narrative'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

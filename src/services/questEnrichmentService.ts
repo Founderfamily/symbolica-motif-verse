@@ -1,5 +1,5 @@
 
-import { MCPService } from '@/services/mcpService';
+import { MCPService, AIProvider } from '@/services/mcpService';
 import { supabase } from '@/integrations/supabase/client';
 import { TreasureQuest, QuestClue } from '@/types/quests';
 
@@ -8,12 +8,14 @@ export interface QuestEnrichmentRequest {
   field: 'story_background' | 'description' | 'clues' | 'target_symbols';
   currentValue: any;
   questContext: Partial<TreasureQuest>;
+  provider?: AIProvider;
 }
 
 export interface QuestEnrichmentResponse {
   enrichedValue: any;
   suggestions: string[];
   confidence: number;
+  provider: string;
 }
 
 class QuestEnrichmentService {
@@ -36,7 +38,7 @@ class QuestEnrichmentService {
         - Les enjeux sociopolitiques
         - Les détails culturels authentiques
         
-        Réponds en français, style narratif captivant mais historiquement précis.`;
+        Réponds en français, style narratif captivant mais historiquement précis (maximum 800 mots).`;
 
       case 'description':
         return `Améliore la description de cette quête historique : "${title}".
@@ -65,7 +67,7 @@ class QuestEnrichmentService {
         - Les détails historiques authentiques
         
         Garde la même structure JSON mais enrichis le contenu.
-        Réponds uniquement avec le JSON enrichi.`;
+        Réponds uniquement avec le JSON enrichi, sans explication supplémentaire.`;
 
       case 'target_symbols':
         return `Suggère des symboles pertinents pour cette quête "${title}" (${questType}).
@@ -79,7 +81,7 @@ class QuestEnrichmentService {
         - Éléments architecturaux typiques
         - Marques de guildes ou ordres
         
-        Réponds avec une liste de noms de symboles séparés par des virgules.`;
+        Réponds avec une liste de noms de symboles séparés par des virgules, sans explication.`;
 
       default:
         return `Aide à enrichir le champ ${field} pour la quête "${title}".`;
@@ -102,29 +104,28 @@ class QuestEnrichmentService {
   async enrichField(request: QuestEnrichmentRequest): Promise<QuestEnrichmentResponse> {
     try {
       const prompt = this.generatePrompt(request);
-      console.log('Enrichissement avec prompt:', prompt);
+      const provider = request.provider || 'deepseek';
+      
+      console.log(`Enrichissement avec ${provider}:`, prompt);
 
-      const response = await MCPService.search(prompt);
+      const response = await MCPService.search(prompt, provider);
       
       if (!response.success) {
         throw new Error(response.error || 'Erreur lors de l\'enrichissement');
       }
 
       let enrichedValue: any = response.content;
-      let confidence = 85;
+      let confidence = this.calculateConfidence(provider, request.field);
 
       // Post-traitement selon le type de champ
       if (request.field === 'clues') {
         try {
-          // Essayer de parser comme JSON si c'est des indices
-          enrichedValue = JSON.parse(response.content);
+          enrichedValue = JSON.parse(response.content!);
         } catch {
-          // Si ce n'est pas du JSON valide, garder le texte
-          confidence = 70;
+          confidence = Math.max(50, confidence - 20);
         }
       } else if (request.field === 'target_symbols') {
-        // Nettoyer la liste de symboles et retourner un array
-        enrichedValue = response.content
+        enrichedValue = response.content!
           .split(',')
           .map((s: string) => s.trim())
           .filter((s: string) => s.length > 0);
@@ -132,12 +133,9 @@ class QuestEnrichmentService {
 
       return {
         enrichedValue,
-        suggestions: [
-          'Contenu enrichi avec succès',
-          'Vérifiez la cohérence historique',
-          'Adaptez selon vos besoins'
-        ],
-        confidence
+        suggestions: this.generateSuggestions(provider, request.field),
+        confidence,
+        provider: response.provider || provider
       };
 
     } catch (error) {
@@ -146,20 +144,45 @@ class QuestEnrichmentService {
     }
   }
 
+  private calculateConfidence(provider: AIProvider, field: string): number {
+    const baseConfidence = {
+      'deepseek': 88,
+      'openai': 85,
+      'anthropic': 90
+    };
+
+    const fieldModifier = {
+      'story_background': 5,
+      'description': 0,
+      'clues': -5,
+      'target_symbols': -10
+    };
+
+    return Math.min(95, baseConfidence[provider] + (fieldModifier[field] || 0));
+  }
+
+  private generateSuggestions(provider: string, field: string): string[] {
+    const providerName = MCPService.getProviderDisplayName(provider as AIProvider);
+    
+    return [
+      `Contenu enrichi avec ${providerName}`,
+      'Vérifiez la cohérence historique',
+      'Adaptez selon vos besoins spécifiques',
+      field === 'clues' ? 'Validez la structure JSON' : 'Révisez le style narratif'
+    ];
+  }
+
   async saveEnrichedQuest(questId: string, updates: Partial<TreasureQuest>): Promise<void> {
     try {
-      // Préparer les données pour Supabase en convertissant les types complexes
       const supabaseUpdates: any = {
         ...updates,
         updated_at: new Date().toISOString()
       };
 
-      // Convertir les clues en JSON si nécessaire
       if (updates.clues) {
         supabaseUpdates.clues = JSON.stringify(updates.clues);
       }
 
-      // Convertir target_symbols en array de strings pour Supabase
       if (updates.target_symbols) {
         supabaseUpdates.target_symbols = Array.isArray(updates.target_symbols) 
           ? updates.target_symbols 

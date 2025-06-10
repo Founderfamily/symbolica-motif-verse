@@ -7,7 +7,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Configuration des API keys
 const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
+const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
 // Input sanitization function
 function sanitizeInput(input: string): string {
@@ -15,19 +18,18 @@ function sanitizeInput(input: string): string {
     throw new Error('Invalid input');
   }
   
-  // Remove HTML tags and potentially dangerous content
   return input
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+=/gi, '') // Remove event handlers
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+=/gi, '')
     .trim()
-    .slice(0, 500); // Limit length
+    .slice(0, 2000);
 }
 
-// Rate limiting (simple in-memory store for demo)
+// Rate limiting
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 10; // requests per minute
-const RATE_WINDOW = 60000; // 1 minute
+const RATE_LIMIT = 15;
+const RATE_WINDOW = 60000;
 
 function checkRateLimit(clientId: string): boolean {
   const now = Date.now();
@@ -46,6 +48,104 @@ function checkRateLimit(clientId: string): boolean {
   return true;
 }
 
+async function callOpenAI(prompt: string): Promise<string> {
+  if (!openaiApiKey) throw new Error('OpenAI API key not configured');
+  
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openaiApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'Tu es un expert en histoire et symboles culturels. Réponds de manière précise et détaillée en français.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1000
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI API error: ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.choices?.[0]?.message?.content || 'Aucune réponse générée';
+}
+
+async function callDeepSeek(prompt: string): Promise<string> {
+  if (!deepseekApiKey) throw new Error('DeepSeek API key not configured');
+  
+  const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${deepseekApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        {
+          role: 'system',
+          content: 'Tu es un expert historien spécialisé dans les symboles et traditions culturelles. Réponds avec précision et détail en français.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1000
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`DeepSeek API error: ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.choices?.[0]?.message?.content || 'Aucune réponse générée';
+}
+
+async function callAnthropic(prompt: string): Promise<string> {
+  if (!anthropicApiKey) throw new Error('Anthropic API key not configured');
+  
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': anthropicApiKey,
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 1000,
+      messages: [
+        {
+          role: 'user',
+          content: `Tu es un expert en histoire et symboles culturels. Réponds de manière précise et détaillée en français.\n\n${prompt}`
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Anthropic API error: ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.content?.[0]?.text || 'Aucune réponse générée';
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -55,7 +155,6 @@ serve(async (req) => {
   const clientId = req.headers.get('x-forwarded-for') || 'unknown';
   
   try {
-    // Rate limiting
     if (!checkRateLimit(clientId)) {
       return new Response(JSON.stringify({
         success: false,
@@ -68,9 +167,8 @@ serve(async (req) => {
       });
     }
 
-    const { query } = await req.json();
+    const { query, provider = 'deepseek' } = await req.json();
     
-    // Input validation and sanitization
     if (!query) {
       throw new Error('Query is required');
     }
@@ -80,50 +178,50 @@ serve(async (req) => {
       throw new Error('Invalid query content');
     }
 
-    if (!deepseekApiKey) {
-      console.error('DEEPSEEK_API_KEY not configured');
-      throw new Error('Service configuration error');
+    let content: string;
+    let usedProvider = provider;
+
+    // Essayer le provider demandé, avec fallback automatique
+    try {
+      switch (provider) {
+        case 'openai':
+          content = await callOpenAI(sanitizedQuery);
+          break;
+        case 'anthropic':
+          content = await callAnthropic(sanitizedQuery);
+          break;
+        case 'deepseek':
+        default:
+          content = await callDeepSeek(sanitizedQuery);
+          break;
+      }
+    } catch (error) {
+      console.warn(`${provider} failed, trying fallback:`, error.message);
+      
+      // Fallback intelligent
+      if (provider !== 'deepseek' && deepseekApiKey) {
+        content = await callDeepSeek(sanitizedQuery);
+        usedProvider = 'deepseek';
+      } else if (provider !== 'openai' && openaiApiKey) {
+        content = await callOpenAI(sanitizedQuery);
+        usedProvider = 'openai';
+      } else if (provider !== 'anthropic' && anthropicApiKey) {
+        content = await callAnthropic(sanitizedQuery);
+        usedProvider = 'anthropic';
+      } else {
+        throw error;
+      }
     }
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${deepseekApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a cultural symbols expert. Provide detailed analysis of symbols, their meanings, and cultural contexts. Keep responses informative and appropriate.'
-          },
-          {
-            role: 'user',
-            content: sanitizedQuery
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      })
-    });
-
-    if (!response.ok) {
-      console.error(`DeepSeek API error: ${response.status}`);
-      throw new Error('External service error');
-    }
-
-    const result = await response.json();
-    const content = result.choices?.[0]?.message?.content || 'No response generated';
-
-    // Sanitize the response content as well
+    // Sanitize response content
     const sanitizedContent = content
-      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove script tags
-      .replace(/javascript:/gi, ''); // Remove javascript: protocol
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/javascript:/gi, '');
 
     return new Response(JSON.stringify({
       success: true,
       content: sanitizedContent,
+      provider: usedProvider,
       timestamp: new Date().toISOString(),
       processingTime: Date.now() - startTime
     }), {
@@ -133,7 +231,6 @@ serve(async (req) => {
   } catch (error) {
     console.error('Function error:', error);
     
-    // Generic error response - don't expose internal details
     const errorMessage = error.message.includes('Rate limit') 
       ? error.message 
       : 'Service temporarily unavailable';

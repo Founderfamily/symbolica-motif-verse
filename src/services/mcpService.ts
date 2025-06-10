@@ -1,27 +1,39 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { MCPSearchRequest, MCPSearchResponse } from '@/types/mcp';
+
+export type AIProvider = 'deepseek' | 'openai' | 'anthropic';
+
+export interface MCPSearchRequest {
+  query: string;
+  provider?: AIProvider;
+}
+
+export interface MCPSearchResponse {
+  success: boolean;
+  content?: string;
+  provider?: string;
+  error?: string;
+  timestamp: string;
+  processingTime: number;
+}
 
 export class MCPService {
-  static async search(query: string): Promise<MCPSearchResponse> {
-    // Sanitize input to prevent XSS
+  static async search(query: string, provider: AIProvider = 'deepseek'): Promise<MCPSearchResponse> {
     const sanitizedQuery = this.sanitizeInput(query);
     
-    // Validate query length
     if (!sanitizedQuery || sanitizedQuery.trim().length === 0) {
       throw new Error('Query cannot be empty');
     }
     
-    if (sanitizedQuery.length > 500) {
+    if (sanitizedQuery.length > 2000) {
       throw new Error('Query too long');
     }
 
     const { data, error } = await supabase.functions.invoke('mcp-search', {
-      body: { query: sanitizedQuery }
+      body: { query: sanitizedQuery, provider }
     });
 
     if (error) {
-      // Don't expose internal error details
       console.error('MCP Search internal error:', error);
       throw new Error('Search service temporarily unavailable');
     }
@@ -29,14 +41,30 @@ export class MCPService {
     return data;
   }
 
+  static getAvailableProviders(): AIProvider[] {
+    return ['deepseek', 'openai', 'anthropic'];
+  }
+
+  static getProviderDisplayName(provider: AIProvider): string {
+    switch (provider) {
+      case 'deepseek':
+        return 'DeepSeek';
+      case 'openai':
+        return 'OpenAI GPT-4o';
+      case 'anthropic':
+        return 'Claude 3 Haiku';
+      default:
+        return provider;
+    }
+  }
+
   private static sanitizeInput(input: string): string {
     if (!input) return '';
     
-    // Basic HTML sanitization
     return input
-      .replace(/[<>]/g, '') // Remove basic HTML chars
-      .replace(/javascript:/gi, '') // Remove javascript: protocol
-      .replace(/on\w+=/gi, '') // Remove event handlers
+      .replace(/[<>]/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+=/gi, '')
       .trim();
   }
 }
