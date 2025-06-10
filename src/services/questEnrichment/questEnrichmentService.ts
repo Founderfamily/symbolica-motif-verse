@@ -2,6 +2,7 @@
 import { MCPService } from '@/services/mcpService';
 import { TreasureQuest } from '@/types/quests';
 import { QuestEnrichmentRequest, QuestEnrichmentResponse } from './types';
+import { supabase } from '@/integrations/supabase/client';
 
 class QuestEnrichmentService {
   async enrichField(request: QuestEnrichmentRequest): Promise<QuestEnrichmentResponse> {
@@ -158,7 +159,6 @@ class QuestEnrichmentService {
         .map((s: string) => s.trim())
         .filter((s: string) => s.length > 0);
     } else {
-      // Pour les textes narratifs, nettoyer le formatage markdown
       return this.cleanMarkdownFormatting(content);
     }
   }
@@ -167,18 +167,18 @@ class QuestEnrichmentService {
     if (!content) return content;
     
     let cleaned = content
-      .replace(/^\s*\*{2,}\s*/gm, '') // Astérisques multiples en début de ligne
-      .replace(/\*{3,}/g, '') // Trois astérisques ou plus consécutifs
-      .replace(/^\s*-{2,}\s+/gm, '') // Tirets multiples en début de ligne
-      .replace(/^\s*•\s+/gm, '') // Puces en début de ligne
-      .replace(/^\s*[\d]+\.\s+/gm, '') // Listes numérotées
-      .replace(/#{1,6}\s+/g, '') // Titres markdown
-      .replace(/`{1,3}/g, '') // Code markdown
+      .replace(/^\s*\*{2,}\s*/gm, '')
+      .replace(/\*{3,}/g, '')
+      .replace(/^\s*-{2,}\s+/gm, '')
+      .replace(/^\s*•\s+/gm, '')
+      .replace(/^\s*[\d]+\.\s+/gm, '')
+      .replace(/#{1,6}\s+/g, '')
+      .replace(/`{1,3}/g, '')
       .trim();
     
     cleaned = cleaned
-      .replace(/\n\s*\n\s*\n/g, '\n\n') // Triple retours à la ligne
-      .replace(/\s{3,}/g, ' ') // Espaces multiples
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .replace(/\s{3,}/g, ' ')
       .trim();
     
     return cleaned;
@@ -217,8 +217,6 @@ class QuestEnrichmentService {
 
   async saveEnrichedQuest(questId: string, updates: Partial<TreasureQuest>): Promise<void> {
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const supabaseUpdates: any = {
         ...updates,
         updated_at: new Date().toISOString()

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { questEnrichmentService } from '@/services/questEnrichment/questEnrichmentService';
+import { questEnrichmentService } from '@/services/questEnrichment';
 import { QuestEnrichmentRequest, QuestEnrichmentResponse } from '@/services/questEnrichment/types';
 import { TreasureQuest } from '@/types/quests';
 import { toast } from '@/components/ui/use-toast';
@@ -20,75 +20,121 @@ export const useQuestEnrichment = () => {
 
   const enrichmentMutation = useMutation({
     mutationFn: async (request: QuestEnrichmentRequest): Promise<QuestEnrichmentResponse> => {
-      return questEnrichmentService.enrichField(request);
+      try {
+        return await questEnrichmentService.enrichField(request);
+      } catch (error) {
+        console.error('Erreur dans enrichmentMutation:', error);
+        throw error;
+      }
     },
     onSuccess: (data, variables) => {
-      const providerName = data.provider || variables.provider || 'IA';
-      toast({
-        title: "Enrichissement réussi",
-        description: `Champ "${variables.field}" enrichi avec ${providerName}`,
-      });
-      
-      const key = `${variables.questId}-${variables.field}`;
-      setEnrichmentHistory(prev => new Map(prev.set(key, {
-        original: variables.currentValue,
-        enriched: data.enrichedValue,
-        timestamp: new Date(),
-        confidence: data.confidence,
-        provider: data.provider
-      })));
+      try {
+        const providerName = data?.provider || variables?.provider || 'IA';
+        toast({
+          title: "Enrichissement réussi",
+          description: `Champ "${variables.field}" enrichi avec ${providerName}`,
+        });
+        
+        const key = `${variables.questId}-${variables.field}`;
+        setEnrichmentHistory(prev => new Map(prev.set(key, {
+          original: variables.currentValue,
+          enriched: data.enrichedValue,
+          timestamp: new Date(),
+          confidence: data.confidence || 0,
+          provider: data.provider || 'IA'
+        })));
+      } catch (error) {
+        console.error('Erreur dans onSuccess:', error);
+      }
     },
     onError: (error, variables) => {
-      console.error('Erreur enrichissement:', error);
-      const providerName = variables.provider || 'IA';
-      toast({
-        title: "Erreur d'enrichissement",
-        description: `Erreur lors de l'enrichissement avec ${providerName}`,
-        variant: "destructive",
-      });
+      try {
+        console.error('Erreur enrichissement:', error);
+        const providerName = variables?.provider || 'IA';
+        toast({
+          title: "Erreur d'enrichissement",
+          description: `Erreur lors de l'enrichissement avec ${providerName}`,
+          variant: "destructive",
+        });
+      } catch (toastError) {
+        console.error('Erreur dans onError:', toastError);
+      }
     }
   });
 
   const saveMutation = useMutation({
     mutationFn: async ({ questId, updates }: { questId: string; updates: Partial<TreasureQuest> }) => {
-      return questEnrichmentService.saveEnrichedQuest(questId, updates);
+      try {
+        return await questEnrichmentService.saveEnrichedQuest(questId, updates);
+      } catch (error) {
+        console.error('Erreur dans saveMutation:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
-      toast({
-        title: "Sauvegarde réussie",
-        description: "Quête sauvegardée avec succès",
-      });
-      queryClient.invalidateQueries({ queryKey: ['treasure-quests'] });
-      queryClient.invalidateQueries({ queryKey: ['quest'] });
+      try {
+        toast({
+          title: "Sauvegarde réussie",
+          description: "Quête sauvegardée avec succès",
+        });
+        queryClient.invalidateQueries({ queryKey: ['treasure-quests'] });
+        queryClient.invalidateQueries({ queryKey: ['quest'] });
+      } catch (error) {
+        console.error('Erreur dans onSuccess save:', error);
+      }
     },
     onError: (error) => {
-      console.error('Erreur sauvegarde:', error);
-      toast({
-        title: "Erreur de sauvegarde",
-        description: "Erreur lors de la sauvegarde",
-        variant: "destructive",
-      });
+      try {
+        console.error('Erreur sauvegarde:', error);
+        toast({
+          title: "Erreur de sauvegarde",
+          description: "Erreur lors de la sauvegarde",
+          variant: "destructive",
+        });
+      } catch (toastError) {
+        console.error('Erreur dans onError save:', toastError);
+      }
     }
   });
 
   const enrichField = async (request: QuestEnrichmentRequest) => {
-    return enrichmentMutation.mutateAsync(request);
+    try {
+      return await enrichmentMutation.mutateAsync(request);
+    } catch (error) {
+      console.error('Erreur dans enrichField:', error);
+      throw error;
+    }
   };
 
   const saveQuest = async (questId: string, updates: Partial<TreasureQuest>) => {
-    return saveMutation.mutateAsync({ questId, updates });
+    try {
+      return await saveMutation.mutateAsync({ questId, updates });
+    } catch (error) {
+      console.error('Erreur dans saveQuest:', error);
+      throw error;
+    }
   };
 
   const getFieldHistory = (questId: string, field: string): EnrichmentHistoryItem | undefined => {
-    return enrichmentHistory.get(`${questId}-${field}`);
+    try {
+      return enrichmentHistory.get(`${questId}-${field}`);
+    } catch (error) {
+      console.error('Erreur dans getFieldHistory:', error);
+      return undefined;
+    }
   };
 
   const revertField = (questId: string, field: string) => {
-    const history = getFieldHistory(questId, field);
-    if (history) {
-      return history.original;
+    try {
+      const history = getFieldHistory(questId, field);
+      if (history) {
+        return history.original;
+      }
+      return null;
+    } catch (error) {
+      console.error('Erreur dans revertField:', error);
+      return null;
     }
-    return null;
   };
 
   return {
