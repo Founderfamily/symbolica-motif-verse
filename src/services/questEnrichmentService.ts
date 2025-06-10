@@ -19,27 +19,24 @@ export interface QuestEnrichmentResponse {
 }
 
 class QuestEnrichmentService {
-  private cleanAIResponse(content: string): string {
+  private cleanMarkdownFormatting(content: string): string {
     if (!content) return content;
     
-    // Nettoyer les astérisques, puces et formatage indésirable
+    // Nettoyage ciblé uniquement pour le formatage markdown indésirable
     let cleaned = content
-      .replace(/^\s*\*+\s*/gm, '') // Astérisques en début de ligne
-      .replace(/\*+\s*/g, '') // Astérisques suivis d'espaces
-      .replace(/\s+\*+/g, '') // Astérisques précédés d'espaces
-      .replace(/\*{2,}/g, '') // Astérisques multiples
-      .replace(/^\s*-\s+/gm, '') // Tirets en début de ligne
+      .replace(/^\s*\*+\s+/gm, '') // Astérisques en début de ligne avec espaces
+      .replace(/\*{2,}/g, '') // Astérisques multiples consécutifs
+      .replace(/^\s*-\s+/gm, '') // Tirets de listes en début de ligne
       .replace(/^\s*•\s+/gm, '') // Puces en début de ligne
       .replace(/^\s*[\d]+\.\s+/gm, '') // Listes numérotées
-      .replace(/#+\s*/g, '') // Titres markdown
+      .replace(/#{1,6}\s+/g, '') // Titres markdown
       .replace(/`{1,3}/g, '') // Code markdown
       .trim();
     
-    // Nettoyer les espaces et sauts de ligne excessifs
+    // Nettoyer les espaces excessifs uniquement
     cleaned = cleaned
       .replace(/\n\s*\n\s*\n/g, '\n\n') // Triple retours à la ligne
       .replace(/\s{3,}/g, ' ') // Espaces multiples
-      .replace(/^\s+|\s+$/gm, '') // Espaces en début/fin de ligne
       .trim();
     
     return cleaned;
@@ -60,9 +57,9 @@ class QuestEnrichmentService {
         
         Écris un contexte historique riche et précis en incluant les événements historiques pertinents, les personnages clés de l'époque, les enjeux sociopolitiques et les détails culturels authentiques. 
         
-        IMPORTANT : Écris uniquement un texte fluide et narratif. N'utilise aucun formatage comme des astérisques, des tirets, des puces, des listes numérotées ou des titres. Rédige environ 800 mots maximum en paragraphes continus.
+        IMPORTANT : Réponds uniquement avec un texte narratif fluide. N'utilise AUCUN formatage markdown, astérisques, tirets, puces, listes numérotées ou titres. Écris environ 800 mots maximum en paragraphes continus.
         
-        Réponds uniquement avec le texte enrichi en français, sans aucun formatage.`;
+        Réponds uniquement avec le texte enrichi en français.`;
 
       case 'description':
         return `Améliore la description de cette quête historique intitulée "${title}".
@@ -73,7 +70,7 @@ class QuestEnrichmentService {
         
         Crée une description engageante qui capture l'essence de la quête et motivera les participants tout en restant fidèle au contexte historique. 
         
-        IMPORTANT : Écris uniquement un texte fluide de 2 à 3 paragraphes maximum avec un ton mystérieux et captivant. N'utilise aucun formatage, aucune liste, aucun astérisque, aucun tiret. Utilise un style narratif fluide en français.
+        IMPORTANT : Réponds uniquement avec un texte narratif fluide de 2 à 3 paragraphes maximum. N'utilise AUCUN formatage markdown, astérisques, tirets ou listes. Style narratif mystérieux et captivant en français.
         
         Réponds uniquement avec le texte de la description.`;
 
@@ -85,7 +82,7 @@ class QuestEnrichmentService {
         
         Pour chaque indice, améliore la description en la rendant plus immersive, rends le hint plus cryptique mais résolvable, et ajoute des détails historiques authentiques. Conserve exactement la même structure JSON mais enrichis uniquement le contenu textuel.
         
-        IMPORTANT : Réponds uniquement avec le JSON enrichi, sans explication supplémentaire, sans formatage markdown, sans astérisques ni puces dans le contenu des descriptions.`;
+        IMPORTANT : Réponds UNIQUEMENT avec le JSON enrichi valide, sans texte d'explication, sans formatage markdown. Le JSON doit être directement parsable.`;
 
       case 'target_symbols':
         return `Suggère des symboles pertinents pour cette quête "${title}" (${questType}).
@@ -95,10 +92,10 @@ class QuestEnrichmentService {
         
         Suggère entre 3 et 5 symboles historiquement appropriés comme les croix templières, sceaux, emblèmes, symboles de l'époque concernée, éléments architecturaux typiques ou marques de guildes et ordres.
         
-        IMPORTANT : Réponds avec une liste de noms de symboles séparés par des virgules, sans explication, sans formatage, sans astérisques.`;
+        IMPORTANT : Réponds avec une liste de noms de symboles séparés par des virgules uniquement, sans explication, sans formatage.`;
 
       default:
-        return `Aide à enrichir le champ ${field} pour la quête "${title}". Réponds avec un texte fluide sans utiliser d'astérisques, de listes à puces ou de formatage markdown.`;
+        return `Aide à enrichir le champ ${field} pour la quête "${title}". Réponds avec un texte fluide sans formatage markdown.`;
     }
   }
 
@@ -131,26 +128,28 @@ class QuestEnrichmentService {
       let enrichedValue: any = response.content;
       let confidence = this.calculateConfidence(provider, request.field);
 
-      // Nettoyage systématique des réponses
-      if (typeof enrichedValue === 'string') {
-        enrichedValue = this.cleanAIResponse(enrichedValue);
-      }
-
       // Post-traitement selon le type de champ
       if (request.field === 'clues') {
         try {
-          const cleanedContent = this.cleanAIResponse(response.content!);
-          enrichedValue = JSON.parse(cleanedContent);
+          // Pour les indices, on tente de parser directement sans nettoyage
+          enrichedValue = JSON.parse(response.content!);
         } catch (parseError) {
           console.warn('Erreur de parsing JSON pour les indices:', parseError);
-          confidence = Math.max(50, confidence - 20);
+          console.log('Contenu reçu:', response.content);
+          // En cas d'erreur, on retourne les indices actuels
+          enrichedValue = request.currentValue;
+          confidence = Math.max(30, confidence - 30);
         }
       } else if (request.field === 'target_symbols') {
-        const cleanedContent = this.cleanAIResponse(response.content!);
+        // Nettoyage minimal pour les symboles
+        const cleanedContent = response.content!.trim();
         enrichedValue = cleanedContent
           .split(',')
           .map((s: string) => s.trim())
           .filter((s: string) => s.length > 0);
+      } else {
+        // Pour les textes narratifs, appliquer le nettoyage markdown
+        enrichedValue = this.cleanMarkdownFormatting(response.content!);
       }
 
       return {
