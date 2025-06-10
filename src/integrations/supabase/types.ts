@@ -302,6 +302,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "collections_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles_with_roles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       comment_likes: {
@@ -978,6 +985,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_group_symbols_added_by"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles_with_roles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_group_symbols_group_id"
             columns: ["group_id"]
             isOneToOne: false
@@ -1099,6 +1113,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      master_explorer_permissions: {
+        Row: {
+          expires_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean | null
+          permission_type: string
+          quest_id: string | null
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          permission_type: string
+          quest_id?: string | null
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          permission_type?: string
+          quest_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_explorer_permissions_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "treasure_quests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mobile_cache_data: {
         Row: {
@@ -1415,29 +1470,41 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bio: string | null
           created_at: string | null
+          credentials: string | null
+          expertise_areas: string[] | null
           full_name: string | null
           id: string
           is_admin: boolean | null
           is_banned: boolean | null
+          specialization: string | null
           updated_at: string | null
           username: string | null
         }
         Insert: {
+          bio?: string | null
           created_at?: string | null
+          credentials?: string | null
+          expertise_areas?: string[] | null
           full_name?: string | null
           id: string
           is_admin?: boolean | null
           is_banned?: boolean | null
+          specialization?: string | null
           updated_at?: string | null
           username?: string | null
         }
         Update: {
+          bio?: string | null
           created_at?: string | null
+          credentials?: string | null
+          expertise_areas?: string[] | null
           full_name?: string | null
           id?: string
           is_admin?: boolean | null
           is_banned?: boolean | null
+          specialization?: string | null
           updated_at?: string | null
           username?: string | null
         }
@@ -2381,6 +2448,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "system_alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles_with_roles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       system_backups: {
@@ -2927,6 +3001,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       validation_votes: {
         Row: {
           annotation_id: string | null
@@ -2964,9 +3062,35 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_profiles_with_roles: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          credentials: string | null
+          expertise_areas: string[] | null
+          full_name: string | null
+          highest_role: Database["public"]["Enums"]["app_role"] | null
+          id: string | null
+          is_admin: boolean | null
+          is_banned: boolean | null
+          is_master_explorer: boolean | null
+          roles: Database["public"]["Enums"]["app_role"][] | null
+          specialization: string | null
+          updated_at: string | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      assign_master_explorer_role: {
+        Args: {
+          _target_user_id: string
+          _admin_user_id: string
+          _quest_ids?: string[]
+        }
+        Returns: undefined
+      }
       award_achievement_points: {
         Args: { p_user_id: string; p_achievement_id: string; p_points: number }
         Returns: undefined
@@ -3138,6 +3262,10 @@ export type Database = {
           achievements_count: number
         }[]
       }
+      get_user_highest_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_management_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3147,6 +3275,13 @@ export type Database = {
           admin_users: number
           new_users_today: number
           new_users_week: number
+        }[]
+      }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+          assigned_at: string
         }[]
       }
       get_users_for_admin: {
@@ -3167,6 +3302,13 @@ export type Database = {
           contributions_count: number
           total_points: number
         }[]
+      }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
       }
       insert_admin_log: {
         Args: {
@@ -3223,6 +3365,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "user" | "admin" | "master_explorer" | "banned"
       image_type: "original" | "pattern" | "reuse"
       symbol_location_verification_status:
         | "unverified"
@@ -3343,6 +3486,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["user", "admin", "master_explorer", "banned"],
       image_type: ["original", "pattern", "reuse"],
       symbol_location_verification_status: [
         "unverified",

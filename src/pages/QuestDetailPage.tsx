@@ -33,6 +33,7 @@ import { useQuestById, useQuestProgress } from '@/hooks/useQuests';
 import HistoricalContextPanel from '@/components/quests/HistoricalContextPanel';
 import InvestigationInterface from '@/components/investigation/InvestigationInterface';
 import ContributeEvidenceDialog from '@/components/quests/ContributeEvidenceDialog';
+import QuestEnrichmentsDisplay from '@/components/quests/QuestEnrichmentsDisplay';
 
 const QuestDetailPage = () => {
   const { questId } = useParams<{ questId: string }>();
@@ -313,6 +314,11 @@ const QuestDetailPage = () => {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Contenu Expert Master Explorer */}
+            <div className="mb-8">
+              <QuestEnrichmentsDisplay questId={quest.id} />
             </div>
 
             {/* Contenu des indices et découvertes */}
