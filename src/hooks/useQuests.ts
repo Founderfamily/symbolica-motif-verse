@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { TreasureQuest, QuestParticipant, QuestProgress, QuestClue } from '@/types/quests';
+import { TreasureQuest, QuestProgress, QuestClue } from '@/types/quests';
 
 export const useQuests = () => {
   return useQuery({
@@ -90,7 +90,7 @@ export const useQuestById = (questId: string) => {
         .from('treasure_quests')
         .select('*')
         .eq('id', questId)
-        .maybeSingle(); // Use maybeSingle instead of single to avoid errors when not found
+        .maybeSingle();
       
       if (error) {
         console.error('useQuestById - Database error:', error);
@@ -119,70 +119,124 @@ export const useQuestById = (questId: string) => {
   });
 };
 
-export const useJoinQuest = () => {
+// Hook pour soumettre des preuves/contributions
+export const useSubmitEvidence = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ questId, teamName }: { questId: string; teamName?: string }) => {
-      console.log('useJoinQuest - Attempting to join quest:', questId);
+    mutationFn: async ({ 
+      questId, 
+      evidenceType, 
+      title, 
+      description, 
+      imageUrl, 
+      location 
+    }: { 
+      questId: string; 
+      evidenceType: string;
+      title: string;
+      description?: string;
+      imageUrl?: string;
+      location?: { latitude: number; longitude: number; name?: string };
+    }) => {
+      console.log('useSubmitEvidence - Submitting evidence for quest:', questId);
       
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) {
-        console.error('useJoinQuest - User not authenticated');
+        console.error('useSubmitEvidence - User not authenticated');
         throw new Error('User not authenticated');
       }
       
-      console.log('useJoinQuest - User authenticated:', user.user.id);
+      console.log('useSubmitEvidence - User authenticated:', user.user.id);
       
       const { data, error } = await supabase
-        .from('quest_participants')
+        .from('quest_evidence')
         .insert({
           quest_id: questId,
-          user_id: user.user.id,
-          team_name: teamName,
-          role: 'member'
+          submitted_by: user.user.id,
+          evidence_type: evidenceType,
+          title,
+          description,
+          image_url: imageUrl,
+          latitude: location?.latitude,
+          longitude: location?.longitude,
+          location_name: location?.name,
+          validation_status: 'pending'
         })
         .select()
         .single();
       
       if (error) {
-        console.error('useJoinQuest - Database error:', error);
+        console.error('useSubmitEvidence - Database error:', error);
         throw error;
       }
       
-      console.log('useJoinQuest - Successfully joined quest:', data);
+      console.log('useSubmitEvidence - Successfully submitted evidence:', data);
       return data;
     },
     onSuccess: (data, variables) => {
-      console.log('useJoinQuest - Invalidating queries after successful join');
-      queryClient.invalidateQueries({ queryKey: ['treasure-quests'] });
-      queryClient.invalidateQueries({ queryKey: ['my-quests'] });
+      console.log('useSubmitEvidence - Invalidating queries after successful submission');
+      queryClient.invalidateQueries({ queryKey: ['quest-evidence', variables.questId] });
       queryClient.invalidateQueries({ queryKey: ['quest', variables.questId] });
     },
     onError: (error) => {
-      console.error('useJoinQuest - Mutation error:', error);
+      console.error('useSubmitEvidence - Mutation error:', error);
     }
   });
 };
 
-export const useMyQuests = () => {
-  return useQuery({
-    queryKey: ['my-quests'],
-    queryFn: async () => {
+// Hook pour valider des preuves soumises par d'autres contributeurs
+export const useValidateEvidence = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ 
+      evidenceId, 
+      voteType, 
+      comment, 
+      expertiseLevel 
+    }: { 
+      evidenceId: string; 
+      voteType: 'validate' | 'dispute' | 'reject';
+      comment?: string;
+      expertiseLevel?: string;
+    }) => {
+      console.log('useValidateEvidence - Validating evidence:', evidenceId);
+      
       const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('User not authenticated');
+      if (!user.user) {
+        console.error('useValidateEvidence - User not authenticated');
+        throw new Error('User not authenticated');
+      }
       
       const { data, error } = await supabase
-        .from('quest_participants')
-        .select(`
-          *,
-          treasure_quests (*)
-        `)
-        .eq('user_id', user.user.id)
-        .eq('status', 'active');
+        .from('evidence_validations')
+        .insert({
+          evidence_id: evidenceId,
+          validator_id: user.user.id,
+          vote_type: voteType,
+          comment,
+          expertise_level: expertiseLevel || 'amateur',
+          confidence_score: 75
+        })
+        .select()
+        .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('useValidateEvidence - Database error:', error);
+        throw error;
+      }
+      
+      console.log('useValidateEvidence - Successfully validated evidence:', data);
       return data;
+    },
+    onSuccess: (data, variables) => {
+      console.log('useValidateEvidence - Invalidating queries after successful validation');
+      queryClient.invalidateQueries({ queryKey: ['quest-evidence'] });
+      queryClient.invalidateQueries({ queryKey: ['evidence-validations', variables.evidenceId] });
+    },
+    onError: (error) => {
+      console.error('useValidateEvidence - Mutation error:', error);
     }
   });
 };

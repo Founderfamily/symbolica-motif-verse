@@ -19,13 +19,17 @@ import {
   BookOpen,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  FileText,
+  Camera,
+  Brain,
+  Archive
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { useQuests, useActiveQuests, useJoinQuest } from '@/hooks/useQuests';
+import { useQuests, useActiveQuests } from '@/hooks/useQuests';
 import { historicalQuestService } from '@/services/historicalQuestService';
 import { TreasureQuest } from '@/types/quests';
 
@@ -38,7 +42,6 @@ const QuestsPage = () => {
   
   const { data: allQuests, isLoading, refetch, error } = useQuests();
   const { data: activeQuests } = useActiveQuests();
-  const joinQuestMutation = useJoinQuest();
 
   // Logs de debug
   console.log('QuestsPage - All quests:', allQuests);
@@ -55,7 +58,7 @@ const QuestsPage = () => {
   const questTypeLabels = {
     templar: 'Templiers',
     lost_civilization: 'Civilisation Perdue',
-    grail: 'Quête du Graal',
+    graal: 'Quête du Graal',
     custom: 'Personnalisée'
   };
 
@@ -67,10 +70,10 @@ const QuestsPage = () => {
   };
 
   const difficultyLabels = {
-    beginner: 'Débutant',
+    beginner: 'Accessible',
     intermediate: 'Intermédiaire',
-    expert: 'Expert',
-    master: 'Maître'
+    expert: 'Avancé',
+    master: 'Expert'
   };
 
   const handlePopulateQuests = async () => {
@@ -89,7 +92,7 @@ const QuestsPage = () => {
       
       if (result.success) {
         console.log('Quests populated successfully, refreshing list...');
-        await refetch(); // Refresh the quests list
+        await refetch();
       }
     } catch (error) {
       console.error('Error populating quests:', error);
@@ -99,15 +102,6 @@ const QuestsPage = () => {
       });
     } finally {
       setIsPopulating(false);
-    }
-  };
-
-  const handleJoinQuest = async (questId: string) => {
-    try {
-      console.log('Attempting to join quest:', questId);
-      await joinQuestMutation.mutateAsync({ questId });
-    } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error);
     }
   };
 
@@ -156,7 +150,7 @@ const QuestsPage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Chargement des quêtes...</p>
+          <p className="text-slate-600">Chargement des recherches...</p>
         </div>
       </div>
     );
@@ -170,38 +164,36 @@ const QuestsPage = () => {
           <div className="flex justify-center mb-6">
             <Badge className="px-6 py-3 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border-amber-200 text-lg">
               <History className="w-5 h-5 mr-2" />
-              Mystères Historiques
+              Recherche Collaborative
             </Badge>
           </div>
           
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-amber-800 via-orange-600 to-red-700 bg-clip-text text-transparent">
-            Quêtes de Trésors Perdus
+            Chasse aux Trésors Perdus
           </h1>
           
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-            Plongez dans l'histoire et résolvez les plus grands mystères de l'humanité. 
-            Du trésor des Templiers aux cités perdues, chaque quête est basée sur de véritables énigmes historiques.
+            Rejoignez une communauté mondiale de chercheurs pour résoudre les plus grands mystères de l'histoire. 
+            Contribuez avec des preuves, des indices, des théories et des liens d'archives pour découvrir ensemble des trésors perdus.
           </p>
 
-          {/* Statistiques rapides */}
+          {/* Statistiques de contribution */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-amber-600 mb-2">{activeQuests?.length || 0}</div>
-              <div className="text-slate-600">Quêtes Actives</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">{activeQuests?.length || 0}</div>
+              <div className="text-slate-600">Recherches Actives</div>
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-orange-600 mb-2">{historicalQuests.length}</div>
-              <div className="text-slate-600">Mystères Historiques</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">2,847</div>
+              <div className="text-slate-600">Preuves Soumises</div>
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-red-600 mb-2">
-                {allQuests?.reduce((sum, quest) => sum + quest.reward_points, 0) || 0}
-              </div>
-              <div className="text-slate-600">Points Totaux</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">1,293</div>
+              <div className="text-slate-600">Contributeurs Actifs</div>
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-purple-600 mb-2">3000+</div>
-              <div className="text-slate-600">Ans d'Histoire</div>
+              <div className="text-3xl font-bold text-red-600 mb-2">156</div>
+              <div className="text-slate-600">Pistes Découvertes</div>
             </div>
           </div>
         </div>
@@ -212,7 +204,7 @@ const QuestsPage = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <Input
-                placeholder="Rechercher une quête..."
+                placeholder="Rechercher un mystère..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -237,10 +229,10 @@ const QuestsPage = () => {
               className="px-4 py-2 border border-slate-300 rounded-lg bg-white"
             >
               <option value="all">Toutes difficultés</option>
-              <option value="beginner">Débutant</option>
+              <option value="beginner">Accessible</option>
               <option value="intermediate">Intermédiaire</option>
-              <option value="expert">Expert</option>
-              <option value="master">Maître</option>
+              <option value="expert">Avancé</option>
+              <option value="master">Expert</option>
             </select>
             
             <Button 
@@ -254,11 +246,11 @@ const QuestsPage = () => {
             
             <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
               <Plus className="w-4 h-4 mr-2" />
-              Créer une Quête
+              Proposer une Recherche
             </Button>
           </div>
           
-          {/* Résultat de population amélioré */}
+          {/* Résultat de population */}
           {populationResult && (
             <div className={`mt-4 p-4 rounded-lg flex items-center gap-3 ${
               populationResult.success 
@@ -277,7 +269,7 @@ const QuestsPage = () => {
           )}
         </div>
 
-        {/* Section des quêtes historiques */}
+        {/* Section des mystères historiques */}
         {historicalQuests.length > 0 && (
           <div className="mb-12">
             <div className="flex items-center mb-8">
@@ -322,7 +314,7 @@ const QuestsPage = () => {
                         <Badge variant={quest.status === 'active' ? 'default' : 'secondary'}>
                           {quest.status === 'active' ? 'Active' : 
                            quest.status === 'upcoming' ? 'À venir' : 
-                           quest.status === 'completed' ? 'Terminée' : 'Annulée'}
+                           quest.status === 'completed' ? 'Résolue' : 'En pause'}
                         </Badge>
                       </div>
                     </div>
@@ -341,46 +333,44 @@ const QuestsPage = () => {
                         </div>
                       )}
                       
-                      {/* Métriques */}
+                      {/* Métriques de contribution */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="flex items-center text-sm text-slate-600">
-                          <Users className="w-4 h-4 mr-2 text-blue-500" />
-                          {quest.min_participants}-{quest.max_participants} joueurs
-                        </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <Award className="w-4 h-4 mr-2 text-amber-500" />
-                          {quest.reward_points} points
-                        </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <MapPin className="w-4 h-4 mr-2 text-green-500" />
+                          <FileText className="w-4 h-4 mr-2 text-blue-500" />
                           {quest.clues?.length || 0} indices
                         </div>
                         <div className="flex items-center text-sm text-slate-600">
-                          <Clock className="w-4 h-4 mr-2 text-purple-500" />
-                          {quest.status === 'active' ? 'En cours' : 'Bientôt'}
+                          <Camera className="w-4 h-4 mr-2 text-green-500" />
+                          24 preuves
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Brain className="w-4 h-4 mr-2 text-purple-500" />
+                          8 théories
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Archive className="w-4 h-4 mr-2 text-orange-500" />
+                          15 archives
                         </div>
                       </div>
                       
-                      {/* Actions */}
+                      {/* Actions de contribution */}
                       <div className="flex gap-3">
                         <Link to={`/quests/${quest.id}`} className="flex-1">
                           <Button 
                             variant="outline" 
                             className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50"
                           >
-                            Voir détails
+                            <Search className="w-4 h-4 mr-2" />
+                            Explorer
                           </Button>
                         </Link>
                         
-                        {quest.status === 'active' && (
-                          <Button 
-                            onClick={() => handleJoinQuest(quest.id)}
-                            disabled={joinQuestMutation.isPending}
-                            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-                          >
-                            {joinQuestMutation.isPending ? 'Inscription...' : 'Rejoindre'}
-                          </Button>
-                        )}
+                        <Button 
+                          className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Contribuer
+                        </Button>
                       </div>
                     </div>
                   </Card>
@@ -390,12 +380,12 @@ const QuestsPage = () => {
           </div>
         )}
 
-        {/* Section des quêtes personnalisées */}
+        {/* Section des recherches personnalisées */}
         {customQuests.length > 0 && (
           <div className="mb-12">
             <div className="flex items-center mb-8">
               <Trophy className="w-8 h-8 text-purple-600 mr-3" />
-              <h2 className="text-3xl font-bold text-slate-800">Quêtes Personnalisées</h2>
+              <h2 className="text-3xl font-bold text-slate-800">Recherches Communautaires</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -405,7 +395,6 @@ const QuestsPage = () => {
                 return (
                   <Card key={quest.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-white/95 backdrop-blur-sm border border-amber-200/50">
                     <div className="relative">
-                      {/* En-tête avec gradient basé sur le type */}
                       <div className={`p-6 bg-gradient-to-br ${
                         quest.quest_type === 'templar' ? 'from-red-500 to-red-700' :
                         quest.quest_type === 'grail' ? 'from-purple-500 to-purple-700' :
@@ -423,12 +412,11 @@ const QuestsPage = () => {
                         <p className="text-white/90 text-sm">{questTypeLabels[quest.quest_type]}</p>
                       </div>
                       
-                      {/* Statut */}
                       <div className="absolute top-4 right-4">
                         <Badge variant={quest.status === 'active' ? 'default' : 'secondary'}>
                           {quest.status === 'active' ? 'Active' : 
                            quest.status === 'upcoming' ? 'À venir' : 
-                           quest.status === 'completed' ? 'Terminée' : 'Annulée'}
+                           quest.status === 'completed' ? 'Résolue' : 'En pause'}
                         </Badge>
                       </div>
                     </div>
@@ -438,43 +426,41 @@ const QuestsPage = () => {
                         {quest.description || quest.story_background}
                       </p>
                       
-                      {/* Métriques */}
+                      {/* Métriques de contribution */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="flex items-center text-sm text-slate-600">
-                          <Users className="w-4 h-4 mr-2 text-blue-500" />
-                          {quest.min_participants}-{quest.max_participants} joueurs
-                        </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <Award className="w-4 h-4 mr-2 text-amber-500" />
-                          {quest.reward_points} points
-                        </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <MapPin className="w-4 h-4 mr-2 text-green-500" />
+                          <FileText className="w-4 h-4 mr-2 text-blue-500" />
                           {quest.clues?.length || 0} indices
                         </div>
                         <div className="flex items-center text-sm text-slate-600">
-                          <Clock className="w-4 h-4 mr-2 text-purple-500" />
-                          {quest.status === 'active' ? 'En cours' : 'Bientôt'}
+                          <Camera className="w-4 h-4 mr-2 text-green-500" />
+                          12 preuves
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Brain className="w-4 h-4 mr-2 text-purple-500" />
+                          3 théories
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Archive className="w-4 h-4 mr-2 text-orange-500" />
+                          7 archives
                         </div>
                       </div>
                       
-                      {/* Actions */}
+                      {/* Actions de contribution */}
                       <div className="flex gap-3">
                         <Link to={`/quests/${quest.id}`} className="flex-1">
                           <Button variant="outline" className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50">
-                            Voir détails
+                            <Search className="w-4 h-4 mr-2" />
+                            Explorer
                           </Button>
                         </Link>
                         
-                        {quest.status === 'active' && (
-                          <Button 
-                            onClick={() => handleJoinQuest(quest.id)}
-                            disabled={joinQuestMutation.isPending}
-                            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-                          >
-                            {joinQuestMutation.isPending ? 'Inscription...' : 'Rejoindre'}
-                          </Button>
-                        )}
+                        <Button 
+                          className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Contribuer
+                        </Button>
                       </div>
                     </div>
                   </Card>
@@ -487,7 +473,7 @@ const QuestsPage = () => {
         {filteredQuests?.length === 0 && (
           <div className="text-center py-16">
             <History className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-600 mb-2">Aucune quête trouvée</h3>
+            <h3 className="text-xl font-semibold text-slate-600 mb-2">Aucune recherche trouvée</h3>
             <p className="text-slate-500 mb-4">Essayez de modifier vos filtres ou chargez les mystères historiques.</p>
             <Button 
               onClick={handlePopulateQuests}
