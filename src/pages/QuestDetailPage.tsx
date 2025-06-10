@@ -216,7 +216,7 @@ const QuestDetailPage = () => {
                   {isHistoricalQuest && (
                     <div className="mb-6">
                       <HistoricalContextPanel
-                        questType={quest.quest_type as 'templar' | 'lost_civilization' | 'graal'}
+                        questType={quest.quest_type as 'templar' | 'lost_civilization' | 'grail'}
                         storyBackground={quest.story_background}
                       />
                     </div>

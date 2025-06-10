@@ -53,7 +53,7 @@ const QuestsPage = () => {
   const questTypeLabels = {
     templar: 'Templiers',
     lost_civilization: 'Civilisation Perdue',
-    graal: 'Quête du Graal',
+    grail: 'Quête du Graal',
     custom: 'Personnalisée'
   };
 
@@ -79,7 +79,15 @@ const QuestsPage = () => {
       const result = await historicalQuestService.populateHistoricalQuests();
       console.log('Population result:', result);
       
-      setPopulationResult(result);
+      // Fix the result structure to always have a message
+      const normalizedResult = {
+        success: result.success,
+        message: result.success 
+          ? (result.message || `${result.data?.length || 0} quêtes chargées avec succès`)
+          : (result.message || result.error || 'Erreur lors du chargement')
+      };
+      
+      setPopulationResult(normalizedResult);
       
       if (result.success) {
         console.log('Quests populated successfully, refreshing list...');
@@ -116,7 +124,7 @@ const QuestsPage = () => {
 
   // Separate historical quests from custom ones
   const historicalQuests = filteredQuests?.filter(quest => 
-    ['templar', 'lost_civilization', 'graal'].includes(quest.quest_type)
+    ['templar', 'lost_civilization', 'grail'].includes(quest.quest_type)
   ) || [];
   
   const customQuests = filteredQuests?.filter(quest => 
@@ -221,7 +229,7 @@ const QuestsPage = () => {
               <option value="all">Tous les types</option>
               <option value="templar">Templiers</option>
               <option value="lost_civilization">Civilisation Perdue</option>
-              <option value="graal">Quête du Graal</option>
+              <option value="grail">Quête du Graal</option>
               <option value="custom">Personnalisée</option>
             </select>
             
@@ -285,7 +293,7 @@ const QuestsPage = () => {
                     <div className="relative">
                       <div className={`p-6 bg-gradient-to-br ${
                         quest.quest_type === 'templar' ? 'from-red-500 to-red-700' :
-                        quest.quest_type === 'graal' ? 'from-purple-500 to-purple-700' :
+                        quest.quest_type === 'grail' ? 'from-purple-500 to-purple-700' :
                         quest.quest_type === 'lost_civilization' ? 'from-blue-500 to-blue-700' :
                         'from-amber-500 to-amber-700'
                       } text-white`}>
