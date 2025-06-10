@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -87,13 +88,54 @@ const QuestEnrichmentEditor = () => {
   };
 
   const formatFieldValue = (field: keyof TreasureQuest, value: any): string => {
-    if (field === 'target_symbols' && Array.isArray(value)) {
-      return value.join(', ');
+    try {
+      if (field === 'target_symbols' && Array.isArray(value)) {
+        return value.join(', ');
+      }
+      if (field === 'clues') {
+        if (typeof value === 'string') {
+          try {
+            // Essayer de parser pour valider
+            JSON.parse(value);
+            return value;
+          } catch {
+            return JSON.stringify(value, null, 2);
+          }
+        }
+        if (typeof value === 'object' && value !== null) {
+          return JSON.stringify(value, null, 2);
+        }
+      }
+      if (typeof value === 'object' && value !== null) {
+        return JSON.stringify(value, null, 2);
+      }
+      return String(value || '');
+    } catch (error) {
+      console.error('Error formatting field value:', error);
+      return String(value || '');
     }
-    if (typeof value === 'object') {
-      return JSON.stringify(value, null, 2);
+  };
+
+  const handleFieldChange = (field: keyof TreasureQuest, newValue: string) => {
+    try {
+      let processedValue: any = newValue;
+      
+      if (field === 'target_symbols') {
+        processedValue = newValue.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      } else if (field === 'clues') {
+        try {
+          processedValue = JSON.parse(newValue);
+        } catch {
+          // Si ce n'est pas du JSON valide, garder la chaîne
+          processedValue = newValue;
+        }
+      }
+      
+      setEditedQuest(prev => ({ ...prev, [field]: processedValue }));
+    } catch (error) {
+      console.error('Error handling field change:', error);
+      setEditedQuest(prev => ({ ...prev, [field]: newValue }));
     }
-    return String(value || '');
   };
 
   const renderFieldEditor = (
@@ -136,23 +178,7 @@ const QuestEnrichmentEditor = () => {
             {isTextArea ? (
               <Textarea
                 value={formatFieldValue(field, fieldValue)}
-                onChange={(e) => {
-                  let newValue: any = e.target.value;
-                  
-                  if (field === 'target_symbols') {
-                    newValue = e.target.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
-                  }
-                  
-                  if (field === 'clues') {
-                    try {
-                      newValue = JSON.parse(e.target.value);
-                    } catch {
-                      newValue = e.target.value;
-                    }
-                  }
-                  
-                  setEditedQuest(prev => ({ ...prev, [field]: newValue }));
-                }}
+                onChange={(e) => handleFieldChange(field, e.target.value)}
                 rows={field === 'clues' ? 8 : 4}
                 className="font-mono text-sm"
               />
