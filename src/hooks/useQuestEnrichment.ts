@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { questEnrichmentService } from '@/services/questEnrichment/questEnrichmentService';
 import { QuestEnrichmentRequest, QuestEnrichmentResponse } from '@/services/questEnrichment/types';
 import { TreasureQuest } from '@/types/quests';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 
 interface EnrichmentHistoryItem {
   original: any;
@@ -24,7 +24,10 @@ export const useQuestEnrichment = () => {
     },
     onSuccess: (data, variables) => {
       const providerName = data.provider || variables.provider || 'IA';
-      toast.success(`Champ "${variables.field}" enrichi avec ${providerName}`);
+      toast({
+        title: "Enrichissement réussi",
+        description: `Champ "${variables.field}" enrichi avec ${providerName}`,
+      });
       
       const key = `${variables.questId}-${variables.field}`;
       setEnrichmentHistory(prev => new Map(prev.set(key, {
@@ -38,7 +41,11 @@ export const useQuestEnrichment = () => {
     onError: (error, variables) => {
       console.error('Erreur enrichissement:', error);
       const providerName = variables.provider || 'IA';
-      toast.error(`Erreur lors de l'enrichissement avec ${providerName}`);
+      toast({
+        title: "Erreur d'enrichissement",
+        description: `Erreur lors de l'enrichissement avec ${providerName}`,
+        variant: "destructive",
+      });
     }
   });
 
@@ -47,13 +54,20 @@ export const useQuestEnrichment = () => {
       return questEnrichmentService.saveEnrichedQuest(questId, updates);
     },
     onSuccess: () => {
-      toast.success('Quête sauvegardée avec succès');
+      toast({
+        title: "Sauvegarde réussie",
+        description: "Quête sauvegardée avec succès",
+      });
       queryClient.invalidateQueries({ queryKey: ['treasure-quests'] });
       queryClient.invalidateQueries({ queryKey: ['quest'] });
     },
     onError: (error) => {
       console.error('Erreur sauvegarde:', error);
-      toast.error('Erreur lors de la sauvegarde');
+      toast({
+        title: "Erreur de sauvegarde",
+        description: "Erreur lors de la sauvegarde",
+        variant: "destructive",
+      });
     }
   });
 

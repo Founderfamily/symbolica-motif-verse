@@ -1,3 +1,3 @@
 
 export { questEnrichmentService } from './questEnrichmentService';
-export * from './types';
+export type { QuestEnrichmentRequest, QuestEnrichmentResponse } from './types';
