@@ -21,6 +21,7 @@ export interface UserWithRoles {
   specialization?: string;
   credentials?: string;
   bio?: string;
+  created_at?: string;
 }
 
 export const useUserRoles = (userId?: string) => {

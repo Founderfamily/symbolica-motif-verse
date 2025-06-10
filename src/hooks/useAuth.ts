@@ -69,12 +69,27 @@ export const useAuth = () => {
           expertise_areas: profileData.expertise_areas,
           specialization: profileData.specialization,
           credentials: profileData.credentials,
-          bio: profileData.bio
+          bio: profileData.bio,
+          avatar_url: profileData.avatar_url
         });
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
     }
+  };
+
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
+    if (!user) throw new Error('User not authenticated');
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('id', user.id);
+
+    if (error) throw error;
+
+    // Refresh profile data
+    await fetchProfile(user.id);
   };
 
   const signIn = async (email: string, password: string) => {
@@ -123,6 +138,7 @@ export const useAuth = () => {
     signUp,
     signOut,
     resetPassword,
+    updateProfile,
     refreshProfile: () => user ? fetchProfile(user.id) : null
   };
 };

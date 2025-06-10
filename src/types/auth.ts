@@ -17,6 +17,7 @@ export interface UserProfile {
   total_points?: number;
   followers_count?: number;
   following_count?: number;
+  avatar_url?: string;
   
   // Extended fields for Master Explorer system
   roles?: string[];
