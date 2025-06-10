@@ -159,7 +159,7 @@ class QuestEnrichmentService {
         supabaseUpdates.clues = JSON.stringify(updates.clues);
       }
 
-      // Convertir target_symbols en array de strings
+      // Convertir target_symbols en array de strings pour Supabase
       if (updates.target_symbols) {
         supabaseUpdates.target_symbols = Array.isArray(updates.target_symbols) 
           ? updates.target_symbols 
