@@ -29,16 +29,56 @@ export class MCPService {
       throw new Error('Query too long');
     }
 
-    const { data, error } = await supabase.functions.invoke('mcp-search', {
-      body: { query: sanitizedQuery, provider }
+    console.log('Appel MCP avec:', {
+      provider,
+      queryLength: sanitizedQuery.length,
+      queryPreview: sanitizedQuery.substring(0, 100) + '...'
     });
 
-    if (error) {
-      console.error('MCP Search internal error:', error);
-      throw new Error('Search service temporarily unavailable');
-    }
+    try {
+      const { data, error } = await supabase.functions.invoke('mcp-search', {
+        body: { query: sanitizedQuery, provider }
+      });
 
-    return data;
+      if (error) {
+        console.error('Erreur Supabase lors de l\'appel MCP:', {
+          error,
+          provider,
+          message: error.message
+        });
+        throw new Error(`Erreur de service: ${error.message || 'Service temporairement indisponible'}`);
+      }
+
+      if (!data) {
+        throw new Error('Aucune donnée reçue du service MCP');
+      }
+
+      console.log('Réponse MCP brute:', {
+        success: data.success,
+        hasContent: !!data.content,
+        provider: data.provider,
+        error: data.error
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Erreur lors de l\'appel MCP:', {
+        error: error.message,
+        provider,
+        originalError: error
+      });
+      
+      // Distinguer les types d'erreurs
+      if (error.message?.includes('Function not found')) {
+        throw new Error('Service d\'enrichissement non disponible. Veuillez contacter l\'administrateur.');
+      }
+      
+      if (error.message?.includes('network') || error.message?.includes('timeout')) {
+        throw new Error('Problème de connexion. Veuillez réessayer dans quelques instants.');
+      }
+      
+      throw new Error(`Erreur du service d'enrichissement: ${error.message}`);
+    }
   }
 
   static getAvailableProviders(): AIProvider[] {

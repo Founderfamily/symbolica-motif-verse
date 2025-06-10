@@ -24,13 +24,46 @@ export class ContentCleaningService {
   }
 
   processFieldContent(field: string, content: string, request: any): any {
+    console.log('Traitement du contenu pour le champ:', {
+      field,
+      contentLength: content?.length,
+      contentType: typeof content,
+      isJSON: field === 'clues'
+    });
+
     if (field === 'clues') {
       try {
-        // Pour les indices, on tente de parser directement sans nettoyage
-        return JSON.parse(content);
+        // Pour les indices, nettoyer d'abord le contenu des balises markdown potentielles
+        let cleanedContent = content.trim();
+        
+        // Retirer les balises de code markdown si présentes
+        if (cleanedContent.startsWith('```json') && cleanedContent.endsWith('```')) {
+          cleanedContent = cleanedContent.slice(7, -3).trim();
+        } else if (cleanedContent.startsWith('```') && cleanedContent.endsWith('```')) {
+          cleanedContent = cleanedContent.slice(3, -3).trim();
+        }
+        
+        // Retirer les backticks simples autour du JSON
+        if (cleanedContent.startsWith('`') && cleanedContent.endsWith('`')) {
+          cleanedContent = cleanedContent.slice(1, -1).trim();
+        }
+        
+        console.log('Contenu nettoyé pour parsing JSON:', {
+          original: content.substring(0, 100) + '...',
+          cleaned: cleanedContent.substring(0, 100) + '...',
+          startsWithBrace: cleanedContent.startsWith('{') || cleanedContent.startsWith('[')
+        });
+        
+        const parsed = JSON.parse(cleanedContent);
+        console.log('JSON parsé avec succès:', { type: typeof parsed, isArray: Array.isArray(parsed) });
+        return parsed;
       } catch (parseError) {
-        console.warn('Erreur de parsing JSON pour les indices:', parseError);
-        console.log('Contenu reçu:', content);
+        console.error('Erreur de parsing JSON pour les indices:', {
+          error: parseError.message,
+          contentPreview: content.substring(0, 200),
+          contentLength: content.length
+        });
+        console.log('Contenu complet qui a échoué:', content);
         // En cas d'erreur, on retourne les indices actuels
         return request.currentValue;
       }
