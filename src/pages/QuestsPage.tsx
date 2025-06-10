@@ -17,7 +17,9 @@ import {
   History,
   Globe,
   BookOpen,
-  AlertCircle
+  AlertCircle,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -74,20 +76,16 @@ const QuestsPage = () => {
   const handlePopulateQuests = async () => {
     setIsPopulating(true);
     setPopulationResult(null);
+    
     try {
       console.log('Starting quest population...');
       const result = await historicalQuestService.populateHistoricalQuests();
       console.log('Population result:', result);
       
-      // Fix the result structure to always have a message
-      const normalizedResult = {
+      setPopulationResult({
         success: result.success,
-        message: result.success 
-          ? (result.message || `${result.data?.length || 0} quêtes chargées avec succès`)
-          : (result.message || result.error || 'Erreur lors du chargement')
-      };
-      
-      setPopulationResult(normalizedResult);
+        message: result.message
+      });
       
       if (result.success) {
         console.log('Quests populated successfully, refreshing list...');
@@ -260,15 +258,19 @@ const QuestsPage = () => {
             </Button>
           </div>
           
-          {/* Résultat de population */}
+          {/* Résultat de population amélioré */}
           {populationResult && (
-            <div className={`mt-4 p-4 rounded-lg ${
+            <div className={`mt-4 p-4 rounded-lg flex items-center gap-3 ${
               populationResult.success 
                 ? 'bg-green-50 border border-green-200 text-green-800'
                 : 'bg-red-50 border border-red-200 text-red-800'
             }`}>
+              {populationResult.success ? (
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              ) : (
+                <XCircle className="w-5 h-5 text-red-600" />
+              )}
               <p className="font-medium">
-                {populationResult.success ? '✅ ' : '❌ '}
                 {populationResult.message}
               </p>
             </div>
@@ -312,13 +314,6 @@ const QuestsPage = () => {
                           <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                             <History className="w-3 h-3 mr-1" />
                             Basé sur l'Histoire
-                          </Badge>
-                        </div>
-                        
-                        {/* Debug: Affichage de l'ID */}
-                        <div className="mt-2">
-                          <Badge variant="secondary" className="bg-black/20 text-white/70 border-white/20 text-xs">
-                            ID: {quest.id.slice(0, 8)}...
                           </Badge>
                         </div>
                       </div>
@@ -372,7 +367,6 @@ const QuestsPage = () => {
                           <Button 
                             variant="outline" 
                             className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50"
-                            onClick={() => console.log('Navigating to quest:', quest.id)}
                           >
                             Voir détails
                           </Button>

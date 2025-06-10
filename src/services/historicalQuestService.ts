@@ -2,23 +2,43 @@
 import { supabase } from '@/integrations/supabase/client';
 import { historicalQuests } from '@/data/historicalQuests';
 
+interface ServiceResponse<T = any> {
+  success: boolean;
+  message: string;
+  data?: T;
+  error?: string;
+}
+
 export const historicalQuestService = {
-  async populateHistoricalQuests() {
+  async populateHistoricalQuests(): Promise<ServiceResponse> {
     try {
       console.log('Starting to populate historical quests...');
       
       // Check if quests already exist
-      const { data: existingQuests } = await supabase
+      const { data: existingQuests, error: checkError } = await supabase
         .from('treasure_quests')
         .select('title')
         .in('title', historicalQuests.map(q => q.title));
+      
+      if (checkError) {
+        console.error('Error checking existing quests:', checkError);
+        return {
+          success: false,
+          message: 'Erreur lors de la vérification des quêtes existantes',
+          error: checkError.message
+        };
+      }
       
       const existingTitles = existingQuests?.map(q => q.title) || [];
       const newQuests = historicalQuests.filter(q => !existingTitles.includes(q.title));
       
       if (newQuests.length === 0) {
         console.log('All historical quests already exist');
-        return { success: true, message: 'All quests already exist' };
+        return { 
+          success: true, 
+          message: `Toutes les quêtes (${existingQuests?.length || 0}) sont déjà présentes`,
+          data: existingQuests
+        };
       }
       
       // Convert quests to database format
@@ -41,6 +61,8 @@ export const historicalQuestService = {
         translations: quest.translations as any
       }));
       
+      console.log(`Attempting to insert ${questsForDb.length} new quests`);
+      
       // Insert new quests
       const { data, error } = await supabase
         .from('treasure_quests')
@@ -48,26 +70,32 @@ export const historicalQuestService = {
         .select();
       
       if (error) {
-        throw error;
+        console.error('Error inserting quests:', error);
+        return {
+          success: false,
+          message: 'Erreur lors de l\'insertion des quêtes',
+          error: error.message
+        };
       }
       
       console.log(`Successfully inserted ${newQuests.length} historical quests`);
       return { 
         success: true, 
-        message: `Inserted ${newQuests.length} new historical quests`,
-        data 
+        message: `${newQuests.length} nouvelle(s) quête(s) historique(s) ajoutée(s) avec succès`,
+        data: data
       };
       
     } catch (error) {
-      console.error('Error populating historical quests:', error);
+      console.error('Unexpected error populating historical quests:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+        message: 'Erreur inattendue lors du chargement des quêtes',
+        error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   },
 
-  async getHistoricalQuestByType(questType: string) {
+  async getHistoricalQuestByType(questType: string): Promise<ServiceResponse> {
     try {
       const { data, error } = await supabase
         .from('treasure_quests')
@@ -76,19 +104,30 @@ export const historicalQuestService = {
         .eq('status', 'active')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
-      return { success: true, data };
+      if (error) {
+        return {
+          success: false,
+          message: 'Erreur lors de la récupération de la quête',
+          error: error.message
+        };
+      }
+
+      return { 
+        success: true, 
+        message: 'Quête récupérée avec succès',
+        data: data
+      };
       
     } catch (error) {
-      console.error('Error fetching historical quest:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+        message: 'Erreur inattendue lors de la récupération',
+        error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   },
 
-  async updateQuestProgress(questId: string, userId: string, clueIndex: number, discoveryData: any) {
+  async updateQuestProgress(questId: string, userId: string, clueIndex: number, discoveryData: any): Promise<ServiceResponse> {
     try {
       const { data, error } = await supabase
         .from('quest_progress')
@@ -103,14 +142,25 @@ export const historicalQuestService = {
         .select()
         .single();
       
-      if (error) throw error;
-      return { success: true, data };
+      if (error) {
+        return {
+          success: false,
+          message: 'Erreur lors de la mise à jour de la progression',
+          error: error.message
+        };
+      }
+
+      return { 
+        success: true, 
+        message: 'Progression mise à jour avec succès',
+        data: data
+      };
       
     } catch (error) {
-      console.error('Error updating quest progress:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+        message: 'Erreur inattendue lors de la mise à jour',
+        error: error instanceof Error ? error.message : 'Erreur inconnue'
       };
     }
   }
