@@ -7,7 +7,6 @@ import { Users, BookOpen, Search, ArrowRight, Plus } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { interestGroupService } from '@/services/interestGroupService';
 import { usePlatformStats } from '@/hooks/usePlatformStats';
 
 interface InterestGroup {
@@ -44,49 +43,42 @@ const Community = () => {
         console.log('🏘️ [Community] Loading interest groups...');
         setLoading(true);
         
-        const groupsData = await interestGroupService.getInterestGroups(4);
-        console.log('✅ [Community] Interest groups loaded:', groupsData);
-        
-        if (groupsData && groupsData.length > 0) {
-          setGroups(groupsData);
-        } else {
-          // Fallback avec des données statiques améliorées
-          console.log('🔄 [Community] Using fallback data');
-          setGroups([
-            {
-              id: '1',
-              name: 'Motifs Art Déco',
-              culture: 'Art Déco',
-              members_count: 156,
-              discoveries_count: 342,
-              themes: ['Architecture', 'Design', 'Géométrie']
-            },
-            {
-              id: '2',
-              name: 'Symbolisme Celtique',
-              culture: 'Celtique',
-              members_count: 203,
-              discoveries_count: 489,
-              themes: ['Spiritualité', 'Nature', 'Ancestral']
-            },
-            {
-              id: '3',
-              name: 'Motifs Japonais',
-              culture: 'Japonais',
-              members_count: 287,
-              discoveries_count: 567,
-              themes: ['Tradition', 'Minimalisme', 'Zen']
-            },
-            {
-              id: '4',
-              name: 'Art Islamique',
-              culture: 'Islamique',
-              members_count: 134,
-              discoveries_count: 298,
-              themes: ['Calligraphie', 'Géométrie', 'Ornements']
-            }
-          ]);
-        }
+        // Utiliser des données statiques améliorées
+        console.log('🔄 [Community] Using static data');
+        setGroups([
+          {
+            id: '1',
+            name: 'Motifs Art Déco',
+            culture: 'Art Déco',
+            members_count: 156,
+            discoveries_count: 342,
+            themes: ['Architecture', 'Design', 'Géométrie']
+          },
+          {
+            id: '2',
+            name: 'Symbolisme Celtique',
+            culture: 'Celtique',
+            members_count: 203,
+            discoveries_count: 489,
+            themes: ['Spiritualité', 'Nature', 'Ancestral']
+          },
+          {
+            id: '3',
+            name: 'Motifs Japonais',
+            culture: 'Japonais',
+            members_count: 287,
+            discoveries_count: 567,
+            themes: ['Tradition', 'Minimalisme', 'Zen']
+          },
+          {
+            id: '4',
+            name: 'Art Islamique',
+            culture: 'Islamique',
+            members_count: 134,
+            discoveries_count: 298,
+            themes: ['Calligraphie', 'Géométrie', 'Ornements']
+          }
+        ]);
       } catch (error) {
         console.error('❌ [Community] Error loading groups:', error);
         // Utiliser le fallback en cas d'erreur
