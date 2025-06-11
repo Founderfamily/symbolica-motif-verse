@@ -1,63 +1,47 @@
-
 import React from 'react';
-import InteractiveHero from '@/components/sections/InteractiveHero';
-import InteractiveDiscovery from '@/components/sections/InteractiveDiscovery';
-import CulturalJourney from '@/components/sections/CulturalJourney';
-import CreativeCommunity from '@/components/sections/CreativeCommunity';
+import Hero from '@/components/sections/Hero';
+import QuickAccess from '@/components/sections/QuickAccess';
 import FeaturedCollections from '@/components/sections/FeaturedCollections';
-import SymbolDiscoverySection from '@/components/sections/SymbolDiscoverySection';
 import Features from '@/components/sections/Features';
 import HowItWorks from '@/components/sections/HowItWorks';
-import Testimonials from '@/components/sections/Testimonials';
+import UploadTools from '@/components/sections/UploadTools';
+import Community from '@/components/sections/Community';
 import Gamification from '@/components/sections/Gamification';
+import Testimonials from '@/components/sections/Testimonials';
+import RoadmapSection from '@/components/sections/RoadmapSection';
 import CallToAction from '@/components/sections/CallToAction';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ErrorHandler } from '@/utils/errorHandler';
+import EnhancedSymbolDiscovery from '@/components/sections/EnhancedSymbolDiscovery';
 
-const HomePage: React.FC = () => {
-  console.log('🏠 HomePage rendu avec nouvelle interface visuelle');
-
-  // Error handling setup
-  React.useEffect(() => {
-    const unsubscribe = ErrorHandler.getInstance().onError((error) => {
-      console.error('HomePage received error:', error);
-    });
-
-    return unsubscribe;
-  }, []);
+const HomePage = () => {
+  const handleSectionError = (sectionName: string, error: Error, errorInfo: React.ErrorInfo) => {
+    console.error(`Error in ${sectionName} section:`, error, errorInfo);
+  };
 
   return (
     <div className="min-h-screen">
-      {/* Hero interactif remplace l'ancien Hero */}
+      {/* Hero Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'InteractiveHero')
+          ErrorHandler.handleComponentError(error, errorInfo, 'Hero')
         }
       >
-        <InteractiveHero />
-      </ErrorBoundary>
-      
-      {/* Découverte interactive remplace QuickAccess */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'InteractiveDiscovery')
-        }
-      >
-        <InteractiveDiscovery />
+        <Hero />
       </ErrorBoundary>
 
-      {/* Voyage culturel - nouvelle section */}
+      {/* Quick Access */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'CulturalJourney')
+          ErrorHandler.handleComponentError(error, errorInfo, 'QuickAccess')
         }
       >
-        <div className="py-16 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
-          <CulturalJourney />
+        <div className="py-16">
+          <QuickAccess />
         </div>
       </ErrorBoundary>
-      
-      {/* Collections mises en avant */}
+
+      {/* Featured Collections */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'FeaturedCollections')
@@ -67,30 +51,17 @@ const HomePage: React.FC = () => {
           <FeaturedCollections />
         </div>
       </ErrorBoundary>
-      
-      {/* Section de découverte des symboles améliorée */}
+
+      {/* Enhanced Symbol Discovery Section (Replacing SymbolTriptychSection) */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'SymbolDiscoverySection')
+          ErrorHandler.handleComponentError(error, errorInfo, 'EnhancedSymbolDiscovery')
         }
       >
-        <div className="py-16">
-          <SymbolDiscoverySection />
-        </div>
+        <EnhancedSymbolDiscovery />
       </ErrorBoundary>
 
-      {/* Communauté créative - remplace Community */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'CreativeCommunity')
-        }
-      >
-        <div className="py-16 bg-gradient-to-br from-rose-50/50 to-pink-50/30">
-          <CreativeCommunity />
-        </div>
-      </ErrorBoundary>
-      
-      {/* Features avec design mis à jour */}
+      {/* Features */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'Features')
@@ -100,8 +71,8 @@ const HomePage: React.FC = () => {
           <Features />
         </div>
       </ErrorBoundary>
-      
-      {/* Comment ça marche */}
+
+      {/* How It Works */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'HowItWorks')
@@ -111,30 +82,61 @@ const HomePage: React.FC = () => {
           <HowItWorks />
         </div>
       </ErrorBoundary>
-      
+
+      {/* Upload Tools */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'UploadTools')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <UploadTools />
+        </div>
+      </ErrorBoundary>
+
+      {/* Community Section (Enhanced) */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'Community')
+        }
+      >
+        <Community />
+      </ErrorBoundary>
+
       {/* Gamification */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'Gamification')
         }
       >
-        <div className="py-16 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
+        <div className="py-16 bg-slate-50/50">
           <Gamification />
         </div>
       </ErrorBoundary>
-      
-      {/* Témoignages */}
+
+      {/* Testimonials */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'Testimonials')
         }
       >
-        <div className="py-16 bg-slate-50/50">
+        <div className="py-16">
           <Testimonials />
         </div>
       </ErrorBoundary>
-      
-      {/* Call to action final */}
+
+      {/* Roadmap */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'RoadmapSection')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <RoadmapSection />
+        </div>
+      </ErrorBoundary>
+
+      {/* Call to Action */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'CallToAction')

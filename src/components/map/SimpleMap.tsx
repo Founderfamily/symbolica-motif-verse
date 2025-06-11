@@ -2,8 +2,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { symbolGeolocationService, SymbolLocation } from '@/services/symbolGeolocationService';
 import { mapboxConfigService } from '@/services/admin/mapboxConfigService';
-import { MapPin, AlertTriangle, Settings } from 'lucide-react';
+import { MapPin, AlertTriangle, Settings, Map, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const SimpleMap: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -11,6 +12,7 @@ const SimpleMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [mapboxReady, setMapboxReady] = useState(false);
 
   // Fonction pour attendre que Mapbox GL JS soit chargé
   const waitForMapboxGL = (): Promise<any> => {
@@ -18,6 +20,7 @@ const SimpleMap: React.FC = () => {
       const checkMapbox = () => {
         if ((window as any).mapboxgl) {
           console.log('✅ [SimpleMap] Mapbox GL JS is now available');
+          setMapboxReady(true);
           resolve((window as any).mapboxgl);
           return;
         }
@@ -38,6 +41,7 @@ const SimpleMap: React.FC = () => {
         if ((window as any).mapboxgl) {
           clearInterval(interval);
           console.log('✅ [SimpleMap] Mapbox GL JS loaded after', attempts * 200, 'ms');
+          setMapboxReady(true);
           resolve((window as any).mapboxgl);
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
@@ -118,13 +122,16 @@ const SimpleMap: React.FC = () => {
             zoom: 6
           });
 
+          // Ajouter des contrôles de navigation
+          map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
           // Ajouter les marqueurs
           symbolLocations.forEach(location => {
             const popup = new mapboxgl.Popup().setHTML(
-              `<div class="p-2">
-                <h3 class="font-semibold text-sm">${location.name}</h3>
-                <p class="text-xs text-gray-600">${location.culture}</p>
-                ${location.description ? `<p class="text-xs mt-1">${location.description}</p>` : ''}
+              `<div class="p-3">
+                <h3 class="font-semibold text-sm mb-1">${location.name}</h3>
+                <p class="text-xs text-gray-600 mb-1">${location.culture}</p>
+                ${location.description ? `<p class="text-xs">${location.description}</p>` : ''}
               </div>`
             );
 
@@ -164,10 +171,17 @@ const SimpleMap: React.FC = () => {
   if (loading) {
     return (
       <div className="w-full h-[500px] bg-slate-100 rounded-lg flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-2"></div>
-          <p className="text-slate-600">Chargement de la carte...</p>
-        </div>
+        <Card className="bg-white shadow-lg">
+          <CardContent className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">Chargement de la carte</h3>
+            <p className="text-slate-600 mb-4">Initialisation de la carte interactive...</p>
+            <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+              <Map className="h-4 w-4" />
+              <span>Mapbox {mapboxReady ? '✓' : '⏳'}</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -175,47 +189,67 @@ const SimpleMap: React.FC = () => {
   if (error) {
     return (
       <div className="w-full h-[500px] bg-slate-100 rounded-lg flex items-center justify-center">
-        <div className="text-center p-6 max-w-md">
-          <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 mb-2">Carte non disponible</h3>
-          <p className="text-slate-600 mb-4">{error}</p>
-          
-          <div className="flex gap-2 justify-center mb-4">
-            <Button onClick={handleRetry} variant="outline" size="sm">
-              Réessayer
-            </Button>
-            {isAdmin && (
-              <Button 
-                onClick={() => window.location.href = '/admin/settings'}
-                size="sm"
-                className="flex items-center gap-1"
-              >
-                <Settings className="h-3 w-3" />
-                Configurer
+        <Card className="bg-white shadow-lg max-w-md">
+          <CardContent className="p-8 text-center">
+            <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-900 mb-2">Carte non disponible</h3>
+            <p className="text-slate-600 mb-6">{error}</p>
+            
+            <div className="flex gap-2 justify-center mb-6">
+              <Button onClick={handleRetry} variant="outline" size="sm">
+                Réessayer
               </Button>
-            )}
-          </div>
-          
-          {locations.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-700">Emplacements disponibles :</p>
-              <div className="max-h-32 overflow-y-auto space-y-2 bg-white rounded-lg p-3 border">
-                {locations.slice(0, 5).map(location => (
-                  <div key={location.id} className="flex items-center gap-2 text-xs">
-                    <MapPin className="h-3 w-3 text-amber-600 flex-shrink-0" />
-                    <span className="text-slate-700">{location.name}</span>
-                    <span className="text-slate-500">({location.culture})</span>
-                  </div>
-                ))}
-                {locations.length > 5 && (
-                  <p className="text-xs text-slate-400 text-center pt-2 border-t">
-                    +{locations.length - 5} autres emplacements...
-                  </p>
-                )}
-              </div>
+              {isAdmin && (
+                <Button 
+                  onClick={() => window.location.href = '/admin/settings'}
+                  size="sm"
+                  className="flex items-center gap-1"
+                >
+                  <Settings className="h-3 w-3" />
+                  Configurer
+                </Button>
+              )}
             </div>
-          )}
-        </div>
+            
+            {locations.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-700">Emplacements disponibles :</p>
+                <div className="max-h-32 overflow-y-auto space-y-2 bg-slate-50 rounded-lg p-3 border">
+                  {locations.slice(0, 5).map(location => (
+                    <div key={location.id} className="flex items-center gap-2 text-xs">
+                      <MapPin className="h-3 w-3 text-amber-600 flex-shrink-0" />
+                      <span className="text-slate-700">{location.name}</span>
+                      <span className="text-slate-500">({location.culture})</span>
+                    </div>
+                  ))}
+                  {locations.length > 5 && (
+                    <p className="text-xs text-slate-400 text-center pt-2 border-t">
+                      +{locations.length - 5} autres emplacements...
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Navigation className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-900">Alternative</span>
+              </div>
+              <p className="text-xs text-blue-700">
+                Explorez nos collections thématiques en attendant la restauration de la carte interactive.
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 text-blue-700 border-blue-300"
+                onClick={() => window.location.href = '/collections'}
+              >
+                Voir les Collections
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

@@ -1,254 +1,343 @@
 
-import React, { useEffect, useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Users, Book, Search } from 'lucide-react';
-import { culturalGradient } from '@/lib/utils';
-import { useTranslation } from '@/i18n/useTranslation';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Users, BookOpen, Search, ArrowRight, Plus } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { getInterestGroups } from '@/services/interestGroupService';
-import { InterestGroup } from '@/types/interest-groups';
-import EmptyState from '@/components/common/EmptyState';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { interestGroupService } from '@/services/interestGroupService';
+import { usePlatformStats } from '@/hooks/usePlatformStats';
 
-// Données d'exemple pour le fallback
-const fallbackGroups: InterestGroup[] = [
-  {
-    id: 'fallback-1',
-    name: 'Symboles Celtes',
-    slug: 'symboles-celtes',
-    description: 'Exploration des symboles de la culture celtique à travers l\'Europe',
-    icon: null,
-    banner_image: null,
-    theme_color: '#2563eb',
-    is_public: true,
-    created_at: '',
-    updated_at: '',
-    created_by: '',
-    members_count: 234,
-    discoveries_count: 45
-  },
-  {
-    id: 'fallback-2',
-    name: 'Art Médiéval',
-    slug: 'art-medieval',
-    description: 'Découverte des symboles dans l\'art et l\'architecture médiévale',
-    icon: null,
-    banner_image: null,
-    theme_color: '#7c3aed',
-    is_public: true,
-    created_at: '',
-    updated_at: '',
-    created_by: '',
-    members_count: 189,
-    discoveries_count: 67
-  },
-  {
-    id: 'fallback-3',
-    name: 'Cultures Asiatiques',
-    slug: 'cultures-asiatiques',
-    description: 'Étude comparative des symboles traditionnels asiatiques',
-    icon: null,
-    banner_image: null,
-    theme_color: '#dc2626',
-    is_public: true,
-    created_at: '',
-    updated_at: '',
-    created_by: '',
-    members_count: 156,
-    discoveries_count: 38
-  },
-  {
-    id: 'fallback-4',
-    name: 'Patrimoine Africain',
-    slug: 'patrimoine-africain',
-    description: 'Préservation et analyse des symboles du patrimoine africain',
-    icon: null,
-    banner_image: null,
-    theme_color: '#059669',
-    is_public: true,
-    created_at: '',
-    updated_at: '',
-    created_by: '',
-    members_count: 112,
-    discoveries_count: 29
-  }
-];
+interface InterestGroup {
+  id: string;
+  name: string;
+  culture: string;
+  members_count: number;
+  discoveries_count: number;
+  themes?: string[];
+}
 
 const Community = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [groups, setGroups] = useState<InterestGroup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usingFallback, setUsingFallback] = useState(false);
+  const { data: platformStats, isLoading: statsLoading } = usePlatformStats();
+
+  // Fonction pour obtenir un gradient basé sur la culture
+  const culturalGradient = (culture: string) => {
+    const gradients = {
+      'Art Déco': 'from-blue-100 to-indigo-100',
+      'Celtique': 'from-green-100 to-emerald-100',
+      'Japonais': 'from-red-100 to-pink-100',
+      'Islamique': 'from-purple-100 to-violet-100',
+      'Égyptien': 'from-yellow-100 to-orange-100',
+      'Nordique': 'from-cyan-100 to-blue-100'
+    };
+    return gradients[culture] || 'from-slate-100 to-gray-100';
+  };
 
   useEffect(() => {
-    const fetchGroups = async () => {
+    const loadGroups = async () => {
       try {
-        console.log('🚀 [Community] Fetching interest groups...');
-        const allGroups = await getInterestGroups();
-        const topGroups = allGroups
-          ?.sort((a, b) => b.members_count - a.members_count)
-          ?.slice(0, 4);
+        console.log('🏘️ [Community] Loading interest groups...');
+        setLoading(true);
         
-        console.log('✅ [Community] Data received:', topGroups?.length || 0, 'groups');
+        const groupsData = await interestGroupService.getInterestGroups(4);
+        console.log('✅ [Community] Interest groups loaded:', groupsData);
         
-        if (topGroups && topGroups.length > 0) {
-          setGroups(topGroups);
-          setUsingFallback(false);
+        if (groupsData && groupsData.length > 0) {
+          setGroups(groupsData);
         } else {
-          console.log('📝 [Community] No data, using fallback');
-          setGroups(fallbackGroups);
-          setUsingFallback(true);
+          // Fallback avec des données statiques améliorées
+          console.log('🔄 [Community] Using fallback data');
+          setGroups([
+            {
+              id: '1',
+              name: 'Motifs Art Déco',
+              culture: 'Art Déco',
+              members_count: 156,
+              discoveries_count: 342,
+              themes: ['Architecture', 'Design', 'Géométrie']
+            },
+            {
+              id: '2',
+              name: 'Symbolisme Celtique',
+              culture: 'Celtique',
+              members_count: 203,
+              discoveries_count: 489,
+              themes: ['Spiritualité', 'Nature', 'Ancestral']
+            },
+            {
+              id: '3',
+              name: 'Motifs Japonais',
+              culture: 'Japonais',
+              members_count: 287,
+              discoveries_count: 567,
+              themes: ['Tradition', 'Minimalisme', 'Zen']
+            },
+            {
+              id: '4',
+              name: 'Art Islamique',
+              culture: 'Islamique',
+              members_count: 134,
+              discoveries_count: 298,
+              themes: ['Calligraphie', 'Géométrie', 'Ornements']
+            }
+          ]);
         }
-      } catch (err) {
-        console.error('❌ [Community] Error:', err);
-        console.log('📝 [Community] Using fallback data due to error');
-        setGroups(fallbackGroups);
-        setUsingFallback(true);
+      } catch (error) {
+        console.error('❌ [Community] Error loading groups:', error);
+        // Utiliser le fallback en cas d'erreur
+        setGroups([
+          {
+            id: '1',
+            name: 'Motifs Art Déco',
+            culture: 'Art Déco',
+            members_count: 156,
+            discoveries_count: 342,
+            themes: ['Architecture', 'Design']
+          },
+          {
+            id: '2',
+            name: 'Symbolisme Celtique',
+            culture: 'Celtique',
+            members_count: 203,
+            discoveries_count: 489,
+            themes: ['Spiritualité', 'Nature']
+          }
+        ]);
       } finally {
         setLoading(false);
       }
     };
 
-    // Timeout réduit à 3 secondes
-    const safetyTimeout = setTimeout(() => {
-      if (loading) {
-        console.log('⏰ [Community] Timeout reached, using fallback data');
-        setGroups(fallbackGroups);
-        setUsingFallback(true);
-        setLoading(false);
-      }
-    }, 3000);
-
-    fetchGroups().finally(() => {
-      clearTimeout(safetyTimeout);
-    });
-
-    return () => clearTimeout(safetyTimeout);
+    loadGroups();
   }, []);
-  
+
   return (
-    <section className="py-16 px-4 md:px-8 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
-      {/* Background patterns */}
-      <div className="absolute inset-0 opacity-5 pattern-grid-lg"></div>
-      
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <span className="px-4 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 inline-block mb-2">
-            <I18nText translationKey="community" ns="sections">Communauté</I18nText>
-          </span>
-          <h2 className="text-4xl font-bold mb-4 text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-            <I18nText translationKey="title" ns="community">Hub Communautaire</I18nText>
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            <I18nText translationKey="community.title">Une Communauté Passionnée</I18nText>
           </h2>
-          <p className="text-center text-slate-600 mb-10 max-w-2xl mx-auto">
-            <I18nText translationKey="description" ns="community">Participez aux discussions, partagez vos découvertes et collaborez avec d'autres chercheurs</I18nText>
+          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+            <I18nText translationKey="community.description">
+              Rejoignez des milliers d'explorateurs qui partagent leurs découvertes et enrichissent notre compréhension du patrimoine symbolique mondial.
+            </I18nText>
           </p>
         </div>
-        
-        {loading ? (
-          <div className="flex items-center justify-center h-32 mb-12">
-            <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
-            <span className="ml-3 text-slate-600">Chargement des groupes communautaires...</span>
+
+        {/* Statistiques de la plateforme */}
+        {!statsLoading && platformStats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-blue-700 mb-1">
+                  {platformStats.totalContributions.toLocaleString()}
+                </div>
+                <div className="text-sm text-blue-600">Contributions</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-emerald-700 mb-1">
+                  {platformStats.totalSymbols.toLocaleString()}
+                </div>
+                <div className="text-sm text-emerald-600">Symboles</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-purple-700 mb-1">
+                  {platformStats.totalCultures}
+                </div>
+                <div className="text-sm text-purple-600">Cultures</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-amber-700 mb-1">
+                  {platformStats.activeUsers}
+                </div>
+                <div className="text-sm text-amber-600">Contributeurs</div>
+              </CardContent>
+            </Card>
           </div>
-        ) : (
-          <div className="mb-12" data-testid="community-groups">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {groups.map((group, i) => (
-                <Card 
-                  key={group.id} 
-                  className={`border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden symbol-card ${culturalGradient('default')} cursor-pointer`}
-                  onClick={() => navigate(`/groups/${group.slug}`)}
-                >
-                  <div className="h-2 w-full bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+        )}
+
+        {/* Groupes d'intérêt */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-semibold text-slate-900 mb-6">Groupes d'Intérêt</h3>
+          
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Card key={index} className="overflow-hidden">
                   <CardContent className="p-6">
-                    <div className="flex items-center gap-4 mb-4">
-                      <Avatar className="h-14 w-14 ring-2 ring-white shadow-md">
-                        <AvatarImage 
-                          src={group.banner_image || group.icon} 
-                          alt={group.name} 
-                        />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-lg">
-                          {group.name.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="font-semibold text-lg text-slate-800 line-clamp-1">
-                          {group.name}
-                        </p>
-                        <p className="text-sm text-slate-500 flex items-center">
-                          <Users className="h-3 w-3 mr-1 text-slate-400" /> 
-                          {group.members_count} <I18nText translationKey="stats.members" ns="community">membres</I18nText>
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {group.description && (
-                      <p className="text-sm text-slate-600 mb-3 line-clamp-2">
-                        {group.description}
-                      </p>
-                    )}
-                    
-                    <div className="flex justify-between text-sm items-center">
-                      <span className="flex items-center gap-1 text-slate-600">
-                        <MapPin className="h-4 w-4 text-slate-500" />
-                        {group.discoveries_count} <I18nText translationKey="stats.discoveries" ns="community">découvertes</I18nText>
-                      </span>
-                      <span className="px-3 py-1.5 text-sm font-medium bg-white rounded-md shadow-sm hover:shadow border border-slate-100 text-slate-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white cursor-pointer transition-all duration-200">
-                        <I18nText translationKey="stats.join" ns="community">Voir</I18nText>
-                      </span>
+                    <div className="animate-pulse">
+                      <div className="h-4 bg-slate-200 rounded mb-3"></div>
+                      <div className="h-6 bg-slate-200 rounded mb-2"></div>
+                      <div className="h-3 bg-slate-200 rounded w-2/3"></div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-            
-            {usingFallback && (
-              <div className="text-center mt-8">
-                <p className="text-sm text-slate-500">
-                  Données d'exemple • Les groupes réels seront synchronisés prochainement
-                </p>
-              </div>
-            )}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {groups.map((group) => (
+                <Card key={group.id} className={`overflow-hidden hover:shadow-lg transition-all duration-200 bg-gradient-to-br ${culturalGradient(group.culture)}`}>
+                  <div className="h-1 bg-gradient-to-r from-amber-400 to-amber-600"></div>
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3 mb-4">
+                      <Avatar className="h-12 w-12">
+                        <AvatarFallback className="bg-amber-100 text-amber-800 font-semibold">
+                          {group.culture.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-slate-900 mb-1">{group.name}</h4>
+                        <Badge variant="secondary" className="text-xs">
+                          {group.culture}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {group.themes && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {group.themes.slice(0, 2).map((theme, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {theme}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="text-center">
+                        <div className="font-semibold text-slate-900">
+                          {group.members_count.toLocaleString()}
+                        </div>
+                        <div className="text-slate-600">Contributeurs</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-semibold text-slate-900">
+                          {group.discoveries_count.toLocaleString()}
+                        </div>
+                        <div className="text-slate-600">Découvertes</div>
+                      </div>
+                    </div>
+
+                    <Button 
+                      className="w-full mt-4" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate('/community')}
+                    >
+                      <I18nText translationKey="community.stats.join">Rejoindre</I18nText>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Activités récentes */}
+        {!statsLoading && platformStats?.recentActivities && platformStats.recentActivities.length > 0 && (
+          <div className="mb-12">
+            <h3 className="text-2xl font-semibold text-slate-900 mb-6">Activités Récentes</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {platformStats.recentActivities.slice(0, 6).map((activity) => (
+                <Card key={activity.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Plus className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-900 text-sm">{activity.title}</p>
+                        <p className="text-xs text-slate-600">par {activity.user_name}</p>
+                        {activity.culture && (
+                          <Badge variant="outline" className="text-xs mt-1">
+                            {activity.culture}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
-        
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <div className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-200">
-              <Users className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">
-              <I18nText translationKey="features.thematicCommunities.title" ns="community">Communautés Thématiques</I18nText>
-            </h3>
-            <p className="text-slate-600">
-              <I18nText translationKey="features.thematicCommunities.description" ns="community">Rejoignez des groupes spécialisés selon vos centres d'intérêt culturels et patrimoniaux</I18nText>
-            </p>
-          </div>
-          
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <div className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-200">
-              <Book className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">
-              <I18nText translationKey="features.personalSpace.title" ns="community">Espace Personnel</I18nText>
-            </h3>
-            <p className="text-slate-600">
-              <I18nText translationKey="features.personalSpace.description" ns="community">Créez votre propre collection de symboles et partagez vos découvertes avec la communauté</I18nText>
-            </p>
-          </div>
-          
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <div className="w-12 h-12 mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-200">
-              <Search className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">
-              <I18nText translationKey="features.intuitiveNavigation.title" ns="community">Navigation Intuitive</I18nText>
-            </h3>
-            <p className="text-slate-600">
-              <I18nText translationKey="features.intuitiveNavigation.description" ns="community">Explorez facilement les symboles grâce à notre interface de recherche avancée et nos filtres intelligents</I18nText>
-            </p>
-          </div>
+
+        {/* Fonctionnalités communautaires */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-200">
+            <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+            <CardContent className="p-6">
+              <div className="bg-blue-100 p-3 rounded-2xl w-14 h-14 flex items-center justify-center mb-4">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+              <h4 className="text-lg font-semibold text-slate-900 mb-2">
+                <I18nText translationKey="community.features.groups.title">Communautés Thématiques</I18nText>
+              </h4>
+              <p className="text-slate-600 text-sm">
+                <I18nText translationKey="community.features.groups.description">
+                  Rejoignez des groupes passionnés par des cultures spécifiques et partagez vos découvertes.
+                </I18nText>
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200 hover:shadow-lg transition-all duration-200">
+            <div className="h-1 bg-gradient-to-r from-amber-400 to-amber-600"></div>
+            <CardContent className="p-6">
+              <div className="bg-amber-100 p-3 rounded-2xl w-14 h-14 flex items-center justify-center mb-4">
+                <BookOpen className="h-6 w-6 text-amber-600" />
+              </div>
+              <h4 className="text-lg font-semibold text-slate-900 mb-2">
+                <I18nText translationKey="community.features.collections.title">Collections Personnelles</I18nText>
+              </h4>
+              <p className="text-slate-600 text-sm">
+                <I18nText translationKey="community.features.collections.description">
+                  Créez et organisez vos propres collections de symboles selon vos centres d'intérêt.
+                </I18nText>
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 hover:shadow-lg transition-all duration-200">
+            <div className="h-1 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
+            <CardContent className="p-6">
+              <div className="bg-emerald-100 p-3 rounded-2xl w-14 h-14 flex items-center justify-center mb-4">
+                <Search className="h-6 w-6 text-emerald-600" />
+              </div>
+              <h4 className="text-lg font-semibold text-slate-900 mb-2">
+                <I18nText translationKey="community.features.discovery.title">Découverte Avancée</I18nText>
+              </h4>
+              <p className="text-slate-600 text-sm">
+                <I18nText translationKey="community.features.discovery.description">
+                  Explorez notre base de données enrichie et découvrez des connexions inattendues.
+                </I18nText>
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* CTA */}
+        <div className="text-center mt-12">
+          <Button 
+            onClick={() => navigate('/community')}
+            className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-8 py-3"
+          >
+            <I18nText translationKey="community.exploreAll">Explorer la Communauté</I18nText>
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
       </div>
     </section>

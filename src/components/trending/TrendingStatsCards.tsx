@@ -31,7 +31,6 @@ export const TrendingStatsCards: React.FC<TrendingStatsCardsProps> = ({ stats, i
     );
   }
 
-  // Utiliser les vraies données reçues
   const symbolsCount = stats?.symbolsCount || 0;
   const collectionsCount = stats?.collectionsCount || 0;
   const contributionsCount = stats?.contributionsCount || 0;
@@ -61,7 +60,7 @@ export const TrendingStatsCards: React.FC<TrendingStatsCardsProps> = ({ stats, i
       gradient: "from-purple-50 to-purple-100"
     },
     {
-      title: "Contributions",
+      title: "Contributions partagées",
       value: contributionsCount.toLocaleString(),
       subtitle: contributionsCount === 0 ? "Bientôt disponible" : "De la communauté",
       icon: contributionsCount === 0 ? Plus : Sparkles,
