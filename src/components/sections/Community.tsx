@@ -24,7 +24,6 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const { data: platformStats, isLoading: statsLoading, error: statsError } = usePlatformStats();
 
-  // Debug logs
   console.log('🏠 [Community] Platform stats:', platformStats);
   console.log('🏠 [Community] Stats loading:', statsLoading);
   console.log('🏠 [Community] Stats error:', statsError);
@@ -32,30 +31,30 @@ const Community = () => {
   const getGroupStyle = (culture: string) => {
     const styles = {
       'Global Explorers': { 
-        gradient: 'from-amber-50 to-stone-50', 
+        gradient: 'from-amber-50/80 to-orange-50/80', 
         accent: 'text-amber-700',
-        border: 'border-amber-200'
+        border: 'border-amber-200/60'
       },
       'Cultural Heritage': { 
-        gradient: 'from-stone-50 to-amber-50', 
+        gradient: 'from-stone-50/80 to-amber-50/80', 
         accent: 'text-stone-700',
-        border: 'border-stone-200'
+        border: 'border-stone-200/60'
       },
       'Symbol Researchers': { 
-        gradient: 'from-amber-50/50 to-stone-100', 
+        gradient: 'from-amber-50/70 to-stone-100/70', 
         accent: 'text-amber-800',
-        border: 'border-amber-200'
+        border: 'border-amber-200/60'
       },
       'Digital Archivists': { 
-        gradient: 'from-stone-50 to-stone-100', 
+        gradient: 'from-stone-50/80 to-stone-100/80', 
         accent: 'text-stone-700',
-        border: 'border-stone-200'
+        border: 'border-stone-200/60'
       }
     };
     return styles[culture] || { 
-      gradient: 'from-stone-50 to-amber-50', 
+      gradient: 'from-stone-50/80 to-amber-50/80', 
       accent: 'text-stone-700',
-      border: 'border-stone-200'
+      border: 'border-stone-200/60'
     };
   };
 
@@ -127,8 +126,14 @@ const Community = () => {
 
   return (
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
+      {/* Subtle background elements */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-1/3 left-1/5 w-72 h-72 bg-amber-100/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-64 h-64 bg-stone-200/30 rounded-full blur-3xl"></div>
+      </div>
+
       <div className="relative">
-        {/* Section Header - Adapté pour une communauté naissante */}
+        {/* Section Header */}
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
             <I18nText translationKey="community.title">Growing Explorer Community</I18nText>
@@ -142,17 +147,17 @@ const Community = () => {
           </p>
         </div>
 
-        {/* Platform Statistics - Toujours afficher même pendant le chargement */}
+        {/* Platform Statistics */}
         <div className="mb-6">
-          <div className="bg-amber-50/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200/50">
             {statsLoading ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, index) => (
-                  <Card key={index} className="bg-stone-50 border-stone-200 text-center">
+                  <Card key={index} className="bg-amber-50/50 border-amber-200/60 text-center">
                     <CardContent className="p-4">
                       <div className="animate-pulse">
-                        <div className="h-8 bg-stone-300 rounded mb-2"></div>
-                        <div className="h-4 bg-stone-300 rounded"></div>
+                        <div className="h-8 bg-amber-300/50 rounded mb-2"></div>
+                        <div className="h-4 bg-amber-300/50 rounded"></div>
                       </div>
                     </CardContent>
                   </Card>
@@ -160,7 +165,7 @@ const Community = () => {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="bg-stone-50 border-stone-200 text-center">
+                <Card className="bg-amber-50/60 border-amber-200/60 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
                       {formatSmallNumber(displayStats.totalContributions)}
@@ -170,7 +175,7 @@ const Community = () => {
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="bg-stone-50 border-stone-200 text-center">
+                <Card className="bg-stone-50/60 border-stone-200/60 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
                       {formatSmallNumber(displayStats.totalSymbols)}
@@ -178,7 +183,7 @@ const Community = () => {
                     <div className="text-sm text-stone-600">Symbols</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-stone-50 border-stone-200 text-center">
+                <Card className="bg-amber-50/60 border-amber-200/60 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
                       {formatSmallNumber(displayStats.totalCultures)}
@@ -186,7 +191,7 @@ const Community = () => {
                     <div className="text-sm text-stone-600">Cultures</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-stone-50 border-stone-200 text-center">
+                <Card className="bg-stone-50/60 border-stone-200/60 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
                       {formatSmallNumber(displayStats.activeUsers)}
@@ -221,22 +226,22 @@ const Community = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-amber-50/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200/40">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {groups.map((group) => {
                   const style = getGroupStyle(group.culture);
                   return (
-                    <Card key={group.id} className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${style.gradient} border ${style.border}`}>
+                    <Card key={group.id} className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${style.gradient} border ${style.border} backdrop-blur-sm`}>
                       <CardContent className="p-6">
                         <div className="flex items-start gap-3 mb-4">
-                          <Avatar className="h-12 w-12 border-2 border-stone-300">
+                          <Avatar className="h-12 w-12 border-2 border-amber-300/50">
                             <AvatarFallback className="bg-stone-800 text-white font-semibold">
                               {group.culture.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
                             <h4 className="font-semibold text-stone-800 mb-1">{group.name}</h4>
-                            <Badge variant="secondary" className="text-xs bg-white/80 text-stone-700">
+                            <Badge variant="secondary" className="text-xs bg-white/80 text-stone-700 border-amber-200/50">
                               {group.culture}
                             </Badge>
                           </div>
@@ -245,7 +250,7 @@ const Community = () => {
                         {group.themes && (
                           <div className="flex flex-wrap gap-1 mb-4">
                             {group.themes.slice(0, 2).map((theme, index) => (
-                              <Badge key={index} variant="outline" className="text-xs bg-white/60 border-stone-300 text-stone-600">
+                              <Badge key={index} variant="outline" className="text-xs bg-white/60 border-amber-300/50 text-stone-600">
                                 {theme}
                               </Badge>
                             ))}
@@ -270,7 +275,7 @@ const Community = () => {
                         </div>
 
                         <Button 
-                          className="w-full bg-stone-800 hover:bg-stone-900 text-white" 
+                          className="w-full bg-stone-800 hover:bg-amber-700 text-white transition-colors" 
                           size="sm"
                           onClick={() => navigate('/community')}
                         >
@@ -290,7 +295,7 @@ const Community = () => {
           <Button 
             onClick={() => navigate('/community')}
             size="lg"
-            className="bg-stone-800 hover:bg-stone-900 text-amber-100 px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
           >
             <Ship className="mr-2 h-4 w-4" />
             <I18nText translationKey="community.exploreAll">Join the Community</I18nText>
@@ -298,10 +303,10 @@ const Community = () => {
           </Button>
         </div>
 
-        {/* Transition Message - Adapté pour communauté naissante */}
+        {/* Transition Message */}
         <div className="text-center">
           <div className="relative max-w-2xl mx-auto">
-            <div className="bg-amber-50 rounded-xl p-6 border-l-4 border-amber-600 shadow-sm">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border-l-4 border-amber-600 shadow-lg border border-amber-200/50">
               <h3 className="text-xl font-semibold text-stone-800 mb-3">
                 Ready to be a pioneer?
               </h3>

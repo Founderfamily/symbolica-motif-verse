@@ -32,7 +32,7 @@ const CommunityHub: React.FC = () => {
 
   const renderContent = () => {
     if (loading) {
-      return <p>Loading groups...</p>;
+      return <p className="text-stone-600">Loading groups...</p>;
     }
 
     let filteredGroups = [...groups];
@@ -53,40 +53,67 @@ const CommunityHub: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen relative">
+      {/* Subtle background elements like in Hero */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-stone-200/40 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-orange-100/20 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+          <div className="inline-block p-2 bg-gradient-to-r from-amber-50 to-stone-50 rounded-full mb-4">
+            <div className="bg-white/80 px-4 py-2 rounded-full text-stone-700 text-sm font-medium border border-amber-200">
+              <I18nText translationKey="badge" ns="community">Communauté Active</I18nText>
+            </div>
+          </div>
+          
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
             <I18nText translationKey="title" ns="community">Hub Communautaire</I18nText>
           </h1>
-          <p className="text-slate-600 max-w-2xl mx-auto">
+          <p className="text-stone-600 max-w-2xl mx-auto">
             <I18nText translationKey="description" ns="community">
               Rejoignez des groupes d'intérêt, partagez vos découvertes et collaborez avec d'autres passionnés de symboles
             </I18nText>
           </p>
         </div>
 
-        {/* Stats - Le composant gère ses propres données */}
-        <CommunityStats />
+        {/* Stats with warm styling */}
+        <div className="mb-8">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200/50">
+            <CommunityStats />
+          </div>
+        </div>
 
-        {/* Tabs - Correction de l'interface */}
-        <CommunityTabs 
-          groups={groups}
-          loading={loading}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        {/* Tabs with warm styling */}
+        <div className="mb-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200/50">
+            <CommunityTabs 
+              groups={groups}
+              loading={loading}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
+          </div>
+        </div>
 
         {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
-            {renderContent()}
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200/30">
+              {renderContent()}
+            </div>
           </div>
 
           <div className="space-y-8">
-            <TopContributors />
-            <ActivityFeed />
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200/50">
+              <TopContributors />
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200/50">
+              <ActivityFeed />
+            </div>
           </div>
         </div>
       </div>
