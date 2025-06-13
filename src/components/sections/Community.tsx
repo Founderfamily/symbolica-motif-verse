@@ -107,33 +107,28 @@ const Community = () => {
   return (
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
       <div className="relative">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 bg-stone-800/90 backdrop-blur-sm px-8 py-4 rounded-full mb-8 shadow-lg">
-            <Users className="h-6 w-6 text-amber-400" />
-            <span className="font-semibold text-lg text-amber-100 tracking-wide">COMMUNAUTÉ</span>
-          </div>
-          
-          <h2 className="text-5xl md:text-6xl font-bold mb-8 text-stone-800 font-adventure">
-            <I18nText translationKey="community.title">Communauté d'Explorateurs</I18nText>
+        {/* Section Header - Simplified */}
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-stone-800">
+            <I18nText translationKey="community.title">Explorer Community</I18nText>
           </h2>
           
-          <p className="text-xl text-stone-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg text-stone-600 max-w-2xl mx-auto mb-8 leading-relaxed">
             <I18nText translationKey="community.description">
-              Rejoignez une communauté mondiale de passionnés qui partagent 
-              leurs découvertes et enrichissent notre compréhension du patrimoine symbolique.
+              Join a global community of enthusiasts who share 
+              their discoveries and enrich our understanding of symbolic heritage.
             </I18nText>
           </p>
         </div>
 
         {/* Platform Statistics */}
         {!statsLoading && platformStats && (
-          <div className="mb-16">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-stone-200">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="mb-12">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
-                    <div className="text-3xl font-bold text-stone-800 mb-1">
+                    <div className="text-2xl font-bold text-stone-800 mb-1">
                       {platformStats.totalContributions.toLocaleString()}
                     </div>
                     <div className="text-sm text-stone-600">Contributions</div>
@@ -141,7 +136,7 @@ const Community = () => {
                 </Card>
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
-                    <div className="text-3xl font-bold text-stone-800 mb-1">
+                    <div className="text-2xl font-bold text-stone-800 mb-1">
                       {platformStats.totalSymbols.toLocaleString()}
                     </div>
                     <div className="text-sm text-stone-600">Symbols</div>
@@ -149,7 +144,7 @@ const Community = () => {
                 </Card>
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
-                    <div className="text-3xl font-bold text-stone-800 mb-1">
+                    <div className="text-2xl font-bold text-stone-800 mb-1">
                       {platformStats.totalCultures}
                     </div>
                     <div className="text-sm text-stone-600">Cultures</div>
@@ -157,7 +152,7 @@ const Community = () => {
                 </Card>
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
-                    <div className="text-3xl font-bold text-stone-800 mb-1">
+                    <div className="text-2xl font-bold text-stone-800 mb-1">
                       {platformStats.activeUsers}
                     </div>
                     <div className="text-sm text-stone-600">Active Members</div>
@@ -169,9 +164,9 @@ const Community = () => {
         )}
 
         {/* Community Groups */}
-        <div className="mb-16">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-semibold text-stone-800 mb-2">Active Communities</h3>
+        <div className="mb-12">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-semibold text-stone-800 mb-2">Active Communities</h3>
             <p className="text-stone-600">Join specialized groups based on your interests</p>
           </div>
           
@@ -190,7 +185,7 @@ const Community = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-stone-200">
+            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {groups.map((group) => {
                   const style = getGroupStyle(group.culture);
@@ -253,33 +248,33 @@ const Community = () => {
           )}
         </div>
 
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <Button 
             onClick={() => navigate('/community')}
             size="lg"
-            className="bg-stone-800 hover:bg-stone-900 text-amber-100 px-12 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            className="bg-stone-800 hover:bg-stone-900 text-amber-100 px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
           >
-            <Ship className="mr-3 h-5 w-5" />
+            <Ship className="mr-2 h-4 w-4" />
             <I18nText translationKey="community.exploreAll">Explore Community</I18nText>
-            <Crown className="ml-3 h-5 w-5" />
+            <Crown className="ml-2 h-4 w-4" />
           </Button>
         </div>
 
         {/* Transition Message */}
         <div className="text-center">
           <div className="relative max-w-2xl mx-auto">
-            <div className="bg-red-50 rounded-xl p-8 border-l-4 border-red-600 shadow-sm">
-              <h3 className="text-2xl font-semibold text-stone-800 mb-4">
+            <div className="bg-red-50 rounded-xl p-6 border-l-4 border-red-600 shadow-sm">
+              <h3 className="text-xl font-semibold text-stone-800 mb-3">
                 Community joined?
               </h3>
-              <p className="text-lg text-stone-600 leading-relaxed">
+              <p className="text-base text-stone-600 leading-relaxed">
                 Perfect! You're ready to embark on your greatest adventure yet. 
                 Let's launch your first legendary expedition!
               </p>
               
-              <div className="mt-6 flex justify-center">
-                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                  <ArrowRight className="h-4 w-4 text-white" />
+              <div className="mt-4 flex justify-center">
+                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
+                  <ArrowRight className="h-3 w-3 text-white" />
                 </div>
               </div>
             </div>

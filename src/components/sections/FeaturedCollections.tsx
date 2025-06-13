@@ -111,28 +111,23 @@ const FeaturedCollections: React.FC = () => {
   return (
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
       <div className="relative">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 bg-stone-800/90 backdrop-blur-sm px-8 py-4 rounded-full mb-8 shadow-lg">
-            <Archive className="h-6 w-6 text-amber-400" />
-            <span className="font-semibold text-lg text-amber-100 tracking-wide">COLLECTIONS</span>
-          </div>
-          
-          <h2 className="text-5xl md:text-6xl font-bold mb-8 text-stone-800 font-adventure">
-            <I18nText translationKey="collections.featured.title">Collections Thématiques</I18nText>
+        {/* Section Header - Simplified */}
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-stone-800">
+            <I18nText translationKey="collections.featured.title">Themed Collections</I18nText>
           </h2>
           
-          <p className="text-xl text-stone-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg text-stone-600 max-w-2xl mx-auto mb-8 leading-relaxed">
             <I18nText translationKey="collections.featured.description">
-              Organisez vos découvertes par thèmes pour approfondir 
-              votre exploration du patrimoine symbolique mondial.
+              Organize your discoveries by themes to deepen 
+              your exploration of world symbolic heritage.
             </I18nText>
           </p>
         </div>
 
         {/* Collections Grid */}
-        <div className="mb-16">
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-stone-200">
+        <div className="mb-12">
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StaticCollections currentLanguage={currentLanguage} />
               
@@ -143,33 +138,33 @@ const FeaturedCollections: React.FC = () => {
           </div>
         </div>
         
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <Button 
             size="lg" 
-            className="bg-stone-800 hover:bg-stone-900 text-amber-100 px-12 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            className="bg-stone-800 hover:bg-stone-900 text-amber-100 px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             onClick={() => window.location.href = '/collections'}
           >
-            <Map className="w-5 h-5 mr-3" />
-            <I18nText translationKey="collections.featured.discoverAll">Discover All Collections</I18nText>
-            <Compass className="w-5 h-5 ml-3" />
+            <Map className="w-4 h-4 mr-2" />
+            <I18nText translationKey="collections.featured.discoverAll">View All Collections</I18nText>
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
 
         {/* Transition Message */}
         <div className="text-center">
           <div className="relative max-w-2xl mx-auto">
-            <div className="bg-emerald-50 rounded-xl p-8 border-l-4 border-emerald-600 shadow-sm">
-              <h3 className="text-2xl font-semibold text-stone-800 mb-4">
+            <div className="bg-emerald-50 rounded-xl p-6 border-l-4 border-emerald-600 shadow-sm">
+              <h3 className="text-xl font-semibold text-stone-800 mb-3">
                 Collections organized?
               </h3>
-              <p className="text-lg text-stone-600 leading-relaxed">
+              <p className="text-base text-stone-600 leading-relaxed">
                 Excellent! Now join a community of fellow explorers 
                 to share your adventures and discoveries.
               </p>
               
-              <div className="mt-6 flex justify-center">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <ArrowRight className="h-4 w-4 text-white" />
+              <div className="mt-4 flex justify-center">
+                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                  <ArrowRight className="h-3 w-3 text-white" />
                 </div>
               </div>
             </div>
