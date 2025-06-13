@@ -14,7 +14,7 @@ interface InterestGroup {
   name: string;
   culture: string;
   members_count: number;
-  discoveries_count: number;
+  contributions_count: number;
   themes?: string[];
 }
 
@@ -43,15 +43,14 @@ const Community = () => {
         console.log('🏘️ [Community] Loading interest groups...');
         setLoading(true);
         
-        // Utiliser des données statiques améliorées
-        console.log('🔄 [Community] Using static data');
+        // Données statiques réalistes
         setGroups([
           {
             id: '1',
             name: 'Motifs Art Déco',
             culture: 'Art Déco',
             members_count: 156,
-            discoveries_count: 342,
+            contributions_count: 342,
             themes: ['Architecture', 'Design', 'Géométrie']
           },
           {
@@ -59,7 +58,7 @@ const Community = () => {
             name: 'Symbolisme Celtique',
             culture: 'Celtique',
             members_count: 203,
-            discoveries_count: 489,
+            contributions_count: 489,
             themes: ['Spiritualité', 'Nature', 'Ancestral']
           },
           {
@@ -67,7 +66,7 @@ const Community = () => {
             name: 'Motifs Japonais',
             culture: 'Japonais',
             members_count: 287,
-            discoveries_count: 567,
+            contributions_count: 567,
             themes: ['Tradition', 'Minimalisme', 'Zen']
           },
           {
@@ -75,20 +74,20 @@ const Community = () => {
             name: 'Art Islamique',
             culture: 'Islamique',
             members_count: 134,
-            discoveries_count: 298,
+            contributions_count: 298,
             themes: ['Calligraphie', 'Géométrie', 'Ornements']
           }
         ]);
       } catch (error) {
         console.error('❌ [Community] Error loading groups:', error);
-        // Utiliser le fallback en cas d'erreur
+        // Fallback simple en cas d'erreur
         setGroups([
           {
             id: '1',
             name: 'Motifs Art Déco',
             culture: 'Art Déco',
             members_count: 156,
-            discoveries_count: 342,
+            contributions_count: 342,
             themes: ['Architecture', 'Design']
           },
           {
@@ -96,7 +95,7 @@ const Community = () => {
             name: 'Symbolisme Celtique',
             culture: 'Celtique',
             members_count: 203,
-            discoveries_count: 489,
+            contributions_count: 489,
             themes: ['Spiritualité', 'Nature']
           }
         ]);
@@ -154,7 +153,7 @@ const Community = () => {
                 <div className="text-2xl font-bold text-amber-700 mb-1">
                   {platformStats.activeUsers}
                 </div>
-                <div className="text-sm text-amber-600">Contributeurs</div>
+                <div className="text-sm text-amber-600">Explorateurs</div>
               </CardContent>
             </Card>
           </div>
@@ -213,13 +212,13 @@ const Community = () => {
                         <div className="font-semibold text-slate-900">
                           {group.members_count.toLocaleString()}
                         </div>
-                        <div className="text-slate-600">Contributeurs</div>
+                        <div className="text-slate-600">Explorateurs</div>
                       </div>
                       <div className="text-center">
                         <div className="font-semibold text-slate-900">
-                          {group.discoveries_count.toLocaleString()}
+                          {group.contributions_count.toLocaleString()}
                         </div>
-                        <div className="text-slate-600">Découvertes</div>
+                        <div className="text-slate-600">Contributions</div>
                       </div>
                     </div>
 
