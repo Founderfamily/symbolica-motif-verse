@@ -32,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuests } from '@/hooks/useQuests';
 import { TreasureQuest } from '@/types/quests';
 import InvestigationInterface from '@/components/investigation/InvestigationInterface';
+import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
 
 const QuestDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,15 +41,20 @@ const QuestDetailPage = () => {
   
   console.log('QuestDetailPage - Quest ID:', id);
   console.log('QuestDetailPage - All quests:', allQuests);
-  console.log('QuestDetailPage - loading state:', isLoading);
-  console.log('QuestDetailPage - error state:', error);
 
   // Trouver la quête par ID
   const quest = allQuests?.find(q => q.id === id);
   
   console.log('QuestDetailPage - Found quest:', quest);
-  console.log('QuestDetailPage - Quest clues type:', typeof quest?.clues);
-  console.log('QuestDetailPage - Quest clues value:', quest?.clues);
+
+  // Normaliser les clues de manière sécurisée
+  const questClues = quest ? normalizeQuestClues(quest) : [];
+  const questCluesCount = quest ? getQuestCluesCount(quest) : 0;
+  const questCluesPreview = quest ? getQuestCluesPreview(quest, 3) : [];
+
+  console.log('QuestDetailPage - Normalized clues:', questClues);
+  console.log('QuestDetailPage - Clues count:', questCluesCount);
+  console.log('QuestDetailPage - Clues preview:', questCluesPreview);
 
   if (isLoading) {
     return (
@@ -96,10 +102,6 @@ const QuestDetailPage = () => {
   }
 
   console.log('QuestDetailPage - Rendering quest:', quest.title);
-
-  // Sécuriser l'accès aux clues avec une vérification robuste
-  const questClues = Array.isArray(quest.clues) ? quest.clues : [];
-  console.log('QuestDetailPage - Safe clues array:', questClues);
 
   const questTypeLabels = {
     templar: 'Templiers',
@@ -209,7 +211,7 @@ const QuestDetailPage = () => {
                   </div>
                   <div className="bg-stone-50 rounded-lg p-4 text-center">
                     <FileText className="w-6 h-6 text-stone-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-stone-800">{questClues.length}</div>
+                    <div className="text-2xl font-bold text-stone-800">{questCluesCount}</div>
                     <div className="text-sm text-stone-600">Indices</div>
                   </div>
                   <div className="bg-amber-50 rounded-lg p-4 text-center">
@@ -316,10 +318,10 @@ const QuestDetailPage = () => {
                   Progression des indices
                 </h3>
                 
-                {questClues.length > 0 ? (
+                {questCluesPreview.length > 0 ? (
                   <div className="space-y-3">
-                    {questClues.slice(0, 3).map((clue, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+                    {questCluesPreview.map((clue, index) => (
+                      <div key={clue.id || index} className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
                         <div className="w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
                           {index + 1}
                         </div>
@@ -334,10 +336,10 @@ const QuestDetailPage = () => {
                       </div>
                     ))}
                     
-                    {questClues.length > 3 && (
+                    {questCluesCount > 3 && (
                       <div className="text-center pt-3">
                         <Button variant="outline" onClick={() => setActiveTab('clues')}>
-                          Voir tous les indices ({questClues.length})
+                          Voir tous les indices ({questCluesCount})
                         </Button>
                       </div>
                     )}
@@ -399,13 +401,13 @@ const QuestDetailPage = () => {
                   <Compass className="w-5 h-5 text-amber-600" />
                   Indices de la quête
                 </h3>
-                <Badge variant="secondary">{questClues.length} indices</Badge>
+                <Badge variant="secondary">{questCluesCount} indices</Badge>
               </div>
               
               {questClues.length > 0 ? (
                 <div className="space-y-4">
                   {questClues.map((clue, index) => (
-                    <div key={index} className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors">
+                    <div key={clue.id || index} className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors">
                       <div className="flex items-start gap-4">
                         <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-stone-600 text-white rounded-full flex items-center justify-center font-semibold">
                           {index + 1}
@@ -527,7 +529,7 @@ const QuestDetailPage = () => {
                 <Search className="w-5 h-5 text-amber-600" />
                 Interface d'investigation collaborative
               </h3>
-              <InvestigationInterface questId={quest.id} />
+              <InvestigationInterface quest={quest} />
             </div>
           </TabsContent>
         </Tabs>
