@@ -112,12 +112,12 @@ const FeaturedCollections: React.FC = () => {
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
       <div className="relative">
         {/* Section Header - Simplified */}
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-stone-800">
+        <div className="text-center mb-8">
+          <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
             <I18nText translationKey="collections.featured.title">Themed Collections</I18nText>
           </h2>
           
-          <p className="text-lg text-stone-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-base text-stone-600 max-w-2xl mx-auto mb-6 leading-relaxed">
             <I18nText translationKey="collections.featured.description">
               Organize your discoveries by themes to deepen 
               your exploration of world symbolic heritage.
@@ -126,7 +126,7 @@ const FeaturedCollections: React.FC = () => {
         </div>
 
         {/* Collections Grid */}
-        <div className="mb-12">
+        <div className="mb-8">
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StaticCollections currentLanguage={currentLanguage} />
@@ -138,7 +138,7 @@ const FeaturedCollections: React.FC = () => {
           </div>
         </div>
         
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <Button 
             size="lg" 
             className="bg-stone-800 hover:bg-stone-900 text-amber-100 px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"

@@ -52,7 +52,7 @@ const HomePage = () => {
           ErrorHandler.handleComponentError(error, errorInfo, 'SymbolTriptychSection')
         }
       >
-        <section className="relative py-20">
+        <section className="relative py-12">
           <SymbolTriptychSection />
         </section>
       </ErrorBoundary>
@@ -63,7 +63,7 @@ const HomePage = () => {
           ErrorHandler.handleComponentError(error, errorInfo, 'FeaturedCollections')
         }
       >
-        <section className="relative py-20 bg-gradient-to-r from-stone-100/50 to-amber-50/30">
+        <section className="relative py-12 bg-gradient-to-r from-stone-100/50 to-amber-50/30">
           <FeaturedCollections />
         </section>
       </ErrorBoundary>
@@ -74,7 +74,7 @@ const HomePage = () => {
           ErrorHandler.handleComponentError(error, errorInfo, 'Community')
         }
       >
-        <section className="relative py-20">
+        <section className="relative py-12">
           <Community />
         </section>
       </ErrorBoundary>
@@ -85,7 +85,7 @@ const HomePage = () => {
           ErrorHandler.handleComponentError(error, errorInfo, 'CallToAction')
         }
       >
-        <section className="relative py-20 bg-gradient-to-r from-amber-50/30 to-stone-100/50">
+        <section className="relative py-12 bg-gradient-to-r from-amber-50/30 to-stone-100/50">
           <CallToAction />
         </section>
       </ErrorBoundary>

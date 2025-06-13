@@ -27,28 +27,28 @@ const Community = () => {
   const getGroupStyle = (culture: string) => {
     const styles = {
       'Global Explorers': { 
-        gradient: 'from-blue-50 to-cyan-50', 
-        accent: 'text-blue-700',
-        border: 'border-blue-200'
-      },
-      'Cultural Heritage': { 
-        gradient: 'from-green-50 to-emerald-50', 
-        accent: 'text-green-700',
-        border: 'border-green-200'
-      },
-      'Symbol Researchers': { 
-        gradient: 'from-purple-50 to-indigo-50', 
-        accent: 'text-purple-700',
-        border: 'border-purple-200'
-      },
-      'Digital Archivists': { 
-        gradient: 'from-amber-50 to-yellow-50', 
+        gradient: 'from-amber-50 to-stone-50', 
         accent: 'text-amber-700',
         border: 'border-amber-200'
+      },
+      'Cultural Heritage': { 
+        gradient: 'from-stone-50 to-amber-50', 
+        accent: 'text-stone-700',
+        border: 'border-stone-200'
+      },
+      'Symbol Researchers': { 
+        gradient: 'from-amber-50/50 to-stone-100', 
+        accent: 'text-amber-800',
+        border: 'border-amber-200'
+      },
+      'Digital Archivists': { 
+        gradient: 'from-stone-50 to-stone-100', 
+        accent: 'text-stone-700',
+        border: 'border-stone-200'
       }
     };
     return styles[culture] || { 
-      gradient: 'from-stone-50 to-gray-50', 
+      gradient: 'from-stone-50 to-amber-50', 
       accent: 'text-stone-700',
       border: 'border-stone-200'
     };
@@ -108,12 +108,12 @@ const Community = () => {
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
       <div className="relative">
         {/* Section Header - Simplified */}
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-stone-800">
+        <div className="text-center mb-8">
+          <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
             <I18nText translationKey="community.title">Explorer Community</I18nText>
           </h2>
           
-          <p className="text-lg text-stone-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-base text-stone-600 max-w-2xl mx-auto mb-6 leading-relaxed">
             <I18nText translationKey="community.description">
               Join a global community of enthusiasts who share 
               their discoveries and enrich our understanding of symbolic heritage.
@@ -123,8 +123,8 @@ const Community = () => {
 
         {/* Platform Statistics */}
         {!statsLoading && platformStats && (
-          <div className="mb-12">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200">
+          <div className="mb-8">
+            <div className="bg-amber-50/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
@@ -164,7 +164,7 @@ const Community = () => {
         )}
 
         {/* Community Groups */}
-        <div className="mb-12">
+        <div className="mb-8">
           <div className="text-center mb-6">
             <h3 className="text-xl font-semibold text-stone-800 mb-2">Active Communities</h3>
             <p className="text-stone-600">Join specialized groups based on your interests</p>
@@ -185,7 +185,7 @@ const Community = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200">
+            <div className="bg-amber-50/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {groups.map((group) => {
                   const style = getGroupStyle(group.culture);
@@ -248,7 +248,7 @@ const Community = () => {
           )}
         </div>
 
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <Button 
             onClick={() => navigate('/community')}
             size="lg"
@@ -263,7 +263,7 @@ const Community = () => {
         {/* Transition Message */}
         <div className="text-center">
           <div className="relative max-w-2xl mx-auto">
-            <div className="bg-red-50 rounded-xl p-6 border-l-4 border-red-600 shadow-sm">
+            <div className="bg-amber-50 rounded-xl p-6 border-l-4 border-amber-600 shadow-sm">
               <h3 className="text-xl font-semibold text-stone-800 mb-3">
                 Community joined?
               </h3>
@@ -273,7 +273,7 @@ const Community = () => {
               </p>
               
               <div className="mt-4 flex justify-center">
-                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 bg-amber-600 rounded-full flex items-center justify-center">
                   <ArrowRight className="h-3 w-3 text-white" />
                 </div>
               </div>

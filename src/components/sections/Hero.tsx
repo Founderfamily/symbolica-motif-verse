@@ -1,16 +1,10 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { I18nText } from '@/components/ui/i18n-text';
 
 const Hero = () => {
   const navigate = useNavigate();
-
-  const handleExploreClick = () => {
-    navigate('/symbols');
-  };
 
   return (
     <section className="relative pt-16 md:pt-24 pb-16 md:pb-24 px-4 md:px-8 max-w-7xl mx-auto">
@@ -27,7 +21,7 @@ const Hero = () => {
           </div>
         </div>
 
-        <div className="space-y-6 mb-12">
+        <div className="space-y-6">
           <h1 className="text-3xl md:text-5xl font-bold text-stone-800 font-adventure leading-tight">
             Symbol Explorer
           </h1>
@@ -35,15 +29,6 @@ const Hero = () => {
             Discover the world's heritage
           </p>
         </div>
-        
-        <Button 
-          size="lg" 
-          onClick={handleExploreClick}
-          className="bg-stone-800 hover:bg-stone-900 text-amber-50 font-semibold px-10 py-4 rounded-full shadow-lg transform hover:-translate-y-1 transition-all duration-300"
-        >
-          <I18nText translationKey="hero.explore">Start Exploring</I18nText> 
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
       </div>
     </section>
   );

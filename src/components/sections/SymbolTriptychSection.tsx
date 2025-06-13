@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ArrowRight, Compass, Map } from 'lucide-react';
+import { ArrowRight, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { I18nText } from '@/components/ui/i18n-text';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
@@ -21,15 +21,14 @@ const SymbolTriptychSection = () => {
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
       <div className="relative">
         {/* Section Header - Simplified */}
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-stone-800">
-            <I18nText translationKey="symbolTriptych.title">Ancient Symbols</I18nText>
+        <div className="text-center mb-8">
+          <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
+            <I18nText translationKey="symbolTriptych.title">Explorez en Détail</I18nText>
           </h2>
           
-          <p className="text-lg text-stone-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-base text-stone-600 max-w-2xl mx-auto mb-6 leading-relaxed">
             <I18nText translationKey="symbolTriptych.description">
-              Each symbol tells a story. Explore our collection of artifacts 
-              and discover the secrets of lost civilizations.
+              Découvrez l'évolution des symboles à travers le temps et les cultures.
             </I18nText>
           </p>
 
@@ -45,7 +44,7 @@ const SymbolTriptychSection = () => {
         </div>
 
         {/* Symbol Gallery */}
-        <div className="mb-12">
+        <div className="mb-8">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-stone-800 border-t-amber-500"></div>
