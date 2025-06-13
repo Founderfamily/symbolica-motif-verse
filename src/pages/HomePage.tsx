@@ -6,15 +6,14 @@ import FeaturedCollections from '@/components/sections/FeaturedCollections';
 import Features from '@/components/sections/Features';
 import Community from '@/components/sections/Community';
 import CallToAction from '@/components/sections/CallToAction';
+import SymbolTriptychSection from '@/components/sections/SymbolTriptychSection';
+import CulturalJourney from '@/components/sections/CulturalJourney';
+import InteractiveDiscovery from '@/components/sections/InteractiveDiscovery';
+import SimpleMap from '@/components/map/SimpleMap';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ErrorHandler } from '@/utils/errorHandler';
-import EnhancedSymbolDiscovery from '@/components/sections/EnhancedSymbolDiscovery';
 
 const HomePage = () => {
-  const handleSectionError = (sectionName: string, error: Error, errorInfo: React.ErrorInfo) => {
-    console.error(`Error in ${sectionName} section:`, error, errorInfo);
-  };
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -37,6 +36,58 @@ const HomePage = () => {
         </div>
       </ErrorBoundary>
 
+      {/* Symbol Triptych Section */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'SymbolTriptychSection')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <SymbolTriptychSection />
+        </div>
+      </ErrorBoundary>
+
+      {/* Interactive Discovery */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'InteractiveDiscovery')
+        }
+      >
+        <InteractiveDiscovery />
+      </ErrorBoundary>
+
+      {/* Cultural Journey */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'CulturalJourney')
+        }
+      >
+        <div className="py-16 bg-slate-50/50">
+          <CulturalJourney />
+        </div>
+      </ErrorBoundary>
+
+      {/* Simple Map */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'SimpleMap')
+        }
+      >
+        <div className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                Exploration Géographique
+              </h2>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Découvrez les symboles dans leur contexte géographique et culturel
+              </p>
+            </div>
+            <SimpleMap />
+          </div>
+        </div>
+      </ErrorBoundary>
+
       {/* Featured Collections */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
@@ -48,22 +99,13 @@ const HomePage = () => {
         </div>
       </ErrorBoundary>
 
-      {/* Enhanced Symbol Discovery Section */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'EnhancedSymbolDiscovery')
-        }
-      >
-        <EnhancedSymbolDiscovery />
-      </ErrorBoundary>
-
       {/* Features */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'Features')
         }
       >
-        <div className="py-16 bg-slate-50/50">
+        <div className="py-16">
           <Features />
         </div>
       </ErrorBoundary>
@@ -74,7 +116,9 @@ const HomePage = () => {
           ErrorHandler.handleComponentError(error, errorInfo, 'Community')
         }
       >
-        <Community />
+        <div className="py-16 bg-slate-50/50">
+          <Community />
+        </div>
       </ErrorBoundary>
 
       {/* Call to Action */}

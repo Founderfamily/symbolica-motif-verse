@@ -43,7 +43,7 @@ const Community = () => {
         console.log('🏘️ [Community] Loading interest groups...');
         setLoading(true);
         
-        // Données statiques réalistes
+        // Données statiques cohérentes avec le design
         setGroups([
           {
             id: '1',
