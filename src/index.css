@@ -1,6 +1,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=Cinzel:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -61,11 +61,7 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-/* Polices d'aventure */
-.font-pirate {
-  font-family: 'Pirata One', cursive;
-}
-
+/* Adventure theme fonts */
 .font-adventure {
   font-family: 'Cinzel', serif;
 }
@@ -89,82 +85,44 @@ body {
     -webkit-line-clamp: 3;
   }
 
-  .pattern-dots-lg {
-    background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  .backdrop-blur-xs {
-    backdrop-filter: blur(2px);
-  }
-
-  .backdrop-blur-sm {
-    backdrop-filter: blur(4px);
-  }
-
-  .backdrop-blur-md {
-    backdrop-filter: blur(8px);
-  }
-
-  /* Gradient radial pour effets de lumière */
-  .bg-gradient-radial {
-    background: radial-gradient(circle, var(--tw-gradient-stops));
-  }
-
-  /* Ombres de texte dramatiques */
+  /* Subtle text shadows for elegance */
   .text-shadow {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   }
   
   .text-shadow-lg {
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-stops));
   }
 }
 
 @layer components {
-  .story-link {
-    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
-  }
-
-  .hover-scale {
-    @apply transition-transform duration-200 hover:scale-105;
-  }
-
-  .glass-effect {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
-  }
-
-  .gradient-text {
-    @apply bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent;
-  }
-
-  .symbol-card-hover {
-    @apply transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:-translate-y-1;
-  }
-
   .modern-card {
-    @apply bg-white/95 backdrop-blur-sm border border-slate-200/50 shadow-lg rounded-2xl overflow-hidden;
+    @apply bg-white/95 backdrop-blur-sm border border-stone-200 shadow-sm rounded-xl;
   }
 
-  .gradient-overlay {
-    @apply absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent;
+  .adventure-button {
+    @apply bg-stone-800 hover:bg-stone-900 text-amber-100 font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1;
   }
 
-  /* Effets d'aventure */
-  .adventure-card {
-    @apply bg-gradient-to-br from-amber-50 to-yellow-100 border-4 border-amber-600 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2;
+  .elegant-transition {
+    @apply transition-all duration-300 ease-out;
   }
 
-  .treasure-glow {
-    @apply shadow-lg shadow-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/70 transition-all duration-300;
+  .hover-lift {
+    @apply elegant-transition hover:shadow-lg hover:-translate-y-1;
   }
 
-  .pirate-button {
-    @apply bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-4 px-8 rounded-full border-4 border-yellow-400 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300;
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-stone-500 focus:ring-offset-2;
   }
 }
 
-/* Animation keyframes d'aventure */
+/* Refined animations */
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -176,96 +134,12 @@ body {
   }
 }
 
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pulse-soft {
+@keyframes gentle-float {
   0%, 100% {
-    opacity: 1;
+    transform: translateY(0px);
   }
   50% {
-    opacity: 0.8;
-  }
-}
-
-/* Animations épiques pour l'aventure */
-@keyframes float-slow {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-  }
-}
-
-@keyframes float-medium {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-15px) rotate(90deg);
-  }
-}
-
-@keyframes float-fast {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-10px) rotate(270deg);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes breathe {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-@keyframes treasure-pulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(251, 191, 36, 0.8);
-  }
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes spin-reverse {
-  from {
-    transform: rotate(360deg);
-  }
-  to {
-    transform: rotate(0deg);
+    transform: translateY(-8px);
   }
 }
 
@@ -273,46 +147,8 @@ body {
   animation: fade-in-up 0.6s ease-out;
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.5s ease-out;
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-float-slow {
-  animation: float-slow 8s ease-in-out infinite;
-}
-
-.animate-float-medium {
-  animation: float-medium 6s ease-in-out infinite;
-}
-
-.animate-float-fast {
-  animation: float-fast 4s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-.animate-breathe {
-  animation: breathe 3s ease-in-out infinite;
-}
-
-.animate-treasure-pulse {
-  animation: treasure-pulse 2s ease-in-out infinite;
-}
-
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
-}
-
-.animate-spin-reverse {
-  animation: spin-reverse 15s linear infinite;
+.animate-gentle-float {
+  animation: gentle-float 4s ease-in-out infinite;
 }
 
 /* Smooth scrolling */
@@ -320,46 +156,27 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar avec thème aventure */
+/* Elegant scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #fef3c7;
-  border-radius: 4px;
+  background: #f8fafc;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #d97706, #92400e);
-  border-radius: 4px;
+  background: #d6d3d1;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #b45309, #78350f);
+  background: #a8a29e;
 }
 
-/* Selection styles avec thème trésor */
+/* Selection styles */
 ::selection {
   background: #fbbf24;
-  color: #92400e;
-}
-
-/* Focus styles */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2;
-}
-
-/* Hover effects épiques */
-.hover-lift {
-  @apply transition-all duration-500 hover:shadow-2xl hover:-translate-y-2;
-}
-
-.hover-glow {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-amber-300/50;
-}
-
-.hover-treasure {
-  @apply transition-all duration-300 hover:shadow-xl hover:shadow-yellow-400/60 hover:scale-105;
+  color: #292524;
 }
