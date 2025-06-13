@@ -282,6 +282,8 @@ const QuestsPage = () => {
               {historicalQuests.map((quest) => {
                 const TypeIcon = questTypeIcons[quest.quest_type];
                 
+                console.log('QuestsPage - Rendering quest card:', quest.title, 'with ID:', quest.id);
+                
                 return (
                   <Card key={quest.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-white/95 backdrop-blur-sm border border-amber-200/50">
                     
@@ -358,6 +360,7 @@ const QuestsPage = () => {
                           <Button 
                             variant="outline" 
                             className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50"
+                            onClick={() => console.log('QuestsPage - Explorer clicked for quest:', quest.id)}
                           >
                             <Search className="w-4 h-4 mr-2" />
                             Explorer
