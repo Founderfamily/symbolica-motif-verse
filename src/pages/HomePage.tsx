@@ -1,22 +1,17 @@
 
 import React from 'react';
 import Hero from '@/components/sections/Hero';
-import QuickAccess from '@/components/sections/QuickAccess';
 import FeaturedCollections from '@/components/sections/FeaturedCollections';
-import Features from '@/components/sections/Features';
 import Community from '@/components/sections/Community';
 import CallToAction from '@/components/sections/CallToAction';
 import SymbolTriptychSection from '@/components/sections/SymbolTriptychSection';
-import CulturalJourney from '@/components/sections/CulturalJourney';
-import InteractiveDiscovery from '@/components/sections/InteractiveDiscovery';
-import SimpleMap from '@/components/map/SimpleMap';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ErrorHandler } from '@/utils/errorHandler';
 
 const HomePage = () => {
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Hero Section - Introduction */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'Hero')
@@ -25,110 +20,63 @@ const HomePage = () => {
         <Hero />
       </ErrorBoundary>
 
-      {/* Quick Access */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'QuickAccess')
-        }
-      >
-        <div className="py-16">
-          <QuickAccess />
-        </div>
-      </ErrorBoundary>
-
-      {/* Symbol Triptych Section */}
+      {/* Étape 1: Découverte des Symboles */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'SymbolTriptychSection')
         }
       >
-        <div className="py-16 bg-slate-50/50">
-          <SymbolTriptychSection />
-        </div>
-      </ErrorBoundary>
-
-      {/* Interactive Discovery */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'InteractiveDiscovery')
-        }
-      >
-        <InteractiveDiscovery />
-      </ErrorBoundary>
-
-      {/* Cultural Journey */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'CulturalJourney')
-        }
-      >
-        <div className="py-16 bg-slate-50/50">
-          <CulturalJourney />
-        </div>
-      </ErrorBoundary>
-
-      {/* Simple Map */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'SimpleMap')
-        }
-      >
-        <div className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">
-                Exploration Géographique
-              </h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                Découvrez les symboles dans leur contexte géographique et culturel
-              </p>
-            </div>
-            <SimpleMap />
+        <div className="relative bg-gradient-to-b from-white to-blue-50/50">
+          {/* Indicateur de progression visuel */}
+          <div className="absolute left-1/2 top-0 w-px h-16 bg-gradient-to-b from-transparent to-blue-300 transform -translate-x-1/2"></div>
+          <div className="py-20">
+            <SymbolTriptychSection />
           </div>
+          {/* Transition vers étape suivante */}
+          <div className="absolute left-1/2 bottom-0 w-px h-16 bg-gradient-to-b from-blue-300 to-green-300 transform -translate-x-1/2"></div>
         </div>
       </ErrorBoundary>
 
-      {/* Featured Collections */}
+      {/* Étape 2: Organisation en Collections */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'FeaturedCollections')
         }
       >
-        <div className="py-16 bg-slate-50/50">
-          <FeaturedCollections />
+        <div className="relative bg-gradient-to-b from-blue-50/50 to-green-50/50">
+          <div className="py-20">
+            <FeaturedCollections />
+          </div>
+          {/* Transition vers étape suivante */}
+          <div className="absolute left-1/2 bottom-0 w-px h-16 bg-gradient-to-b from-green-300 to-amber-300 transform -translate-x-1/2"></div>
         </div>
       </ErrorBoundary>
 
-      {/* Features */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'Features')
-        }
-      >
-        <div className="py-16">
-          <Features />
-        </div>
-      </ErrorBoundary>
-
-      {/* Community Section */}
+      {/* Étape 3: Rejoindre la Communauté */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'Community')
         }
       >
-        <div className="py-16 bg-slate-50/50">
-          <Community />
+        <div className="relative bg-gradient-to-b from-green-50/50 to-amber-50/50">
+          <div className="py-20">
+            <Community />
+          </div>
+          {/* Transition vers étape finale */}
+          <div className="absolute left-1/2 bottom-0 w-px h-16 bg-gradient-to-b from-amber-300 to-red-300 transform -translate-x-1/2"></div>
         </div>
       </ErrorBoundary>
 
-      {/* Call to Action */}
+      {/* Étape 4: Lancer sa Première Quête */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
           ErrorHandler.handleComponentError(error, errorInfo, 'CallToAction')
         }
       >
-        <div className="py-16">
-          <CallToAction />
+        <div className="bg-gradient-to-b from-amber-50/50 to-red-50/50">
+          <div className="py-20">
+            <CallToAction />
+          </div>
         </div>
       </ErrorBoundary>
     </div>

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown, BookOpen, Sparkles } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useTranslation } from '@/i18n/useTranslation';
 import { FeaturedCollectionsLoadingSkeleton } from './FeaturedCollectionsLoadingSkeleton';
@@ -59,26 +59,27 @@ const StaticCollections: React.FC<{ currentLanguage: string }> = React.memo(({ c
         <Link
           key={collection.id}
           to={`/collections/${collection.slug}`}
-          className="block transition-transform hover:scale-105"
+          className="block transition-all duration-300 hover:scale-105 hover:shadow-lg"
         >
-          <Card className="h-full hover:shadow-lg transition-shadow">
+          <Card className="h-full border-green-200 hover:border-green-400 transition-colors">
             <CardHeader>
               <div className="flex justify-between items-start mb-2">
-                <CardTitle className="text-lg">
+                <CardTitle className="text-lg text-green-800">
                   {collection.title}
                 </CardTitle>
                 {collection.is_featured && (
-                  <Badge variant="default">
+                  <Badge variant="default" className="bg-green-100 text-green-700 border-green-300">
                     <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
                   </Badge>
                 )}
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-600 text-sm line-clamp-3">
+              <p className="text-slate-600 text-sm line-clamp-3 mb-4">
                 {collection.description}
               </p>
-              <div className="mt-4 text-sm text-amber-600 font-medium">
+              <div className="flex items-center text-sm text-green-600 font-medium">
+                <BookOpen className="w-4 h-4 mr-1" />
                 <I18nText translationKey="collections.explore">Explorer →</I18nText>
               </div>
             </CardContent>
@@ -95,36 +96,58 @@ const FeaturedCollections: React.FC = () => {
   const { currentLanguage } = useTranslation();
 
   return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-            <I18nText translationKey="collections.featured.title">Collections en Vedette</I18nText>
-          </h2>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-            <I18nText translationKey="collections.featured.description">
-              Explorez des parcours thématiques à travers les symboles du monde entier
-            </I18nText>
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {/* Show static collections immediately for fast UI */}
-          <StaticCollections currentLanguage={currentLanguage} />
-          
-          {/* Lazy load dynamic collections with Suspense */}
-          <Suspense fallback={null}>
-            <LazyDynamicCollections />
-          </Suspense>
+    <section className="relative py-20 px-4 md:px-8 max-w-7xl mx-auto">
+      {/* Indicateur d'étape */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-green-100 text-green-800 font-semibold mb-6">
+          <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+          <I18nText translationKey="collections.step2">Organisez vos découvertes</I18nText>
         </div>
         
-        <div className="text-center">
-          <Link to="/collections">
-            <Button size="lg" className="bg-amber-600 hover:bg-amber-700">
-              <I18nText translationKey="collections.featured.discoverAll">Découvrir Toutes les Collections</I18nText>
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </Link>
+        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-green-800 via-green-600 to-green-500 bg-clip-text text-transparent">
+          <I18nText translationKey="collections.featured.title">Collections Thématiques</I18nText>
+        </h2>
+        
+        <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+          <I18nText translationKey="collections.featured.description">
+            Organisez vos symboles favoris en collections pour approfondir votre compréhension et partager vos découvertes.
+          </I18nText>
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* Show static collections immediately for fast UI */}
+        <StaticCollections currentLanguage={currentLanguage} />
+        
+        {/* Lazy load dynamic collections with Suspense */}
+        <Suspense fallback={null}>
+          <LazyDynamicCollections />
+        </Suspense>
+      </div>
+      
+      <div className="text-center mb-16">
+        <Link to="/collections">
+          <Button size="lg" className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800">
+            <Sparkles className="w-5 h-5 mr-2" />
+            <I18nText translationKey="collections.featured.discoverAll">Découvrir Toutes les Collections</I18nText>
+            <ArrowRight className="w-5 h-5 ml-2" />
+          </Button>
+        </Link>
+      </div>
+
+      {/* Transition narrative vers l'étape suivante */}
+      <div className="text-center">
+        <div className="bg-gradient-to-r from-green-50 to-amber-50 rounded-3xl p-8 border border-green-200">
+          <h3 className="text-2xl font-semibold text-slate-800 mb-4">
+            Prêt à rejoindre la communauté ?
+          </h3>
+          <p className="text-slate-600 mb-6 max-w-2xl mx-auto">
+            Maintenant que vous avez organisé vos découvertes, partagez votre passion 
+            avec une communauté mondiale d'explorateurs de symboles.
+          </p>
+          <div className="flex items-center justify-center">
+            <ChevronDown className="h-6 w-6 text-green-500 animate-bounce" />
+          </div>
         </div>
       </div>
     </section>
