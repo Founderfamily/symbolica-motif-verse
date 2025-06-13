@@ -1,7 +1,42 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TreasureQuest, QuestProgress, QuestClue } from '@/types/quests';
+
+// Fonction utilitaire pour parser les clues de manière robuste
+const parseQuestClues = (clues: any): QuestClue[] => {
+  console.log('parseQuestClues - Raw clues:', clues);
+  console.log('parseQuestClues - Type:', typeof clues);
+  
+  if (!clues) {
+    console.log('parseQuestClues - No clues, returning empty array');
+    return [];
+  }
+  
+  let parsedClues;
+  
+  // Si c'est une string, essayer de la parser comme JSON
+  if (typeof clues === 'string') {
+    try {
+      console.log('parseQuestClues - Parsing string as JSON');
+      parsedClues = JSON.parse(clues);
+    } catch (error) {
+      console.error('parseQuestClues - Failed to parse JSON string:', error);
+      return [];
+    }
+  } else {
+    // Si c'est déjà un objet/array, l'utiliser directement
+    parsedClues = clues;
+  }
+  
+  // Vérifier que c'est un array
+  if (!Array.isArray(parsedClues)) {
+    console.log('parseQuestClues - Parsed clues is not an array:', parsedClues);
+    return [];
+  }
+  
+  console.log('parseQuestClues - Successfully parsed clues:', parsedClues);
+  return parsedClues;
+};
 
 export const useQuests = () => {
   return useQuery({
@@ -23,15 +58,20 @@ export const useQuests = () => {
       
       // Convertir les données Supabase vers nos types TypeScript
       const processedQuests = data?.map(quest => {
+        console.log('useQuests - Processing quest:', quest.title, 'Raw clues:', quest.clues);
+        
+        // Parser les clues de manière robuste
+        const parsedClues = parseQuestClues(quest.clues);
+        
         const processed = {
           ...quest,
-          clues: (quest.clues as any) || [],
+          clues: parsedClues,
           special_rewards: quest.special_rewards || [],
           target_symbols: quest.target_symbols || [],
           translations: quest.translations || { en: {}, fr: {} }
         } as TreasureQuest;
         
-        console.log('useQuests - Processed quest:', processed.title, 'ID:', processed.id);
+        console.log('useQuests - Processed quest:', processed.title, 'ID:', processed.id, 'Clues count:', processed.clues.length);
         return processed;
       }) || [];
       
@@ -62,13 +102,17 @@ export const useActiveQuests = () => {
         throw error;
       }
       
-      return data?.map(quest => ({
-        ...quest,
-        clues: (quest.clues as any) || [],
-        special_rewards: quest.special_rewards || [],
-        target_symbols: quest.target_symbols || [],
-        translations: quest.translations || { en: {}, fr: {} }
-      })) as TreasureQuest[];
+      return data?.map(quest => {
+        const parsedClues = parseQuestClues(quest.clues);
+        
+        return {
+          ...quest,
+          clues: parsedClues,
+          special_rewards: quest.special_rewards || [],
+          target_symbols: quest.target_symbols || [],
+          translations: quest.translations || { en: {}, fr: {} }
+        };
+      }) as TreasureQuest[];
     },
     retry: 2,
     staleTime: 60000 // 1 minute
@@ -102,9 +146,11 @@ export const useQuestById = (questId: string) => {
         return null;
       }
       
+      const parsedClues = parseQuestClues(data.clues);
+      
       const processedQuest = {
         ...data,
-        clues: (data.clues as any) || [],
+        clues: parsedClues,
         special_rewards: data.special_rewards || [],
         target_symbols: data.target_symbols || [],
         translations: data.translations || { en: {}, fr: {} }
