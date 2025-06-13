@@ -4,6 +4,7 @@ import Hero from '@/components/sections/Hero';
 import SymbolTriptychSection from '@/components/sections/SymbolTriptychSection';
 import FeaturedCollections from '@/components/sections/FeaturedCollections';
 import Community from '@/components/sections/Community';
+import QuestsSection from '@/components/sections/QuestsSection';
 import CallToAction from '@/components/sections/CallToAction';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ErrorHandler } from '@/utils/errorHandler';
@@ -76,6 +77,17 @@ const HomePage = () => {
       >
         <section className="relative py-12">
           <Community />
+        </section>
+      </ErrorBoundary>
+
+      {/* Quests Section */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'QuestsSection')
+        }
+      >
+        <section className="relative py-12 bg-gradient-to-r from-amber-50/30 to-stone-100/50">
+          <QuestsSection />
         </section>
       </ErrorBoundary>
 
