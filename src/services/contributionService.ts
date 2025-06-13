@@ -1,7 +1,48 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ContributionFormData } from '@/types/contributions';
+import { ContributionFormData, CompleteContribution, ContributionImage, ContributionTag, ContributionComment } from '@/types/contributions';
 import { SecurityUtils } from '@/utils/securityUtils';
+
+// Helper function to safely cast image_type
+const castImageType = (type: string): 'original' | 'pattern' | 'analysis' | 'extract' => {
+  if (['original', 'pattern', 'analysis', 'extract'].includes(type)) {
+    return type as 'original' | 'pattern' | 'analysis' | 'extract';
+  }
+  return 'original'; // fallback to original if unknown type
+};
+
+// Helper function to map database results to our types
+const mapContributionData = (dbContribution: any): CompleteContribution => {
+  return {
+    ...dbContribution,
+    images: (dbContribution.contribution_images || []).map((img: any): ContributionImage => ({
+      id: img.id,
+      contribution_id: img.contribution_id,
+      image_url: img.image_url,
+      image_type: castImageType(img.image_type),
+      annotations: img.annotations,
+      extracted_pattern_url: img.extracted_pattern_url,
+      created_at: img.created_at
+    })),
+    tags: (dbContribution.contribution_tags || []).map((tag: any): ContributionTag => ({
+      id: tag.id,
+      contribution_id: tag.contribution_id,
+      tag: tag.tag,
+      created_at: tag.created_at,
+      tag_translations: tag.tag_translations
+    })),
+    comments: (dbContribution.contribution_comments || []).map((comment: any): ContributionComment => ({
+      id: comment.id,
+      contribution_id: comment.contribution_id,
+      user_id: comment.user_id,
+      comment: comment.comment,
+      created_at: comment.created_at,
+      comment_translations: comment.comment_translations,
+      profiles: comment.profiles
+    })),
+    user_profile: dbContribution.profiles
+  };
+};
 
 export const createContribution = async (
   userId: string, 
@@ -141,14 +182,7 @@ export const getContributionById = async (id: string) => {
       throw error;
     }
 
-    // Map the data to CompleteContribution format
-    return {
-      ...data,
-      images: data.contribution_images || [],
-      tags: data.contribution_tags || [],
-      comments: data.contribution_comments || [],
-      user_profile: data.profiles
-    };
+    return mapContributionData(data);
   } catch (error) {
     console.error('Error in getContributionById:', error);
     throw error;
@@ -183,13 +217,7 @@ export const getUserContributions = async (userId: string, status?: string) => {
       throw error;
     }
 
-    // Map the data to CompleteContribution format
-    return data.map(contribution => ({
-      ...contribution,
-      images: contribution.contribution_images || [],
-      tags: contribution.contribution_tags || [],
-      comments: contribution.contribution_comments || []
-    }));
+    return data.map(mapContributionData);
   } catch (error) {
     console.error('Error in getUserContributions:', error);
     throw error;
@@ -215,14 +243,7 @@ export const getPendingContributions = async () => {
       throw error;
     }
 
-    // Map the data to CompleteContribution format
-    return data.map(contribution => ({
-      ...contribution,
-      images: contribution.contribution_images || [],
-      tags: contribution.contribution_tags || [],
-      comments: contribution.contribution_comments || [],
-      user_profile: contribution.profiles
-    }));
+    return data.map(mapContributionData);
   } catch (error) {
     console.error('Error in getPendingContributions:', error);
     throw error;
