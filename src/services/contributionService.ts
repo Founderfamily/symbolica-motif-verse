@@ -130,7 +130,8 @@ export const getContributionById = async (id: string) => {
         *,
         profiles!inner(username, full_name),
         contribution_images(*),
-        contribution_tags(*)
+        contribution_tags(*),
+        contribution_comments(*)
       `)
       .eq('id', sanitizedId)
       .single();
@@ -140,7 +141,14 @@ export const getContributionById = async (id: string) => {
       throw error;
     }
 
-    return data;
+    // Map the data to CompleteContribution format
+    return {
+      ...data,
+      images: data.contribution_images || [],
+      tags: data.contribution_tags || [],
+      comments: data.contribution_comments || [],
+      user_profile: data.profiles
+    };
   } catch (error) {
     console.error('Error in getContributionById:', error);
     throw error;
@@ -157,7 +165,8 @@ export const getUserContributions = async (userId: string, status?: string) => {
       .select(`
         *,
         contribution_images(*),
-        contribution_tags(*)
+        contribution_tags(*),
+        contribution_comments(*)
       `)
       .eq('user_id', sanitizedUserId)
       .order('created_at', { ascending: false });
@@ -174,9 +183,94 @@ export const getUserContributions = async (userId: string, status?: string) => {
       throw error;
     }
 
-    return data;
+    // Map the data to CompleteContribution format
+    return data.map(contribution => ({
+      ...contribution,
+      images: contribution.contribution_images || [],
+      tags: contribution.contribution_tags || [],
+      comments: contribution.contribution_comments || []
+    }));
   } catch (error) {
     console.error('Error in getUserContributions:', error);
     throw error;
+  }
+};
+
+export const getPendingContributions = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('user_contributions')
+      .select(`
+        *,
+        profiles!inner(username, full_name),
+        contribution_images(*),
+        contribution_tags(*),
+        contribution_comments(*)
+      `)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching pending contributions:', error);
+      throw error;
+    }
+
+    // Map the data to CompleteContribution format
+    return data.map(contribution => ({
+      ...contribution,
+      images: contribution.contribution_images || [],
+      tags: contribution.contribution_tags || [],
+      comments: contribution.contribution_comments || [],
+      user_profile: contribution.profiles
+    }));
+  } catch (error) {
+    console.error('Error in getPendingContributions:', error);
+    throw error;
+  }
+};
+
+export const updateContributionStatus = async (
+  contributionId: string,
+  status: 'approved' | 'rejected' | 'pending',
+  adminId: string,
+  reason?: string
+): Promise<boolean> => {
+  try {
+    // Validate input
+    const sanitizedId = SecurityUtils.validateInput(contributionId, 36);
+    const sanitizedAdminId = SecurityUtils.validateInput(adminId, 36);
+    const sanitizedReason = reason ? SecurityUtils.validateInput(reason, 500) : null;
+
+    const { error } = await supabase
+      .from('user_contributions')
+      .update({
+        status,
+        reviewed_by: sanitizedAdminId,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', sanitizedId);
+
+    if (error) {
+      console.error('Error updating contribution status:', error);
+      throw error;
+    }
+
+    // Add a comment if reason is provided
+    if (sanitizedReason) {
+      await supabase
+        .from('contribution_comments')
+        .insert({
+          contribution_id: sanitizedId,
+          user_id: sanitizedAdminId,
+          comment: sanitizedReason
+        });
+    }
+
+    console.log('Contribution status updated successfully:', contributionId);
+    return true;
+  } catch (error) {
+    console.error('Error in updateContributionStatus:', error);
+    return false;
   }
 };
