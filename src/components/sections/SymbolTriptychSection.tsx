@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ArrowRight, Sparkles, ChevronDown } from 'lucide-react';
+import { Search, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { I18nText } from '@/components/ui/i18n-text';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
@@ -17,73 +17,67 @@ const SymbolTriptychSection = () => {
     navigate('/symbols');
   };
 
-  const handleSymbolSelect = (symbol: SymbolData) => {
-    setSelectedSymbol(symbol);
-  };
-
   return (
-    <section className="relative py-20 px-4 md:px-8 max-w-7xl mx-auto">
-      {/* Indicateur d'étape */}
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-blue-100 text-blue-800 font-semibold mb-6">
-          <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
-          <I18nText translationKey="symbolTriptych.step1">Commencez par un symbole</I18nText>
-        </div>
-        
-        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-800 via-blue-600 to-blue-500 bg-clip-text text-transparent">
+    <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
+      {/* Titre principal avec design épuré */}
+      <div className="text-center mb-16">
+        <h2 className="text-5xl md:text-6xl font-bold mb-6 text-slate-800">
           <I18nText translationKey="symbolTriptych.title">Découvrez les Symboles</I18nText>
         </h2>
         
         <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8 leading-relaxed">
           <I18nText translationKey="symbolTriptych.description">
-            Chaque symbole raconte une histoire. Explorez notre collection et laissez-vous guider par votre curiosité.
+            Chaque symbole raconte une histoire unique. Explorez notre collection et laissez-vous guider par votre curiosité pour découvrir des trésors culturels du monde entier.
           </I18nText>
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div className="flex justify-center mb-16">
           <Button 
             onClick={handleExploreMore}
             size="lg"
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-slate-800 hover:bg-slate-900 text-white px-12 py-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
           >
-            <Search className="mr-2 h-5 w-5" />
-            <I18nText translationKey="symbolTriptych.exploreCollection">Explorer la Collection Complète</I18nText>
+            <Search className="mr-3 h-5 w-5" />
+            <I18nText translationKey="symbolTriptych.exploreCollection">Explorer la Collection</I18nText>
+            <ArrowRight className="ml-3 h-5 w-5" />
           </Button>
         </div>
       </div>
 
-      {/* Galerie de symboles avec vraies données */}
+      {/* Galerie de symboles avec design immersif */}
       <div className="mb-16">
-        <div className="text-center mb-8">
-          <h3 className="text-2xl font-semibold text-slate-800 mb-4 flex items-center justify-center gap-2">
-            <Sparkles className="h-6 w-6 text-blue-500" />
-            Aperçu de la Collection
-          </h3>
-          <p className="text-slate-600">Cliquez sur un symbole pour en découvrir l'histoire</p>
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-slate-200">
+            <Sparkles className="h-5 w-5 text-blue-600" />
+            <span className="font-medium text-slate-800">Aperçu de la Collection</span>
+          </div>
+          <p className="text-slate-600 mt-4">Cliquez sur un symbole pour découvrir son histoire</p>
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="flex items-center justify-center py-20">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div className="absolute inset-0 rounded-full border-2 border-slate-200"></div>
+            </div>
           </div>
         ) : (
-          <SymbolGrid symbols={symbols?.slice(0, 6) || []} />
+          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-slate-200 shadow-xl">
+            <SymbolGrid symbols={symbols?.slice(0, 6) || []} />
+          </div>
         )}
       </div>
 
-      {/* Transition narrative vers l'étape suivante */}
+      {/* Message de transition narratif */}
       <div className="text-center">
-        <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-3xl p-8 border border-blue-200">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-slate-200 shadow-lg max-w-2xl mx-auto">
           <h3 className="text-2xl font-semibold text-slate-800 mb-4">
-            Prêt pour l'étape suivante ?
+            Symboles découverts ?
           </h3>
-          <p className="text-slate-600 mb-6 max-w-2xl mx-auto">
-            Une fois que vous avez découvert des symboles qui vous intriguent, 
-            organisez-les en collections thématiques pour approfondir votre exploration.
+          <p className="text-slate-600 leading-relaxed">
+            Parfait ! Maintenant, organisez vos découvertes en collections thématiques 
+            pour approfondir votre exploration et créer votre propre parcours culturel.
           </p>
-          <div className="flex items-center justify-center">
-            <ChevronDown className="h-6 w-6 text-blue-500 animate-bounce" />
-          </div>
         </div>
       </div>
     </section>
