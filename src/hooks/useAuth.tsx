@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
+import { SecurityUtils } from '@/utils/securityUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -124,9 +125,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateProfile = async (profileData: Partial<UserProfile>) => {
     if (!user) throw new Error('User not authenticated');
 
+    // Validate input data
+    const sanitizedData: Partial<UserProfile> = {};
+    
+    if (profileData.username) {
+      sanitizedData.username = SecurityUtils.validateInput(profileData.username, 50);
+    }
+    if (profileData.full_name) {
+      sanitizedData.full_name = SecurityUtils.validateInput(profileData.full_name, 100);
+    }
+    if (profileData.bio) {
+      sanitizedData.bio = SecurityUtils.validateInput(profileData.bio, 500);
+    }
+
     const { error } = await supabase
       .from('profiles')
-      .update(profileData)
+      .update(sanitizedData)
       .eq('id', user.id);
 
     if (error) throw error;
@@ -136,25 +150,74 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, userData?: any) => {
+    // Validate email and password
+    const sanitizedEmail = SecurityUtils.validateInput(email, 255);
+    
+    // Check password strength
+    const passwordValidation = SecurityUtils.validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      return { 
+        error: { 
+          message: `Password is too weak: ${passwordValidation.feedback.join(', ')}` 
+        } 
+      };
+    }
+
+    // Generate CSRF token for signup
+    const csrfToken = SecurityUtils.generateCSRFToken();
+    SecurityUtils.setSecureSessionData('signup_csrf', csrfToken, 15);
+
+    // Set up email redirect URL - CRITICAL SECURITY FIX
+    const redirectUrl = `${window.location.origin}/`;
+
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: sanitizedEmail,
       password,
       options: {
-        data: userData
+        emailRedirectTo: redirectUrl, // This was missing - critical fix
+        data: {
+          ...userData,
+          csrf_token: csrfToken
+        }
       }
     });
+
+    if (error) {
+      console.error('Signup error:', error);
+    }
+
     return { data, error };
   };
 
   const signIn = async (email: string, password: string) => {
+    // Rate limiting check
+    if (!SecurityUtils.checkRateLimit(`login_${email}`, 5, 300000)) { // 5 attempts per 5 minutes
+      return { 
+        error: { 
+          message: 'Too many login attempts. Please try again later.' 
+        } 
+      };
+    }
+
+    // Validate input
+    const sanitizedEmail = SecurityUtils.validateInput(email, 255);
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: sanitizedEmail,
       password
     });
+
+    if (error) {
+      console.error('Login error:', error);
+    }
+
     return { data, error };
   };
 
   const signOut = async () => {
+    // Clear any stored session data
+    SecurityUtils.setSecureSessionData('signup_csrf', null, 0);
+    
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };

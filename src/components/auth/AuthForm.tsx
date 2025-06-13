@@ -15,33 +15,58 @@ import { Mail, Lock, User, UserPlus, Eye, EyeOff, Shield, CheckCircle, AlertCirc
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import { SecurityBadges } from './SecurityBadges';
 import { WelcomeModal } from './WelcomeModal';
+import { SecurityUtils } from '@/utils/securityUtils';
+import SecurityAlert from '@/components/security/SecurityAlert';
+import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
 
 export default function AuthForm() {
   const { t } = useTranslation();
   const { signIn, signUp, isLoading } = useAuth();
+  const { logSecurityEvent } = useSecurityMonitoring();
   const [activeTab, setActiveTab] = useState('login');
   const [authError, setAuthError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [newUserName, setNewUserName] = useState<string>('');
+  const [securityAlert, setSecurityAlert] = useState<{
+    type: 'success' | 'warning' | 'error' | 'info';
+    title: string;
+    message: string;
+  } | null>(null);
 
-  // Validation schema for login with internationalized messages
+  // Enhanced validation schema for login with security checks
   const loginSchema = z.object({
-    email: z.string().email(t('errors.invalidEmail', { ns: 'auth' })),
-    password: z.string().min(6, t('errors.passwordTooShort', { ns: 'auth' })),
-  });
-
-  // Extended validation schema for registration with internationalized messages
-  const registerSchema = z.object({
-    email: z.string().email(t('errors.invalidEmail', { ns: 'auth' })),
-    username: z.string().min(3, t('errors.usernameTooShort', { ns: 'auth' })).max(50),
-    fullName: z.string().min(2, t('errors.fullNameTooShort', { ns: 'auth' })).max(100).optional(),
+    email: z.string()
+      .email(t('errors.invalidEmail', { ns: 'auth' }))
+      .min(1, 'Email is required')
+      .max(255, 'Email is too long'),
     password: z.string()
       .min(6, t('errors.passwordTooShort', { ns: 'auth' }))
+      .max(128, 'Password is too long'),
+  });
+
+  // Enhanced validation schema for registration with security requirements
+  const registerSchema = z.object({
+    email: z.string()
+      .email(t('errors.invalidEmail', { ns: 'auth' }))
+      .min(1, 'Email is required')
+      .max(255, 'Email is too long'),
+    username: z.string()
+      .min(3, t('errors.usernameTooShort', { ns: 'auth' }))
+      .max(50, 'Username is too long')
+      .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
+    fullName: z.string()
+      .min(2, t('errors.fullNameTooShort', { ns: 'auth' }))
+      .max(100, 'Full name is too long')
+      .optional(),
+    password: z.string()
+      .min(8, 'Password must be at least 8 characters long')
+      .max(128, 'Password is too long')
       .regex(/[A-Z]/, t('errors.passwordUppercase', { ns: 'auth' }))
       .regex(/[a-z]/, t('errors.passwordLowercase', { ns: 'auth' }))
-      .regex(/\d/, t('errors.passwordNumber', { ns: 'auth' })),
-    passwordConfirm: z.string().min(6),
+      .regex(/\d/, t('errors.passwordNumber', { ns: 'auth' }))
+      .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+    passwordConfirm: z.string().min(8),
   }).refine((data) => data.password === data.passwordConfirm, {
     message: t('errors.passwordsNoMatch', { ns: 'auth' }),
     path: ["passwordConfirm"],
@@ -74,42 +99,130 @@ export default function AuthForm() {
   // Watch password for strength indicator
   const watchedPassword = registerForm.watch('password');
 
-  // Handle login submission
+  // Handle login submission with security enhancements
   const onLoginSubmit = async (values: LoginFormValues) => {
     setAuthError(null);
+    setSecurityAlert(null);
+    
     try {
-      const result = await signIn(values.email, values.password);
+      // Validate inputs with security utils
+      const sanitizedEmail = SecurityUtils.validateInput(values.email, 255);
+      
+      // Check rate limiting
+      if (!SecurityUtils.checkRateLimit(`login_${sanitizedEmail}`, 5, 300000)) {
+        logSecurityEvent({
+          type: 'rate_limit',
+          severity: 'medium',
+          message: `Rate limit exceeded for email: ${sanitizedEmail}`
+        });
+        
+        setSecurityAlert({
+          type: 'warning',
+          title: 'Rate Limit Exceeded',
+          message: 'Too many login attempts. Please wait 5 minutes before trying again.'
+        });
+        return;
+      }
+
+      const result = await signIn(sanitizedEmail, values.password);
+      
       if (result.error) {
+        logSecurityEvent({
+          type: 'auth_failure',
+          severity: 'medium',
+          message: `Login failed for email: ${sanitizedEmail}`
+        });
+        
         setAuthError(result.error.message === 'Invalid login credentials' 
           ? t('errors.invalidCredentials', { ns: 'auth' })
-          : result.error.message);
+          : SecurityUtils.createSafeErrorResponse(result.error));
       }
     } catch (error: any) {
-      setAuthError(t('errors.loginError', { ns: 'auth' }));
+      logSecurityEvent({
+        type: 'auth_failure',
+        severity: 'high',
+        message: `Login error: ${error?.message}`
+      });
+      
+      setAuthError(SecurityUtils.createSafeErrorResponse(error));
     }
   };
 
-  // Handle registration submission
+  // Handle registration submission with security enhancements
   const onRegisterSubmit = async (values: RegisterFormValues) => {
     setAuthError(null);
+    setSecurityAlert(null);
+    
     try {
+      // Validate inputs with security utils
+      const sanitizedEmail = SecurityUtils.validateInput(values.email, 255);
+      const sanitizedUsername = SecurityUtils.validateInput(values.username, 50);
+      const sanitizedFullName = values.fullName ? SecurityUtils.validateInput(values.fullName, 100) : '';
+
+      // Additional password strength validation
+      const passwordValidation = SecurityUtils.validatePasswordStrength(values.password);
+      if (!passwordValidation.isValid) {
+        setSecurityAlert({
+          type: 'error',
+          title: 'Weak Password',
+          message: `Password requirements not met: ${passwordValidation.feedback.join(', ')}`
+        });
+        return;
+      }
+
+      // Check rate limiting for registration
+      if (!SecurityUtils.checkRateLimit(`register_${sanitizedEmail}`, 3, 3600000)) {
+        logSecurityEvent({
+          type: 'rate_limit',
+          severity: 'high',
+          message: `Registration rate limit exceeded for email: ${sanitizedEmail}`
+        });
+        
+        setSecurityAlert({
+          type: 'warning',
+          title: 'Registration Limit',
+          message: 'Too many registration attempts. Please wait 1 hour before trying again.'
+        });
+        return;
+      }
+
       const userData: Partial<UserProfile> = {
-        username: values.username,
-        full_name: values.fullName || values.username,
+        username: sanitizedUsername,
+        full_name: sanitizedFullName || sanitizedUsername,
       };
-      const result = await signUp(values.email, values.password, userData);
+      
+      const result = await signUp(sanitizedEmail, values.password, userData);
+      
       if (result.error) {
+        logSecurityEvent({
+          type: 'auth_failure',
+          severity: 'medium',
+          message: `Registration failed for email: ${sanitizedEmail}`
+        });
+        
         if (result.error.message.includes('already registered')) {
           setAuthError(t('errors.emailAlreadyUsed', { ns: 'auth' }));
         } else {
-          setAuthError(result.error.message);
+          setAuthError(SecurityUtils.createSafeErrorResponse(result.error));
         }
       } else {
-        setNewUserName(values.username);
+        setNewUserName(sanitizedUsername);
         setShowWelcomeModal(true);
+        
+        setSecurityAlert({
+          type: 'success',
+          title: 'Registration Successful',
+          message: 'Please check your email to verify your account.'
+        });
       }
     } catch (error: any) {
-      setAuthError(t('errors.registrationError', { ns: 'auth' }));
+      logSecurityEvent({
+        type: 'auth_failure',
+        severity: 'high',
+        message: `Registration error: ${error?.message}`
+      });
+      
+      setAuthError(SecurityUtils.createSafeErrorResponse(error));
     }
   };
 
@@ -142,6 +255,15 @@ export default function AuthForm() {
           </div>
 
           <div className="p-6">
+            {securityAlert && (
+              <SecurityAlert
+                type={securityAlert.type}
+                title={securityAlert.title}
+                message={securityAlert.message}
+                onDismiss={() => setSecurityAlert(null)}
+              />
+            )}
+
             <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login" className="flex items-center space-x-2">
@@ -183,6 +305,8 @@ export default function AuthForm() {
                                 placeholder={t('form.emailPlaceholder', { ns: 'auth' })} 
                                 className="pl-10 pr-10 h-12 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
+                                maxLength={255}
+                                autoComplete="email"
                               />
                               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                                 {getFieldValidationIcon('email', loginForm)}
@@ -217,6 +341,8 @@ export default function AuthForm() {
                                 placeholder={t('form.passwordPlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-12 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
+                                maxLength={128}
+                                autoComplete="current-password"
                               />
                               <button
                                 type="button"
@@ -286,6 +412,8 @@ export default function AuthForm() {
                                 placeholder={t('form.emailPlaceholder', { ns: 'auth' })} 
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
+                                maxLength={255}
+                                autoComplete="email"
                               />
                               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                                 {getFieldValidationIcon('email', registerForm)}
@@ -312,6 +440,8 @@ export default function AuthForm() {
                                 placeholder={t('form.usernamePlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
+                                maxLength={50}
+                                autoComplete="username"
                               />
                               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                                 {getFieldValidationIcon('username', registerForm)}
@@ -340,6 +470,8 @@ export default function AuthForm() {
                                 placeholder={t('form.fullNamePlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
+                                maxLength={100}
+                                autoComplete="name"
                               />
                               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                                 {getFieldValidationIcon('fullName', registerForm)}
@@ -366,6 +498,8 @@ export default function AuthForm() {
                                 placeholder={t('form.passwordPlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
+                                maxLength={128}
+                                autoComplete="new-password"
                               />
                               <button
                                 type="button"
@@ -397,6 +531,8 @@ export default function AuthForm() {
                                 placeholder={t('form.passwordPlaceholder', { ns: 'auth' })}
                                 className="pl-10 pr-10 h-11 border-slate-200 focus:border-amber-500 focus:ring-amber-500 transition-colors" 
                                 {...field} 
+                                maxLength={128}
+                                autoComplete="new-password"
                               />
                               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                                 {getFieldValidationIcon('passwordConfirm', registerForm)}
