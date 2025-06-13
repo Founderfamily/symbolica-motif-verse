@@ -62,11 +62,12 @@ const QuestsPage = () => {
     custom: 'Personnalisée'
   };
 
+  // Unified color palette using amber/stone tones
   const difficultyColors = {
-    beginner: 'bg-green-100 text-green-800',
-    intermediate: 'bg-yellow-100 text-yellow-800',
-    expert: 'bg-orange-100 text-orange-800',
-    master: 'bg-red-100 text-red-800'
+    beginner: 'bg-amber-50 text-amber-800 border-amber-200',
+    intermediate: 'bg-amber-100 text-amber-900 border-amber-300',
+    expert: 'bg-stone-100 text-stone-800 border-stone-300',
+    master: 'bg-stone-200 text-stone-900 border-stone-400'
   };
 
   const difficultyLabels = {
@@ -162,38 +163,38 @@ const QuestsPage = () => {
         {/* En-tête */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
-            <Badge className="px-6 py-3 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border-amber-200 text-lg">
+            <Badge className="px-6 py-3 bg-gradient-to-r from-amber-100 to-stone-100 text-amber-800 border-amber-200 text-lg">
               <History className="w-5 h-5 mr-2" />
               Recherche Collaborative
             </Badge>
           </div>
           
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-amber-800 via-orange-600 to-red-700 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
             Chasse aux Trésors Perdus
           </h1>
           
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-stone-600 max-w-3xl mx-auto mb-8">
             Rejoignez une communauté mondiale de chercheurs pour résoudre les plus grands mystères de l'histoire. 
             Contribuez avec des preuves, des indices, des théories et des liens d'archives pour découvrir ensemble des trésors perdus.
           </p>
 
-          {/* Statistiques de contribution */}
+          {/* Statistiques unifiées avec palette cohérente */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-blue-600 mb-2">{activeQuests?.length || 0}</div>
-              <div className="text-slate-600">Recherches Actives</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
+              <div className="text-3xl font-bold text-amber-700 mb-2">{activeQuests?.length || 0}</div>
+              <div className="text-stone-600">Recherches Actives</div>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-green-600 mb-2">2,847</div>
-              <div className="text-slate-600">Preuves Soumises</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
+              <div className="text-3xl font-bold text-amber-800 mb-2">2,847</div>
+              <div className="text-stone-600">Preuves Soumises</div>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-purple-600 mb-2">1,293</div>
-              <div className="text-slate-600">Contributeurs Actifs</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
+              <div className="text-3xl font-bold text-stone-700 mb-2">1,293</div>
+              <div className="text-stone-600">Contributeurs Actifs</div>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-red-600 mb-2">156</div>
-              <div className="text-slate-600">Pistes Découvertes</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
+              <div className="text-3xl font-bold text-stone-800 mb-2">156</div>
+              <div className="text-stone-600">Pistes Découvertes</div>
             </div>
           </div>
         </div>
@@ -238,13 +239,13 @@ const QuestsPage = () => {
             <Button 
               onClick={handlePopulateQuests}
               disabled={isPopulating}
-              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+              className="bg-stone-700 hover:bg-stone-800 text-white"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               {isPopulating ? 'Chargement...' : 'Charger Mystères'}
             </Button>
             
-            <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
+            <Button className="bg-amber-600 hover:bg-amber-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Proposer une Recherche
             </Button>
@@ -274,7 +275,7 @@ const QuestsPage = () => {
           <div className="mb-12">
             <div className="flex items-center mb-8">
               <Globe className="w-8 h-8 text-amber-600 mr-3" />
-              <h2 className="text-3xl font-bold text-slate-800">Mystères Historiques Authentiques</h2>
+              <h2 className="text-3xl font-bold text-stone-800">Mystères Historiques Authentiques</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -285,25 +286,23 @@ const QuestsPage = () => {
                   <Card key={quest.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-white/95 backdrop-blur-sm border border-amber-200/50">
                     
                     <div className="relative">
-                      <div className={`p-6 bg-gradient-to-br ${
-                        quest.quest_type === 'templar' ? 'from-red-500 to-red-700' :
-                        quest.quest_type === 'grail' ? 'from-purple-500 to-purple-700' :
-                        quest.quest_type === 'lost_civilization' ? 'from-blue-500 to-blue-700' :
-                        'from-amber-500 to-amber-700'
-                      } text-white`}>
+                      {/* Simplified card header with unified amber/stone gradient */}
+                      <div className="p-6 bg-gradient-to-br from-amber-100 to-stone-100 border-b border-amber-200">
                         <div className="flex items-center justify-between mb-4">
-                          <TypeIcon className="w-8 h-8" />
+                          <div className="w-12 h-12 bg-stone-800 text-amber-100 rounded-lg flex items-center justify-center">
+                            <TypeIcon className="w-6 h-6" />
+                          </div>
                           <Badge className={`${difficultyColors[quest.difficulty_level]} border-0`}>
                             {difficultyLabels[quest.difficulty_level]}
                           </Badge>
                         </div>
                         
-                        <h3 className="text-2xl font-bold mb-2">{quest.title}</h3>
-                        <p className="text-white/90 text-sm">{questTypeLabels[quest.quest_type]}</p>
+                        <h3 className="text-2xl font-bold mb-2 text-stone-800">{quest.title}</h3>
+                        <p className="text-stone-600 text-sm">{questTypeLabels[quest.quest_type]}</p>
                         
                         {/* Historical authenticity badge */}
                         <div className="mt-3">
-                          <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                          <Badge variant="secondary" className="bg-amber-50 text-amber-800 border-amber-300">
                             <History className="w-3 h-3 mr-1" />
                             Basé sur l'Histoire
                           </Badge>
@@ -311,7 +310,7 @@ const QuestsPage = () => {
                       </div>
                       
                       <div className="absolute top-4 right-4">
-                        <Badge variant={quest.status === 'active' ? 'default' : 'secondary'}>
+                        <Badge variant={quest.status === 'active' ? 'default' : 'secondary'} className="bg-stone-800 text-amber-100">
                           {quest.status === 'active' ? 'Active' : 
                            quest.status === 'upcoming' ? 'À venir' : 
                            quest.status === 'completed' ? 'Résolue' : 'En pause'}
@@ -320,7 +319,7 @@ const QuestsPage = () => {
                     </div>
                     
                     <div className="p-6">
-                      <p className="text-slate-600 mb-4 line-clamp-3">
+                      <p className="text-stone-600 mb-4 line-clamp-3">
                         {quest.description}
                       </p>
                       
@@ -333,22 +332,22 @@ const QuestsPage = () => {
                         </div>
                       )}
                       
-                      {/* Métriques de contribution */}
+                      {/* Métriques de contribution avec couleurs unifiées */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="flex items-center text-sm text-slate-600">
-                          <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                        <div className="flex items-center text-sm text-stone-600">
+                          <FileText className="w-4 h-4 mr-2 text-amber-600" />
                           {quest.clues?.length || 0} indices
                         </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <Camera className="w-4 h-4 mr-2 text-green-500" />
+                        <div className="flex items-center text-sm text-stone-600">
+                          <Camera className="w-4 h-4 mr-2 text-amber-700" />
                           24 preuves
                         </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <Brain className="w-4 h-4 mr-2 text-purple-500" />
+                        <div className="flex items-center text-sm text-stone-600">
+                          <Brain className="w-4 h-4 mr-2 text-stone-700" />
                           8 théories
                         </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <Archive className="w-4 h-4 mr-2 text-orange-500" />
+                        <div className="flex items-center text-sm text-stone-600">
+                          <Archive className="w-4 h-4 mr-2 text-stone-600" />
                           15 archives
                         </div>
                       </div>
@@ -366,7 +365,7 @@ const QuestsPage = () => {
                         </Link>
                         
                         <Button 
-                          className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                          className="flex-1 bg-stone-800 hover:bg-stone-900 text-amber-100"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Contribuer
@@ -384,8 +383,8 @@ const QuestsPage = () => {
         {customQuests.length > 0 && (
           <div className="mb-12">
             <div className="flex items-center mb-8">
-              <Trophy className="w-8 h-8 text-purple-600 mr-3" />
-              <h2 className="text-3xl font-bold text-slate-800">Recherches Communautaires</h2>
+              <Trophy className="w-8 h-8 text-stone-600 mr-3" />
+              <h2 className="text-3xl font-bold text-stone-800">Recherches Communautaires</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -395,25 +394,22 @@ const QuestsPage = () => {
                 return (
                   <Card key={quest.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-white/95 backdrop-blur-sm border border-amber-200/50">
                     <div className="relative">
-                      <div className={`p-6 bg-gradient-to-br ${
-                        quest.quest_type === 'templar' ? 'from-red-500 to-red-700' :
-                        quest.quest_type === 'grail' ? 'from-purple-500 to-purple-700' :
-                        quest.quest_type === 'lost_civilization' ? 'from-blue-500 to-blue-700' :
-                        'from-amber-500 to-amber-700'
-                      } text-white`}>
+                      <div className="p-6 bg-gradient-to-br from-stone-100 to-amber-50 border-b border-stone-200">
                         <div className="flex items-center justify-between mb-4">
-                          <TypeIcon className="w-8 h-8" />
+                          <div className="w-12 h-12 bg-stone-700 text-amber-100 rounded-lg flex items-center justify-center">
+                            <TypeIcon className="w-6 h-6" />
+                          </div>
                           <Badge className={`${difficultyColors[quest.difficulty_level]} border-0`}>
                             {difficultyLabels[quest.difficulty_level]}
                           </Badge>
                         </div>
                         
-                        <h3 className="text-2xl font-bold mb-2">{quest.title}</h3>
-                        <p className="text-white/90 text-sm">{questTypeLabels[quest.quest_type]}</p>
+                        <h3 className="text-2xl font-bold mb-2 text-stone-800">{quest.title}</h3>
+                        <p className="text-stone-600 text-sm">{questTypeLabels[quest.quest_type]}</p>
                       </div>
                       
                       <div className="absolute top-4 right-4">
-                        <Badge variant={quest.status === 'active' ? 'default' : 'secondary'}>
+                        <Badge variant={quest.status === 'active' ? 'default' : 'secondary'} className="bg-stone-700 text-amber-100">
                           {quest.status === 'active' ? 'Active' : 
                            quest.status === 'upcoming' ? 'À venir' : 
                            quest.status === 'completed' ? 'Résolue' : 'En pause'}
@@ -422,26 +418,26 @@ const QuestsPage = () => {
                     </div>
                     
                     <div className="p-6">
-                      <p className="text-slate-600 mb-4 line-clamp-3">
+                      <p className="text-stone-600 mb-4 line-clamp-3">
                         {quest.description || quest.story_background}
                       </p>
                       
-                      {/* Métriques de contribution */}
+                      {/* Métriques de contribution avec couleurs unifiées */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="flex items-center text-sm text-slate-600">
-                          <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                        <div className="flex items-center text-sm text-stone-600">
+                          <FileText className="w-4 h-4 mr-2 text-amber-600" />
                           {quest.clues?.length || 0} indices
                         </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <Camera className="w-4 h-4 mr-2 text-green-500" />
+                        <div className="flex items-center text-sm text-stone-600">
+                          <Camera className="w-4 h-4 mr-2 text-amber-700" />
                           12 preuves
                         </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <Brain className="w-4 h-4 mr-2 text-purple-500" />
+                        <div className="flex items-center text-sm text-stone-600">
+                          <Brain className="w-4 h-4 mr-2 text-stone-700" />
                           3 théories
                         </div>
-                        <div className="flex items-center text-sm text-slate-600">
-                          <Archive className="w-4 h-4 mr-2 text-orange-500" />
+                        <div className="flex items-center text-sm text-stone-600">
+                          <Archive className="w-4 h-4 mr-2 text-stone-600" />
                           7 archives
                         </div>
                       </div>
@@ -456,7 +452,7 @@ const QuestsPage = () => {
                         </Link>
                         
                         <Button 
-                          className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                          className="flex-1 bg-stone-800 hover:bg-stone-900 text-amber-100"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Contribuer
@@ -478,7 +474,7 @@ const QuestsPage = () => {
             <Button 
               onClick={handlePopulateQuests}
               disabled={isPopulating}
-              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+              className="bg-stone-700 hover:bg-stone-800 text-white"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               {isPopulating ? 'Chargement...' : 'Charger les Mystères Historiques'}
