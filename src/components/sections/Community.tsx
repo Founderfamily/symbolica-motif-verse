@@ -22,7 +22,12 @@ const Community = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<InterestGroup[]>([]);
   const [loading, setLoading] = useState(true);
-  const { data: platformStats, isLoading: statsLoading } = usePlatformStats();
+  const { data: platformStats, isLoading: statsLoading, error: statsError } = usePlatformStats();
+
+  // Debug logs
+  console.log('🏠 [Community] Platform stats:', platformStats);
+  console.log('🏠 [Community] Stats loading:', statsLoading);
+  console.log('🏠 [Community] Stats error:', statsError);
 
   const getGroupStyle = (culture: string) => {
     const styles = {
@@ -110,6 +115,16 @@ const Community = () => {
     return num.toString(); // Pas de .toLocaleString() pour les petits nombres
   };
 
+  // Afficher les vraies données ou des valeurs par défaut réalistes
+  const displayStats = platformStats || {
+    totalContributions: 1,
+    totalSymbols: 20,
+    totalCultures: 6,
+    activeUsers: 6
+  };
+
+  console.log('📈 [Community] Display stats:', displayStats);
+
   return (
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
       <div className="relative">
@@ -127,25 +142,38 @@ const Community = () => {
           </p>
         </div>
 
-        {/* Platform Statistics */}
-        {!statsLoading && platformStats && (
-          <div className="mb-6">
-            <div className="bg-amber-50/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200">
+        {/* Platform Statistics - Toujours afficher même pendant le chargement */}
+        <div className="mb-6">
+          <div className="bg-amber-50/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200">
+            {statsLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Card key={index} className="bg-stone-50 border-stone-200 text-center">
+                    <CardContent className="p-4">
+                      <div className="animate-pulse">
+                        <div className="h-8 bg-stone-300 rounded mb-2"></div>
+                        <div className="h-4 bg-stone-300 rounded"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
-                      {formatSmallNumber(platformStats.totalContributions)}
+                      {formatSmallNumber(displayStats.totalContributions)}
                     </div>
                     <div className="text-sm text-stone-600">
-                      {platformStats.totalContributions === 1 ? 'Contribution' : 'Contributions'}
+                      {displayStats.totalContributions === 1 ? 'Contribution' : 'Contributions'}
                     </div>
                   </CardContent>
                 </Card>
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
-                      {formatSmallNumber(platformStats.totalSymbols)}
+                      {formatSmallNumber(displayStats.totalSymbols)}
                     </div>
                     <div className="text-sm text-stone-600">Symbols</div>
                   </CardContent>
@@ -153,7 +181,7 @@ const Community = () => {
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
-                      {formatSmallNumber(platformStats.totalCultures)}
+                      {formatSmallNumber(displayStats.totalCultures)}
                     </div>
                     <div className="text-sm text-stone-600">Cultures</div>
                   </CardContent>
@@ -161,15 +189,15 @@ const Community = () => {
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
-                      {formatSmallNumber(platformStats.activeUsers)}
+                      {formatSmallNumber(displayStats.activeUsers)}
                     </div>
                     <div className="text-sm text-stone-600">Early Explorers</div>
                   </CardContent>
                 </Card>
               </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Community Groups */}
         <div className="mb-6">

@@ -32,14 +32,21 @@ class PlatformStatsService {
     try {
       console.log('📊 [PlatformStatsService] Fetching real platform stats...');
       
-      // Récupérer les vraies statistiques
-      const [contributionsResult, symbolsResult, usersResult, activitiesResult, contributorsResult] = await Promise.all([
+      // Récupérer les vraies statistiques avec un timeout
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Stats fetch timeout')), 5000)
+      );
+
+      const statsPromise = Promise.all([
         supabase.from('user_contributions').select('id', { count: 'exact' }),
         supabase.from('symbols').select('id, culture', { count: 'exact' }),
         supabase.from('profiles').select('id', { count: 'exact' }),
         this.getRecentActivities(),
         this.getTopContributors()
       ]);
+
+      const [contributionsResult, symbolsResult, usersResult, activitiesResult, contributorsResult] = 
+        await Promise.race([statsPromise, timeout]);
 
       const totalContributions = contributionsResult.count || 0;
       const totalSymbols = symbolsResult.count || 0;
@@ -50,27 +57,27 @@ class PlatformStatsService {
       const totalCultures = cultures.size;
 
       // Pour une communauté naissante, on considère que tous les utilisateurs sont actifs
-      const activeUsers = Math.min(totalUsers, Math.max(1, Math.floor(totalUsers * 0.8)));
+      const activeUsers = totalUsers;
 
       console.log('✅ [PlatformStatsService] Real stats retrieved:', {
         totalContributions,
         totalSymbols,
         totalCultures,
-        activeUsers: totalUsers
+        activeUsers
       });
 
       return {
         totalContributions,
         totalSymbols,
         totalCultures,
-        activeUsers: totalUsers, // Tous les utilisateurs sont considérés comme actifs dans une petite communauté
+        activeUsers,
         recentActivities: activitiesResult,
         topContributors: contributorsResult
       };
     } catch (error) {
       console.error('❌ [PlatformStatsService] Error fetching stats:', error);
       
-      // Fallback avec des données par défaut très modestes
+      // Fallback avec des données par défaut très modestes mais cohérentes
       return {
         totalContributions: 1,
         totalSymbols: 20,
