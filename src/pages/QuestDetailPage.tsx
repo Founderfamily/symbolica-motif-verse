@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -39,13 +38,21 @@ const QuestDetailPage = () => {
   const { data: allQuests, isLoading, error } = useQuests();
   const [activeTab, setActiveTab] = useState('overview');
   
-  console.log('QuestDetailPage - Quest ID:', id);
-  console.log('QuestDetailPage - All quests:', allQuests);
-
-  // Trouver la quête par ID
-  const quest = allQuests?.find(q => q.id === id);
+  console.log('QuestDetailPage - Quest ID from params:', id);
+  console.log('QuestDetailPage - All quests loaded:', allQuests?.length || 0);
   
-  console.log('QuestDetailPage - Found quest:', quest);
+  if (allQuests) {
+    console.log('QuestDetailPage - Available quest IDs:', allQuests.map(q => ({ id: q.id, title: q.title })));
+  }
+
+  // Trouver la quête par ID avec meilleur diagnostic
+  const quest = allQuests?.find(q => {
+    console.log('QuestDetailPage - Comparing:', q.id, 'vs', id, 'match:', q.id === id);
+    return q.id === id;
+  });
+  
+  console.log('QuestDetailPage - Found quest:', quest ? quest.title : 'QUEST NOT FOUND');
+  console.log('QuestDetailPage - Quest object:', quest);
 
   // Normaliser les clues de manière sécurisée
   const questClues = quest ? normalizeQuestClues(quest) : [];
@@ -68,13 +75,28 @@ const QuestDetailPage = () => {
   }
 
   if (error) {
+    console.error('QuestDetailPage - Error loading quests:', error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="p-8 text-center">
             <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-slate-800 mb-4">Erreur de chargement</h1>
-            <p className="text-slate-600">Impossible de charger les détails de la quête.</p>
+            <p className="text-slate-600 mb-4">Impossible de charger les détails de la quête.</p>
+            <p className="text-sm text-slate-500 mb-6">
+              Erreur: {error instanceof Error ? error.message : 'Erreur inconnue'}
+            </p>
+            <div className="space-y-4">
+              <Link to="/quests">
+                <Button>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Retour aux quêtes
+                </Button>
+              </Link>
+              <Button onClick={() => window.location.reload()} variant="outline">
+                Réessayer
+              </Button>
+            </div>
           </Card>
         </div>
       </div>
@@ -82,13 +104,31 @@ const QuestDetailPage = () => {
   }
 
   if (!quest) {
+    console.warn('QuestDetailPage - Quest not found. ID searched:', id);
+    console.warn('QuestDetailPage - Available IDs:', allQuests?.map(q => q.id));
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="p-8 text-center">
             <Search className="w-16 h-16 text-slate-400 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-slate-800 mb-4">Quête introuvable</h1>
-            <p className="text-slate-600 mb-6">La quête demandée n'existe pas ou n'est pas disponible.</p>
+            <p className="text-slate-600 mb-4">La quête demandée n'existe pas ou n'est pas disponible.</p>
+            <div className="bg-slate-50 p-4 rounded-lg mb-6">
+              <p className="text-sm text-slate-500 mb-2">Détails de débogage :</p>
+              <p className="text-xs text-slate-400">ID recherché : {id}</p>
+              <p className="text-xs text-slate-400">Quêtes disponibles : {allQuests?.length || 0}</p>
+              {allQuests && allQuests.length > 0 && (
+                <details className="mt-2">
+                  <summary className="text-xs text-slate-400 cursor-pointer">IDs disponibles</summary>
+                  <div className="mt-1 text-xs text-slate-300 max-h-32 overflow-auto">
+                    {allQuests.map(q => (
+                      <div key={q.id}>{q.id} - {q.title}</div>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </div>
             <Link to="/quests">
               <Button>
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -101,7 +141,7 @@ const QuestDetailPage = () => {
     );
   }
 
-  console.log('QuestDetailPage - Rendering quest:', quest.title);
+  console.log('QuestDetailPage - Successfully rendering quest:', quest.title);
 
   const questTypeLabels = {
     templar: 'Templiers',

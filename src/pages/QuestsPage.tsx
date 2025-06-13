@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -354,13 +353,19 @@ const QuestsPage = () => {
                         </div>
                       </div>
                       
-                      {/* Actions de contribution */}
+                      {/* Actions de contribution avec navigation fixée */}
                       <div className="flex gap-3">
-                        <Link to={`/quests/${quest.id}`} className="flex-1">
+                        <Link 
+                          to={`/quests/${quest.id}`} 
+                          className="flex-1"
+                          onClick={() => {
+                            console.log('QuestsPage - Navigation vers quest:', quest.id);
+                            console.log('QuestsPage - Quest object:', quest);
+                          }}
+                        >
                           <Button 
                             variant="outline" 
                             className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50"
-                            onClick={() => console.log('QuestsPage - Explorer clicked for quest:', quest.id)}
                           >
                             <Search className="w-4 h-4 mr-2" />
                             Explorer
