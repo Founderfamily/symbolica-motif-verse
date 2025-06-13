@@ -59,37 +59,38 @@ const Community = () => {
       try {
         setLoading(true);
         
+        // Données réalistes pour une communauté naissante
         setGroups([
           {
             id: '1',
             name: 'Global Explorers',
             culture: 'Global Explorers',
-            members_count: 1284,
-            contributions_count: 2567,
+            members_count: 3, // Plus réaliste
+            contributions_count: 8,
             themes: ['Discovery', 'Adventure', 'Heritage']
           },
           {
             id: '2',
             name: 'Cultural Heritage',
             culture: 'Cultural Heritage',
-            members_count: 986,
-            contributions_count: 1823,
+            members_count: 2,
+            contributions_count: 5,
             themes: ['Preservation', 'Education', 'Research']
           },
           {
             id: '3',
             name: 'Symbol Researchers',
             culture: 'Symbol Researchers',
-            members_count: 756,
-            contributions_count: 1334,
+            members_count: 2,
+            contributions_count: 3,
             themes: ['Analysis', 'Documentation', 'Study']
           },
           {
             id: '4',
             name: 'Digital Archivists',
             culture: 'Digital Archivists',
-            members_count: 629,
-            contributions_count: 1198,
+            members_count: 1,
+            contributions_count: 2,
             themes: ['Technology', 'Digital', 'Archive']
           }
         ]);
@@ -104,40 +105,47 @@ const Community = () => {
     loadGroups();
   }, []);
 
+  // Fonction pour formater les petits nombres sans virgules inutiles
+  const formatSmallNumber = (num: number): string => {
+    return num.toString(); // Pas de .toLocaleString() pour les petits nombres
+  };
+
   return (
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
       <div className="relative">
-        {/* Section Header - Simplified */}
-        <div className="text-center mb-8">
+        {/* Section Header - Adapté pour une communauté naissante */}
+        <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
-            <I18nText translationKey="community.title">Explorer Community</I18nText>
+            <I18nText translationKey="community.title">Growing Explorer Community</I18nText>
           </h2>
           
           <p className="text-base text-stone-600 max-w-2xl mx-auto mb-6 leading-relaxed">
             <I18nText translationKey="community.description">
-              Join a global community of enthusiasts who share 
-              their discoveries and enrich our understanding of symbolic heritage.
+              Join our growing community of early explorers who are building 
+              the foundation of symbolic heritage discovery.
             </I18nText>
           </p>
         </div>
 
         {/* Platform Statistics */}
         {!statsLoading && platformStats && (
-          <div className="mb-8">
+          <div className="mb-6">
             <div className="bg-amber-50/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
-                      {platformStats.totalContributions.toLocaleString()}
+                      {formatSmallNumber(platformStats.totalContributions)}
                     </div>
-                    <div className="text-sm text-stone-600">Contributions</div>
+                    <div className="text-sm text-stone-600">
+                      {platformStats.totalContributions === 1 ? 'Contribution' : 'Contributions'}
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
-                      {platformStats.totalSymbols.toLocaleString()}
+                      {formatSmallNumber(platformStats.totalSymbols)}
                     </div>
                     <div className="text-sm text-stone-600">Symbols</div>
                   </CardContent>
@@ -145,7 +153,7 @@ const Community = () => {
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
-                      {platformStats.totalCultures}
+                      {formatSmallNumber(platformStats.totalCultures)}
                     </div>
                     <div className="text-sm text-stone-600">Cultures</div>
                   </CardContent>
@@ -153,9 +161,9 @@ const Community = () => {
                 <Card className="bg-stone-50 border-stone-200 text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-stone-800 mb-1">
-                      {platformStats.activeUsers}
+                      {formatSmallNumber(platformStats.activeUsers)}
                     </div>
-                    <div className="text-sm text-stone-600">Active Members</div>
+                    <div className="text-sm text-stone-600">Early Explorers</div>
                   </CardContent>
                 </Card>
               </div>
@@ -164,10 +172,10 @@ const Community = () => {
         )}
 
         {/* Community Groups */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-stone-800 mb-2">Active Communities</h3>
-            <p className="text-stone-600">Join specialized groups based on your interests</p>
+            <h3 className="text-xl font-semibold text-stone-800 mb-2">Pioneer Groups</h3>
+            <p className="text-stone-600">Join the first specialized explorer communities</p>
           </div>
           
           {loading ? (
@@ -219,13 +227,15 @@ const Community = () => {
                         <div className="grid grid-cols-2 gap-3 text-sm mb-4">
                           <div className="text-center bg-white/50 rounded-lg p-2">
                             <div className="font-semibold text-stone-800">
-                              {group.members_count.toLocaleString()}
+                              {formatSmallNumber(group.members_count)}
                             </div>
-                            <div className="text-stone-600 text-xs">Members</div>
+                            <div className="text-stone-600 text-xs">
+                              {group.members_count === 1 ? 'Member' : 'Members'}
+                            </div>
                           </div>
                           <div className="text-center bg-white/50 rounded-lg p-2">
                             <div className="font-semibold text-stone-800">
-                              {group.contributions_count.toLocaleString()}
+                              {formatSmallNumber(group.contributions_count)}
                             </div>
                             <div className="text-stone-600 text-xs">Posts</div>
                           </div>
@@ -248,28 +258,28 @@ const Community = () => {
           )}
         </div>
 
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <Button 
             onClick={() => navigate('/community')}
             size="lg"
             className="bg-stone-800 hover:bg-stone-900 text-amber-100 px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
           >
             <Ship className="mr-2 h-4 w-4" />
-            <I18nText translationKey="community.exploreAll">Explore Community</I18nText>
+            <I18nText translationKey="community.exploreAll">Join the Community</I18nText>
             <Crown className="ml-2 h-4 w-4" />
           </Button>
         </div>
 
-        {/* Transition Message */}
+        {/* Transition Message - Adapté pour communauté naissante */}
         <div className="text-center">
           <div className="relative max-w-2xl mx-auto">
             <div className="bg-amber-50 rounded-xl p-6 border-l-4 border-amber-600 shadow-sm">
               <h3 className="text-xl font-semibold text-stone-800 mb-3">
-                Community joined?
+                Ready to be a pioneer?
               </h3>
               <p className="text-base text-stone-600 leading-relaxed">
-                Perfect! You're ready to embark on your greatest adventure yet. 
-                Let's launch your first legendary expedition!
+                Perfect! Join our founding explorers and help build 
+                the world's most comprehensive symbolic heritage database.
               </p>
               
               <div className="mt-4 flex justify-center">
