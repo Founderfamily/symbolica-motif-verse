@@ -1,46 +1,159 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { generateSymbolSuggestion } from '@/services/aiSymbolGeneratorService';
 import { SymbolData } from '@/types/supabase';
-import { Loader2, Sparkle, Plus } from 'lucide-react';
-
-const fields: Record<string, { label: string; type: 'text' | 'textarea' | 'list' }> = {
-  name: { label: 'Nom du symbole', type: 'text' },
-  culture: { label: 'Culture', type: 'text' },
-  period: { label: 'Période', type: 'text' },
-  description: { label: 'Description', type: 'textarea' },
-  function: { label: 'Fonction(s)', type: 'list' },
-  tags: { label: 'Étiquettes', type: 'list' },
-  medium: { label: 'Matériaux', type: 'list' },
-  technique: { label: 'Techniques', type: 'list' },
-  significance: { label: 'Signification', type: 'textarea' },
-  historical_context: { label: 'Contexte historique', type: 'textarea' },
-  // Intentionally omitting 'translations' and 'related_symbols' from the input list form here
-};
+import { Loader2, Sparkle } from 'lucide-react';
 
 const SymbolMCPGenerator: React.FC = () => {
   const { toast } = useToast();
   const [theme, setTheme] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [aiSymbol, setAiSymbol] = useState<Partial<SymbolData> | null>(null);
-  const [editSymbol, setEditSymbol] = useState<Partial<SymbolData> | null>(null);
+  const [resultState, setResultState] = useState<{symbol: Partial<SymbolData>; collection: any;} | null>(null);
 
-  const handleGenerate = async () => {
+  // Utilitaire pour capitaliser
+  const capitalize = (s: string) =>
+    s && typeof s === 'string' ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+
+  // Recherche une collection en fonction de la culture (FR, EN, slug)
+  const findOrCreateCollection = async (culture: string) => {
+    // 1. Recherche d'une collection existante
+    let { data: collections, error } = await supabase
+      .from('collections')
+      .select(`
+        id, slug, collection_translations (
+          id, language, title, description
+        )
+      `);
+
+    if (error) collections = [];
+
+    // Si pas de collection, en créer une
+    if (collections && collections.length > 0) {
+      // priorité : titre FR > slug > titre EN
+      const found = collections.find((c: any) => 
+        c.collection_translations.some((tr: any) =>
+          tr.language === 'fr' && tr.title && tr.title.toLowerCase().includes(culture.toLowerCase())
+        ) ||
+        (c.slug && c.slug.toLowerCase().includes(culture.toLowerCase())) ||
+        c.collection_translations.some((tr: any) =>
+          tr.language === 'en' && tr.title && tr.title.toLowerCase().includes(culture.toLowerCase())
+        )
+      );
+      if (found) return found;
+    }
+
+    // Création d'une collection
+    const slug = culture.toLowerCase().replace(/\s/g, '-').replace(/[^\w\-]+/g, '');
+    const { data: newCollection, error: insertError } = await supabase
+      .from('collections')
+      .insert([
+        {
+          slug: slug,
+          is_featured: false,
+        }
+      ])
+      .select();
+
+    if (insertError || !newCollection?.[0]?.id) {
+      throw new Error("Erreur de création de la collection : " + (insertError?.message || 'inconnue'));
+    }
+
+    // Ajout des traductions
+    await supabase.from('collection_translations').insert([
+      {
+        collection_id: newCollection[0].id,
+        language: 'fr',
+        title: capitalize(culture),
+        description: `Collection automatique : symboles de la culture ${capitalize(culture)}.`
+      },
+      {
+        collection_id: newCollection[0].id,
+        language: 'en',
+        title: capitalize(culture),
+        description: `Auto collection: symbols of ${capitalize(culture)} culture.`
+      }
+    ]);
+
+    return {
+      id: newCollection[0].id,
+      slug,
+      collection_translations: [
+        { language: 'fr', title: capitalize(culture) },
+        { language: 'en', title: capitalize(culture) }
+      ]
+    };
+  };
+
+  const handleGenerateAuto = async () => {
     setIsLoading(true);
-    setAiSymbol(null);
-    setEditSymbol(null);
+    setResultState(null);
     try {
+      // 1. Générer le symbole authentique
       const suggestion = await generateSymbolSuggestion(theme.trim());
-      setAiSymbol(suggestion || null);
-      setEditSymbol({ ...suggestion });
+      if (!suggestion?.culture) {
+        throw new Error("La génération IA n'a pas renvoyé de culture.");
+      }
+
+      // 2. Chercher/créer la collection associée
+      const collection = await findOrCreateCollection(suggestion.culture);
+
+      // 3. Créer le symbole dans la DB
+      const dataToInsert = {
+        name: suggestion.name,
+        culture: suggestion.culture,
+        period: suggestion.period,
+        description: suggestion.description ?? null,
+        function: suggestion.function ?? null,
+        tags: suggestion.tags ?? null,
+        medium: suggestion.medium ?? null,
+        technique: suggestion.technique ?? null,
+        significance: suggestion.significance ?? null,
+        historical_context: suggestion.historical_context ?? null
+      };
+      const { data: symbolResp, error: insertError } = await supabase
+        .from('symbols')
+        .insert([dataToInsert])
+        .select();
+
+      if (insertError || !symbolResp?.[0]?.id) {
+        throw new Error("Erreur à la création du symbole : " + (insertError?.message || 'inconnue'));
+      }
+
+      // 4. Associer à la collection
+      await supabase.from('collection_symbols').insert([
+        {
+          collection_id: collection.id,
+          symbol_id: symbolResp[0].id,
+        }
+      ]);
+
+      setResultState({
+        symbol: symbolResp[0],
+        collection,
+      });
+
+      toast({
+        title: 'Symbole authentique créé 🎉',
+        description: (
+          <div>
+            <div>
+              <b>{symbolResp[0].name}</b> ({symbolResp[0].culture}, {symbolResp[0].period})
+            </div>
+            <div>
+              <span className="italic">Ajouté à la collection :</span> <b>{collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title || collection.slug}</b>
+            </div>
+          </div>
+        ),
+      });
+      setTheme('');
     } catch (e: any) {
       toast({
-        title: 'Erreur de génération',
+        title: 'Erreur de génération ou d’insertion',
         description: e.message,
         variant: 'destructive',
       });
@@ -49,221 +162,58 @@ const SymbolMCPGenerator: React.FC = () => {
     }
   };
 
-  const handleInputChange = (key: string, value: any) => {
-    setEditSymbol((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleListChange = (key: string, value: string, index: number) => {
-    setEditSymbol((prev) => {
-      const arr = Array.isArray(prev?.[key]) ? [...(prev as any)[key]] : [];
-      arr[index] = value;
-      return { ...prev, [key]: arr };
-    });
-  };
-
-  const handleAddToList = (key: string) => {
-    setEditSymbol((prev) => {
-      const arr = Array.isArray(prev?.[key]) ? [...(prev as any)[key]] : [];
-      arr.push('');
-      return { ...prev, [key]: arr };
-    });
-  };
-
-  const handleRemoveFromList = (key: string, idx: number) => {
-    setEditSymbol((prev) => {
-      const arr = Array.isArray(prev?.[key]) ? [...(prev as any)[key]] : [];
-      arr.splice(idx, 1);
-      return { ...prev, [key]: arr };
-    });
-  };
-
-  const handleSave = async () => {
-    // Validate required fields
-    if (
-      !editSymbol?.name ||
-      !editSymbol?.culture ||
-      !editSymbol?.period
-    ) {
-      toast({
-        title: 'Champs manquants',
-        description: 'Remplissez au moins le nom, la culture et la période.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Enforce at least required fields as non-undefined
-    const data: {
-      name: string;
-      culture: string;
-      period: string;
-      description?: string | null;
-      function?: string[];
-      tags?: string[];
-      medium?: string[];
-      technique?: string[];
-      significance?: string | null;
-      historical_context?: string | null;
-    } = {
-      name: editSymbol.name,
-      culture: editSymbol.culture,
-      period: editSymbol.period,
-    };
-
-    // Add optional fields if they exist and are strings or arrays
-    for (const key of [
-      'description', 'function', 'tags', 'medium', 'technique', 'significance', 'historical_context'
-    ]) {
-      const value = editSymbol[key as keyof SymbolData];
-      if (
-        typeof value === 'string' ||
-        (Array.isArray(value) && value.length > 0)
-      ) {
-        data[key] = value;
-      }
-    }
-
-    try {
-      const { error } = await supabase.from('symbols').insert([data]);
-      if (error) throw error;
-      toast({
-        title: 'Symbole créé 🎉',
-        description: `Le symbole "${editSymbol.name}" a été ajouté à la base de données.`,
-      });
-      setAiSymbol(null);
-      setEditSymbol(null);
-      setTheme('');
-    } catch (e: any) {
-      toast({
-        title: 'Erreur de création',
-        description: e.message || 'Impossible de créer le symbole.',
-        variant: 'destructive',
-      });
-    }
-  };
-
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Sparkle className="w-5 h-5 text-yellow-500" />
-            Générateur MCP de Symboles
+            Générateur Automatique de Symbole Authentique
           </CardTitle>
           <div className="text-sm text-stone-600 mt-2">
-            Proposez un thème, générez un symbole complet grâce à l’IA, puis validez en un clic !
+            Génère, crée et rattache automatiquement un symbole à la bonne collection, tout authentique et vérifié&nbsp;!
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2 mb-5">
             <Input
-              placeholder="Thème (optionnel, ex : Sagesse, Éternité...)"
+              placeholder="Thème ou culture (optionnel)"
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
               disabled={isLoading}
             />
             <Button 
-              onClick={handleGenerate} 
+              onClick={handleGenerateAuto} 
               variant="default" 
-              className="gap-2" 
+              className="gap-2"
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" />}
-              Générer
+              Générer et Créer
             </Button>
           </div>
-          {editSymbol && (
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                handleSave();
-              }}
-              className="space-y-4"
-            >
-              {Object.entries(fields).map(([key, field]) => (
-                <div key={key}>
-                  <Label htmlFor={key}>{field.label}</Label>
-                  {field.type === 'text' && (
-                    <Input
-                      id={key}
-                      value={(editSymbol[key as keyof SymbolData] ?? '') as string}
-                      onChange={(e) => handleInputChange(key, e.target.value)}
-                      required={['name', 'culture', 'period'].includes(key)}
-                    />
-                  )}
-                  {field.type === 'textarea' && (
-                    <textarea
-                      id={key}
-                      className="w-full border rounded px-3 py-2"
-                      rows={3}
-                      value={(editSymbol[key as keyof SymbolData] ?? '') as string}
-                      onChange={(e) => handleInputChange(key, e.target.value)}
-                    />
-                  )}
-                  {field.type === 'list' && (
-                    <div>
-                      {Array.isArray(editSymbol[key as keyof SymbolData]) 
-                        ? (editSymbol[key as keyof SymbolData] as string[]).map((item, idx) => (
-                          <div key={idx} className="flex gap-2 mb-1">
-                            <Input
-                              value={item}
-                              onChange={(e) => handleListChange(key, e.target.value, idx)}
-                            />
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleRemoveFromList(key, idx)}
-                            >
-                              ✕
-                            </Button>
-                          </div>
-                        ))
-                        : null}
-                      <Button 
-                        type="button"
-                        variant="secondary" 
-                        size="sm"
-                        onClick={() => handleAddToList(key)}
-                        className="mt-1"
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Ajouter
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))}
 
-              {/* Display related_symbols and translations in readonly blocks if present */}
-              {'related_symbols' in (editSymbol as any) && Array.isArray(editSymbol.related_symbols) && (
-                <div>
-                  <Label>Liens associés</Label>
-                  <div className="p-2 bg-stone-100 rounded mb-2 text-xs select-all focus:outline-none" style={{ fontFamily: 'monospace' }}>
-                    {(editSymbol.related_symbols as string[]).join(', ')}
-                  </div>
-                </div>
-              )}
+          {isLoading && (
+            <div className="text-center text-stone-500 py-8">
+              Génération et création en cours… Veuillez patienter.
+            </div>
+          )}
 
-              {'translations' in (editSymbol as any) && editSymbol.translations && (
-                <div>
-                  <Label>Traductions (lecture seule)</Label>
-                  <pre className="p-2 bg-stone-100 rounded mb-2 text-xs select-all overflow-x-auto" style={{ fontFamily: 'monospace' }}>
-                    {JSON.stringify(editSymbol.translations, null, 2)}
-                  </pre>
-                </div>
-              )}
-
-              <div className="flex justify-end">
-                <Button type="submit" className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Créer ce symbole
-                </Button>
+          {!isLoading && resultState && (
+            <div className="space-y-2 mt-6 p-4 rounded bg-stone-50 border">
+              <div className="font-semibold text-stone-800">
+                ✅ Symbole authentique ajouté&nbsp;!
               </div>
-            </form>
+              <div>
+                <span className="font-medium">{resultState.symbol.name}</span> ({resultState.symbol.culture}, {resultState.symbol.period})
+              </div>
+              {resultState.symbol.description && (
+                <div className="text-sm mt-2 text-stone-600">{resultState.symbol.description}</div>
+              )}
+              <div className="mt-2 text-xs text-stone-500">
+                Collection&nbsp;: <span className="font-bold">{resultState.collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title || resultState.collection.slug}</span>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
