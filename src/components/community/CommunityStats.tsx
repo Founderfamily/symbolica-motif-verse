@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, TrendingUp, Star, Activity } from 'lucide-react';
+import { Users, TrendingUp, Star } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useCommunityStats } from '@/hooks/useCommunityStats';
 import { usePlatformStats } from '@/hooks/usePlatformStats';
@@ -14,14 +13,14 @@ const CommunityStats: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {Array.from({ length: 3 }).map((_, index) => (
-          <Card key={index}>
+          <Card key={index} className="bg-white/75 backdrop-blur-sm border-stone-200/60 shadow-sm">
             <CardContent className="p-6">
               <div className="animate-pulse">
-                <div className="h-4 bg-slate-200 rounded mb-3"></div>
-                <div className="h-8 bg-slate-200 rounded mb-2"></div>
-                <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+                <div className="h-4 bg-stone-200 rounded mb-3"></div>
+                <div className="h-8 bg-stone-200 rounded mb-2"></div>
+                <div className="h-3 bg-stone-200 rounded w-2/3"></div>
               </div>
             </CardContent>
           </Card>
@@ -35,22 +34,21 @@ const CommunityStats: React.FC = () => {
     return null;
   }
 
-  // Utiliser les données de la plateforme si disponibles, sinon fallback
   const totalGroups = stats?.totalGroups || 8;
   const totalContributions = platformStats?.totalContributions || stats?.totalMembers || 2340;
   const totalSymbols = platformStats?.totalSymbols || stats?.totalDiscoveries || 5670;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <Card>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <Card className="bg-white/75 backdrop-blur-sm border-stone-200/60 shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center space-x-3">
-            <div className="bg-blue-100 p-3 rounded-full">
-              <Users className="h-6 w-6 text-blue-600" />
+            <div className="bg-stone-100 p-3 rounded-full">
+              <Users className="h-6 w-6 text-amber-700" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalGroups}</p>
-              <p className="text-slate-600 text-sm">
+              <p className="text-2xl font-bold text-stone-800">{totalGroups}</p>
+              <p className="text-stone-600 text-sm">
                 <I18nText translationKey="community.stats.groups">Groupes d'Intérêt</I18nText>
               </p>
             </div>
@@ -58,15 +56,15 @@ const CommunityStats: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-white/75 backdrop-blur-sm border-stone-200/60 shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center space-x-3">
-            <div className="bg-green-100 p-3 rounded-full">
-              <TrendingUp className="h-6 w-6 text-green-600" />
+            <div className="bg-stone-100 p-3 rounded-full">
+              <TrendingUp className="h-6 w-6 text-amber-700" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalContributions?.toLocaleString() || '0'}</p>
-              <p className="text-slate-600 text-sm">
+              <p className="text-2xl font-bold text-stone-800">{totalContributions?.toLocaleString() || '0'}</p>
+              <p className="text-stone-600 text-sm">
                 <I18nText translationKey="community.stats.contributions">Contributions de la Communauté</I18nText>
               </p>
             </div>
@@ -74,15 +72,15 @@ const CommunityStats: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-white/75 backdrop-blur-sm border-stone-200/60 shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center space-x-3">
-            <div className="bg-purple-100 p-3 rounded-full">
-              <Star className="h-6 w-6 text-purple-600" />
+            <div className="bg-stone-100 p-3 rounded-full">
+              <Star className="h-6 w-6 text-amber-700" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalSymbols?.toLocaleString() || '0'}</p>
-              <p className="text-slate-600 text-sm">
+              <p className="text-2xl font-bold text-stone-800">{totalSymbols?.toLocaleString() || '0'}</p>
+              <p className="text-stone-600 text-sm">
                 <I18nText translationKey="community.stats.discoveries">Symboles Partagés</I18nText>
               </p>
             </div>
