@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -123,7 +122,6 @@ const SymbolMCPGenerator: React.FC = () => {
         typeof value === 'string' ||
         (Array.isArray(value) && value.length > 0)
       ) {
-        // @ts-expect-error - direct assignment
         data[key] = value;
       }
     }
