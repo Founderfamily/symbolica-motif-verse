@@ -8,15 +8,15 @@ const Hero = () => {
 
   return (
     <section className="relative pt-8 md:pt-12 pb-8 md:pb-12 px-4 md:px-8 max-w-7xl mx-auto">
-      {/* Subtle background elements */}
+      {/* Subtle background elements - aligned with CommunityHub */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-stone-200/40 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-stone-100/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-56 h-56 bg-amber-50/20 rounded-full blur-2xl"></div>
       </div>
       
       <div className="text-center relative z-10">
-        <div className="inline-block p-2 bg-gradient-to-r from-amber-50 to-stone-50 rounded-full mb-4">
-          <div className="bg-white/80 px-4 py-1 rounded-full text-stone-700 text-sm font-medium border border-stone-200">
+        <div className="inline-block p-2 bg-gradient-to-r from-stone-50 to-amber-50 rounded-full mb-4">
+          <div className="bg-white/75 px-4 py-1 rounded-full text-stone-700 text-sm font-medium border border-amber-100">
             <I18nText translationKey="app.version">Version 1.2.0</I18nText>
           </div>
         </div>
