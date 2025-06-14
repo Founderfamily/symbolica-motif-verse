@@ -21,31 +21,58 @@ export class MCPService {
   static async search(query: string, provider: AIProvider = 'deepseek'): Promise<MCPSearchResponse> {
     try {
       const sanitizedQuery = this.sanitizeInput(query);
-      
+
       if (!sanitizedQuery || sanitizedQuery.trim().length === 0) {
         throw new Error('Query cannot be empty');
       }
-      
+
       if (sanitizedQuery.length > 2000) {
         throw new Error('Query too long');
       }
 
-      // Pour le moment, retourner une réponse simulée pour éviter les erreurs
-      return {
-        success: true,
-        content: `Réponse simulée pour: ${sanitizedQuery}`,
-        provider: provider,
-        timestamp: new Date().toISOString(),
-        processingTime: 1000
-      };
+      const { data, error } = await supabase.functions.invoke('mcp-search', {
+        body: {
+          query: sanitizedQuery,
+          provider,
+        },
+      });
 
-    } catch (error) {
+      if (error) {
+        throw new Error(error.message || 'Search service temporarily unavailable');
+      }
+
+      // 'data' is expected to be the edge func response object
+      if (!data) {
+        throw new Error('No response from MCP service');
+      }
+
+      // Defensive: sometimes data may not be parsed
+      let result: MCPSearchResponse;
+      if (typeof data === 'string') {
+        try {
+          result = JSON.parse(data);
+        } catch {
+          // fallback: treat as raw content
+          result = {
+            success: true,
+            content: data,
+            provider,
+            timestamp: new Date().toISOString(),
+            processingTime: 0,
+          };
+        }
+      } else {
+        result = data as MCPSearchResponse;
+      }
+
+      return result;
+    } catch (error: any) {
       console.error('MCP Search error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Search service temporarily unavailable',
         timestamp: new Date().toISOString(),
-        processingTime: 0
+        processingTime: 0,
       };
     }
   }
@@ -69,7 +96,7 @@ export class MCPService {
 
   private static sanitizeInput(input: string): string {
     if (!input) return '';
-    
+
     return input
       .replace(/[<>]/g, '')
       .replace(/javascript:/gi, '')
@@ -77,3 +104,4 @@ export class MCPService {
       .trim();
   }
 }
+
