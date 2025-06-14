@@ -53,23 +53,25 @@ const CommunityHub: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative">
-      {/* Subtle background elements like in Hero */}
+    <div className="min-h-screen relative bg-stone-50">
+      {/* Subtle background like HomePage */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-stone-200/40 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-orange-100/20 rounded-full blur-3xl"></div>
+        {/* Main subtle paper effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-100"></div>
+        {/* Soft background circles */}
+        <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-stone-100/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-56 h-56 bg-amber-50/20 rounded-full blur-2xl" />
+        <div className="absolute top-2/3 right-1/4 w-40 h-40 bg-stone-200/15 rounded-full blur-2xl" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-block p-2 bg-gradient-to-r from-amber-50 to-stone-50 rounded-full mb-4">
-            <div className="bg-white/80 px-4 py-2 rounded-full text-stone-700 text-sm font-medium border border-amber-200">
+          <div className="inline-block p-2 bg-gradient-to-r from-stone-50 to-amber-50 rounded-full mb-4">
+            <div className="bg-white/75 px-4 py-2 rounded-full text-stone-700 text-sm font-medium border border-amber-100">
               <I18nText translationKey="badge" ns="community">Communauté Active</I18nText>
             </div>
           </div>
-          
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
             <I18nText translationKey="title" ns="community">Hub Communautaire</I18nText>
           </h1>
@@ -80,16 +82,16 @@ const CommunityHub: React.FC = () => {
           </p>
         </div>
 
-        {/* Stats with warm styling */}
+        {/* Stats - subtle neutral style */}
         <div className="mb-8">
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200/50">
+          <div className="bg-white/75 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-200/60">
             <CommunityStats />
           </div>
         </div>
 
-        {/* Tabs with warm styling */}
+        {/* Tabs */}
         <div className="mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200/50">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
             <CommunityTabs 
               groups={groups}
               loading={loading}
@@ -99,19 +101,19 @@ const CommunityHub: React.FC = () => {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200/30">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-200/40">
               {renderContent()}
             </div>
           </div>
 
           <div className="space-y-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200/50">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
               <TopContributors />
             </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-stone-200/50">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
               <ActivityFeed />
             </div>
           </div>
