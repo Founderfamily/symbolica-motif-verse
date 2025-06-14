@@ -6,7 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { generateSymbolSuggestion } from '@/services/aiSymbolGeneratorService';
 import { SymbolData } from '@/types/supabase';
-import { Loader2, Sparkle } from 'lucide-react';
+import { Loader2, Sparkle, AlertCircle } from 'lucide-react';
+import { supabaseSymbolService } from '@/services/supabaseSymbolService';
 
 const SymbolMCPGenerator: React.FC = () => {
   const { toast } = useToast();
@@ -20,6 +21,7 @@ const SymbolMCPGenerator: React.FC = () => {
     symbol: Partial<SymbolData>;
     collection: any;
   } | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
   // Utilitaire pour capitaliser
   const capitalize = (s: string) =>
@@ -100,15 +102,73 @@ const SymbolMCPGenerator: React.FC = () => {
     setIsLoading(true);
     setResultState(null);
     setProposal(null);
-    try {
-      // 1. Générer la suggestion IA
-      const suggestion = await generateSymbolSuggestion(theme.trim());
-      if (!suggestion?.culture) {
-        throw new Error("La génération IA n'a pas renvoyé de culture.");
-      }
+    setDuplicateError(null);
 
-      // 2. Trouver/créer la collection associée
-      const collection = await findOrCreateCollection(suggestion.culture);
+    let attempt = 0;
+    let suggestion: Partial<SymbolData> | null = null;
+    let foundDuplicate = false;
+    const maxTries = 3;
+
+    while (attempt < maxTries) {
+      foundDuplicate = false;
+      try {
+        // 1. Générer la suggestion IA
+        suggestion = await generateSymbolSuggestion(theme.trim());
+
+        if (!suggestion?.name || !suggestion?.culture) {
+          throw new Error("La génération IA n'a pas renvoyé de nom ou de culture.");
+        }
+
+        // 2. Vérifier dans la base si existe déjà (sur nom + culture + période)
+        const existingSymbol = await supabaseSymbolService.findSymbolByName(suggestion.name);
+        // Notion de vrai doublon : comparer nom et (culture ou période proche)
+        if (
+          existingSymbol &&
+          existingSymbol.name?.toLowerCase().trim() === suggestion.name.toLowerCase().trim() &&
+          (
+            (!suggestion.culture || (existingSymbol.culture?.toLowerCase() === suggestion.culture.toLowerCase()))
+            ||
+            (!suggestion.period || (existingSymbol.period?.toLowerCase() === suggestion.period?.toLowerCase()))
+          )
+        ) {
+          foundDuplicate = true;
+          attempt++;
+          toast({
+            title: 'Doublon détecté',
+            description: (
+              <div>
+                <div><b>{suggestion.name}</b> existe déjà dans la base ({existingSymbol.culture}, {existingSymbol.period}).</div>
+                <div className="mt-1">Génération d’un autre symbole... (essai {attempt}/{maxTries})</div>
+              </div>
+            ),
+            variant: 'destructive',
+          });
+          suggestion = null;
+          continue;
+        }
+
+        // Aucun doublon : on sort de la boucle
+        break;
+      } catch (e: any) {
+        toast({
+          title: 'Erreur IA ou interne',
+          description: e.message,
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    if (!suggestion) {
+      setDuplicateError("Impossible de générer un symbole unique après plusieurs essais. Merci de réessayer avec un autre thème.");
+      setIsLoading(false);
+      return;
+    }
+
+    // 3. Trouver/créer la collection associée
+    try {
+      const collection = await findOrCreateCollection(suggestion.culture!);
 
       setProposal({
         suggestion,
@@ -116,7 +176,7 @@ const SymbolMCPGenerator: React.FC = () => {
       });
     } catch (e: any) {
       toast({
-        title: 'Erreur de génération',
+        title: 'Erreur lors de l’association collection',
         description: e.message,
         variant: 'destructive',
       });
@@ -226,22 +286,41 @@ const SymbolMCPGenerator: React.FC = () => {
         <CardContent>
           {/* Champ de saisie du thème (étape 1) */}
           {!proposal && !resultState && (
-            <div className="flex gap-2 mb-5">
-              <Input
-                placeholder="Thème ou culture (optionnel)"
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-                disabled={isLoading}
-              />
-              <Button
-                onClick={handlePropose}
-                variant="default"
-                className="gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" />}
-                Proposer
-              </Button>
+            <div>
+              <div className="flex gap-2 mb-5">
+                <Input
+                  placeholder="Thème ou culture (optionnel)"
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value)}
+                  disabled={isLoading}
+                />
+                <Button
+                  onClick={handlePropose}
+                  variant="default"
+                  className="gap-2"
+                  disabled={isLoading}
+                >
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" />}
+                  Proposer
+                </Button>
+              </div>
+              {duplicateError && (
+                <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded border border-red-200 mb-3">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <span>{duplicateError}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto"
+                    onClick={() => {
+                      setDuplicateError(null);
+                      setTheme('');
+                    }}
+                  >
+                    Réessayer
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
