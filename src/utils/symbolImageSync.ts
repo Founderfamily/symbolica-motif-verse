@@ -1,8 +1,7 @@
-
 import { supabaseSymbolService } from '@/services/supabaseSymbolService';
 import { SymbolData } from '@/types/supabase';
 
-interface ImageHealthStatus {
+export interface ImageHealthStatus {
   symbolId: string;
   symbolName: string;
   hasSupabaseImage: boolean;
