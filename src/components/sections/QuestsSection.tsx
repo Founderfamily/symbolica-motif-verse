@@ -85,17 +85,21 @@ const QuestsSection = () => {
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-1 text-stone-600">
                           <Crown className="h-3 w-3" />
-                          <span>{quest.reward_points} points</span>
+                          <span>{quest.reward_points ?? 0} points</span>
                         </div>
                         <div className="flex items-center gap-1 text-stone-600">
                           <Users className="h-3 w-3" />
-                          <span>{Math.max(1, Math.floor(quest.max_participants / 2))} explorateurs</span>
+                          {/* Affichage du vrai nombre de participants maximum de la quête */}
+                          <span>{quest.max_participants ?? '-'} participant{quest.max_participants === 1 ? '' : 's'}</span>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-1 text-sm text-stone-600">
                         <Clock className="h-3 w-3" />
-                        <span>{quest.clues.length} indices à découvrir</span>
+                        <span>
+                          {/* Affichage du vrai nombre d'indices */}
+                          {Array.isArray(quest.clues) ? quest.clues.length : 0} indice{(Array.isArray(quest.clues) && quest.clues.length > 1) ? 's' : ''}
+                        </span>
                       </div>
                     </div>
 
@@ -151,3 +155,4 @@ const QuestsSection = () => {
 };
 
 export default QuestsSection;
+
