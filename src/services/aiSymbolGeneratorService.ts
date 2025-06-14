@@ -1,31 +1,35 @@
-
 import { MCPService, MCPSearchResponse } from './mcpService';
 import { SymbolData } from '@/types/supabase';
 
-// Prompt template to guide DeepSeek to output all fields for a new SymbolData object
+// Prompt template to guide DeepSeek to output ONLY real, attested, authentic SymbolData.
+// No more fiction/originals.
 function buildSymbolPrompt(themeIdea: string) {
-  // The AI is instructed to output proper JSON for SymbolData creation.
   return `
-Tu es un expert en symbolique culturelle. Génère un nouveau symbole culturel pour le projet Symbol Explorer.
+Tu es un expert en symbolique et en histoire des cultures. 
+Génère uniquement un symbole culturel HISTORIQUE, AUTHENTIQUE et bien documenté, pour enrichir un projet éducatif (jamais un symbole inventé).
 
-Propose un symbole original et complet sur le thème suivant (génère un thème si vide): "${themeIdea ? themeIdea : 'Mystère'}".
+- Propose un symbole réel, ayant existé ou existant, reconnu, public et attesté, jamais fictif ni inventé.
+- Le symbole DOIT pouvoir être retrouvé dans les livres d'histoire, encyclopédies, ou référencés par des institutions muséales ou universitaires.
+- Si possible, cite un exemple de source ou d’œuvre où il est attesté (${themeIdea ? "si pertinent, sur le thème : " + themeIdea : "sinon pioche dans les symboles universels."})
 
-Fournis TOUTES les propriétés requises au format JSON pour cette structure :
+Formate la sortie UNIQUEMENT sous la forme d’un objet JSON conforme à :
 {
-  "name": "Nom du symbole",
+  "name": "Nom réel du symbole",
   "culture": "Culture/source principale",
   "period": "Période historique",
-  "description": "Description détaillée du symbole",
+  "description": "Description détaillée du symbole reconnu",
   "function": ["fonction1","fonction2"],
   "tags": ["tag1","tag2"],
   "medium": ["matériau1","matériau2"],
   "technique": ["technique1"],
   "significance": "Signification profonde",
-  "historical_context": "Contexte historique détaillé"
+  "historical_context": "Contexte historique ou anecdote (si possible, référence/rappel de l’origine ou rediffusion)"
 }
 
-Respecte le format JSON exact et écris-le sans commentaire.
-Réponds uniquement avec la structure JSON ci-dessus. Les champs tableaux ne doivent pas être vides.
+IMPORTANT :
+- Jamais de création ni d’invention : uniquement des symboles vérifiables et universellement connus ou documentés dans l’Histoire.
+- Les tableaux ne doivent pas être vides.
+- N’ajoute pas d’explications ou de commentaires hors du champ JSON.
 `;
 }
 
