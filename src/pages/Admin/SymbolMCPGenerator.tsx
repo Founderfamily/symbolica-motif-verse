@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,7 +12,14 @@ const SymbolMCPGenerator: React.FC = () => {
   const { toast } = useToast();
   const [theme, setTheme] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [resultState, setResultState] = useState<{symbol: Partial<SymbolData>; collection: any;} | null>(null);
+  const [proposal, setProposal] = useState<{
+    suggestion: Partial<SymbolData>;
+    collection: any;
+  } | null>(null);
+  const [resultState, setResultState] = useState<{
+    symbol: Partial<SymbolData>;
+    collection: any;
+  } | null>(null);
 
   // Utilitaire pour capitaliser
   const capitalize = (s: string) =>
@@ -89,32 +95,62 @@ const SymbolMCPGenerator: React.FC = () => {
     };
   };
 
-  const handleGenerateAuto = async () => {
+  // Étape 1 : Proposer un symbole (mais ne pas l'ajouter en base)
+  const handlePropose = async () => {
     setIsLoading(true);
     setResultState(null);
+    setProposal(null);
     try {
-      // 1. Générer le symbole authentique
+      // 1. Générer la suggestion IA
       const suggestion = await generateSymbolSuggestion(theme.trim());
       if (!suggestion?.culture) {
         throw new Error("La génération IA n'a pas renvoyé de culture.");
       }
 
-      // 2. Chercher/créer la collection associée
+      // 2. Trouver/créer la collection associée
       const collection = await findOrCreateCollection(suggestion.culture);
 
-      // 3. Créer le symbole dans la DB
+      setProposal({
+        suggestion,
+        collection,
+      });
+    } catch (e: any) {
+      toast({
+        title: 'Erreur de génération',
+        description: e.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Étape 2 : Accepter le symbole → création réelle en base
+  const handleAcceptAndCreate = async () => {
+    if (!proposal?.suggestion || !proposal?.collection) {
+      toast({
+        title: 'Erreur',
+        description: "Aucune proposition active à valider.",
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsLoading(true);
+    setResultState(null);
+    try {
       const dataToInsert = {
-        name: suggestion.name,
-        culture: suggestion.culture,
-        period: suggestion.period,
-        description: suggestion.description ?? null,
-        function: suggestion.function ?? null,
-        tags: suggestion.tags ?? null,
-        medium: suggestion.medium ?? null,
-        technique: suggestion.technique ?? null,
-        significance: suggestion.significance ?? null,
-        historical_context: suggestion.historical_context ?? null
+        name: proposal.suggestion.name,
+        culture: proposal.suggestion.culture,
+        period: proposal.suggestion.period,
+        description: proposal.suggestion.description ?? null,
+        function: proposal.suggestion.function ?? null,
+        tags: proposal.suggestion.tags ?? null,
+        medium: proposal.suggestion.medium ?? null,
+        technique: proposal.suggestion.technique ?? null,
+        significance: proposal.suggestion.significance ?? null,
+        historical_context: proposal.suggestion.historical_context ?? null
       };
+
       const { data: symbolResp, error: insertError } = await supabase
         .from('symbols')
         .insert([dataToInsert])
@@ -124,17 +160,17 @@ const SymbolMCPGenerator: React.FC = () => {
         throw new Error("Erreur à la création du symbole : " + (insertError?.message || 'inconnue'));
       }
 
-      // 4. Associer à la collection
+      // Associer à la collection
       await supabase.from('collection_symbols').insert([
         {
-          collection_id: collection.id,
+          collection_id: proposal.collection.id,
           symbol_id: symbolResp[0].id,
         }
       ]);
 
       setResultState({
         symbol: symbolResp[0],
-        collection,
+        collection: proposal.collection,
       });
 
       toast({
@@ -145,21 +181,32 @@ const SymbolMCPGenerator: React.FC = () => {
               <b>{symbolResp[0].name}</b> ({symbolResp[0].culture}, {symbolResp[0].period})
             </div>
             <div>
-              <span className="italic">Ajouté à la collection :</span> <b>{collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title || collection.slug}</b>
+              <span className="italic">Ajouté à la collection :</span>{" "}
+              <b>
+                {proposal.collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title ||
+                  proposal.collection.slug}
+              </b>
             </div>
           </div>
         ),
       });
+      setProposal(null);
       setTheme('');
     } catch (e: any) {
       toast({
-        title: 'Erreur de génération ou d’insertion',
+        title: 'Erreur de création du symbole',
         description: e.message,
         variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Rejeter la proposition (Recommencer)
+  const handleRejectProposal = () => {
+    setProposal(null);
+    setResultState(null);
   };
 
   return (
@@ -171,34 +218,93 @@ const SymbolMCPGenerator: React.FC = () => {
             Générateur Automatique de Symbole Authentique
           </CardTitle>
           <div className="text-sm text-stone-600 mt-2">
-            Génère, crée et rattache automatiquement un symbole à la bonne collection, tout authentique et vérifié&nbsp;!
+            1. Propose un symbole vérifié par IA<br />
+            2. Vous validez<br />
+            3. Il est ajouté à la base relié à la bonne collection
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2 mb-5">
-            <Input
-              placeholder="Thème ou culture (optionnel)"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-              disabled={isLoading}
-            />
-            <Button 
-              onClick={handleGenerateAuto} 
-              variant="default" 
-              className="gap-2"
-              disabled={isLoading}
-            >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" />}
-              Générer et Créer
-            </Button>
-          </div>
-
-          {isLoading && (
-            <div className="text-center text-stone-500 py-8">
-              Génération et création en cours… Veuillez patienter.
+          {/* Champ de saisie du thème (étape 1) */}
+          {!proposal && !resultState && (
+            <div className="flex gap-2 mb-5">
+              <Input
+                placeholder="Thème ou culture (optionnel)"
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                disabled={isLoading}
+              />
+              <Button
+                onClick={handlePropose}
+                variant="default"
+                className="gap-2"
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" />}
+                Proposer
+              </Button>
             </div>
           )}
 
+          {/* Indication de chargement */}
+          {isLoading && (
+            <div className="text-center text-stone-500 py-8">
+              Traitement en cours… Veuillez patienter.
+            </div>
+          )}
+
+          {/* Étape 2 : Affichage de la proposition et validation */}
+          {!isLoading && proposal && (
+            <div className="space-y-3 mt-2 p-4 rounded border bg-stone-50">
+              <div className="font-semibold text-stone-800 mb-2">
+                Proposition de symbole authentique
+              </div>
+              <div>
+                <span className="font-medium">{proposal.suggestion.name}</span>
+                {" "}({proposal.suggestion.culture}, {proposal.suggestion.period})
+              </div>
+              {proposal.suggestion.description && (
+                <div className="text-sm mt-1 text-stone-600">
+                  {proposal.suggestion.description}
+                </div>
+              )}
+              {/* Affichage des autres propriétés */}
+              {proposal.suggestion.tags && (
+                <div className="text-xs text-stone-500">
+                  <b>Tags&nbsp;:</b> {Array.isArray(proposal.suggestion.tags) ? proposal.suggestion.tags.join(', ') : proposal.suggestion.tags}
+                </div>
+              )}
+              {proposal.suggestion.significance && (
+                <div className="text-xs italic text-stone-500">
+                  {proposal.suggestion.significance}
+                </div>
+              )}
+              <div className="mt-3 text-xs text-teal-600">
+                Collection cible : <b>
+                  {proposal.collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title ||
+                    proposal.collection.slug}
+                </b>
+              </div>
+              <div className="flex gap-2 mt-4 justify-end">
+                <Button
+                  variant="default"
+                  onClick={handleAcceptAndCreate}
+                  className="gap-2"
+                >
+                  <Sparkle className="w-4 h-4" />
+                  Accepter et Créer ce Symbole
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleRejectProposal}
+                  className="gap-2"
+                >
+                  Proposer un autre
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Résultat final */}
           {!isLoading && resultState && (
             <div className="space-y-2 mt-6 p-4 rounded bg-stone-50 border">
               <div className="font-semibold text-stone-800">
@@ -212,6 +318,11 @@ const SymbolMCPGenerator: React.FC = () => {
               )}
               <div className="mt-2 text-xs text-stone-500">
                 Collection&nbsp;: <span className="font-bold">{resultState.collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title || resultState.collection.slug}</span>
+              </div>
+              <div className="flex justify-end mt-3">
+                <Button variant="outline" onClick={() => { setResultState(null); setProposal(null); }}>
+                  Ajouter un autre
+                </Button>
               </div>
             </div>
           )}
