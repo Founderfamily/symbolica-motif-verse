@@ -1,16 +1,21 @@
+
 import { MCPService, MCPSearchResponse } from './mcpService';
 import { SymbolData } from '@/types/supabase';
 
-// Prompt template to guide DeepSeek to output ONLY real, attested, authentic SymbolData.
-// No more fiction/originals.
-function buildSymbolPrompt(themeIdea: string) {
+// Enhanced prompt to enforce avoidance of previously proposed symbol names and require more diversity
+function buildSymbolPrompt(themeIdea: string, blacklist: string[]) {
   return `
 Tu es un expert en symbolique et en histoire des cultures. 
 Génère uniquement un symbole culturel HISTORIQUE, AUTHENTIQUE et bien documenté, pour enrichir un projet éducatif (jamais un symbole inventé).
 
-- Propose un symbole réel, ayant existé ou existant, reconnu, public et attesté, jamais fictif ni inventé.
-- Le symbole DOIT pouvoir être retrouvé dans les livres d'histoire, encyclopédies, ou référencés par des institutions muséales ou universitaires.
-- Si possible, cite un exemple de source ou d’œuvre où il est attesté (${themeIdea ? "si pertinent, sur le thème : " + themeIdea : "sinon pioche dans les symboles universels."})
+- Propose un symbole réel, jamais inventé, attesté historiquement.
+- Ne propose PAS un symbole dont le nom figure dans cette liste noire (Blacklist): [${blacklist.join(", ")}]
+- Évite absolument les symboles trop connus ou déjà proposés récemment.
+- Si pertinent, favorise la diversité culturelle et temporelle.
+
+Blacklist: [${blacklist.join(", ")}]
+
+Si possible, cite un exemple de source ou d’œuvre où il est attesté (${themeIdea ? "si pertinent, sur le thème : " + themeIdea : "sinon pioche dans les symboles universels."})
 
 Formate la sortie UNIQUEMENT sous la forme d’un objet JSON conforme à :
 {
@@ -33,9 +38,9 @@ IMPORTANT :
 `;
 }
 
-// Generate suggestion for a new symbol
-export async function generateSymbolSuggestion(theme: string = ''): Promise<Partial<SymbolData> | null> {
-  const prompt = buildSymbolPrompt(theme);
+// Generate suggestion for a new symbol, supporting a blacklist for diversity
+export async function generateSymbolSuggestion(theme: string = '', blacklist: string[] = []): Promise<Partial<SymbolData> | null> {
+  const prompt = buildSymbolPrompt(theme, blacklist);
 
   const res: MCPSearchResponse = await MCPService.search(prompt, 'deepseek');
   if (!res.success || !res.content) {
@@ -43,11 +48,11 @@ export async function generateSymbolSuggestion(theme: string = ''): Promise<Part
   }
 
   try {
-    // Expect the AI to reply with a single JSON blob
+    // Try parsing the main JSON blob
     const json = JSON.parse(res.content);
     return json;
   } catch (e) {
-    // The AI may sometimes output code fences; try to fix that
+    // Sometimes the AI outputs code fences; try to extract the JSON
     const match = res.content.match(/\{[\s\S]*\}/);
     if (match) {
       try {

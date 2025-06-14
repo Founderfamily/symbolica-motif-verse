@@ -22,6 +22,8 @@ const SymbolMCPGenerator: React.FC = () => {
     collection: any;
   } | null>(null);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  // Memory for recently proposed symbol names to enforce diversity & avoid repeats
+  const [recentNames, setRecentNames] = useState<string[]>([]);
 
   // Utilitaire pour capitaliser
   const capitalize = (s: string) =>
@@ -97,7 +99,7 @@ const SymbolMCPGenerator: React.FC = () => {
     };
   };
 
-  // Étape 1 : Proposer un symbole (mais ne pas l'ajouter en base)
+  // Enhanced propose handler to support blacklist & skip repeated names
   const handlePropose = async () => {
     setIsLoading(true);
     setResultState(null);
@@ -108,19 +110,25 @@ const SymbolMCPGenerator: React.FC = () => {
     let suggestion: Partial<SymbolData> | null = null;
     let foundDuplicate = false;
     const maxTries = 3;
+    // Store all generated names in this session to force diversity
+    let blacklist = [...recentNames];
 
     while (attempt < maxTries) {
       foundDuplicate = false;
       try {
-        // 1. Générer la suggestion IA
-        suggestion = await generateSymbolSuggestion(theme.trim());
+        // 1. Générer la suggestion IA (pass blacklist)
+        suggestion = await generateSymbolSuggestion(theme.trim(), blacklist);
 
         if (!suggestion?.name || !suggestion?.culture) {
           throw new Error("La génération IA n'a pas renvoyé de nom ou de culture.");
         }
 
+        // Logs for debugging
+        console.log("🔁 Nouvelle suggestion IA:", suggestion);
+
         // 2. Vérifier dans la base si existe déjà (sur nom + culture + période)
         const existingSymbol = await supabaseSymbolService.findSymbolByName(suggestion.name);
+
         // Notion de vrai doublon : comparer nom et (culture ou période proche)
         if (
           existingSymbol &&
@@ -132,18 +140,46 @@ const SymbolMCPGenerator: React.FC = () => {
           )
         ) {
           foundDuplicate = true;
-          attempt++;
+          // Add proposed name to blacklist for next try, and local session memory
+          if (!blacklist.includes(suggestion.name)) {
+            blacklist.push(suggestion.name);
+          }
           toast({
             title: 'Doublon détecté',
             description: (
               <div>
                 <div><b>{suggestion.name}</b> existe déjà dans la base ({existingSymbol.culture}, {existingSymbol.period}).</div>
-                <div className="mt-1">Génération d’un autre symbole... (essai {attempt}/{maxTries})</div>
+                <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{maxTries})</div>
               </div>
             ),
             variant: 'destructive',
           });
           suggestion = null;
+          attempt++;
+          continue;
+        }
+
+        // Also avoid proposing exactly the same name in the same session (even if not in DB)
+        if (blacklist
+          .map(s => s.toLowerCase().trim())
+          .includes(suggestion.name.toLowerCase().trim())
+        ) {
+          foundDuplicate = true;
+          toast({
+            title: 'Symbole déjà proposé récemment',
+            description: (
+              <div>
+                <div><b>{suggestion.name}</b> a déjà été proposé lors de cette session.</div>
+                <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{maxTries})</div>
+              </div>
+            ),
+            variant: 'destructive',
+          });
+          if (!blacklist.includes(suggestion.name)) {
+            blacklist.push(suggestion.name);
+          }
+          suggestion = null;
+          attempt++;
           continue;
         }
 
@@ -173,6 +209,12 @@ const SymbolMCPGenerator: React.FC = () => {
       setProposal({
         suggestion,
         collection,
+      });
+
+      // Memorize the new symbol name (keep last 10)
+      setRecentNames(prev => {
+        const next = [suggestion!.name, ...prev.filter(n => n !== suggestion!.name)];
+        return next.slice(0, 10);
       });
     } catch (e: any) {
       toast({
