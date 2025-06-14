@@ -9,6 +9,7 @@ export const NavigationItems = () => {
   const location = useLocation();
   const { isAdmin } = useAuth();
   
+  // Ordre du menu : Accueil, Symboles, Collections, Quêtes, Communauté, À propos
   const navigation = [
     { name: 'Accueil', href: '/', translationKey: 'home' },
     { name: 'Symboles', href: '/symbols', translationKey: 'symbols' },
