@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ const fields: Record<string, { label: string; type: 'text' | 'textarea' | 'list'
   technique: { label: 'Techniques', type: 'list' },
   significance: { label: 'Signification', type: 'textarea' },
   historical_context: { label: 'Contexte historique', type: 'textarea' },
+  // Intentionally omitting 'translations' and 'related_symbols' from the input list form here
 };
 
 const SymbolMCPGenerator: React.FC = () => {
@@ -80,7 +82,12 @@ const SymbolMCPGenerator: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!editSymbol?.name || !editSymbol.culture || !editSymbol.period) {
+    // Validate required fields
+    if (
+      !editSymbol?.name ||
+      !editSymbol?.culture ||
+      !editSymbol?.period
+    ) {
       toast({
         title: 'Champs manquants',
         description: 'Remplissez au moins le nom, la culture et la période.',
@@ -88,13 +95,38 @@ const SymbolMCPGenerator: React.FC = () => {
       });
       return;
     }
-    // Only keep fields defined in SymbolData that exist
-    const data: Partial<SymbolData> = {};
-    Object.keys(fields).forEach((key) => {
-      if (editSymbol[key as keyof SymbolData]) {
-        (data as any)[key] = editSymbol[key as keyof SymbolData];
+
+    // Enforce at least required fields as non-undefined
+    const data: {
+      name: string;
+      culture: string;
+      period: string;
+      description?: string | null;
+      function?: string[];
+      tags?: string[];
+      medium?: string[];
+      technique?: string[];
+      significance?: string | null;
+      historical_context?: string | null;
+    } = {
+      name: editSymbol.name,
+      culture: editSymbol.culture,
+      period: editSymbol.period,
+    };
+
+    // Add optional fields if they exist and are strings or arrays
+    for (const key of [
+      'description', 'function', 'tags', 'medium', 'technique', 'significance', 'historical_context'
+    ]) {
+      const value = editSymbol[key as keyof SymbolData];
+      if (
+        typeof value === 'string' ||
+        (Array.isArray(value) && value.length > 0)
+      ) {
+        // @ts-expect-error - direct assignment
+        data[key] = value;
       }
-    });
+    }
 
     try {
       const { error } = await supabase.from('symbols').insert([data]);
@@ -159,7 +191,7 @@ const SymbolMCPGenerator: React.FC = () => {
                   {field.type === 'text' && (
                     <Input
                       id={key}
-                      value={editSymbol[key as keyof SymbolData] ?? ''}
+                      value={(editSymbol[key as keyof SymbolData] ?? '') as string}
                       onChange={(e) => handleInputChange(key, e.target.value)}
                       required={['name', 'culture', 'period'].includes(key)}
                     />
@@ -169,7 +201,7 @@ const SymbolMCPGenerator: React.FC = () => {
                       id={key}
                       className="w-full border rounded px-3 py-2"
                       rows={3}
-                      value={editSymbol[key as keyof SymbolData] ?? ''}
+                      value={(editSymbol[key as keyof SymbolData] ?? '') as string}
                       onChange={(e) => handleInputChange(key, e.target.value)}
                     />
                   )}
@@ -207,6 +239,26 @@ const SymbolMCPGenerator: React.FC = () => {
                   )}
                 </div>
               ))}
+
+              {/* Display related_symbols and translations in readonly blocks if present */}
+              {'related_symbols' in (editSymbol as any) && Array.isArray(editSymbol.related_symbols) && (
+                <div>
+                  <Label>Liens associés</Label>
+                  <div className="p-2 bg-stone-100 rounded mb-2 text-xs select-all focus:outline-none" style={{ fontFamily: 'monospace' }}>
+                    {(editSymbol.related_symbols as string[]).join(', ')}
+                  </div>
+                </div>
+              )}
+
+              {'translations' in (editSymbol as any) && editSymbol.translations && (
+                <div>
+                  <Label>Traductions (lecture seule)</Label>
+                  <pre className="p-2 bg-stone-100 rounded mb-2 text-xs select-all overflow-x-auto" style={{ fontFamily: 'monospace' }}>
+                    {JSON.stringify(editSymbol.translations, null, 2)}
+                  </pre>
+                </div>
+              )}
+
               <div className="flex justify-end">
                 <Button type="submit" className="gap-2">
                   <Plus className="w-4 h-4" />
