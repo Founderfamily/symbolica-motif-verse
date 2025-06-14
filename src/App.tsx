@@ -38,6 +38,7 @@ import AnalysisExamplesManagement from '@/pages/Admin/AnalysisExamplesManagement
 import MasterExplorer from '@/pages/Admin/MasterExplorer';
 import ContributionsModerationPage from '@/pages/Admin/ContributionsModerationPage';
 import QuestEnrichmentPage from '@/pages/Admin/QuestEnrichmentPage';
+import SymbolMCPGenerator from '@/pages/Admin/SymbolMCPGenerator';
 
 // Other specialized pages
 import AnalysisPage from '@/pages/AnalysisPage';
@@ -111,6 +112,7 @@ function App() {
                   <Route path="/admin/content" element={<ContentManagement />} />
                   <Route path="/admin/analysis-examples" element={<AnalysisExamplesManagement />} />
                   <Route path="/admin/settings" element={<SystemSettings />} />
+                  <Route path="/admin/symbol-generator" element={<SymbolMCPGenerator />} />
 
                   {/* Specialized pages */}
                   <Route path="/analysis" element={<AnalysisPage />} />

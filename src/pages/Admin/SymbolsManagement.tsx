@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +8,8 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ImageIcon, PencilIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Sparkle } from 'lucide-react';
 
 const SymbolsManagement = () => {
   const navigate = useNavigate();
@@ -184,7 +185,18 @@ const SymbolsManagement = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-slate-800">Gestion des Symboles</h2>
-        <Button onClick={handleCreateNew}>Nouveau symbole</Button>
+        <div className="flex gap-2">
+          {/* Lien vers MCP Generator */}
+          <Link 
+            to="/admin/symbol-generator"
+            className="inline-flex items-center px-3 py-2 bg-amber-100 text-amber-800 rounded hover:bg-amber-200 transition"
+            title="Générateur MCP IA"
+          >
+            <Sparkle className="w-4 h-4 mr-1" />
+            Générateur IA
+          </Link>
+          <Button onClick={handleCreateNew}>Nouveau symbole</Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
