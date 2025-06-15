@@ -8,8 +8,16 @@ import { generateSymbolSuggestion } from '@/services/aiSymbolGeneratorService';
 import { SymbolData } from '@/types/supabase';
 import { Loader2, Sparkle, AlertCircle } from 'lucide-react';
 import { supabaseSymbolService } from '@/services/supabaseSymbolService';
+import { getNextAIProvider, resetAIProviderRotation, providerDisplayNames } from '@/services/aiProviders';
 
 const RECENT_NAMES_KEY = 'symbolRecentNames';
+
+const MAX_ATTEMPTS = 7;
+const DIVERSITY_TIPS = [
+  "Égypte ancienne", "Inde médiévale", "Amérique précolombienne", "Afrique subsaharienne",
+  "Proche-Orient antique", "Renaissance", "civilisation celtique", "culture viking",
+  "royaumes africains", "tribus aborigènes", "civilisation chinoise ancienne"
+];
 
 const SymbolMCPGenerator: React.FC = () => {
   const { toast } = useToast();
@@ -24,6 +32,7 @@ const SymbolMCPGenerator: React.FC = () => {
     collection: any;
   } | null>(null);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const [attemptLog, setAttemptLog] = useState<{num:number, provider:string, theme:string, constraint:string, error?:string}[]>([]);
   // Memory for recently proposed symbol names to enforce diversity & avoid repeats
   const [recentNames, setRecentNames] = useState<string[]>([]);
 
@@ -118,37 +127,73 @@ const SymbolMCPGenerator: React.FC = () => {
     } catch {}
   }, [recentNames]);
 
-  // Enhanced propose handler to support blacklist & skip repeated names
+  // Reset "mémoire" des propositions (purge la liste blacklist persistance)
+  const handleResetMemory = () => {
+    setRecentNames([]);
+    resetAIProviderRotation();
+    localStorage.removeItem(RECENT_NAMES_KEY);
+    setDuplicateError(null);
+    setProposal(null);
+    setResultState(null);
+    setTheme('');
+    setAttemptLog([]);
+    toast({
+      title: "Mémoire effacée",
+      description: "La mémoire des symboles récemment générés a été vidée.",
+      variant: "default"
+    });
+  };
+
+  // Ajoute : suggestions dynamiques lors d’un échec
+  function getThemeSuggestion() {
+    const set = new Set(recentNames.map(n => n.toLowerCase()));
+    for (const tip of DIVERSITY_TIPS) {
+      if (!set.has(tip.toLowerCase())) return tip;
+    }
+    // fallback random
+    return DIVERSITY_TIPS[Math.floor(Math.random() * DIVERSITY_TIPS.length)];
+  }
+
+  // Handler de proposition IA diversifié, provider rotatif, persistance blacklist
   const handlePropose = async () => {
     setIsLoading(true);
     setResultState(null);
     setProposal(null);
     setDuplicateError(null);
+    setAttemptLog([]);
+    resetAIProviderRotation();
 
     let attempt = 0;
     let suggestion: Partial<SymbolData> | null = null;
     let foundDuplicate = false;
-    const maxTries = 3;
-    // Use local memory and persisted blacklist
     let blacklist = [...recentNames];
+    let provider = 'deepseek';
+    let constraint = "";
 
-    while (attempt < maxTries) {
+    while (attempt < MAX_ATTEMPTS) {
       foundDuplicate = false;
-      try {
-        // 1. Générer la suggestion IA (pass blacklist; prompt has a randomizer/nonce in next file)
-        suggestion = await generateSymbolSuggestion(theme.trim(), blacklist);
+      // Diversité : ajoute une contrainte de culture/période différente à chaque tentative si >2 essais
+      constraint = attempt > 1 ? DIVERSITY_TIPS[(attempt-2) % DIVERSITY_TIPS.length] : "";
+      // Rotation provider à chaque essai (pour chaque fail : deepseek → openai → anthropic ...)
+      provider = getNextAIProvider(attempt === 0 ? undefined : provider);
 
+      try {
+        suggestion = await generateSymbolSuggestion(
+          theme.trim(), 
+          blacklist,
+          provider, 
+          constraint
+        );
         if (!suggestion?.name || !suggestion?.culture) {
           throw new Error("La génération IA n'a pas renvoyé de nom ou de culture.");
         }
-
         // Logs for debugging
         console.log("🔁 Nouvelle suggestion IA:", suggestion);
 
+        // Duplicate detection : code refait pour tracker l’historique des tentatives
         // 2. Vérifier dans la base si existe déjà (sur nom + culture + période)
         const existingSymbol = await supabaseSymbolService.findSymbolByName(suggestion.name);
 
-        // Notion de vrai doublon : comparer nom et (culture ou période proche)
         if (
           existingSymbol &&
           existingSymbol.name?.toLowerCase().trim() === suggestion.name.toLowerCase().trim() &&
@@ -163,12 +208,16 @@ const SymbolMCPGenerator: React.FC = () => {
           if (!blacklist.includes(suggestion.name)) {
             blacklist.push(suggestion.name);
           }
+          setAttemptLog(prev => [
+            ...prev, 
+            {num: attempt+1, provider, theme, constraint, error: `[DOUBLON DB] ${suggestion.name}`}
+          ]);
           toast({
             title: 'Doublon détecté',
             description: (
               <div>
-                <div><b>{suggestion.name}</b> existe déjà dans la base ({existingSymbol.culture}, {existingSymbol.period}).</div>
-                <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{maxTries})</div>
+                <div><b>{suggestion.name}</b> existe déjà ({existingSymbol.culture}, {existingSymbol.period}).</div>
+                <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{MAX_ATTEMPTS}) (IA : {providerDisplayNames[provider as keyof typeof providerDisplayNames]})</div>
               </div>
             ),
             variant: 'destructive',
@@ -184,12 +233,16 @@ const SymbolMCPGenerator: React.FC = () => {
           .includes(suggestion.name.toLowerCase().trim())
         ) {
           foundDuplicate = true;
+          setAttemptLog(prev => [
+            ...prev, 
+            {num: attempt+1, provider, theme, constraint, error: `[BlackList] ${suggestion.name}`}
+          ]);
           toast({
             title: 'Symbole déjà proposé récemment',
             description: (
               <div>
                 <div><b>{suggestion.name}</b> a déjà été proposé lors de cette session ou récemment.</div>
-                <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{maxTries})</div>
+                <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{MAX_ATTEMPTS})</div>
               </div>
             ),
             variant: 'destructive',
@@ -205,23 +258,46 @@ const SymbolMCPGenerator: React.FC = () => {
         // Aucun doublon : on sort de la boucle
         break;
       } catch (e: any) {
+        setAttemptLog(prev => [
+          ...prev, 
+          {num: attempt+1, provider, theme, constraint, error: e.message}
+        ]);
         toast({
-          title: 'Erreur IA ou interne',
-          description: e.message,
-          variant: 'destructive',
+          title: 'Erreur IA/fournisseur',
+          description: (<span>Essai {attempt+1}/{MAX_ATTEMPTS} : {e.message} (provider {provider})</span>),
+          variant: 'destructive'
         });
-        setIsLoading(false);
-        return;
+        suggestion = null;
+        attempt++;
+        continue;
       }
     }
 
     if (!suggestion) {
-      setDuplicateError("Impossible de générer un symbole unique après plusieurs essais. Merci de réessayer avec un autre thème.");
+      setDuplicateError(
+        <>
+          <div>Impossible de générer un symbole unique après {MAX_ATTEMPTS} essais sur {providerDisplayNames[provider as keyof typeof providerDisplayNames]}.</div>
+          <div className="mt-1">
+            <span className="text-xs text-stone-500">Astuce : essayez un autre thème plus original,
+              ou utilisez la suggestion proposée ci-dessous.</span>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="bg-amber-100 rounded px-2 py-1 text-amber-700 text-xs">Suggestion : </span>
+            <Button 
+              size="sm"
+              variant="outline"
+              onClick={() => setTheme(getThemeSuggestion())}
+            >
+              {getThemeSuggestion()}
+            </Button>
+          </div>
+        </>
+      );
       setIsLoading(false);
       return;
     }
 
-    // 3. Trouver/créer la collection associée
+    // Trouver/créer la collection associée
     try {
       const collection = await findOrCreateCollection(suggestion.culture!);
 
@@ -344,6 +420,10 @@ const SymbolMCPGenerator: React.FC = () => {
             2. Vous validez<br />
             3. Il est ajouté à la base relié à la bonne collection
           </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button size="xs" variant="outline" onClick={handleResetMemory}>Vider la mémoire</Button>
+            <span className="text-xs text-stone-500">La mémoire permet d’éviter les répétitions récentes.</span>
+          </div>
         </CardHeader>
         <CardContent>
           {/* Champ de saisie du thème (étape 1) */}
@@ -369,7 +449,7 @@ const SymbolMCPGenerator: React.FC = () => {
               {duplicateError && (
                 <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded border border-red-200 mb-3">
                   <AlertCircle className="w-5 h-5 shrink-0" />
-                  <span>{duplicateError}</span>
+                  <span className="flex-1">{duplicateError}</span>
                   <Button
                     variant="outline"
                     size="sm"
@@ -377,10 +457,28 @@ const SymbolMCPGenerator: React.FC = () => {
                     onClick={() => {
                       setDuplicateError(null);
                       setTheme('');
+                      setAttemptLog([]);
                     }}
                   >
                     Réessayer
                   </Button>
+                </div>
+              )}
+              {/* Affichage des tentatives précédentes */}
+              {attemptLog.length > 0 && (
+                <div className="mt-2 mb-3 p-2 rounded-md bg-stone-50 border text-xs">
+                  <div className="font-semibold text-stone-600 mb-1">Tentatives&nbsp;:</div>
+                  <ul className="space-y-1">
+                    {attemptLog.map(a => (
+                      <li key={a.num} className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">#{a.num}</span>
+                        <span>{providerDisplayNames[a.provider as keyof typeof providerDisplayNames]}</span>
+                        {a.theme && <span className="pl-1 italic">({a.theme})</span>}
+                        {a.constraint && <span className="bg-blue-50 text-blue-600 px-2 rounded">{a.constraint}</span>}
+                        {a.error && <span className="text-red-500">{a.error}</span>}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
