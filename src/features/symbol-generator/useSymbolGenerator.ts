@@ -69,18 +69,24 @@ export const useSymbolGenerator = () => {
 
   const handlePropose = useCallback(async () => {
     setIsLoading(true);
-    setProposals(Array.from({ length: NB_PROPOSALS }).map(() => ({ suggestion: null, collection: null, isLoading: true, error: null })));
+    const placeholderProposals = Array.from({ length: NB_PROPOSALS }).map(() => ({
+      suggestion: null,
+      collection: null,
+      isLoading: true,
+      error: null,
+    }));
+    setProposals(placeholderProposals);
     setSelectedIndices([]);
     setResultStates([]);
     resetAIProviderRotation();
 
     const batchBlacklist = [...recentNames];
-    const finalProposals: Proposal[] = [];
+    const currentProposals: Proposal[] = [...placeholderProposals];
 
     for (let i = 0; i < NB_PROPOSALS; i++) {
       try {
         const suggestion = await getUniqueSymbolSuggestion(theme, batchBlacklist, i);
-        
+
         if (!suggestion || !suggestion.name || !suggestion.culture) {
           throw new Error("Réponse de l'IA incomplète (nom ou culture manquant).");
         }
@@ -88,31 +94,22 @@ export const useSymbolGenerator = () => {
         batchBlacklist.push(suggestion.name);
 
         const collection = await findOrCreateCollection(suggestion.culture);
-        const newProposal = { suggestion, collection, isLoading: false, error: null };
-        finalProposals.push(newProposal);
-
-        setProposals(prev => {
-          const updatedProposals = [...prev];
-          updatedProposals[i] = newProposal;
-          return updatedProposals;
-        });
-
+        currentProposals[i] = { suggestion, collection, isLoading: false, error: null };
       } catch (err: any) {
-        const errorProposal = { suggestion: null, collection: null, isLoading: false, error: err?.message || "Erreur inattendue" };
-        finalProposals.push(errorProposal);
-        
-        setProposals(prev => {
-          const updatedProposals = [...prev];
-          updatedProposals[i] = errorProposal;
-          return updatedProposals;
-        });
+        currentProposals[i] = {
+          suggestion: null,
+          collection: null,
+          isLoading: false,
+          error: err?.message || "Erreur inattendue",
+        };
       }
+      setProposals([...currentProposals]);
     }
-    
+
     setIsLoading(false);
-    const successfulIndices = finalProposals
+    const successfulIndices = currentProposals
       .map((r, i) => (r.suggestion ? i : -1))
-      .filter(i => i !== -1);
+      .filter((i) => i !== -1);
     setSelectedIndices(successfulIndices);
   }, [theme, recentNames, getUniqueSymbolSuggestion]);
 
