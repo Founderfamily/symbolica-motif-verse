@@ -14,9 +14,20 @@ const RECENT_NAMES_KEY = 'symbolRecentNames';
 
 const MAX_ATTEMPTS = 7;
 const DIVERSITY_TIPS = [
-  "Égypte ancienne", "Inde médiévale", "Amérique précolombienne", "Afrique subsaharienne",
-  "Proche-Orient antique", "Renaissance", "civilisation celtique", "culture viking",
-  "royaumes africains", "tribus aborigènes", "civilisation chinoise ancienne"
+  "France médiévale (hors royauté)",
+  "Symbolique régionale de Bretagne",
+  "Traditions d'Alsace ou de Lorraine",
+  "Symboles de l'époque gallo-romaine en Gaule",
+  "Artisanat et compagnonnage français",
+  "Héraldique de villes de Provence",
+  "Symboles de l'Occitanie",
+  "Période de la Renaissance française",
+  "Symboles maritimes de Normandie",
+  "Folklore des Alpes françaises",
+  "Blasons du Pays Basque français",
+  "Héritage des Cathares",
+  "Architecture gothique et ses symboles",
+  "Symboles de la Révolution française (hors cocarde)"
 ];
 
 type Provider = 'deepseek' | 'openai' | 'anthropic';
@@ -399,10 +410,10 @@ const SymbolMCPGenerator: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Sparkle className="w-5 h-5 text-yellow-500" />
-            Générateur Automatique de Symbole Authentique
+            Générateur de Symboles de France
           </CardTitle>
           <div className="text-sm text-stone-600 mt-2">
-            5 symboles générés à la fois pour accélérer la découverte !
+            Génère 5 symboles authentiques de l'histoire de France et de ses régions.
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={handleResetMemory}>Vider la mémoire</Button>
