@@ -1,19 +1,22 @@
-
 import { MCPService, MCPSearchResponse } from './mcpService';
 import { SymbolData } from '@/types/supabase';
 
-// Enhanced prompt to enforce avoidance of previously proposed symbol names and require more diversity
+// Enhanced prompt with a nonce/timestamp for more diversity/randomness
 function buildSymbolPrompt(themeIdea: string, blacklist: string[]) {
+  // Ajout d'un suffixe pour "forcer" l'IA à changer : timestamp + nombre pseudo-aléatoire
+  const randomNonce = Date.now().toString() + '-' + Math.floor(Math.random() * 100000);
   return `
 Tu es un expert en symbolique et en histoire des cultures. 
 Génère uniquement un symbole culturel HISTORIQUE, AUTHENTIQUE et bien documenté, pour enrichir un projet éducatif (jamais un symbole inventé).
 
 - Propose un symbole réel, jamais inventé, attesté historiquement.
 - Ne propose PAS un symbole dont le nom figure dans cette liste noire (Blacklist): [${blacklist.join(", ")}]
-- Évite absolument les symboles trop connus ou déjà proposés récemment.
-- Si pertinent, favorise la diversité culturelle et temporelle.
+- Évite absolument les symboles trop connus ou déjà proposés récemment (par exemple : Labrys, Triskèle, Fleur de Lys, Yin Yang, Croix, ou les symboles de la mythologie grecque très célèbre).
+- Si pertinent, favorise la diversité culturelle (différents continents ou peuples) et temporelle (antique, médiéval, moderne).
 
 Blacklist: [${blacklist.join(", ")}]
+
+// Exception : forcer la diversité avec cette valeur unique "${randomNonce}"
 
 Si possible, cite un exemple de source ou d’œuvre où il est attesté (${themeIdea ? "si pertinent, sur le thème : " + themeIdea : "sinon pioche dans les symboles universels."})
 
@@ -35,6 +38,7 @@ IMPORTANT :
 - Jamais de création ni d’invention : uniquement des symboles vérifiables et universellement connus ou documentés dans l’Histoire.
 - Les tableaux ne doivent pas être vides.
 - N’ajoute pas d’explications ou de commentaires hors du champ JSON.
+- Pour ce prompt unique : ${randomNonce}
 `;
 }
 

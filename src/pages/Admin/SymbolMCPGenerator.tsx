@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { generateSymbolSuggestion } from '@/services/aiSymbolGeneratorService';
 import { SymbolData } from '@/types/supabase';
 import { Loader2, Sparkle, AlertCircle } from 'lucide-react';
 import { supabaseSymbolService } from '@/services/supabaseSymbolService';
+
+const RECENT_NAMES_KEY = 'symbolRecentNames';
 
 const SymbolMCPGenerator: React.FC = () => {
   const { toast } = useToast();
@@ -99,6 +101,23 @@ const SymbolMCPGenerator: React.FC = () => {
     };
   };
 
+  // On mount: load persisted recentNames from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(RECENT_NAMES_KEY);
+      if (saved) {
+        setRecentNames(JSON.parse(saved));
+      }
+    } catch {}
+  }, []);
+
+  // Whenever recentNames changes, save to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(RECENT_NAMES_KEY, JSON.stringify(recentNames));
+    } catch {}
+  }, [recentNames]);
+
   // Enhanced propose handler to support blacklist & skip repeated names
   const handlePropose = async () => {
     setIsLoading(true);
@@ -110,13 +129,13 @@ const SymbolMCPGenerator: React.FC = () => {
     let suggestion: Partial<SymbolData> | null = null;
     let foundDuplicate = false;
     const maxTries = 3;
-    // Store all generated names in this session to force diversity
+    // Use local memory and persisted blacklist
     let blacklist = [...recentNames];
 
     while (attempt < maxTries) {
       foundDuplicate = false;
       try {
-        // 1. Générer la suggestion IA (pass blacklist)
+        // 1. Générer la suggestion IA (pass blacklist; prompt has a randomizer/nonce in next file)
         suggestion = await generateSymbolSuggestion(theme.trim(), blacklist);
 
         if (!suggestion?.name || !suggestion?.culture) {
@@ -159,7 +178,7 @@ const SymbolMCPGenerator: React.FC = () => {
           continue;
         }
 
-        // Also avoid proposing exactly the same name in the same session (even if not in DB)
+        // Also avoid proposing exactly the same name in the blacklist (even if not in DB)
         if (blacklist
           .map(s => s.toLowerCase().trim())
           .includes(suggestion.name.toLowerCase().trim())
@@ -169,7 +188,7 @@ const SymbolMCPGenerator: React.FC = () => {
             title: 'Symbole déjà proposé récemment',
             description: (
               <div>
-                <div><b>{suggestion.name}</b> a déjà été proposé lors de cette session.</div>
+                <div><b>{suggestion.name}</b> a déjà été proposé lors de cette session ou récemment.</div>
                 <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{maxTries})</div>
               </div>
             ),
@@ -211,10 +230,10 @@ const SymbolMCPGenerator: React.FC = () => {
         collection,
       });
 
-      // Memorize the new symbol name (keep last 10)
+      // Memorize the new symbol name (keep last 20)
       setRecentNames(prev => {
         const next = [suggestion!.name, ...prev.filter(n => n !== suggestion!.name)];
-        return next.slice(0, 10);
+        return next.slice(0, 20); // ↑ Plus large "mémoire"
       });
     } catch (e: any) {
       toast({
@@ -309,6 +328,7 @@ const SymbolMCPGenerator: React.FC = () => {
   const handleRejectProposal = () => {
     setProposal(null);
     setResultState(null);
+    // Reset is *not* necessary; recentNames remains!
   };
 
   return (
