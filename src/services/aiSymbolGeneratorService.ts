@@ -3,46 +3,33 @@ import { SymbolData } from '@/types/supabase';
 import { Provider } from './aiProviders';
 
 function buildSymbolPrompt(themeIdea: string, blacklist: string[], randomConstraint: string = '') {
-  // Contrainte random additionnelle (période/culture/thème) injectée si présente
-  const nonce = Date.now().toString() + '-' + Math.floor(Math.random() * 100000);
+  // La blacklist peut devenir très longue. On ne garde que les 15 plus récents pour alléger le prompt.
+  const shortBlacklist = blacklist.slice(0, 15);
+
   return `
-Tu es un expert en symbolique et histoire de France.
-Génère uniquement un symbole culturel HISTORIQUE, AUTHENTIQUE et bien documenté, lié à la France, pour enrichir un projet éducatif.
+Expert en symbolique et histoire de France. Génère UN symbole culturel français, historique et authentique.
 
-- SUJET EXCLUSIF : Le symbole doit OBLIGATOIREMENT provenir de l'histoire de France (incluant ses régions, ses périodes historiques comme l'époque gallo-romaine, le Moyen Âge, la Renaissance, etc.). N'accepte AUCUN symbole d'une autre culture (pas de symbole celte non-gaulois, pas de symbole viking, etc.).
-- Propose un symbole réel, jamais inventé, attesté historiquement en France.
-- Ne propose PAS un symbole dont le nom figure dans cette liste noire (Blacklist): [${blacklist.join(", ")}]
-- Évite les symboles français trop évidents ou déjà proposés récemment (ex : Fleur de Lys, Coq Gaulois, Croix de Lorraine, Tour Eiffel, Triskèle breton trop commun).
-- La culture doit être une région ou un groupe culturel français (ex: "Alsace", "Gallo-romain", "Royauté française").
+Règles strictes :
+- SUJET : France uniquement (métropole, régions, périodes historiques françaises). Exclus toute autre culture.
+- AUTHENTICITÉ : Symbole réel et documenté, jamais inventé.
+- BLACKLIST : Ne PAS générer de symbole listé ici : [${shortBlacklist.join(", ")}].
+- DIVERSITÉ : Éviter les clichés (Fleur de Lys, Coq Gaulois, Tour Eiffel).
+- CONTRAINTE SPÉCIFIQUE : ${randomConstraint || "Aucune. Choisir un symbole régional ou historique peu connu."}
+- THÈME : ${themeIdea || "Aucun."}
 
-${randomConstraint ? `
-⚠️ Pour cette fois, le symbole doit ABSOLUMENT être associé à ce contexte français spécifique : ${randomConstraint}
-` : ''}
-
-Blacklist: [${blacklist.join(", ")}]
-// Exception : forcer la diversité avec cette valeur unique "${nonce}"
-
-Si possible, cite une source ou œuvre où il est attesté (${themeIdea ? "si pertinent, sur le thème : " + themeIdea : "sinon pioche dans les symboles régionaux ou historiques peu connus."})
-
-Formate la sortie UNIQUEMENT sous la forme d’un objet JSON conforme à :
+Format de sortie : JSON valide et complet, sans texte extérieur.
 {
-  "name": "Nom réel du symbole",
-  "culture": "Culture/source principale (région française, période...)",
+  "name": "Nom du symbole",
+  "culture": "Culture/région française",
   "period": "Période historique",
-  "description": "Description détaillée du symbole reconnu",
-  "function": ["fonction1","fonction2"],
-  "tags": ["tag1","tag2"],
-  "medium": ["matériau1","matériau2"],
+  "description": "Description concise du symbole.",
+  "function": ["fonction1", "fonction2"],
+  "tags": ["tag1", "tag2"],
+  "medium": ["matériau1", "matériau2"],
   "technique": ["technique1"],
-  "significance": "Signification profonde",
-  "historical_context": "Contexte historique ou anecdote (si possible, référence/rappel de l’origine ou rediffusion)"
+  "significance": "Signification profonde.",
+  "historical_context": "Contexte historique et source si possible."
 }
-
-IMPORTANT :
-- Jamais de création ni d’invention : uniquement des symboles vérifiables et documentés dans l’Histoire de France.
-- Les tableaux ne doivent pas être vides.
-- N’ajoute pas d’explications ou de commentaires hors du champ JSON.
-- Pour ce prompt unique : ${nonce}
 `;
 }
 
