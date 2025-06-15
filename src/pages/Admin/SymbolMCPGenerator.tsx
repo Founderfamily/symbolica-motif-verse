@@ -19,6 +19,8 @@ const DIVERSITY_TIPS = [
   "royaumes africains", "tribus aborigènes", "civilisation chinoise ancienne"
 ];
 
+type Provider = 'deepseek' | 'openai' | 'anthropic';
+
 const SymbolMCPGenerator: React.FC = () => {
   const { toast } = useToast();
   const [theme, setTheme] = useState('');
@@ -31,7 +33,8 @@ const SymbolMCPGenerator: React.FC = () => {
     symbol: Partial<SymbolData>;
     collection: any;
   } | null>(null);
-  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  // Changed from string | null to React.ReactNode for JSX compat
+  const [duplicateError, setDuplicateError] = useState<React.ReactNode>(null);
   const [attemptLog, setAttemptLog] = useState<{num:number, provider:string, theme:string, constraint:string, error?:string}[]>([]);
   // Memory for recently proposed symbol names to enforce diversity & avoid repeats
   const [recentNames, setRecentNames] = useState<string[]>([]);
@@ -167,16 +170,15 @@ const SymbolMCPGenerator: React.FC = () => {
     let suggestion: Partial<SymbolData> | null = null;
     let foundDuplicate = false;
     let blacklist = [...recentNames];
-    let provider = 'deepseek';
+    // Explicitly set type to Provider instead of plain string
+    let provider: Provider = 'deepseek';
     let constraint = "";
 
     while (attempt < MAX_ATTEMPTS) {
       foundDuplicate = false;
-      // Diversité : ajoute une contrainte de culture/période différente à chaque tentative si >2 essais
       constraint = attempt > 1 ? DIVERSITY_TIPS[(attempt-2) % DIVERSITY_TIPS.length] : "";
-      // Rotation provider à chaque essai (pour chaque fail : deepseek → openai → anthropic ...)
-      provider = getNextAIProvider(attempt === 0 ? undefined : provider);
-
+      // Force provider to be of type Provider throughout all rotations
+      provider = getNextAIProvider(attempt === 0 ? undefined : provider) as Provider;
       try {
         suggestion = await generateSymbolSuggestion(
           theme.trim(), 
@@ -421,7 +423,7 @@ const SymbolMCPGenerator: React.FC = () => {
             3. Il est ajouté à la base relié à la bonne collection
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            <Button size="xs" variant="outline" onClick={handleResetMemory}>Vider la mémoire</Button>
+            <Button size="sm" variant="outline" onClick={handleResetMemory}>Vider la mémoire</Button>
             <span className="text-xs text-stone-500">La mémoire permet d’éviter les répétitions récentes.</span>
           </div>
         </CardHeader>
