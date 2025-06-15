@@ -12,7 +12,7 @@ import { getNextAIProvider, resetAIProviderRotation, providerDisplayNames } from
 
 const RECENT_NAMES_KEY = 'symbolRecentNames';
 
-const MAX_ATTEMPTS = 7;
+const MAX_ATTEMPTS = 4; // Réduit pour accélérer les tentatives
 const DIVERSITY_TIPS = [
   "France médiévale (hors royauté)",
   "Symbolique régionale de Bretagne",
@@ -176,104 +176,114 @@ const SymbolMCPGenerator: React.FC = () => {
     return DIVERSITY_TIPS[Math.floor(Math.random() * DIVERSITY_TIPS.length)];
   }
 
-  // Handle propose main (génère NB_PROPOSALS en série ou parallélisé)
+  // Handle propose main (génère NB_PROPOSALS en parallèle)
   const handlePropose = async () => {
     setIsLoading(true);
     setDuplicateError(null);
-    setProposals([]);
-    setSelectedIndices([]);
-    setResultStates([]);
-    setAttemptLog([]);
-
-    let generatedProposals: ({
-      suggestion: Partial<SymbolData> | null,
-      collection: any | null,
-      isLoading: boolean,
-      error: string | null,
-    })[] = [];
-
-    // Blacklist commune, partagée par toutes les propositions, pour garantir diversité
-    let globalBlacklist = [...recentNames];
-
-    for (let i = 0; i < NB_PROPOSALS; i++) {
-      generatedProposals.push({
+    setProposals(
+      Array.from({ length: NB_PROPOSALS }).map(() => ({
         suggestion: null,
         collection: null,
         isLoading: true,
         error: null,
-      });
-    }
-    setProposals(generatedProposals);
+      }))
+    );
+    setSelectedIndices([]);
+    setResultStates([]);
+    setAttemptLog([]);
 
-    // Génération séquentielle pour garantir la diversité
-    for (let i = 0; i < NB_PROPOSALS; i++) {
-      try {
-        const suggestion = await getUniqueSymbolSuggestion(theme, globalBlacklist, i);
-        const collection = suggestion?.culture
-          ? await findOrCreateCollection(suggestion.culture)
-          : null;
-        if (suggestion?.name) {
-          // Ajoute à mémoires/blacklist instantanément (cumul)
-          globalBlacklist.push(suggestion.name);
-        }
-        generatedProposals[i] = {
-          suggestion,
-          collection,
-          isLoading: false,
-          error: suggestion && suggestion.name ? null : "Erreur de génération",
-        };
-      } catch (err: any) {
-        generatedProposals[i] = {
-          suggestion: null,
-          collection: null,
-          isLoading: false,
-          error: err?.message || "Erreur inattendue",
-        };
-      }
-      setProposals([...generatedProposals]);
-    }
+    const generationPromises = Array.from({ length: NB_PROPOSALS }).map((_, i) =>
+      getUniqueSymbolSuggestion(theme, [...recentNames], i)
+        .then(async (suggestion) => {
+          if (!suggestion) {
+            throw new Error("La suggestion est nulle après la génération.");
+          }
+          const collection = suggestion.culture
+            ? await findOrCreateCollection(suggestion.culture)
+            : null;
+          return {
+            suggestion,
+            collection,
+            isLoading: false,
+            error: null,
+          };
+        })
+        .catch((err: any) => {
+          console.error(`La proposition ${i} a échoué:`, err);
+          return {
+            suggestion: null,
+            collection: null,
+            isLoading: false,
+            error: err?.message || "Erreur inattendue",
+          };
+        })
+    );
+
+    const results = await Promise.all(generationPromises);
+    setProposals(results);
+    
     setIsLoading(false);
-    setSelectedIndices(Array.from({length: NB_PROPOSALS}, (_, i)=>i)); // tout précoché
+    const successfulIndices = results
+      .map((r, i) => (r.suggestion ? i : -1))
+      .filter(i => i !== -1);
+    setSelectedIndices(successfulIndices);
   };
 
   // Fonction pour garantir unicité sur chaque proposition
   async function getUniqueSymbolSuggestion(theme: string, blacklist: string[], pass: number) {
-    let attempt = 0, suggestion = null, provider: Provider = 'deepseek', constraint = "";
+    let attempt = 0;
+    let suggestion = null;
+    let provider: Provider = 'deepseek';
+    let constraint = "";
+    let lastError: Error | null = new Error("La génération a échoué après plusieurs tentatives.");
+
     while (attempt < MAX_ATTEMPTS) {
-      constraint = attempt > 1 ? DIVERSITY_TIPS[(attempt-2 + pass) % DIVERSITY_TIPS.length] : "";
+      const currentAttempt = attempt + 1;
+      constraint = attempt > 1 ? DIVERSITY_TIPS[(attempt - 2 + pass) % DIVERSITY_TIPS.length] : "";
       provider = getNextAIProvider(attempt === 0 ? undefined : provider) as Provider;
+      
       try {
+        console.log(`[Passe ${pass}, Essai ${currentAttempt}] Génération avec ${provider}...`);
         suggestion = await generateSymbolSuggestion(theme.trim(), blacklist, provider, constraint);
+        
         if (!suggestion || !suggestion.name || !suggestion.culture) {
-          throw new Error("La génération IA n'a pas renvoyé de nom ou de culture.");
+          console.warn(`[Passe ${pass}, Essai ${currentAttempt}] Suggestion invalide reçue:`, suggestion);
+          throw new Error("Réponse de l'IA incomplète (nom ou culture manquant).");
         }
+        
+        console.log(`[Passe ${pass}, Essai ${currentAttempt}] Suggestion obtenue: "${suggestion.name}"`);
+
         const existingSymbol = await supabaseSymbolService.findSymbolByName(suggestion.name);
-        // Gestion doublon BDD
         if (
           existingSymbol &&
           typeof existingSymbol.name === "string" &&
           existingSymbol.name.toLowerCase().trim() === suggestion.name.toLowerCase().trim()
         ) {
+          console.warn(`[Passe ${pass}, Essai ${currentAttempt}] Doublon dans la BDD: "${suggestion.name}"`);
           blacklist.push(suggestion.name);
-          attempt++;
-          continue;
+          throw new Error(`Le symbole "${suggestion.name}" existe déjà.`);
         }
-        // Gestion doublon mémoire/blacklist
+
         if (
-          blacklist.some(nm => typeof nm === "string" && nm.toLowerCase().trim() === suggestion.name.toLowerCase().trim())
+          blacklist.some(nm => typeof nm === "string" && nm.toLowerCase().trim() === suggestion.name!.toLowerCase().trim())
         ) {
+          console.warn(`[Passe ${pass}, Essai ${currentAttempt}] Doublon dans la blacklist: "${suggestion.name}"`);
           blacklist.push(suggestion.name);
-          attempt++;
-          continue;
+          throw new Error(`Le symbole "${suggestion.name}" est dans la blacklist.`);
         }
-        return suggestion;
-      } catch (e) {
+        
+        return suggestion; // Succès
+
+      } catch (e: any) {
+        console.error(`[Passe ${pass}, Essai ${currentAttempt}] Échec.`, e.message);
+        lastError = e;
         attempt++;
         suggestion = null;
-        continue;
       }
     }
-    return null; // si tout a échoué
+
+    console.error(`[Passe ${pass}] Les ${MAX_ATTEMPTS} tentatives ont échoué. Dernière erreur:`, lastError?.message);
+    throw lastError;
   }
 
   // Régénérer une proposition précise

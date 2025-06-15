@@ -3,32 +3,24 @@ import { SymbolData } from '@/types/supabase';
 import { Provider } from './aiProviders';
 
 function buildSymbolPrompt(themeIdea: string, blacklist: string[], randomConstraint: string = '') {
-  // La blacklist peut devenir très longue. On ne garde que les 15 plus récents pour alléger le prompt.
-  const shortBlacklist = blacklist.slice(0, 15);
+  // On garde les 8 plus récents pour un prompt très court.
+  const shortBlacklist = blacklist.slice(0, 8);
 
   return `
-Expert en symbolique et histoire de France. Génère UN symbole culturel français, historique et authentique.
-
-Règles strictes :
-- SUJET : France uniquement (métropole, régions, périodes historiques françaises). Exclus toute autre culture.
-- AUTHENTICITÉ : Symbole réel et documenté, jamais inventé.
-- BLACKLIST : Ne PAS générer de symbole listé ici : [${shortBlacklist.join(", ")}].
-- DIVERSITÉ : Éviter les clichés (Fleur de Lys, Coq Gaulois, Tour Eiffel).
-- CONTRAINTE SPÉCIFIQUE : ${randomConstraint || "Aucune. Choisir un symbole régional ou historique peu connu."}
-- THÈME : ${themeIdea || "Aucun."}
-
-Format de sortie : JSON valide et complet, sans texte extérieur.
+Génère UN symbole historique français authentique.
+SUJET: France et ses régions/cultures.
+BLACKLIST: [${shortBlacklist.join(", ")}]. Ne pas générer ces symboles.
+CONTRAINTE: ${randomConstraint || "Symbole régional ou historique peu connu."}
+THEME: ${themeIdea || "Aucun."}
+FORMAT: Réponds avec un JSON unique, sans texte autour.
 {
   "name": "Nom du symbole",
   "culture": "Culture/région française",
   "period": "Période historique",
-  "description": "Description concise du symbole.",
-  "function": ["fonction1", "fonction2"],
+  "description": "Description concise.",
   "tags": ["tag1", "tag2"],
-  "medium": ["matériau1", "matériau2"],
-  "technique": ["technique1"],
-  "significance": "Signification profonde.",
-  "historical_context": "Contexte historique et source si possible."
+  "significance": "Signification.",
+  "historical_context": "Contexte historique."
 }
 `;
 }
