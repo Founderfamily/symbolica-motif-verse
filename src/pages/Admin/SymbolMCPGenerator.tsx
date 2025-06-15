@@ -181,44 +181,50 @@ const SymbolMCPGenerator: React.FC = () => {
       provider = getNextAIProvider(attempt === 0 ? undefined : provider) as Provider;
       try {
         suggestion = await generateSymbolSuggestion(
-          theme.trim(), 
+          theme.trim(),
           blacklist,
-          provider, 
+          provider,
           constraint
         );
-        if (!suggestion?.name || !suggestion?.culture) {
+        // If suggestion or suggestion.name/culture is missing, error. 
+        if (!suggestion || !suggestion.name || !suggestion.culture) {
           throw new Error("La génération IA n'a pas renvoyé de nom ou de culture.");
         }
         // Logs for debugging
         console.log("🔁 Nouvelle suggestion IA:", suggestion);
 
-        // Duplicate detection : code refait pour tracker l’historique des tentatives
-        // 2. Vérifier dans la base si existe déjà (sur nom + culture + période)
+        // Duplicate detection: code refait pour tracker l’historique des tentatives
         const existingSymbol = await supabaseSymbolService.findSymbolByName(suggestion.name);
+
+        // ---- PATCH: null check before .toLowerCase() ----
+        const proposedName = typeof suggestion.name === "string" ? suggestion.name : "";
+        const proposedPeriod = typeof suggestion.period === "string" ? suggestion.period : undefined;
+        const proposedCulture = typeof suggestion.culture === "string" ? suggestion.culture : "";
 
         if (
           existingSymbol &&
-          existingSymbol.name?.toLowerCase().trim() === suggestion.name.toLowerCase().trim() &&
+          typeof existingSymbol.name === "string" &&
+          existingSymbol.name.toLowerCase().trim() === proposedName.toLowerCase().trim() &&
           (
-            (!suggestion.culture || (existingSymbol.culture?.toLowerCase() === suggestion.culture.toLowerCase()))
+            (!proposedCulture || (typeof existingSymbol.culture === "string" && existingSymbol.culture.toLowerCase() === proposedCulture.toLowerCase()))
             ||
-            (!suggestion.period || (existingSymbol.period?.toLowerCase() === suggestion.period?.toLowerCase()))
+            (!proposedPeriod || (typeof existingSymbol.period === "string" && existingSymbol.period.toLowerCase() === proposedPeriod.toLowerCase()))
           )
         ) {
           foundDuplicate = true;
           // Add proposed name to blacklist for next try, and local session memory
-          if (!blacklist.includes(suggestion.name)) {
-            blacklist.push(suggestion.name);
+          if (proposedName && !blacklist.includes(proposedName)) {
+            blacklist.push(proposedName);
           }
           setAttemptLog(prev => [
-            ...prev, 
-            {num: attempt+1, provider, theme, constraint, error: `[DOUBLON DB] ${suggestion.name}`}
+            ...prev,
+            {num: attempt+1, provider, theme, constraint, error: `[DOUBLON DB] ${proposedName}`}
           ]);
           toast({
             title: 'Doublon détecté',
             description: (
               <div>
-                <div><b>{suggestion.name}</b> existe déjà ({existingSymbol.culture}, {existingSymbol.period}).</div>
+                <div><b>{proposedName}</b> existe déjà ({existingSymbol.culture}, {existingSymbol.period}).</div>
                 <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{MAX_ATTEMPTS}) (IA : {providerDisplayNames[provider as keyof typeof providerDisplayNames]})</div>
               </div>
             ),
@@ -230,27 +236,30 @@ const SymbolMCPGenerator: React.FC = () => {
         }
 
         // Also avoid proposing exactly the same name in the blacklist (even if not in DB)
-        if (blacklist
-          .map(s => s.toLowerCase().trim())
-          .includes(suggestion.name.toLowerCase().trim())
-        ) {
+        const isBlacklisted =
+          proposedName &&
+          blacklist
+            .map(s => typeof s === "string" ? s.toLowerCase().trim() : "")
+            .includes(proposedName.toLowerCase().trim());
+
+        if (isBlacklisted) {
           foundDuplicate = true;
           setAttemptLog(prev => [
-            ...prev, 
-            {num: attempt+1, provider, theme, constraint, error: `[BlackList] ${suggestion.name}`}
+            ...prev,
+            {num: attempt+1, provider, theme, constraint, error: `[BlackList] ${proposedName}`}
           ]);
           toast({
             title: 'Symbole déjà proposé récemment',
             description: (
               <div>
-                <div><b>{suggestion.name}</b> a déjà été proposé lors de cette session ou récemment.</div>
+                <div><b>{proposedName}</b> a déjà été proposé lors de cette session ou récemment.</div>
                 <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{MAX_ATTEMPTS})</div>
               </div>
             ),
             variant: 'destructive',
           });
-          if (!blacklist.includes(suggestion.name)) {
-            blacklist.push(suggestion.name);
+          if (proposedName && !blacklist.includes(proposedName)) {
+            blacklist.push(proposedName);
           }
           suggestion = null;
           attempt++;
@@ -261,7 +270,7 @@ const SymbolMCPGenerator: React.FC = () => {
         break;
       } catch (e: any) {
         setAttemptLog(prev => [
-          ...prev, 
+          ...prev,
           {num: attempt+1, provider, theme, constraint, error: e.message}
         ]);
         toast({
@@ -275,7 +284,7 @@ const SymbolMCPGenerator: React.FC = () => {
       }
     }
 
-    if (!suggestion) {
+    if (!suggestion || !suggestion.name) {
       setDuplicateError(
         <>
           <div>Impossible de générer un symbole unique après {MAX_ATTEMPTS} essais sur {providerDisplayNames[provider as keyof typeof providerDisplayNames]}.</div>
@@ -310,7 +319,8 @@ const SymbolMCPGenerator: React.FC = () => {
 
       // Memorize the new symbol name (keep last 20)
       setRecentNames(prev => {
-        const next = [suggestion!.name, ...prev.filter(n => n !== suggestion!.name)];
+        if (!suggestion || !suggestion.name) return prev;
+        const next = [suggestion.name, ...prev.filter(n => n !== suggestion.name)];
         return next.slice(0, 20); // ↑ Plus large "mémoire"
       });
     } catch (e: any) {
