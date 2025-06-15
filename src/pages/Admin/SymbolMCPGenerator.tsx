@@ -21,23 +21,31 @@ const DIVERSITY_TIPS = [
 
 type Provider = 'deepseek' | 'openai' | 'anthropic';
 
+const NB_PROPOSALS = 5;
+
 const SymbolMCPGenerator: React.FC = () => {
   const { toast } = useToast();
   const [theme, setTheme] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [proposal, setProposal] = useState<{
-    suggestion: Partial<SymbolData>;
-    collection: any;
-  } | null>(null);
-  const [resultState, setResultState] = useState<{
-    symbol: Partial<SymbolData>;
-    collection: any;
-  } | null>(null);
-  // Changed from string | null to React.ReactNode for JSX compat
   const [duplicateError, setDuplicateError] = useState<React.ReactNode>(null);
   const [attemptLog, setAttemptLog] = useState<{num:number, provider:string, theme:string, constraint:string, error?:string}[]>([]);
-  // Memory for recently proposed symbol names to enforce diversity & avoid repeats
   const [recentNames, setRecentNames] = useState<string[]>([]);
+
+  // Pour la fonctionnalité "5 par 5"
+  const [proposals, setProposals] = useState<({
+    suggestion: Partial<SymbolData> | null,
+    collection: any | null,
+    isLoading: boolean,
+    error: string | null,
+  })[]>([]);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+  const [resultStates, setResultStates] = useState<
+    { symbol: Partial<SymbolData>; collection: any; error?: string }[]
+  >([]);
+
+  // Utilitaire pour sélectionner tout/désélectionner tout
+  const allSelected = selectedIndices.length === proposals.length && proposals.length > 0;
+  const noneSelected = selectedIndices.length === 0;
 
   // Utilitaire pour capitaliser
   const capitalize = (s: string) =>
@@ -84,7 +92,7 @@ const SymbolMCPGenerator: React.FC = () => {
       .select();
 
     if (insertError || !newCollection?.[0]?.id) {
-      throw new Error("Erreur de création de la collection : " + (insertError?.message || 'inconnue'));
+      throw new Error("Erreur de création de la collection : " + (insertError?.message || 'inconnue'));
     }
 
     // Ajout des traductions
@@ -93,7 +101,7 @@ const SymbolMCPGenerator: React.FC = () => {
         collection_id: newCollection[0].id,
         language: 'fr',
         title: capitalize(culture),
-        description: `Collection automatique : symboles de la culture ${capitalize(culture)}.`
+        description: `Collection automatique : symboles de la culture ${capitalize(culture)}.`
       },
       {
         collection_id: newCollection[0].id,
@@ -136,8 +144,8 @@ const SymbolMCPGenerator: React.FC = () => {
     resetAIProviderRotation();
     localStorage.removeItem(RECENT_NAMES_KEY);
     setDuplicateError(null);
-    setProposal(null);
-    setResultState(null);
+    setProposals([]);
+    setResultStates([]);
     setTheme('');
     setAttemptLog([]);
     toast({
@@ -147,7 +155,7 @@ const SymbolMCPGenerator: React.FC = () => {
     });
   };
 
-  // Ajoute : suggestions dynamiques lors d’un échec
+  // Ajoute : suggestions dynamiques lors d'un échec
   function getThemeSuggestion() {
     const set = new Set(recentNames.map(n => n.toLowerCase()));
     for (const tip of DIVERSITY_TIPS) {
@@ -157,266 +165,232 @@ const SymbolMCPGenerator: React.FC = () => {
     return DIVERSITY_TIPS[Math.floor(Math.random() * DIVERSITY_TIPS.length)];
   }
 
-  // Handler de proposition IA diversifié, provider rotatif, persistance blacklist
+  // Handle propose main (génère NB_PROPOSALS en série ou parallélisé)
   const handlePropose = async () => {
     setIsLoading(true);
-    setResultState(null);
-    setProposal(null);
     setDuplicateError(null);
+    setProposals([]);
+    setSelectedIndices([]);
+    setResultStates([]);
     setAttemptLog([]);
-    resetAIProviderRotation();
 
-    let attempt = 0;
-    let suggestion: Partial<SymbolData> | null = null;
-    let foundDuplicate = false;
-    let blacklist = [...recentNames];
-    // Explicitly set type to Provider instead of plain string
-    let provider: Provider = 'deepseek';
-    let constraint = "";
+    let generatedProposals: ({
+      suggestion: Partial<SymbolData> | null,
+      collection: any | null,
+      isLoading: boolean,
+      error: string | null,
+    })[] = [];
 
+    // Blacklist commune, partagée par toutes les propositions, pour garantir diversité
+    let globalBlacklist = [...recentNames];
+
+    for (let i = 0; i < NB_PROPOSALS; i++) {
+      generatedProposals.push({
+        suggestion: null,
+        collection: null,
+        isLoading: true,
+        error: null,
+      });
+    }
+    setProposals(generatedProposals);
+
+    // Génération séquentielle pour garantir la diversité
+    for (let i = 0; i < NB_PROPOSALS; i++) {
+      try {
+        const suggestion = await getUniqueSymbolSuggestion(theme, globalBlacklist, i);
+        const collection = suggestion?.culture
+          ? await findOrCreateCollection(suggestion.culture)
+          : null;
+        if (suggestion?.name) {
+          // Ajoute à mémoires/blacklist instantanément (cumul)
+          globalBlacklist.push(suggestion.name);
+        }
+        generatedProposals[i] = {
+          suggestion,
+          collection,
+          isLoading: false,
+          error: suggestion && suggestion.name ? null : "Erreur de génération",
+        };
+      } catch (err: any) {
+        generatedProposals[i] = {
+          suggestion: null,
+          collection: null,
+          isLoading: false,
+          error: err?.message || "Erreur inattendue",
+        };
+      }
+      setProposals([...generatedProposals]);
+    }
+    setIsLoading(false);
+    setSelectedIndices(Array.from({length: NB_PROPOSALS}, (_, i)=>i)); // tout précoché
+  };
+
+  // Fonction pour garantir unicité sur chaque proposition
+  async function getUniqueSymbolSuggestion(theme: string, blacklist: string[], pass: number) {
+    let attempt = 0, suggestion = null, provider: Provider = 'deepseek', constraint = "";
     while (attempt < MAX_ATTEMPTS) {
-      foundDuplicate = false;
-      constraint = attempt > 1 ? DIVERSITY_TIPS[(attempt-2) % DIVERSITY_TIPS.length] : "";
-      // Force provider to be of type Provider throughout all rotations
+      constraint = attempt > 1 ? DIVERSITY_TIPS[(attempt-2 + pass) % DIVERSITY_TIPS.length] : "";
       provider = getNextAIProvider(attempt === 0 ? undefined : provider) as Provider;
       try {
-        suggestion = await generateSymbolSuggestion(
-          theme.trim(),
-          blacklist,
-          provider,
-          constraint
-        );
-        // If suggestion or suggestion.name/culture is missing, error. 
+        suggestion = await generateSymbolSuggestion(theme.trim(), blacklist, provider, constraint);
         if (!suggestion || !suggestion.name || !suggestion.culture) {
           throw new Error("La génération IA n'a pas renvoyé de nom ou de culture.");
         }
-        // Logs for debugging
-        console.log("🔁 Nouvelle suggestion IA:", suggestion);
-
-        // Duplicate detection: code refait pour tracker l’historique des tentatives
         const existingSymbol = await supabaseSymbolService.findSymbolByName(suggestion.name);
-
-        // ---- PATCH: null check before .toLowerCase() ----
-        const proposedName = typeof suggestion.name === "string" ? suggestion.name : "";
-        const proposedPeriod = typeof suggestion.period === "string" ? suggestion.period : undefined;
-        const proposedCulture = typeof suggestion.culture === "string" ? suggestion.culture : "";
-
+        // Gestion doublon BDD
         if (
           existingSymbol &&
           typeof existingSymbol.name === "string" &&
-          existingSymbol.name.toLowerCase().trim() === proposedName.toLowerCase().trim() &&
-          (
-            (!proposedCulture || (typeof existingSymbol.culture === "string" && existingSymbol.culture.toLowerCase() === proposedCulture.toLowerCase()))
-            ||
-            (!proposedPeriod || (typeof existingSymbol.period === "string" && existingSymbol.period.toLowerCase() === proposedPeriod.toLowerCase()))
-          )
+          existingSymbol.name.toLowerCase().trim() === suggestion.name.toLowerCase().trim()
         ) {
-          foundDuplicate = true;
-          // Add proposed name to blacklist for next try, and local session memory
-          if (proposedName && !blacklist.includes(proposedName)) {
-            blacklist.push(proposedName);
-          }
-          setAttemptLog(prev => [
-            ...prev,
-            {num: attempt+1, provider, theme, constraint, error: `[DOUBLON DB] ${proposedName}`}
-          ]);
-          toast({
-            title: 'Doublon détecté',
-            description: (
-              <div>
-                <div><b>{proposedName}</b> existe déjà ({existingSymbol.culture}, {existingSymbol.period}).</div>
-                <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{MAX_ATTEMPTS}) (IA : {providerDisplayNames[provider as keyof typeof providerDisplayNames]})</div>
-              </div>
-            ),
-            variant: 'destructive',
-          });
-          suggestion = null;
+          blacklist.push(suggestion.name);
           attempt++;
           continue;
         }
-
-        // Also avoid proposing exactly the same name in the blacklist (even if not in DB)
-        const isBlacklisted =
-          proposedName &&
-          blacklist
-            .map(s => typeof s === "string" ? s.toLowerCase().trim() : "")
-            .includes(proposedName.toLowerCase().trim());
-
-        if (isBlacklisted) {
-          foundDuplicate = true;
-          setAttemptLog(prev => [
-            ...prev,
-            {num: attempt+1, provider, theme, constraint, error: `[BlackList] ${proposedName}`}
-          ]);
-          toast({
-            title: 'Symbole déjà proposé récemment',
-            description: (
-              <div>
-                <div><b>{proposedName}</b> a déjà été proposé lors de cette session ou récemment.</div>
-                <div className="mt-1">Génération d’un autre symbole... (essai {attempt + 1}/{MAX_ATTEMPTS})</div>
-              </div>
-            ),
-            variant: 'destructive',
-          });
-          if (proposedName && !blacklist.includes(proposedName)) {
-            blacklist.push(proposedName);
-          }
-          suggestion = null;
+        // Gestion doublon mémoire/blacklist
+        if (
+          blacklist.some(nm => typeof nm === "string" && nm.toLowerCase().trim() === suggestion.name.toLowerCase().trim())
+        ) {
+          blacklist.push(suggestion.name);
           attempt++;
           continue;
         }
-
-        // Aucun doublon : on sort de la boucle
-        break;
-      } catch (e: any) {
-        setAttemptLog(prev => [
-          ...prev,
-          {num: attempt+1, provider, theme, constraint, error: e.message}
-        ]);
-        toast({
-          title: 'Erreur IA/fournisseur',
-          description: (<span>Essai {attempt+1}/{MAX_ATTEMPTS} : {e.message} (provider {provider})</span>),
-          variant: 'destructive'
-        });
-        suggestion = null;
+        return suggestion;
+      } catch (e) {
         attempt++;
+        suggestion = null;
         continue;
       }
     }
+    return null; // si tout a échoué
+  }
 
-    if (!suggestion || !suggestion.name) {
-      setDuplicateError(
-        <>
-          <div>Impossible de générer un symbole unique après {MAX_ATTEMPTS} essais sur {providerDisplayNames[provider as keyof typeof providerDisplayNames]}.</div>
-          <div className="mt-1">
-            <span className="text-xs text-stone-500">Astuce : essayez un autre thème plus original,
-              ou utilisez la suggestion proposée ci-dessous.</span>
-          </div>
-          <div className="mt-2 flex items-center gap-2">
-            <span className="bg-amber-100 rounded px-2 py-1 text-amber-700 text-xs">Suggestion : </span>
-            <Button 
-              size="sm"
-              variant="outline"
-              onClick={() => setTheme(getThemeSuggestion())}
-            >
-              {getThemeSuggestion()}
-            </Button>
-          </div>
-        </>
+  // Régénérer une proposition précise
+  const handleRegenerate = async (index: number) => {
+    setProposals(prev =>
+      prev.map((prop, i) =>
+        i === index
+          ? { suggestion: null, collection: null, isLoading: true, error: null }
+          : prop
+      )
+    );
+    let blacklist = [
+      ...recentNames,
+      ...proposals.filter(p => p.suggestion?.name).map(p => p.suggestion!.name!),
+    ];
+    try {
+      const suggestion = await getUniqueSymbolSuggestion(theme, blacklist, index);
+      const collection = suggestion?.culture
+        ? await findOrCreateCollection(suggestion.culture)
+        : null;
+      setProposals(prev =>
+        prev.map((prop, i) =>
+          i === index
+            ? {
+                suggestion,
+                collection,
+                isLoading: false,
+                error: suggestion && suggestion.name ? null : "Erreur de génération",
+              }
+            : prop
+        )
       );
-      setIsLoading(false);
-      return;
-    }
-
-    // Trouver/créer la collection associée
-    try {
-      const collection = await findOrCreateCollection(suggestion.culture!);
-
-      setProposal({
-        suggestion,
-        collection,
-      });
-
-      // Memorize the new symbol name (keep last 20)
-      setRecentNames(prev => {
-        if (!suggestion || !suggestion.name) return prev;
-        const next = [suggestion.name, ...prev.filter(n => n !== suggestion.name)];
-        return next.slice(0, 20); // ↑ Plus large "mémoire"
-      });
-    } catch (e: any) {
-      toast({
-        title: 'Erreur lors de l’association collection',
-        description: e.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (err: any) {
+      setProposals(prev =>
+        prev.map((prop, i) =>
+          i === index
+            ? {
+                suggestion: null,
+                collection: null,
+                isLoading: false,
+                error: err?.message || "Erreur inattendue",
+              }
+            : prop
+        )
+      );
     }
   };
 
-  // Étape 2 : Accepter le symbole → création réelle en base
-  const handleAcceptAndCreate = async () => {
-    if (!proposal?.suggestion || !proposal?.collection) {
-      toast({
-        title: 'Erreur',
-        description: "Aucune proposition active à valider.",
-        variant: 'destructive',
-      });
-      return;
-    }
+  // Sélection batch
+  const handleToggleSelect = (i: number) => {
+    setSelectedIndices(prev =>
+      prev.includes(i)
+        ? prev.filter(idx => idx !== i)
+        : [...prev, i]
+    );
+  };
+  const handleSelectAll = () => {
+    if (allSelected) setSelectedIndices([]);
+    else setSelectedIndices(proposals.map((_, i) => i));
+  };
+
+  // Création des symboles sélectionnés (en lot)
+  const handleAcceptAndCreateBatch = async () => {
     setIsLoading(true);
-    setResultState(null);
-    try {
-      const dataToInsert = {
-        name: proposal.suggestion.name,
-        culture: proposal.suggestion.culture,
-        period: proposal.suggestion.period,
-        description: proposal.suggestion.description ?? null,
-        function: proposal.suggestion.function ?? null,
-        tags: proposal.suggestion.tags ?? null,
-        medium: proposal.suggestion.medium ?? null,
-        technique: proposal.suggestion.technique ?? null,
-        significance: proposal.suggestion.significance ?? null,
-        historical_context: proposal.suggestion.historical_context ?? null
-      };
+    setResultStates([]);
+    const toCreate = selectedIndices
+      .map(i => proposals[i])
+      .filter(p => p && p.suggestion && p.collection);
 
-      const { data: symbolResp, error: insertError } = await supabase
-        .from('symbols')
-        .insert([dataToInsert])
-        .select();
+    let results: { symbol: Partial<SymbolData>; collection: any; error?: string }[] = [];
 
-      if (insertError || !symbolResp?.[0]?.id) {
-        throw new Error("Erreur à la création du symbole : " + (insertError?.message || 'inconnue'));
-      }
+    await Promise.allSettled(
+      toCreate.map(async ({ suggestion, collection }) => {
+        try {
+          const dataToInsert = {
+            name: suggestion!.name,
+            culture: suggestion!.culture,
+            period: suggestion!.period,
+            description: suggestion!.description ?? null,
+            function: suggestion!.function ?? null,
+            tags: suggestion!.tags ?? null,
+            medium: suggestion!.medium ?? null,
+            technique: suggestion!.technique ?? null,
+            significance: suggestion!.significance ?? null,
+            historical_context: suggestion!.historical_context ?? null
+          };
 
-      // Associer à la collection
-      await supabase.from('collection_symbols').insert([
-        {
-          collection_id: proposal.collection.id,
-          symbol_id: symbolResp[0].id,
+          const { data: symbolResp, error: insertError } = await supabase
+            .from('symbols')
+            .insert([dataToInsert])
+            .select();
+
+          if (insertError || !symbolResp?.[0]?.id) {
+            throw new Error('Erreur à la création du symbole');
+          }
+
+          await supabase.from('collection_symbols').insert([
+            {
+              collection_id: collection.id,
+              symbol_id: symbolResp[0].id,
+            }
+          ]);
+
+          results.push({
+            symbol: symbolResp[0],
+            collection,
+            error: undefined,
+          });
+        } catch (err: any) {
+          results.push({
+            symbol: suggestion!,
+            collection,
+            error: err?.message || "Erreur inattendue",
+          });
         }
-      ]);
+      })
+    );
 
-      setResultState({
-        symbol: symbolResp[0],
-        collection: proposal.collection,
-      });
+    // Mise à jour mémoire pour tous les noms nouvellement créés
+    setRecentNames(prev => [
+      ...toCreate.filter(p => p.suggestion && p.suggestion.name).map(p => p.suggestion!.name!),
+      ...prev,
+    ].slice(0, 20));
 
-      toast({
-        title: 'Symbole authentique créé 🎉',
-        description: (
-          <div>
-            <div>
-              <b>{symbolResp[0].name}</b> ({symbolResp[0].culture}, {symbolResp[0].period})
-            </div>
-            <div>
-              <span className="italic">Ajouté à la collection :</span>{" "}
-              <b>
-                {proposal.collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title ||
-                  proposal.collection.slug}
-              </b>
-            </div>
-          </div>
-        ),
-      });
-      setProposal(null);
-      setTheme('');
-    } catch (e: any) {
-      toast({
-        title: 'Erreur de création du symbole',
-        description: e.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Rejeter la proposition (Recommencer)
-  const handleRejectProposal = () => {
-    setProposal(null);
-    setResultState(null);
-    // Reset is *not* necessary; recentNames remains!
+    setResultStates(results);
+    setIsLoading(false);
+    setProposals([]);
+    setSelectedIndices([]);
   };
 
   return (
@@ -428,24 +402,22 @@ const SymbolMCPGenerator: React.FC = () => {
             Générateur Automatique de Symbole Authentique
           </CardTitle>
           <div className="text-sm text-stone-600 mt-2">
-            1. Propose un symbole vérifié par IA<br />
-            2. Vous validez<br />
-            3. Il est ajouté à la base relié à la bonne collection
+            5 symboles générés à la fois pour accélérer la découverte !
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={handleResetMemory}>Vider la mémoire</Button>
-            <span className="text-xs text-stone-500">La mémoire permet d’éviter les répétitions récentes.</span>
+            <span className="text-xs text-stone-500">Évite les répétitions récentes.</span>
           </div>
         </CardHeader>
         <CardContent>
-          {/* Champ de saisie du thème (étape 1) */}
-          {!proposal && !resultState && (
+          {/* Étape 1 : input thème + generate 5 */}
+          {proposals.length === 0 && resultStates.length === 0 && (
             <div>
               <div className="flex gap-2 mb-5">
                 <Input
                   placeholder="Thème ou culture (optionnel)"
                   value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
+                  onChange={e => setTheme(e.target.value)}
                   disabled={isLoading}
                 />
                 <Button
@@ -455,7 +427,7 @@ const SymbolMCPGenerator: React.FC = () => {
                   disabled={isLoading}
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" />}
-                  Proposer
+                  Générer 5 symboles
                 </Button>
               </div>
               {duplicateError && (
@@ -476,105 +448,136 @@ const SymbolMCPGenerator: React.FC = () => {
                   </Button>
                 </div>
               )}
-              {/* Affichage des tentatives précédentes */}
-              {attemptLog.length > 0 && (
-                <div className="mt-2 mb-3 p-2 rounded-md bg-stone-50 border text-xs">
-                  <div className="font-semibold text-stone-600 mb-1">Tentatives&nbsp;:</div>
-                  <ul className="space-y-1">
-                    {attemptLog.map(a => (
-                      <li key={a.num} className="flex flex-wrap items-center gap-2">
-                        <span className="font-medium">#{a.num}</span>
-                        <span>{providerDisplayNames[a.provider as keyof typeof providerDisplayNames]}</span>
-                        {a.theme && <span className="pl-1 italic">({a.theme})</span>}
-                        {a.constraint && <span className="bg-blue-50 text-blue-600 px-2 rounded">{a.constraint}</span>}
-                        {a.error && <span className="text-red-500">{a.error}</span>}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            </div>
+          )}
+          {/* Étape 2 : grille de propositions */}
+          {!isLoading && proposals.length > 0 && (
+            <div>
+              <div className="flex gap-2 mb-4">
+                <Button size="sm" variant="outline" onClick={handleSelectAll}>
+                  {allSelected ? "Tout désélectionner" : "Tout sélectionner"}
+                </Button>
+                <span className="text-xs text-teal-700">
+                  {selectedIndices.length} sur {proposals.length} sélectionné{selectedIndices.length > 1 ? "s" : ""}
+                </span>
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={handleAcceptAndCreateBatch}
+                  disabled={selectedIndices.length === 0}
+                  className="ml-auto"
+                >
+                  Créer {selectedIndices.length > 1 ? `${selectedIndices.length} symboles` : "le symbole sélectionné"}
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {proposals.map((proposal, i) => (
+                  <div key={i} className={`relative border rounded-lg bg-stone-50 p-4 flex flex-col items-start ${selectedIndices.includes(i) ? "border-teal-400 shadow-md" : "border-stone-200"}`}>
+                    <label className="flex gap-2 items-center cursor-pointer mb-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedIndices.includes(i)}
+                        onChange={() => handleToggleSelect(i)}
+                        className="accent-teal-600"
+                        disabled={proposal.isLoading}
+                      />
+                      <span className="font-medium text-teal-900">Sélectionner</span>
+                    </label>
+                    {proposal.isLoading ? (
+                      <div className="w-full flex items-center justify-center py-5">
+                        <Loader2 className="animate-spin w-6 h-6 text-gray-400" />
+                      </div>
+                    ) : proposal.error ? (
+                      <div className="text-red-500 text-sm">
+                        {proposal.error}
+                        <Button size="sm" variant="outline" className="mt-2" onClick={() => handleRegenerate(i)}>
+                          Régénérer
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <span className="font-semibold">
+                            {proposal.suggestion?.name || "--"}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {" "}
+                            ({proposal.suggestion?.culture}
+                            {proposal.suggestion?.period ? `, ${proposal.suggestion.period}` : ""})
+                          </span>
+                        </div>
+                        {proposal.suggestion?.description && (
+                          <div className="text-xs mt-1 text-stone-600 line-clamp-4">
+                            {proposal.suggestion.description}
+                          </div>
+                        )}
+                        {proposal.suggestion?.tags && (
+                          <div className="text-xs text-stone-400 mt-2">
+                            <b>Tags: </b>{Array.isArray(proposal.suggestion.tags) ? proposal.suggestion.tags.join(', ') : proposal.suggestion.tags}
+                          </div>
+                        )}
+                        <div className="text-xs text-teal-700 mt-2">
+                          Collection : <b>
+                            {proposal.collection?.collection_translations?.find((tr: any) => tr.language === 'fr')?.title || proposal.collection?.slug}
+                          </b>
+                        </div>
+                        <Button size="sm" variant="ghost" className="mt-3" onClick={() => handleRegenerate(i)}>
+                          Régénérer ce symbole
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-center mt-5">
+                <Button variant="outline" size="sm" onClick={handlePropose}>
+                  Générer 5 nouveaux symboles
+                </Button>
+              </div>
             </div>
           )}
 
-          {/* Indication de chargement */}
+          {/* Résultat final (créations multiples) */}
+          {!isLoading && resultStates.length > 0 && (
+            <div className="space-y-2 mt-6">
+              <div className="font-semibold text-teal-700">
+                {resultStates.filter(r=>!r.error).length} symbole(s) ajouté(s) avec succès, {resultStates.filter(r=>r.error).length} échec(s)
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {resultStates.map((res, idx) => (
+                  <div key={idx} className={`border rounded-lg p-3 ${res.error ? "border-red-300 bg-red-50" : "border-green-300 bg-green-50"}`}>
+                    <div>
+                      <strong>{res.symbol.name}</strong>{" "}
+                      <span className="text-xs text-stone-500">
+                        ({res.symbol.culture}{res.symbol.period ? `, ${res.symbol.period}` : ""})
+                      </span>
+                    </div>
+                    {res.error ? (
+                      <div className="text-xs text-red-700 mt-2">{res.error}</div>
+                    ) : (
+                      <>
+                        {res.symbol.description && (
+                          <div className="text-xs text-stone-600 mt-1">{res.symbol.description}</div>
+                        )}
+                        <div className="text-xs text-stone-700 mt-1">
+                          Collection : <span className="font-bold">{res.collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title || res.collection.slug}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end mt-3">
+                <Button variant="outline" onClick={() => { setResultStates([]); setProposals([]); }}>
+                  Générer d'autres symboles
+                </Button>
+              </div>
+            </div>
+          )}
+
           {isLoading && (
             <div className="text-center text-stone-500 py-8">
               Traitement en cours… Veuillez patienter.
-            </div>
-          )}
-
-          {/* Étape 2 : Affichage de la proposition et validation */}
-          {!isLoading && proposal && (
-            <div className="space-y-3 mt-2 p-4 rounded border bg-stone-50">
-              <div className="font-semibold text-stone-800 mb-2">
-                Proposition de symbole authentique
-              </div>
-              <div>
-                <span className="font-medium">{proposal.suggestion.name}</span>
-                {" "}({proposal.suggestion.culture}, {proposal.suggestion.period})
-              </div>
-              {proposal.suggestion.description && (
-                <div className="text-sm mt-1 text-stone-600">
-                  {proposal.suggestion.description}
-                </div>
-              )}
-              {/* Affichage des autres propriétés */}
-              {proposal.suggestion.tags && (
-                <div className="text-xs text-stone-500">
-                  <b>Tags&nbsp;:</b> {Array.isArray(proposal.suggestion.tags) ? proposal.suggestion.tags.join(', ') : proposal.suggestion.tags}
-                </div>
-              )}
-              {proposal.suggestion.significance && (
-                <div className="text-xs italic text-stone-500">
-                  {proposal.suggestion.significance}
-                </div>
-              )}
-              <div className="mt-3 text-xs text-teal-600">
-                Collection cible : <b>
-                  {proposal.collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title ||
-                    proposal.collection.slug}
-                </b>
-              </div>
-              <div className="flex gap-2 mt-4 justify-end">
-                <Button
-                  variant="default"
-                  onClick={handleAcceptAndCreate}
-                  className="gap-2"
-                >
-                  <Sparkle className="w-4 h-4" />
-                  Accepter et Créer ce Symbole
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={handleRejectProposal}
-                  className="gap-2"
-                >
-                  Proposer un autre
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Résultat final */}
-          {!isLoading && resultState && (
-            <div className="space-y-2 mt-6 p-4 rounded bg-stone-50 border">
-              <div className="font-semibold text-stone-800">
-                ✅ Symbole authentique ajouté&nbsp;!
-              </div>
-              <div>
-                <span className="font-medium">{resultState.symbol.name}</span> ({resultState.symbol.culture}, {resultState.symbol.period})
-              </div>
-              {resultState.symbol.description && (
-                <div className="text-sm mt-2 text-stone-600">{resultState.symbol.description}</div>
-              )}
-              <div className="mt-2 text-xs text-stone-500">
-                Collection&nbsp;: <span className="font-bold">{resultState.collection.collection_translations?.find((tr: any) => tr.language === 'fr')?.title || resultState.collection.slug}</span>
-              </div>
-              <div className="flex justify-end mt-3">
-                <Button variant="outline" onClick={() => { setResultState(null); setProposal(null); }}>
-                  Ajouter un autre
-                </Button>
-              </div>
             </div>
           )}
         </CardContent>
