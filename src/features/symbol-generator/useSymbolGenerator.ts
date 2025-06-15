@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,21 +74,45 @@ export const useSymbolGenerator = () => {
     setResultStates([]);
     resetAIProviderRotation();
 
-    const generationPromises = Array.from({ length: NB_PROPOSALS }).map((_, i) =>
-      getUniqueSymbolSuggestion(theme, [...recentNames], i)
-        .then(async (suggestion) => {
-          if (!suggestion) throw new Error("La suggestion est nulle après la génération.");
-          const collection = suggestion.culture ? await findOrCreateCollection(suggestion.culture) : null;
-          return { suggestion, collection, isLoading: false, error: null };
-        })
-        .catch((err: any) => ({ suggestion: null, collection: null, isLoading: false, error: err?.message || "Erreur inattendue" }))
-    );
+    const batchBlacklist = [...recentNames];
+    const finalProposals: Proposal[] = [];
 
-    const results = await Promise.all(generationPromises);
-    setProposals(results);
+    for (let i = 0; i < NB_PROPOSALS; i++) {
+      try {
+        const suggestion = await getUniqueSymbolSuggestion(theme, batchBlacklist, i);
+        
+        if (!suggestion || !suggestion.name || !suggestion.culture) {
+          throw new Error("Réponse de l'IA incomplète (nom ou culture manquant).");
+        }
+
+        batchBlacklist.push(suggestion.name);
+
+        const collection = await findOrCreateCollection(suggestion.culture);
+        const newProposal = { suggestion, collection, isLoading: false, error: null };
+        finalProposals.push(newProposal);
+
+        setProposals(prev => {
+          const updatedProposals = [...prev];
+          updatedProposals[i] = newProposal;
+          return updatedProposals;
+        });
+
+      } catch (err: any) {
+        const errorProposal = { suggestion: null, collection: null, isLoading: false, error: err?.message || "Erreur inattendue" };
+        finalProposals.push(errorProposal);
+        
+        setProposals(prev => {
+          const updatedProposals = [...prev];
+          updatedProposals[i] = errorProposal;
+          return updatedProposals;
+        });
+      }
+    }
     
     setIsLoading(false);
-    const successfulIndices = results.map((r, i) => (r.suggestion ? i : -1)).filter(i => i !== -1);
+    const successfulIndices = finalProposals
+      .map((r, i) => (r.suggestion ? i : -1))
+      .filter(i => i !== -1);
     setSelectedIndices(successfulIndices);
   }, [theme, recentNames, getUniqueSymbolSuggestion]);
 
@@ -176,4 +199,3 @@ export const useSymbolGenerator = () => {
     startOver,
   };
 };
-
