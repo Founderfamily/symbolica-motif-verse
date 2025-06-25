@@ -4,15 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Map, Crown, Users, Clock, ArrowRight, Compass } from 'lucide-react';
+import { Map, Crown, Users, Clock, ArrowRight, Compass, Loader2 } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { historicalQuests } from '@/data/historicalQuests';
+import { useQuests } from '@/hooks/useQuests';
+import { getQuestCluesCount } from '@/utils/questUtils';
 
 const QuestsSection = () => {
   const navigate = useNavigate();
+  const { data: quests, isLoading, error } = useQuests();
 
-  // Prendre les 3 premières quêtes pour l'affichage
-  const featuredQuests = historicalQuests.slice(0, 3);
+  // Filtrer les quêtes actives et prendre les 3 premières
+  const featuredQuests = quests?.filter(quest => quest.status === 'active').slice(0, 3) || [];
 
   const getDifficultyColor = (level: string) => {
     switch (level) {
@@ -33,6 +35,69 @@ const QuestsSection = () => {
       default: return level;
     }
   };
+
+  const getQuestTypeIcon = (questType: string) => {
+    switch (questType) {
+      case 'templar': return <Crown className="h-4 w-4" />;
+      case 'lost_civilization': return <Compass className="h-4 w-4" />;
+      case 'grail': return <Map className="h-4 w-4" />;
+      default: return <Map className="h-4 w-4" />;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="relative">
+          <div className="text-center mb-8">
+            <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
+              <I18nText translationKey="quests.featured.title">Quêtes Historiques</I18nText>
+            </h2>
+            <p className="text-base text-stone-600 max-w-2xl mx-auto mb-6 leading-relaxed">
+              <I18nText translationKey="quests.featured.description">
+                Partez à l'aventure sur les traces des grands mystères de l'Histoire. 
+                Résolvez des énigmes, découvrez des trésors cachés et percez les secrets du passé.
+              </I18nText>
+            </p>
+          </div>
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-stone-600" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || featuredQuests.length === 0) {
+    return (
+      <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
+        <div className="relative">
+          <div className="text-center mb-8">
+            <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
+              <I18nText translationKey="quests.featured.title">Quêtes Historiques</I18nText>
+            </h2>
+            <p className="text-base text-stone-600 max-w-2xl mx-auto mb-6 leading-relaxed">
+              <I18nText translationKey="quests.featured.description">
+                Partez à l'aventure sur les traces des grands mystères de l'Histoire. 
+                Résolvez des énigmes, découvrez des trésors cachés et percez les secrets du passé.
+              </I18nText>
+            </p>
+          </div>
+          <div className="text-center py-8">
+            <p className="text-stone-500 mb-4">Aucune quête disponible pour le moment.</p>
+            <Button 
+              onClick={() => navigate('/quests')}
+              variant="outline"
+              className="bg-stone-800 hover:bg-stone-900 text-amber-100"
+            >
+              <Compass className="mr-2 h-4 w-4" />
+              Voir toutes les quêtes
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative px-4 md:px-8 max-w-7xl mx-auto">
@@ -55,15 +120,13 @@ const QuestsSection = () => {
         <div className="mb-8">
           <div className="bg-gradient-to-br from-amber-50/80 via-stone-50 to-amber-50/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-amber-200">
             <div className="grid md:grid-cols-3 gap-6">
-              {featuredQuests.map((quest, index) => (
-                <Card key={quest.title} className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white/90 border-stone-200">
+              {featuredQuests.map((quest) => (
+                <Card key={quest.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white/90 border-stone-200">
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-stone-800 text-amber-100 rounded-lg flex items-center justify-center">
-                          {quest.quest_type === 'templar' && <Crown className="h-4 w-4" />}
-                          {quest.quest_type === 'lost_civilization' && <Compass className="h-4 w-4" />}
-                          {quest.quest_type === 'grail' && <Map className="h-4 w-4" />}
+                          {getQuestTypeIcon(quest.quest_type)}
                         </div>
                         <Badge className={getDifficultyColor(quest.difficulty_level)}>
                           {getDifficultyLabel(quest.difficulty_level)}
@@ -89,7 +152,6 @@ const QuestsSection = () => {
                         </div>
                         <div className="flex items-center gap-1 text-stone-600">
                           <Users className="h-3 w-3" />
-                          {/* Affichage du vrai nombre de participants maximum de la quête */}
                           <span>{quest.max_participants ?? '-'} participant{quest.max_participants === 1 ? '' : 's'}</span>
                         </div>
                       </div>
@@ -97,15 +159,14 @@ const QuestsSection = () => {
                       <div className="flex items-center gap-1 text-sm text-stone-600">
                         <Clock className="h-3 w-3" />
                         <span>
-                          {/* Affichage du vrai nombre d'indices */}
-                          {Array.isArray(quest.clues) ? quest.clues.length : 0} indice{(Array.isArray(quest.clues) && quest.clues.length > 1) ? 's' : ''}
+                          {getQuestCluesCount(quest)} indice{getQuestCluesCount(quest) > 1 ? 's' : ''}
                         </span>
                       </div>
                     </div>
 
                     <Button 
                       className="w-full bg-stone-800 hover:bg-stone-900 text-amber-100"
-                      onClick={() => navigate('/quests')}
+                      onClick={() => navigate(`/quests/${quest.id}`)}
                     >
                       <Map className="w-4 h-4 mr-2" />
                       <I18nText translationKey="quests.join">Rejoindre la quête</I18nText>
@@ -155,4 +216,3 @@ const QuestsSection = () => {
 };
 
 export default QuestsSection;
-
