@@ -10,18 +10,19 @@ interface ServiceResponse<T = any> {
 }
 
 export const historicalQuestService = {
-  async populateHistoricalQuests(): Promise<ServiceResponse> {
+  async populateHistoricalQuests(forceReload: boolean = false): Promise<ServiceResponse> {
     try {
-      console.log('Starting to populate historical quests...');
+      console.log('🔄 Starting to populate historical quests...');
+      console.log('📊 Total quests in historicalQuests.ts:', historicalQuests.length);
       
       // Check if quests already exist
       const { data: existingQuests, error: checkError } = await supabase
         .from('treasure_quests')
         .select('title')
-        .in('title', historicalQuests.map(q => q.title));
+        .order('created_at', { ascending: false });
       
       if (checkError) {
-        console.error('Error checking existing quests:', checkError);
+        console.error('❌ Error checking existing quests:', checkError);
         return {
           success: false,
           message: 'Erreur lors de la vérification des quêtes existantes',
@@ -29,39 +30,58 @@ export const historicalQuestService = {
         };
       }
       
-      const existingTitles = existingQuests?.map(q => q.title) || [];
-      const newQuests = historicalQuests.filter(q => !existingTitles.includes(q.title));
+      console.log('📋 Existing quests in database:', existingQuests?.length || 0);
+      console.log('📝 Existing quest titles:', existingQuests?.map(q => q.title) || []);
       
-      if (newQuests.length === 0) {
-        console.log('All historical quests already exist');
+      const existingTitles = new Set(existingQuests?.map(q => q.title.trim().toLowerCase()) || []);
+      console.log('🔍 Normalized existing titles:', Array.from(existingTitles));
+      
+      // Filter new quests more carefully
+      const newQuests = historicalQuests.filter(quest => {
+        const normalizedTitle = quest.title.trim().toLowerCase();
+        const isNew = !existingTitles.has(normalizedTitle);
+        console.log(`🔎 Checking "${quest.title}" (normalized: "${normalizedTitle}") - Is new: ${isNew}`);
+        return isNew;
+      });
+      
+      console.log('🆕 New quests to add:', newQuests.length);
+      console.log('📜 New quest titles:', newQuests.map(q => q.title));
+      
+      if (!forceReload && newQuests.length === 0) {
+        console.log('ℹ️ All historical quests already exist');
         return { 
           success: true, 
-          message: `Toutes les quêtes (${existingQuests?.length || 0}) sont déjà présentes`,
+          message: `Toutes les quêtes (${existingQuests?.length || 0}) sont déjà présentes. Utilisez l'actualisation forcée si nécessaire.`,
           data: existingQuests
         };
       }
       
-      // Convert quests to database format, excluding created_by to avoid foreign key issues
-      const questsForDb = newQuests.map(quest => ({
-        title: quest.title,
-        description: quest.description,
-        story_background: quest.story_background,
-        quest_type: quest.quest_type,
-        difficulty_level: quest.difficulty_level,
-        max_participants: quest.max_participants,
-        min_participants: quest.min_participants,
-        status: quest.status,
-        start_date: quest.start_date,
-        end_date: quest.end_date,
-        reward_points: quest.reward_points,
-        special_rewards: quest.special_rewards as any,
-        clues: quest.clues as any,
-        target_symbols: quest.target_symbols,
-        translations: quest.translations as any
-        // Note: created_by is intentionally excluded to avoid foreign key constraint violations
-      }));
+      const questsToProcess = forceReload ? historicalQuests : newQuests;
+      console.log('⚙️ Processing quests:', questsToProcess.length);
       
-      console.log(`Attempting to insert ${questsForDb.length} new quests`);
+      // Convert quests to database format
+      const questsForDb = questsToProcess.map(quest => {
+        console.log(`🔧 Converting quest: "${quest.title}"`);
+        return {
+          title: quest.title,
+          description: quest.description,
+          story_background: quest.story_background,
+          quest_type: quest.quest_type,
+          difficulty_level: quest.difficulty_level,
+          max_participants: quest.max_participants,
+          min_participants: quest.min_participants,
+          status: quest.status,
+          start_date: quest.start_date,
+          end_date: quest.end_date,
+          reward_points: quest.reward_points,
+          special_rewards: quest.special_rewards as any,
+          clues: quest.clues as any,
+          target_symbols: quest.target_symbols,
+          translations: quest.translations as any
+        };
+      });
+      
+      console.log(`💾 Attempting to insert ${questsForDb.length} quests`);
       
       // Insert new quests
       const { data, error } = await supabase
@@ -70,7 +90,7 @@ export const historicalQuestService = {
         .select();
       
       if (error) {
-        console.error('Error inserting quests:', error);
+        console.error('❌ Error inserting quests:', error);
         return {
           success: false,
           message: 'Erreur lors de l\'insertion des quêtes',
@@ -78,15 +98,17 @@ export const historicalQuestService = {
         };
       }
       
-      console.log(`Successfully inserted ${newQuests.length} historical quests`);
+      console.log(`✅ Successfully inserted ${questsToProcess.length} historical quests`);
       return { 
         success: true, 
-        message: `${newQuests.length} nouvelle(s) quête(s) historique(s) ajoutée(s) avec succès`,
+        message: forceReload 
+          ? `${questsToProcess.length} quête(s) rechargée(s) avec succès`
+          : `${questsToProcess.length} nouvelle(s) quête(s) historique(s) ajoutée(s) avec succès`,
         data: data
       };
       
     } catch (error) {
-      console.error('Unexpected error populating historical quests:', error);
+      console.error('💥 Unexpected error populating historical quests:', error);
       return { 
         success: false, 
         message: 'Erreur inattendue lors du chargement des quêtes',

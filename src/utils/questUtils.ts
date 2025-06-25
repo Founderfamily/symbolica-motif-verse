@@ -36,3 +36,21 @@ export const getQuestStatusLabel = (status: string): string => {
     default: return status;
   }
 };
+
+// Fonctions manquantes pour corriger les erreurs de build
+export const normalizeQuestClues = (clues: any) => {
+  if (!clues) return [];
+  if (typeof clues === 'string') {
+    try {
+      return JSON.parse(clues);
+    } catch {
+      return [];
+    }
+  }
+  return Array.isArray(clues) ? clues : [];
+};
+
+export const getQuestCluesPreview = (quest: TreasureQuest): string => {
+  const cluesCount = getQuestCluesCount(quest);
+  return cluesCount > 0 ? `${cluesCount} indice${cluesCount > 1 ? 's' : ''}` : 'Aucun indice';
+};

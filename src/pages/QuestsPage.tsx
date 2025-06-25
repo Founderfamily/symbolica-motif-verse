@@ -25,7 +25,8 @@ import {
   Brain,
   Archive,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -34,12 +35,14 @@ import { Input } from '@/components/ui/input';
 import { useQuests, useActiveQuests } from '@/hooks/useQuests';
 import { historicalQuestService } from '@/services/historicalQuestService';
 import { TreasureQuest } from '@/types/quests';
+import { getQuestTypeLabel, getDifficultyLabel } from '@/utils/questUtils';
 
 const QuestsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
   const [isPopulating, setIsPopulating] = useState(false);
+  const [isForceReloading, setIsForceReloading] = useState(false);
   const [populationResult, setPopulationResult] = useState<{success: boolean, message: string} | null>(null);
   
   const { data: allQuests, isLoading, refetch, error } = useQuests();
@@ -47,12 +50,14 @@ const QuestsPage = () => {
 
   // Debug: Afficher les informations de débogage
   useEffect(() => {
-    console.log('QuestsPage - Debug Info:');
+    console.log('🔍 QuestsPage - Debug Info:');
     console.log('- All quests loaded:', allQuests?.length || 0);
     console.log('- Active quests:', activeQuests?.length || 0);
     console.log('- Loading state:', isLoading);
     console.log('- Error state:', error);
-    console.log('- Quests data:', allQuests);
+    if (allQuests) {
+      console.log('- Quest titles:', allQuests.map(q => q.title));
+    }
   }, [allQuests, activeQuests, isLoading, error]);
 
   const questTypeIcons = {
@@ -62,13 +67,6 @@ const QuestsPage = () => {
     custom: Trophy
   };
 
-  const questTypeLabels = {
-    templar: 'Templiers',
-    lost_civilization: 'Civilisation Perdue',
-    grail: 'Quête du Graal',
-    custom: 'Personnalisée'
-  };
-
   const difficultyColors = {
     beginner: 'bg-amber-50 text-amber-800 border-amber-200',
     intermediate: 'bg-amber-100 text-amber-900 border-amber-300',
@@ -76,21 +74,18 @@ const QuestsPage = () => {
     master: 'bg-stone-200 text-stone-900 border-stone-400'
   };
 
-  const difficultyLabels = {
-    beginner: 'Accessible',
-    intermediate: 'Intermédiaire',
-    expert: 'Avancé',
-    master: 'Expert'
-  };
-
-  const handlePopulateQuests = async () => {
-    console.log('Début du chargement des quêtes...');
-    setIsPopulating(true);
+  const handlePopulateQuests = async (forceReload: boolean = false) => {
+    console.log(`🚀 ${forceReload ? 'Force reloading' : 'Loading'} quests...`);
+    if (forceReload) {
+      setIsForceReloading(true);
+    } else {
+      setIsPopulating(true);
+    }
     setPopulationResult(null);
     
     try {
-      const result = await historicalQuestService.populateHistoricalQuests();
-      console.log('Résultat du chargement:', result);
+      const result = await historicalQuestService.populateHistoricalQuests(forceReload);
+      console.log('📊 Population result:', result);
       
       setPopulationResult({
         success: result.success,
@@ -98,22 +93,23 @@ const QuestsPage = () => {
       });
       
       if (result.success) {
-        console.log('Quêtes chargées avec succès, actualisation de la liste...');
+        console.log('✅ Quests loaded successfully, refreshing list...');
         await refetch();
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des quêtes:', error);
+      console.error('💥 Error loading quests:', error);
       setPopulationResult({
         success: false,
         message: 'Erreur lors du chargement: ' + (error instanceof Error ? error.message : 'Erreur inconnue')
       });
     } finally {
       setIsPopulating(false);
+      setIsForceReloading(false);
     }
   };
 
   const handleRefreshQuests = async () => {
-    console.log('Actualisation forcée des quêtes...');
+    console.log('🔄 Refreshing quests list...');
     await refetch();
   };
 
@@ -127,9 +123,8 @@ const QuestsPage = () => {
     return matchesSearch && matchesType && matchesDifficulty;
   });
 
-  console.log('QuestsPage - Filtered quests:', filteredQuests?.length || 0);
+  console.log('🎯 QuestsPage - Filtered quests:', filteredQuests?.length || 0);
 
-  // Ne plus séparer les quêtes par type pour simplifier l'affichage
   const questsToDisplay = filteredQuests || [];
 
   if (error) {
@@ -150,7 +145,7 @@ const QuestsPage = () => {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Réessayer
               </Button>
-              <Button onClick={handlePopulateQuests} disabled={isPopulating}>
+              <Button onClick={() => handlePopulateQuests()} disabled={isPopulating}>
                 <BookOpen className="w-4 h-4 mr-2" />
                 {isPopulating ? 'Chargement...' : 'Charger Mystères'}
               </Button>
@@ -205,7 +200,7 @@ const QuestsPage = () => {
 
         {/* Filtres et recherche améliorés */}
         <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 border border-amber-200/50 shadow-xl mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <Input
@@ -250,7 +245,7 @@ const QuestsPage = () => {
             </Button>
             
             <Button 
-              onClick={handlePopulateQuests}
+              onClick={() => handlePopulateQuests(false)}
               disabled={isPopulating}
               className="bg-stone-700 hover:bg-stone-800 text-white"
             >
@@ -263,6 +258,25 @@ const QuestsPage = () => {
                 <>
                   <BookOpen className="w-4 h-4 mr-2" />
                   Charger Mystères
+                </>
+              )}
+            </Button>
+
+            <Button 
+              onClick={() => handlePopulateQuests(true)}
+              disabled={isForceReloading}
+              variant="outline"
+              className="border-2 border-red-300 text-red-700 hover:bg-red-50"
+            >
+              {isForceReloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Rechargement...
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Recharger Tout
                 </>
               )}
             </Button>
@@ -329,12 +343,12 @@ const QuestsPage = () => {
                             <TypeIcon className="w-6 h-6" />
                           </div>
                           <Badge className={`${difficultyColors[quest.difficulty_level]} border-0`}>
-                            {difficultyLabels[quest.difficulty_level]}
+                            {getDifficultyLabel(quest.difficulty_level)}
                           </Badge>
                         </div>
                         
                         <h3 className="text-2xl font-bold mb-2 text-stone-800">{quest.title}</h3>
-                        <p className="text-stone-600 text-sm">{questTypeLabels[quest.quest_type]}</p>
+                        <p className="text-stone-600 text-sm">{getQuestTypeLabel(quest.quest_type)}</p>
                         
                         {/* Badge d'authenticité historique */}
                         {['templar', 'lost_civilization', 'grail'].includes(quest.quest_type) && (
@@ -434,7 +448,7 @@ const QuestsPage = () => {
             </p>
             <div className="flex gap-4 justify-center">
               <Button 
-                onClick={handlePopulateQuests}
+                onClick={() => handlePopulateQuests(false)}
                 disabled={isPopulating}
                 className="bg-stone-700 hover:bg-stone-800 text-white"
               >
