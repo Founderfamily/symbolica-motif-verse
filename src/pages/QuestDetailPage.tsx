@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -54,10 +55,11 @@ const QuestDetailPage = () => {
   console.log('QuestDetailPage - Found quest:', quest ? quest.title : 'QUEST NOT FOUND');
   console.log('QuestDetailPage - Quest object:', quest);
 
-  // Normaliser les clues de manière sécurisée
-  const questClues = quest ? normalizeQuestClues(quest) : [];
+  // Normaliser les clues de manière sécurisée - CORRECTION: passer seulement quest.clues
+  const questClues = quest ? normalizeQuestClues(quest.clues) : [];
   const questCluesCount = quest ? getQuestCluesCount(quest) : 0;
-  const questCluesPreview = quest ? getQuestCluesPreview(quest, 3) : [];
+  // CORRECTION: passer seulement quest, pas quest et 3
+  const questCluesPreview = quest ? getQuestCluesPreview(quest).slice(0, 3) : [];
 
   console.log('QuestDetailPage - Normalized clues:', questClues);
   console.log('QuestDetailPage - Clues count:', questCluesCount);
@@ -360,7 +362,8 @@ const QuestDetailPage = () => {
                 
                 {questCluesPreview.length > 0 ? (
                   <div className="space-y-3">
-                    {questCluesPreview.map((clue, index) => (
+                    {/* CORRECTION: S'assurer que questCluesPreview est un array avant d'utiliser map */}
+                    {Array.isArray(questCluesPreview) && questCluesPreview.map((clue, index) => (
                       <div key={clue.id || index} className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
                         <div className="w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
                           {index + 1}
