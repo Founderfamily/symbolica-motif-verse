@@ -84,7 +84,9 @@ const QuestsSection = () => {
             </p>
           </div>
           <div className="text-center py-8">
-            <p className="text-stone-500 mb-4">Aucune quête disponible pour le moment.</p>
+            <p className="text-stone-500 mb-4">
+              {error ? 'Erreur lors du chargement des quêtes.' : 'Aucune quête disponible pour le moment.'}
+            </p>
             <Button 
               onClick={() => navigate('/quests')}
               variant="outline"

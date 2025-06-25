@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -22,7 +23,9 @@ import {
   FileText,
   Camera,
   Brain,
-  Archive
+  Archive,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -42,10 +45,15 @@ const QuestsPage = () => {
   const { data: allQuests, isLoading, refetch, error } = useQuests();
   const { data: activeQuests } = useActiveQuests();
 
-  // Logs de debug
-  console.log('QuestsPage - All quests:', allQuests);
-  console.log('QuestsPage - Loading state:', isLoading);
-  console.log('QuestsPage - Error state:', error);
+  // Debug: Afficher les informations de débogage
+  useEffect(() => {
+    console.log('QuestsPage - Debug Info:');
+    console.log('- All quests loaded:', allQuests?.length || 0);
+    console.log('- Active quests:', activeQuests?.length || 0);
+    console.log('- Loading state:', isLoading);
+    console.log('- Error state:', error);
+    console.log('- Quests data:', allQuests);
+  }, [allQuests, activeQuests, isLoading, error]);
 
   const questTypeIcons = {
     templar: Sword,
@@ -57,11 +65,10 @@ const QuestsPage = () => {
   const questTypeLabels = {
     templar: 'Templiers',
     lost_civilization: 'Civilisation Perdue',
-    graal: 'Quête du Graal',
+    grail: 'Quête du Graal',
     custom: 'Personnalisée'
   };
 
-  // Unified color palette using amber/stone tones
   const difficultyColors = {
     beginner: 'bg-amber-50 text-amber-800 border-amber-200',
     intermediate: 'bg-amber-100 text-amber-900 border-amber-300',
@@ -77,13 +84,13 @@ const QuestsPage = () => {
   };
 
   const handlePopulateQuests = async () => {
+    console.log('Début du chargement des quêtes...');
     setIsPopulating(true);
     setPopulationResult(null);
     
     try {
-      console.log('Starting quest population...');
       const result = await historicalQuestService.populateHistoricalQuests();
-      console.log('Population result:', result);
+      console.log('Résultat du chargement:', result);
       
       setPopulationResult({
         success: result.success,
@@ -91,11 +98,11 @@ const QuestsPage = () => {
       });
       
       if (result.success) {
-        console.log('Quests populated successfully, refreshing list...');
+        console.log('Quêtes chargées avec succès, actualisation de la liste...');
         await refetch();
       }
     } catch (error) {
-      console.error('Error populating quests:', error);
+      console.error('Erreur lors du chargement des quêtes:', error);
       setPopulationResult({
         success: false,
         message: 'Erreur lors du chargement: ' + (error instanceof Error ? error.message : 'Erreur inconnue')
@@ -105,6 +112,12 @@ const QuestsPage = () => {
     }
   };
 
+  const handleRefreshQuests = async () => {
+    console.log('Actualisation forcée des quêtes...');
+    await refetch();
+  };
+
+  // Filtrer les quêtes avec debug
   const filteredQuests = allQuests?.filter(quest => {
     const matchesSearch = quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          quest.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -114,14 +127,10 @@ const QuestsPage = () => {
     return matchesSearch && matchesType && matchesDifficulty;
   });
 
-  // Separate historical quests from custom ones
-  const historicalQuests = filteredQuests?.filter(quest => 
-    ['templar', 'lost_civilization', 'grail'].includes(quest.quest_type)
-  ) || [];
-  
-  const customQuests = filteredQuests?.filter(quest => 
-    quest.quest_type === 'custom'
-  ) || [];
+  console.log('QuestsPage - Filtered quests:', filteredQuests?.length || 0);
+
+  // Ne plus séparer les quêtes par type pour simplifier l'affichage
+  const questsToDisplay = filteredQuests || [];
 
   if (error) {
     return (
@@ -136,21 +145,17 @@ const QuestsPage = () => {
             <p className="text-sm text-slate-500 mb-6">
               {error instanceof Error ? error.message : 'Erreur inconnue'}
             </p>
-            <Button onClick={() => window.location.reload()}>
-              Réessayer
-            </Button>
+            <div className="flex gap-4 justify-center">
+              <Button onClick={() => window.location.reload()}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Réessayer
+              </Button>
+              <Button onClick={handlePopulateQuests} disabled={isPopulating}>
+                <BookOpen className="w-4 h-4 mr-2" />
+                {isPopulating ? 'Chargement...' : 'Charger Mystères'}
+              </Button>
+            </div>
           </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Chargement des recherches...</p>
         </div>
       </div>
     );
@@ -177,15 +182,15 @@ const QuestsPage = () => {
             Contribuez avec des preuves, des indices, des théories et des liens d'archives pour découvrir ensemble des trésors perdus.
           </p>
 
-          {/* Statistiques unifiées avec palette cohérente */}
+          {/* Statistiques avec informations de debug */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
               <div className="text-3xl font-bold text-amber-700 mb-2">{activeQuests?.length || 0}</div>
               <div className="text-stone-600">Recherches Actives</div>
             </div>
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-amber-800 mb-2">2,847</div>
-              <div className="text-stone-600">Preuves Soumises</div>
+              <div className="text-3xl font-bold text-amber-800 mb-2">{allQuests?.length || 0}</div>
+              <div className="text-stone-600">Total des Quêtes</div>
             </div>
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
               <div className="text-3xl font-bold text-stone-700 mb-2">1,293</div>
@@ -198,9 +203,9 @@ const QuestsPage = () => {
           </div>
         </div>
 
-        {/* Filtres et recherche */}
+        {/* Filtres et recherche améliorés */}
         <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 border border-amber-200/50 shadow-xl mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <Input
@@ -236,12 +241,30 @@ const QuestsPage = () => {
             </select>
             
             <Button 
+              onClick={handleRefreshQuests}
+              variant="outline"
+              className="border-2 border-amber-300 text-amber-700 hover:bg-amber-50"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Actualiser
+            </Button>
+            
+            <Button 
               onClick={handlePopulateQuests}
               disabled={isPopulating}
               className="bg-stone-700 hover:bg-stone-800 text-white"
             >
-              <BookOpen className="w-4 h-4 mr-2" />
-              {isPopulating ? 'Chargement...' : 'Charger Mystères'}
+              {isPopulating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Chargement...
+                </>
+              ) : (
+                <>
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Charger Mystères
+                </>
+              )}
             </Button>
             
             <Button className="bg-amber-600 hover:bg-amber-700 text-white">
@@ -269,25 +292,37 @@ const QuestsPage = () => {
           )}
         </div>
 
-        {/* Section des mystères historiques */}
-        {historicalQuests.length > 0 && (
+        {/* État de chargement */}
+        {isLoading && (
+          <div className="text-center py-16">
+            <Loader2 className="w-12 h-12 animate-spin text-amber-600 mx-auto mb-4" />
+            <p className="text-slate-600 text-lg">Chargement des recherches...</p>
+          </div>
+        )}
+
+        {/* Affichage des quêtes */}
+        {!isLoading && questsToDisplay.length > 0 && (
           <div className="mb-12">
-            <div className="flex items-center mb-8">
-              <Globe className="w-8 h-8 text-amber-600 mr-3" />
-              <h2 className="text-3xl font-bold text-stone-800">Mystères Historiques Authentiques</h2>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <Globe className="w-8 h-8 text-amber-600 mr-3" />
+                <h2 className="text-3xl font-bold text-stone-800">
+                  Mystères Disponibles ({questsToDisplay.length})
+                </h2>
+              </div>
+              <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-4 py-2">
+                {questsToDisplay.filter(q => q.status === 'active').length} Actives
+              </Badge>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {historicalQuests.map((quest) => {
+              {questsToDisplay.map((quest) => {
                 const TypeIcon = questTypeIcons[quest.quest_type];
-                
-                console.log('QuestsPage - Rendering quest card:', quest.title, 'with ID:', quest.id);
                 
                 return (
                   <Card key={quest.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-white/95 backdrop-blur-sm border border-amber-200/50">
                     
                     <div className="relative">
-                      {/* Simplified card header with unified amber/stone gradient */}
                       <div className="p-6 bg-gradient-to-br from-amber-100 to-stone-100 border-b border-amber-200">
                         <div className="flex items-center justify-between mb-4">
                           <div className="w-12 h-12 bg-stone-800 text-amber-100 rounded-lg flex items-center justify-center">
@@ -301,13 +336,15 @@ const QuestsPage = () => {
                         <h3 className="text-2xl font-bold mb-2 text-stone-800">{quest.title}</h3>
                         <p className="text-stone-600 text-sm">{questTypeLabels[quest.quest_type]}</p>
                         
-                        {/* Historical authenticity badge */}
-                        <div className="mt-3">
-                          <Badge variant="secondary" className="bg-amber-50 text-amber-800 border-amber-300">
-                            <History className="w-3 h-3 mr-1" />
-                            Basé sur l'Histoire
-                          </Badge>
-                        </div>
+                        {/* Badge d'authenticité historique */}
+                        {['templar', 'lost_civilization', 'grail'].includes(quest.quest_type) && (
+                          <div className="mt-3">
+                            <Badge variant="secondary" className="bg-amber-50 text-amber-800 border-amber-300">
+                              <History className="w-3 h-3 mr-1" />
+                              Basé sur l'Histoire
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="absolute top-4 right-4">
@@ -324,7 +361,7 @@ const QuestsPage = () => {
                         {quest.description}
                       </p>
                       
-                      {/* Story background preview */}
+                      {/* Aperçu du contexte historique */}
                       {quest.story_background && (
                         <div className="bg-amber-50 rounded-lg p-3 mb-4 border-l-4 border-amber-400">
                           <p className="text-amber-800 text-sm line-clamp-2">
@@ -333,35 +370,31 @@ const QuestsPage = () => {
                         </div>
                       )}
                       
-                      {/* Métriques de contribution avec couleurs unifiées */}
+                      {/* Métriques de contribution */}
                       <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="flex items-center text-sm text-stone-600">
                           <FileText className="w-4 h-4 mr-2 text-amber-600" />
                           {quest.clues?.length || 0} indices
                         </div>
                         <div className="flex items-center text-sm text-stone-600">
-                          <Camera className="w-4 h-4 mr-2 text-amber-700" />
-                          24 preuves
+                          <Award className="w-4 h-4 mr-2 text-amber-700" />
+                          {quest.reward_points || 0} points
                         </div>
                         <div className="flex items-center text-sm text-stone-600">
-                          <Brain className="w-4 h-4 mr-2 text-stone-700" />
-                          8 théories
+                          <Users className="w-4 h-4 mr-2 text-stone-700" />
+                          {quest.max_participants || 0} max
                         </div>
                         <div className="flex items-center text-sm text-stone-600">
-                          <Archive className="w-4 h-4 mr-2 text-stone-600" />
-                          15 archives
+                          <Clock className="w-4 h-4 mr-2 text-stone-600" />
+                          Multi-étapes
                         </div>
                       </div>
                       
-                      {/* Actions de contribution avec navigation fixée */}
+                      {/* Actions */}
                       <div className="flex gap-3">
                         <Link 
                           to={`/quests/${quest.id}`} 
                           className="flex-1"
-                          onClick={() => {
-                            console.log('QuestsPage - Navigation vers quest:', quest.id);
-                            console.log('QuestsPage - Quest object:', quest);
-                          }}
                         >
                           <Button 
                             variant="outline" 
@@ -387,106 +420,49 @@ const QuestsPage = () => {
           </div>
         )}
 
-        {/* Section des recherches personnalisées */}
-        {customQuests.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center mb-8">
-              <Trophy className="w-8 h-8 text-stone-600 mr-3" />
-              <h2 className="text-3xl font-bold text-stone-800">Recherches Communautaires</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {customQuests?.map((quest) => {
-                const TypeIcon = questTypeIcons[quest.quest_type];
-                
-                return (
-                  <Card key={quest.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-white/95 backdrop-blur-sm border border-amber-200/50">
-                    <div className="relative">
-                      <div className="p-6 bg-gradient-to-br from-stone-100 to-amber-50 border-b border-stone-200">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="w-12 h-12 bg-stone-700 text-amber-100 rounded-lg flex items-center justify-center">
-                            <TypeIcon className="w-6 h-6" />
-                          </div>
-                          <Badge className={`${difficultyColors[quest.difficulty_level]} border-0`}>
-                            {difficultyLabels[quest.difficulty_level]}
-                          </Badge>
-                        </div>
-                        
-                        <h3 className="text-2xl font-bold mb-2 text-stone-800">{quest.title}</h3>
-                        <p className="text-stone-600 text-sm">{questTypeLabels[quest.quest_type]}</p>
-                      </div>
-                      
-                      <div className="absolute top-4 right-4">
-                        <Badge variant={quest.status === 'active' ? 'default' : 'secondary'} className="bg-stone-700 text-amber-100">
-                          {quest.status === 'active' ? 'Active' : 
-                           quest.status === 'upcoming' ? 'À venir' : 
-                           quest.status === 'completed' ? 'Résolue' : 'En pause'}
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="p-6">
-                      <p className="text-stone-600 mb-4 line-clamp-3">
-                        {quest.description || quest.story_background}
-                      </p>
-                      
-                      {/* Métriques de contribution avec couleurs unifiées */}
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="flex items-center text-sm text-stone-600">
-                          <FileText className="w-4 h-4 mr-2 text-amber-600" />
-                          {quest.clues?.length || 0} indices
-                        </div>
-                        <div className="flex items-center text-sm text-stone-600">
-                          <Camera className="w-4 h-4 mr-2 text-amber-700" />
-                          12 preuves
-                        </div>
-                        <div className="flex items-center text-sm text-stone-600">
-                          <Brain className="w-4 h-4 mr-2 text-stone-700" />
-                          3 théories
-                        </div>
-                        <div className="flex items-center text-sm text-stone-600">
-                          <Archive className="w-4 h-4 mr-2 text-stone-600" />
-                          7 archives
-                        </div>
-                      </div>
-                      
-                      {/* Actions de contribution */}
-                      <div className="flex gap-3">
-                        <Link to={`/quests/${quest.id}`} className="flex-1">
-                          <Button variant="outline" className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50">
-                            <Search className="w-4 h-4 mr-2" />
-                            Explorer
-                          </Button>
-                        </Link>
-                        
-                        <Button 
-                          className="flex-1 bg-stone-800 hover:bg-stone-900 text-amber-100"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Contribuer
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {filteredQuests?.length === 0 && (
+        {/* État vide amélioré */}
+        {!isLoading && questsToDisplay.length === 0 && (
           <div className="text-center py-16">
             <History className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-600 mb-2">Aucune recherche trouvée</h3>
-            <p className="text-slate-500 mb-4">Essayez de modifier vos filtres ou chargez les mystères historiques.</p>
-            <Button 
-              onClick={handlePopulateQuests}
-              disabled={isPopulating}
-              className="bg-stone-700 hover:bg-stone-800 text-white"
-            >
-              <BookOpen className="w-4 h-4 mr-2" />
-              {isPopulating ? 'Chargement...' : 'Charger les Mystères Historiques'}
-            </Button>
+            <h3 className="text-xl font-semibold text-slate-600 mb-2">
+              {allQuests?.length === 0 ? 'Aucune quête chargée' : 'Aucune recherche trouvée'}
+            </h3>
+            <p className="text-slate-500 mb-6">
+              {allQuests?.length === 0 
+                ? 'Chargez les mystères historiques pour commencer votre exploration.' 
+                : 'Essayez de modifier vos filtres pour voir plus de résultats.'}
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button 
+                onClick={handlePopulateQuests}
+                disabled={isPopulating}
+                className="bg-stone-700 hover:bg-stone-800 text-white"
+              >
+                {isPopulating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Chargement...
+                  </>
+                ) : (
+                  <>
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Charger les Mystères Historiques
+                  </>
+                )}
+              </Button>
+              {allQuests?.length > 0 && (
+                <Button 
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterType('all');
+                    setFilterDifficulty('all');
+                  }}
+                  variant="outline"
+                >
+                  Réinitialiser les filtres
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>
