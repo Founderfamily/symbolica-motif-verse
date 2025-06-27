@@ -28,36 +28,26 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useQuests } from '@/hooks/useQuests';
-import { TreasureQuest } from '@/types/quests';
+import { useQuestById } from '@/hooks/useQuests';
 import InvestigationInterface from '@/components/investigation/InvestigationInterface';
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
 
 const QuestDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: allQuests, isLoading, error } = useQuests();
   const [activeTab, setActiveTab] = useState('overview');
   
   console.log('QuestDetailPage - Quest ID from params:', id);
-  console.log('QuestDetailPage - All quests loaded:', allQuests?.length || 0);
   
-  if (allQuests) {
-    console.log('QuestDetailPage - Available quest IDs:', allQuests.map(q => ({ id: q.id, title: q.title })));
-  }
+  // Utiliser le hook spécialisé pour récupérer une seule quête
+  const { data: quest, isLoading, error } = useQuestById(id || '');
 
-  // Trouver la quête par ID avec meilleur diagnostic
-  const quest = allQuests?.find(q => {
-    console.log('QuestDetailPage - Comparing:', q.id, 'vs', id, 'match:', q.id === id);
-    return q.id === id;
-  });
-  
-  console.log('QuestDetailPage - Found quest:', quest ? quest.title : 'QUEST NOT FOUND');
-  console.log('QuestDetailPage - Quest object:', quest);
+  console.log('QuestDetailPage - Quest data:', quest);
+  console.log('QuestDetailPage - Loading state:', isLoading);
+  console.log('QuestDetailPage - Error state:', error);
 
-  // Normaliser les clues de manière sécurisée - CORRECTION: passer seulement quest.clues
+  // Normaliser les clues de manière sécurisée
   const questClues = quest ? normalizeQuestClues(quest.clues) : [];
   const questCluesCount = quest ? getQuestCluesCount(quest) : 0;
-  // CORRECTION: passer seulement quest, pas quest et 3
   const questCluesPreview = quest ? getQuestCluesPreview(quest).slice(0, 3) : [];
 
   console.log('QuestDetailPage - Normalized clues:', questClues);
@@ -76,7 +66,7 @@ const QuestDetailPage = () => {
   }
 
   if (error) {
-    console.error('QuestDetailPage - Error loading quests:', error);
+    console.error('QuestDetailPage - Error loading quest:', error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -105,8 +95,7 @@ const QuestDetailPage = () => {
   }
 
   if (!quest) {
-    console.warn('QuestDetailPage - Quest not found. ID searched:', id);
-    console.warn('QuestDetailPage - Available IDs:', allQuests?.map(q => q.id));
+    console.warn('QuestDetailPage - Quest not found for ID:', id);
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
@@ -118,17 +107,6 @@ const QuestDetailPage = () => {
             <div className="bg-slate-50 p-4 rounded-lg mb-6">
               <p className="text-sm text-slate-500 mb-2">Détails de débogage :</p>
               <p className="text-xs text-slate-400">ID recherché : {id}</p>
-              <p className="text-xs text-slate-400">Quêtes disponibles : {allQuests?.length || 0}</p>
-              {allQuests && allQuests.length > 0 && (
-                <details className="mt-2">
-                  <summary className="text-xs text-slate-400 cursor-pointer">IDs disponibles</summary>
-                  <div className="mt-1 text-xs text-slate-300 max-h-32 overflow-auto">
-                    {allQuests.map(q => (
-                      <div key={q.id}>{q.id} - {q.title}</div>
-                    ))}
-                  </div>
-                </details>
-              )}
             </div>
             <Link to="/quests">
               <Button>
@@ -144,6 +122,7 @@ const QuestDetailPage = () => {
 
   console.log('QuestDetailPage - Successfully rendering quest:', quest.title);
 
+  // Trouver la quête par ID avec meilleur diagnostic
   const questTypeLabels = {
     templar: 'Templiers',
     lost_civilization: 'Civilisation Perdue',
@@ -361,7 +340,6 @@ const QuestDetailPage = () => {
                 
                 {questCluesPreview.length > 0 ? (
                   <div className="space-y-3">
-                    {/* CORRECTION: S'assurer que questCluesPreview est un array avant d'utiliser map */}
                     {Array.isArray(questCluesPreview) && questCluesPreview.map((clue, index) => (
                       <div key={clue.id || index} className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
                         <div className="w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
