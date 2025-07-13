@@ -33,13 +33,13 @@ import InvestigationInterface from '@/components/investigation/InvestigationInte
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
 
 const QuestDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { questId } = useParams<{ questId: string }>();
   const [activeTab, setActiveTab] = useState('overview');
   
-  console.log('QuestDetailPage - Quest ID from params:', id);
+  console.log('QuestDetailPage - Quest ID from params:', questId);
   
   // Utiliser le hook spécialisé pour récupérer une seule quête
-  const { data: quest, isLoading, error } = useQuestById(id || '');
+  const { data: quest, isLoading, error } = useQuestById(questId || '');
 
   console.log('QuestDetailPage - Quest data:', quest);
   console.log('QuestDetailPage - Loading state:', isLoading);
@@ -95,7 +95,7 @@ const QuestDetailPage = () => {
   }
 
   if (!quest) {
-    console.warn('QuestDetailPage - Quest not found for ID:', id);
+    console.warn('QuestDetailPage - Quest not found for ID:', questId);
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
@@ -106,7 +106,7 @@ const QuestDetailPage = () => {
             <p className="text-slate-600 mb-4">La quête demandée n'existe pas ou n'est pas disponible.</p>
             <div className="bg-slate-50 p-4 rounded-lg mb-6">
               <p className="text-sm text-slate-500 mb-2">Détails de débogage :</p>
-              <p className="text-xs text-slate-400">ID recherché : {id}</p>
+              <p className="text-xs text-slate-400">ID recherché : {questId}</p>
             </div>
             <Link to="/quests">
               <Button>
