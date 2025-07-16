@@ -37,7 +37,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'dall-e-3',
-        prompt: `Generate only a visual artistic representation without any text, labels, or writing. ${prompt}`,
+        prompt: `Create a clean visual image with NO TEXT, NO WORDS, NO LABELS, NO CAPTIONS, NO DESCRIPTIONS written anywhere in the image. Pure visual representation only. ${prompt}`,
         n: 1,
         size: "1024x1024",
         quality: "standard",
