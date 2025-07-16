@@ -39,8 +39,9 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif, index }) => {
   const [useFallback, setUseFallback] = useState(false);
   const { toast } = useToast();
   
-  // Récupérer les vérifications IA pour ce symbole (utilise le nom du symbole pour les symboles statiques)
-  const { data: verification } = useSymbolVerification(motif.name);
+  // Récupérer les vérifications IA pour ce symbole (utilise l'UUID si disponible, sinon le nom)
+  const symbolIdentifier = (motif as any).id || motif.name;
+  const { data: verification } = useSymbolVerification(symbolIdentifier);
 
   // Réinitialiser l'état d'erreur si le motif change
   useEffect(() => {

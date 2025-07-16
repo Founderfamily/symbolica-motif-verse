@@ -381,65 +381,68 @@ Répondez avec:
 };
 
 function extractConfidenceScore(text: string, api: string): number {
-  // Debug logging for Gemini specifically
-  if (api === 'gemini') {
-    console.log(`Extracting confidence from Gemini response (first 300 chars): ${text.substring(0, 300)}`);
-  }
+  // Debug logging pour tracer les extractions
+  console.log(`Extracting confidence from ${api} response (first 400 chars): ${text.substring(0, 400)}`);
   
   // Normalize text for better matching
   const normalizedText = text.toLowerCase().replace(/\s+/g, ' ');
   
   // Enhanced patterns to extract confidence score, prioritizing explicit percentage statements
   const patterns = [
-    // Markdown formatted percentages with stars/bold
-    /\*\*(\d+)\s*%\*\*/g,
-    /\*(\d+)\s*%\*/g,
-    
-    // Direct confidence/confiance statements with percentage
+    // PRIORITY 1: Direct confidence statements with specific percentages
     /niveau de confiance[:\s]*(\d+)\s*%/gi,
     /confiance[:\s]*(\d+)\s*%/gi,
     /confidence[:\s]*(\d+)\s*%/gi,
     /(\d+)\s*%\s*de confiance/gi,
     /(\d+)\s*%\s*confidence/gi,
     
-    // Score/notation patterns
+    // PRIORITY 2: Markdown formatted percentages with stars/bold
+    /\*\*niveau de confiance[:\s]*(\d+)\s*%\*\*/gi,
+    /\*\*confiance[:\s]*(\d+)\s*%\*\*/gi,
+    /\*\*(\d+)\s*%\*\*/g,
+    /\*(\d+)\s*%\*/g,
+    
+    // PRIORITY 3: Score/evaluation patterns with percentages
     /score[:\s]*(\d+)\s*%/gi,
     /(\d+)\s*%\s*score/gi,
-    /notation[:\s]*(\d+)\s*%/gi,
-    /(\d+)\s*%\s*notation/gi,
+    /évaluation[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*d'évaluation/gi,
     
-    // Reliability/fiabilité patterns
+    // PRIORITY 4: Reliability/fiabilité patterns
     /fiabilité[:\s]*(\d+)\s*%/gi,
     /reliability[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*de fiabilité/gi,
     /(\d+)\s*%\s*fiabilité/gi,
     /(\d+)\s*%\s*reliability/gi,
     
-    // Certainty/certitude patterns
+    // PRIORITY 5: Certainty/certitude patterns
     /certitude[:\s]*(\d+)\s*%/gi,
     /certainty[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*de certitude/gi,
     /(\d+)\s*%\s*certitude/gi,
     /(\d+)\s*%\s*certainty/gi,
     
-    // Accuracy patterns
+    // PRIORITY 6: Accuracy patterns
     /précision[:\s]*(\d+)\s*%/gi,
     /accuracy[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*de précision/gi,
     /(\d+)\s*%\s*précision/gi,
     /(\d+)\s*%\s*accuracy/gi,
     
-    // Gemini-specific patterns (French responses)
-    /évaluation[:\s]*(\d+)\s*%/gi,
-    /niveau[:\s]*(\d+)\s*%/gi,
-    /(\d+)\s*%\s*d[eo]?\s*fiabilité/gi,
-    /(\d+)\s*%\s*d[eo]?\s*précision/gi,
+    // PRIORITY 7: Specific Gemini patterns (French responses, common patterns)
+    /(\d+)\s*%\s*\([^)]*confiance[^)]*\)/gi,
+    /\(.*confiance.*(\d+)\s*%.*\)/gi,
     
-    // Generic percentage patterns (less specific, lower priority)
+    // PRIORITY 8: Generic percentage patterns (least specific, last resort)
     /\b(\d+)\s*%\b/g
   ];
 
   let foundScores: number[] = [];
+  let patternUsed = '';
   
-  // Try each pattern and collect all valid scores
-  for (const pattern of patterns) {
+  // Try each pattern in priority order and collect valid scores
+  for (let i = 0; i < patterns.length; i++) {
+    const pattern = patterns[i];
     let match;
     // Reset regex index for each pattern
     pattern.lastIndex = 0;
@@ -448,22 +451,30 @@ function extractConfidenceScore(text: string, api: string): number {
       const score = parseInt(match[1]);
       if (score >= 0 && score <= 100) {
         foundScores.push(score);
-        // For confidence-specific patterns, prioritize and break early
-        if (pattern.source.includes('confiance') || pattern.source.includes('confidence')) {
-          console.log(`Found confidence score: ${score}% for API: ${api}`);
+        patternUsed = `Pattern ${i + 1}: ${pattern.source.substring(0, 50)}...`;
+        
+        // For high-priority confidence patterns (patterns 1-3), return immediately
+        if (i < 3 && (pattern.source.includes('confiance') || pattern.source.includes('confidence'))) {
+          console.log(`Found confidence score: ${score}% for API: ${api} using ${patternUsed}`);
           return score;
         }
       }
     }
+    
+    // If we found scores in high-priority patterns, don't continue to lower priority ones
+    if (foundScores.length > 0 && i < 6) {
+      break;
+    }
   }
   
-  // If we found any valid percentage scores, use the first meaningful one
+  // If we found any valid percentage scores, use the highest reasonable one
   if (foundScores.length > 0) {
     // Remove extremely low scores that are likely not confidence scores
     const meaningfulScores = foundScores.filter(s => s >= 10);
     if (meaningfulScores.length > 0) {
-      const selectedScore = meaningfulScores[0];
-      console.log(`Selected confidence score: ${selectedScore}% for API: ${api} from scores: [${foundScores.join(', ')}]`);
+      // Take the highest score from meaningful scores (more likely to be the actual confidence)
+      const selectedScore = Math.max(...meaningfulScores);
+      console.log(`Selected confidence score: ${selectedScore}% for API: ${api} from scores: [${foundScores.join(', ')}] using ${patternUsed}`);
       
       // Special handling for Gemini: if we found sources and have a decent score, boost it
       if (api === 'gemini' && hasReliableSourcesIndicators(text) && selectedScore >= 50) {
@@ -474,9 +485,10 @@ function extractConfidenceScore(text: string, api: string): number {
       
       return selectedScore;
     }
-    // If no meaningful scores, return the first one anyway
-    console.log(`Using fallback score: ${foundScores[0]}% for API: ${api}`);
-    return foundScores[0];
+    // If no meaningful scores, return the highest found score anyway
+    const fallbackScore = Math.max(...foundScores);
+    console.log(`Using fallback score: ${fallbackScore}% for API: ${api} from low scores: [${foundScores.join(', ')}]`);
+    return fallbackScore;
   }
 
   // Fallback: Check for textual confidence indicators

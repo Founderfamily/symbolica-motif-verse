@@ -15,15 +15,41 @@ export interface SymbolVerificationData {
   }[];
 }
 
-export const useSymbolVerification = (symbolId: string) => {
+export const useSymbolVerification = (symbolIdentifier: string) => {
   return useQuery({
-    queryKey: ['symbol-verification', symbolId],
+    queryKey: ['symbol-verification', symbolIdentifier],
     queryFn: async (): Promise<SymbolVerificationData> => {
-      const { data: verifications, error } = await supabase
+      // Try to find by UUID first, then by symbol name
+      let query = supabase
         .from('symbol_verifications')
-        .select('api, confidence, status, created_at')
-        .eq('symbol_id', symbolId)
-        .order('created_at', { ascending: false });
+        .select('api, confidence, status, created_at');
+
+      // Check if the identifier looks like a UUID (contains hyphens and is 36 chars)
+      if (symbolIdentifier?.includes('-') && symbolIdentifier.length === 36) {
+        query = query.eq('symbol_id', symbolIdentifier);
+      } else {
+        // For static symbols, we need to find the symbol_id by joining with symbols table
+        const { data: symbolData, error: symbolError } = await supabase
+          .from('symbols')
+          .select('id')
+          .eq('name', symbolIdentifier)
+          .single();
+        
+        if (symbolError || !symbolData) {
+          console.log(`No symbol found for name: ${symbolIdentifier}`);
+          return {
+            status: 'unverified',
+            averageConfidence: 0,
+            verificationCount: 0,
+            lastVerified: null,
+            details: []
+          };
+        }
+        
+        query = query.eq('symbol_id', symbolData.id);
+      }
+
+      const { data: verifications, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching symbol verifications:', error);
@@ -66,7 +92,7 @@ export const useSymbolVerification = (symbolId: string) => {
         }))
       };
     },
-    enabled: !!symbolId,
+    enabled: !!symbolIdentifier,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
