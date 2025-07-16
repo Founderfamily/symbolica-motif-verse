@@ -12,9 +12,14 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting image generation request...')
+    
     const { prompt, symbolName, culture, period } = await req.json()
     
+    console.log('Request data:', { prompt, symbolName, culture, period })
+    
     if (!prompt) {
+      console.log('Error: No prompt provided')
       return new Response(
         JSON.stringify({ error: 'Le prompt est requis' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -22,7 +27,10 @@ serve(async (req) => {
     }
 
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    console.log('OpenAI API Key exists:', !!openaiApiKey)
+    
     if (!openaiApiKey) {
+      console.log('Error: OpenAI API key not configured')
       return new Response(
         JSON.stringify({ error: 'Clé API OpenAI non configurée' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
@@ -36,6 +44,10 @@ ${prompt}
 
 Style: Art traditionnel détaillé, couleurs riches et authentiques, haute qualité, style documentaire artistique. L'image doit être claire, bien définie et respectueuse de l'héritage culturel.`
 
+    console.log('Enriched prompt:', enrichedPrompt)
+
+    console.log('Making request to OpenAI...')
+    
     // Appel à l'API OpenAI pour la génération d'image
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -53,25 +65,31 @@ Style: Art traditionnel détaillé, couleurs riches et authentiques, haute quali
       }),
     })
 
+    console.log('OpenAI response status:', response.status)
+
     if (!response.ok) {
       const errorData = await response.text()
       console.error('Erreur API OpenAI:', errorData)
       return new Response(
-        JSON.stringify({ error: 'Erreur lors de la génération d\'image' }),
+        JSON.stringify({ error: 'Erreur lors de la génération d\'image', details: errorData }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
 
+    console.log('Getting response data...')
     const data = await response.json()
+    console.log('Response data structure:', Object.keys(data))
     
     if (!data.data || !data.data[0] || !data.data[0].b64_json) {
+      console.log('Invalid response structure:', data)
       return new Response(
-        JSON.stringify({ error: 'Réponse invalide de l\'API OpenAI' }),
+        JSON.stringify({ error: 'Réponse invalide de l\'API OpenAI', data }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
 
     const base64Image = data.data[0].b64_json
+    console.log('Image generated successfully, base64 length:', base64Image.length)
     
     return new Response(
       JSON.stringify({ 
@@ -84,8 +102,9 @@ Style: Art traditionnel détaillé, couleurs riches et authentiques, haute quali
 
   } catch (error) {
     console.error('Erreur dans generate-image-openai:', error)
+    console.error('Error details:', error.message, error.stack)
     return new Response(
-      JSON.stringify({ error: 'Erreur interne du serveur' }),
+      JSON.stringify({ error: 'Erreur interne du serveur', details: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }
