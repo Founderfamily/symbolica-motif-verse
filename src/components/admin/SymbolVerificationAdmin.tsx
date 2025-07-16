@@ -295,8 +295,17 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
       <Alert>
         <ShieldCheck className="h-4 w-4" />
         <AlertDescription>
-          Cette interface permet de lancer une vérification complète du symbole via 5 APIs d'IA. 
+          <strong>Vérification objective :</strong> Cette interface lance une vérification complètement neutre du symbole via 5 APIs d'IA indépendantes. 
+          Aucune information préalable n'est fournie aux IA pour garantir des résultats non biaisés.
           Les résultats sont automatiquement sauvegardés et apparaîtront dans l'onglet "Vérification" public.
+        </AlertDescription>
+      </Alert>
+      
+      <Alert className="border-blue-200 bg-blue-50">
+        <RefreshCw className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="text-blue-800">
+          <strong>Note importante :</strong> Pour éviter tout biais, chaque nouvelle vérification utilise uniquement les informations de base du symbole 
+          (nom, culture, période) sans référence aux vérifications précédentes ou aux sources externes.
         </AlertDescription>
       </Alert>
     </div>
