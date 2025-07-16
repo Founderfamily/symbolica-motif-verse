@@ -343,6 +343,10 @@ function extractConfidenceScore(text: string, api: string): number {
   
   // Enhanced patterns to extract confidence score, prioritizing explicit percentage statements
   const patterns = [
+    // Markdown formatted percentages with stars/bold
+    /\*\*(\d+)\s*%\*\*/g,
+    /\*(\d+)\s*%\*/g,
+    
     // Direct confidence/confiance statements with percentage
     /niveau de confiance[:\s]*(\d+)\s*%/gi,
     /confiance[:\s]*(\d+)\s*%/gi,

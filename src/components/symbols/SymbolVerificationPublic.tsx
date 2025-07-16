@@ -17,6 +17,7 @@ interface SymbolVerificationPublicProps {
   symbol: {
     id: string;
     name: string;
+    sources?: any[];
   };
 }
 
@@ -323,21 +324,27 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
             </div>
           </Card>
 
-          {/* Source externe validée */}
-          <Card className="p-6 border-green-200 bg-green-50">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-              <div className="space-y-2">
-                <h4 className="text-md font-semibold text-green-800">Source externe confirmée</h4>
-                <p className="text-sm text-green-700">
-                  L'existence de "l'aigle caché" de la cathédrale de Reims est confirmée par France Bleu Champagne-Ardenne dans leur série documentaire "Les mystères de la cathédrale de Reims" (2020), racontée par l'historien Patrick Demouy.
-                </p>
-                <div className="text-xs text-green-600">
-                  <strong>Source :</strong> "Les mystères de la cathédrale de Reims : l'aigle caché - Episode 10" - France Bleu Champagne-Ardenne, 21 décembre 2020
+          {/* Sources documentées */}
+          {symbol.sources && symbol.sources.length > 0 && (
+            <Card className="p-6 border-green-200 bg-green-50">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <div className="space-y-2">
+                  <h4 className="text-md font-semibold text-green-800">Sources documentées</h4>
+                  <div className="space-y-2">
+                    {symbol.sources.map((source: any, index: number) => (
+                      <div key={index} className="text-sm text-green-700">
+                        <p>{source.description}</p>
+                        <div className="text-xs text-green-600">
+                          <strong>Source :</strong> {source.citation}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
         </div>
       ) : !loading && !error ? (
         <Alert>
