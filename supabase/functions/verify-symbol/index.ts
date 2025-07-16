@@ -159,7 +159,7 @@ Répondez avec:
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1000,
       messages: [
         {
@@ -211,7 +211,7 @@ Répondez avec:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-sonar-large-128k-online',
+      model: 'llama-3.1-sonar-small-128k-online',
       messages: [
         {
           role: 'system',
@@ -261,7 +261,7 @@ Répondez avec:
 - Un résumé en 2-3 phrases
 - Une analyse détaillée avec vos sources de référence`;
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
