@@ -47,7 +47,7 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
           body: { prompt: 'test', symbolName: 'test' }
         });
         
-        if (error?.message?.includes('DEEPSEEK_API_KEY')) {
+        if (error?.message?.includes('OPENAI_API_KEY') || error?.message?.includes('non configurée')) {
           setApiStatus('unavailable');
         } else {
           setApiStatus('available');

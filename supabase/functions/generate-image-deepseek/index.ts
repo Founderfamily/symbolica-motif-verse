@@ -21,10 +21,10 @@ serve(async (req) => {
       )
     }
 
-    const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY')
-    if (!deepseekApiKey) {
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openaiApiKey) {
       return new Response(
-        JSON.stringify({ error: 'Clé API DeepSeek non configurée' }),
+        JSON.stringify({ error: 'Clé API OpenAI non configurée' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
@@ -36,14 +36,15 @@ ${prompt}
 
 Style: Art traditionnel détaillé, couleurs riches et authentiques, haute qualité, style documentaire artistique. L'image doit être claire, bien définie et respectueuse de l'héritage culturel.`
 
-    // Appel à l'API DeepSeek pour la génération d'image
-    const response = await fetch('https://api.deepseek.com/v1/images/generations', {
+    // Appel à l'API OpenAI pour la génération d'image
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${deepseekApiKey}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        model: 'dall-e-3',
         prompt: enrichedPrompt,
         n: 1,
         size: "1024x1024",
@@ -54,7 +55,7 @@ Style: Art traditionnel détaillé, couleurs riches et authentiques, haute quali
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error('Erreur API DeepSeek:', errorData)
+      console.error('Erreur API OpenAI:', errorData)
       return new Response(
         JSON.stringify({ error: 'Erreur lors de la génération d\'image' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
@@ -65,7 +66,7 @@ Style: Art traditionnel détaillé, couleurs riches et authentiques, haute quali
     
     if (!data.data || !data.data[0] || !data.data[0].b64_json) {
       return new Response(
-        JSON.stringify({ error: 'Réponse invalide de l\'API DeepSeek' }),
+        JSON.stringify({ error: 'Réponse invalide de l\'API OpenAI' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
@@ -82,7 +83,7 @@ Style: Art traditionnel détaillé, couleurs riches et authentiques, haute quali
     )
 
   } catch (error) {
-    console.error('Erreur dans generate-image-deepseek:', error)
+    console.error('Erreur dans generate-image-openai:', error)
     return new Response(
       JSON.stringify({ error: 'Erreur interne du serveur' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
