@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useToast } from '@/hooks/use-toast';
 import { Info, AlertCircle, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { getSymbolThemeColor } from '@/utils/symbolImageUtils';
 import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { useSymbolVerification } from '@/hooks/useSymbolVerification';
 import { VerificationBadge } from '@/components/ui/verification-badge';
@@ -118,42 +119,13 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     return images.find(img => img.image_type === 'original') || images[0];
   }, [images]);
   
-  // Fonction pour trouver la meilleure image locale
+  // Fonction pour trouver la meilleure image locale ou utiliser un placeholder robuste
   const findBestLocalImage = React.useCallback((symbolName: string, culture: string): string => {
     console.log(`SymbolCard: Recherche d'image locale pour "${symbolName}" (culture: ${culture})`);
     
-    // 1. Essayer le nom exact du symbole
-    if (symbolToLocalImageEnhanced[symbolName]) {
-      console.log(`SymbolCard: Image trouvée pour nom exact: ${symbolToLocalImageEnhanced[symbolName]}`);
-      return symbolToLocalImageEnhanced[symbolName];
-    }
-    
-    // 2. Essayer le nom sans accents et en minuscules
-    const normalizedName = symbolName
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    
-    for (const [key, value] of Object.entries(symbolToLocalImageEnhanced)) {
-      const normalizedKey = key
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
-      
-      if (normalizedKey.includes(normalizedName) || normalizedName.includes(normalizedKey)) {
-        console.log(`SymbolCard: Image trouvée par recherche approximative: ${value}`);
-        return value;
-      }
-    }
-    
-    // 3. Essayer par culture
-    if (symbolToLocalImageEnhanced[culture]) {
-      console.log(`SymbolCard: Image trouvée par culture: ${symbolToLocalImageEnhanced[culture]}`);
-      return symbolToLocalImageEnhanced[culture];
-    }
-    
-    // 4. Fallback final
-    console.log(`SymbolCard: Aucune image trouvée, utilisation du placeholder`);
+    // Directement utiliser le placeholder car les images locales n'existent pas
+    // au lieu de faire des références vers des fichiers inexistants
+    console.log(`SymbolCard: Utilisation directe du placeholder pour ${symbolName}`);
     return PLACEHOLDER;
   }, []);
   
@@ -192,16 +164,7 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     }
     
     setLoading(false);
-    
-    // Notifier seulement pour les erreurs persistantes
-    if (retryCount >= 1) {
-      toast({
-        title: "Image non disponible",
-        description: `L'image pour "${symbol.name}" n'est pas disponible. Une image alternative est utilisée.`,
-        variant: "default",
-      });
-    }
-  }, [symbol.name, imageSource, isLocalImage, retryCount, toast]);
+  }, [symbol.name, imageSource, isLocalImage, retryCount]);
   
   // Gradient culturel adapté
   const culturalGradient = React.useMemo(() => {
@@ -236,6 +199,21 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
     setLoading(true);
     setRetryCount(0);
   }, [symbol.id]);
+
+  // Timeout pour éviter les chargements infinis
+  React.useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        if (loading) {
+          console.log(`SymbolCard: Timeout de chargement pour ${symbol.name}`);
+          setLoading(false);
+          setError(true);
+        }
+      }, 3000); // 3 secondes max
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading, symbol.name]);
   
   return (
     <Link to={getSymbolLink()} className="block">
@@ -290,14 +268,28 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
             </div>
           )}
           
-          <img
-            src={imageSource}
-            alt={symbol.name}
-            className={`object-cover w-full h-full transition-all duration-500 ${loading ? 'opacity-0' : 'opacity-100'} ${isHovered ? 'scale-110' : 'scale-100'}`}
-            onError={handleImageError}
-            onLoad={handleImageLoad}
-            key={`${symbol.id}-${retryCount}`} // Force reload on retry
-          />
+          {/* Fallback vers une représentation visuelle avec icône si image indisponible */}
+          {(error || imageSource === PLACEHOLDER) ? (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-2 ${getSymbolThemeColor(symbol.culture)}`}>
+                <div className="text-white text-2xl font-bold">
+                  {symbol.name.charAt(0).toUpperCase()}
+                </div>
+              </div>
+              <div className="text-slate-600 text-xs text-center px-2">
+                {symbol.name}
+              </div>
+            </div>
+          ) : (
+            <img
+              src={imageSource}
+              alt={symbol.name}
+              className={`object-cover w-full h-full transition-all duration-500 ${loading ? 'opacity-0' : 'opacity-100'} ${isHovered ? 'scale-110' : 'scale-100'}`}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+              key={`${symbol.id}-${retryCount}`}
+            />
+          )}
           
           {isHovered && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3 transition-opacity duration-300">
