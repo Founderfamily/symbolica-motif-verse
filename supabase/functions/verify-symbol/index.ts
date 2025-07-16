@@ -374,10 +374,18 @@ Répondez avec:
     throw new Error(`Gemini API error: ${data.error?.message || response.statusText}`);
   }
   
-  return parseVerificationResponse(data.candidates[0].content.parts[0].text, 'gemini');
+  const geminiResponse = data.candidates[0].content.parts[0].text;
+  console.log(`Gemini raw response for symbol ${symbol.name}:`, geminiResponse);
+  
+  return parseVerificationResponse(geminiResponse, 'gemini');
 };
 
 function extractConfidenceScore(text: string, api: string): number {
+  // Debug logging for Gemini specifically
+  if (api === 'gemini') {
+    console.log(`Extracting confidence from Gemini response (first 300 chars): ${text.substring(0, 300)}`);
+  }
+  
   // Normalize text for better matching
   const normalizedText = text.toLowerCase().replace(/\s+/g, ' ');
   
@@ -418,6 +426,12 @@ function extractConfidenceScore(text: string, api: string): number {
     /(\d+)\s*%\s*précision/gi,
     /(\d+)\s*%\s*accuracy/gi,
     
+    // Gemini-specific patterns (French responses)
+    /évaluation[:\s]*(\d+)\s*%/gi,
+    /niveau[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*d[eo]?\s*fiabilité/gi,
+    /(\d+)\s*%\s*d[eo]?\s*précision/gi,
+    
     // Generic percentage patterns (less specific, lower priority)
     /\b(\d+)\s*%\b/g
   ];
@@ -450,6 +464,14 @@ function extractConfidenceScore(text: string, api: string): number {
     if (meaningfulScores.length > 0) {
       const selectedScore = meaningfulScores[0];
       console.log(`Selected confidence score: ${selectedScore}% for API: ${api} from scores: [${foundScores.join(', ')}]`);
+      
+      // Special handling for Gemini: if we found sources and have a decent score, boost it
+      if (api === 'gemini' && hasReliableSourcesIndicators(text) && selectedScore >= 50) {
+        const boostedScore = Math.min(95, selectedScore + 25);
+        console.log(`Gemini source bonus applied: ${boostedScore}% (was ${selectedScore}%)`);
+        return boostedScore;
+      }
+      
       return selectedScore;
     }
     // If no meaningful scores, return the first one anyway
@@ -508,10 +530,42 @@ function extractConfidenceScore(text: string, api: string): number {
   }
   
   if (api === 'gemini') {
-    if (text.includes('high certainty') || text.includes('well-established') || text.includes('bien établi')) textualScore = 70;
-    else if (text.includes('moderate certainty') || text.includes('established') || text.includes('établi')) textualScore = 50;
-    else if (text.includes('low certainty') || text.includes('uncertain') || text.includes('peu certain')) textualScore = 25;
-    else if (text.includes('very uncertain') || text.includes('unestablished') || text.includes('très incertain')) textualScore = 15;
+    // Enhanced Gemini pattern matching with debug logging
+    console.log(`Analyzing Gemini textual patterns in: ${text.substring(0, 200)}...`);
+    
+    // Look for French responses from Gemini (it often responds in French)
+    if (text.includes('très fiable') || text.includes('haute fiabilité') || text.includes('bien établi')) {
+      textualScore = 85;
+      console.log(`Gemini high confidence French pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('fiable') || text.includes('documenté') || text.includes('vérifié') || text.includes('établi')) {
+      textualScore = 70;
+      console.log(`Gemini moderate confidence French pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('partiellement') || text.includes('en partie') || text.includes('moyennement')) {
+      textualScore = 45;
+      console.log(`Gemini partial confidence French pattern detected: ${textualScore}%`);
+    }
+    // English patterns
+    else if (text.includes('high certainty') || text.includes('well-established') || text.includes('highly reliable')) {
+      textualScore = 85;
+      console.log(`Gemini high confidence English pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('moderate certainty') || text.includes('established') || text.includes('reliable')) {
+      textualScore = 70;
+      console.log(`Gemini moderate confidence English pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('low certainty') || text.includes('uncertain') || text.includes('peu certain')) {
+      textualScore = 25;
+      console.log(`Gemini low confidence pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('very uncertain') || text.includes('unestablished') || text.includes('très incertain')) {
+      textualScore = 15;
+      console.log(`Gemini very low confidence pattern detected: ${textualScore}%`);
+    }
+    else {
+      console.log(`No specific Gemini pattern found, using default: ${textualScore}%`);
+    }
   }
   
   console.log(`Using textual pattern score: ${textualScore}% for API: ${api}`);
