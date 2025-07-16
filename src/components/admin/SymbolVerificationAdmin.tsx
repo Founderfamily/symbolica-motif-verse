@@ -81,7 +81,7 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
   const [saving, setSaving] = useState(false);
 
   const extractConfidenceScore = (text: string, api: string): number => {
-    // Extraction plus stricte des scores de confiance
+    // Extraction plus stricte des scores de confiance avec détection améliorée du manque de sources
     const patterns = [
       /(?:confiance|confidence)[\s:]*(\d+)%/i,
       /(\d+)%[\s]*(?:de )?(?:confiance|confidence)/i,
@@ -90,37 +90,71 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
       /niveau de confiance[\s:]*(\d+)%/i
     ];
 
+    let extractedScore = null;
     for (const pattern of patterns) {
       const match = text.match(pattern);
       if (match) {
         const score = parseInt(match[1], 10);
         if (score >= 0 && score <= 100) {
-          return score;
+          extractedScore = score;
+          break;
         }
       }
     }
 
-    // Détection de mentions de manque de sources
+    // Détection renforcée de mentions de manque de sources
     const noSourcesPatterns = [
-      /pas de sources/i,
-      /aucune source/i,
+      /pas de sources fiables/i,
+      /aucune source fiable/i,
       /manque de sources/i,
       /sources limitées/i,
       /informations insuffisantes/i,
-      /données manquantes/i
+      /données manquantes/i,
+      /cannot verify/i,
+      /impossible à vérifier/i,
+      /no reliable sources/i,
+      /insufficient information/i,
+      /lack of documentation/i,
+      /peu de documentation/i,
+      /manque de documentation/i,
+      /no concrete evidence/i,
+      /pas de preuves concrètes/i
     ];
 
     const hasNoSources = noSourcesPatterns.some(pattern => pattern.test(text));
+    
+    // Pondération spéciale pour OpenAI et Perplexity qui détectent mieux les problèmes
+    const isReliableDetector = api === 'openai' || api === 'perplexity';
+    
     if (hasNoSources) {
-      return 15; // Score très bas si pas de sources
+      if (isReliableDetector) {
+        return 15; // Score très bas pour les détecteurs fiables
+      }
+      return Math.min(extractedScore || 20, 20); // Forcer max 20% si pas de sources
     }
 
-    // Dernière tentative avec des mots-clés
-    if (/très fiable|hautement fiable|certifié/i.test(text)) return 85;
-    if (/fiable|probable|vérifiable/i.test(text)) return 65;
+    // Si score extrait mais mentions de sources douteuses, le réduire
+    if (extractedScore && extractedScore > 40) {
+      const doubtfulPatterns = [
+        /difficile à vérifier/i,
+        /sources contradictoires/i,
+        /informations partielles/i,
+        /peu documenté/i
+      ];
+      
+      if (doubtfulPatterns.some(pattern => pattern.test(text))) {
+        return Math.min(extractedScore, 45);
+      }
+    }
+
+    if (extractedScore) return extractedScore;
+
+    // Analyse par mots-clés en dernier recours
+    if (/très fiable|hautement fiable|bien documenté|certifié/i.test(text)) return 85;
+    if (/fiable|probable|vérifiable|confirmé/i.test(text)) return 65;
     if (/possible|potentiel|plausible/i.test(text)) return 45;
-    if (/douteux|incertain|questionnable/i.test(text)) return 25;
-    if (/non vérifié|faux|erroné/i.test(text)) return 10;
+    if (/douteux|incertain|questionnable|disputé/i.test(text)) return 25;
+    if (/non vérifié|faux|erroné|inexact/i.test(text)) return 10;
 
     return 30; // Score par défaut conservateur
   };
@@ -150,6 +184,8 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
     setLoading(prev => ({ ...prev, [apiKey]: true }));
     
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const payload = {
         api: apiKey,
         symbol: {
@@ -159,7 +195,10 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
           description: symbol.description,
           significance: symbol.significance,
           historical_context: symbol.historical_context
-        }
+        },
+        symbolId: symbol.id,
+        userId: user?.id,
+        autoSave: true // Auto-save enabled
       };
 
       const { data, error } = await supabase.functions.invoke('verify-symbol', {
@@ -168,7 +207,7 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
 
       if (error) throw error;
 
-      // Extraction et correction du score de confiance
+      // Extraction et correction du score de confiance avec logique améliorée
       const extractedConfidence = extractConfidenceScore(data.details || data.summary || '', apiKey);
       const correctedStatus = determineStatus(extractedConfidence, data.details || '');
 
@@ -184,7 +223,7 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
         [apiKey]: result
       }));
       
-      toast.success(`Vérification ${API_CONFIGS[apiKey as keyof typeof API_CONFIGS].name} terminée`);
+      toast.success(`Vérification ${API_CONFIGS[apiKey as keyof typeof API_CONFIGS].name} terminée et sauvegardée`);
     } catch (error) {
       console.error(`Erreur lors de la vérification ${apiKey}:`, error);
       setResults(prev => ({
@@ -325,19 +364,10 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
           </Button>
           
           {Object.keys(results).length > 0 && (
-            <Button 
-              onClick={saveResults} 
-              disabled={saving || Object.values(results).filter(r => r.status !== 'error').length === 0}
-              variant="default"
-              className="flex items-center gap-2"
-            >
-              {saving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              Sauvegarder
-            </Button>
+            <div className="text-sm text-green-600 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Résultats sauvegardés automatiquement
+            </div>
           )}
         </div>
       </div>

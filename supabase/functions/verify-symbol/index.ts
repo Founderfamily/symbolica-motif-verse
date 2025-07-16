@@ -424,7 +424,11 @@ serve(async (req) => {
   }
 
   try {
-    const { api, symbol }: VerificationRequest = await req.json();
+    const { api, symbol, symbolId, userId, autoSave }: VerificationRequest & { 
+      symbolId?: string; 
+      userId?: string; 
+      autoSave?: boolean 
+    } = await req.json();
 
     if (!api || !symbol) {
       return new Response(
@@ -462,6 +466,40 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         );
+    }
+
+    // Auto-save if requested
+    if (autoSave && symbolId && userId) {
+      try {
+        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.49.4');
+        
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        );
+
+        await supabase.from('symbol_verifications').insert({
+          symbol_id: symbolId,
+          api: result.api,
+          status: result.status,
+          confidence: result.confidence,
+          summary: result.summary,
+          details: result.details,
+          sources: result.sources || [],
+          verified_by: userId
+        });
+
+        console.log(`Auto-saved verification result for ${api} on symbol ${symbolId}`);
+      } catch (saveError) {
+        console.error('Error auto-saving verification result:', saveError);
+        // Continue with the response even if save fails
+      }
     }
 
     return new Response(
