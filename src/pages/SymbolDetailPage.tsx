@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Info, MapPin, Calendar, Share2, Tag, Palette, Hammer, Star, BookOpen, Clock, Images } from 'lucide-react';
+import { ArrowLeft, Info, MapPin, Calendar, Share2, Tag, Palette, Hammer, Star, BookOpen, Clock, Images, ExternalLink } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { I18nText } from '@/components/ui/i18n-text';
 import { ShareButton } from '@/components/social/ShareButton';
@@ -78,7 +78,7 @@ const SymbolDetailPage: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   
   // État pour la section active
-  const [activeSection, setActiveSection] = React.useState<'info' | 'verification' | 'admin' | 'community'>('info');
+  const [activeSection, setActiveSection] = React.useState<'info' | 'verification' | 'admin' | 'community' | 'sources'>('info');
   
   // État pour forcer le rechargement après vérification
   const [refreshKey, setRefreshKey] = React.useState(0);
@@ -372,6 +372,16 @@ const SymbolDetailPage: React.FC = () => {
                 >
                   Community
                 </button>
+                <button
+                  onClick={() => setActiveSection('sources')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeSection === 'sources'
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  Sources
+                </button>
               </nav>
             </div>
           </div>
@@ -564,6 +574,57 @@ const SymbolDetailPage: React.FC = () => {
             <div>
               <SymbolVerificationCommunity symbol={displaySymbol} />
             </div>
+          )}
+
+          {activeSection === 'sources' && (
+            <Card className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="h-5 w-5 text-amber-600" />
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Sources de référence
+                </h3>
+              </div>
+              
+              {displaySymbol.sources && Array.isArray(displaySymbol.sources) && displaySymbol.sources.length > 0 ? (
+                <div className="space-y-4">
+                  {displaySymbol.sources.map((source: any, index: number) => (
+                    <div key={index} className="border border-slate-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-slate-900">{source.title}</h4>
+                          <Badge variant="outline" className="mt-2 capitalize bg-amber-100 text-amber-800">
+                            {source.type}
+                          </Badge>
+                          {source.description && (
+                            <p className="text-slate-600 text-sm mt-2">
+                              {source.description}
+                            </p>
+                          )}
+                        </div>
+                        {source.url && (
+                          <a
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-4 inline-flex items-center gap-1 text-amber-600 hover:text-amber-700 text-sm"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Voir la source
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-slate-600">Aucune source de référence disponible pour ce symbole.</p>
+                  <p className="text-sm text-slate-500 mt-2">
+                    Les sources aident à valider et vérifier l'authenticité des informations.
+                  </p>
+                </div>
+              )}
+            </Card>
           )}
         </div>
 
