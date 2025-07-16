@@ -29,6 +29,7 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
         onSymbolUpdated={onSymbolUpdated}
         trigger={
           <Button
+            type="button"
             size="lg"
             className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-amber-600 hover:bg-amber-700 gap-2"
           >
