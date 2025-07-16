@@ -211,7 +211,7 @@ Répondez avec:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-sonar-small-128k-online',
+      model: 'llama-3.1-sonar-large-128k-online',
       messages: [
         {
           role: 'user',
@@ -224,8 +224,7 @@ Répondez avec:
       return_citations: true,
       return_images: false,
       return_related_questions: false,
-      search_domain_filter: ["perplexity.ai"],
-      search_recency_filter: "month"
+      search_recency_filter: 'month'
     }),
   });
 
