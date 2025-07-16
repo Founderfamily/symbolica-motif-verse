@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { AdminFloatingEditButton } from '@/components/admin/AdminFloatingEditButton';
+import { ImageGalleryModal } from '@/components/symbols/ImageGalleryModal';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -68,6 +69,10 @@ const SymbolDetailPage: React.FC = () => {
 
   // État local pour le symbole (pour les mises à jour en temps réel)
   const [currentSymbol, setCurrentSymbol] = React.useState<typeof symbol>(symbol);
+  
+  // État pour la modal de galerie
+  const [isGalleryOpen, setIsGalleryOpen] = React.useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
 
   // Mettre à jour le symbole local quand les données changent
   React.useEffect(() => {
@@ -90,6 +95,26 @@ const SymbolDetailPage: React.FC = () => {
            images.find(img => img.image_type === 'original') || 
            images[0];
   }, [images]);
+
+  // Handler pour ouvrir la galerie
+  const handleImageClick = () => {
+    if (!images || images.length === 0) return;
+    
+    // Trouver l'index de l'image principale
+    const primaryIndex = images.findIndex(img => 
+      img.is_primary || 
+      (primaryImage && img.id === primaryImage.id)
+    );
+    
+    setSelectedImageIndex(Math.max(0, primaryIndex));
+    setIsGalleryOpen(true);
+  };
+
+  // Handler pour cliquer sur une miniature
+  const handleThumbnailClick = (imageIndex: number) => {
+    setSelectedImageIndex(imageIndex);
+    setIsGalleryOpen(true);
+  };
 
   // États de chargement et d'erreur
   if (symbolLoading) {
@@ -202,7 +227,8 @@ const SymbolDetailPage: React.FC = () => {
                 <img
                   src={primaryImage?.image_url || '/placeholder.svg'}
                   alt={displaySymbol.name}
-                  className="object-cover w-full h-full"
+                  className="object-cover w-full h-full cursor-pointer hover:scale-105 transition-transform duration-200"
+                  onClick={handleImageClick}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = '/placeholder.svg';
@@ -397,7 +423,8 @@ const SymbolDetailPage: React.FC = () => {
                         <img
                           src={primaryImage.image_url}
                           alt={primaryImage.title || displaySymbol.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                          onClick={handleImageClick}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = '/placeholder.svg';
@@ -410,11 +437,15 @@ const SymbolDetailPage: React.FC = () => {
                     {images.length > 1 && (
                       <div className="grid grid-cols-4 gap-2">
                         {images.slice(0, 8).map((image, index) => (
-                          <div key={image.id} className="aspect-square bg-slate-100 rounded border overflow-hidden">
+                          <div 
+                            key={image.id} 
+                            className="relative aspect-square bg-slate-100 rounded border overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200"
+                            onClick={() => handleThumbnailClick(index)}
+                          >
                             <img
                               src={image.image_url}
                               alt={image.title || displaySymbol.name}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                              className="w-full h-full object-cover"
                               title={image.title || 'Image du symbole'}
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
@@ -428,10 +459,18 @@ const SymbolDetailPage: React.FC = () => {
                                 </Badge>
                               </div>
                             )}
+                            {image.is_primary && (
+                              <div className="absolute top-1 right-1">
+                                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                              </div>
+                            )}
                           </div>
                         ))}
                         {images.length > 8 && (
-                          <div className="aspect-square flex items-center justify-center bg-slate-100 rounded border text-slate-500 text-sm">
+                          <div 
+                            className="aspect-square flex items-center justify-center bg-slate-100 rounded border text-slate-500 text-sm cursor-pointer hover:bg-slate-200 transition-colors"
+                            onClick={() => handleThumbnailClick(8)}
+                          >
                             +{images.length - 8}
                           </div>
                         )}
@@ -458,6 +497,17 @@ const SymbolDetailPage: React.FC = () => {
         symbol={displaySymbol}
         onSymbolUpdated={handleSymbolUpdated}
       />
+      
+      {/* Modal de galerie d'images */}
+      {images && images.length > 0 && (
+        <ImageGalleryModal
+          images={images}
+          selectedImageIndex={selectedImageIndex}
+          isOpen={isGalleryOpen}
+          onClose={() => setIsGalleryOpen(false)}
+          symbolName={displaySymbol.name}
+        />
+      )}
     </div>
   );
 };
