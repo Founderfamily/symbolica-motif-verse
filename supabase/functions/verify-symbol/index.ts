@@ -306,7 +306,12 @@ Répondez avec:
 };
 
 function extractConfidenceScore(text: string, api: string): number {
-  // Extract confidence percentage from text with multiple patterns
+  // Check for no sources indicators first - strict scoring
+  if (hasNoSourcesIndicators(text)) {
+    return Math.min(15, extractBasicConfidence(text)); // Maximum 15% if no sources
+  }
+  
+  // Enhanced confidence percentage extraction with multilingual support
   const patterns = [
     /confidence[:\s]*(\d+)%/i,
     /(\d+)%\s*confidence/i,
@@ -315,55 +320,160 @@ function extractConfidenceScore(text: string, api: string): number {
     /fiabilité[:\s]*(\d+)%/i,
     /(\d+)%\s*fiabilité/i,
     /niveau de confiance[:\s]*(\d+)%/i,
-    /(\d+)%\s*niveau de confiance/i
+    /(\d+)%\s*niveau de confiance/i,
+    /certitude[:\s]*(\d+)%/i,
+    /(\d+)%\s*certitude/i,
+    /reliability[:\s]*(\d+)%/i,
+    /(\d+)%\s*reliability/i,
+    /certain[ty]*[:\s]*(\d+)%/i,
+    /(\d+)%\s*certain/i
   ];
   
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match) {
       const score = parseInt(match[1]);
-      // If API mentions lack of sources but gives high score, force it down
-      if (score > 30 && hasNoSourcesIndicators(text)) {
-        return Math.min(score, 20);
-      }
-      return score;
+      // Strict cap at 20% if no sources detected even with explicit score
+      return hasNoSourcesIndicators(text) ? Math.min(20, score) : score;
     }
   }
   
-  // Check for explicit lack of sources/evidence indicators
-  if (hasNoSourcesIndicators(text)) {
-    return 15; // Very low confidence for no sources
+  // API-specific patterns with much stricter scoring
+  if (api === 'openai') {
+    if (text.includes('highly confident') || text.includes('très confiant')) return 75;
+    if (text.includes('confident') || text.includes('confiant')) return 60;
+    if (text.includes('likely') || text.includes('probable')) return 45;
+    if (text.includes('possible') || text.includes('might') || text.includes('pourrait')) return 25;
+    if (text.includes('uncertain') || text.includes('unclear') || text.includes('incertain')) return 15;
   }
   
-  // Default very low confidence if no explicit score found
+  if (api === 'anthropic') {
+    if (text.includes('high confidence') || text.includes('haute confiance')) return 70;
+    if (text.includes('moderate confidence') || text.includes('confiance modérée')) return 50;
+    if (text.includes('low confidence') || text.includes('faible confiance')) return 25;
+    if (text.includes('uncertain') || text.includes('incertain')) return 15;
+  }
+  
+  if (api === 'deepseek') {
+    if (text.includes('very reliable') || text.includes('highly accurate')) return 70;
+    if (text.includes('reliable') || text.includes('accurate')) return 55;
+    if (text.includes('somewhat reliable') || text.includes('partiellement fiable')) return 35;
+    if (text.includes('unreliable') || text.includes('inaccurate') || text.includes('peu fiable')) return 15;
+  }
+  
+  if (api === 'perplexity') {
+    if (text.includes('well-documented') || text.includes('multiple sources') || text.includes('bien documenté')) return 75;
+    if (text.includes('documented') || text.includes('sources available') || text.includes('documenté')) return 55;
+    if (text.includes('limited sources') || text.includes('few references') || text.includes('sources limitées')) return 25;
+    if (text.includes('no clear sources') || text.includes('unverified') || text.includes('pas de sources claires')) return 10;
+  }
+  
+  if (api === 'gemini') {
+    if (text.includes('high certainty') || text.includes('well-established') || text.includes('bien établi')) return 70;
+    if (text.includes('moderate certainty') || text.includes('established') || text.includes('établi')) return 50;
+    if (text.includes('low certainty') || text.includes('uncertain') || text.includes('peu certain')) return 25;
+    if (text.includes('very uncertain') || text.includes('unestablished') || text.includes('très incertain')) return 15;
+  }
+  
+  return 15; // Much lower default fallback (was 30)
+}
+
+function extractBasicConfidence(text: string): number {
+  // Helper function to extract basic confidence without source penalty
+  const patterns = [
+    /confidence[:\s]*(\d+)%/i,
+    /(\d+)%\s*confidence/i,
+    /score[:\s]*(\d+)%/i,
+    /(\d+)%\s*certain/i,
+    /reliability[:\s]*(\d+)%/i,
+    /fiabilité[:\s]*(\d+)%/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      return parseInt(match[1]);
+    }
+  }
   return 15;
 }
 
 function hasNoSourcesIndicators(text: string): boolean {
   const lowerText = text.toLowerCase();
   const noSourcesIndicators = [
+    // English indicators
     'no reliable sources',
     'insufficient information',
     'cannot verify',
+    'no sources',
+    'lack of sources',
+    'insufficient evidence',
+    'no concrete evidence',
+    'difficult to verify',
+    'little documentation',
+    'lack of documentation',
+    'no historical evidence',
+    'cannot confirm',
+    'unable to verify',
+    'unverified claim',
+    'no documentation',
+    'limited evidence',
+    'no clear sources',
+    'uncertain origins',
+    'dubious authenticity',
+    'questionable sources',
+    'unreliable information',
+    'no supporting evidence',
+    'lacks evidence',
+    'insufficient data',
+    
+    // French indicators
     'pas de sources fiables',
     'informations insuffisantes',
     'sources manquantes',
     'aucune source',
-    'no sources',
-    'lack of sources',
     'manque de sources',
     'données insuffisantes',
     'preuves insuffisantes',
-    'insufficient evidence',
-    'no concrete evidence',
     'pas de preuves concrètes',
     'impossible à vérifier',
-    'difficult to verify',
     'difficile à vérifier',
     'peu de documentation',
-    'little documentation',
     'manque de documentation',
-    'lack of documentation'
+    'pas de preuves historiques',
+    'ne peut pas confirmer',
+    'incapable de vérifier',
+    'affirmation non vérifiée',
+    'pas de documentation',
+    'preuves limitées',
+    'pas de sources claires',
+    'origines incertaines',
+    'authenticité douteuse',
+    'sources douteuses',
+    'informations peu fiables',
+    'aucune preuve à l\'appui',
+    'manque de preuves',
+    'données insuffisantes',
+    
+    // German indicators (common in academic sources)
+    'keine zuverlässigen quellen',
+    'unzureichende informationen',
+    'nicht verifizierbar',
+    'keine quellen',
+    'mangel an quellen',
+    
+    // Spanish indicators
+    'no hay fuentes fiables',
+    'información insuficiente',
+    'no se puede verificar',
+    'sin fuentes',
+    'falta de fuentes',
+    
+    // Italian indicators
+    'nessuna fonte affidabile',
+    'informazioni insufficienti',
+    'non verificabile',
+    'mancanza di fonti'
   ];
   
   return noSourcesIndicators.some(indicator => lowerText.includes(indicator));
