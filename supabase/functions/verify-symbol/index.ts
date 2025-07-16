@@ -17,7 +17,9 @@ interface SymbolData {
 
 interface VerificationRequest {
   api: string;
-  symbol: SymbolData;
+  symbol?: SymbolData;
+  symbolId?: string;
+  symbolName?: string;
 }
 
 const verifyWithOpenAI = async (symbol: SymbolData) => {
@@ -424,15 +426,76 @@ serve(async (req) => {
   }
 
   try {
-    const { api, symbol, symbolId, userId, autoSave }: VerificationRequest & { 
-      symbolId?: string; 
+    const { api, symbol, symbolId, symbolName, userId, autoSave }: VerificationRequest & { 
       userId?: string; 
       autoSave?: boolean 
     } = await req.json();
 
-    if (!api || !symbol) {
+    if (!api || (!symbol && !symbolId)) {
       return new Response(
-        JSON.stringify({ error: 'API and symbol data are required' }),
+        JSON.stringify({ error: 'API and symbol data (symbol object or symbolId) are required' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // If we only have symbolId, fetch symbol data from database
+    let symbolData: SymbolData;
+    if (symbol) {
+      symbolData = symbol;
+    } else if (symbolId) {
+      try {
+        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.49.4');
+        
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        );
+
+        const { data: symbolFromDb, error } = await supabase
+          .from('symbols')
+          .select('name, culture, period, description, significance, historical_context')
+          .eq('id', symbolId)
+          .single();
+
+        if (error || !symbolFromDb) {
+          return new Response(
+            JSON.stringify({ error: 'Symbol not found in database' }),
+            { 
+              status: 404, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+
+        symbolData = {
+          name: symbolFromDb.name,
+          culture: symbolFromDb.culture,
+          period: symbolFromDb.period,
+          description: symbolFromDb.description,
+          significance: symbolFromDb.significance,
+          historical_context: symbolFromDb.historical_context
+        };
+      } catch (dbError) {
+        console.error('Error fetching symbol from database:', dbError);
+        // Fallback to minimal data if available
+        symbolData = {
+          name: symbolName || 'Symbole inconnu',
+          culture: 'Culture non spécifiée',
+          period: 'Période non spécifiée'
+        };
+      }
+    } else {
+      return new Response(
+        JSON.stringify({ error: 'Either symbol object or symbolId must be provided' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -444,19 +507,19 @@ serve(async (req) => {
     
     switch (api) {
       case 'openai':
-        result = await verifyWithOpenAI(symbol);
+        result = await verifyWithOpenAI(symbolData);
         break;
       case 'deepseek':
-        result = await verifyWithDeepSeek(symbol);
+        result = await verifyWithDeepSeek(symbolData);
         break;
       case 'anthropic':
-        result = await verifyWithAnthropic(symbol);
+        result = await verifyWithAnthropic(symbolData);
         break;
       case 'perplexity':
-        result = await verifyWithPerplexity(symbol);
+        result = await verifyWithPerplexity(symbolData);
         break;
       case 'gemini':
-        result = await verifyWithGemini(symbol);
+        result = await verifyWithGemini(symbolData);
         break;
       default:
         return new Response(

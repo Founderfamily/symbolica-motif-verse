@@ -92,11 +92,15 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
         }]);
 
         try {
+          const { data: { user } } = await supabase.auth.getUser();
+          
           const { data, error } = await supabase.functions.invoke('verify-symbol', {
             body: { 
               symbolId: symbol.id,
+              symbolName: symbol.name,
               api: api,
-              symbolName: symbol.name
+              userId: user?.id,
+              autoSave: true
             }
           });
 
