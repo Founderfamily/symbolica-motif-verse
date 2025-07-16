@@ -62,7 +62,7 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
         .from('symbol_verifications')
         .select(`
           *,
-          profiles!verified_by(username, full_name)
+          profiles(username, full_name)
         `)
         .eq('symbol_id', symbol.id)
         .order('created_at', { ascending: false });
