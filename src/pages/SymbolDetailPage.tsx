@@ -85,7 +85,10 @@ const SymbolDetailPage: React.FC = () => {
   // Trouver l'image principale
   const primaryImage = React.useMemo(() => {
     if (!images || images.length === 0) return null;
-    return images.find(img => img.image_type === 'original') || images[0];
+    // Prioriser l'image marquée comme principale
+    return images.find(img => img.is_primary) || 
+           images.find(img => img.image_type === 'original') || 
+           images[0];
   }, [images]);
 
   // États de chargement et d'erreur

@@ -37,7 +37,8 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
     title: string;
     description: string;
     image_type: 'original' | 'pattern' | 'reuse';
-  }>({ title: '', description: '', image_type: 'original' });
+    is_primary: boolean;
+  }>({ title: '', description: '', image_type: 'original', is_primary: false });
 
   // Vérifier le statut de l'API au chargement
   useEffect(() => {
@@ -158,6 +159,7 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
           title: editingData.title,
           description: editingData.description,
           image_type: editingData.image_type,
+          is_primary: editingData.is_primary,
           updated_at: new Date().toISOString()
         })
         .eq('id', imageId)
@@ -182,8 +184,33 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
     setEditingData({
       title: image.title || '',
       description: image.description || '',
-      image_type: image.image_type
+      image_type: image.image_type,
+      is_primary: image.is_primary || false
     });
+  };
+
+  const togglePrimary = async (imageId: string, currentIsPrimary: boolean) => {
+    try {
+      const { data, error } = await supabase
+        .from('symbol_images')
+        .update({
+          is_primary: !currentIsPrimary,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', imageId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Mettre à jour la liste des images
+      onImagesUpdated(images.map(img => img.id === imageId ? data : img));
+      toast.success(data.is_primary ? 'Image définie comme principale' : 'Image retirée comme principale');
+
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour:', error);
+      toast.error('Erreur lors de la mise à jour de l\'image');
+    }
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -486,6 +513,21 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
                           <option value="pattern">Motif extrait</option>
                           <option value="reuse">Réutilisation</option>
                         </select>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`primary-${image.id}`}
+                            checked={editingData.is_primary}
+                            onChange={(e) => setEditingData(prev => ({ 
+                              ...prev, 
+                              is_primary: e.target.checked
+                            }))}
+                            className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor={`primary-${image.id}`} className="text-sm text-gray-700">
+                            Image principale
+                          </label>
+                        </div>
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => updateImage(image.id)}>
                             <Save className="h-3 w-3 mr-1" />
@@ -505,11 +547,25 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
                             {image.image_type === 'original' ? 'Original' : 
                              image.image_type === 'pattern' ? 'Motif' : 'Réutilisation'}
                           </Badge>
+                          {image.is_primary && (
+                            <Badge variant="default" className="text-xs bg-amber-500">
+                              Principale
+                            </Badge>
+                          )}
                         </div>
                         {image.description && (
                           <p className="text-xs text-slate-600 mb-2">{image.description}</p>
                         )}
                         <div className="flex gap-1">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => togglePrimary(image.id, image.is_primary || false)}
+                            className={image.is_primary ? "text-amber-600 hover:text-amber-700" : "text-gray-600 hover:text-gray-700"}
+                          >
+                            {image.is_primary ? <Star className="h-3 w-3 mr-1 fill-current" /> : <StarOff className="h-3 w-3 mr-1" />}
+                            {image.is_primary ? 'Défaut' : 'Définir'}
+                          </Button>
                           <Button size="sm" variant="outline" onClick={() => startEditing(image)}>
                             <Edit className="h-3 w-3 mr-1" />
                             Éditer

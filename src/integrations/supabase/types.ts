@@ -2154,6 +2154,7 @@ export type Database = {
           id: string
           image_type: Database["public"]["Enums"]["image_type"]
           image_url: string
+          is_primary: boolean | null
           location: string | null
           source: string | null
           symbol_id: string
@@ -2169,6 +2170,7 @@ export type Database = {
           id?: string
           image_type: Database["public"]["Enums"]["image_type"]
           image_url: string
+          is_primary?: boolean | null
           location?: string | null
           source?: string | null
           symbol_id: string
@@ -2184,6 +2186,7 @@ export type Database = {
           id?: string
           image_type?: Database["public"]["Enums"]["image_type"]
           image_url?: string
+          is_primary?: boolean | null
           location?: string | null
           source?: string | null
           symbol_id?: string

@@ -42,6 +42,7 @@ export interface SymbolImage {
   location: string | null;
   source: string | null;
   tags: string[] | null;
+  is_primary?: boolean | null;
   translations?: {
     [language: string]: {
       title?: string;

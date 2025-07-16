@@ -61,6 +61,7 @@ class SupabaseSymbolService {
         .from('symbol_images')
         .select('*')
         .eq('symbol_id', symbolId)
+        .order('is_primary', { ascending: false })
         .order('created_at');
 
       if (error) {

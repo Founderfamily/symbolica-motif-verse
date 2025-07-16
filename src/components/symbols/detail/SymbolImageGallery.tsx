@@ -13,11 +13,17 @@ export const SymbolImageGallery: React.FC<SymbolImageGalleryProps> = ({
   images,
   symbolName
 }) => {
-  if (!images || images.length <= 1) {
+  // Trouver l'image principale et exclure de la galerie
+  const primaryImage = images.find(img => img.is_primary) || 
+                      images.find(img => img.image_type === 'original') || 
+                      images[0];
+  
+  const otherImages = images.filter(img => img.id !== primaryImage?.id);
+  
+  if (otherImages.length === 0) {
     return null;
   }
-
-  const otherImages = images.slice(1);
+  
   const displayImages = otherImages.slice(0, 8);
   const remainingCount = Math.max(0, otherImages.length - 8);
 
