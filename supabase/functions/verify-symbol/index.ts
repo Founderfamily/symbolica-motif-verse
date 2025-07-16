@@ -161,6 +161,15 @@ Format your response with:
   });
 
   const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(`Anthropic API error: ${data.error?.message || response.statusText}`);
+  }
+  
+  if (!data.content || !data.content[0] || !data.content[0].text) {
+    throw new Error('Invalid response format from Anthropic API');
+  }
+  
   return parseVerificationResponse(data.content[0].text, 'anthropic');
 };
 
@@ -207,6 +216,15 @@ Provide verification status, confidence level, summary, and cite your sources.`;
   });
 
   const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(`Perplexity API error: ${data.error?.message || response.statusText}`);
+  }
+  
+  if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+    throw new Error('Invalid response format from Perplexity API');
+  }
+  
   return parseVerificationResponse(data.choices[0].message.content, 'perplexity', data.citations);
 };
 
@@ -248,6 +266,15 @@ Please analyze and provide:
   });
 
   const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(`Gemini API error: ${data.error?.message || response.statusText}`);
+  }
+  
+  if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
+    throw new Error('Invalid response format from Gemini API');
+  }
+  
   return parseVerificationResponse(data.candidates[0].content.parts[0].text, 'gemini');
 };
 
