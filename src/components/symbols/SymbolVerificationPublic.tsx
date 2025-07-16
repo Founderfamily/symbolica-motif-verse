@@ -38,6 +38,7 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
   const [verificationHistory, setVerificationHistory] = React.useState<VerificationHistoryItem[]>([]);
   const [currentVerification, setCurrentVerification] = React.useState<VerificationHistoryItem | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
 
   React.useEffect(() => {
@@ -57,19 +58,24 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
     try {
       setLoading(true);
       
-      // Récupérer toutes les vérifications pour ce symbole
+      console.log('Loading verification history for symbol:', symbol.id);
+      
+      // Récupérer toutes les vérifications pour ce symbole (sans jointure pour simplifier)
       const { data: verifications, error } = await supabase
         .from('symbol_verifications')
-        .select(`
-          *,
-          profiles(username, full_name)
-        `)
+        .select('*')
         .eq('symbol_id', symbol.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('Query result:', { verifications, error });
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       if (verifications && verifications.length > 0) {
+        console.log('Found', verifications.length, 'verifications');
         // Grouper par session de vérification (même created_at approximatif)
         const groupedVerifications = groupVerificationsBySession(verifications);
         
@@ -86,7 +92,7 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
             timestamp: group[0].created_at,
             overallStatus,
             averageConfidence,
-            verifiedBy: group[0].profiles?.full_name || group[0].profiles?.username || 'Inconnu',
+            verifiedBy: 'Système automatique',
             results: group.map(v => ({
               api: v.api,
               status: v.status,
@@ -98,9 +104,15 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
 
         setVerificationHistory(history);
         setCurrentVerification(history[0] || null); // La plus récente
+        setError(null);
+      } else {
+        console.log('No verifications found');
+        setVerificationHistory([]);
+        setCurrentVerification(null);
       }
     } catch (error) {
       console.error('Erreur lors du chargement de l\'historique:', error);
+      setError(error instanceof Error ? error.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
     }
@@ -222,7 +234,23 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
         </Button>
       </div>
 
-      {currentVerification ? (
+      {loading && (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Chargement des vérifications...</p>
+        </div>
+      )}
+
+      {error && (
+        <Alert className="border-red-200 bg-red-50">
+          <XCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            Erreur lors du chargement des vérifications: {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!loading && !error && currentVerification ? (
         <div className="space-y-4">
           {/* Résultat global actuel */}
           <Card className="p-6">
@@ -284,7 +312,7 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
             </div>
           </Card>
         </div>
-      ) : (
+      ) : !loading && !error ? (
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
@@ -292,7 +320,7 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
             Les informations présentées n'ont pas été validées par des sources externes.
           </AlertDescription>
         </Alert>
-      )}
+      ) : null}
 
       {/* Historique des vérifications */}
       {verificationHistory.length > 0 && (
