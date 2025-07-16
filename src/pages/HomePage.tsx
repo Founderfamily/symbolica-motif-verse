@@ -2,7 +2,7 @@
 import React from 'react';
 import Hero from '@/components/sections/Hero';
 import SymbolTriptychSection from '@/components/sections/SymbolTriptychSection';
-import FeaturedCollections from '@/components/sections/FeaturedCollections';
+import SimpleFeaturedCollections from '@/components/sections/SimpleFeaturedCollections';
 import Community from '@/components/sections/Community';
 import QuestsSection from '@/components/sections/QuestsSection';
 import CallToAction from '@/components/sections/CallToAction';
@@ -61,11 +61,11 @@ const HomePage = () => {
       {/* Collections Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'FeaturedCollections')
+          ErrorHandler.handleComponentError(error, errorInfo, 'SimpleFeaturedCollections')
         }
       >
         <section className="relative py-12 bg-gradient-to-r from-stone-100/50 to-amber-50/30">
-          <FeaturedCollections />
+          <SimpleFeaturedCollections />
         </section>
       </ErrorBoundary>
 

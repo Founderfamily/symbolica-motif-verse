@@ -121,23 +121,9 @@ const CollectionCategories: React.FC = () => {
   const { getTranslation } = useCollectionTranslations();
 
   // LOGS DE DEBUG SIMPLIFIÉS
-  console.log('🎯 [CollectionCategories] État actuel:', {
-    collectionsCount: collections?.length || 0,
-    isLoading,
-    hasError: !!error,
-    errorMessage: error?.message
-  });
-
-  const staticCollections = React.useMemo(() => getStaticCollections(currentLanguage), [currentLanguage]);
-  
-  // Logique simplifiée : utiliser les collections de la base si disponibles, sinon fallback statique
+  // Use database collections if available, otherwise show empty state
   const hasValidCollections = collections && Array.isArray(collections) && collections.length > 0;
-  const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : staticCollections;
-
-  console.log('📊 [CollectionCategories] Collections finales:', {
-    sourceType: hasValidCollections ? 'database' : 'static',
-    count: finalCollections.length
-  });
+  const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : [];
 
   // Function to get title from any collection type
   const getCollectionTitle = React.useCallback((collection: UnifiedCollection) => {
@@ -184,16 +170,6 @@ const CollectionCategories: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Debug info en développement */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-blue-50 p-4 rounded-lg text-sm">
-          <strong>Debug Collections:</strong> 
-          {hasValidCollections 
-            ? `${collections.length} collections de la base`
-            : `${staticCollections.length} collections statiques`
-          }
-        </div>
-      )}
 
       {/* Controls Section */}
       <CollectionControls
