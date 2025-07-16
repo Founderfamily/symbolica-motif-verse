@@ -208,6 +208,17 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
         return;
       }
 
+      // Test de la clé API d'abord
+      console.log('Testing OpenAI API access...');
+      const testResponse = await supabase.functions.invoke('test-openai-key');
+      console.log('Test response:', testResponse);
+      
+      if (testResponse.error) {
+        console.error('Test API failed:', testResponse.error);
+        toast.error('Problème avec la clé API OpenAI: ' + testResponse.error.message);
+        return;
+      }
+
       // Appel à l'edge function
       const { data, error } = await supabase.functions.invoke('generate-image-deepseek', {
         body: {
