@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Star, StarOff, Edit, Save, Trash2, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { Upload, X, Star, StarOff, Edit, Save, Trash2, Image as ImageIcon, Sparkles, CheckCircle, XCircle } from 'lucide-react';
 import { SymbolImage } from '@/types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -32,11 +32,34 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
   const [generating, setGenerating] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [editingImage, setEditingImage] = useState<string | null>(null);
+  const [apiStatus, setApiStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
   const [editingData, setEditingData] = useState<{
     title: string;
     description: string;
     image_type: 'original' | 'pattern' | 'reuse';
   }>({ title: '', description: '', image_type: 'original' });
+
+  // Vérifier le statut de l'API au chargement
+  useEffect(() => {
+    const checkApiStatus = async () => {
+      try {
+        const { error } = await supabase.functions.invoke('generate-image-deepseek', {
+          body: { prompt: 'test', symbolName: 'test' }
+        });
+        
+        if (error?.message?.includes('DEEPSEEK_API_KEY')) {
+          setApiStatus('unavailable');
+        } else {
+          setApiStatus('available');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification API:', error);
+        setApiStatus('unavailable');
+      }
+    };
+
+    checkApiStatus();
+  }, []);
 
   const uploadImage = async (file: File) => {
     try {
@@ -298,41 +321,74 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
 
       {/* Générateur d'images IA */}
       <div className="border border-blue-200 rounded-lg p-4 bg-blue-50/50">
-        <Label className="text-base font-semibold text-blue-900 mb-2 block">
-          <Sparkles className="inline h-4 w-4 mr-2" />
-          Générer une image avec IA
-        </Label>
-        <p className="text-sm text-blue-700 mb-3">
-          Décrivez l'image que vous souhaitez générer pour ce symbole
-        </p>
-        
-        <div className="space-y-3">
-          <Textarea
-            placeholder="Ex: Une représentation artistique détaillée du symbole, avec des couleurs vives et un style traditionnel..."
-            value={generatedPrompt}
-            onChange={(e) => setGeneratedPrompt(e.target.value)}
-            rows={3}
-            className="bg-white"
-          />
+        <div className="flex items-center justify-between mb-2">
+          <Label className="text-base font-semibold text-blue-900 flex items-center">
+            <Sparkles className="h-4 w-4 mr-2" />
+            Générer une image avec IA
+          </Label>
           
-          <Button 
-            onClick={generateImage}
-            disabled={generating || !generatedPrompt.trim()}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {generating ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Génération en cours...
-              </>
+          {/* Indicateur de statut API */}
+          <div className="flex items-center gap-2">
+            {apiStatus === 'checking' ? (
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                <div className="animate-spin rounded-full h-3 w-3 border-b border-slate-400"></div>
+                Vérification...
+              </div>
+            ) : apiStatus === 'available' ? (
+              <div className="flex items-center gap-1 text-xs text-green-600">
+                <CheckCircle className="h-3 w-3" />
+                API disponible
+              </div>
             ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Générer l'image
-              </>
+              <div className="flex items-center gap-1 text-xs text-red-600">
+                <XCircle className="h-3 w-3" />
+                API indisponible
+              </div>
             )}
-          </Button>
+          </div>
         </div>
+        
+        {apiStatus === 'unavailable' ? (
+          <div className="bg-red-50 border border-red-200 rounded p-3 mb-3">
+            <p className="text-sm text-red-700 mb-2">
+              ⚠️ La clé API DeepSeek n'est pas configurée. Veuillez la configurer pour utiliser cette fonctionnalité.
+            </p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-blue-700 mb-3">
+              Décrivez l'image que vous souhaitez générer pour ce symbole
+            </p>
+            
+            <div className="space-y-3">
+              <Textarea
+                placeholder="Ex: Une représentation artistique détaillée du symbole, avec des couleurs vives et un style traditionnel..."
+                value={generatedPrompt}
+                onChange={(e) => setGeneratedPrompt(e.target.value)}
+                rows={3}
+                className="bg-white"
+              />
+              
+              <Button 
+                onClick={generateImage}
+                disabled={generating || !generatedPrompt.trim() || apiStatus !== 'available'}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+              {generating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Génération en cours...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Générer l'image
+                </>
+              )}
+            </Button>
+          </div>
+        </>
+        )}
       </div>
 
       {/* Liste des images existantes */}
