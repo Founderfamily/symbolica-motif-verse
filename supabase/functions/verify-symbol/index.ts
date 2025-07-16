@@ -303,34 +303,105 @@ Répondez avec:
   return parseVerificationResponse(data.candidates[0].content.parts[0].text, 'gemini');
 };
 
-const parseVerificationResponse = (response: string, api: string, sources?: string[]) => {
-  // Extract status, confidence, summary and details from response
-  const statusMatch = response.toLowerCase().match(/status:?\s*(verified|disputed|unverified)/);
-  const confidenceMatch = response.match(/confidence:?\s*(\d+)%?/i);
+function extractConfidenceScore(text: string, api: string): number {
+  // Extract confidence percentage from text with multiple patterns
+  const patterns = [
+    /confidence[:\s]*(\d+)%/i,
+    /(\d+)%\s*confidence/i,
+    /score[:\s]*(\d+)%/i,
+    /(\d+)%\s*score/i,
+    /fiabilité[:\s]*(\d+)%/i,
+    /(\d+)%\s*fiabilité/i,
+    /niveau de confiance[:\s]*(\d+)%/i,
+    /(\d+)%\s*niveau de confiance/i
+  ];
   
-  // Default values
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const score = parseInt(match[1]);
+      // If API mentions lack of sources but gives high score, force it down
+      if (score > 30 && hasNoSourcesIndicators(text)) {
+        return Math.min(score, 20);
+      }
+      return score;
+    }
+  }
+  
+  // Check for explicit lack of sources/evidence indicators
+  if (hasNoSourcesIndicators(text)) {
+    return 15; // Very low confidence for no sources
+  }
+  
+  // Default very low confidence if no explicit score found
+  return 15;
+}
+
+function hasNoSourcesIndicators(text: string): boolean {
+  const lowerText = text.toLowerCase();
+  const noSourcesIndicators = [
+    'no reliable sources',
+    'insufficient information',
+    'cannot verify',
+    'pas de sources fiables',
+    'informations insuffisantes',
+    'sources manquantes',
+    'aucune source',
+    'no sources',
+    'lack of sources',
+    'manque de sources',
+    'données insuffisantes',
+    'preuves insuffisantes',
+    'insufficient evidence',
+    'no concrete evidence',
+    'pas de preuves concrètes',
+    'impossible à vérifier',
+    'difficult to verify',
+    'difficile à vérifier',
+    'peu de documentation',
+    'little documentation',
+    'manque de documentation',
+    'lack of documentation'
+  ];
+  
+  return noSourcesIndicators.some(indicator => lowerText.includes(indicator));
+}
+
+const parseVerificationResponse = (response: string, api: string, sources?: string[]) => {
+  // Extract status from response
+  const statusMatch = response.toLowerCase().match(/status:?\s*(verified|disputed|unverified)/);
+  
+  // Use improved confidence extraction
+  const confidence = extractConfidenceScore(response, api);
+  
+  // Determine status based on content analysis
   let status = 'unverified';
-  let confidence = 50;
   
   if (statusMatch) {
     status = statusMatch[1];
   } else {
-    // Fallback: analyze content for verification keywords
-    const verifiedKeywords = ['verified', 'accurate', 'correct', 'authentic', 'confirmed'];
-    const disputedKeywords = ['disputed', 'questionable', 'unclear', 'uncertain', 'partial'];
-    
+    // Analyze content for verification keywords and lack of sources
     const lowerResponse = response.toLowerCase();
-    if (verifiedKeywords.some(word => lowerResponse.includes(word))) {
-      status = 'verified';
-      confidence = 75;
-    } else if (disputedKeywords.some(word => lowerResponse.includes(word))) {
-      status = 'disputed';
-      confidence = 40;
+    
+    if (hasNoSourcesIndicators(response)) {
+      status = 'unverified';
+    } else {
+      const verifiedKeywords = ['verified', 'accurate', 'correct', 'authentic', 'confirmed'];
+      const disputedKeywords = ['disputed', 'questionable', 'unclear', 'uncertain', 'partial'];
+      
+      if (verifiedKeywords.some(word => lowerResponse.includes(word))) {
+        status = 'verified';
+      } else if (disputedKeywords.some(word => lowerResponse.includes(word))) {
+        status = 'disputed';
+      }
     }
   }
   
-  if (confidenceMatch) {
-    confidence = parseInt(confidenceMatch[1]);
+  // Force status based on confidence level and content analysis
+  if (confidence <= 25 || hasNoSourcesIndicators(response)) {
+    status = 'unverified';
+  } else if (confidence <= 50) {
+    status = 'disputed';
   }
   
   // Extract summary (first paragraph or first few sentences)

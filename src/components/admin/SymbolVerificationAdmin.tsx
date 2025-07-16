@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,8 @@ import {
   Search, 
   ShieldCheck,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Save
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -77,6 +78,7 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
   const [results, setResults] = useState<Record<string, VerificationResult>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('overview');
+  const [saving, setSaving] = useState(false);
 
   const extractConfidenceScore = (text: string, api: string): number => {
     // Extraction plus stricte des scores de confiance
@@ -260,6 +262,42 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
     return Math.round(validResults.reduce((acc, r) => acc + r.confidence, 0) / validResults.length);
   };
 
+  const saveResults = async () => {
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Utilisateur non connecté');
+
+      const validResults = Object.values(results).filter(r => r.status !== 'error');
+      if (validResults.length === 0) {
+        toast.error('Aucun résultat à sauvegarder');
+        return;
+      }
+
+      // Sauvegarder chaque résultat d'API
+      const promises = validResults.map(result => 
+        supabase.from('symbol_verifications').insert({
+          symbol_id: symbol.id,
+          api: result.api,
+          status: result.status,
+          confidence: result.confidence,
+          summary: result.summary,
+          details: result.details,
+          sources: result.sources || [],
+          verified_by: user.id
+        })
+      );
+
+      await Promise.all(promises);
+      toast.success('Résultats de vérification sauvegardés avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      toast.error('Erreur lors de la sauvegarde des résultats');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -272,18 +310,36 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
             Interface administrateur pour vérifier l'exactitude des informations
           </p>
         </div>
-        <Button 
-          onClick={verifyAll} 
-          disabled={Object.values(loading).some(Boolean)}
-          className="flex items-center gap-2"
-        >
-          {Object.values(loading).some(Boolean) ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Search className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={verifyAll} 
+            disabled={Object.values(loading).some(Boolean)}
+            className="flex items-center gap-2"
+          >
+            {Object.values(loading).some(Boolean) ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Search className="h-4 w-4" />
+            )}
+            Vérifier tout
+          </Button>
+          
+          {Object.keys(results).length > 0 && (
+            <Button 
+              onClick={saveResults} 
+              disabled={saving || Object.values(results).filter(r => r.status !== 'error').length === 0}
+              variant="default"
+              className="flex items-center gap-2"
+            >
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Sauvegarder
+            </Button>
           )}
-          Vérifier tout
-        </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

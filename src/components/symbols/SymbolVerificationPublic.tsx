@@ -10,6 +10,7 @@ import {
   Clock,
   Info
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SymbolVerificationPublicProps {
   symbol: {
@@ -33,9 +34,109 @@ interface VerificationHistoryItem {
 }
 
 export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> = ({ symbol }) => {
-  // TODO: Récupérer l'historique des vérifications depuis la base de données
-  const [verificationHistory] = React.useState<VerificationHistoryItem[]>([]);
-  const [currentVerification] = React.useState<VerificationHistoryItem | null>(null);
+  const [verificationHistory, setVerificationHistory] = React.useState<VerificationHistoryItem[]>([]);
+  const [currentVerification, setCurrentVerification] = React.useState<VerificationHistoryItem | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    loadVerificationHistory();
+  }, [symbol.id]);
+
+  const loadVerificationHistory = async () => {
+    try {
+      setLoading(true);
+      
+      // Récupérer toutes les vérifications pour ce symbole
+      const { data: verifications, error } = await supabase
+        .from('symbol_verifications')
+        .select(`
+          *,
+          profiles!verified_by(username, full_name)
+        `)
+        .eq('symbol_id', symbol.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (verifications && verifications.length > 0) {
+        // Grouper par session de vérification (même created_at approximatif)
+        const groupedVerifications = groupVerificationsBySession(verifications);
+        
+        // Créer l'historique des vérifications
+        const history = groupedVerifications.map(group => {
+          const averageConfidence = Math.round(
+            group.reduce((acc, v) => acc + v.confidence, 0) / group.length
+          );
+          
+          const overallStatus = determineOverallStatus(group, averageConfidence);
+          
+          return {
+            id: group[0].id,
+            timestamp: group[0].created_at,
+            overallStatus,
+            averageConfidence,
+            verifiedBy: group[0].profiles?.full_name || group[0].profiles?.username || 'Inconnu',
+            results: group.map(v => ({
+              api: v.api,
+              status: v.status,
+              confidence: v.confidence,
+              summary: v.summary
+            }))
+          };
+        });
+
+        setVerificationHistory(history);
+        setCurrentVerification(history[0] || null); // La plus récente
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement de l\'historique:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const groupVerificationsBySession = (verifications: any[]) => {
+    // Grouper les vérifications par session (même heure approximative)
+    const sessions: any[][] = [];
+    const sortedVerifications = [...verifications].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    for (const verification of sortedVerifications) {
+      const verificationTime = new Date(verification.created_at).getTime();
+      
+      // Chercher une session existante dans une fenêtre de 10 minutes
+      const existingSession = sessions.find(session => {
+        const sessionTime = new Date(session[0].created_at).getTime();
+        return Math.abs(verificationTime - sessionTime) < 10 * 60 * 1000; // 10 minutes
+      });
+
+      if (existingSession) {
+        existingSession.push(verification);
+      } else {
+        sessions.push([verification]);
+      }
+    }
+
+    return sessions;
+  };
+
+  const determineOverallStatus = (verifications: any[], averageConfidence: number): 'verified' | 'disputed' | 'unverified' => {
+    const noSourcesCount = verifications.filter(v => 
+      v.details.toLowerCase().includes('pas de sources') ||
+      v.details.toLowerCase().includes('aucune source') ||
+      v.details.toLowerCase().includes('manque de sources')
+    ).length;
+
+    // Logique stricte : si plusieurs APIs mentionnent le manque de sources, forcer "unverified"
+    if (noSourcesCount >= Math.ceil(verifications.length / 2) || averageConfidence < 30) {
+      return 'unverified';
+    } else if (averageConfidence >= 30 && averageConfidence < 60) {
+      return 'disputed';
+    } else {
+      return 'verified';
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {

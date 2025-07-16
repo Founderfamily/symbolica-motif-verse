@@ -2354,6 +2354,56 @@ export type Database = {
           },
         ]
       }
+      symbol_verifications: {
+        Row: {
+          api: string
+          confidence: number
+          created_at: string
+          details: string | null
+          id: string
+          sources: Json | null
+          status: string
+          summary: string | null
+          symbol_id: string
+          updated_at: string
+          verified_by: string | null
+        }
+        Insert: {
+          api: string
+          confidence?: number
+          created_at?: string
+          details?: string | null
+          id?: string
+          sources?: Json | null
+          status: string
+          summary?: string | null
+          symbol_id: string
+          updated_at?: string
+          verified_by?: string | null
+        }
+        Update: {
+          api?: string
+          confidence?: number
+          created_at?: string
+          details?: string | null
+          id?: string
+          sources?: Json | null
+          status?: string
+          summary?: string | null
+          symbol_id?: string
+          updated_at?: string
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_verifications_symbol_id_fkey"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       symbols: {
         Row: {
           created_at: string | null
