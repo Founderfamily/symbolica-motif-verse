@@ -32,30 +32,38 @@ const verifyWithOpenAI = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   if (!apiKey) throw new Error('OpenAI API key not configured');
 
-  const sourcesText = symbol.sources && symbol.sources.length > 0 
-    ? `\n\nSOURCES DE RÉFÉRENCE DISPONIBLES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nVeuillez consulter ces sources pour valider les informations ci-dessus.\n`
-    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE FOURNIE - Veuillez évaluer uniquement sur vos connaissances générales.\n';
+  const existingSourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nSOURCES DE RÉFÉRENCE DOCUMENTÉES:\n${symbol.sources.map(s => `- ${s.title || s.description} (${s.type || 'source'}): ${s.url || s.citation || 'non spécifiée'}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n`
+    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE DOCUMENTÉE.\n';
 
-  const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
+  const prompt = `PHASE 1 - RECHERCHE DE SOURCES ACADÉMIQUES:
+En tant qu'expert en histoire et symbolisme, listez d'abord 3-5 sources académiques légitimes que vous connaissez sur ce symbole culturel:
 
 Nom: ${symbol.name}
 Culture: ${symbol.culture}
-Période: ${symbol.period}
-Description: ${symbol.description || 'Non spécifiée'}
-Signification: ${symbol.significance || 'Non spécifiée'}
-Contexte historique: ${symbol.historical_context || 'Non spécifié'}${sourcesText}
-Veuillez évaluer:
+Période: ${symbol.period}${existingSourcesText}
+Recherchez et listez des sources fiables comme:
+- Musées nationaux et institutions culturelles
+- Ouvrages académiques de référence  
+- Articles de revues scientifiques
+- Collections de musées spécialisés
+
+Format pour les nouvelles sources trouvées:
+SOURCES SUPPLÉMENTAIRES TROUVÉES:
+- [Description] - [Citation complète]
+
+PHASE 2 - ÉVALUATION:
+Maintenant, en considérant TOUTES les sources (documentées + trouvées), évaluez:
 1. L'exactitude historique de ces informations
 2. La cohérence entre le nom, la culture et la période
 3. La plausibilité de la description et de la signification
-4. Toute incohérence ou erreur potentielle
-5. La qualité et fiabilité des sources fournies (si disponibles)
+4. La qualité et fiabilité de toutes les sources disponibles
 
 Répondez avec:
 - Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
-- Un niveau de confiance (0-100%)
+- Un niveau de confiance (0-100%) - BONUS si sources fiables trouvées
 - Un résumé en 2-3 phrases
-- Une analyse détaillée avec vos sources de référence`;
+- Une analyse détaillée`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -92,30 +100,38 @@ const verifyWithDeepSeek = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('DEEPSEEK_API_KEY');
   if (!apiKey) throw new Error('DeepSeek API key not configured');
 
-  const sourcesText = symbol.sources && symbol.sources.length > 0 
-    ? `\n\nAVAILABLE REFERENCE SOURCES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nPlease consult these sources to validate the information above. These sources should significantly influence your confidence level.\n`
-    : '\n\nNO REFERENCE SOURCES PROVIDED - Please evaluate based only on general knowledge. This should result in a lower confidence level.\n';
+  const existingSourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nDOCUMENTED REFERENCE SOURCES:\n${symbol.sources.map(s => `- ${s.title || s.description} (${s.type || 'source'}): ${s.url || s.citation || 'not specified'}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n`
+    : '\n\nNO DOCUMENTED REFERENCE SOURCES.\n';
 
-  const prompt = `Analyze this cultural symbol for historical accuracy:
+  const prompt = `PHASE 1 - ACADEMIC SOURCE SEARCH:
+As a cultural historian expert, first list 3-5 legitimate academic sources you know about this cultural symbol:
 
 Symbol: ${symbol.name}
 Culture: ${symbol.culture}
-Period: ${symbol.period}
-Description: ${symbol.description || 'Not specified'}
-Significance: ${symbol.significance || 'Not specified'}
-Historical context: ${symbol.historical_context || 'Not specified'}${sourcesText}
-Please verify:
+Period: ${symbol.period}${existingSourcesText}
+Search for reliable sources such as:
+- National museums and cultural institutions
+- Academic reference works
+- Scientific journal articles
+- Specialized museum collections
+
+Format for found sources:
+ADDITIONAL SOURCES FOUND:
+- [Description] - [Complete citation]
+
+PHASE 2 - EVALUATION:
+Now, considering ALL sources (documented + found), evaluate:
 1. Historical accuracy of this information
 2. Consistency between name, culture and period
 3. Plausibility of description and significance
-4. Any inconsistencies or potential errors
-5. Quality and reliability of provided sources (if available)
+4. Quality and reliability of all available sources
 
 Please provide:
 - Status: verified/disputed/unverified
-- Confidence level (0-100%) - Consider whether reliable sources are provided
+- Confidence level (0-100%) - BONUS if reliable sources found
 - Brief summary in 2-3 sentences
-- Detailed analysis with your reference sources`;
+- Detailed analysis`;
 
   const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
     method: 'POST',
@@ -152,30 +168,38 @@ const verifyWithAnthropic = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
   if (!apiKey) throw new Error('Anthropic API key not configured');
 
-  const sourcesText = symbol.sources && symbol.sources.length > 0 
-    ? `\n\nSOURCES DE RÉFÉRENCE DISPONIBLES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nVeuillez consulter ces sources pour valider les informations ci-dessus.\n`
-    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE FOURNIE - Veuillez évaluer uniquement sur vos connaissances générales.\n';
+  const existingSourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nSOURCES DE RÉFÉRENCE DOCUMENTÉES:\n${symbol.sources.map(s => `- ${s.title || s.description} (${s.type || 'source'}): ${s.url || s.citation || 'non spécifiée'}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n`
+    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE DOCUMENTÉE.\n';
 
-  const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
+  const prompt = `PHASE 1 - RECHERCHE DE SOURCES ACADÉMIQUES:
+En tant qu'expert en histoire et symbolisme, listez d'abord 3-5 sources académiques légitimes que vous connaissez sur ce symbole culturel:
 
 Nom: ${symbol.name}
 Culture: ${symbol.culture}
-Période: ${symbol.period}
-Description: ${symbol.description || 'Non spécifiée'}
-Signification: ${symbol.significance || 'Non spécifiée'}
-Contexte historique: ${symbol.historical_context || 'Non spécifié'}${sourcesText}
-Veuillez évaluer:
+Période: ${symbol.period}${existingSourcesText}
+Recherchez des sources fiables comme:
+- Musées nationaux et institutions culturelles
+- Ouvrages académiques de référence
+- Articles de revues scientifiques
+- Collections de musées spécialisés
+
+Format pour les nouvelles sources trouvées:
+SOURCES SUPPLÉMENTAIRES TROUVÉES:
+- [Description] - [Citation complète]
+
+PHASE 2 - ÉVALUATION:
+Maintenant, en considérant TOUTES les sources (documentées + trouvées), évaluez:
 1. L'exactitude historique de ces informations
 2. La cohérence entre le nom, la culture et la période
 3. La plausibilité de la description et de la signification
-4. Toute incohérence ou erreur potentielle
-5. La qualité et fiabilité des sources fournies (si disponibles)
+4. La qualité et fiabilité de toutes les sources disponibles
 
 Répondez avec:
 - Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
-- Un niveau de confiance (0-100%)
+- Un niveau de confiance (0-100%) - BONUS si sources fiables trouvées
 - Un résumé en 2-3 phrases
-- Une analyse détaillée avec vos sources de référence`;
+- Une analyse détaillée`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -209,30 +233,38 @@ const verifyWithPerplexity = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('PERPLEXITY_API_KEY');
   if (!apiKey) throw new Error('Perplexity API key not configured');
 
-  const sourcesText = symbol.sources && symbol.sources.length > 0 
-    ? `\n\nSOURCES DE RÉFÉRENCE DISPONIBLES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nVeuillez consulter ces sources pour valider les informations ci-dessus. Ces sources doivent significativement influencer votre niveau de confiance.\n`
-    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE FOURNIE - Veuillez évaluer uniquement sur vos connaissances générales. Ceci devrait résulter en un niveau de confiance plus faible.\n';
+  const existingSourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nSOURCES DE RÉFÉRENCE DOCUMENTÉES:\n${symbol.sources.map(s => `- ${s.title || s.description} (${s.type || 'source'}): ${s.url || s.citation || 'non spécifiée'}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n`
+    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE DOCUMENTÉE.\n';
 
-  const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
+  const prompt = `PHASE 1 - RECHERCHE DE SOURCES ACADÉMIQUES:
+En tant qu'expert en histoire et symbolisme, listez d'abord 3-5 sources académiques légitimes que vous connaissez sur ce symbole culturel:
 
 Nom: ${symbol.name}
 Culture: ${symbol.culture}
-Période: ${symbol.period}
-Description: ${symbol.description || 'Non spécifiée'}
-Signification: ${symbol.significance || 'Non spécifiée'}
-Contexte historique: ${symbol.historical_context || 'Non spécifié'}${sourcesText}
-Veuillez évaluer:
+Période: ${symbol.period}${existingSourcesText}
+Recherchez des sources fiables comme:
+- Musées nationaux et institutions culturelles
+- Ouvrages académiques de référence
+- Articles de revues scientifiques
+- Collections de musées spécialisés
+
+Format pour les nouvelles sources trouvées:
+SOURCES SUPPLÉMENTAIRES TROUVÉES:
+- [Description] - [Citation complète]
+
+PHASE 2 - ÉVALUATION:
+Maintenant, en considérant TOUTES les sources (documentées + trouvées), évaluez:
 1. L'exactitude historique de ces informations
 2. La cohérence entre le nom, la culture et la période
 3. La plausibilité de la description et de la signification
-4. Toute incohérence ou erreur potentielle
-5. La qualité et fiabilité des sources fournies (si disponibles)
+4. La qualité et fiabilité de toutes les sources disponibles
 
 Répondez avec:
 - Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
-- Un niveau de confiance (0-100%) - Considérez si des sources fiables sont fournies
+- Un niveau de confiance (0-100%) - BONUS si sources fiables trouvées
 - Un résumé en 2-3 phrases
-- Une analyse détaillée avec vos sources de référence`;
+- Une analyse détaillée`;
 
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
@@ -272,30 +304,38 @@ const verifyWithGemini = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) throw new Error('Gemini API key not configured');
 
-  const sourcesText = symbol.sources && symbol.sources.length > 0 
-    ? `\n\nSOURCES DE RÉFÉRENCE DISPONIBLES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nVeuillez consulter ces sources pour valider les informations ci-dessus. Ces sources doivent significativement influencer votre niveau de confiance.\n`
-    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE FOURNIE - Veuillez évaluer uniquement sur vos connaissances générales. Ceci devrait résulter en un niveau de confiance plus faible.\n';
+  const existingSourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nSOURCES DE RÉFÉRENCE DOCUMENTÉES:\n${symbol.sources.map(s => `- ${s.title || s.description} (${s.type || 'source'}): ${s.url || s.citation || 'non spécifiée'}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n`
+    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE DOCUMENTÉE.\n';
 
-  const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
+  const prompt = `PHASE 1 - RECHERCHE DE SOURCES ACADÉMIQUES:
+En tant qu'expert en histoire et symbolisme, listez d'abord 3-5 sources académiques légitimes que vous connaissez sur ce symbole culturel:
 
 Nom: ${symbol.name}
 Culture: ${symbol.culture}
-Période: ${symbol.period}
-Description: ${symbol.description || 'Non spécifiée'}
-Signification: ${symbol.significance || 'Non spécifiée'}
-Contexte historique: ${symbol.historical_context || 'Non spécifié'}${sourcesText}
-Veuillez évaluer:
+Période: ${symbol.period}${existingSourcesText}
+Recherchez des sources fiables comme:
+- Musées nationaux et institutions culturelles
+- Ouvrages académiques de référence
+- Articles de revues scientifiques
+- Collections de musées spécialisés
+
+Format pour les nouvelles sources trouvées:
+SOURCES SUPPLÉMENTAIRES TROUVÉES:
+- [Description] - [Citation complète]
+
+PHASE 2 - ÉVALUATION:
+Maintenant, en considérant TOUTES les sources (documentées + trouvées), évaluez:
 1. L'exactitude historique de ces informations
 2. La cohérence entre le nom, la culture et la période
 3. La plausibilité de la description et de la signification
-4. Toute incohérence ou erreur potentielle
-5. La qualité et fiabilité des sources fournies (si disponibles)
+4. La qualité et fiabilité de toutes les sources disponibles
 
 Répondez avec:
 - Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
-- Un niveau de confiance (0-100%) - Considérez si des sources fiables sont fournies
+- Un niveau de confiance (0-100%) - BONUS si sources fiables trouvées
 - Un résumé en 2-3 phrases
-- Une analyse détaillée avec vos sources de référence`;
+- Une analyse détaillée`;
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',

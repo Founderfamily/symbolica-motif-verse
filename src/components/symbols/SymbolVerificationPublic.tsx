@@ -324,18 +324,19 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
             </div>
           </Card>
 
-          {/* Sources documentées */}
+          {/* Sources de référence existantes */}
           {symbol.sources && symbol.sources.length > 0 && (
-            <Card className="p-6 border-green-200 bg-green-50">
+            <Card className="p-6 border-blue-200 bg-blue-50">
               <div className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div className="space-y-2">
-                  <h4 className="text-md font-semibold text-green-800">Sources documentées</h4>
+                  <h4 className="text-md font-semibold text-blue-800">Sources de référence documentées</h4>
+                  <p className="text-xs text-blue-600 mb-3">Ces sources étaient déjà documentées pour ce symbole et ont été prises en compte par les IA dans leur évaluation.</p>
                   <div className="space-y-2">
                     {symbol.sources.map((source: any, index: number) => (
-                      <div key={index} className="text-sm text-green-700">
+                      <div key={index} className="text-sm text-blue-700 p-2 bg-blue-100 rounded border border-blue-200">
                         <p>{source.description}</p>
-                        <div className="text-xs text-green-600">
+                        <div className="text-xs text-blue-600 mt-1">
                           <strong>Source :</strong> {source.citation}
                         </div>
                       </div>
