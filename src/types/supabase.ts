@@ -18,6 +18,11 @@ export interface SymbolData {
   historical_context?: string | null;
   related_symbols?: string[] | null;
   tags?: string[] | null;
+  sources?: Array<{
+    title: string;
+    url: string;
+    type: string;
+  }> | Json | null;
   translations?: {
     [language: string]: {
       name: string;

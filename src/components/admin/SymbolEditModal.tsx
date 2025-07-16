@@ -6,7 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Save, X, Images, ShieldCheck } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Edit, Save, X, Images, ShieldCheck, Plus, ExternalLink, Trash2 } from 'lucide-react';
 import { SymbolData, SymbolImage } from '@/types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -37,6 +39,14 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
   trigger
 }) => {
   const [open, setOpen] = useState(false);
+  
+  // Helper function to ensure sources is an array
+  const getSourcesArray = (sources: any): Array<{title: string, url: string, type: string}> => {
+    if (!sources) return [];
+    if (Array.isArray(sources)) return sources;
+    return [];
+  };
+  
   const [formData, setFormData] = useState({
     name: symbol.name,
     culture: symbol.culture,
@@ -47,7 +57,8 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
     tags: symbol.tags || [],
     medium: symbol.medium || [],
     technique: symbol.technique || [],
-    function: symbol.function || []
+    function: symbol.function || [],
+    sources: getSourcesArray(symbol.sources)
   });
   const [saving, setSaving] = useState(false);
   const [selectedCollections, setSelectedCollections] = useState<Collection[]>([]);
@@ -57,6 +68,9 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
   const [mediumInput, setMediumInput] = useState('');
   const [techniqueInput, setTechniqueInput] = useState('');
   const [functionInput, setFunctionInput] = useState('');
+  
+  // États pour les sources
+  const [newSource, setNewSource] = useState({ title: '', url: '', type: 'article' });
 
   // Récupérer les images du symbole
   const { data: symbolImages, refetch: refetchImages } = useSymbolImages(symbol.id);
@@ -148,6 +162,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
           medium: formData.medium,
           technique: formData.technique,
           function: formData.function,
+          sources: formData.sources,
           updated_at: new Date().toISOString()
         })
         .eq('id', symbol.id)
@@ -210,6 +225,33 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
     refetchImages();
   };
 
+  // Fonctions pour gérer les sources
+  const addSource = () => {
+    if (newSource.title.trim() && newSource.url.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        sources: [...prev.sources, { ...newSource }]
+      }));
+      setNewSource({ title: '', url: '', type: 'article' });
+    }
+  };
+
+  const removeSource = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      sources: prev.sources.filter((_, i) => i !== index)
+    }));
+  };
+
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const defaultTrigger = (
     <Button variant="outline" size="sm" className="gap-2">
       <Edit className="h-4 w-4" />
@@ -228,8 +270,12 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
         </DialogHeader>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="general">Informations générales</TabsTrigger>
+            <TabsTrigger value="sources" className="gap-2">
+              <ExternalLink className="h-4 w-4" />
+              Sources ({formData.sources.length})
+            </TabsTrigger>
             <TabsTrigger value="images" className="gap-2">
               <Images className="h-4 w-4" />
               Images ({localImages.length})
@@ -461,6 +507,139 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
               </div>
             </div>
 
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleSave} disabled={saving} className="gap-2">
+                <Save className="h-4 w-4" />
+                {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="sources" className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Sources de référence</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Ajoutez des liens vers des sources externes (articles, documents académiques, sites officiels) 
+                  qui aideront l'IA à mieux vérifier et contextualiser ce symbole.
+                </p>
+              </div>
+
+              {/* Formulaire d'ajout de source */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Ajouter une nouvelle source
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="source-title">Titre de la source</Label>
+                      <Input
+                        id="source-title"
+                        placeholder="Ex: Article France Bleu sur l'Aigle de Reims"
+                        value={newSource.title}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, title: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="source-type">Type de source</Label>
+                      <Select 
+                        value={newSource.type} 
+                        onValueChange={(value) => setNewSource(prev => ({ ...prev, type: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="article">Article de presse</SelectItem>
+                          <SelectItem value="academic">Document académique</SelectItem>
+                          <SelectItem value="museum">Site de musée</SelectItem>
+                          <SelectItem value="official">Site officiel</SelectItem>
+                          <SelectItem value="book">Livre/Ouvrage</SelectItem>
+                          <SelectItem value="other">Autre</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="source-url">URL de la source</Label>
+                    <Input
+                      id="source-url"
+                      type="url"
+                      placeholder="https://..."
+                      value={newSource.url}
+                      onChange={(e) => setNewSource(prev => ({ ...prev, url: e.target.value }))}
+                      className={newSource.url && !isValidUrl(newSource.url) ? 'border-destructive' : ''}
+                    />
+                    {newSource.url && !isValidUrl(newSource.url) && (
+                      <p className="text-sm text-destructive mt-1">Veuillez entrer une URL valide</p>
+                    )}
+                  </div>
+                  <Button 
+                    onClick={addSource}
+                    disabled={!newSource.title.trim() || !newSource.url.trim() || !isValidUrl(newSource.url)}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Ajouter la source
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Liste des sources existantes */}
+              <div className="space-y-3">
+                <h4 className="font-medium">Sources ajoutées ({formData.sources.length})</h4>
+                {formData.sources.length === 0 ? (
+                  <p className="text-sm text-muted-foreground italic">Aucune source ajoutée pour le moment</p>
+                ) : (
+                  formData.sources.map((source, index) => (
+                    <Card key={index} className="border-l-4 border-l-primary">
+                      <CardContent className="pt-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                              <h5 className="font-medium">{source.title}</h5>
+                              <Badge variant="outline" className="text-xs">
+                                {source.type === 'article' && 'Article'}
+                                {source.type === 'academic' && 'Académique'}
+                                {source.type === 'museum' && 'Musée'}
+                                {source.type === 'official' && 'Officiel'}
+                                {source.type === 'book' && 'Livre'}
+                                {source.type === 'other' && 'Autre'}
+                              </Badge>
+                            </div>
+                            <a 
+                              href={source.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-sm text-primary hover:underline break-all"
+                            >
+                              {source.url}
+                            </a>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeSource(index)}
+                            className="gap-1 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+            
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setOpen(false)}>
                 Annuler
