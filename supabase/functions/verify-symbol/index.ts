@@ -744,8 +744,13 @@ function extractSourcesFromResponse(response: string): Array<{title: string, url
 }
 
 const parseVerificationResponse = (response: string, api: string, sources?: string[]) => {
-  // Extract status from response
-  const statusMatch = response.toLowerCase().match(/status:?\s*(verified|disputed|unverified)/);
+  // Extract status from response with improved patterns for different APIs
+  let statusMatch = response.toLowerCase().match(/status:?\s*(verified|disputed|unverified)/);
+  
+  // Special handling for Perplexity format: "Statut : **verified**"
+  if (!statusMatch && api === 'perplexity') {
+    statusMatch = response.match(/statut\s*:\s*\*\*(verified|disputed|unverified)\*\*/i);
+  }
   
   // Use improved confidence extraction
   const confidence = extractConfidenceScore(response, api);
@@ -757,7 +762,7 @@ const parseVerificationResponse = (response: string, api: string, sources?: stri
   let status = 'unverified';
   
   if (statusMatch) {
-    status = statusMatch[1];
+    status = statusMatch[1].toLowerCase();
   } else {
     // Analyze content for verification keywords and lack of sources
     const lowerResponse = response.toLowerCase();
@@ -765,8 +770,8 @@ const parseVerificationResponse = (response: string, api: string, sources?: stri
     if (hasNoSourcesIndicators(response)) {
       status = 'unverified';
     } else {
-      const verifiedKeywords = ['verified', 'accurate', 'correct', 'authentic', 'confirmed'];
-      const disputedKeywords = ['disputed', 'questionable', 'unclear', 'uncertain', 'partial'];
+      const verifiedKeywords = ['verified', 'accurate', 'correct', 'authentic', 'confirmed', 'vérifié'];
+      const disputedKeywords = ['disputed', 'questionable', 'unclear', 'uncertain', 'partial', 'contesté'];
       
       if (verifiedKeywords.some(word => lowerResponse.includes(word))) {
         status = 'verified';
@@ -776,13 +781,14 @@ const parseVerificationResponse = (response: string, api: string, sources?: stri
     }
   }
   
-  // Force status based on confidence level and content analysis
-  if (confidence <= 30 || hasNoSourcesIndicators(response)) {
-    status = 'unverified';
-  } else if (confidence <= 60) {
-    status = 'disputed';
-  } else if (confidence >= 75 || hasReliableSourcesIndicators(response)) {
+  // Prioritize confidence over content analysis for final status
+  // If confidence is high (≥70%), force verified status regardless of source mentions
+  if (confidence >= 70) {
     status = 'verified';
+  } else if (confidence >= 50) {
+    status = 'disputed'; 
+  } else if (confidence < 30 || hasNoSourcesIndicators(response)) {
+    status = 'unverified';
   }
   
   // Extract summary (first paragraph or first few sentences)

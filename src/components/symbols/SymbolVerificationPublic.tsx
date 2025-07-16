@@ -155,19 +155,14 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
   };
 
   const determineOverallStatus = (verifications: any[], averageConfidence: number): 'verified' | 'disputed' | 'unverified' => {
-    const noSourcesCount = verifications.filter(v => 
-      v.details.toLowerCase().includes('pas de sources') ||
-      v.details.toLowerCase().includes('aucune source') ||
-      v.details.toLowerCase().includes('manque de sources')
-    ).length;
-
-    // Logique stricte : si plusieurs APIs mentionnent le manque de sources, forcer "unverified"
-    if (noSourcesCount >= Math.ceil(verifications.length / 2) || averageConfidence < 30) {
-      return 'unverified';
-    } else if (averageConfidence >= 30 && averageConfidence < 60) {
+    // Prioritize average confidence over individual API source mentions
+    // If confidence is high, trust the AI verification regardless of source mentions
+    if (averageConfidence >= 70) {
+      return 'verified';
+    } else if (averageConfidence >= 50) {
       return 'disputed';
     } else {
-      return 'verified';
+      return 'unverified';
     }
   };
 
