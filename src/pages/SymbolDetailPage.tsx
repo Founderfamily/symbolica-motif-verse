@@ -554,7 +554,13 @@ const SymbolDetailPage: React.FC = () => {
 
           {activeSection === 'verification' && (
             <div key={refreshKey}>
-              <SymbolVerificationPublic symbol={displaySymbol} />
+              <SymbolVerificationPublic 
+                symbol={{
+                  id: displaySymbol.id,
+                  name: displaySymbol.name,
+                  sources: Array.isArray(displaySymbol.sources) ? displaySymbol.sources : []
+                }} 
+              />
             </div>
           )}
 
