@@ -200,15 +200,19 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
 
     try {
       setGenerating(true);
+      console.log('🔄 ÉTAPE 1: Début de la génération d\'image');
       
       // Vérifier que l'utilisateur est connecté
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
+        console.log('❌ ÉTAPE 1: Utilisateur non connecté');
         toast.error('Vous devez être connecté pour générer des images');
         return;
       }
+      console.log('✅ ÉTAPE 1: Utilisateur connecté', user.id);
 
-      // Appel à l'edge function
+      // ÉTAPE 2: Appel à l'edge function
+      console.log('🔄 ÉTAPE 2: Appel à l\'edge function avec prompt:', generatedPrompt);
       const { data, error } = await supabase.functions.invoke('generate-image-deepseek', {
         body: {
           prompt: generatedPrompt,
@@ -218,57 +222,99 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
         }
       });
 
-      if (error) throw error;
+      console.log('📊 ÉTAPE 2: Réponse de l\'edge function:', { data, error });
+
+      if (error) {
+        console.log('❌ ÉTAPE 2: Erreur edge function:', error);
+        throw error;
+      }
 
       if (!data.success || !data.image) {
+        console.log('❌ ÉTAPE 2: Données invalides:', data);
         throw new Error(data.error || 'Erreur lors de la génération');
       }
 
-      // Convertir base64 en blob
+      console.log('✅ ÉTAPE 2: Image générée avec succès, taille base64:', data.image.length);
+
+      // ÉTAPE 3: Convertir base64 en blob
+      console.log('🔄 ÉTAPE 3: Conversion base64 en blob');
       const base64Response = await fetch(data.image);
       const blob = await base64Response.blob();
+      console.log('✅ ÉTAPE 3: Blob créé, taille:', blob.size);
 
-      // Créer un fichier depuis le blob
+      // ÉTAPE 4: Upload vers Supabase Storage
+      console.log('🔄 ÉTAPE 4: Upload vers Supabase Storage');
       const fileName = `${symbolId}/generated_${Date.now()}.png`;
+      
+      console.log('📂 ÉTAPE 4: Nom du fichier:', fileName);
 
-      // Upload vers Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('symbol-images')
         .upload(fileName, blob);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.log('❌ ÉTAPE 4: Erreur upload storage:', uploadError);
+        throw uploadError;
+      }
 
-      // Obtenir l'URL publique
+      console.log('✅ ÉTAPE 4: Upload réussi:', uploadData);
+
+      // ÉTAPE 5: Obtenir l'URL publique
+      console.log('🔄 ÉTAPE 5: Obtention de l\'URL publique');
       const { data: { publicUrl } } = supabase.storage
         .from('symbol-images')
         .getPublicUrl(fileName);
 
-      // Créer l'entrée dans la base de données
-      const { data: imageData, error: dbError } = await supabase
+      console.log('✅ ÉTAPE 5: URL publique:', publicUrl);
+
+      // ÉTAPE 6: Insertion en base de données
+      console.log('🔄 ÉTAPE 6: Insertion en base de données');
+      const imageData = {
+        symbol_id: symbolId,
+        image_url: publicUrl,
+        image_type: 'original' as const,
+        title: `Image générée - ${symbolName || 'Symbole'}`,
+        description: `Générée avec IA: ${generatedPrompt}`,
+        uploaded_by: user.id
+      };
+
+      console.log('📊 ÉTAPE 6: Données à insérer:', imageData);
+
+      const { data: insertData, error: dbError } = await supabase
         .from('symbol_images')
-        .insert({
-          symbol_id: symbolId,
-          image_url: publicUrl,
-          image_type: 'original',
-          title: `Image générée - ${symbolName || 'Symbole'}`,
-          description: `Générée avec IA: ${generatedPrompt}`,
-          uploaded_by: user.id
-        })
+        .insert(imageData)
         .select()
         .single();
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.log('❌ ÉTAPE 6: Erreur insertion base:', dbError);
+        throw dbError;
+      }
 
-      // Mettre à jour la liste des images
-      onImagesUpdated([...images, imageData]);
-      toast.success('Image générée et ajoutée avec succès!');
+      console.log('✅ ÉTAPE 6: Insertion réussie:', insertData);
+
+      // ÉTAPE 7: Mise à jour de l'état local
+      console.log('🔄 ÉTAPE 7: Mise à jour de l\'état local');
+      const updatedImages = [...images, insertData];
+      onImagesUpdated(updatedImages);
+      console.log('✅ ÉTAPE 7: État mis à jour, total images:', updatedImages.length);
+
+      // Reset du prompt
       setGeneratedPrompt('');
+      toast.success('Image générée et ajoutée avec succès !');
+      console.log('🎉 PROCESSUS TERMINÉ AVEC SUCCÈS');
 
     } catch (error) {
-      console.error('Erreur lors de la génération:', error);
-      toast.error('Erreur lors de la génération de l\'image');
+      console.error('💥 ERREUR DANS LE PROCESSUS:', error);
+      console.error('📊 Détails de l\'erreur:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      toast.error('Erreur lors de la génération de l\'image: ' + error.message);
     } finally {
       setGenerating(false);
+      console.log('🏁 Fin du processus de génération');
     }
   };
 
