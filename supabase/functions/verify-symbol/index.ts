@@ -159,8 +159,8 @@ Répondez avec:
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1000,
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 1024,
       messages: [
         {
           role: 'user',
@@ -214,16 +214,18 @@ Répondez avec:
       model: 'llama-3.1-sonar-small-128k-online',
       messages: [
         {
-          role: 'system',
-          content: 'Vous êtes un expert historien spécialisé dans les symboles et leur signification culturelle. Soyez précis et factuel dans vos analyses.'
-        },
-        {
           role: 'user',
           content: prompt
         }
       ],
+      max_tokens: 1000,
       temperature: 0.2,
+      top_p: 0.9,
       return_citations: true,
+      return_images: false,
+      return_related_questions: false,
+      search_domain_filter: ["perplexity.ai"],
+      search_recency_filter: "month"
     }),
   });
 
@@ -274,8 +276,21 @@ Répondez avec:
       }],
       generationConfig: {
         temperature: 0.3,
-        maxOutputTokens: 1000,
-      }
+        topK: 32,
+        topP: 1,
+        maxOutputTokens: 1024,
+        stopSequences: []
+      },
+      safetySettings: [
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          "category": "HARM_CATEGORY_HATE_SPEECH",
+          "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+        }
+      ]
     }),
   });
 
