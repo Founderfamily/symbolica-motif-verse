@@ -338,82 +338,140 @@ Répondez avec:
 };
 
 function extractConfidenceScore(text: string, api: string): number {
-  // Check for reliable sources indicators first - higher scoring
+  // Normalize text for better matching
+  const normalizedText = text.toLowerCase().replace(/\s+/g, ' ');
+  
+  // Enhanced patterns to extract confidence score, prioritizing explicit percentage statements
+  const patterns = [
+    // Direct confidence/confiance statements with percentage
+    /niveau de confiance[:\s]*(\d+)\s*%/gi,
+    /confiance[:\s]*(\d+)\s*%/gi,
+    /confidence[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*de confiance/gi,
+    /(\d+)\s*%\s*confidence/gi,
+    
+    // Score/notation patterns
+    /score[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*score/gi,
+    /notation[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*notation/gi,
+    
+    // Reliability/fiabilité patterns
+    /fiabilité[:\s]*(\d+)\s*%/gi,
+    /reliability[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*fiabilité/gi,
+    /(\d+)\s*%\s*reliability/gi,
+    
+    // Certainty/certitude patterns
+    /certitude[:\s]*(\d+)\s*%/gi,
+    /certainty[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*certitude/gi,
+    /(\d+)\s*%\s*certainty/gi,
+    
+    // Accuracy patterns
+    /précision[:\s]*(\d+)\s*%/gi,
+    /accuracy[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*précision/gi,
+    /(\d+)\s*%\s*accuracy/gi,
+    
+    // Generic percentage patterns (less specific, lower priority)
+    /\b(\d+)\s*%\b/g
+  ];
+
+  let foundScores: number[] = [];
+  
+  // Try each pattern and collect all valid scores
+  for (const pattern of patterns) {
+    let match;
+    // Reset regex index for each pattern
+    pattern.lastIndex = 0;
+    
+    while ((match = pattern.exec(normalizedText)) !== null) {
+      const score = parseInt(match[1]);
+      if (score >= 0 && score <= 100) {
+        foundScores.push(score);
+        // For confidence-specific patterns, prioritize and break early
+        if (pattern.source.includes('confiance') || pattern.source.includes('confidence')) {
+          console.log(`Found confidence score: ${score}% for API: ${api}`);
+          return score;
+        }
+      }
+    }
+  }
+  
+  // If we found any valid percentage scores, use the first meaningful one
+  if (foundScores.length > 0) {
+    // Remove extremely low scores that are likely not confidence scores
+    const meaningfulScores = foundScores.filter(s => s >= 10);
+    if (meaningfulScores.length > 0) {
+      const selectedScore = meaningfulScores[0];
+      console.log(`Selected confidence score: ${selectedScore}% for API: ${api} from scores: [${foundScores.join(', ')}]`);
+      return selectedScore;
+    }
+    // If no meaningful scores, return the first one anyway
+    console.log(`Using fallback score: ${foundScores[0]}% for API: ${api}`);
+    return foundScores[0];
+  }
+
+  // Fallback: Check for textual confidence indicators
+  console.log(`No percentage found, checking textual indicators for API: ${api}`);
+  
+  // Check for reliable sources indicators first
   if (hasReliableSourcesIndicators(text)) {
     const baseScore = extractBasicConfidence(text);
-    return Math.min(95, baseScore + 20); // Bonus for having reliable sources
+    const finalScore = Math.min(95, baseScore + 20);
+    console.log(`Reliable sources bonus applied: ${finalScore}% for API: ${api}`);
+    return finalScore;
   }
   
   // Check for no sources indicators - strict scoring
   if (hasNoSourcesIndicators(text)) {
-    return Math.min(25, extractBasicConfidence(text)); // Maximum 25% if no sources
+    const finalScore = Math.min(25, extractBasicConfidence(text));
+    console.log(`No sources penalty applied: ${finalScore}% for API: ${api}`);
+    return finalScore;
   }
+
+  // API-specific textual patterns
+  let textualScore = 25; // Default fallback
   
-  // Enhanced confidence percentage extraction with multilingual support
-  const patterns = [
-    /confidence[:\s]*(\d+)%/i,
-    /(\d+)%\s*confidence/i,
-    /score[:\s]*(\d+)%/i,
-    /(\d+)%\s*score/i,
-    /fiabilité[:\s]*(\d+)%/i,
-    /(\d+)%\s*fiabilité/i,
-    /niveau de confiance[:\s]*(\d+)%/i,
-    /(\d+)%\s*niveau de confiance/i,
-    /certitude[:\s]*(\d+)%/i,
-    /(\d+)%\s*certitude/i,
-    /reliability[:\s]*(\d+)%/i,
-    /(\d+)%\s*reliability/i,
-    /certain[ty]*[:\s]*(\d+)%/i,
-    /(\d+)%\s*certain/i
-  ];
-  
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match) {
-      const score = parseInt(match[1]);
-      // Strict cap at 30% if no sources detected even with explicit score
-      return hasNoSourcesIndicators(text) ? Math.min(30, score) : score;
-    }
-  }
-  
-  // API-specific patterns with much stricter scoring
   if (api === 'openai') {
-    if (text.includes('highly confident') || text.includes('très confiant')) return 75;
-    if (text.includes('confident') || text.includes('confiant')) return 60;
-    if (text.includes('likely') || text.includes('probable')) return 45;
-    if (text.includes('possible') || text.includes('might') || text.includes('pourrait')) return 25;
-    if (text.includes('uncertain') || text.includes('unclear') || text.includes('incertain')) return 15;
+    if (text.includes('highly confident') || text.includes('très confiant')) textualScore = 75;
+    else if (text.includes('confident') || text.includes('confiant')) textualScore = 60;
+    else if (text.includes('likely') || text.includes('probable')) textualScore = 45;
+    else if (text.includes('possible') || text.includes('might') || text.includes('pourrait')) textualScore = 25;
+    else if (text.includes('uncertain') || text.includes('unclear') || text.includes('incertain')) textualScore = 15;
   }
   
   if (api === 'anthropic') {
-    if (text.includes('high confidence') || text.includes('haute confiance')) return 70;
-    if (text.includes('moderate confidence') || text.includes('confiance modérée')) return 50;
-    if (text.includes('low confidence') || text.includes('faible confiance')) return 25;
-    if (text.includes('uncertain') || text.includes('incertain')) return 15;
+    if (text.includes('high confidence') || text.includes('haute confiance')) textualScore = 70;
+    else if (text.includes('moderate confidence') || text.includes('confiance modérée')) textualScore = 50;
+    else if (text.includes('low confidence') || text.includes('faible confiance')) textualScore = 25;
+    else if (text.includes('uncertain') || text.includes('incertain')) textualScore = 15;
   }
   
   if (api === 'deepseek') {
-    if (text.includes('very reliable') || text.includes('highly accurate')) return 70;
-    if (text.includes('reliable') || text.includes('accurate')) return 55;
-    if (text.includes('somewhat reliable') || text.includes('partiellement fiable')) return 35;
-    if (text.includes('unreliable') || text.includes('inaccurate') || text.includes('peu fiable')) return 15;
+    if (text.includes('very reliable') || text.includes('highly accurate')) textualScore = 70;
+    else if (text.includes('reliable') || text.includes('accurate')) textualScore = 55;
+    else if (text.includes('somewhat reliable') || text.includes('partiellement fiable')) textualScore = 35;
+    else if (text.includes('unreliable') || text.includes('inaccurate') || text.includes('peu fiable')) textualScore = 15;
   }
   
   if (api === 'perplexity') {
-    if (text.includes('well-documented') || text.includes('multiple sources') || text.includes('bien documenté')) return 75;
-    if (text.includes('documented') || text.includes('sources available') || text.includes('documenté')) return 55;
-    if (text.includes('limited sources') || text.includes('few references') || text.includes('sources limitées')) return 25;
-    if (text.includes('no clear sources') || text.includes('unverified') || text.includes('pas de sources claires')) return 10;
+    if (text.includes('well-documented') || text.includes('multiple sources') || text.includes('bien documenté')) textualScore = 75;
+    else if (text.includes('documented') || text.includes('sources available') || text.includes('documenté')) textualScore = 55;
+    else if (text.includes('limited sources') || text.includes('few references') || text.includes('sources limitées')) textualScore = 25;
+    else if (text.includes('no clear sources') || text.includes('unverified') || text.includes('pas de sources claires')) textualScore = 10;
   }
   
   if (api === 'gemini') {
-    if (text.includes('high certainty') || text.includes('well-established') || text.includes('bien établi')) return 70;
-    if (text.includes('moderate certainty') || text.includes('established') || text.includes('établi')) return 50;
-    if (text.includes('low certainty') || text.includes('uncertain') || text.includes('peu certain')) return 25;
-    if (text.includes('very uncertain') || text.includes('unestablished') || text.includes('très incertain')) return 15;
+    if (text.includes('high certainty') || text.includes('well-established') || text.includes('bien établi')) textualScore = 70;
+    else if (text.includes('moderate certainty') || text.includes('established') || text.includes('établi')) textualScore = 50;
+    else if (text.includes('low certainty') || text.includes('uncertain') || text.includes('peu certain')) textualScore = 25;
+    else if (text.includes('very uncertain') || text.includes('unestablished') || text.includes('très incertain')) textualScore = 15;
   }
   
-  return 25; // Default fallback
+  console.log(`Using textual pattern score: ${textualScore}% for API: ${api}`);
+  return textualScore;
 }
 
 function hasReliableSourcesIndicators(text: string): boolean {
