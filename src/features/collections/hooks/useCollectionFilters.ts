@@ -38,20 +38,18 @@ export const useCollectionFilters = ({ collections }: UseCollectionFiltersProps)
       }
     }
 
-    // Filter by category (basic implementation based on slug patterns)
+    // Filter by category - centralized mapping
     if (filterCategory !== 'all') {
+      const categoryMapping = {
+        cultures: ['culture', 'mythologie', 'religieux', 'tradition'],
+        periods: ['ancien', 'ere', 'moderne', 'prehistoire', 'antique'],
+        sciences: ['geometrie', 'alchimie', 'esoterisme', 'mathematique', 'physique']
+      };
+      
+      const keywords = categoryMapping[filterCategory as keyof typeof categoryMapping] || [];
       result = result.filter(collection => {
-        const slug = collection.slug || '';
-        switch (filterCategory) {
-          case 'cultures':
-            return slug.includes('culture') || slug.includes('mythologie') || slug.includes('religieux');
-          case 'periods':
-            return slug.includes('ancien') || slug.includes('ere') || slug.includes('moderne');
-          case 'sciences':
-            return slug.includes('geometrie') || slug.includes('alchimie') || slug.includes('esoterisme');
-          default:
-            return true;
-        }
+        const slug = collection.slug?.toLowerCase() || '';
+        return keywords.some(keyword => slug.includes(keyword));
       });
     }
 
