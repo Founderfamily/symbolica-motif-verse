@@ -211,7 +211,7 @@ Répondez avec:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-sonar-large-128k-online',
+      model: 'llama-3.1-sonar-huge-128k-online',
       messages: [
         {
           role: 'user',
@@ -223,15 +223,15 @@ Répondez avec:
       top_p: 0.9,
       return_citations: true,
       return_images: false,
-      return_related_questions: false,
-      search_recency_filter: 'month'
+      return_related_questions: false
     }),
   });
 
   const data = await response.json();
   
   if (!response.ok) {
-    throw new Error(`Perplexity API error: ${data.error?.message || response.statusText}`);
+    console.error('Perplexity API Error:', data);
+    throw new Error(`Perplexity API error: ${data.error?.message || data.message || response.statusText}`);
   }
   
   return parseVerificationResponse(data.choices[0].message.content, 'perplexity', data.citations);
