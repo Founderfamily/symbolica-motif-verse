@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Star, StarOff, Edit, Save, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Star, StarOff, Edit, Save, Trash2, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { SymbolImage } from '@/types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -15,14 +15,22 @@ interface ImageGalleryEditorProps {
   symbolId: string;
   images: SymbolImage[];
   onImagesUpdated: (updatedImages: SymbolImage[]) => void;
+  symbolName?: string;
+  culture?: string;
+  period?: string;
 }
 
 export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
   symbolId,
   images,
-  onImagesUpdated
+  onImagesUpdated,
+  symbolName,
+  culture,
+  period
 }) => {
   const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [editingImage, setEditingImage] = useState<string | null>(null);
   const [editingData, setEditingData] = useState<{
     title: string;
@@ -161,6 +169,86 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
     });
   }, [symbolId]);
 
+  const generateImage = async () => {
+    if (!generatedPrompt.trim()) {
+      toast.error('Veuillez entrer une description pour générer l\'image');
+      return;
+    }
+
+    try {
+      setGenerating(true);
+      
+      // Vérifier que l'utilisateur est connecté
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        toast.error('Vous devez être connecté pour générer des images');
+        return;
+      }
+
+      // Appel à l'edge function
+      const { data, error } = await supabase.functions.invoke('generate-image-deepseek', {
+        body: {
+          prompt: generatedPrompt,
+          symbolName,
+          culture,
+          period
+        }
+      });
+
+      if (error) throw error;
+
+      if (!data.success || !data.image) {
+        throw new Error(data.error || 'Erreur lors de la génération');
+      }
+
+      // Convertir base64 en blob
+      const base64Response = await fetch(data.image);
+      const blob = await base64Response.blob();
+
+      // Créer un fichier depuis le blob
+      const fileName = `${symbolId}/generated_${Date.now()}.png`;
+
+      // Upload vers Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('symbol-images')
+        .upload(fileName, blob);
+
+      if (uploadError) throw uploadError;
+
+      // Obtenir l'URL publique
+      const { data: { publicUrl } } = supabase.storage
+        .from('symbol-images')
+        .getPublicUrl(fileName);
+
+      // Créer l'entrée dans la base de données
+      const { data: imageData, error: dbError } = await supabase
+        .from('symbol_images')
+        .insert({
+          symbol_id: symbolId,
+          image_url: publicUrl,
+          image_type: 'original',
+          title: `Image générée - ${symbolName || 'Symbole'}`,
+          description: `Générée avec IA: ${generatedPrompt}`,
+          uploaded_by: user.id
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      // Mettre à jour la liste des images
+      onImagesUpdated([...images, imageData]);
+      toast.success('Image générée et ajoutée avec succès!');
+      setGeneratedPrompt('');
+
+    } catch (error) {
+      console.error('Erreur lors de la génération:', error);
+      toast.error('Erreur lors de la génération de l\'image');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -206,6 +294,45 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
             </div>
           </div>
         )}
+      </div>
+
+      {/* Générateur d'images IA */}
+      <div className="border border-blue-200 rounded-lg p-4 bg-blue-50/50">
+        <Label className="text-base font-semibold text-blue-900 mb-2 block">
+          <Sparkles className="inline h-4 w-4 mr-2" />
+          Générer une image avec IA
+        </Label>
+        <p className="text-sm text-blue-700 mb-3">
+          Décrivez l'image que vous souhaitez générer pour ce symbole
+        </p>
+        
+        <div className="space-y-3">
+          <Textarea
+            placeholder="Ex: Une représentation artistique détaillée du symbole, avec des couleurs vives et un style traditionnel..."
+            value={generatedPrompt}
+            onChange={(e) => setGeneratedPrompt(e.target.value)}
+            rows={3}
+            className="bg-white"
+          />
+          
+          <Button 
+            onClick={generateImage}
+            disabled={generating || !generatedPrompt.trim()}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {generating ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Génération en cours...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Générer l'image
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Liste des images existantes */}

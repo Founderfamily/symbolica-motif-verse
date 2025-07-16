@@ -472,6 +472,9 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
               symbolId={symbol.id}
               images={localImages}
               onImagesUpdated={handleImagesUpdated}
+              symbolName={formData.name}
+              culture={formData.culture}
+              period={formData.period}
             />
             
             <div className="flex justify-end gap-2 pt-4 border-t">
