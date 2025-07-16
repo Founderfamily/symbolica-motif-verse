@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { AdminFloatingEditButton } from '@/components/admin/AdminFloatingEditButton';
 import { ImageGalleryModal } from '@/components/symbols/ImageGalleryModal';
+import { SymbolVerification } from '@/components/symbols/SymbolVerification';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -73,6 +74,9 @@ const SymbolDetailPage: React.FC = () => {
   // État pour la modal de galerie
   const [isGalleryOpen, setIsGalleryOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
+  
+  // État pour la section active
+  const [activeSection, setActiveSection] = React.useState<'info' | 'verification'>('info');
 
   // Mettre à jour le symbole local quand les données changent
   React.useEffect(() => {
@@ -318,10 +322,39 @@ const SymbolDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Sections détaillées */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-          {/* Informations culturelles */}
-          <Card className="p-6">
+        {/* Onglets pour les sections détaillées */}
+        <div className="mt-12">
+          <div className="mb-6">
+            <div className="border-b border-slate-200">
+              <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                <button
+                  onClick={() => setActiveSection('info')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeSection === 'info'
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  Informations
+                </button>
+                <button
+                  onClick={() => setActiveSection('verification')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeSection === 'verification'
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  Vérification
+                </button>
+              </nav>
+            </div>
+          </div>
+
+          {activeSection === 'info' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Informations culturelles */}
+              <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Info className="h-5 w-5 text-amber-600" />
               <h3 className="text-lg font-semibold text-slate-900">
@@ -481,6 +514,14 @@ const SymbolDetailPage: React.FC = () => {
               )}
             </div>
           </Card>
+            </div>
+          )}
+
+          {activeSection === 'verification' && (
+            <div>
+              <SymbolVerification symbol={displaySymbol} />
+            </div>
+          )}
         </div>
 
         {/* Collections associées */}
