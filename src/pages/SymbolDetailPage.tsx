@@ -14,6 +14,7 @@ import { AdminFloatingEditButton } from '@/components/admin/AdminFloatingEditBut
 import { ImageGalleryModal } from '@/components/symbols/ImageGalleryModal';
 import { SymbolVerificationPublic } from '@/components/symbols/SymbolVerificationPublic';
 import { SymbolVerificationCommunity } from '@/components/symbols/SymbolVerificationCommunity';
+import { SymbolVerificationAdmin } from '@/components/admin/SymbolVerificationAdmin';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -77,7 +78,10 @@ const SymbolDetailPage: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   
   // État pour la section active
-  const [activeSection, setActiveSection] = React.useState<'info' | 'verification' | 'community'>('info');
+  const [activeSection, setActiveSection] = React.useState<'info' | 'verification' | 'admin' | 'community'>('info');
+  
+  // État pour forcer le rechargement après vérification
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
   // Mettre à jour le symbole local quand les données changent
   React.useEffect(() => {
@@ -349,6 +353,16 @@ const SymbolDetailPage: React.FC = () => {
                   Vérification
                 </button>
                 <button
+                  onClick={() => setActiveSection('admin')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeSection === 'admin'
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  Admin
+                </button>
+                <button
                   onClick={() => setActiveSection('community')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
                     activeSection === 'community'
@@ -529,8 +543,20 @@ const SymbolDetailPage: React.FC = () => {
           )}
 
           {activeSection === 'verification' && (
-            <div>
+            <div key={refreshKey}>
               <SymbolVerificationPublic symbol={displaySymbol} />
+            </div>
+          )}
+
+          {activeSection === 'admin' && (
+            <div>
+              <SymbolVerificationAdmin 
+                symbol={displaySymbol} 
+                onVerificationComplete={() => {
+                  setRefreshKey(prev => prev + 1);
+                  setActiveSection('verification');
+                }}
+              />
             </div>
           )}
 

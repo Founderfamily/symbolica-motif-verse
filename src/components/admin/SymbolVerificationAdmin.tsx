@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { 
   CheckCircle, 
   XCircle, 
   AlertTriangle, 
-  Loader2, 
-  Bot, 
-  Search, 
   ShieldCheck,
-  Clock,
-  ExternalLink,
-  Save
+  Settings,
+  Play,
+  Loader2,
+  RefreshCw,
+  Eye,
+  Clock
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -23,232 +22,148 @@ interface SymbolVerificationAdminProps {
   symbol: {
     id: string;
     name: string;
-    culture: string;
-    period: string;
-    description?: string;
-    significance?: string;
-    historical_context?: string;
   };
+  onVerificationComplete?: () => void;
 }
 
 interface VerificationResult {
   api: string;
-  status: 'verified' | 'disputed' | 'unverified' | 'error';
+  status: 'verified' | 'disputed' | 'unverified';
   confidence: number;
   summary: string;
-  details: string;
-  sources?: string[];
-  timestamp: string;
+  details?: string;
+  sources?: any[];
+  saved: boolean;
 }
 
-const API_CONFIGS = {
-  openai: {
-    name: 'OpenAI GPT-4',
-    icon: Bot,
-    description: 'Analyse avec GPT-4 pour vérifier les informations historiques',
-    color: 'green'
-  },
-  deepseek: {
-    name: 'DeepSeek',
-    icon: Search,
-    description: 'Modèle spécialisé dans la recherche et l\'analyse factuelle',
-    color: 'blue'
-  },
-  anthropic: {
-    name: 'Claude (Anthropic)',
-    icon: ShieldCheck,
-    description: 'Analyse critique et factuelle avec Claude',
-    color: 'purple'
-  },
-  perplexity: {
-    name: 'Perplexity',
-    icon: ExternalLink,
-    description: 'Recherche en temps réel avec sources web actualisées',
-    color: 'orange'
-  },
-  gemini: {
-    name: 'Google Gemini',
-    icon: Bot,
-    description: 'Analyse multimodale avec accès aux données Google',
-    color: 'red'
-  }
-};
+export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = ({ 
+  symbol, 
+  onVerificationComplete 
+}) => {
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [results, setResults] = useState<VerificationResult[]>([]);
+  const [currentStep, setCurrentStep] = useState<string>('');
+  const [isAdmin, setIsAdmin] = useState(false);
 
-export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = ({ symbol }) => {
-  const [results, setResults] = useState<Record<string, VerificationResult>>({});
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
-  const [activeTab, setActiveTab] = useState('overview');
-  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    checkAdminStatus();
+  }, []);
 
-  const extractConfidenceScore = (text: string, api: string): number => {
-    // Extraction plus stricte des scores de confiance avec détection améliorée du manque de sources
-    const patterns = [
-      /(?:confiance|confidence)[\s:]*(\d+)%/i,
-      /(\d+)%[\s]*(?:de )?(?:confiance|confidence)/i,
-      /score[\s:]*(\d+)%/i,
-      /fiabilité[\s:]*(\d+)%/i,
-      /niveau de confiance[\s:]*(\d+)%/i
-    ];
-
-    let extractedScore = null;
-    for (const pattern of patterns) {
-      const match = text.match(pattern);
-      if (match) {
-        const score = parseInt(match[1], 10);
-        if (score >= 0 && score <= 100) {
-          extractedScore = score;
-          break;
-        }
-      }
-    }
-
-    // Détection renforcée de mentions de manque de sources
-    const noSourcesPatterns = [
-      /pas de sources fiables/i,
-      /aucune source fiable/i,
-      /manque de sources/i,
-      /sources limitées/i,
-      /informations insuffisantes/i,
-      /données manquantes/i,
-      /cannot verify/i,
-      /impossible à vérifier/i,
-      /no reliable sources/i,
-      /insufficient information/i,
-      /lack of documentation/i,
-      /peu de documentation/i,
-      /manque de documentation/i,
-      /no concrete evidence/i,
-      /pas de preuves concrètes/i
-    ];
-
-    const hasNoSources = noSourcesPatterns.some(pattern => pattern.test(text));
-    
-    // Pondération spéciale pour OpenAI et Perplexity qui détectent mieux les problèmes
-    const isReliableDetector = api === 'openai' || api === 'perplexity';
-    
-    if (hasNoSources) {
-      if (isReliableDetector) {
-        return 15; // Score très bas pour les détecteurs fiables
-      }
-      return Math.min(extractedScore || 20, 20); // Forcer max 20% si pas de sources
-    }
-
-    // Si score extrait mais mentions de sources douteuses, le réduire
-    if (extractedScore && extractedScore > 40) {
-      const doubtfulPatterns = [
-        /difficile à vérifier/i,
-        /sources contradictoires/i,
-        /informations partielles/i,
-        /peu documenté/i
-      ];
-      
-      if (doubtfulPatterns.some(pattern => pattern.test(text))) {
-        return Math.min(extractedScore, 45);
-      }
-    }
-
-    if (extractedScore) return extractedScore;
-
-    // Analyse par mots-clés en dernier recours
-    if (/très fiable|hautement fiable|bien documenté|certifié/i.test(text)) return 85;
-    if (/fiable|probable|vérifiable|confirmé/i.test(text)) return 65;
-    if (/possible|potentiel|plausible/i.test(text)) return 45;
-    if (/douteux|incertain|questionnable|disputé/i.test(text)) return 25;
-    if (/non vérifié|faux|erroné|inexact/i.test(text)) return 10;
-
-    return 30; // Score par défaut conservateur
-  };
-
-  const determineStatus = (confidence: number, details: string): VerificationResult['status'] => {
-    // Détection de mentions critiques
-    const noSourcesPatterns = [
-      /pas de sources/i,
-      /aucune source/i,
-      /manque de sources/i,
-      /sources limitées/i,
-      /informations insuffisantes/i
-    ];
-
-    const hasNoSources = noSourcesPatterns.some(pattern => pattern.test(details));
-    
-    if (hasNoSources || confidence < 30) {
-      return 'unverified';
-    } else if (confidence >= 30 && confidence < 60) {
-      return 'disputed';
-    } else {
-      return 'verified';
-    }
-  };
-
-  const verifyWithAPI = async (apiKey: string) => {
-    setLoading(prev => ({ ...prev, [apiKey]: true }));
-    
+  const checkAdminStatus = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      const payload = {
-        api: apiKey,
-        symbol: {
-          name: symbol.name,
-          culture: symbol.culture,
-          period: symbol.period,
-          description: symbol.description,
-          significance: symbol.significance,
-          historical_context: symbol.historical_context
-        },
-        symbolId: symbol.id,
-        userId: user?.id,
-        autoSave: true // Auto-save enabled
-      };
+      if (!user) return;
 
-      const { data, error } = await supabase.functions.invoke('verify-symbol', {
-        body: payload
-      });
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
 
-      if (error) throw error;
-
-      // Extraction et correction du score de confiance avec logique améliorée
-      const extractedConfidence = extractConfidenceScore(data.details || data.summary || '', apiKey);
-      const correctedStatus = determineStatus(extractedConfidence, data.details || '');
-
-      const result: VerificationResult = {
-        ...data,
-        confidence: extractedConfidence,
-        status: correctedStatus,
-        timestamp: new Date().toISOString()
-      };
-
-      setResults(prev => ({
-        ...prev,
-        [apiKey]: result
-      }));
-      
-      toast.success(`Vérification ${API_CONFIGS[apiKey as keyof typeof API_CONFIGS].name} terminée et sauvegardée`);
+      setIsAdmin(profile?.is_admin || false);
     } catch (error) {
-      console.error(`Erreur lors de la vérification ${apiKey}:`, error);
-      setResults(prev => ({
-        ...prev,
-        [apiKey]: {
-          api: apiKey,
-          status: 'error',
-          confidence: 0,
-          summary: 'Erreur lors de la vérification',
-          details: error instanceof Error ? error.message : 'Erreur inconnue',
-          timestamp: new Date().toISOString()
-        }
-      }));
-      toast.error(`Erreur lors de la vérification ${API_CONFIGS[apiKey as keyof typeof API_CONFIGS].name}`);
-    } finally {
-      setLoading(prev => ({ ...prev, [apiKey]: false }));
+      console.error('Erreur lors de la vérification admin:', error);
     }
   };
 
-  const verifyAll = async () => {
-    const apis = Object.keys(API_CONFIGS);
-    await Promise.all(apis.map(api => verifyWithAPI(api)));
+  const startVerification = async () => {
+    if (!isAdmin) {
+      toast.error('Seuls les administrateurs peuvent lancer des vérifications');
+      return;
+    }
+
+    setIsVerifying(true);
+    setResults([]);
+    setCurrentStep('Initialisation...');
+
+    const apis = ['anthropic', 'gemini', 'perplexity', 'openai', 'deepseek'];
+    
+    try {
+      for (const api of apis) {
+        setCurrentStep(`Vérification via ${api.toUpperCase()}...`);
+        
+        // Ajouter un résultat temporaire
+        setResults(prev => [...prev, {
+          api: api.toUpperCase(),
+          status: 'disputed',
+          confidence: 0,
+          summary: 'Vérification en cours...',
+          saved: false
+        }]);
+
+        try {
+          const { data, error } = await supabase.functions.invoke('verify-symbol', {
+            body: { 
+              symbolId: symbol.id,
+              api: api,
+              symbolName: symbol.name
+            }
+          });
+
+          if (error) throw error;
+
+          // Mettre à jour le résultat avec les vraies données
+          setResults(prev => prev.map(result => 
+            result.api === api.toUpperCase() 
+              ? {
+                  ...result,
+                  status: data.status,
+                  confidence: data.confidence,
+                  summary: data.summary,
+                  details: data.details,
+                  sources: data.sources,
+                  saved: true
+                }
+              : result
+          ));
+
+          // Feedback visuel de sauvegarde
+          toast.success(`✓ ${api.toUpperCase()} - Résultat sauvegardé`, {
+            duration: 2000,
+          });
+
+        } catch (apiError) {
+          console.error(`Erreur ${api}:`, apiError);
+          
+          // Mettre à jour avec l'erreur
+          setResults(prev => prev.map(result => 
+            result.api === api.toUpperCase() 
+              ? {
+                  ...result,
+                  status: 'unverified',
+                  confidence: 0,
+                  summary: 'Erreur lors de la vérification',
+                  details: 'Service temporairement indisponible',
+                  saved: false
+                }
+              : result
+          ));
+
+          toast.error(`Erreur ${api.toUpperCase()}`);
+        }
+
+        // Pause courte entre les appels
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      setCurrentStep('Vérification terminée');
+      toast.success('🎉 Vérification complète ! Tous les résultats ont été sauvegardés.', {
+        duration: 4000,
+      });
+
+      // Notifier le parent
+      onVerificationComplete?.();
+
+    } catch (error) {
+      console.error('Erreur lors de la vérification:', error);
+      toast.error('Erreur lors de la vérification');
+    } finally {
+      setIsVerifying(false);
+      setCurrentStep('');
+    }
   };
 
-  const getStatusIcon = (status: VerificationResult['status']) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'verified':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -256,12 +171,12 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
         return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
       case 'unverified':
         return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'error':
+      default:
         return <XCircle className="h-4 w-4 text-gray-600" />;
     }
   };
 
-  const getStatusColor = (status: VerificationResult['status']) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'verified':
         return 'bg-green-100 text-green-800 border-green-200';
@@ -269,267 +184,117 @@ export const SymbolVerificationAdmin: React.FC<SymbolVerificationAdminProps> = (
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'unverified':
         return 'bg-red-100 text-red-800 border-red-200';
-      case 'error':
+      default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const getOverallStatus = (): VerificationResult['status'] | null => {
-    const resultValues = Object.values(results).filter(r => r.status !== 'error');
-    if (resultValues.length === 0) return null;
-    
-    const averageConfidence = getAverageConfidence();
-    const noSourcesCount = resultValues.filter(r => 
-      r.details.toLowerCase().includes('pas de sources') ||
-      r.details.toLowerCase().includes('aucune source') ||
-      r.details.toLowerCase().includes('manque de sources')
-    ).length;
-
-    // Logique stricte : si plusieurs APIs mentionnent le manque de sources, forcer "unverified"
-    if (noSourcesCount >= Math.ceil(resultValues.length / 2) || averageConfidence < 30) {
-      return 'unverified';
-    } else if (averageConfidence >= 30 && averageConfidence < 60) {
-      return 'disputed';
-    } else {
-      return 'verified';
-    }
-  };
-
-  const getAverageConfidence = () => {
-    const validResults = Object.values(results).filter(r => r.status !== 'error');
-    if (validResults.length === 0) return 0;
-    return Math.round(validResults.reduce((acc, r) => acc + r.confidence, 0) / validResults.length);
-  };
-
-  const saveResults = async () => {
-    setSaving(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Utilisateur non connecté');
-
-      const validResults = Object.values(results).filter(r => r.status !== 'error');
-      if (validResults.length === 0) {
-        toast.error('Aucun résultat à sauvegarder');
-        return;
-      }
-
-      // Sauvegarder chaque résultat d'API
-      const promises = validResults.map(result => 
-        supabase.from('symbol_verifications').insert({
-          symbol_id: symbol.id,
-          api: result.api,
-          status: result.status,
-          confidence: result.confidence,
-          summary: result.summary,
-          details: result.details,
-          sources: result.sources || [],
-          verified_by: user.id
-        })
-      );
-
-      await Promise.all(promises);
-      toast.success('Résultats de vérification sauvegardés avec succès');
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      toast.error('Erreur lors de la sauvegarde des résultats');
-    } finally {
-      setSaving(false);
-    }
-  };
+  if (!isAdmin) {
+    return (
+      <Alert>
+        <ShieldCheck className="h-4 w-4" />
+        <AlertDescription>
+          Seuls les administrateurs peuvent accéder à l'interface de vérification.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-amber-600" />
-            Vérification de la véracité (Admin)
-          </h3>
-          <p className="text-slate-600 text-sm">
-            Interface administrateur pour vérifier l'exactitude des informations
-          </p>
-        </div>
         <div className="flex items-center gap-2">
-          <Button 
-            onClick={verifyAll} 
-            disabled={Object.values(loading).some(Boolean)}
-            className="flex items-center gap-2"
-          >
-            {Object.values(loading).some(Boolean) ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Search className="h-4 w-4" />
-            )}
-            Vérifier tout
-          </Button>
-          
-          {Object.keys(results).length > 0 && (
-            <div className="text-sm text-green-600 flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Résultats sauvegardés automatiquement
-            </div>
-          )}
+          <Settings className="h-5 w-5 text-amber-600" />
+          <h3 className="text-lg font-semibold text-slate-900">
+            Interface de vérification admin
+          </h3>
         </div>
+        <Button 
+          onClick={startVerification}
+          disabled={isVerifying}
+          className="flex items-center gap-2"
+        >
+          {isVerifying ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Play className="h-4 w-4" />
+          )}
+          {isVerifying ? 'Vérification...' : 'Lancer la vérification'}
+        </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-          <TabsTrigger value="details">Détails par API</TabsTrigger>
-        </TabsList>
+      {/* État actuel */}
+      {isVerifying && currentStep && (
+        <Alert>
+          <RefreshCw className="h-4 w-4 animate-spin" />
+          <AlertDescription>
+            {currentStep}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        <TabsContent value="overview" className="space-y-4">
-          {Object.keys(results).length > 0 && (
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium">Résultat global</h4>
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-slate-600">
-                    Confiance moyenne: {getAverageConfidence()}%
-                  </div>
-                  <Badge className={getStatusColor(getOverallStatus() || 'error')}>
-                    {getStatusIcon(getOverallStatus() || 'error')}
-                    <span className="ml-1 capitalize">{getOverallStatus() || 'Erreur'}</span>
-                  </Badge>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">
-                    {Object.values(results).filter(r => r.status === 'verified').length}
-                  </div>
-                  <div className="text-sm text-green-700">Vérifiées</div>
-                </div>
-                <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {Object.values(results).filter(r => r.status === 'disputed').length}
-                  </div>
-                  <div className="text-sm text-yellow-700">Contestées</div>
-                </div>
-                <div className="text-center p-3 bg-red-50 rounded-lg">
-                  <div className="text-2xl font-bold text-red-600">
-                    {Object.values(results).filter(r => r.status === 'unverified').length}
-                  </div>
-                  <div className="text-sm text-red-700">Non vérifiées</div>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(API_CONFIGS).map(([key, config]) => {
-              const result = results[key];
-              const isLoading = loading[key];
-              const Icon = config.icon;
-
-              return (
-                <Card key={key} className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4" />
-                      <span className="font-medium">{config.name}</span>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => verifyWithAPI(key)}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        'Vérifier'
-                      )}
-                    </Button>
-                  </div>
-                  
-                  <p className="text-sm text-slate-600 mb-3">{config.description}</p>
-                  
-                  {result && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Badge className={getStatusColor(result.status)}>
-                          {getStatusIcon(result.status)}
-                          <span className="ml-1 capitalize">{result.status}</span>
-                        </Badge>
-                        <span className="text-sm text-slate-600">{result.confidence}%</span>
-                      </div>
-                      <p className="text-sm text-slate-700">{result.summary}</p>
-                    </div>
-                  )}
-                </Card>
-              );
-            })}
+      {/* Résultats en temps réel */}
+      {results.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Eye className="h-5 w-5 text-blue-600" />
+            <h4 className="font-medium text-slate-900">Résultats en temps réel</h4>
           </div>
-        </TabsContent>
-
-        <TabsContent value="details" className="space-y-4">
-          {Object.entries(results).map(([key, result]) => {
-            const config = API_CONFIGS[key as keyof typeof API_CONFIGS];
-            const Icon = config.icon;
-
-            return (
-              <Card key={key} className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-5 w-5" />
-                    <h4 className="font-semibold">{config.name}</h4>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(result.status)}>
-                      {getStatusIcon(result.status)}
-                      <span className="ml-1 capitalize">{result.status}</span>
-                    </Badge>
-                    <span className="text-sm text-slate-600">{result.confidence}% confiance</span>
-                  </div>
+          
+          <div className="space-y-3">
+            {results.map((result, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Badge className={getStatusColor(result.status)} variant="outline">
+                    {getStatusIcon(result.status)}
+                    <span className="ml-1">{result.api}</span>
+                  </Badge>
+                  <span className="text-sm text-slate-700">{result.summary}</span>
                 </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <h5 className="font-medium text-slate-900 mb-2">Résumé</h5>
-                    <p className="text-slate-700">{result.summary}</p>
-                  </div>
-
-                  <div>
-                    <h5 className="font-medium text-slate-900 mb-2">Analyse détaillée</h5>
-                    <p className="text-slate-700 whitespace-pre-wrap">{result.details}</p>
-                  </div>
-
-                  {result.sources && result.sources.length > 0 && (
-                    <div>
-                      <h5 className="font-medium text-slate-900 mb-2">Sources</h5>
-                      <ul className="list-disc list-inside space-y-1">
-                        {result.sources.map((source, index) => (
-                          <li key={index} className="text-slate-700 text-sm">
-                            <a href={source} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                              {source}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-600">{result.confidence}%</span>
+                  {result.saved ? (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <CheckCircle className="h-3 w-3" />
+                      <span className="text-xs">Sauvé</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-yellow-600">
+                      <Clock className="h-3 w-3" />
+                      <span className="text-xs">En cours</span>
                     </div>
                   )}
-
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <Clock className="h-4 w-4" />
-                    <span>Vérifié le {new Date(result.timestamp).toLocaleString('fr-FR')}</span>
-                  </div>
                 </div>
-              </Card>
-            );
-          })}
+              </div>
+            ))}
+          </div>
 
-          {Object.keys(results).length === 0 && (
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Aucune vérification n'a encore été effectuée. Cliquez sur "Vérifier tout" pour commencer.
-              </AlertDescription>
-            </Alert>
+          {/* Résumé global */}
+          {results.length > 0 && results.every(r => r.saved) && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-700">
+                <CheckCircle className="h-4 w-4" />
+                <span className="font-medium">Vérification terminée</span>
+              </div>
+              <p className="text-sm text-blue-600 mt-1">
+                Confiance moyenne: {Math.round(results.reduce((acc, r) => acc + r.confidence, 0) / results.length)}% 
+                • {results.filter(r => r.status === 'verified').length} vérifiées 
+                • {results.filter(r => r.status === 'disputed').length} contestées 
+                • {results.filter(r => r.status === 'unverified').length} non vérifiées
+              </p>
+            </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </Card>
+      )}
+
+      {/* Instructions */}
+      <Alert>
+        <ShieldCheck className="h-4 w-4" />
+        <AlertDescription>
+          Cette interface permet de lancer une vérification complète du symbole via 5 APIs d'IA. 
+          Les résultats sont automatiquement sauvegardés et apparaîtront dans l'onglet "Vérification" public.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };

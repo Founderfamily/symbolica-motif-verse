@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   CheckCircle, 
@@ -37,10 +38,20 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
   const [verificationHistory, setVerificationHistory] = React.useState<VerificationHistoryItem[]>([]);
   const [currentVerification, setCurrentVerification] = React.useState<VerificationHistoryItem | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
   React.useEffect(() => {
     loadVerificationHistory();
-  }, [symbol.id]);
+  }, [symbol.id, refreshKey]);
+
+  // Auto-refresh every 30 seconds to catch new verifications
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const loadVerificationHistory = async () => {
     try {
@@ -105,10 +116,10 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
     for (const verification of sortedVerifications) {
       const verificationTime = new Date(verification.created_at).getTime();
       
-      // Chercher une session existante dans une fenêtre de 10 minutes
+      // Chercher une session existante dans une fenêtre de 15 minutes (augmenté pour mieux grouper)
       const existingSession = sessions.find(session => {
         const sessionTime = new Date(session[0].created_at).getTime();
-        return Math.abs(verificationTime - sessionTime) < 10 * 60 * 1000; // 10 minutes
+        return Math.abs(verificationTime - sessionTime) < 15 * 60 * 1000; // 15 minutes
       });
 
       if (existingSession) {
@@ -192,11 +203,23 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <ShieldCheck className="h-5 w-5 text-amber-600" />
-        <h3 className="text-lg font-semibold text-slate-900">
-          État de vérification
-        </h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-amber-600" />
+          <h3 className="text-lg font-semibold text-slate-900">
+            État de vérification
+          </h3>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setRefreshKey(prev => prev + 1)}
+          disabled={loading}
+          className="flex items-center gap-2"
+        >
+          <Clock className="h-4 w-4" />
+          Actualiser
+        </Button>
       </div>
 
       {currentVerification ? (

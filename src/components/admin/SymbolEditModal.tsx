@@ -493,12 +493,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
             <SymbolVerificationAdmin
               symbol={{
                 id: symbol.id,
-                name: formData.name,
-                culture: formData.culture,
-                period: formData.period,
-                description: formData.description,
-                significance: formData.significance,
-                historical_context: formData.historical_context
+                name: formData.name
               }}
             />
             
