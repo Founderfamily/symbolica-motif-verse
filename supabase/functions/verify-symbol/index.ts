@@ -396,11 +396,15 @@ function extractConfidenceScore(text: string, api: string): number {
     /(\d+)\s*%\s*de confiance/gi,
     /(\d+)\s*%\s*confidence/gi,
     
-    // PRIORITY 2: Markdown formatted percentages with stars/bold
+    // PRIORITY 2: Gemini-specific markdown formatted patterns (double asterisks)
     /\*\*niveau de confiance[:\s]*(\d+)\s*%\*\*/gi,
     /\*\*confiance[:\s]*(\d+)\s*%\*\*/gi,
     /\*\*(\d+)\s*%\*\*/g,
     /\*(\d+)\s*%\*/g,
+    
+    // PRIORITY 3: Gemini specific patterns for common response formats
+    /statut.*?confiance[:\s]*(\d+)\s*%/gi,
+    /évaluation.*?(\d+)\s*%/gi,
     
     // PRIORITY 3: Score/evaluation patterns with percentages
     /score[:\s]*(\d+)\s*%/gi,

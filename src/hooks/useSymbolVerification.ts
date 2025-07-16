@@ -19,37 +19,52 @@ export const useSymbolVerification = (symbolIdentifier: string) => {
   return useQuery({
     queryKey: ['symbol-verification', symbolIdentifier],
     queryFn: async (): Promise<SymbolVerificationData> => {
-      // Try to find by UUID first, then by symbol name
-      let query = supabase
-        .from('symbol_verifications')
-        .select('api, confidence, status, created_at');
+      // Static symbol UUID mapping for well-known symbols
+      const staticSymbolMap: Record<string, string> = {
+        'Adi Shakti': '93149524-2bfd-4bf2-abf1-ba786e0b4c6e',
+        // Add more mappings as needed
+      };
 
-      // Check if the identifier looks like a UUID (contains hyphens and is 36 chars)
+      let targetSymbolId: string | null = null;
+      
+      // Try to find by UUID first, then by symbol name
       if (symbolIdentifier?.includes('-') && symbolIdentifier.length === 36) {
-        query = query.eq('symbol_id', symbolIdentifier);
+        // It's already a UUID
+        targetSymbolId = symbolIdentifier;
       } else {
-        // For static symbols, we need to find the symbol_id by joining with symbols table
-        const { data: symbolData, error: symbolError } = await supabase
-          .from('symbols')
-          .select('id')
-          .eq('name', symbolIdentifier)
-          .single();
+        // Check static mapping first
+        targetSymbolId = staticSymbolMap[symbolIdentifier];
         
-        if (symbolError || !symbolData) {
-          console.log(`No symbol found for name: ${symbolIdentifier}`);
-          return {
-            status: 'unverified',
-            averageConfidence: 0,
-            verificationCount: 0,
-            lastVerified: null,
-            details: []
-          };
+        if (!targetSymbolId) {
+          // Try to find in database by name
+          const { data: symbolData, error: symbolError } = await supabase
+            .from('symbols')
+            .select('id')
+            .eq('name', symbolIdentifier)
+            .single();
+          
+          if (symbolData) {
+            targetSymbolId = symbolData.id;
+          }
         }
-        
-        query = query.eq('symbol_id', symbolData.id);
       }
 
-      const { data: verifications, error } = await query.order('created_at', { ascending: false });
+      if (!targetSymbolId) {
+        console.log(`No symbol found for identifier: ${symbolIdentifier}`);
+        return {
+          status: 'unverified',
+          averageConfidence: 0,
+          verificationCount: 0,
+          lastVerified: null,
+          details: []
+        };
+      }
+
+      const { data: verifications, error } = await supabase
+        .from('symbol_verifications')
+        .select('api, confidence, status, created_at')
+        .eq('symbol_id', targetSymbolId)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching symbol verifications:', error);
