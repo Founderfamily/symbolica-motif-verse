@@ -6,13 +6,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Save, X, Images } from 'lucide-react';
+import { Edit, Save, X, Images, ShieldCheck } from 'lucide-react';
 import { SymbolData, SymbolImage } from '@/types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageGalleryEditor } from './ImageGalleryEditor';
 import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { CollectionSelector } from './CollectionSelector';
+import { SymbolVerificationAdmin } from './SymbolVerificationAdmin';
 
 interface SymbolEditModalProps {
   symbol: SymbolData;
@@ -227,11 +228,15 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
         </DialogHeader>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general">Informations générales</TabsTrigger>
             <TabsTrigger value="images" className="gap-2">
               <Images className="h-4 w-4" />
               Images ({localImages.length})
+            </TabsTrigger>
+            <TabsTrigger value="verification" className="gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              Vérification
             </TabsTrigger>
           </TabsList>
 
@@ -475,6 +480,26 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
               symbolName={formData.name}
               culture={formData.culture}
               period={formData.period}
+            />
+            
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Fermer
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="verification" className="space-y-4">
+            <SymbolVerificationAdmin
+              symbol={{
+                id: symbol.id,
+                name: formData.name,
+                culture: formData.culture,
+                period: formData.period,
+                description: formData.description,
+                significance: formData.significance,
+                historical_context: formData.historical_context
+              }}
             />
             
             <div className="flex justify-end gap-2 pt-4 border-t">

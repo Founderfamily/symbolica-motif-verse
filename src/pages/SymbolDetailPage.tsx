@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { AdminFloatingEditButton } from '@/components/admin/AdminFloatingEditButton';
 import { ImageGalleryModal } from '@/components/symbols/ImageGalleryModal';
-import { SymbolVerification } from '@/components/symbols/SymbolVerification';
+import { SymbolVerificationPublic } from '@/components/symbols/SymbolVerificationPublic';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -519,7 +519,7 @@ const SymbolDetailPage: React.FC = () => {
 
           {activeSection === 'verification' && (
             <div>
-              <SymbolVerification symbol={displaySymbol} />
+              <SymbolVerificationPublic symbol={displaySymbol} />
             </div>
           )}
         </div>
