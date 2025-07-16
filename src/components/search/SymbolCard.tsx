@@ -6,6 +6,8 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useToast } from '@/hooks/use-toast';
 import { Info, AlertCircle, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
+import { useSymbolVerification } from '@/hooks/useSymbolVerification';
+import { VerificationBadge } from '@/components/ui/verification-badge';
 import { Link } from 'react-router-dom';
 
 interface SymbolCardProps {
@@ -108,6 +110,9 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
   
   // Obtenir les images du symbole depuis Supabase
   const { data: images, isError: imagesError } = useSymbolImages(symbol.id);
+  
+  // Obtenir les données de vérification du symbole
+  const { data: verificationData } = useSymbolVerification(symbol.id);
   const primaryImage = React.useMemo(() => {
     if (!images || images.length === 0) return null;
     return images.find(img => img.image_type === 'original') || images[0];
@@ -265,8 +270,20 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol }) => 
             </div>
           </div>
           
+          {/* Badge de vérification */}
+          <div className="absolute top-2 right-2 z-20">
+            {verificationData && (
+              <VerificationBadge 
+                status={verificationData.status}
+                confidence={verificationData.averageConfidence}
+                verificationCount={verificationData.verificationCount}
+                className="opacity-90 hover:opacity-100 transition-opacity"
+              />
+            )}
+          </div>
+          
           {error && retryCount >= 1 && (
-            <div className="absolute top-2 right-2 z-20">
+            <div className="absolute top-12 right-2 z-20">
               <div className="bg-red-100 text-red-600 p-1 rounded-full">
                 <AlertCircle className="w-4 h-4" />
               </div>
