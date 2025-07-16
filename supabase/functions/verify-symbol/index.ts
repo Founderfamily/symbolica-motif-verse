@@ -13,6 +13,12 @@ interface SymbolData {
   description?: string;
   significance?: string;
   historical_context?: string;
+  sources?: Array<{
+    title: string;
+    url: string;
+    type: string;
+    description?: string;
+  }>;
 }
 
 interface VerificationRequest {
@@ -26,6 +32,10 @@ const verifyWithOpenAI = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   if (!apiKey) throw new Error('OpenAI API key not configured');
 
+  const sourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nSOURCES DE RÉFÉRENCE DISPONIBLES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nVeuillez consulter ces sources pour valider les informations ci-dessus.\n`
+    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE FOURNIE - Veuillez évaluer uniquement sur vos connaissances générales.\n';
+
   const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
 
 Nom: ${symbol.name}
@@ -33,13 +43,13 @@ Culture: ${symbol.culture}
 Période: ${symbol.period}
 Description: ${symbol.description || 'Non spécifiée'}
 Signification: ${symbol.significance || 'Non spécifiée'}
-Contexte historique: ${symbol.historical_context || 'Non spécifié'}
-
+Contexte historique: ${symbol.historical_context || 'Non spécifié'}${sourcesText}
 Veuillez évaluer:
 1. L'exactitude historique de ces informations
 2. La cohérence entre le nom, la culture et la période
 3. La plausibilité de la description et de la signification
 4. Toute incohérence ou erreur potentielle
+5. La qualité et fiabilité des sources fournies (si disponibles)
 
 Répondez avec:
 - Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
@@ -132,6 +142,10 @@ const verifyWithAnthropic = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
   if (!apiKey) throw new Error('Anthropic API key not configured');
 
+  const sourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nSOURCES DE RÉFÉRENCE DISPONIBLES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nVeuillez consulter ces sources pour valider les informations ci-dessus.\n`
+    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE FOURNIE - Veuillez évaluer uniquement sur vos connaissances générales.\n';
+
   const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
 
 Nom: ${symbol.name}
@@ -139,13 +153,13 @@ Culture: ${symbol.culture}
 Période: ${symbol.period}
 Description: ${symbol.description || 'Non spécifiée'}
 Signification: ${symbol.significance || 'Non spécifiée'}
-Contexte historique: ${symbol.historical_context || 'Non spécifié'}
-
+Contexte historique: ${symbol.historical_context || 'Non spécifié'}${sourcesText}
 Veuillez évaluer:
 1. L'exactitude historique de ces informations
 2. La cohérence entre le nom, la culture et la période
 3. La plausibilité de la description et de la signification
 4. Toute incohérence ou erreur potentielle
+5. La qualité et fiabilité des sources fournies (si disponibles)
 
 Répondez avec:
 - Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
@@ -572,7 +586,7 @@ serve(async (req) => {
 
         const { data: symbolFromDb, error } = await supabase
           .from('symbols')
-          .select('name, culture, period, description, significance, historical_context')
+          .select('name, culture, period, description, significance, historical_context, sources')
           .eq('id', symbolId)
           .single();
 
@@ -592,7 +606,8 @@ serve(async (req) => {
           period: symbolFromDb.period,
           description: symbolFromDb.description,
           significance: symbolFromDb.significance,
-          historical_context: symbolFromDb.historical_context
+          historical_context: symbolFromDb.historical_context,
+          sources: symbolFromDb.sources || []
         };
       } catch (dbError) {
         console.error('Error fetching symbol from database:', dbError);

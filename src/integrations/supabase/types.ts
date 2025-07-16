@@ -2458,6 +2458,7 @@ export type Database = {
           period: string
           related_symbols: string[] | null
           significance: string | null
+          sources: Json | null
           tags: string[] | null
           technique: string[] | null
           translations: Json | null
@@ -2475,6 +2476,7 @@ export type Database = {
           period: string
           related_symbols?: string[] | null
           significance?: string | null
+          sources?: Json | null
           tags?: string[] | null
           technique?: string[] | null
           translations?: Json | null
@@ -2492,6 +2494,7 @@ export type Database = {
           period?: string
           related_symbols?: string[] | null
           significance?: string | null
+          sources?: Json | null
           tags?: string[] | null
           technique?: string[] | null
           translations?: Json | null
