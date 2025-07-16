@@ -664,12 +664,94 @@ function hasNoSourcesIndicators(text: string): boolean {
   return noSourcesIndicators.some(indicator => lowerText.includes(indicator));
 }
 
+function extractSourcesFromResponse(response: string): Array<{title: string, url: string, type: string, description?: string}> {
+  const sources: Array<{title: string, url: string, type: string, description?: string}> = [];
+  
+  // Enhanced patterns to extract sources from AI responses
+  const sourcePatterns = [
+    // French patterns
+    /SOURCES SUPPLÉMENTAIRES TROUVÉES:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    /NOUVELLES SOURCES TROUVÉES:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    /SOURCES ACADÉMIQUES TROUVÉES:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    
+    // English patterns
+    /ADDITIONAL SOURCES FOUND:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    /NEW SOURCES FOUND:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    /ACADEMIC SOURCES FOUND:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+  ];
+  
+  for (const pattern of sourcePatterns) {
+    const match = response.match(pattern);
+    if (match && match[1]) {
+      const sourcesText = match[1].trim();
+      
+      // Split by lines and parse each source
+      const lines = sourcesText.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+      
+      for (const line of lines) {
+        const cleanLine = line.replace(/^[-•]\s*/, '').trim();
+        
+        // Try to parse structured source format: "Description - Citation"
+        const parts = cleanLine.split(' - ');
+        if (parts.length >= 2) {
+          const description = parts[0].trim();
+          const citation = parts.slice(1).join(' - ').trim();
+          
+          // Try to extract URL from citation
+          const urlMatch = citation.match(/(https?:\/\/[^\s]+)/);
+          const url = urlMatch ? urlMatch[1] : '';
+          
+          // Determine source type based on content
+          let type = 'academic';
+          if (citation.toLowerCase().includes('musée') || citation.toLowerCase().includes('museum')) {
+            type = 'museum';
+          } else if (citation.toLowerCase().includes('archive') || citation.toLowerCase().includes('archiv')) {
+            type = 'archive';
+          } else if (citation.toLowerCase().includes('journal') || citation.toLowerCase().includes('revue')) {
+            type = 'journal';
+          } else if (citation.toLowerCase().includes('livre') || citation.toLowerCase().includes('book')) {
+            type = 'book';
+          } else if (url) {
+            type = 'website';
+          }
+          
+          sources.push({
+            title: description,
+            url: url || citation,
+            type: type,
+            description: citation
+          });
+        } else if (cleanLine.length > 10) {
+          // Fallback: treat entire line as a source
+          const urlMatch = cleanLine.match(/(https?:\/\/[^\s]+)/);
+          sources.push({
+            title: cleanLine.substring(0, 100) + (cleanLine.length > 100 ? '...' : ''),
+            url: urlMatch ? urlMatch[1] : '',
+            type: 'reference',
+            description: cleanLine
+          });
+        }
+      }
+      
+      if (sources.length > 0) {
+        console.log(`Extracted ${sources.length} sources from ${pattern.source}`);
+        break; // Stop after first successful extraction
+      }
+    }
+  }
+  
+  return sources;
+}
+
 const parseVerificationResponse = (response: string, api: string, sources?: string[]) => {
   // Extract status from response
   const statusMatch = response.toLowerCase().match(/status:?\s*(verified|disputed|unverified)/);
   
   // Use improved confidence extraction
   const confidence = extractConfidenceScore(response, api);
+  
+  // Extract new sources from AI response
+  const extractedSources = extractSourcesFromResponse(response);
   
   // Determine status based on content analysis
   let status = 'unverified';
@@ -714,6 +796,7 @@ const parseVerificationResponse = (response: string, api: string, sources?: stri
     summary: summary || 'Analyse terminée',
     details: response,
     sources: sources || [],
+    extractedSources: extractedSources, // New field for AI-found sources
   };
 };
 
@@ -845,6 +928,7 @@ serve(async (req) => {
           }
         );
 
+        // Save verification result
         await supabase.from('symbol_verifications').insert({
           symbol_id: symbolId,
           api: result.api,
@@ -855,6 +939,41 @@ serve(async (req) => {
           sources: result.sources || [],
           verified_by: userId
         });
+
+        // If AI found new sources, add them to the symbol
+        if (result.extractedSources && result.extractedSources.length > 0) {
+          // Get current symbol sources
+          const { data: currentSymbol } = await supabase
+            .from('symbols')
+            .select('sources')
+            .eq('id', symbolId)
+            .single();
+
+          const currentSources = currentSymbol?.sources || [];
+          
+          // Merge with new sources, avoiding duplicates
+          const newSources = [...currentSources];
+          for (const newSource of result.extractedSources) {
+            const isDuplicate = currentSources.some(existing => 
+              existing.title === newSource.title || 
+              (existing.url && newSource.url && existing.url === newSource.url)
+            );
+            
+            if (!isDuplicate) {
+              newSources.push(newSource);
+            }
+          }
+
+          // Update symbol with new sources
+          if (newSources.length > currentSources.length) {
+            await supabase
+              .from('symbols')
+              .update({ sources: newSources })
+              .eq('id', symbolId);
+            
+            console.log(`Added ${newSources.length - currentSources.length} new sources to symbol ${symbolId}`);
+          }
+        }
 
         console.log(`Auto-saved verification result for ${api} on symbol ${symbolId}`);
       } catch (saveError) {

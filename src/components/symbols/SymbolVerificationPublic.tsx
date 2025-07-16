@@ -32,6 +32,13 @@ interface VerificationHistoryItem {
     status: string;
     confidence: number;
     summary: string;
+    sources?: any[];
+    extractedSources?: Array<{
+      title: string;
+      url: string;
+      type: string;
+      description?: string;
+    }>;
   }[];
 }
 
@@ -98,7 +105,9 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
               api: v.api,
               status: v.status,
               confidence: v.confidence,
-              summary: v.summary
+              summary: v.summary,
+              sources: v.sources,
+              extractedSources: v.extractedSources
             }))
           };
         });
@@ -335,13 +344,76 @@ export const SymbolVerificationPublic: React.FC<SymbolVerificationPublicProps> =
                   <div className="space-y-2">
                     {symbol.sources.map((source: any, index: number) => (
                       <div key={index} className="text-sm text-blue-700 p-2 bg-blue-100 rounded border border-blue-200">
-                        <p>{source.description}</p>
-                        <div className="text-xs text-blue-600 mt-1">
-                          <strong>Source :</strong> {source.citation}
+                        <div className="font-medium">{source.title}</div>
+                        {source.description && <p className="mt-1">{source.description}</p>}
+                        <div className="text-xs text-blue-600 mt-1 flex items-center gap-2">
+                          <span className="px-2 py-1 bg-blue-200 rounded text-blue-800">{source.type || 'source'}</span>
+                          {source.url && (
+                            <a 
+                              href={source.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              Voir la source
+                            </a>
+                          )}
                         </div>
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Sources supplémentaires trouvées par l'IA */}
+          {currentVerification.results.some(r => (r.extractedSources && r.extractedSources.length > 0) || (r.sources && r.sources.length > 0)) && (
+            <Card className="p-6 border-green-200 bg-green-50">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <div className="space-y-3">
+                  <h4 className="text-md font-semibold text-green-800">Sources supplémentaires trouvées par l'IA</h4>
+                  <p className="text-xs text-green-600 mb-3">Nouvelles sources académiques et références découvertes pendant le processus de vérification.</p>
+                  
+                  {currentVerification.results.map((result, index) => {
+                    const aiSources = result.extractedSources || result.sources || [];
+                    return aiSources.length > 0 && (
+                      <div key={index} className="space-y-2">
+                        <div className="text-sm font-medium text-green-800 flex items-center gap-2">
+                          <span className="px-2 py-1 bg-green-200 rounded text-green-800 text-xs uppercase">{result.api}</span>
+                          Sources trouvées
+                        </div>
+                        <div className="space-y-2">
+                          {aiSources.map((source: any, sourceIndex: number) => (
+                            <div key={sourceIndex} className="text-sm text-green-700 p-2 bg-green-100 rounded border border-green-200">
+                              {typeof source === 'string' ? (
+                                <div>{source}</div>
+                              ) : (
+                                <div>
+                                  <div className="font-medium">{source.title}</div>
+                                  {source.description && <p className="mt-1 text-xs">{source.description}</p>}
+                                  <div className="text-xs text-green-600 mt-1 flex items-center gap-2">
+                                    <span className="px-2 py-1 bg-green-200 rounded text-green-800">{source.type || 'référence'}</span>
+                                    {source.url && (
+                                      <a 
+                                        href={source.url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-green-600 hover:underline"
+                                      >
+                                        Voir la source
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </Card>
