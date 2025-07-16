@@ -308,34 +308,39 @@ const verifyWithGemini = async (symbol: SymbolData) => {
     ? `\n\nSOURCES DE RÉFÉRENCE DOCUMENTÉES:\n${symbol.sources.map(s => `- ${s.title || s.description} (${s.type || 'source'}): ${s.url || s.citation || 'non spécifiée'}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n`
     : '\n\nAUCUNE SOURCE DE RÉFÉRENCE DOCUMENTÉE.\n';
 
-  const prompt = `PHASE 1 - RECHERCHE DE SOURCES ACADÉMIQUES:
-En tant qu'expert en histoire et symbolisme, listez d'abord 3-5 sources académiques légitimes que vous connaissez sur ce symbole culturel:
+  const prompt = `MISSION: En tant qu'expert collaboratif en histoire et symbolisme, enrichissez activement la base de données avec de nouvelles sources académiques.
 
-Nom: ${symbol.name}
-Culture: ${symbol.culture}
-Période: ${symbol.period}${existingSourcesText}
-Recherchez des sources fiables comme:
-- Musées nationaux et institutions culturelles
-- Ouvrages académiques de référence
-- Articles de revues scientifiques
-- Collections de musées spécialisés
+PHASE 1 - RECHERCHE PROACTIVE DE SOURCES:
+Symbole à enrichir:
+- Nom: ${symbol.name}
+- Culture: ${symbol.culture}
+- Période: ${symbol.period}${existingSourcesText}
 
-Format pour les nouvelles sources trouvées:
-SOURCES SUPPLÉMENTAIRES TROUVÉES:
-- [Description] - [Citation complète]
+🔍 RECHERCHEZ ET LISTEZ 3-5 SOURCES ACADÉMIQUES SUPPLÉMENTAIRES que vous connaissez:
+- Ouvrages de référence sur cette culture/période
+- Musées et institutions spécialisées
+- Publications scientifiques reconnues
+- Collections documentaires établies
 
-PHASE 2 - ÉVALUATION:
-Maintenant, en considérant TOUTES les sources (documentées + trouvées), évaluez:
-1. L'exactitude historique de ces informations
-2. La cohérence entre le nom, la culture et la période
-3. La plausibilité de la description et de la signification
-4. La qualité et fiabilité de toutes les sources disponibles
+FORMAT OBLIGATOIRE pour les nouvelles sources trouvées:
+**SOURCES SUPPLÉMENTAIRES TROUVÉES:**
+- [Nom institution/auteur] - [Titre complet] - [Type: musée/livre/article/etc.]
+- [Nom institution/auteur] - [Titre complet] - [Type: musée/livre/article/etc.]
 
-Répondez avec:
-- Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
-- Un niveau de confiance (0-100%) - BONUS si sources fiables trouvées
-- Un résumé en 2-3 phrases
-- Une analyse détaillée`;
+PHASE 2 - ÉVALUATION BIENVEILLANTE:
+Adoptez une approche CONSTRUCTIVE en évaluant:
+✅ Points forts: Que confirment les sources existantes et nouvelles?
+✅ Cohérence historique: Le symbole s'inscrit-il logiquement dans son contexte?
+✅ Qualité des informations: Les descriptions sont-elles plausibles?
+✅ Richesse documentaire: Combien de sources (existantes + nouvelles) supportent les informations?
+
+⚠️ ATTENTION: Ne pénalisez PAS pour des "formats de citation imparfaits" - valorisez le CONTENU des sources.
+
+RÉPONSE ATTENDUE:
+- **Statut**: verified/disputed/unverified
+- **Niveau de confiance**: 0-100% (BONUS: +20% si vous trouvez 3+ nouvelles sources fiables)
+- **Résumé**: 2-3 phrases positives sur les confirmations trouvées
+- **Analyse détaillée**: Focus sur les CONFIRMATIONS plutôt que les lacunes`;
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
