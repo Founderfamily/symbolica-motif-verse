@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import Replicate from "https://esm.sh/replicate@0.25.2"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,59 +22,68 @@ serve(async (req) => {
       )
     }
 
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openaiApiKey) {
+    const replicateApiKey = Deno.env.get('REPLICATE_API_KEY')
+    if (!replicateApiKey) {
       return new Response(
-        JSON.stringify({ error: 'Clé API OpenAI non configurée' }),
+        JSON.stringify({ error: 'Clé API Replicate non configurée' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
 
-    const response = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'dall-e-3',
-        prompt: `Create a clean visual image with NO TEXT, NO WORDS, NO LABELS, NO CAPTIONS, NO DESCRIPTIONS written anywhere in the image. Pure visual representation only. ${prompt}`,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-        response_format: "b64_json"
-      }),
+    const replicate = new Replicate({
+      auth: replicateApiKey,
     })
 
-    if (!response.ok) {
-      const errorData = await response.text()
-      return new Response(
-        JSON.stringify({ error: 'Erreur API OpenAI: ' + errorData }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-      )
-    }
-
-    const data = await response.json()
+    console.log("Generating image with Flux model:", prompt)
     
-    if (!data.data || !data.data[0] || !data.data[0].b64_json) {
+    const output = await replicate.run(
+      "black-forest-labs/flux-schnell",
+      {
+        input: {
+          prompt: `Clean visual image without any text, words, or labels. ${prompt}`,
+          go_fast: true,
+          megapixels: "1",
+          num_outputs: 1,
+          aspect_ratio: "1:1",
+          output_format: "webp",
+          output_quality: 80,
+          num_inference_steps: 4
+        }
+      }
+    )
+
+    console.log("Flux generation response:", output)
+    
+    if (!output || !Array.isArray(output) || output.length === 0) {
       return new Response(
-        JSON.stringify({ error: 'Réponse invalide de l\'API OpenAI' }),
+        JSON.stringify({ error: 'Réponse invalide de l\'API Replicate' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
 
-    const base64Image = data.data[0].b64_json
+    // Récupérer l'URL de l'image
+    const imageUrl = output[0]
+    
+    // Télécharger l'image et la convertir en base64
+    const imageResponse = await fetch(imageUrl)
+    if (!imageResponse.ok) {
+      throw new Error('Impossible de télécharger l\'image générée')
+    }
+    
+    const imageBuffer = await imageResponse.arrayBuffer()
+    const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
     
     return new Response(
       JSON.stringify({ 
         success: true,
-        image: `data:image/png;base64,${base64Image}`,
+        image: `data:image/webp;base64,${base64Image}`,
         prompt: prompt
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
+    console.error("Error in generate-image function:", error)
     return new Response(
       JSON.stringify({ error: 'Erreur: ' + error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
