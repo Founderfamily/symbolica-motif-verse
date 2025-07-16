@@ -73,14 +73,11 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
     try {
       setLoading(true);
       
+      // Utilisation d'une requête SQL directe pour éviter les problèmes de types
       const { data: verificationComments, error } = await supabase
-        .from('symbol_verification_community')
-        .select(`
-          *,
-          profiles!user_id(username, full_name, is_admin)
-        `)
-        .eq('symbol_id', symbol.id)
-        .order('created_at', { ascending: false });
+        .rpc('get_community_verification_comments', { 
+          p_symbol_id: symbol.id 
+        });
 
       if (error) throw error;
 
@@ -97,14 +94,14 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
 
     setSubmitting(true);
     try {
+      // Utilisation d'une fonction RPC pour insérer le commentaire
       const { error } = await supabase
-        .from('symbol_verification_community')
-        .insert({
-          symbol_id: symbol.id,
-          user_id: userProfile.id,
-          comment: newComment.trim(),
-          verification_rating: selectedRating,
-          expertise_level: userProfile.is_admin ? 'admin' : 'community'
+        .rpc('add_community_verification_comment', {
+          p_symbol_id: symbol.id,
+          p_user_id: userProfile.id,
+          p_comment: newComment.trim(),
+          p_verification_rating: selectedRating,
+          p_expertise_level: userProfile.is_admin ? 'admin' : 'community'
         });
 
       if (error) throw error;

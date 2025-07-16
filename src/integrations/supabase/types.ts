@@ -2354,6 +2354,47 @@ export type Database = {
           },
         ]
       }
+      symbol_verification_community: {
+        Row: {
+          comment: string
+          created_at: string
+          expertise_level: string
+          id: string
+          symbol_id: string
+          updated_at: string
+          user_id: string
+          verification_rating: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          expertise_level?: string
+          id?: string
+          symbol_id: string
+          updated_at?: string
+          user_id: string
+          verification_rating: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          expertise_level?: string
+          id?: string
+          symbol_id?: string
+          updated_at?: string
+          user_id?: string
+          verification_rating?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_verification_community_symbol_id_fkey"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       symbol_verifications: {
         Row: {
           api: string
