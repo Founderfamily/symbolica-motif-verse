@@ -3,10 +3,12 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { VerificationBadge } from '@/components/ui/verification-badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Eye, Trash2 } from 'lucide-react';
 import { GroupSymbol } from '@/types/interest-groups';
 import { useAuth } from '@/hooks/useAuth';
+import { useSymbolVerification } from '@/hooks/useSymbolVerification';
 
 interface GroupSymbolCardProps {
   groupSymbol: GroupSymbol;
@@ -20,6 +22,9 @@ const GroupSymbolCard: React.FC<GroupSymbolCardProps> = ({
   onRemove 
 }) => {
   const auth = useAuth();
+  
+  // Récupérer les vérifications IA pour ce symbole
+  const { data: verification } = useSymbolVerification(groupSymbol.symbol_id);
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -38,6 +43,14 @@ const GroupSymbolCard: React.FC<GroupSymbolCardProps> = ({
                   <Badge variant="outline">
                     {groupSymbol.symbol?.period}
                   </Badge>
+                  {/* Badge de vérification IA */}
+                  {verification && (
+                    <VerificationBadge 
+                      status={verification.status}
+                      confidence={verification.averageConfidence}
+                      verificationCount={verification.verificationCount}
+                    />
+                  )}
                 </div>
               </div>
               

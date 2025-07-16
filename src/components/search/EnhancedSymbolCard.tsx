@@ -4,9 +4,11 @@ import { SymbolData } from '@/types/supabase';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Badge } from '@/components/ui/badge';
+import { VerificationBadge } from '@/components/ui/verification-badge';
 import { useToast } from '@/hooks/use-toast';
 import { Info, Heart, Eye, Wifi, WifiOff, Share2 } from 'lucide-react';
 import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
+import { useSymbolVerification } from '@/hooks/useSymbolVerification';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -24,6 +26,9 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
   
   // Obtenir les images du symbole depuis Supabase
   const { data: images } = useSymbolImages(symbol.id);
+  
+  // Récupérer les vérifications IA pour ce symbole
+  const { data: verification } = useSymbolVerification(symbol.id);
   const primaryImage = React.useMemo(() => {
     if (!images || images.length === 0) return null;
     return images.find(img => img.image_type === 'original') || images[0];
@@ -125,6 +130,15 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
           
           {/* Indicateurs et contrôles */}
           <div className="absolute top-2 left-2 z-20 flex gap-2">
+            {/* Badge de vérification IA */}
+            {verification && (
+              <VerificationBadge 
+                status={verification.status}
+                confidence={verification.averageConfidence}
+                verificationCount={verification.verificationCount}
+                className="shadow-sm"
+              />
+            )}
             <Badge variant="secondary" className={`${isLocalImage ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'} text-xs`}>
               {isLocalImage ? <WifiOff className="w-3 h-3 mr-1" /> : <Wifi className="w-3 h-3 mr-1" />}
               {isLocalImage ? 'Local' : 'Live'}

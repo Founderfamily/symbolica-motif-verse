@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { VerificationBadge } from "@/components/ui/verification-badge";
 import { Symbol } from '@/data/symbols';
 import { culturalGradient } from '@/lib/utils';
 import { Info, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSymbolVerification } from '@/hooks/useSymbolVerification';
 
 // Image de remplacement locale en cas d'erreur
 const PLACEHOLDER = "/placeholder.svg";
@@ -36,6 +38,9 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif, index }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [useFallback, setUseFallback] = useState(false);
   const { toast } = useToast();
+  
+  // Récupérer les vérifications IA pour ce symbole (utilise le nom du symbole pour les symboles statiques)
+  const { data: verification } = useSymbolVerification(motif.name);
 
   // Réinitialiser l'état d'erreur si le motif change
   useEffect(() => {
@@ -103,6 +108,19 @@ const SymbolCard: React.FC<SymbolCardProps> = ({ motif, index }) => {
               </div>
             </div>
           )}
+          
+          {/* Badge de vérification IA */}
+          {verification && (
+            <div className="absolute top-2 left-2 z-20">
+              <VerificationBadge 
+                status={verification.status}
+                confidence={verification.averageConfidence}
+                verificationCount={verification.verificationCount}
+                className="shadow-sm"
+              />
+            </div>
+          )}
+          
           <img
             src={imageSource}
             alt={motif.name}
