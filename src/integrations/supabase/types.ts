@@ -3182,6 +3182,16 @@ export type Database = {
       }
     }
     Functions: {
+      add_community_verification_comment: {
+        Args: {
+          p_symbol_id: string
+          p_user_id: string
+          p_comment: string
+          p_verification_rating: string
+          p_expertise_level: string
+        }
+        Returns: string
+      }
       assign_master_explorer_role: {
         Args: {
           _target_user_id: string
@@ -3274,6 +3284,18 @@ export type Database = {
           details: Json
           created_at: string
           admin_name: string
+        }[]
+      }
+      get_community_verification_comments: {
+        Args: { p_symbol_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          comment: string
+          verification_rating: string
+          expertise_level: string
+          created_at: string
+          profiles: Json
         }[]
       }
       get_contribution_management_stats: {

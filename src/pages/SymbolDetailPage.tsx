@@ -13,6 +13,7 @@ import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { AdminFloatingEditButton } from '@/components/admin/AdminFloatingEditButton';
 import { ImageGalleryModal } from '@/components/symbols/ImageGalleryModal';
 import { SymbolVerificationPublic } from '@/components/symbols/SymbolVerificationPublic';
+import { SymbolVerificationCommunity } from '@/components/symbols/SymbolVerificationCommunity';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -76,7 +77,7 @@ const SymbolDetailPage: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   
   // État pour la section active
-  const [activeSection, setActiveSection] = React.useState<'info' | 'verification'>('info');
+  const [activeSection, setActiveSection] = React.useState<'info' | 'verification' | 'community'>('info');
 
   // Mettre à jour le symbole local quand les données changent
   React.useEffect(() => {
@@ -347,6 +348,16 @@ const SymbolDetailPage: React.FC = () => {
                 >
                   Vérification
                 </button>
+                <button
+                  onClick={() => setActiveSection('community')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeSection === 'community'
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  Community
+                </button>
               </nav>
             </div>
           </div>
@@ -520,6 +531,12 @@ const SymbolDetailPage: React.FC = () => {
           {activeSection === 'verification' && (
             <div>
               <SymbolVerificationPublic symbol={displaySymbol} />
+            </div>
+          )}
+
+          {activeSection === 'community' && (
+            <div>
+              <SymbolVerificationCommunity symbol={displaySymbol} />
             </div>
           )}
         </div>
