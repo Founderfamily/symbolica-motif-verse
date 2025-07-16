@@ -223,7 +223,8 @@ Répondez avec:
       top_p: 0.9,
       return_citations: true,
       return_images: false,
-      return_related_questions: false
+      return_related_questions: false,
+      search_recency_filter: 'month'
     }),
   });
 
