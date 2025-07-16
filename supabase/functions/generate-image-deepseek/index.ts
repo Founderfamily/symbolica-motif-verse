@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import Replicate from "https://esm.sh/replicate@0.25.2"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +12,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { prompt } = body
+    const { prompt, model = 'dall-e-3' } = body
     
     if (!prompt) {
       return new Response(
@@ -22,68 +21,63 @@ serve(async (req) => {
       )
     }
 
-    const replicateApiKey = Deno.env.get('REPLICATE_API_KEY')
-    if (!replicateApiKey) {
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openaiApiKey) {
       return new Response(
-        JSON.stringify({ error: 'Clé API Replicate non configurée' }),
+        JSON.stringify({ error: 'Clé API OpenAI non configurée' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
 
-    const replicate = new Replicate({
-      auth: replicateApiKey,
+    // Prompt optimisé pour éviter le texte
+    const optimizedPrompt = `Create a pure visual artwork with absolutely NO TEXT, NO WORDS, NO LETTERS, NO CAPTIONS, NO LABELS anywhere in the image. The image should be completely text-free. Only visual elements. ${prompt}. Style: clean artistic representation without any written content.`
+
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model,
+        prompt: optimizedPrompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+        response_format: "b64_json"
+      }),
     })
 
-    console.log("Generating image with Flux model:", prompt)
-    
-    const output = await replicate.run(
-      "black-forest-labs/flux-schnell",
-      {
-        input: {
-          prompt: `Clean visual image without any text, words, or labels. ${prompt}`,
-          go_fast: true,
-          megapixels: "1",
-          num_outputs: 1,
-          aspect_ratio: "1:1",
-          output_format: "webp",
-          output_quality: 80,
-          num_inference_steps: 4
-        }
-      }
-    )
-
-    console.log("Flux generation response:", output)
-    
-    if (!output || !Array.isArray(output) || output.length === 0) {
+    if (!response.ok) {
+      const errorData = await response.text()
       return new Response(
-        JSON.stringify({ error: 'Réponse invalide de l\'API Replicate' }),
+        JSON.stringify({ error: 'Erreur API OpenAI: ' + errorData }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
 
-    // Récupérer l'URL de l'image
-    const imageUrl = output[0]
+    const data = await response.json()
     
-    // Télécharger l'image et la convertir en base64
-    const imageResponse = await fetch(imageUrl)
-    if (!imageResponse.ok) {
-      throw new Error('Impossible de télécharger l\'image générée')
+    if (!data.data || !data.data[0] || !data.data[0].b64_json) {
+      return new Response(
+        JSON.stringify({ error: 'Réponse invalide de l\'API OpenAI' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      )
     }
-    
-    const imageBuffer = await imageResponse.arrayBuffer()
-    const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
+
+    const base64Image = data.data[0].b64_json
     
     return new Response(
       JSON.stringify({ 
         success: true,
-        image: `data:image/webp;base64,${base64Image}`,
-        prompt: prompt
+        image: `data:image/png;base64,${base64Image}`,
+        prompt: prompt,
+        model: model
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error("Error in generate-image function:", error)
     return new Response(
       JSON.stringify({ error: 'Erreur: ' + error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
