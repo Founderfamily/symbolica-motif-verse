@@ -92,6 +92,10 @@ const verifyWithDeepSeek = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('DEEPSEEK_API_KEY');
   if (!apiKey) throw new Error('DeepSeek API key not configured');
 
+  const sourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nAVAILABLE REFERENCE SOURCES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nPlease consult these sources to validate the information above. These sources should significantly influence your confidence level.\n`
+    : '\n\nNO REFERENCE SOURCES PROVIDED - Please evaluate based only on general knowledge. This should result in a lower confidence level.\n';
+
   const prompt = `Analyze this cultural symbol for historical accuracy:
 
 Symbol: ${symbol.name}
@@ -99,13 +103,19 @@ Culture: ${symbol.culture}
 Period: ${symbol.period}
 Description: ${symbol.description || 'Not specified'}
 Significance: ${symbol.significance || 'Not specified'}
-Historical context: ${symbol.historical_context || 'Not specified'}
+Historical context: ${symbol.historical_context || 'Not specified'}${sourcesText}
+Please verify:
+1. Historical accuracy of this information
+2. Consistency between name, culture and period
+3. Plausibility of description and significance
+4. Any inconsistencies or potential errors
+5. Quality and reliability of provided sources (if available)
 
-Please verify the factual accuracy and provide:
+Please provide:
 - Status: verified/disputed/unverified
-- Confidence level (0-100%)
-- Brief summary
-- Detailed analysis with reasoning`;
+- Confidence level (0-100%) - Consider whether reliable sources are provided
+- Brief summary in 2-3 sentences
+- Detailed analysis with your reference sources`;
 
   const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
     method: 'POST',
@@ -199,6 +209,10 @@ const verifyWithPerplexity = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('PERPLEXITY_API_KEY');
   if (!apiKey) throw new Error('Perplexity API key not configured');
 
+  const sourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nSOURCES DE RÉFÉRENCE DISPONIBLES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nVeuillez consulter ces sources pour valider les informations ci-dessus. Ces sources doivent significativement influencer votre niveau de confiance.\n`
+    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE FOURNIE - Veuillez évaluer uniquement sur vos connaissances générales. Ceci devrait résulter en un niveau de confiance plus faible.\n';
+
   const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
 
 Nom: ${symbol.name}
@@ -206,17 +220,17 @@ Culture: ${symbol.culture}
 Période: ${symbol.period}
 Description: ${symbol.description || 'Non spécifiée'}
 Signification: ${symbol.significance || 'Non spécifiée'}
-Contexte historique: ${symbol.historical_context || 'Non spécifié'}
-
+Contexte historique: ${symbol.historical_context || 'Non spécifié'}${sourcesText}
 Veuillez évaluer:
 1. L'exactitude historique de ces informations
 2. La cohérence entre le nom, la culture et la période
 3. La plausibilité de la description et de la signification
 4. Toute incohérence ou erreur potentielle
+5. La qualité et fiabilité des sources fournies (si disponibles)
 
 Répondez avec:
 - Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
-- Un niveau de confiance (0-100%)
+- Un niveau de confiance (0-100%) - Considérez si des sources fiables sont fournies
 - Un résumé en 2-3 phrases
 - Une analyse détaillée avec vos sources de référence`;
 
@@ -258,6 +272,10 @@ const verifyWithGemini = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) throw new Error('Gemini API key not configured');
 
+  const sourcesText = symbol.sources && symbol.sources.length > 0 
+    ? `\n\nSOURCES DE RÉFÉRENCE DISPONIBLES:\n${symbol.sources.map(s => `- ${s.title} (${s.type}): ${s.url}${s.description ? ` - ${s.description}` : ''}`).join('\n')}\n\nVeuillez consulter ces sources pour valider les informations ci-dessus. Ces sources doivent significativement influencer votre niveau de confiance.\n`
+    : '\n\nAUCUNE SOURCE DE RÉFÉRENCE FOURNIE - Veuillez évaluer uniquement sur vos connaissances générales. Ceci devrait résulter en un niveau de confiance plus faible.\n';
+
   const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
 
 Nom: ${symbol.name}
@@ -265,17 +283,17 @@ Culture: ${symbol.culture}
 Période: ${symbol.period}
 Description: ${symbol.description || 'Non spécifiée'}
 Signification: ${symbol.significance || 'Non spécifiée'}
-Contexte historique: ${symbol.historical_context || 'Non spécifié'}
-
+Contexte historique: ${symbol.historical_context || 'Non spécifié'}${sourcesText}
 Veuillez évaluer:
 1. L'exactitude historique de ces informations
 2. La cohérence entre le nom, la culture et la période
 3. La plausibilité de la description et de la signification
 4. Toute incohérence ou erreur potentielle
+5. La qualité et fiabilité des sources fournies (si disponibles)
 
 Répondez avec:
 - Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
-- Un niveau de confiance (0-100%)
+- Un niveau de confiance (0-100%) - Considérez si des sources fiables sont fournies
 - Un résumé en 2-3 phrases
 - Une analyse détaillée avec vos sources de référence`;
 
@@ -320,9 +338,15 @@ Répondez avec:
 };
 
 function extractConfidenceScore(text: string, api: string): number {
-  // Check for no sources indicators first - strict scoring
+  // Check for reliable sources indicators first - higher scoring
+  if (hasReliableSourcesIndicators(text)) {
+    const baseScore = extractBasicConfidence(text);
+    return Math.min(95, baseScore + 20); // Bonus for having reliable sources
+  }
+  
+  // Check for no sources indicators - strict scoring
   if (hasNoSourcesIndicators(text)) {
-    return Math.min(15, extractBasicConfidence(text)); // Maximum 15% if no sources
+    return Math.min(25, extractBasicConfidence(text)); // Maximum 25% if no sources
   }
   
   // Enhanced confidence percentage extraction with multilingual support
@@ -347,8 +371,8 @@ function extractConfidenceScore(text: string, api: string): number {
     const match = text.match(pattern);
     if (match) {
       const score = parseInt(match[1]);
-      // Strict cap at 20% if no sources detected even with explicit score
-      return hasNoSourcesIndicators(text) ? Math.min(20, score) : score;
+      // Strict cap at 30% if no sources detected even with explicit score
+      return hasNoSourcesIndicators(text) ? Math.min(30, score) : score;
     }
   }
   
@@ -389,7 +413,52 @@ function extractConfidenceScore(text: string, api: string): number {
     if (text.includes('very uncertain') || text.includes('unestablished') || text.includes('très incertain')) return 15;
   }
   
-  return 15; // Much lower default fallback (was 30)
+  return 25; // Default fallback
+}
+
+function hasReliableSourcesIndicators(text: string): boolean {
+  const lowerText = text.toLowerCase();
+  const reliableSourcesIndicators = [
+    // English indicators
+    'france bleu',
+    'reliable sources',
+    'documented sources',
+    'credible sources',
+    'official sources',
+    'verified sources',
+    'multiple sources',
+    'well-documented',
+    'authoritative sources',
+    'peer-reviewed',
+    'scholarly sources',
+    'academic sources',
+    'museum sources',
+    'historical records',
+    'official documentation',
+    'archive sources',
+    'reputable sources',
+    'established sources',
+    
+    // French indicators
+    'sources fiables',
+    'sources documentées',
+    'sources crédibles',
+    'sources officielles',
+    'sources vérifiées',
+    'sources multiples',
+    'bien documenté',
+    'sources autoritaires',
+    'sources académiques',
+    'sources savantes',
+    'sources de musée',
+    'archives historiques',
+    'documentation officielle',
+    'sources d\'archives',
+    'sources réputées',
+    'sources établies'
+  ];
+  
+  return reliableSourcesIndicators.some(indicator => lowerText.includes(indicator));
 }
 
 function extractBasicConfidence(text: string): number {
@@ -524,10 +593,12 @@ const parseVerificationResponse = (response: string, api: string, sources?: stri
   }
   
   // Force status based on confidence level and content analysis
-  if (confidence <= 25 || hasNoSourcesIndicators(response)) {
+  if (confidence <= 30 || hasNoSourcesIndicators(response)) {
     status = 'unverified';
-  } else if (confidence <= 50) {
+  } else if (confidence <= 60) {
     status = 'disputed';
+  } else if (confidence >= 75 || hasReliableSourcesIndicators(response)) {
+    status = 'verified';
   }
   
   // Extract summary (first paragraph or first few sentences)
