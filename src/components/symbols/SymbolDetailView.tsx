@@ -9,7 +9,7 @@ import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { useAuth } from '@/hooks/useAuth';
 import { useGamification } from '@/hooks/useGamification';
 import { supabase } from '@/integrations/supabase/client';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ExternalLink } from 'lucide-react';
 import type { SymbolData } from '@/types/supabase';
 
 interface SymbolDetailViewProps {
@@ -23,6 +23,11 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasAwardedExplorationPoints, setHasAwardedExplorationPoints] = useState(false);
   const { loading: imagesLoading, images } = useSymbolImages(symbol.id);
+
+  // Helper function to check if sources is an array
+  const isValidSourcesArray = (sources: any): sources is Array<{title: string, url?: string, type: string, description?: string}> => {
+    return Array.isArray(sources);
+  };
 
   // Award exploration points when user views symbol details
   useEffect(() => {
@@ -148,10 +153,11 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
       </Card>
 
       <Tabs defaultValue="images" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="images">Images</TabsTrigger>
           <TabsTrigger value="patterns">Motifs</TabsTrigger>
           <TabsTrigger value="analysis">Analyse IA</TabsTrigger>
+          <TabsTrigger value="sources">Sources</TabsTrigger>
         </TabsList>
 
         <TabsContent value="images" className="space-y-4">
@@ -247,6 +253,55 @@ export const SymbolDetailView: React.FC<SymbolDetailViewProps> = ({ symbol }) =>
                   <Sparkles className="w-4 h-4 mr-2" />
                   {isAnalyzing ? 'Analyse en cours...' : 'Lancer l\'analyse IA'}
                 </Button>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sources">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sources de référence</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {symbol.sources && isValidSourcesArray(symbol.sources) && symbol.sources.length > 0 ? (
+                <div className="space-y-4">
+                  {symbol.sources.map((source, index) => (
+                    <div key={index} className="border border-border rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-foreground">{source.title}</h4>
+                          <Badge variant="outline" className="mt-2 capitalize">
+                            {source.type}
+                          </Badge>
+                          {source.description && (
+                            <p className="text-muted-foreground text-sm mt-2">
+                              {source.description}
+                            </p>
+                          )}
+                        </div>
+                        {source.url && (
+                          <a
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-4 inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Voir la source
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Aucune source de référence disponible pour ce symbole.</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Les sources aident à valider et vérifier l'authenticité des informations.
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
