@@ -68,6 +68,11 @@ Répondez avec:
   });
 
   const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(`OpenAI API error: ${data.error?.message || response.statusText}`);
+  }
+  
   return parseVerificationResponse(data.choices[0].message.content, 'openai');
 };
 
@@ -113,6 +118,11 @@ Please verify the factual accuracy and provide:
   });
 
   const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(`DeepSeek API error: ${data.error?.message || response.statusText}`);
+  }
+  
   return parseVerificationResponse(data.choices[0].message.content, 'deepseek');
 };
 
@@ -120,26 +130,26 @@ const verifyWithAnthropic = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
   if (!apiKey) throw new Error('Anthropic API key not configured');
 
-  const prompt = `As a scholarly expert in cultural symbols and history, please verify these details:
+  const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
 
-Symbol Name: ${symbol.name}
-Cultural Origin: ${symbol.culture}
-Historical Period: ${symbol.period}
-Description: ${symbol.description || 'Not provided'}
-Significance: ${symbol.significance || 'Not provided'}
-Historical Context: ${symbol.historical_context || 'Not provided'}
+Nom: ${symbol.name}
+Culture: ${symbol.culture}
+Période: ${symbol.period}
+Description: ${symbol.description || 'Non spécifiée'}
+Signification: ${symbol.significance || 'Non spécifiée'}
+Contexte historique: ${symbol.historical_context || 'Non spécifié'}
 
-Please provide a critical analysis including:
-1. Historical accuracy verification
-2. Cultural authenticity assessment
-3. Temporal consistency check
-4. Overall credibility rating
+Veuillez évaluer:
+1. L'exactitude historique de ces informations
+2. La cohérence entre le nom, la culture et la période
+3. La plausibilité de la description et de la signification
+4. Toute incohérence ou erreur potentielle
 
-Format your response with:
-- Status: verified/disputed/unverified
-- Confidence: 0-100%
-- Summary: 2-3 sentences
-- Detailed analysis with sources when possible`;
+Répondez avec:
+- Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
+- Un niveau de confiance (0-100%)
+- Un résumé en 2-3 phrases
+- Une analyse détaillée avec vos sources de référence`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -166,10 +176,6 @@ Format your response with:
     throw new Error(`Anthropic API error: ${data.error?.message || response.statusText}`);
   }
   
-  if (!data.content || !data.content[0] || !data.content[0].text) {
-    throw new Error('Invalid response format from Anthropic API');
-  }
-  
   return parseVerificationResponse(data.content[0].text, 'anthropic');
 };
 
@@ -177,20 +183,26 @@ const verifyWithPerplexity = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('PERPLEXITY_API_KEY');
   if (!apiKey) throw new Error('Perplexity API key not configured');
 
-  const prompt = `Research and verify this cultural symbol information using current sources:
+  const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
 
-Symbol: ${symbol.name}
+Nom: ${symbol.name}
 Culture: ${symbol.culture}
-Period: ${symbol.period}
-Description: ${symbol.description || 'Not specified'}
+Période: ${symbol.period}
+Description: ${symbol.description || 'Non spécifiée'}
+Signification: ${symbol.significance || 'Non spécifiée'}
+Contexte historique: ${symbol.historical_context || 'Non spécifié'}
 
-Please search for and verify:
-1. Historical evidence for this symbol's existence
-2. Accuracy of cultural attribution
-3. Correctness of historical period
-4. Validity of the description and significance
+Veuillez évaluer:
+1. L'exactitude historique de ces informations
+2. La cohérence entre le nom, la culture et la période
+3. La plausibilité de la description et de la signification
+4. Toute incohérence ou erreur potentielle
 
-Provide verification status, confidence level, summary, and cite your sources.`;
+Répondez avec:
+- Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
+- Un niveau de confiance (0-100%)
+- Un résumé en 2-3 phrases
+- Une analyse détaillée avec vos sources de référence`;
 
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
@@ -203,7 +215,7 @@ Provide verification status, confidence level, summary, and cite your sources.`;
       messages: [
         {
           role: 'system',
-          content: 'You are a research assistant specializing in cultural history and symbols. Use reliable sources to verify information.'
+          content: 'Vous êtes un expert historien spécialisé dans les symboles et leur signification culturelle. Soyez précis et factuel dans vos analyses.'
         },
         {
           role: 'user',
@@ -221,10 +233,6 @@ Provide verification status, confidence level, summary, and cite your sources.`;
     throw new Error(`Perplexity API error: ${data.error?.message || response.statusText}`);
   }
   
-  if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-    throw new Error('Invalid response format from Perplexity API');
-  }
-  
   return parseVerificationResponse(data.choices[0].message.content, 'perplexity', data.citations);
 };
 
@@ -232,20 +240,26 @@ const verifyWithGemini = async (symbol: SymbolData) => {
   const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) throw new Error('Gemini API key not configured');
 
-  const prompt = `Verify the historical accuracy of this cultural symbol:
+  const prompt = `En tant qu'expert en histoire et symbolisme, veuillez analyser et vérifier les informations suivantes sur ce symbole:
 
-Name: ${symbol.name}
+Nom: ${symbol.name}
 Culture: ${symbol.culture}
-Period: ${symbol.period}
-Description: ${symbol.description || 'Not provided'}
-Significance: ${symbol.significance || 'Not provided'}
-Context: ${symbol.historical_context || 'Not provided'}
+Période: ${symbol.period}
+Description: ${symbol.description || 'Non spécifiée'}
+Signification: ${symbol.significance || 'Non spécifiée'}
+Contexte historique: ${symbol.historical_context || 'Non spécifié'}
 
-Please analyze and provide:
-- Verification status (verified/disputed/unverified)
-- Confidence percentage
-- Brief summary
-- Detailed analysis`;
+Veuillez évaluer:
+1. L'exactitude historique de ces informations
+2. La cohérence entre le nom, la culture et la période
+3. La plausibilité de la description et de la signification
+4. Toute incohérence ou erreur potentielle
+
+Répondez avec:
+- Un statut: "verified" (vérifié), "disputed" (contesté), ou "unverified" (non vérifié)
+- Un niveau de confiance (0-100%)
+- Un résumé en 2-3 phrases
+- Une analyse détaillée avec vos sources de référence`;
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
     method: 'POST',
@@ -269,10 +283,6 @@ Please analyze and provide:
   
   if (!response.ok) {
     throw new Error(`Gemini API error: ${data.error?.message || response.statusText}`);
-  }
-  
-  if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
-    throw new Error('Invalid response format from Gemini API');
   }
   
   return parseVerificationResponse(data.candidates[0].content.parts[0].text, 'gemini');
