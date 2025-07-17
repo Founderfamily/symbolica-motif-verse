@@ -112,12 +112,57 @@ export function extractCountryFromCulture(culture: string): string | null {
     return CULTURE_TO_COUNTRY_MAP[culture];
   }
   
-  // Recherche par mots-clés
+  // Extraire les pays entre parenthèses (ex: "Akan (peuple du Ghana et de Côte d'Ivoire)")
+  const parenthesesMatch = culture.match(/\(([^)]*)\)/);
+  if (parenthesesMatch) {
+    const parenthesesContent = parenthesesMatch[1].toLowerCase();
+    
+    // Rechercher des pays spécifiques dans le contenu des parenthèses
+    const countryPatterns = [
+      { pattern: /ghana/, country: 'Ghana' },
+      { pattern: /côte d'ivoire|cote d'ivoire/, country: 'Côte d\'Ivoire' },
+      { pattern: /mali/, country: 'Mali' },
+      { pattern: /sénégal/, country: 'Sénégal' },
+      { pattern: /burkina faso/, country: 'Burkina Faso' },
+      { pattern: /niger/, country: 'Niger' },
+      { pattern: /guinée/, country: 'Guinée' },
+      { pattern: /pérou/, country: 'Pérou' },
+      { pattern: /crète/, country: 'Grèce' },
+      { pattern: /france/, country: 'France' },
+      { pattern: /bretagne|normandie/, country: 'France' },
+      { pattern: /drôme|allier|auvergne/, country: 'France' },
+      { pattern: /corée/, country: 'Corée' },
+      { pattern: /inde/, country: 'Inde' },
+      { pattern: /tibet/, country: 'Tibet' },
+      { pattern: /australie/, country: 'Australie' },
+      { pattern: /amérique du nord/, country: 'Amérique du Nord' }
+    ];
+    
+    for (const { pattern, country } of countryPatterns) {
+      if (pattern.test(parenthesesContent)) {
+        return country;
+      }
+    }
+  }
+  
+  // Recherche par mots-clés dans le texte principal
   const cultureLower = culture.toLowerCase();
   for (const mapping of KEYWORD_TO_COUNTRY_MAP) {
     if (mapping.keywords.some(keyword => cultureLower.includes(keyword))) {
       return mapping.country;
     }
+  }
+  
+  // Recherche par régions françaises
+  const frenchRegions = [
+    'aquitaine', 'ardennes', 'bourbonnais', 'bourgogne', 'bretagne',
+    'champagne', 'dauphiné', 'flandre', 'franche-comté', 'gascogne',
+    'île-de-france', 'languedoc', 'lorraine', 'normandie', 'picardie',
+    'poitou', 'provence', 'savoie'
+  ];
+  
+  if (frenchRegions.some(region => cultureLower.includes(region))) {
+    return 'France';
   }
   
   return null;

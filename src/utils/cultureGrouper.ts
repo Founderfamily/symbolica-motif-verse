@@ -11,10 +11,21 @@ export interface CultureFamily {
 
 export const CULTURE_FAMILIES: CultureFamily[] = [
   {
+    id: 'french-regional',
+    name: 'France & Régions françaises',
+    cultures: [
+      'Française', 'Compagnonnage français', 'Gauloise', 'Culture gauloise',
+      'Aquitaine', 'Ardennes', 'Bourbonnais', 'Bourgogne', 'Bretagne',
+      'Champagne', 'Champagne-Ardenne', 'Dauphiné', 'Flandre française',
+      'Franche-Comté', 'Gascogne', 'Île-de-France'
+    ],
+    description: 'Cultures de France et ses régions historiques'
+  },
+  {
     id: 'western-european',
     name: 'Europe occidentale',
     cultures: [
-      'Française', 'Allemande', 'Italienne', 'Espagnole', 'Anglaise',
+      'Allemande', 'Italienne', 'Espagnole', 'Anglaise',
       'Britannique', 'Romaine', 'Portugaise', 'Hollandaise', 'Belge',
       'Suisse', 'Autrichienne'
     ],
@@ -24,7 +35,7 @@ export const CULTURE_FAMILIES: CultureFamily[] = [
     id: 'celtic-nordic',
     name: 'Celtique & Nordique',
     cultures: [
-      'Celtique', 'Viking', 'Scandinave', 'Grecque'
+      'Celtique', 'Celtes', 'Irlandaise celtique', 'Viking', 'Scandinave', 'Grecque'
     ],
     description: 'Cultures celtiques et nordiques'
   },
@@ -74,17 +85,18 @@ export const CULTURE_FAMILIES: CultureFamily[] = [
   },
   {
     id: 'north-african',
-    name: 'Afrique du Nord',
+    name: 'Afrique du Nord & Égypte ancienne',
     cultures: [
-      'Égyptienne', 'Marocaine', 'Tunisienne', 'Algérienne', 'Libyenne'
+      'Égyptienne', 'Égypte ancienne', 'Égypte antique', 'Ancienne Égypte',
+      'Marocaine', 'Tunisienne', 'Algérienne', 'Libyenne'
     ],
-    description: 'Cultures d\'Afrique du Nord'
+    description: 'Cultures d\'Afrique du Nord et Égypte ancienne'
   },
   {
     id: 'sub-saharan',
     name: 'Afrique subsaharienne',
     cultures: [
-      'Akan (Ghana)', 'Nigériane', 'Sud-Africaine', 'Malienne',
+      'Akan', 'Ashanti', 'Bamana', 'Nigériane', 'Sud-Africaine', 'Malienne',
       'Sénégalaise', 'Éthiopienne', 'Kenyane', 'Tanzanienne'
     ],
     description: 'Cultures d\'Afrique subsaharienne'
@@ -118,10 +130,27 @@ export const CULTURE_FAMILIES: CultureFamily[] = [
     id: 'oceanic',
     name: 'Océanie',
     cultures: [
-      'Aborigènes d\'Australie', 'Australienne', 'Néo-Zélandaise',
+      'Aborigènes d\'Australie', 'Aborigène australienne', 'Australienne', 'Néo-Zélandaise',
       'Maori', 'Polynésienne', 'Mélanésienne', 'Micronésienne'
     ],
     description: 'Cultures d\'Océanie'
+  },
+  {
+    id: 'religious-spiritual',
+    name: 'Traditions religieuses & spirituelles',
+    cultures: [
+      'Bouddhisme', 'Hindouisme', 'Druidisme moderne', 'Néo-druidisme'
+    ],
+    description: 'Traditions religieuses et spirituelles transculturelles'
+  },
+  {
+    id: 'ancient-civilizations',
+    name: 'Civilisations antiques',
+    cultures: [
+      'Civilisation Inca', 'Civilisation Maya', 'Civilisation minoenne', 'Culture Moche',
+      'Empire Ottoman', 'Culture turco-persane', 'Cultures préhistoriques'
+    ],
+    description: 'Grandes civilisations antiques'
   }
 ];
 
@@ -129,12 +158,33 @@ export const CULTURE_FAMILIES: CultureFamily[] = [
  * Trouve la famille culturelle pour une culture donnée
  */
 export function getCultureFamilyForCulture(culture: string): CultureFamily | null {
+  if (!culture) return null;
+  
+  const cultureLower = culture.toLowerCase();
+  
   return CULTURE_FAMILIES.find(family => 
-    family.cultures.some(c => 
-      c.toLowerCase() === culture.toLowerCase() ||
-      culture.toLowerCase().includes(c.toLowerCase()) ||
-      c.toLowerCase().includes(culture.toLowerCase())
-    )
+    family.cultures.some(c => {
+      const cLower = c.toLowerCase();
+      
+      // Correspondance exacte
+      if (cLower === cultureLower) return true;
+      
+      // Correspondance avec parenthèses (ex: "Akan (peuple du Ghana)" correspond à "Akan")
+      if (cultureLower.startsWith(cLower + ' (') || cultureLower.startsWith(cLower + '(')) return true;
+      
+      // Correspondance partielle bidirectionnelle
+      if (cultureLower.includes(cLower) || cLower.includes(cultureLower)) return true;
+      
+      // Correspondance pour les variantes (ex: "Égypte ancienne" correspond à "Égyptienne")
+      const baseWords = cLower.split(' ')[0];
+      const cultureBaseWords = cultureLower.split(' ')[0];
+      if (baseWords.length > 3 && cultureBaseWords.length > 3) {
+        if (baseWords.startsWith(cultureBaseWords.slice(0, 4)) || 
+            cultureBaseWords.startsWith(baseWords.slice(0, 4))) return true;
+      }
+      
+      return false;
+    })
   ) || null;
 }
 

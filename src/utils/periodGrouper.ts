@@ -12,22 +12,23 @@ export interface PeriodGroup {
 export const PERIOD_GROUPS: PeriodGroup[] = [
   {
     id: 'prehistoric',
-    name: 'Préhistoire',
+    name: 'Préhistoire & Protohistoire',
     periods: [
       'Préhistoire', 'Paléolithique', 'Néolithique', 'Âge de Pierre',
-      'Âge du Bronze', 'Âge du Fer', 'Protohistoire'
+      'Âge du Bronze', 'Âge du Fer', 'Protohistoire', 'Cultures préhistoriques'
     ],
-    description: 'Avant l\'écriture'
+    description: 'Avant l\'écriture et périodes protohistoriques'
   },
   {
     id: 'antiquity',
     name: 'Antiquité',
     periods: [
       'Antiquité', 'Antiquité égyptienne', 'Antiquité grecque', 'Antiquité romaine',
-      'Empire romain', 'Grèce antique', 'Égypte ancienne', 'Mésopotamie',
-      'Perse antique', 'Chine antique', 'Inde antique', '-500 à 500'
+      'Empire romain', 'Grèce antique', 'Égypte ancienne', 'Ancienne Égypte',
+      'Égypte antique', 'Mésopotamie', 'Perse antique', 'Chine antique', 
+      'Inde ancienne', 'Empire Ottoman', '-500 à 500', 'Gojoseon'
     ],
-    description: 'Civilisations antiques'
+    description: 'Civilisations antiques jusqu\'à 500 ap. J.-C.'
   },
   {
     id: 'medieval',
