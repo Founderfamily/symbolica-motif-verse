@@ -42,19 +42,19 @@ export const useSymbolImages = (symbolId: string | undefined) => {
 };
 
 /**
- * Hook pour la recherche de symboles
+ * Hook pour la recherche de symboles avec filtres hiérarchiques
  */
 export const useSearchSymbols = (
   query?: string,
-  culture?: string,
-  period?: string,
-  tags?: string[],
-  country?: string
+  region?: string,
+  periodGroup?: string,
+  cultureFamily?: string,
+  tags?: string[]
 ) => {
   return useQuery({
-    queryKey: ['symbols', 'search', { query, culture, period, tags, country }],
-    queryFn: () => supabaseSymbolService.searchSymbols(query, culture, period, tags, country),
-    enabled: !!(query || culture || period || tags?.length || country),
+    queryKey: ['symbols', 'search', { query, region, periodGroup, cultureFamily, tags }],
+    queryFn: () => supabaseSymbolService.searchSymbols(query, region, periodGroup, cultureFamily, tags),
+    enabled: !!(query || region || periodGroup || cultureFamily || tags?.length),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

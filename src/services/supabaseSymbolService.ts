@@ -101,14 +101,14 @@ class SupabaseSymbolService {
   }
 
   /**
-   * Recherche de symboles avec filtres
+   * Recherche de symboles avec filtres hiérarchiques
    */
   async searchSymbols(
     query?: string,
-    culture?: string,
-    period?: string,
-    tags?: string[],
-    country?: string
+    region?: string,
+    periodGroup?: string,
+    cultureFamily?: string,
+    tags?: string[]
   ): Promise<SymbolData[]> {
     try {
       let queryBuilder = supabase.from('symbols').select('*');
@@ -119,35 +119,7 @@ class SupabaseSymbolService {
         );
       }
 
-      if (culture) {
-        queryBuilder = queryBuilder.ilike('culture', `%${culture}%`);
-      }
-
-      if (period) {
-        queryBuilder = queryBuilder.ilike('period', `%${period}%`);
-      }
-
-      if (tags && tags.length > 0) {
-        queryBuilder = queryBuilder.overlaps('tags', tags);
-      }
-
-      // Filtre par pays (recherche dans la culture)
-      if (country) {
-        // Import dynamique pour éviter les dépendances circulaires
-        const { filterSymbolsByCountry } = await import('@/utils/countryExtractor');
-        
-        // D'abord récupérer tous les résultats selon les autres filtres
-        const { data: allData, error } = await queryBuilder.order('name');
-        
-        if (error) {
-          console.error('Erreur lors de la recherche:', error);
-          return [];
-        }
-        
-        // Puis filtrer par pays côté client
-        return filterSymbolsByCountry(allData || [], country) as SymbolData[];
-      }
-
+      // Récupérer tous les résultats d'abord
       const { data, error } = await queryBuilder.order('name');
 
       if (error) {
@@ -155,7 +127,31 @@ class SupabaseSymbolService {
         return [];
       }
 
-      return data as SymbolData[];
+      let filteredSymbols = data as SymbolData[];
+
+      // Appliquer les filtres côté client pour plus de flexibilité
+      if (region && region !== 'all') {
+        const { filterSymbolsByRegion } = await import('@/utils/regionGrouper');
+        filteredSymbols = filterSymbolsByRegion(filteredSymbols, region) as SymbolData[];
+      }
+
+      if (periodGroup && periodGroup !== 'all') {
+        const { filterSymbolsByPeriodGroup } = await import('@/utils/periodGrouper');
+        filteredSymbols = filterSymbolsByPeriodGroup(filteredSymbols, periodGroup) as SymbolData[];
+      }
+
+      if (cultureFamily && cultureFamily !== 'all') {
+        const { filterSymbolsByCultureFamily } = await import('@/utils/cultureGrouper');
+        filteredSymbols = filterSymbolsByCultureFamily(filteredSymbols, cultureFamily) as SymbolData[];
+      }
+
+      if (tags && tags.length > 0) {
+        filteredSymbols = filteredSymbols.filter(symbol => 
+          tags.some(tag => symbol.tags?.includes(tag))
+        );
+      }
+
+      return filteredSymbols;
     } catch (error) {
       console.error('Erreur dans searchSymbols:', error);
       return [];

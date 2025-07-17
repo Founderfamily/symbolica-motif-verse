@@ -7,13 +7,15 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Filter } from 'lucide-react';
-import { extractUniqueCountries } from '@/utils/countryExtractor';
+import { REGIONS } from '@/utils/regionGrouper';
+import { PERIOD_GROUPS } from '@/utils/periodGrouper';
+import { CULTURE_FAMILIES } from '@/utils/cultureGrouper';
 
 const SymbolsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCulture, setSelectedCulture] = useState('');
-  const [selectedPeriod, setSelectedPeriod] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedPeriodGroup, setSelectedPeriodGroup] = useState('');
+  const [selectedCultureFamily, setSelectedCultureFamily] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -21,38 +23,22 @@ const SymbolsPage: React.FC = () => {
   const { data: allSymbols, isLoading: allSymbolsLoading } = useAllSymbols();
   const { data: searchResults, isLoading: searchLoading } = useSearchSymbols(
     searchQuery || undefined,
-    selectedCulture || undefined, 
-    selectedPeriod || undefined,
-    selectedTags.length > 0 ? selectedTags : undefined,
-    selectedCountry || undefined
+    selectedRegion || undefined, 
+    selectedPeriodGroup || undefined,
+    selectedCultureFamily || undefined,
+    selectedTags.length > 0 ? selectedTags : undefined
   );
 
   // Déterminer quelles données utiliser
-  const hasActiveFilters = searchQuery || selectedCulture || selectedPeriod || selectedCountry || selectedTags.length > 0;
+  const hasActiveFilters = searchQuery || selectedRegion || selectedPeriodGroup || selectedCultureFamily || selectedTags.length > 0;
   const symbols = hasActiveFilters ? (searchResults || []) : (allSymbols || []);
   const isLoading = hasActiveFilters ? searchLoading : allSymbolsLoading;
 
-  // Extraire les cultures et périodes uniques pour les filtres
-  const availableCultures = React.useMemo(() => {
-    if (!allSymbols) return [];
-    return [...new Set(allSymbols.map(s => s.culture))].sort();
-  }, [allSymbols]);
-
-  const availablePeriods = React.useMemo(() => {
-    if (!allSymbols) return [];
-    return [...new Set(allSymbols.map(s => s.period))].sort();
-  }, [allSymbols]);
-
-  const availableCountries = React.useMemo(() => {
-    if (!allSymbols) return [];
-    return extractUniqueCountries(allSymbols);
-  }, [allSymbols]);
-
   const clearFilters = () => {
     setSearchQuery('');
-    setSelectedCulture('');
-    setSelectedPeriod('');
-    setSelectedCountry('');
+    setSelectedRegion('');
+    setSelectedPeriodGroup('');
+    setSelectedCultureFamily('');
     setSelectedTags([]);
   };
 
@@ -100,57 +86,57 @@ const SymbolsPage: React.FC = () => {
               )}
             </div>
 
-            {/* Filtres avancés */}
+            {/* Filtres avancés hiérarchiques */}
             {showFilters && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <I18nText translationKey="searchFilters.cultures">Culture</I18nText>
+                    <I18nText translationKey="searchFilters.regions">Région</I18nText>
                   </label>
                   <select
-                    value={selectedCulture}
-                    onChange={(e) => setSelectedCulture(e.target.value)}
+                    value={selectedRegion}
+                    onChange={(e) => setSelectedRegion(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
                     <option value="">
-                      <I18nText translationKey="symbols.page.filters.allCultures">Toutes les cultures</I18nText>
+                      <I18nText translationKey="symbols.page.filters.allRegions">Toutes les régions</I18nText>
                     </option>
-                    {availableCultures.map(culture => (
-                      <option key={culture} value={culture}>{culture}</option>
+                    {REGIONS.map(region => (
+                      <option key={region.id} value={region.id}>{region.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <I18nText translationKey="searchFilters.periods">Période</I18nText>
+                    <I18nText translationKey="searchFilters.periodGroups">Époque</I18nText>
                   </label>
                   <select
-                    value={selectedPeriod}
-                    onChange={(e) => setSelectedPeriod(e.target.value)}
+                    value={selectedPeriodGroup}
+                    onChange={(e) => setSelectedPeriodGroup(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
                     <option value="">
-                      <I18nText translationKey="symbols.page.filters.allPeriods">Toutes les périodes</I18nText>
+                      <I18nText translationKey="symbols.page.filters.allPeriods">Toutes les époques</I18nText>
                     </option>
-                    {availablePeriods.map(period => (
-                      <option key={period} value={period}>{period}</option>
+                    {PERIOD_GROUPS.map(group => (
+                      <option key={group.id} value={group.id}>{group.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <I18nText translationKey="searchFilters.countries">Pays</I18nText>
+                    <I18nText translationKey="searchFilters.cultureFamilies">Famille culturelle</I18nText>
                   </label>
                   <select
-                    value={selectedCountry}
-                    onChange={(e) => setSelectedCountry(e.target.value)}
+                    value={selectedCultureFamily}
+                    onChange={(e) => setSelectedCultureFamily(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
                     <option value="">
-                      <I18nText translationKey="symbols.page.filters.allCountries">Tous les pays</I18nText>
+                      <I18nText translationKey="symbols.page.filters.allCultures">Toutes les familles</I18nText>
                     </option>
-                    {availableCountries.map(country => (
-                      <option key={country} value={country}>{country}</option>
+                    {CULTURE_FAMILIES.map(family => (
+                      <option key={family.id} value={family.id}>{family.name}</option>
                     ))}
                   </select>
                 </div>

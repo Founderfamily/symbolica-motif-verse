@@ -2,7 +2,10 @@
 {
   "cultures": "Cultures",
   "periods": "Periods",
-  "countries": "Countries", 
+  "countries": "Countries",
+  "regions": "Regions",
+  "periodGroups": "Eras",
+  "cultureFamilies": "Cultural families",
   "functions": "Functions",
   "techniques": "Techniques",
   "mediums": "Materials",
