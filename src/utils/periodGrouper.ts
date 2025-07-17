@@ -75,13 +75,45 @@ export const PERIOD_GROUPS: PeriodGroup[] = [
  * Trouve le groupe de période pour une période donnée
  */
 export function getPeriodGroupForPeriod(period: string): PeriodGroup | null {
-  return PERIOD_GROUPS.find(group => 
-    group.periods.some(p => 
-      p.toLowerCase() === period.toLowerCase() ||
-      period.toLowerCase().includes(p.toLowerCase()) ||
-      p.toLowerCase().includes(period.toLowerCase())
-    )
-  ) || null;
+  const periodLower = period.toLowerCase();
+  
+  // Gestion spéciale pour les périodes multi-séculaires (priorité à la période la plus ancienne)
+  if (periodLower.includes('-') && periodLower.includes('siècle')) {
+    // Extraire le premier siècle mentionné
+    const firstCenturyMatch = periodLower.match(/(xi{1,3}e|xve|xvie|xviie|xviiie|xixe|xxe|xxie)\s*siècle/);
+    if (firstCenturyMatch) {
+      const firstCentury = firstCenturyMatch[0];
+      // Chercher d'abord avec le premier siècle
+      for (const group of PERIOD_GROUPS) {
+        if (group.periods.some(p => p.toLowerCase() === firstCentury)) {
+          return group;
+        }
+      }
+    }
+  }
+  
+  // Correspondance exacte en priorité
+  for (const group of PERIOD_GROUPS) {
+    if (group.periods.some(p => p.toLowerCase() === periodLower)) {
+      return group;
+    }
+  }
+  
+  // Ensuite chercher les inclusions (plus conservateur)
+  for (const group of PERIOD_GROUPS) {
+    if (group.periods.some(p => {
+      const pLower = p.toLowerCase();
+      // Éviter les matches partiels problématiques pour les siècles
+      if (pLower.includes('siècle') && periodLower.includes('siècle')) {
+        return pLower === periodLower;
+      }
+      return periodLower.includes(pLower) || pLower.includes(periodLower);
+    })) {
+      return group;
+    }
+  }
+  
+  return null;
 }
 
 /**
