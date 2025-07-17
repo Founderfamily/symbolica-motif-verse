@@ -107,7 +107,8 @@ class SupabaseSymbolService {
     query?: string,
     culture?: string,
     period?: string,
-    tags?: string[]
+    tags?: string[],
+    country?: string
   ): Promise<SymbolData[]> {
     try {
       let queryBuilder = supabase.from('symbols').select('*');
@@ -128,6 +129,23 @@ class SupabaseSymbolService {
 
       if (tags && tags.length > 0) {
         queryBuilder = queryBuilder.overlaps('tags', tags);
+      }
+
+      // Filtre par pays (recherche dans la culture)
+      if (country) {
+        // Import dynamique pour éviter les dépendances circulaires
+        const { filterSymbolsByCountry } = await import('@/utils/countryExtractor');
+        
+        // D'abord récupérer tous les résultats selon les autres filtres
+        const { data: allData, error } = await queryBuilder.order('name');
+        
+        if (error) {
+          console.error('Erreur lors de la recherche:', error);
+          return [];
+        }
+        
+        // Puis filtrer par pays côté client
+        return filterSymbolsByCountry(allData || [], country) as SymbolData[];
       }
 
       const { data, error } = await queryBuilder.order('name');

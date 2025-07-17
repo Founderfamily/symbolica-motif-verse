@@ -35,6 +35,11 @@
     "searchPlaceholder": "Rechercher des symboles...",
     "activeFilters": "Filtres actifs",
     "noFilters": "Aucun filtre actif",
-    "resultsCount": "{count} symboles trouvés"
+    "resultsCount": "{count} symboles trouvés",
+    "filters": {
+      "allCultures": "Toutes les cultures",
+      "allPeriods": "Toutes les périodes",
+      "allCountries": "Tous les pays"
+    }
   }
 }

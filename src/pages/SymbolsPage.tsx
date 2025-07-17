@@ -7,11 +7,13 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Filter } from 'lucide-react';
+import { extractUniqueCountries } from '@/utils/countryExtractor';
 
 const SymbolsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCulture, setSelectedCulture] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -21,11 +23,12 @@ const SymbolsPage: React.FC = () => {
     searchQuery || undefined,
     selectedCulture || undefined, 
     selectedPeriod || undefined,
-    selectedTags.length > 0 ? selectedTags : undefined
+    selectedTags.length > 0 ? selectedTags : undefined,
+    selectedCountry || undefined
   );
 
   // Déterminer quelles données utiliser
-  const hasActiveFilters = searchQuery || selectedCulture || selectedPeriod || selectedTags.length > 0;
+  const hasActiveFilters = searchQuery || selectedCulture || selectedPeriod || selectedCountry || selectedTags.length > 0;
   const symbols = hasActiveFilters ? (searchResults || []) : (allSymbols || []);
   const isLoading = hasActiveFilters ? searchLoading : allSymbolsLoading;
 
@@ -40,10 +43,16 @@ const SymbolsPage: React.FC = () => {
     return [...new Set(allSymbols.map(s => s.period))].sort();
   }, [allSymbols]);
 
+  const availableCountries = React.useMemo(() => {
+    if (!allSymbols) return [];
+    return extractUniqueCountries(allSymbols);
+  }, [allSymbols]);
+
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedCulture('');
     setSelectedPeriod('');
+    setSelectedCountry('');
     setSelectedTags([]);
   };
 
@@ -93,17 +102,19 @@ const SymbolsPage: React.FC = () => {
 
             {/* Filtres avancés */}
             {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Culture
+                    <I18nText translationKey="searchFilters.cultures">Culture</I18nText>
                   </label>
                   <select
                     value={selectedCulture}
                     onChange={(e) => setSelectedCulture(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
-                    <option value="">Toutes les cultures</option>
+                    <option value="">
+                      <I18nText translationKey="symbols.page.filters.allCultures">Toutes les cultures</I18nText>
+                    </option>
                     {availableCultures.map(culture => (
                       <option key={culture} value={culture}>{culture}</option>
                     ))}
@@ -111,16 +122,35 @@ const SymbolsPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Période
+                    <I18nText translationKey="searchFilters.periods">Période</I18nText>
                   </label>
                   <select
                     value={selectedPeriod}
                     onChange={(e) => setSelectedPeriod(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
-                    <option value="">Toutes les périodes</option>
+                    <option value="">
+                      <I18nText translationKey="symbols.page.filters.allPeriods">Toutes les périodes</I18nText>
+                    </option>
                     {availablePeriods.map(period => (
                       <option key={period} value={period}>{period}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <I18nText translationKey="searchFilters.countries">Pays</I18nText>
+                  </label>
+                  <select
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  >
+                    <option value="">
+                      <I18nText translationKey="symbols.page.filters.allCountries">Tous les pays</I18nText>
+                    </option>
+                    {availableCountries.map(country => (
+                      <option key={country} value={country}>{country}</option>
                     ))}
                   </select>
                 </div>

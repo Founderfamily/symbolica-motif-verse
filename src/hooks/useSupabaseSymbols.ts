@@ -48,12 +48,13 @@ export const useSearchSymbols = (
   query?: string,
   culture?: string,
   period?: string,
-  tags?: string[]
+  tags?: string[],
+  country?: string
 ) => {
   return useQuery({
-    queryKey: ['symbols', 'search', { query, culture, period, tags }],
-    queryFn: () => supabaseSymbolService.searchSymbols(query, culture, period, tags),
-    enabled: !!(query || culture || period || tags?.length),
+    queryKey: ['symbols', 'search', { query, culture, period, tags, country }],
+    queryFn: () => supabaseSymbolService.searchSymbols(query, culture, period, tags, country),
+    enabled: !!(query || culture || period || tags?.length || country),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

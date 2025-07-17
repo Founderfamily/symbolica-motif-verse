@@ -23,6 +23,7 @@
   "filters": {
     "culture": "Culture",
     "period": "Period",
+    "country": "Country",
     "type": "Type",
     "location": "Location",
     "clearAll": "Clear All Filters"
