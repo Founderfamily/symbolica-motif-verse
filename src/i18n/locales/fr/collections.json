@@ -3,7 +3,17 @@
   "title": "Collections",
   "featured": {
     "title": "Collections en Vedette",
-    "description": "Explorez des parcours thématiques à travers les symboles du monde entier"
+    "description": "Explorez des parcours thématiques à travers les symboles du monde entier",
+    "subtitle": "Découvrez les symboles organisés par thèmes",
+    "geometry": "Géométrie Sacrée",
+    "geometryDesc": "Formes géométriques et proportions sacrées dans l'art symbolique",
+    "mysteries": "Mystères Anciens", 
+    "mysteriesDesc": "Symboles énigmatiques et traditions ésotériques ancestrales",
+    "traditions": "Traditions Culturelles",
+    "traditionsDesc": "Héritages symboliques des civilisations du monde entier",
+    "universal": "Symboles Universels",
+    "universalDesc": "Symboles partagés par toutes les cultures humaines",
+    "exploreAll": "Explorer toutes les collections"
   },
   "allCollections": "Toutes les Collections",
   "create": "Créer une Collection",

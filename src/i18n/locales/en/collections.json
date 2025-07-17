@@ -3,7 +3,17 @@
   "title": "Collections",
   "featured": {
     "title": "Featured Collections",
-    "description": "Explore thematic journeys through symbols from around the world"
+    "description": "Explore thematic journeys through symbols from around the world",
+    "subtitle": "Discover symbols organized by themes",
+    "geometry": "Sacred Geometry",
+    "geometryDesc": "Geometric forms and sacred proportions in symbolic art",
+    "mysteries": "Ancient Mysteries",
+    "mysteriesDesc": "Enigmatic symbols and ancestral esoteric traditions", 
+    "traditions": "Cultural Traditions",
+    "traditionsDesc": "Symbolic heritage from civilizations around the world",
+    "universal": "Universal Symbols",
+    "universalDesc": "Symbols shared by all human cultures",
+    "exploreAll": "Explore all collections"
   },
   "allCollections": "All Collections",
   "create": "Create Collection",
