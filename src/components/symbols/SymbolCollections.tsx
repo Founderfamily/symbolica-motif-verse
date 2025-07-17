@@ -188,15 +188,6 @@ export const SymbolCollections: React.FC<SymbolCollectionsProps> = ({
             </I18nText>
           </Button>
         </div>
-
-        {/* Debug info en mode développement avec succès */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-2 p-2 bg-green-100 rounded text-xs">
-            <p className="font-bold text-green-700">Debug Info (Succès):</p>
-            <p>Symbole ID: {symbolId}</p>
-            <p>Collections trouvées: {collections.length}</p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
