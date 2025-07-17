@@ -79,10 +79,10 @@ export function getPeriodGroupForPeriod(period: string): PeriodGroup | null {
   
   // Gestion spéciale pour les périodes multi-séculaires (priorité à la période la plus ancienne)
   if (periodLower.includes('-') && periodLower.includes('siècle')) {
-    // Extraire le premier siècle mentionné
-    const firstCenturyMatch = periodLower.match(/(xi{1,3}e|xve|xvie|xviie|xviiie|xixe|xxe|xxie)\s*siècle/);
-    if (firstCenturyMatch) {
-      const firstCentury = firstCenturyMatch[0];
+    // Extraire tous les siècles mentionnés et prendre le premier
+    const centuryMatches = periodLower.match(/(xie|xiie|xiiie|xive|xve|xvie|xviie|xviiie|xixe|xxe|xxie)\s*siècle/g);
+    if (centuryMatches && centuryMatches.length > 0) {
+      const firstCentury = centuryMatches[0];
       // Chercher d'abord avec le premier siècle
       for (const group of PERIOD_GROUPS) {
         if (group.periods.some(p => p.toLowerCase() === firstCentury)) {
