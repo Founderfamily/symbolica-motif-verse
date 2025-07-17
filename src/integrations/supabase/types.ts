@@ -265,6 +265,13 @@ export type Database = {
             referencedRelation: "collections"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "collection_translations_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections_with_symbols"
+            referencedColumns: ["id"]
+          },
         ]
       }
       collections: {
@@ -3206,6 +3213,34 @@ export type Database = {
       }
     }
     Views: {
+      collections_with_symbols: {
+        Row: {
+          collection_symbols: Json | null
+          collection_translations: Json | null
+          created_at: string | null
+          created_by: string | null
+          id: string | null
+          is_featured: boolean | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collections_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles_with_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles_with_roles: {
         Row: {
           bio: string | null

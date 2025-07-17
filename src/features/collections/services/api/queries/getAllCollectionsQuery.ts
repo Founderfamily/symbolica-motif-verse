@@ -4,52 +4,38 @@ import { CollectionWithTranslations } from '../../../types/collections';
 import { logger } from '@/utils/logger';
 
 /**
- * Query service for fetching all collections with translations - VERSION SIMPLIFIÉE
+ * Query service for fetching all collections with translations - UTILISE LA VUE
  */
 export class GetAllCollectionsQuery {
   /**
-   * Récupère toutes les collections avec leurs traductions
+   * Récupère toutes les collections avec leurs traductions via la vue collections_with_symbols
    */
   async execute(): Promise<CollectionWithTranslations[]> {
     try {
-      // STEP 1: Fetch all collections
-      const { data: collectionsData, error: collectionsError } = await supabase
-        .from('collections')
+      const { data, error } = await supabase
+        .from('collections_with_symbols')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (collectionsError) {
-        throw collectionsError;
+      if (error) {
+        logger.error('Error fetching collections from view', { error });
+        throw error;
       }
 
-      if (!collectionsData || collectionsData.length === 0) {
-        return [];
-      }
+      // Convert the view data to proper format
+      const collections: CollectionWithTranslations[] = (data || []).map(item => ({
+        id: item.id,
+        slug: item.slug,
+        created_by: item.created_by,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        is_featured: item.is_featured,
+        collection_translations: Array.isArray(item.collection_translations) 
+          ? item.collection_translations as any[] 
+          : []
+      }));
 
-      // STEP 2: Fetch all translations
-      const { data: translationsData, error: translationsError } = await supabase
-        .from('collection_translations')
-        .select('*');
-
-      if (translationsError) {
-        logger.warn('Translations fetch error', translationsError);
-        // Continue even if translations fail
-      }
-
-      // STEP 3: Map collections with their translations
-      const collectionsWithTranslations: CollectionWithTranslations[] = collectionsData.map(collection => {
-        const collectionTranslations = translationsData?.filter(
-          translation => translation.collection_id === collection.id
-        ) || [];
-
-        return {
-          ...collection,
-          collection_translations: collectionTranslations
-        };
-      });
-
-      return collectionsWithTranslations;
-
+      return collections;
     } catch (error) {
       logger.error('Critical error', { error });
       throw error;
