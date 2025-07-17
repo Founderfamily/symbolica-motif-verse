@@ -240,6 +240,13 @@ export type Database = {
             referencedRelation: "symbols"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_collection_symbols_symbol_id"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
         ]
       }
       collection_translations: {
@@ -2132,6 +2139,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_symbol_connections_symbol_id_1"
+            columns: ["symbol_id_1"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_symbol_connections_symbol_id_2"
+            columns: ["symbol_id_2"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "symbol_connections_symbol_id_1_fkey"
             columns: ["symbol_id_1"]
             isOneToOne: false
@@ -2197,6 +2218,13 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_symbol_images_symbol_id"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "symbol_images_symbol_id_fkey"
             columns: ["symbol_id"]
@@ -2269,6 +2297,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_symbol_locations_symbol_id"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "symbol_locations_symbol_id_fkey"
             columns: ["symbol_id"]
             isOneToOne: false
@@ -2339,6 +2374,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_symbol_taxonomy_mapping_symbol_id"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "symbol_taxonomy_mapping_symbol_id_fkey"
             columns: ["symbol_id"]
             isOneToOne: false
@@ -2386,6 +2428,13 @@ export type Database = {
           verification_rating?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_symbol_verification_community_symbol_id"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "symbol_verification_community_symbol_id_fkey"
             columns: ["symbol_id"]
@@ -2436,6 +2485,13 @@ export type Database = {
           verified_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_symbol_verifications_symbol_id"
+            columns: ["symbol_id"]
+            isOneToOne: false
+            referencedRelation: "symbols"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "symbol_verifications_symbol_id_fkey"
             columns: ["symbol_id"]
@@ -3271,6 +3327,10 @@ export type Database = {
           p_is_admin?: boolean
         }
         Returns: string
+      }
+      delete_symbol_cascade: {
+        Args: { p_symbol_id: string; p_admin_id: string; p_dry_run?: boolean }
+        Returns: Json
       }
       delete_user_as_admin: {
         Args: { p_admin_id: string; p_user_id: string }
