@@ -15,6 +15,7 @@ import { ImageGalleryModal } from '@/components/symbols/ImageGalleryModal';
 import { SymbolVerificationPublic } from '@/components/symbols/SymbolVerificationPublic';
 import { SymbolVerificationCommunity } from '@/components/symbols/SymbolVerificationCommunity';
 import { SymbolVerificationAdmin } from '@/components/admin/SymbolVerificationAdmin';
+import { EnhancedSymbolDetailView } from '@/components/symbols/enhanced/EnhancedSymbolDetailView';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -327,21 +328,16 @@ const SymbolDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Onglets pour les sections détaillées */}
+        {/* Vue enrichie du symbole */}
+        <div className="mt-12">
+          <EnhancedSymbolDetailView symbol={displaySymbol} />
+        </div>
+
+        {/* Anciennes sections de vérification (gardées pour compatibilité) */}
         <div className="mt-12">
           <div className="mb-6">
             <div className="border-b border-slate-200">
               <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                <button
-                  onClick={() => setActiveSection('info')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeSection === 'info'
-                      ? 'border-amber-500 text-amber-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  Informations
-                </button>
                 <button
                   onClick={() => setActiveSection('verification')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
@@ -372,21 +368,11 @@ const SymbolDetailPage: React.FC = () => {
                 >
                   Community
                 </button>
-                <button
-                  onClick={() => setActiveSection('sources')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeSection === 'sources'
-                      ? 'border-amber-500 text-amber-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  Sources
-                </button>
               </nav>
             </div>
           </div>
 
-          {activeSection === 'info' && (
+          {activeSection === 'verification' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Informations culturelles */}
               <Card className="p-6">
