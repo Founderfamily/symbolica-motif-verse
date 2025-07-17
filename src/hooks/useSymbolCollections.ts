@@ -21,56 +21,50 @@ export const useSymbolCollections = (symbolId: string | number) => {
       console.log('2. ID pour la requête:', queryId);
 
       try {
-        // Requête directe avec l'UUID Supabase
-        const { data, error } = await supabase
+        // Nouvelle approche: utiliser des requêtes séparées au lieu des relations cassées
+        
+        // 1. Récupérer les IDs des collections liées à ce symbole
+        const { data: symbolCollectionLinks, error: linksError } = await supabase
           .from('collection_symbols')
-          .select(`
-            collection_id,
-            collections (
-              id,
-              slug,
-              created_by,
-              created_at,
-              updated_at,
-              is_featured,
-              collection_translations (
-                id,
-                collection_id,
-                language,
-                title,
-                description
-              )
-            )
-          `)
+          .select('collection_id')
           .eq('symbol_id', queryId);
 
-        console.log('3. Requête Supabase terminée');
-        console.log('4. Error:', error);
-        console.log('5. Data reçue:', data);
-        console.log('6. Nombre de relations trouvées:', data?.length || 0);
-
-        if (error) {
-          console.error('Error fetching symbol collections:', error);
-          throw error;
+        if (linksError) {
+          console.error('Error fetching collection links:', linksError);
+          throw linksError;
         }
 
-        if (!data || data.length === 0) {
+        if (!symbolCollectionLinks || symbolCollectionLinks.length === 0) {
           console.log('7. Aucune collection trouvée pour ce symbole');
           return [];
         }
 
-        // Transformer les données pour correspondre au type attendu
-        const collectionsWithTranslations: CollectionWithTranslations[] = data
-          .filter(item => item.collections) // S'assurer que la collection existe
-          .map(item => ({
-            id: item.collections.id,
-            slug: item.collections.slug,
-            created_by: item.collections.created_by,
-            created_at: item.collections.created_at,
-            updated_at: item.collections.updated_at,
-            is_featured: item.collections.is_featured,
-            collection_translations: item.collections.collection_translations || []
-          }));
+        const collectionIds = symbolCollectionLinks.map(link => link.collection_id);
+        console.log('7. IDs des collections trouvées:', collectionIds);
+
+        // 2. Récupérer les collections avec leurs traductions via la vue
+        const { data: collectionsData, error: collectionsError } = await supabase
+          .from('collections_with_symbols')
+          .select('*')
+          .in('id', collectionIds);
+
+        if (collectionsError) {
+          console.error('Error fetching collections data:', collectionsError);
+          throw collectionsError;
+        }
+
+        // 3. Transformer les données pour correspondre au type attendu
+        const collectionsWithTranslations: CollectionWithTranslations[] = (collectionsData || []).map(item => ({
+          id: item.id,
+          slug: item.slug,
+          created_by: item.created_by,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          is_featured: item.is_featured,
+          collection_translations: Array.isArray(item.collection_translations) 
+            ? item.collection_translations as any[] 
+            : []
+        }));
 
         console.log('8. Résultat final:', collectionsWithTranslations);
         console.log('9. Nombre de collections avec traductions:', collectionsWithTranslations.length);

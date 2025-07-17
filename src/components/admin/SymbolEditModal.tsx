@@ -89,26 +89,38 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
       if (!symbol.id) return;
       
       try {
-        const { data, error } = await supabase
+        // Nouvelle approche: utiliser des requêtes séparées au lieu des relations cassées
+        
+        // 1. Récupérer les IDs des collections liées à ce symbole
+        const { data: symbolCollectionLinks, error: linksError } = await supabase
           .from('collection_symbols')
-          .select(`
-            collections (
-              id,
-              slug,
-              collection_translations (
-                language,
-                title,
-                description
-              )
-            )
-          `)
+          .select('collection_id')
           .eq('symbol_id', symbol.id);
 
-        if (error) throw error;
-        
-        const collections = data
-          ?.filter(item => item.collections)
-          .map(item => item.collections) || [];
+        if (linksError) throw linksError;
+
+        if (!symbolCollectionLinks || symbolCollectionLinks.length === 0) {
+          setSelectedCollections([]);
+          return;
+        }
+
+        const collectionIds = symbolCollectionLinks.map(link => link.collection_id);
+
+        // 2. Récupérer les collections avec leurs traductions via la vue
+        const { data: collectionsData, error: collectionsError } = await supabase
+          .from('collections_with_symbols')
+          .select('*')
+          .in('id', collectionIds);
+
+        if (collectionsError) throw collectionsError;
+
+        const collections = (collectionsData || []).map(item => ({
+          id: item.id,
+          slug: item.slug,
+          collection_translations: Array.isArray(item.collection_translations) 
+            ? item.collection_translations as any[] 
+            : []
+        }));
         
         setSelectedCollections(collections);
       } catch (error) {

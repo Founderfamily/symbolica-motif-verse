@@ -16,7 +16,7 @@ export async function migrateImageTitles(): Promise<MigrationResult> {
   };
 
   try {
-    // Récupérer toutes les images avec leurs symboles
+    // Récupérer toutes les images avec leurs symboles - approche séparée
     const { data: images, error: fetchError } = await supabase
       .from('symbol_images')
       .select(`
@@ -24,13 +24,9 @@ export async function migrateImageTitles(): Promise<MigrationResult> {
         title,
         image_type,
         image_url,
-        symbols (
-          id,
-          name,
-          culture
-        )
+        symbol_id
       `)
-      .not('symbols', 'is', null);
+      .not('symbol_id', 'is', null);
 
     if (fetchError) {
       throw fetchError;
@@ -41,19 +37,37 @@ export async function migrateImageTitles(): Promise<MigrationResult> {
       return result;
     }
 
+    // Récupérer les données des symboles séparément
+    const symbolIds = [...new Set(images.map(img => img.symbol_id).filter(Boolean))];
+    const { data: symbols, error: symbolsError } = await supabase
+      .from('symbols')
+      .select('id, name, culture')
+      .in('id', symbolIds);
+
+    if (symbolsError) {
+      console.error('Erreur lors de la récupération des symboles:', symbolsError);
+      throw symbolsError;
+    }
+
+    const symbolsMap = (symbols || []).reduce((acc, symbol) => {
+      acc[symbol.id] = symbol;
+      return acc;
+    }, {} as Record<string, any>);
+
     // Grouper par symbole pour compter les indices
     const imagesBySymbol = images.reduce((acc, image) => {
-      const symbolId = image.symbols?.id;
-      if (!symbolId) return acc;
+      const symbolId = image.symbol_id;
+      if (!symbolId || !symbolsMap[symbolId]) return acc;
       
+      const symbol = symbolsMap[symbolId];
       if (!acc[symbolId]) {
         acc[symbolId] = {
-          symbolName: image.symbols.name,
-          symbolCulture: image.symbols.culture,
+          symbolName: symbol.name,
+          symbolCulture: symbol.culture,
           images: []
         };
       }
-      acc[symbolId].images.push(image);
+      acc[symbolId].images.push({ ...image, symbols: symbol });
       return acc;
     }, {} as Record<string, { symbolName: string; symbolCulture: string; images: any[] }>);
 
@@ -134,31 +148,38 @@ export async function migrateImageTitles(): Promise<MigrationResult> {
 // Fonction pour migrer une seule image
 export async function migrateSingleImageTitle(imageId: string): Promise<boolean> {
   try {
-    // Récupérer l'image avec son symbole
+    // Récupérer l'image et son symbole séparément
     const { data: imageData, error: fetchError } = await supabase
       .from('symbol_images')
       .select(`
         id,
         title,
         image_type,
-        symbols (
-          id,
-          name,
-          culture
-        )
+        symbol_id
       `)
       .eq('id', imageId)
       .single();
 
-    if (fetchError || !imageData || !imageData.symbols) {
-      throw new Error('Image ou symbole non trouvé');
+    if (fetchError || !imageData || !imageData.symbol_id) {
+      throw new Error('Image non trouvée');
+    }
+
+    // Récupérer les données du symbole
+    const { data: symbolData, error: symbolError } = await supabase
+      .from('symbols')
+      .select('id, name, culture')
+      .eq('id', imageData.symbol_id)
+      .single();
+
+    if (symbolError || !symbolData) {
+      throw new Error('Symbole non trouvé');
     }
 
     // Compter les images existantes du même type pour déterminer l'index
     const { data: existingImages, error: countError } = await supabase
       .from('symbol_images')
       .select('title')
-      .eq('symbol_id', imageData.symbols.id)
+      .eq('symbol_id', imageData.symbol_id)
       .eq('image_type', imageData.image_type);
 
     if (countError) {
@@ -180,10 +201,10 @@ export async function migrateSingleImageTitle(imageId: string): Promise<boolean>
     const imageIndex = existingOfType.length + 1;
 
     // Générer le nouveau titre
-    const newTitle = generateSEOImageTitle(imageData.symbols.name, imageType, imageIndex);
+    const newTitle = generateSEOImageTitle(symbolData.name, imageType, imageIndex);
     const newDescription = generateImageDescription(
-      imageData.symbols.name, 
-      imageData.symbols.culture, 
+      symbolData.name, 
+      symbolData.culture, 
       imageType
     );
 

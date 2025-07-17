@@ -80,29 +80,36 @@ const SymbolEditor = () => {
           function: Array.isArray(symbolData.function) ? symbolData.function : [],
         });
 
-        // Charger les collections associées
-        const { data: collectionsData, error: collectionsError } = await supabase
+        // Charger les collections associées - nouvelle approche
+        const { data: symbolCollectionLinks, error: linksError } = await supabase
           .from('collection_symbols')
-          .select(`
-            collections (
-              id,
-              slug,
-              collection_translations (
-                language,
-                title,
-                description
-              )
-            )
-          `)
+          .select('collection_id')
           .eq('symbol_id', id);
 
-        if (collectionsError) {
-          console.error('❌ Erreur lors du chargement des collections:', collectionsError);
+        if (linksError) {
+          console.error('❌ Erreur lors du chargement des liens collections:', linksError);
+        } else if (symbolCollectionLinks && symbolCollectionLinks.length > 0) {
+          const collectionIds = symbolCollectionLinks.map(link => link.collection_id);
+          
+          const { data: collectionsData, error: collectionsError } = await supabase
+            .from('collections_with_symbols')
+            .select('*')
+            .in('id', collectionIds);
+
+          if (collectionsError) {
+            console.error('❌ Erreur lors du chargement des collections:', collectionsError);
+          } else {
+            const collections = (collectionsData || []).map(item => ({
+              id: item.id,
+              slug: item.slug,
+              collection_translations: Array.isArray(item.collection_translations) 
+                ? item.collection_translations as any[] 
+                : []
+            }));
+            setSelectedCollections(collections);
+          }
         } else {
-          const collections = collectionsData
-            ?.filter(item => item.collections)
-            .map(item => item.collections) || [];
-          setSelectedCollections(collections);
+          setSelectedCollections([]);
         }
 
         const { data: imagesData, error: imagesError } = await supabase
