@@ -10,6 +10,8 @@ import { SymbolImage } from '@/types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useDropzone } from 'react-dropzone';
+import { generateSEOImageTitle, generateImageDescription, getNextImageIndex } from '@/utils/seoImageUtils';
+import { migrateImageTitles, migrateSingleImageTitle } from '@/utils/migrateImageTitles';
 
 interface ImageGalleryEditorProps {
   symbolId: string;
@@ -33,6 +35,7 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [editingImage, setEditingImage] = useState<string | null>(null);
   const [apiStatus, setApiStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
+  const [migrating, setMigrating] = useState(false);
   const [editingData, setEditingData] = useState<{
     title: string;
     description: string;
@@ -62,6 +65,41 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
     checkApiStatus();
   }, []);
 
+  const handleMigrateAllTitles = async () => {
+    setMigrating(true);
+    try {
+      const result = await migrateImageTitles();
+      if (result.success) {
+        toast.success(`${result.updated} images mises à jour avec des titres SEO-friendly`);
+        // Recharger les images pour voir les changements
+        window.location.reload();
+      } else {
+        toast.error(`Migration partiellement échouée: ${result.errors.length} erreurs`);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la migration:', error);
+      toast.error('Erreur lors de la migration des titres');
+    } finally {
+      setMigrating(false);
+    }
+  };
+
+  const handleMigrateSingleTitle = async (imageId: string) => {
+    try {
+      const success = await migrateSingleImageTitle(imageId);
+      if (success) {
+        toast.success('Titre mis à jour avec succès');
+        // Recharger les images pour voir les changements
+        window.location.reload();
+      } else {
+        toast.error('Erreur lors de la mise à jour du titre');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la migration:', error);
+      toast.error('Erreur lors de la mise à jour du titre');
+    }
+  };
+
   const uploadImage = async (file: File) => {
     try {
       setUploading(true);
@@ -89,6 +127,15 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
         .from('symbol-images')
         .getPublicUrl(fileName);
 
+      // Générer un titre SEO-friendly
+      const imageIndex = getNextImageIndex(images, 'original');
+      const seoTitle = generateSEOImageTitle(symbolName || 'symbole', 'original', imageIndex);
+      const seoDescription = generateImageDescription(
+        symbolName || 'Symbole',
+        culture || 'Culture',
+        'original'
+      );
+
       // Créer l'entrée dans la base de données
       const { data: imageData, error: dbError } = await supabase
         .from('symbol_images')
@@ -96,8 +143,8 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
           symbol_id: symbolId,
           image_url: publicUrl,
           image_type: 'original',
-          title: file.name,
-          description: null,
+          title: seoTitle,
+          description: seoDescription,
           uploaded_by: user.id
         })
         .select()
@@ -296,12 +343,21 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
 
       // ÉTAPE 6: Insertion en base de données
       console.log('🔄 ÉTAPE 6: Insertion en base de données');
+      // Générer un titre SEO-friendly pour l'image IA
+      const imageIndex = getNextImageIndex(images, 'original');
+      const seoTitle = generateSEOImageTitle(symbolName || 'symbole', 'original', imageIndex);
+      const seoDescription = `${generateImageDescription(
+        symbolName || 'Symbole',
+        culture || 'Culture',
+        'original'
+      )} - Générée avec IA: ${generatedPrompt}`;
+
       const imageData = {
         symbol_id: symbolId,
         image_url: publicUrl,
         image_type: 'original' as const,
-        title: `Image générée - ${symbolName || 'Symbole'}`,
-        description: `Générée avec IA: ${generatedPrompt}`,
+        title: seoTitle,
+        description: seoDescription,
         uploaded_by: user.id
       };
 
@@ -464,6 +520,42 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
         )}
       </div>
 
+      {/* Outils de migration SEO */}
+      {images.length > 0 && (
+        <div className="border border-green-200 rounded-lg p-4 bg-green-50/50">
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-base font-semibold text-green-900 flex items-center">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Optimisation SEO des titres
+            </Label>
+          </div>
+          
+          <p className="text-sm text-green-700 mb-3">
+            Transformez les noms de fichiers en titres SEO-friendly (ex: "mandala-original-1")
+          </p>
+          
+          <Button 
+            onClick={handleMigrateAllTitles}
+            disabled={migrating}
+            variant="outline"
+            size="sm"
+            className="bg-green-600 text-white hover:bg-green-700"
+          >
+            {migrating ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Migration en cours...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Migrer tous les titres
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
       {/* Liste des images existantes */}
       {images.length > 0 && (
         <div className="space-y-4">
@@ -566,10 +658,20 @@ export const ImageGalleryEditor: React.FC<ImageGalleryEditorProps> = ({
                             {image.is_primary ? <Star className="h-3 w-3 mr-1 fill-current" /> : <StarOff className="h-3 w-3 mr-1" />}
                             {image.is_primary ? 'Défaut' : 'Définir'}
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => startEditing(image)}>
-                            <Edit className="h-3 w-3 mr-1" />
-                            Éditer
-                          </Button>
+                           <Button size="sm" variant="outline" onClick={() => startEditing(image)}>
+                             <Edit className="h-3 w-3 mr-1" />
+                             Éditer
+                           </Button>
+                           <Button 
+                             size="sm" 
+                             variant="outline"
+                             onClick={() => handleMigrateSingleTitle(image.id)}
+                             className="text-green-600 hover:text-green-700"
+                             title="Générer un titre SEO-friendly"
+                           >
+                             <Sparkles className="h-3 w-3 mr-1" />
+                             SEO
+                           </Button>
                           <Button 
                             size="sm" 
                             variant="outline" 
