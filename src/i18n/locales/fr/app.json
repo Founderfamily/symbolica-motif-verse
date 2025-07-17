@@ -2,5 +2,13 @@
 {
   "name": "Symbolica",
   "version": "Version 1.2.0",
-  "tagline": "Musée collaboratif du patrimoine symbolique"
+  "tagline": "Musée collaboratif du patrimoine symbolique",
+  "community": {
+    "title": "Communauté d'Explorateurs en Croissance",
+    "description": "Rejoignez notre communauté grandissante d'explorateurs pionniers qui construisent les fondations de la découverte du patrimoine symbolique.",
+    "stats": {
+      "join": "Rejoindre le Groupe"
+    },
+    "exploreAll": "Rejoindre la Communauté"
+  }
 }

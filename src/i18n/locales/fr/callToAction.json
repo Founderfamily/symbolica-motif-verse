@@ -1,8 +1,14 @@
 
 {
-  "joinUs": "Rejoignez notre communauté mondiale d'enthousiastes du patrimoine",
-  "description": "Aidez-nous à préserver et célébrer les symboles culturels du monde entier grâce à la documentation collaborative et au partage.",
-  "join": "Rejoindre la communauté",
-  "explore": "Explorer les symboles",
-  "support": "Vos contributions aident à préserver le patrimoine symbolique mondial pour les générations futures."
+  "adventure": "AVENTURE",
+  "joinUs": "Votre Voyage Commence",
+  "description": "Vous avez découvert des symboles, organisé des collections et trouvé votre communauté. Il est maintenant temps de vous lancer dans votre plus grande aventure.",
+  "ready": "PRÊT POUR L'AVENTURE",
+  "choosePath": "Choisissez Votre Voie",
+  "pathsDesc": "Trois chemins s'offrent à vous. Choisissez votre destin et devenez un explorateur légendaire.",
+  "join": "Rejoindre en tant qu'Explorateur",
+  "explore": "Explorer en Solo",
+  "community": "Rejoindre la Communauté",
+  "support": "Vos contributions aident à préserver le patrimoine mondial pour les futures générations d'explorateurs.",
+  "awaits": "VOTRE AVENTURE VOUS ATTEND"
 }

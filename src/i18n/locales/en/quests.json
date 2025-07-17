@@ -1,9 +1,26 @@
-
 {
   "featured": {
     "title": "Historical Quests",
-    "description": "Embark on an adventure following the great mysteries of History. Solve puzzles, discover hidden treasures and unveil the secrets of the past.",
-    "exploreAll": "Explore all quests"
+    "description": "Embark on adventures following the great mysteries of History. Solve puzzles, discover hidden treasures and unlock the secrets of the past.",
+    "exploreAll": "Discover all quests"
+  },
+  "difficulty": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "expert": "Expert",
+    "master": "Master"
+  },
+  "ui": {
+    "points": "points",
+    "participants": "participants", 
+    "participant": "participant",
+    "clues": "clues",
+    "clue": "clue",
+    "loadingError": "Error loading quests.",
+    "noQuests": "No quests available at the moment.",
+    "allQuests": "View all quests",
+    "ready": "Ready for adventure?",
+    "readyDesc": "Perfect! Join our explorer community and start your first quest today."
   },
   "join": "Join the quest"
 }

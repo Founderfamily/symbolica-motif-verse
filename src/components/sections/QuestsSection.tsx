@@ -84,17 +84,19 @@ const QuestsSection = () => {
             </p>
           </div>
           <div className="text-center py-8">
-            <p className="text-stone-500 mb-4">
-              {error ? 'Erreur lors du chargement des quêtes.' : 'Aucune quête disponible pour le moment.'}
-            </p>
+             <p className="text-stone-500 mb-4">
+               <I18nText translationKey={error ? "quests.ui.loadingError" : "quests.ui.noQuests"}>
+                 {error ? 'Erreur lors du chargement des quêtes.' : 'Aucune quête disponible pour le moment.'}
+               </I18nText>
+             </p>
             <Button 
               onClick={() => navigate('/quests')}
               variant="outline"
               className="bg-stone-800 hover:bg-stone-900 text-amber-100"
             >
               <Compass className="mr-2 h-4 w-4" />
-              Voir toutes les quêtes
-            </Button>
+               <I18nText translationKey="quests.ui.allQuests">Voir toutes les quêtes</I18nText>
+             </Button>
           </div>
         </div>
       </section>
@@ -131,7 +133,9 @@ const QuestsSection = () => {
                           {getQuestTypeIcon(quest.quest_type)}
                         </div>
                         <Badge className={getDifficultyColor(quest.difficulty_level)}>
-                          {getDifficultyLabel(quest.difficulty_level)}
+                          <I18nText translationKey={`quests.difficulty.${quest.difficulty_level}`}>
+                            {getDifficultyLabel(quest.difficulty_level)}
+                          </I18nText>
                         </Badge>
                       </div>
                     </div>
@@ -147,23 +151,23 @@ const QuestsSection = () => {
                     </p>
 
                     <div className="space-y-3 mb-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1 text-stone-600">
-                          <Crown className="h-3 w-3" />
-                          <span>{quest.reward_points ?? 0} points</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-stone-600">
-                          <Users className="h-3 w-3" />
-                          <span>{quest.max_participants ?? '-'} participant{quest.max_participants === 1 ? '' : 's'}</span>
-                        </div>
-                      </div>
+                       <div className="flex items-center justify-between text-sm">
+                         <div className="flex items-center gap-1 text-stone-600">
+                           <Crown className="h-3 w-3" />
+                           <span>{quest.reward_points ?? 0} <I18nText translationKey="quests.ui.points">points</I18nText></span>
+                         </div>
+                         <div className="flex items-center gap-1 text-stone-600">
+                           <Users className="h-3 w-3" />
+                           <span>{quest.max_participants ?? '-'} <I18nText translationKey={quest.max_participants === 1 ? "quests.ui.participant" : "quests.ui.participants"}>{quest.max_participants === 1 ? 'participant' : 'participants'}</I18nText></span>
+                         </div>
+                       </div>
                       
-                      <div className="flex items-center gap-1 text-sm text-stone-600">
-                        <Clock className="h-3 w-3" />
-                        <span>
-                          {getQuestCluesCount(quest)} indice{getQuestCluesCount(quest) > 1 ? 's' : ''}
-                        </span>
-                      </div>
+                       <div className="flex items-center gap-1 text-sm text-stone-600">
+                         <Clock className="h-3 w-3" />
+                         <span>
+                           {getQuestCluesCount(quest)} <I18nText translationKey={getQuestCluesCount(quest) > 1 ? "quests.ui.clues" : "quests.ui.clue"}>{getQuestCluesCount(quest) > 1 ? 'indices' : 'indice'}</I18nText>
+                         </span>
+                       </div>
                     </div>
 
                     <Button 
@@ -197,11 +201,13 @@ const QuestsSection = () => {
           <div className="relative max-w-2xl mx-auto">
             <div className="bg-stone-50 rounded-xl p-6 border-l-4 border-stone-600 shadow-sm">
               <h3 className="text-xl font-semibold text-stone-800 mb-3">
-                Prêt pour l'aventure ?
+                <I18nText translationKey="quests.ui.ready">Prêt pour l'aventure ?</I18nText>
               </h3>
               <p className="text-base text-stone-600 leading-relaxed">
-                Parfait ! Rejoignez notre communauté d'explorateurs et commencez 
-                votre première quête dès aujourd'hui.
+                <I18nText translationKey="quests.ui.readyDesc">
+                  Parfait ! Rejoignez notre communauté d'explorateurs et commencez 
+                  votre première quête dès aujourd'hui.
+                </I18nText>
               </p>
               
               <div className="mt-4 flex justify-center">

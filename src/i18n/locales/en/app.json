@@ -2,5 +2,13 @@
 {
   "name": "Symbolica", 
   "version": "Version 1.2.0",
-  "tagline": "Collaborative symbolic heritage museum"
+  "tagline": "Collaborative symbolic heritage museum",
+  "community": {
+    "title": "Growing Explorer Community",
+    "description": "Join our growing community of early explorers who are building the foundation of symbolic heritage discovery.",
+    "stats": {
+      "join": "Join Group"
+    },
+    "exploreAll": "Join the Community"
+  }
 }

@@ -15,7 +15,9 @@ const CallToAction = () => {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-3 bg-stone-800/90 backdrop-blur-sm px-8 py-4 rounded-full mb-8 shadow-lg">
             <Compass className="h-6 w-6 text-amber-400" />
-            <span className="font-semibold text-lg text-amber-100 tracking-wide">AVENTURE</span>
+            <span className="font-semibold text-lg text-amber-100 tracking-wide">
+              <I18nText translationKey="callToAction.adventure">AVENTURE</I18nText>
+            </span>
           </div>
           
           <h2 className="text-5xl md:text-6xl font-bold mb-8 text-stone-800 font-adventure">
@@ -44,13 +46,13 @@ const CallToAction = () => {
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-3 bg-amber-600/20 backdrop-blur-sm px-6 py-3 rounded-full mb-6 border border-amber-400/30">
                   <Crown className="h-6 w-6 text-amber-400" />
-                  <span className="font-semibold text-lg text-amber-100">READY FOR ADVENTURE</span>
+                  <span className="font-semibold text-lg text-amber-100"><I18nText translationKey="callToAction.ready">PRÊT POUR L'AVENTURE</I18nText></span>
                 </div>
                 <h3 className="text-4xl font-bold text-white mb-6">
-                  Choose Your Path
+                  <I18nText translationKey="callToAction.choosePath">Choisissez Votre Voie</I18nText>
                 </h3>
                 <p className="text-xl text-stone-300 max-w-2xl mx-auto">
-                  Three paths lie before you. Choose your destiny and become a legendary explorer.
+                  <I18nText translationKey="callToAction.pathsDesc">Trois chemins s'offrent à vous. Choisissez votre destin et devenez un explorateur légendaire.</I18nText>
                 </p>
               </div>
 
@@ -102,7 +104,7 @@ const CallToAction = () => {
         <div className="text-center mt-12">
           <div className="inline-flex items-center gap-3 bg-stone-800 px-6 py-3 rounded-full shadow-lg">
             <Compass className="h-5 w-5 text-amber-400" />
-            <span className="text-lg font-semibold text-amber-100">YOUR ADVENTURE AWAITS</span>
+            <span className="text-lg font-semibold text-amber-100"><I18nText translationKey="callToAction.awaits">VOTRE AVENTURE VOUS ATTEND</I18nText></span>
             <Compass className="h-5 w-5 text-amber-400" />
           </div>
         </div>

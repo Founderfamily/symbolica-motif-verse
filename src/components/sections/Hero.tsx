@@ -23,10 +23,10 @@ const Hero = () => {
 
         <div className="space-y-3">
           <h1 className="text-3xl md:text-5xl font-bold text-stone-800 font-adventure leading-tight">
-            Symbol Explorer
+            <I18nText translationKey="hero.heading">Découvrez le patrimoine symbolique mondial</I18nText>
           </h1>
           <p className="text-lg md:text-xl text-stone-600 max-w-2xl mx-auto font-light">
-            Discover the world's heritage
+            <I18nText translationKey="hero.subheading">Explorez, contribuez et apprenez sur les symboles culturels à travers les âges</I18nText>
           </p>
         </div>
       </div>

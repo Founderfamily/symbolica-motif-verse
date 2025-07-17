@@ -136,13 +136,13 @@ const Community = () => {
         {/* Section Header */}
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
-            <I18nText translationKey="community.title">Growing Explorer Community</I18nText>
+            <I18nText translationKey="app.community.title">Communauté d'Explorateurs en Croissance</I18nText>
           </h2>
           
           <p className="text-base text-stone-600 max-w-2xl mx-auto mb-6 leading-relaxed">
-            <I18nText translationKey="community.description">
-              Join our growing community of early explorers who are building 
-              the foundation of symbolic heritage discovery.
+            <I18nText translationKey="app.community.description">
+              Rejoignez notre communauté grandissante d'explorateurs pionniers qui construisent 
+              les fondations de la découverte du patrimoine symbolique.
             </I18nText>
           </p>
         </div>
@@ -180,7 +180,7 @@ const Community = () => {
                     <div className="text-2xl font-bold text-stone-800 mb-1">
                       {formatSmallNumber(displayStats.totalSymbols)}
                     </div>
-                    <div className="text-sm text-stone-600">Symbols</div>
+                    <div className="text-sm text-stone-600">Symboles</div>
                   </CardContent>
                 </Card>
                 <Card className="bg-amber-50/60 border-amber-200/60 text-center">
@@ -196,7 +196,7 @@ const Community = () => {
                     <div className="text-2xl font-bold text-stone-800 mb-1">
                       {formatSmallNumber(displayStats.activeUsers)}
                     </div>
-                    <div className="text-sm text-stone-600">Early Explorers</div>
+                    <div className="text-sm text-stone-600">Explorateurs Pionniers</div>
                   </CardContent>
                 </Card>
               </div>
@@ -207,8 +207,8 @@ const Community = () => {
         {/* Community Groups */}
         <div className="mb-6">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-stone-800 mb-2">Pioneer Groups</h3>
-            <p className="text-stone-600">Join the first specialized explorer communities</p>
+            <h3 className="text-xl font-semibold text-stone-800 mb-2">Groupes Pionniers</h3>
+            <p className="text-stone-600">Rejoignez les premières communautés d'explorateurs spécialisées</p>
           </div>
           
           {loading ? (
@@ -263,14 +263,14 @@ const Community = () => {
                               {formatSmallNumber(group.members_count)}
                             </div>
                             <div className="text-stone-600 text-xs">
-                              {group.members_count === 1 ? 'Member' : 'Members'}
+                              {group.members_count === 1 ? 'Membre' : 'Membres'}
                             </div>
                           </div>
                           <div className="text-center bg-white/50 rounded-lg p-2">
                             <div className="font-semibold text-stone-800">
                               {formatSmallNumber(group.contributions_count)}
                             </div>
-                            <div className="text-stone-600 text-xs">Posts</div>
+                            <div className="text-stone-600 text-xs">Publications</div>
                           </div>
                         </div>
 
@@ -280,7 +280,7 @@ const Community = () => {
                           onClick={() => navigate('/community')}
                         >
                           <Users2 className="w-4 h-4 mr-2" />
-                          <I18nText translationKey="community.stats.join">Join Group</I18nText>
+                          <I18nText translationKey="app.community.stats.join">Rejoindre le Groupe</I18nText>
                         </Button>
                       </CardContent>
                     </Card>
@@ -298,7 +298,7 @@ const Community = () => {
             className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
           >
             <Ship className="mr-2 h-4 w-4" />
-            <I18nText translationKey="community.exploreAll">Join the Community</I18nText>
+            <I18nText translationKey="app.community.exploreAll">Rejoindre la Communauté</I18nText>
             <Crown className="ml-2 h-4 w-4" />
           </Button>
         </div>
@@ -308,11 +308,11 @@ const Community = () => {
           <div className="relative max-w-2xl mx-auto">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border-l-4 border-amber-600 shadow-lg border border-amber-200/50">
               <h3 className="text-xl font-semibold text-stone-800 mb-3">
-                Ready to be a pioneer?
+                Prêt à être un pionnier ?
               </h3>
               <p className="text-base text-stone-600 leading-relaxed">
-                Perfect! Join our founding explorers and help build 
-                the world's most comprehensive symbolic heritage database.
+                Parfait ! Rejoignez nos explorateurs fondateurs et aidez à construire 
+                la base de données du patrimoine symbolique la plus complète au monde.
               </p>
               
               <div className="mt-4 flex justify-center">

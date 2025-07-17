@@ -1,8 +1,13 @@
-
 {
-  "joinUs": "Join our global community of heritage enthusiasts",
-  "description": "Help us preserve and celebrate cultural symbols from around the world through collaborative documentation and sharing.",
-  "join": "Join the community",
-  "explore": "Explore symbols",
-  "support": "Your contributions help preserve the world's symbolic heritage for future generations."
+  "adventure": "ADVENTURE",
+  "joinUs": "Your Journey Begins",
+  "description": "You've discovered symbols, organized collections, and found your community. Now it's time to embark on your greatest adventure yet.",
+  "ready": "READY FOR ADVENTURE",
+  "choosePath": "Choose Your Path", 
+  "pathsDesc": "Three paths lie before you. Choose your destiny and become a legendary explorer.",
+  "join": "Join as Explorer",
+  "explore": "Explore Solo",
+  "community": "Join Community",
+  "support": "Your contributions help preserve world heritage for future generations of explorers.",
+  "awaits": "YOUR ADVENTURE AWAITS"
 }

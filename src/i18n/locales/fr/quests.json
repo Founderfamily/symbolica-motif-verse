@@ -5,5 +5,23 @@
     "description": "Partez à l'aventure sur les traces des grands mystères de l'Histoire. Résolvez des énigmes, découvrez des trésors cachés et percez les secrets du passé.",
     "exploreAll": "Découvrir toutes les quêtes"
   },
+  "difficulty": {
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "expert": "Expert",
+    "master": "Maître"
+  },
+  "ui": {
+    "points": "points",
+    "participants": "participants",
+    "participant": "participant",
+    "clues": "indices",
+    "clue": "indice",
+    "loadingError": "Erreur lors du chargement des quêtes.",
+    "noQuests": "Aucune quête disponible pour le moment.",
+    "allQuests": "Voir toutes les quêtes",
+    "ready": "Prêt pour l'aventure ?",
+    "readyDesc": "Parfait ! Rejoignez notre communauté d'explorateurs et commencez votre première quête dès aujourd'hui."
+  },
   "join": "Rejoindre la quête"
 }
