@@ -13,5 +13,7 @@
   "error": "Erreur de chargement",
   "errorDesc": "Impossible de charger les données du symbole. Veuillez réessayer.",
   "imageError": "Erreur de chargement",
-  "imageErrorDesc": "Certaines images n'ont pas pu être chargées. Les images de fallback sont utilisées."
+  "imageErrorDesc": "Certaines images n'ont pas pu être chargées. Les images de fallback sont utilisées.",
+  "transitionTitle": "Symboles découverts ?",
+  "transitionMessage": "Parfait ! Maintenant organisez vos découvertes en collections pour créer votre propre carte au trésor."
 }

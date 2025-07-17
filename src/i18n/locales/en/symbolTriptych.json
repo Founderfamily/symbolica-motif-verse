@@ -13,5 +13,7 @@
   "error": "Error loading symbol",
   "errorDesc": "Unable to load symbol data. Please try again.",
   "imageError": "Loading Error",
-  "imageErrorDesc": "Some images could not be loaded. Fallback images are being used."
+  "imageErrorDesc": "Some images could not be loaded. Fallback images are being used.",
+  "transitionTitle": "Symbols discovered?",
+  "transitionMessage": "Perfect! Now organize your findings into collections to create your own treasure map."
 }

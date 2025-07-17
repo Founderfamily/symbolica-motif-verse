@@ -63,11 +63,13 @@ const SymbolTriptychSection = () => {
           <div className="relative max-w-2xl mx-auto">
             <div className="bg-amber-50 rounded-xl p-6 border-l-4 border-amber-600 shadow-sm">
               <h3 className="text-xl font-semibold text-stone-800 mb-3">
-                Symbols discovered?
+                <I18nText translationKey="symbolTriptych.transitionTitle">Symboles découverts ?</I18nText>
               </h3>
               <p className="text-base text-stone-600 leading-relaxed">
-                Perfect! Now organize your findings into collections 
-                to create your own treasure map.
+                <I18nText translationKey="symbolTriptych.transitionMessage">
+                  Parfait ! Maintenant organisez vos découvertes en collections 
+                  pour créer votre propre carte au trésor.
+                </I18nText>
               </p>
               
               <div className="mt-4 flex justify-center">
