@@ -165,6 +165,110 @@ const AboutPage = () => {
           </div>
         </section>
         
+        {/* Classification methodology section */}
+        <section className="py-12 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <I18nText
+              translationKey="about.methodology.title"
+              as="h2"
+              className="text-2xl font-bold text-slate-800 mb-8 text-center"
+            >
+              Classification Internationale
+            </I18nText>
+            
+            <div className="bg-slate-50 rounded-xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                <I18nText
+                  translationKey="about.methodology.subtitle"
+                  as="h3"
+                  className="text-lg font-semibold text-slate-800"
+                >
+                  Standards Académiques UNESCO
+                </I18nText>
+              </div>
+              
+              <I18nText
+                translationKey="about.methodology.description"
+                as="p"
+                className="text-slate-600 mb-8"
+              >
+                Notre plateforme adopte les standards de classification chronologique reconnus 
+                internationalement par l'UNESCO et les institutions académiques mondiales.
+              </I18nText>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="p-6 border-l-4 border-amber-500">
+                  <h4 className="font-semibold text-slate-800 mb-2">Préhistoire</h4>
+                  <p className="text-sm text-slate-600 mb-3">Avant 3000 av. J.-C.</p>
+                  <p className="text-sm text-slate-500">
+                    Paléolithique, Mésolithique, Néolithique, Âge du Bronze initial
+                  </p>
+                </Card>
+                
+                <Card className="p-6 border-l-4 border-blue-500">
+                  <h4 className="font-semibold text-slate-800 mb-2">Antiquité</h4>
+                  <p className="text-sm text-slate-600 mb-3">3000 av. J.-C. - 476 ap. J.-C.</p>
+                  <p className="text-sm text-slate-500">
+                    Civilisations antiques : Égypte, Grèce, Rome, Mésopotamie
+                  </p>
+                </Card>
+                
+                <Card className="p-6 border-l-4 border-green-500">
+                  <h4 className="font-semibold text-slate-800 mb-2">Moyen Âge</h4>
+                  <p className="text-sm text-slate-600 mb-3">476 - 1453 ap. J.-C.</p>
+                  <p className="text-sm text-slate-500">
+                    Période médiévale européenne et civilisations contemporaines
+                  </p>
+                </Card>
+                
+                <Card className="p-6 border-l-4 border-purple-500">
+                  <h4 className="font-semibold text-slate-800 mb-2">Moderne</h4>
+                  <p className="text-sm text-slate-600 mb-3">1453 - 1789 ap. J.-C.</p>
+                  <p className="text-sm text-slate-500">
+                    Renaissance, Baroque, Enlightenment, découvertes
+                  </p>
+                </Card>
+                
+                <Card className="p-6 border-l-4 border-red-500">
+                  <h4 className="font-semibold text-slate-800 mb-2">Contemporain</h4>
+                  <p className="text-sm text-slate-600 mb-3">1789 - Présent</p>
+                  <p className="text-sm text-slate-500">
+                    Révolutions, industrialisation, époque moderne
+                  </p>
+                </Card>
+              </div>
+              
+              <Separator className="my-8" />
+              
+              <div className="bg-white rounded-lg p-6">
+                <h4 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Algorithme Intelligent
+                </h4>
+                <div className="space-y-3 text-sm text-slate-600">
+                  <div className="flex items-start gap-3">
+                    <span className="font-medium text-amber-600">•</span>
+                    <span>Classification automatique des périodes multi-séculaires</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="font-medium text-amber-600">•</span>
+                    <span>Analyse des bornes chronologiques précises (av./ap. J.-C.)</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="font-medium text-amber-600">•</span>
+                    <span>Respect des spécificités culturelles et régionales</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="font-medium text-amber-600">•</span>
+                    <span>Validation par expertise académique internationale</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
         {/* Team section */}
         <section className="py-12 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

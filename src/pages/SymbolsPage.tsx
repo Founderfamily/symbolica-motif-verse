@@ -6,7 +6,8 @@ import { Card } from '@/components/ui/card';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { REGIONS } from '@/utils/regionGrouper';
 import { PERIOD_GROUPS } from '@/utils/periodGrouper';
 import { CULTURE_FAMILIES } from '@/utils/cultureGrouper';
@@ -107,8 +108,27 @@ const SymbolsPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
                     <I18nText translationKey="searchFilters.periodGroups">Époque</I18nText>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-4 w-4 text-slate-400 hover:text-slate-600 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <div className="space-y-2">
+                            <p className="font-medium">Classification Internationale UNESCO</p>
+                            <p className="text-sm">
+                              Standards académiques mondiaux avec bornes chronologiques précises :
+                              Préhistoire, Antiquité, Moyen Âge, Moderne, Contemporain.
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              Algorithme intelligent pour périodes multi-séculaires
+                            </p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </label>
                   <select
                     value={selectedPeriodGroup}
