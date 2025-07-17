@@ -227,20 +227,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "collection_symbols_collection_id_fkey"
-            columns: ["collection_id"]
-            isOneToOne: false
-            referencedRelation: "collections"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "collection_symbols_symbol_id_fkey"
-            columns: ["symbol_id"]
-            isOneToOne: false
-            referencedRelation: "symbols"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fk_collection_symbols_symbol_id"
             columns: ["symbol_id"]
             isOneToOne: false
