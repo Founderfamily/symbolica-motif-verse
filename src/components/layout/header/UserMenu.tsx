@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, HelpCircle } from 'lucide-react';
+import { User, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -50,17 +50,6 @@ export const UserMenu: React.FC = () => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {auth.profile.is_admin && (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/admin">
-                <Settings className="mr-2 h-4 w-4" />
-                {t('adminDashboard', { ns: 'header' })}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
         <DropdownMenuItem onClick={() => auth.signOut()}>
           {t('logout', { ns: 'header' })}
         </DropdownMenuItem>

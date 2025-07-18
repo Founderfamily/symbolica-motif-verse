@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Settings, Users, FileText, Database, Shield, BarChart3 } from 'lucide-react';
+import { ChevronDown, Settings, Users, Database, Shield, BarChart3 } from 'lucide-react';
 
 export const NavigationItems = () => {
   const location = useLocation();
@@ -85,7 +85,7 @@ export const NavigationItems = () => {
               <ChevronDown className="h-3 w-3" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-white border shadow-md z-50">
+          <DropdownMenuContent align="end" className="w-56 bg-white border shadow-md z-[100]">
             <DropdownMenuLabel>Administration</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {adminMenuItems.map((item) => (

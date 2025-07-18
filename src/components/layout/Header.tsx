@@ -7,6 +7,7 @@ import { NotificationCenter } from '@/components/notifications/NotificationCente
 import { NavigationItems } from './header/NavigationItems';
 import { UserMenu } from './header/UserMenu';
 import { AuthButtons } from './header/AuthButtons';
+import { MobileNavigation } from './header/MobileNavigation';
 import { I18nText } from '@/components/ui/i18n-text';
 
 const Header: React.FC = () => {
@@ -30,12 +31,15 @@ const Header: React.FC = () => {
               </span>
             </Link>
             
-            {/* Main Navigation */}
+            {/* Main Navigation - Desktop */}
             <NavigationItems />
           </div>
 
-          {/* Right side: Notifications, Language Selector, and User Menu */}
+          {/* Right side: Mobile Nav, Notifications, Language Selector, and User Menu */}
           <div className="flex items-center space-x-3">
+            {/* Mobile Navigation */}
+            <MobileNavigation />
+
             {/* Notifications - only for authenticated users */}
             {auth?.user && <NotificationCenter />}
 
