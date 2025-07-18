@@ -2096,6 +2096,121 @@ export type Database = {
         }
         Relationships: []
       }
+      source_action_requests: {
+        Row: {
+          action_type: string
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          priority: number | null
+          source_id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          priority?: number | null
+          source_id: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          priority?: number | null
+          source_id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_action_requests_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "symbol_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      source_report_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          severity_level: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          severity_level?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          severity_level?: number | null
+        }
+        Relationships: []
+      }
+      source_validation_history: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          new_status: string | null
+          notes: string | null
+          old_status: string | null
+          source_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          source_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          source_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_validation_history_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "symbol_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       symbol_connections: {
         Row: {
           created_at: string | null
@@ -2383,6 +2498,63 @@ export type Database = {
           },
         ]
       }
+      symbol_source_reports: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          evidence_url: string | null
+          id: string
+          reason: string | null
+          resolution_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          evidence_url?: string | null
+          id?: string
+          reason?: string | null
+          resolution_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          evidence_url?: string | null
+          id?: string
+          reason?: string | null
+          resolution_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbol_source_reports_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "source_report_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_source_reports_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "symbol_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       symbol_source_votes: {
         Row: {
           created_at: string | null
@@ -2432,48 +2604,72 @@ export type Database = {
       symbol_sources: {
         Row: {
           added_by: string | null
+          archive_url: string | null
           author: string | null
+          citation_format: string | null
           created_at: string | null
           credibility_score: number | null
           date_added: string | null
           description: string | null
+          doi: string | null
           downvotes: number | null
+          expert_verified: boolean | null
           id: string
+          isbn: string | null
+          reliability_tier: number | null
           symbol_id: string
           title: string
           updated_at: string | null
           upvotes: number | null
           url: string
+          verification_status: string | null
+          verified_at: string | null
         }
         Insert: {
           added_by?: string | null
+          archive_url?: string | null
           author?: string | null
+          citation_format?: string | null
           created_at?: string | null
           credibility_score?: number | null
           date_added?: string | null
           description?: string | null
+          doi?: string | null
           downvotes?: number | null
+          expert_verified?: boolean | null
           id?: string
+          isbn?: string | null
+          reliability_tier?: number | null
           symbol_id: string
           title: string
           updated_at?: string | null
           upvotes?: number | null
           url: string
+          verification_status?: string | null
+          verified_at?: string | null
         }
         Update: {
           added_by?: string | null
+          archive_url?: string | null
           author?: string | null
+          citation_format?: string | null
           created_at?: string | null
           credibility_score?: number | null
           date_added?: string | null
           description?: string | null
+          doi?: string | null
           downvotes?: number | null
+          expert_verified?: boolean | null
           id?: string
+          isbn?: string | null
+          reliability_tier?: number | null
           symbol_id?: string
           title?: string
           updated_at?: string | null
           upvotes?: number | null
           url?: string
+          verification_status?: string | null
+          verified_at?: string | null
         }
         Relationships: [
           {
