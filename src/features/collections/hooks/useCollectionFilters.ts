@@ -1,6 +1,7 @@
 
 import { useState, useMemo } from 'react';
 import { CollectionWithTranslations } from '../types/collections';
+import { useStandardizedFilters } from './useStandardizedFilters';
 
 export type SortOption = 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc' | 'featured-first';
 export type FilterCategory = 'all' | 'cultures' | 'periods' | 'sciences' | 'others';
@@ -11,13 +12,17 @@ interface UseCollectionFiltersProps {
 }
 
 export const useCollectionFilters = ({ collections }: UseCollectionFiltersProps) => {
+  // Utilisation des nouveaux filtres standardisés
+  const standardizedFilters = useStandardizedFilters(collections);
+  
   const [sortBy, setSortBy] = useState<SortOption>('featured-first');
   const [filterCategory, setFilterCategory] = useState<FilterCategory>('all');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredAndSortedCollections = useMemo(() => {
-    let result = [...collections];
+    // Utiliser les filtres standardisés comme base
+    let result = standardizedFilters.filteredCollections;
 
     // Filter by search query
     if (searchQuery) {
@@ -87,7 +92,7 @@ export const useCollectionFilters = ({ collections }: UseCollectionFiltersProps)
     });
 
     return result;
-  }, [collections, sortBy, filterCategory, filterStatus, searchQuery]);
+  }, [standardizedFilters.filteredCollections, sortBy, filterCategory, filterStatus, searchQuery]);
 
   const resetFilters = () => {
     setSortBy('featured-first');

@@ -1,10 +1,14 @@
 
 import { useMemo } from 'react';
 import { CollectionWithTranslations } from '../types/collections';
+import { useStandardizedCategories } from './useStandardizedCategories';
 
 export const useCollectionCategories = (collections: CollectionWithTranslations[] | undefined) => {
+  // Utiliser la nouvelle taxonomie standardisée
+  const standardizedCategories = useStandardizedCategories(collections);
+  
   const categorizedCollections = useMemo(() => {
-    console.log('🏷️ Categorizing collections:', collections?.length || 0);
+    console.log('🏷️ Categorizing collections with standardized taxonomy:', collections?.length || 0);
     
     // Guard pour éviter les erreurs si collections est undefined ou null
     if (!collections || !Array.isArray(collections) || collections.length === 0) {
@@ -22,78 +26,33 @@ export const useCollectionCategories = (collections: CollectionWithTranslations[
     const featured = collections.filter(c => c?.is_featured === true);
     console.log('✨ Featured collections:', featured.length);
     
-    // Logique de catégorisation améliorée basée sur les slugs de la BDD
-    const cultures = collections.filter(c => {
-      const slug = c?.slug?.toLowerCase() || '';
-      return slug.includes('culture-') ||
-             slug.includes('egyptien') || 
-             slug.includes('chinois') || 
-             slug.includes('celtique') || 
-             slug.includes('maya') || 
-             slug.includes('grec') ||
-             slug.includes('romain') ||
-             slug.includes('japonais') ||
-             slug.includes('africain') ||
-             slug.includes('nordique') ||
-             slug.includes('viking') ||
-             slug.includes('arabe') ||
-             slug.includes('perse') ||
-             slug.includes('indien') ||
-             slug.includes('azteque') ||
-             slug.includes('aborigene');
-    });
+    // Utilisation de la taxonomie standardisée mondiale
+    const cultures = standardizedCategories.categorizedCollections.geographic.flatMap(g => g.collections);
+    const periods = standardizedCategories.categorizedCollections.temporal.flatMap(g => g.collections);
+    const sciences = standardizedCategories.categorizedCollections.thematic.flatMap(g => g.collections);
     
-    const periods = collections.filter(c => {
-      const slug = c?.slug?.toLowerCase() || '';
-      return slug.includes('medieval') || 
-             slug.includes('renaissance') || 
-             slug.includes('ancien') || 
-             slug.includes('moderne') ||
-             slug.includes('antique') ||
-             slug.includes('epoque') ||
-             slug.includes('prehistoire') ||
-             slug.includes('contemporain') ||
-             slug.includes('baroque') ||
-             slug.includes('classique');
-    });
-    
-    // Sciences et ésotérisme
-    const sciences = collections.filter(c => {
-      const slug = c?.slug?.toLowerCase() || '';
-      return slug.includes('alchimie') || 
-             slug.includes('geometrie') || 
-             slug.includes('sacre') || 
-             slug.includes('fibonacci') ||
-             slug.includes('mandala') ||
-             slug.includes('chakra') ||
-             slug.includes('astro') ||
-             slug.includes('mathematique') ||
-             slug.includes('science') ||
-             slug.includes('mystique') ||
-             slug.includes('esoter') ||
-             slug.includes('spirituel') ||
-             slug.includes('mystere') ||
-             slug.includes('numerologie');
-    });
-    
-    // Autres collections qui ne rentrent pas dans les catégories précédentes
-    const others = collections.filter(c => 
-      c?.is_featured !== true && 
-      !cultures.some(culture => culture.id === c.id) &&
-      !periods.some(period => period.id === c.id) &&
-      !sciences.some(science => science.id === c.id)
-    );
+    // Collections non catégorisées selon les standards mondiaux
+    const others = standardizedCategories.categorizedCollections.uncategorized;
 
-    console.log('📊 Categorization results:', {
+    console.log('📊 Standardized categorization results:', {
       featured: featured.length,
       cultures: cultures.length,
       periods: periods.length,
       sciences: sciences.length,
-      others: others.length
+      others: others.length,
+      conformityStats: standardizedCategories.getConformityStats()
     });
 
-    return { featured, cultures, periods, sciences, others };
-  }, [collections]);
+    return { 
+      featured, 
+      cultures, 
+      periods, 
+      sciences, 
+      others,
+      // Ajout des données de conformité aux standards mondiaux
+      standardizedData: standardizedCategories
+    };
+  }, [collections, standardizedCategories]);
 
   return categorizedCollections;
 };
