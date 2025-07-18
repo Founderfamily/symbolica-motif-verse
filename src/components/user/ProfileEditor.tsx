@@ -108,8 +108,9 @@ export default function ProfileEditor() {
   const uploadAvatar = async (file: File): Promise<string | null> => {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}-avatar.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `avatar.${fileExt}`;
+      // Structure: user_id/avatar.ext (pour correspondre aux politiques RLS)
+      const filePath = `${user?.id}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('user_content')
@@ -125,6 +126,8 @@ export default function ProfileEditor() {
           throw new Error('Fichier trop volumineux. La taille maximale est de 5 MB.');
         } else if (uploadError.message?.includes('Invalid file type')) {
           throw new Error('Type de fichier non supporté. Utilisez JPG, PNG ou GIF.');
+        } else if (uploadError.message?.includes('row-level security policy')) {
+          throw new Error('Permissions insuffisantes pour télécharger le fichier.');
         } else {
           throw new Error(`Échec du téléchargement: ${uploadError.message}`);
         }
