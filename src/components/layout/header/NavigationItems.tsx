@@ -18,14 +18,13 @@ export const NavigationItems = () => {
   const location = useLocation();
   const { isAdmin, user } = useAuth();
   
-  // Ordre du menu : Accueil, Symboles, Collections, Quêtes, Communauté, Contribuer (si connecté), À propos
+  // Navigation principale sans "À propos" (déplacé vers le footer)
   const navigation = [
     { name: 'Accueil', href: '/', translationKey: 'home' },
     { name: 'Symboles', href: '/symbols', translationKey: 'symbols' },
     { name: 'Collections', href: '/collections', translationKey: 'collections' },
     { name: 'Quêtes', href: '/quests', translationKey: 'quests' },
     { name: 'Communauté', href: '/community', translationKey: 'community' },
-    { name: 'À propos', href: '/about', translationKey: 'about' },
   ];
 
   // Navigation pour utilisateurs connectés
@@ -33,7 +32,7 @@ export const NavigationItems = () => {
     { name: 'Contribuer', href: '/propose-symbol', translationKey: 'contribute' },
   ] : [];
 
-  const allNavigation = [...navigation.slice(0, -1), ...userNavigation, navigation[navigation.length - 1]];
+  const allNavigation = [...navigation, ...userNavigation];
 
   const adminMenuItems = [
     { name: 'Tableau de bord', href: '/admin', icon: BarChart3 },

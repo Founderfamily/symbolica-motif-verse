@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -21,11 +20,9 @@ export const LanguageSelector = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="flex items-center gap-2 px-3 py-2"
+          className="flex items-center gap-1 px-2 py-2 min-w-0"
         >
-          <Languages className="h-4 w-4" />
-          <span>{currentLang?.flag}</span>
-          <span className="hidden sm:inline">{currentLang?.label}</span>
+          <span className="text-lg">{currentLang?.flag}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

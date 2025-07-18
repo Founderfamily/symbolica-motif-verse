@@ -3,9 +3,49 @@
   "home": "Accueil",
   "symbols": "Symboles",
   "collections": "Collections",
-  "quests": "Quêtes",
   "community": "Communauté",
   "contribute": "Contribuer",
-  "about": "À propos",
-  "navigation.admin": "Administration"
+  "analysis": "Analyse",
+  "map": "Carte",
+  "trending": "Tendances",
+  "search": "Recherche",
+  "quests": "Quêtes",
+  "contact": "Contact",
+  "legal": "Légal",
+  "privacy": "Confidentialité",
+  "terms": "Conditions",
+  "footer": {
+    "followUs": "Suivez-nous",
+    "newsletter": "Newsletter",
+    "support": "Support",
+    "company": "Entreprise",
+    "product": "Produit",
+    "legal": "Légal"
+  },
+  "meta": {
+    "home": {
+      "title": "Explorateur de Symboles Culturels - Découvrez l'Héritage Mondial",
+      "description": "Explorez et découvrez des symboles culturels du monde entier. Rejoignez notre communauté de passionnés d'héritage culturel."
+    },
+    "symbols": {
+      "title": "Explorateur de Symboles - Parcourez les Symboles Culturels",
+      "description": "Parcourez et explorez les symboles culturels de différentes civilisations et périodes historiques."
+    },
+    "collections": {
+      "title": "Collections Culturelles - Ensembles de Symboles Curatés",
+      "description": "Découvrez des collections curées de symboles culturels organisés par thèmes, régions et périodes historiques."
+    },
+    "community": {
+      "title": "Communauté Culturelle - Connectez-vous avec des Passionnés",
+      "description": "Rejoignez notre communauté de passionnés d'héritage culturel et partagez vos découvertes."
+    },
+    "search": {
+      "title": "Recherche de Symboles - Trouvez l'Héritage Culturel",
+      "description": "Recherchez dans notre vaste base de données de symboles culturels et d'éléments patrimoniaux."
+    },
+    "trending": {
+      "title": "Symboles Tendance - Découvertes Populaires",
+      "description": "Découvrez les symboles culturels les plus populaires et tendance dans notre communauté."
+    }
+  }
 }
