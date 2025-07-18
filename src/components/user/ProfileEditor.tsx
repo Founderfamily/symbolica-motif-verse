@@ -115,16 +115,31 @@ export default function ProfileEditor() {
         .from('user_content')
         .upload(filePath, file, { upsert: true });
         
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        
+        // Provide specific error messages based on error type
+        if (uploadError.message?.includes('Bucket not found')) {
+          throw new Error('Bucket de stockage non trouvé. Veuillez contacter le support.');
+        } else if (uploadError.message?.includes('File size')) {
+          throw new Error('Fichier trop volumineux. La taille maximale est de 5 MB.');
+        } else if (uploadError.message?.includes('Invalid file type')) {
+          throw new Error('Type de fichier non supporté. Utilisez JPG, PNG ou GIF.');
+        } else {
+          throw new Error(`Échec du téléchargement: ${uploadError.message}`);
+        }
+      }
       
       const { data: urlData } = await supabase.storage
         .from('user_content')
         .getPublicUrl(filePath);
         
       return urlData.publicUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      return null;
+      
+      // Re-throw the error with message to be caught by the calling function
+      throw error;
     }
   };
   
