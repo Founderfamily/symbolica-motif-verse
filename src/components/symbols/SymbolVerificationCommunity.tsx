@@ -73,24 +73,20 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
     try {
       setLoading(true);
       
-      // Utilisation d'un appel SQL direct
+      // Utilisation de la fonction PostgreSQL dédiée
       const { data: verificationComments, error } = await supabase
-        .from('symbol_verification_community' as any)
-        .select(`
-          id,
-          user_id,
-          comment,
-          verification_rating,
-          expertise_level,
-          created_at,
-          profiles:user_id(username, full_name, is_admin)
-        `)
-        .eq('symbol_id', symbol.id)
-        .order('created_at', { ascending: false });
+        .rpc('get_community_verification_comments', {
+          p_symbol_id: symbol.id
+        });
 
       if (error) throw error;
 
-      setComments(verificationComments as any || []);
+      setComments((verificationComments || []).map((comment: any) => ({
+        ...comment,
+        profiles: typeof comment.profiles === 'string' 
+          ? JSON.parse(comment.profiles) 
+          : comment.profiles
+      })));
     } catch (error) {
       console.error('Erreur lors du chargement des commentaires:', error);
       setComments([]); // Fallback pour éviter les erreurs
