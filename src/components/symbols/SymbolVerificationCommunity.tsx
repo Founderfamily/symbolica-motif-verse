@@ -25,6 +25,7 @@ interface SymbolVerificationCommunityProps {
     id: string;
     name: string;
   };
+  commentsDisabled?: boolean;
 }
 
 interface CommunityComment {
@@ -41,7 +42,7 @@ interface CommunityComment {
   };
 }
 
-export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityProps> = ({ symbol }) => {
+export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityProps> = ({ symbol, commentsDisabled = false }) => {
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [selectedRating, setSelectedRating] = useState<'verified' | 'disputed' | 'unverified'>('disputed');
@@ -291,62 +292,71 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
       )}
 
       {/* Formulaire d'ajout de commentaire */}
-      <Card className="p-6">
-        <h4 className="font-medium text-slate-900 mb-4">Ajouter une évaluation</h4>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Votre évaluation
-            </label>
-            <div className="flex gap-2">
-              {[
-                { value: 'verified', label: 'Vérifié', color: 'green' },
-                { value: 'disputed', label: 'Contesté', color: 'yellow' },
-                { value: 'unverified', label: 'Non vérifié', color: 'red' }
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setSelectedRating(option.value as any)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
-                    selectedRating === option.value 
-                      ? getStatusColor(option.value)
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  {getStatusIcon(option.value)}
-                  {option.label}
-                </button>
-              ))}
+      {commentsDisabled ? (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Les commentaires sont temporairement désactivés par l'administration.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Card className="p-6">
+          <h4 className="font-medium text-slate-900 mb-4">Ajouter une évaluation</h4>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Votre évaluation
+              </label>
+              <div className="flex gap-2">
+                {[
+                  { value: 'verified', label: 'Vérifié', color: 'green' },
+                  { value: 'disputed', label: 'Contesté', color: 'yellow' },
+                  { value: 'unverified', label: 'Non vérifié', color: 'red' }
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedRating(option.value as any)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
+                      selectedRating === option.value 
+                        ? getStatusColor(option.value)
+                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {getStatusIcon(option.value)}
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Commentaire détaillé
-            </label>
-            <Textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Expliquez votre évaluation en détail, mentionnez vos sources ou références..."
-              className="min-h-[100px]"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Commentaire détaillé
+              </label>
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Expliquez votre évaluation en détail, mentionnez vos sources ou références..."
+                className="min-h-[100px]"
+              />
+            </div>
 
-          <Button 
-            onClick={submitComment}
-            disabled={!newComment.trim() || submitting}
-            className="flex items-center gap-2"
-          >
-            {submitting ? (
-              <Clock className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-            Publier l'évaluation
-          </Button>
-        </div>
-      </Card>
+            <Button 
+              onClick={submitComment}
+              disabled={!newComment.trim() || submitting}
+              className="flex items-center gap-2"
+            >
+              {submitting ? (
+                <Clock className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              Publier l'évaluation
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Liste des commentaires */}
       <div className="space-y-4">

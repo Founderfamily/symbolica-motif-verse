@@ -17,7 +17,10 @@ import {
   MessageSquare,
   Trash2,
   Filter,
-  Search
+  Search,
+  Ban,
+  RotateCcw,
+  AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -38,14 +41,16 @@ interface ModerationItem {
 
 interface CommunityModerationProps {
   symbolId: string;
+  onCommentsDisabledChange?: (disabled: boolean) => void;
 }
 
-export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbolId }) => {
+export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbolId, onCommentsDisabledChange }) => {
   const [moderationItems, setModerationItems] = useState<ModerationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [filterType, setFilterType] = useState<string>('all');
+  const [commentsDisabled, setCommentsDisabled] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -234,6 +239,53 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
     }
   };
 
+  const clearProcessedHistory = async () => {
+    if (!userProfile?.is_admin) {
+      toast.error('Action réservée aux administrateurs');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Êtes-vous sûr de vouloir supprimer tout l'historique des signalements traités ? Cette action est irréversible."
+    );
+    if (!confirmed) return;
+
+    try {
+      const { error } = await supabase
+        .from('symbol_moderation_items')
+        .delete()
+        .eq('symbol_id', symbolId)
+        .in('status', ['approved', 'rejected']);
+
+      if (error) throw error;
+
+      await loadModerationItems();
+      toast.success('Historique supprimé avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'historique:', error);
+      toast.error('Erreur lors de la suppression de l\'historique');
+    }
+  };
+
+  const toggleCommentsAccess = async () => {
+    if (!userProfile?.is_admin) {
+      toast.error('Action réservée aux administrateurs');
+      return;
+    }
+
+    const newStatus = !commentsDisabled;
+    setCommentsDisabled(newStatus);
+    
+    // Notifier le composant parent du changement
+    onCommentsDisabledChange?.(newStatus);
+    
+    toast.success(
+      newStatus 
+        ? 'Commentaires désactivés temporairement' 
+        : 'Commentaires réactivés'
+    );
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -295,6 +347,12 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
               {pendingItems.length} en attente
             </Badge>
           )}
+          {commentsDisabled && (
+            <Badge variant="outline" className="bg-orange-50 text-orange-700">
+              <Ban className="h-3 w-3 mr-1" />
+              Commentaires désactivés
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -311,6 +369,48 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
           </select>
         </div>
       </div>
+
+      {/* Panneau d'administration */}
+      {userProfile?.is_admin && (
+        <Card className="p-4 bg-blue-50 border-blue-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-blue-600" />
+              <h4 className="font-medium text-blue-900">Administration</h4>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleCommentsAccess}
+                className={`flex items-center gap-1 ${
+                  commentsDisabled 
+                    ? 'text-green-600 border-green-300 hover:bg-green-50' 
+                    : 'text-orange-600 border-orange-300 hover:bg-orange-50'
+                }`}
+              >
+                {commentsDisabled ? (
+                  <RotateCcw className="h-4 w-4" />
+                ) : (
+                  <Ban className="h-4 w-4" />
+                )}
+                {commentsDisabled ? 'Réactiver commentaires' : 'Désactiver commentaires'}
+              </Button>
+              {processedItems.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearProcessedHistory}
+                  className="flex items-center gap-1 text-red-600 border-red-300 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Vider l'historique
+                </Button>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
 
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full grid-cols-2">

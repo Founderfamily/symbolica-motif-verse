@@ -82,6 +82,9 @@ const SymbolDetailPage: React.FC = () => {
   // État pour la section active
   const [activeSection, setActiveSection] = React.useState<'info' | 'verification' | 'community' | 'sources' | 'moderation'>('info');
   
+  // État pour les commentaires désactivés
+  const [commentsDisabled, setCommentsDisabled] = React.useState(false);
+  
   // État pour forcer le rechargement après vérification
   const [refreshKey, setRefreshKey] = React.useState(0);
 
@@ -568,7 +571,10 @@ const SymbolDetailPage: React.FC = () => {
 
           {activeSection === 'community' && (
             <div className="grid grid-cols-1 gap-8">
-              <SymbolVerificationCommunity symbol={displaySymbol} />
+              <SymbolVerificationCommunity 
+                symbol={displaySymbol} 
+                commentsDisabled={commentsDisabled}
+              />
             </div>
           )}
 
@@ -580,7 +586,10 @@ const SymbolDetailPage: React.FC = () => {
 
           {activeSection === 'moderation' && (
             <div className="grid grid-cols-1 gap-8">
-              <CommunityModeration symbolId={displaySymbol.id} />
+              <CommunityModeration 
+                symbolId={displaySymbol.id} 
+                onCommentsDisabledChange={setCommentsDisabled}
+              />
             </div>
           )}
 
