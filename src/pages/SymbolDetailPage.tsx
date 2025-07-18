@@ -15,6 +15,8 @@ import { ImageGalleryModal } from '@/components/symbols/ImageGalleryModal';
 import { SymbolVerificationPublic } from '@/components/symbols/SymbolVerificationPublic';
 import { SymbolVerificationCommunity } from '@/components/symbols/SymbolVerificationCommunity';
 import { SymbolVerificationAdmin } from '@/components/admin/SymbolVerificationAdmin';
+import { SourceVoting } from '@/components/symbols/SourceVoting';
+import { CommunityModeration } from '@/components/symbols/CommunityModeration';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -78,7 +80,7 @@ const SymbolDetailPage: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   
   // État pour la section active
-  const [activeSection, setActiveSection] = React.useState<'info' | 'verification' | 'admin' | 'community' | 'sources'>('info');
+  const [activeSection, setActiveSection] = React.useState<'info' | 'verification' | 'community' | 'sources' | 'moderation'>('info');
   
   // État pour forcer le rechargement après vérification
   const [refreshKey, setRefreshKey] = React.useState(0);
@@ -353,16 +355,6 @@ const SymbolDetailPage: React.FC = () => {
                   Vérification
                 </button>
                 <button
-                  onClick={() => setActiveSection('admin')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeSection === 'admin'
-                      ? 'border-amber-500 text-amber-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  Admin
-                </button>
-                <button
                   onClick={() => setActiveSection('community')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
                     activeSection === 'community'
@@ -370,7 +362,7 @@ const SymbolDetailPage: React.FC = () => {
                       : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                   }`}
                 >
-                  Community
+                  Communauté
                 </button>
                 <button
                   onClick={() => setActiveSection('sources')}
@@ -381,6 +373,16 @@ const SymbolDetailPage: React.FC = () => {
                   }`}
                 >
                   Sources
+                </button>
+                <button
+                  onClick={() => setActiveSection('moderation')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeSection === 'moderation'
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  Modération
                 </button>
               </nav>
             </div>
@@ -564,21 +566,21 @@ const SymbolDetailPage: React.FC = () => {
             </div>
           )}
 
-          {activeSection === 'admin' && (
-            <div>
-              <SymbolVerificationAdmin 
-                symbol={displaySymbol} 
-                onVerificationComplete={() => {
-                  setRefreshKey(prev => prev + 1);
-                  setActiveSection('verification');
-                }}
-              />
+          {activeSection === 'community' && (
+            <div className="grid grid-cols-1 gap-8">
+              <SymbolVerificationCommunity symbol={displaySymbol} />
             </div>
           )}
 
-          {activeSection === 'community' && (
-            <div>
-              <SymbolVerificationCommunity symbol={displaySymbol} />
+          {activeSection === 'sources' && (
+            <div className="grid grid-cols-1 gap-8">
+              <SourceVoting symbolId={displaySymbol.id} />
+            </div>
+          )}
+
+          {activeSection === 'moderation' && (
+            <div className="grid grid-cols-1 gap-8">
+              <CommunityModeration symbolId={displaySymbol.id} />
             </div>
           )}
 
