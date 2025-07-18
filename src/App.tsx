@@ -75,13 +75,14 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <Router>
+    <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-            <div className="min-h-screen bg-background">
-              <Layout>
-                <Routes>
+            <Router>
+              <div className="min-h-screen bg-background">
+                <Layout>
+                  <Routes>
                   {/* Main pages */}
                   <Route path="/" element={<HomePage />} />
                   <Route path="/about" element={<AboutPage />} />
@@ -147,10 +148,11 @@ function App() {
               </Layout>
             </div>
             <Toaster />
-          </ThemeProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </Router>
+          </Router>
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
   );
 }
 
