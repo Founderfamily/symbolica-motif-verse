@@ -119,8 +119,37 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
       return;
     }
 
+    // Confirmation pour l'approbation qui va supprimer le contenu
+    if (action === 'approve') {
+      const confirmed = window.confirm(
+        "Approuver ce signalement va supprimer définitivement le commentaire original. Voulez-vous continuer ?"
+      );
+      if (!confirmed) return;
+    }
+
     try {
-      // Mettre à jour dans la base de données
+      const currentItem = moderationItems.find(item => item.id === itemId);
+      if (!currentItem) {
+        toast.error('Élément non trouvé');
+        return;
+      }
+
+      // Si on approuve un signalement de commentaire, supprimer le commentaire original
+      if (action === 'approve' && currentItem.type === 'comment') {
+        // Supprimer le commentaire de la table symbol_verification_community
+        const { error: deleteCommentError } = await supabase
+          .from('symbol_verification_community')
+          .delete()
+          .eq('comment', currentItem.content)
+          .eq('symbol_id', symbolId);
+
+        if (deleteCommentError) {
+          console.error('Erreur lors de la suppression du commentaire:', deleteCommentError);
+          // Continuer même si la suppression échoue pour au moins marquer le signalement
+        }
+      }
+
+      // Mettre à jour le statut du signalement
       const { error } = await supabase
         .from('symbol_moderation_items')
         .update({
@@ -134,7 +163,12 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
 
       // Recharger les données
       await loadModerationItems();
-      toast.success(`Élément ${action === 'approve' ? 'approuvé' : 'rejeté'} avec succès`);
+      
+      if (action === 'approve') {
+        toast.success('Signalement approuvé et contenu supprimé');
+      } else {
+        toast.success('Signalement rejeté - le contenu reste visible');
+      }
     } catch (error) {
       console.error('Erreur lors de la modération:', error);
       toast.error('Erreur lors de la modération');
@@ -352,15 +386,17 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
                           size="sm"
                           onClick={() => handleModeration(item.id, 'approve')}
                           className="flex items-center gap-1 text-green-600 border-green-300 hover:bg-green-50"
+                          title="Approuver le signalement et supprimer le contenu"
                         >
                           <ThumbsUp className="h-4 w-4" />
-                          Approuver
+                          Approuver & Supprimer
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleModeration(item.id, 'reject')}
                           className="flex items-center gap-1 text-red-600 border-red-300 hover:bg-red-50"
+                          title="Rejeter le signalement (garder le contenu)"
                         >
                           <ThumbsDown className="h-4 w-4" />
                           Rejeter
