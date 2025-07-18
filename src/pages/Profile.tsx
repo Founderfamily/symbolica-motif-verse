@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,9 +10,10 @@ import MyContributions from '@/components/profile/MyContributions';
 import MyCommunities from '@/components/profile/MyCommunities';
 import NotificationsAndMessages from '@/components/profile/NotificationsAndMessages';
 import MyReports from '@/components/profile/MyReports';
+import MyEvaluations from '@/components/profile/MyEvaluations';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useGamification } from '@/hooks/useGamification';
-import { User, FileText, Users, Bell, AlertTriangle, Settings } from 'lucide-react';
+import { User, FileText, Users, Bell, AlertTriangle, Settings, Star } from 'lucide-react';
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
@@ -81,7 +81,7 @@ export default function Profile() {
 
       {isOwnProfile ? (
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Vue d'ensemble</span>
@@ -89,6 +89,10 @@ export default function Profile() {
             <TabsTrigger value="contributions" className="flex items-center space-x-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Contributions</span>
+            </TabsTrigger>
+            <TabsTrigger value="evaluations" className="flex items-center space-x-2">
+              <Star className="h-4 w-4" />
+              <span className="hidden sm:inline">Évaluations</span>
             </TabsTrigger>
             <TabsTrigger value="communities" className="flex items-center space-x-2">
               <Users className="h-4 w-4" />
@@ -211,6 +215,10 @@ export default function Profile() {
 
             <TabsContent value="contributions">
               <MyContributions userId={user?.id} />
+            </TabsContent>
+
+            <TabsContent value="evaluations">
+              <MyEvaluations userId={user?.id} />
             </TabsContent>
 
             <TabsContent value="communities">

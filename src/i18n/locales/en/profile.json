@@ -50,5 +50,11 @@
   },
   "level": "Level {level}",
   "xpToNextLevel": "{xp} XP to next level",
-  "yourProgress": "Your Progress"
+  "yourProgress": "Your Progress",
+  "evaluations": {
+    "title": "My Evaluations",
+    "noEvaluations": "No evaluations",
+    "noEvaluationsDescription": "You haven't posted any symbol evaluations yet.",
+    "comment": "Comment"
+  }
 }
