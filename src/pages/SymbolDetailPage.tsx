@@ -102,21 +102,28 @@ const SymbolDetailPage: React.FC = () => {
     refetchImages();
   };
 
+  // Convert images object to array if needed
+  const imagesArray = React.useMemo(() => {
+    if (!images) return [];
+    if (Array.isArray(images)) return images;
+    return Object.values(images);
+  }, [images]);
+
   // Trouver l'image principale
   const primaryImage = React.useMemo(() => {
-    if (!images || images.length === 0) return null;
+    if (!imagesArray || imagesArray.length === 0) return null;
     // Prioriser l'image marquée comme principale
-    return images.find(img => img.is_primary) || 
-           images.find(img => img.image_type === 'original') || 
-           images[0];
-  }, [images]);
+    return imagesArray.find(img => img.is_primary) || 
+           imagesArray.find(img => img.image_type === 'original') || 
+           imagesArray[0];
+  }, [imagesArray]);
 
   // Handler pour ouvrir la galerie
   const handleImageClick = () => {
-    if (!images || images.length === 0) return;
+    if (!imagesArray || imagesArray.length === 0) return;
     
     // Trouver l'index de l'image principale
-    const primaryIndex = images.findIndex(img => 
+    const primaryIndex = imagesArray.findIndex(img => 
       img.is_primary || 
       (primaryImage && img.id === primaryImage.id)
     );
@@ -400,165 +407,166 @@ const SymbolDetailPage: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Informations culturelles */}
                 <Card className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Info className="h-5 w-5 text-amber-600" />
-              <h3 className="text-lg font-semibold text-slate-900">
-                <I18nText translationKey="symbols.details.information">Informations culturelles</I18nText>
-              </h3>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-slate-700">
-                  <I18nText translationKey="symbols.culture">Culture</I18nText>
-                </label>
-                <p className="text-slate-900">{displaySymbol.culture}</p>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-slate-700">
-                  <I18nText translationKey="symbols.period">Période</I18nText>
-                </label>
-                <p className="text-slate-900">{displaySymbol.period}</p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-slate-700">UUID du symbole</label>
-                <p className="text-slate-900 text-sm font-mono">{displaySymbol.id}</p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Informations techniques avec galerie d'images améliorée */}
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Palette className="h-5 w-5 text-amber-600" />
-              <h3 className="text-lg font-semibold text-slate-900">
-                Aspects techniques
-              </h3>
-            </div>
-            
-            <div className="space-y-4">
-              {displaySymbol.function && displaySymbol.function.length > 0 && (
-                <div>
-                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
-                    <BookOpen className="h-4 w-4" />
-                    Fonctions
-                  </label>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {displaySymbol.function.map((func, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {func}
-                      </Badge>
-                    ))}
+                  <div className="flex items-center gap-2 mb-4">
+                    <Info className="h-5 w-5 text-amber-600" />
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      <I18nText translationKey="symbols.details.information">Informations culturelles</I18nText>
+                    </h3>
                   </div>
-                </div>
-              )}
-
-              {displaySymbol.medium && displaySymbol.medium.length > 0 && (
-                <div>
-                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
-                    <Palette className="h-4 w-4" />
-                    Supports utilisés
-                  </label>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {displaySymbol.medium.map((med, index) => (
-                      <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-700">
-                        {med}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {displaySymbol.technique && displaySymbol.technique.length > 0 && (
-                <div>
-                  <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
-                    <Hammer className="h-4 w-4" />
-                    Techniques
-                  </label>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {displaySymbol.technique.map((tech, index) => (
-                      <Badge key={index} variant="outline" className="text-xs bg-green-50 text-green-700">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Galerie d'images améliorée */}
-              {images && images.length > 0 && (
-                <div>
-                  <label className="text-sm font-medium text-slate-700 mb-2 block flex items-center gap-2">
-                    <Images className="h-4 w-4" />
-                    Galerie d'images ({images.length})
-                  </label>
-                  <div className="space-y-3">
-                    {/* Image principale en grand */}
-                    {primaryImage && (
-                      <div className="aspect-video bg-slate-100 rounded border overflow-hidden">
-                        <img
-                          src={primaryImage.image_url}
-                          alt={primaryImage.title || displaySymbol.name}
-                          className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
-                          onClick={handleImageClick}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder.svg';
-                          }}
-                        />
-                      </div>
-                    )}
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700">
+                        <I18nText translationKey="symbols.culture">Culture</I18nText>
+                      </label>
+                      <p className="text-slate-900">{displaySymbol.culture}</p>
+                    </div>
                     
-                    {/* Miniatures des autres images */}
-                    {images.length > 1 && (
-                      <div className="grid grid-cols-4 gap-2">
-                        {images.slice(0, 8).map((image, index) => (
-                          <div 
-                            key={image.id} 
-                            className="relative aspect-square bg-slate-100 rounded border overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200"
-                            onClick={() => handleThumbnailClick(index)}
-                          >
-                            <img
-                              src={image.image_url}
-                              alt={image.title || displaySymbol.name}
-                              className="w-full h-full object-cover"
-                              title={image.title || 'Image du symbole'}
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = '/placeholder.svg';
-                              }}
-                            />
-                            {image.image_type !== 'original' && (
-                              <div className="absolute bottom-1 right-1">
-                                <Badge variant="secondary" className="text-xs">
-                                  {image.image_type === 'pattern' ? 'Motif' : 'Réut.'}
-                                </Badge>
-                              </div>
-                            )}
-                            {image.is_primary && (
-                              <div className="absolute top-1 right-1">
-                                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {images.length > 8 && (
-                          <div 
-                            className="aspect-square flex items-center justify-center bg-slate-100 rounded border text-slate-500 text-sm cursor-pointer hover:bg-slate-200 transition-colors"
-                            onClick={() => handleThumbnailClick(8)}
-                          >
-                            +{images.length - 8}
-                          </div>
-                        )}
+                    <div>
+                      <label className="text-sm font-medium text-slate-700">
+                        <I18nText translationKey="symbols.period">Période</I18nText>
+                      </label>
+                      <p className="text-slate-900">{displaySymbol.period}</p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-slate-700">UUID du symbole</label>
+                      <p className="text-slate-900 text-sm font-mono">{displaySymbol.id}</p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Informations techniques avec galerie d'images améliorée */}
+                <Card className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Palette className="h-5 w-5 text-amber-600" />
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Aspects techniques
+                    </h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {displaySymbol.function && displaySymbol.function.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                          <BookOpen className="h-4 w-4" />
+                          Fonctions
+                        </label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {displaySymbol.function.map((func, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {func}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {displaySymbol.medium && displaySymbol.medium.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                          <Palette className="h-4 w-4" />
+                          Supports utilisés
+                        </label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {displaySymbol.medium.map((med, index) => (
+                            <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                              {med}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {displaySymbol.technique && displaySymbol.technique.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                          <Hammer className="h-4 w-4" />
+                          Techniques
+                        </label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {displaySymbol.technique.map((tech, index) => (
+                            <Badge key={index} variant="outline" className="text-xs bg-green-50 text-green-700">
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Galerie d'images améliorée */}
+                    {imagesArray && imagesArray.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-slate-700 mb-2 block flex items-center gap-2">
+                          <Images className="h-4 w-4" />
+                          Galerie d'images ({imagesArray.length})
+                        </label>
+                        <div className="space-y-3">
+                          {/* Image principale en grand */}
+                          {primaryImage && (
+                            <div className="aspect-video bg-slate-100 rounded border overflow-hidden">
+                              <img
+                                src={primaryImage.image_url}
+                                alt={primaryImage.title || displaySymbol.name}
+                                className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                                onClick={handleImageClick}
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = '/placeholder.svg';
+                                }}
+                              />
+                            </div>
+                          )}
+                          
+                          {/* Miniatures des autres images */}
+                          {imagesArray.length > 1 && (
+                            <div className="grid grid-cols-4 gap-2">
+                              {imagesArray.slice(0, 8).map((image, index) => (
+                                <div 
+                                  key={image.id} 
+                                  className="relative aspect-square bg-slate-100 rounded border overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200"
+                                  onClick={() => handleThumbnailClick(index)}
+                                >
+                                  <img
+                                    src={image.image_url}
+                                    alt={image.title || displaySymbol.name}
+                                    className="w-full h-full object-cover"
+                                    title={image.title || 'Image du symbole'}
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.src = '/placeholder.svg';
+                                    }}
+                                  />
+                                  {image.image_type !== 'original' && (
+                                    <div className="absolute bottom-1 right-1">
+                                      <Badge variant="secondary" className="text-xs">
+                                        {image.image_type === 'pattern' ? 'Motif' : 'Réut.'}
+                                      </Badge>
+                                    </div>
+                                  )}
+                                  {image.is_primary && (
+                                    <div className="absolute top-1 right-1">
+                                      <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                              {imagesArray.length > 8 && (
+                                <div 
+                                  className="aspect-square flex items-center justify-center bg-slate-100 rounded border text-slate-500 text-sm cursor-pointer hover:bg-slate-200 transition-colors"
+                                  onClick={() => handleThumbnailClick(8)}
+                                >
+                                  +{imagesArray.length - 8}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
-            </div>
-          </Card>
+                </Card>
+              </div>
             </div>
           )}
 
@@ -597,57 +605,6 @@ const SymbolDetailPage: React.FC = () => {
               />
             </div>
           )}
-
-          {activeSection === 'sources' && (
-            <Card className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="h-5 w-5 text-amber-600" />
-                <h3 className="text-lg font-semibold text-slate-900">
-                  Sources de référence
-                </h3>
-              </div>
-              
-              {displaySymbol.sources && Array.isArray(displaySymbol.sources) && displaySymbol.sources.length > 0 ? (
-                <div className="space-y-4">
-                  {displaySymbol.sources.map((source: any, index: number) => (
-                    <div key={index} className="border border-slate-200 rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-slate-900">{source.title}</h4>
-                          <Badge variant="outline" className="mt-2 capitalize bg-amber-100 text-amber-800">
-                            {source.type}
-                          </Badge>
-                          {source.description && (
-                            <p className="text-slate-600 text-sm mt-2">
-                              {source.description}
-                            </p>
-                          )}
-                        </div>
-                        {source.url && (
-                          <a
-                            href={source.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="ml-4 inline-flex items-center gap-1 text-amber-600 hover:text-amber-700 text-sm"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            Voir la source
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-slate-600">Aucune source de référence disponible pour ce symbole.</p>
-                  <p className="text-sm text-slate-500 mt-2">
-                    Les sources aident à valider et vérifier l'authenticité des informations.
-                  </p>
-                </div>
-              )}
-            </Card>
-          )}
         </div>
 
         {/* Collections associées */}
@@ -666,9 +623,9 @@ const SymbolDetailPage: React.FC = () => {
       />
       
       {/* Modal de galerie d'images */}
-      {images && images.length > 0 && (
+      {imagesArray && imagesArray.length > 0 && (
         <ImageGalleryModal
-          images={images}
+          images={imagesArray}
           selectedImageIndex={selectedImageIndex}
           isOpen={isGalleryOpen}
           onClose={() => setIsGalleryOpen(false)}
