@@ -66,39 +66,44 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
     try {
       setLoading(true);
       
-      // Simuler des éléments de modération
-      const mockItems: ModerationItem[] = [
-        {
-          id: '1',
-          type: 'comment',
-          content: 'Ce symbole est mal interprété, voici la vraie signification...',
-          reported_count: 2,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          reported_at: new Date().toISOString(),
-          user: {
-            username: 'user123',
-            full_name: 'Utilisateur Actif'
-          }
-        },
-        {
-          id: '2',
-          type: 'source',
-          content: 'https://source-douteuse.com/symbole-fake',
-          reported_count: 5,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          reported_at: new Date().toISOString(),
-          user: {
-            username: 'contributor',
-            full_name: 'Contributeur Pro'
-          }
+      // Récupérer les éléments de modération depuis la base de données
+      const { data: moderationData, error } = await supabase
+        .from('symbol_moderation_items')
+        .select(`
+          *,
+          profiles!symbol_moderation_items_reported_by_fkey (
+            username,
+            full_name
+          )
+        `)
+        .eq('symbol_id', symbolId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erreur lors du chargement des éléments de modération:', error);
+        setModerationItems([]);
+        return;
+      }
+
+      // Mapper les données pour correspondre à l'interface
+      const mappedItems = moderationData.map(item => ({
+        id: item.id,
+        type: item.item_type as 'comment' | 'source' | 'symbol_info',
+        content: item.content,
+        reported_count: item.reported_count,
+        status: item.status as 'pending' | 'approved' | 'rejected',
+        created_at: item.created_at,
+        reported_at: item.created_at,
+        user: {
+          username: item.profiles?.username || 'Utilisateur anonyme',
+          full_name: item.profiles?.full_name || 'Utilisateur anonyme'
         }
-      ];
+      }));
       
-      setModerationItems(mockItems);
+      setModerationItems(mappedItems);
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
+      setModerationItems([]);
     } finally {
       setLoading(false);
     }
@@ -111,13 +116,20 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
     }
 
     try {
-      // Mettre à jour localement
-      setModerationItems(prev => prev.map(item => 
-        item.id === itemId 
-          ? { ...item, status: action === 'approve' ? 'approved' : 'rejected' }
-          : item
-      ));
+      // Mettre à jour dans la base de données
+      const { error } = await supabase
+        .from('symbol_moderation_items')
+        .update({
+          status: action === 'approve' ? 'approved' : 'rejected',
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', itemId);
 
+      if (error) throw error;
+
+      // Recharger les données
+      await loadModerationItems();
       toast.success(`Élément ${action === 'approve' ? 'approuvé' : 'rejeté'} avec succès`);
     } catch (error) {
       console.error('Erreur lors de la modération:', error);
@@ -132,13 +144,25 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
     }
 
     try {
-      // Mettre à jour le compteur de signalements
-      setModerationItems(prev => prev.map(item => 
-        item.id === itemId 
-          ? { ...item, reported_count: item.reported_count + 1 }
-          : item
-      ));
+      // Trouver l'élément actuel pour incrémenter le compteur
+      const currentItem = moderationItems.find(item => item.id === itemId);
+      if (!currentItem) {
+        toast.error('Élément non trouvé');
+        return;
+      }
 
+      // Mettre à jour directement le compteur de signalements
+      const { error } = await supabase
+        .from('symbol_moderation_items')
+        .update({
+          reported_count: currentItem.reported_count + 1
+        })
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      // Recharger les données
+      await loadModerationItems();
       toast.success('Signalement envoyé');
     } catch (error) {
       console.error('Erreur lors du signalement:', error);

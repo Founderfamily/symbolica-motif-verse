@@ -45,43 +45,46 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
     try {
       setLoading(true);
       
-      // Simuler des sources pour le moment (vous pourrez les connecter à votre table de sources)
-      const mockSources: Source[] = [
-        {
-          id: '1',
-          url: 'https://example.com/source1',
-          title: 'Source académique sur le symbole',
-          description: 'Article universitaire détaillé',
-          added_by: user?.id || 'system',
-          created_at: new Date().toISOString(),
-          upvotes: 5,
-          downvotes: 1,
-          user_vote: null,
-          profiles: {
-            username: 'expert_symboles',
-            full_name: 'Dr. Expert'
-          }
-        },
-        {
-          id: '2',
-          url: 'https://example.com/source2',
-          title: 'Documentation historique',
-          description: 'Source historique primaire',
-          added_by: user?.id || 'system',
-          created_at: new Date().toISOString(),
-          upvotes: 8,
-          downvotes: 2,
-          user_vote: null,
-          profiles: {
-            username: 'historien',
-            full_name: 'Historien Pro'
-          }
-        }
-      ];
+      // Récupérer les sources depuis la base de données
+      const { data: sourcesData, error } = await supabase
+        .from('symbol_sources')
+        .select(`
+          *,
+          profiles (
+            username,
+            full_name
+          )
+        `)
+        .eq('symbol_id', symbolId)
+        .order('credibility_score', { ascending: false });
+
+      if (error) {
+        console.error('Erreur lors du chargement des sources:', error);
+        setSources([]);
+        return;
+      }
+
+      // Récupérer les votes de l'utilisateur actuel si connecté
+      let userVotes: any[] = [];
+      if (user) {
+        const { data: votesData } = await supabase
+          .from('symbol_source_votes')
+          .select('source_id, vote_type')
+          .eq('user_id', user.id);
+        
+        userVotes = votesData || [];
+      }
+
+      // Mapper les données avec les votes de l'utilisateur
+      const sourcesWithVotes = sourcesData.map(source => ({
+        ...source,
+        user_vote: userVotes.find(vote => vote.source_id === source.id)?.vote_type || null
+      }));
       
-      setSources(mockSources);
+      setSources(sourcesWithVotes);
     } catch (error) {
       console.error('Erreur lors du chargement des sources:', error);
+      setSources([]);
     } finally {
       setLoading(false);
     }
@@ -94,36 +97,38 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
     }
 
     try {
-      // Mettre à jour localement pour un feedback immédiat
-      setSources(prev => prev.map(source => {
-        if (source.id === sourceId) {
-          let newUpvotes = source.upvotes;
-          let newDownvotes = source.downvotes;
-          
-          // Retirer l'ancien vote s'il existe
-          if (source.user_vote === 'up') newUpvotes--;
-          if (source.user_vote === 'down') newDownvotes--;
-          
-          // Ajouter le nouveau vote ou l'annuler
-          if (source.user_vote === voteType) {
-            // Annuler le vote
-            return { ...source, user_vote: null, upvotes: newUpvotes, downvotes: newDownvotes };
-          } else {
-            // Nouveau vote
-            if (voteType === 'up') newUpvotes++;
-            if (voteType === 'down') newDownvotes++;
-            return { ...source, user_vote: voteType, upvotes: newUpvotes, downvotes: newDownvotes };
-          }
-        }
-        return source;
-      }));
+      // Vérifier si l'utilisateur a déjà voté
+      const currentSource = sources.find(s => s.id === sourceId);
+      const isTogglingVote = currentSource?.user_vote === voteType;
 
-      // Ici vous pourrez implémenter la logique de base de données
-      toast.success('Vote enregistré !');
+      if (isTogglingVote) {
+        // Supprimer le vote existant
+        const { error } = await supabase
+          .from('symbol_source_votes')
+          .delete()
+          .eq('source_id', sourceId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        // Ajouter ou modifier le vote
+        const { error } = await supabase
+          .from('symbol_source_votes')
+          .upsert({
+            source_id: sourceId,
+            user_id: user.id,
+            vote_type: voteType
+          });
+
+        if (error) throw error;
+      }
+
+      // Recharger les sources pour mettre à jour les compteurs
+      await loadSources();
+      toast.success(isTogglingVote ? 'Vote retiré !' : 'Vote enregistré !');
     } catch (error) {
       console.error('Erreur lors du vote:', error);
       toast.error('Erreur lors du vote');
-      loadSources(); // Recharger en cas d'erreur
     }
   };
 

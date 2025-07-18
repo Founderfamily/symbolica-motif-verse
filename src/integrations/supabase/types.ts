@@ -2096,53 +2096,6 @@ export type Database = {
         }
         Relationships: []
       }
-      symbol_chakras: {
-        Row: {
-          chakra_name: string
-          color: string | null
-          created_at: string
-          description: string | null
-          element: string | null
-          id: string
-          position: number | null
-          symbol_id: string
-          translations: Json | null
-          updated_at: string
-        }
-        Insert: {
-          chakra_name: string
-          color?: string | null
-          created_at?: string
-          description?: string | null
-          element?: string | null
-          id?: string
-          position?: number | null
-          symbol_id: string
-          translations?: Json | null
-          updated_at?: string
-        }
-        Update: {
-          chakra_name?: string
-          color?: string | null
-          created_at?: string
-          description?: string | null
-          element?: string | null
-          id?: string
-          position?: number | null
-          symbol_id?: string
-          translations?: Json | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "symbol_chakras_symbol_id_fkey"
-            columns: ["symbol_id"]
-            isOneToOne: false
-            referencedRelation: "symbols"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       symbol_connections: {
         Row: {
           created_at: string | null
@@ -2202,71 +2155,6 @@ export type Database = {
           {
             foreignKeyName: "symbol_connections_symbol_id_2_fkey"
             columns: ["symbol_id_2"]
-            isOneToOne: false
-            referencedRelation: "symbols"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      symbol_events: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          end_date: string | null
-          event_name: string
-          event_type: string | null
-          id: string
-          is_recurring: boolean | null
-          latitude: number | null
-          location: string | null
-          longitude: number | null
-          recurrence_pattern: string | null
-          start_date: string | null
-          symbol_id: string
-          translations: Json | null
-          website_url: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          end_date?: string | null
-          event_name: string
-          event_type?: string | null
-          id?: string
-          is_recurring?: boolean | null
-          latitude?: number | null
-          location?: string | null
-          longitude?: number | null
-          recurrence_pattern?: string | null
-          start_date?: string | null
-          symbol_id: string
-          translations?: Json | null
-          website_url?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          end_date?: string | null
-          event_name?: string
-          event_type?: string | null
-          id?: string
-          is_recurring?: boolean | null
-          latitude?: number | null
-          location?: string | null
-          longitude?: number | null
-          recurrence_pattern?: string | null
-          start_date?: string | null
-          symbol_id?: string
-          translations?: Json | null
-          website_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "symbol_events_symbol_id_fkey"
-            columns: ["symbol_id"]
             isOneToOne: false
             referencedRelation: "symbols"
             referencedColumns: ["id"]
@@ -2417,49 +2305,77 @@ export type Database = {
           },
         ]
       }
-      symbol_mantras: {
+      symbol_moderation_items: {
         Row: {
-          audio_url: string | null
-          created_at: string
-          created_by: string | null
+          content: string
+          created_at: string | null
           id: string
-          language: string
-          mantra_text: string
-          meaning: string | null
-          pronunciation: string | null
+          item_type: string
+          reported_by: string | null
+          reported_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
           symbol_id: string
-          translations: Json | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          audio_url?: string | null
-          created_at?: string
-          created_by?: string | null
+          content: string
+          created_at?: string | null
           id?: string
-          language?: string
-          mantra_text: string
-          meaning?: string | null
-          pronunciation?: string | null
+          item_type: string
+          reported_by?: string | null
+          reported_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
           symbol_id: string
-          translations?: Json | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          audio_url?: string | null
-          created_at?: string
-          created_by?: string | null
+          content?: string
+          created_at?: string | null
           id?: string
-          language?: string
-          mantra_text?: string
-          meaning?: string | null
-          pronunciation?: string | null
+          item_type?: string
+          reported_by?: string | null
+          reported_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
           symbol_id?: string
-          translations?: Json | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "symbol_mantras_symbol_id_fkey"
+            foreignKeyName: "symbol_moderation_items_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_moderation_items_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles_with_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_moderation_items_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_moderation_items_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles_with_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_moderation_items_symbol_id_fkey"
             columns: ["symbol_id"]
             isOneToOne: false
             referencedRelation: "symbols"
@@ -2467,224 +2383,115 @@ export type Database = {
           },
         ]
       }
-      symbol_quiz_questions: {
+      symbol_source_votes: {
         Row: {
-          correct_answer: string
-          created_at: string
-          created_by: string | null
-          difficulty_level: string | null
-          explanation: string | null
+          created_at: string | null
           id: string
-          options: Json | null
-          question_text: string
-          question_type: string | null
-          symbol_id: string
-          translations: Json | null
+          source_id: string
+          user_id: string
+          vote_type: string
         }
         Insert: {
-          correct_answer: string
-          created_at?: string
-          created_by?: string | null
-          difficulty_level?: string | null
-          explanation?: string | null
+          created_at?: string | null
           id?: string
-          options?: Json | null
-          question_text: string
-          question_type?: string | null
-          symbol_id: string
-          translations?: Json | null
+          source_id: string
+          user_id: string
+          vote_type: string
         }
         Update: {
-          correct_answer?: string
-          created_at?: string
-          created_by?: string | null
-          difficulty_level?: string | null
-          explanation?: string | null
+          created_at?: string | null
           id?: string
-          options?: Json | null
-          question_text?: string
-          question_type?: string | null
-          symbol_id?: string
-          translations?: Json | null
+          source_id?: string
+          user_id?: string
+          vote_type?: string
         }
         Relationships: [
           {
-            foreignKeyName: "symbol_quiz_questions_symbol_id_fkey"
-            columns: ["symbol_id"]
+            foreignKeyName: "symbol_source_votes_source_id_fkey"
+            columns: ["source_id"]
             isOneToOne: false
-            referencedRelation: "symbols"
+            referencedRelation: "symbol_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_source_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbol_source_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles_with_roles"
             referencedColumns: ["id"]
           },
         ]
       }
-      symbol_relationships: {
+      symbol_sources: {
         Row: {
-          created_at: string
-          created_by: string | null
+          added_by: string | null
+          author: string | null
+          created_at: string | null
+          credibility_score: number | null
+          date_added: string | null
           description: string | null
+          downvotes: number | null
           id: string
-          related_symbol_id: string
-          relationship_type: string
-          strength: number | null
           symbol_id: string
+          title: string
+          updated_at: string | null
+          upvotes: number | null
+          url: string
         }
         Insert: {
-          created_at?: string
-          created_by?: string | null
+          added_by?: string | null
+          author?: string | null
+          created_at?: string | null
+          credibility_score?: number | null
+          date_added?: string | null
           description?: string | null
+          downvotes?: number | null
           id?: string
-          related_symbol_id: string
-          relationship_type: string
-          strength?: number | null
           symbol_id: string
+          title: string
+          updated_at?: string | null
+          upvotes?: number | null
+          url: string
         }
         Update: {
-          created_at?: string
-          created_by?: string | null
+          added_by?: string | null
+          author?: string | null
+          created_at?: string | null
+          credibility_score?: number | null
+          date_added?: string | null
           description?: string | null
+          downvotes?: number | null
           id?: string
-          related_symbol_id?: string
-          relationship_type?: string
-          strength?: number | null
           symbol_id?: string
+          title?: string
+          updated_at?: string | null
+          upvotes?: number | null
+          url?: string
         }
         Relationships: [
           {
-            foreignKeyName: "symbol_relationships_related_symbol_id_fkey"
-            columns: ["related_symbol_id"]
+            foreignKeyName: "symbol_sources_added_by_fkey"
+            columns: ["added_by"]
             isOneToOne: false
-            referencedRelation: "symbols"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "symbol_relationships_symbol_id_fkey"
-            columns: ["symbol_id"]
+            foreignKeyName: "symbol_sources_added_by_fkey"
+            columns: ["added_by"]
             isOneToOne: false
-            referencedRelation: "symbols"
+            referencedRelation: "user_profiles_with_roles"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      symbol_rituals: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          difficulty_level: string | null
-          duration_minutes: number | null
-          id: string
-          instructions: string | null
-          materials_needed: string[] | null
-          occasion: string | null
-          ritual_name: string
-          symbol_id: string
-          translations: Json | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          difficulty_level?: string | null
-          duration_minutes?: number | null
-          id?: string
-          instructions?: string | null
-          materials_needed?: string[] | null
-          occasion?: string | null
-          ritual_name: string
-          symbol_id: string
-          translations?: Json | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          difficulty_level?: string | null
-          duration_minutes?: number | null
-          id?: string
-          instructions?: string | null
-          materials_needed?: string[] | null
-          occasion?: string | null
-          ritual_name?: string
-          symbol_id?: string
-          translations?: Json | null
-          updated_at?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "symbol_rituals_symbol_id_fkey"
-            columns: ["symbol_id"]
-            isOneToOne: false
-            referencedRelation: "symbols"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      symbol_sacred_sites: {
-        Row: {
-          country: string | null
-          created_at: string
-          created_by: string | null
-          description: string | null
-          historical_significance: string | null
-          id: string
-          image_url: string | null
-          latitude: number | null
-          longitude: number | null
-          region: string | null
-          site_name: string
-          site_type: string | null
-          symbol_id: string
-          translations: Json | null
-          updated_at: string
-          verified: boolean | null
-          visit_info: string | null
-          website_url: string | null
-        }
-        Insert: {
-          country?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          historical_significance?: string | null
-          id?: string
-          image_url?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          region?: string | null
-          site_name: string
-          site_type?: string | null
-          symbol_id: string
-          translations?: Json | null
-          updated_at?: string
-          verified?: boolean | null
-          visit_info?: string | null
-          website_url?: string | null
-        }
-        Update: {
-          country?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          historical_significance?: string | null
-          id?: string
-          image_url?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          region?: string | null
-          site_name?: string
-          site_type?: string | null
-          symbol_id?: string
-          translations?: Json | null
-          updated_at?: string
-          verified?: boolean | null
-          visit_info?: string | null
-          website_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "symbol_sacred_sites_symbol_id_fkey"
+            foreignKeyName: "symbol_sources_symbol_id_fkey"
             columns: ["symbol_id"]
             isOneToOne: false
             referencedRelation: "symbols"
@@ -2772,56 +2579,6 @@ export type Database = {
             columns: ["taxonomy_id"]
             isOneToOne: false
             referencedRelation: "symbol_taxonomy"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      symbol_testimonials: {
-        Row: {
-          created_at: string
-          experience_type: string | null
-          id: string
-          rating: number | null
-          symbol_id: string
-          testimonial_text: string
-          translations: Json | null
-          updated_at: string
-          user_id: string
-          verified: boolean | null
-          verified_by: string | null
-        }
-        Insert: {
-          created_at?: string
-          experience_type?: string | null
-          id?: string
-          rating?: number | null
-          symbol_id: string
-          testimonial_text: string
-          translations?: Json | null
-          updated_at?: string
-          user_id: string
-          verified?: boolean | null
-          verified_by?: string | null
-        }
-        Update: {
-          created_at?: string
-          experience_type?: string | null
-          id?: string
-          rating?: number | null
-          symbol_id?: string
-          testimonial_text?: string
-          translations?: Json | null
-          updated_at?: string
-          user_id?: string
-          verified?: boolean | null
-          verified_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "symbol_testimonials_symbol_id_fkey"
-            columns: ["symbol_id"]
-            isOneToOne: false
-            referencedRelation: "symbols"
             referencedColumns: ["id"]
           },
         ]
