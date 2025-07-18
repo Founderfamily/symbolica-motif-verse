@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Edit, Eye } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { UserContribution } from '@/types/contributions';
 import { format } from 'date-fns';
@@ -20,6 +21,7 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const targetUserId = userId || user?.id;
 
@@ -84,6 +86,20 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
     return '';
   };
 
+  const handleCreateNew = () => {
+    navigate('/contributions/new');
+  };
+
+  const handleViewDetails = (contributionId: string) => {
+    navigate(`/contributions/${contributionId}`);
+  };
+
+  const handleEdit = (contributionId: string) => {
+    // Pour l'instant, rediriger vers la page de création
+    // TODO: Implémenter une vraie page d'édition avec pré-remplissage
+    navigate(`/contributions/new?edit=${contributionId}`);
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -120,10 +136,8 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
       <Card>
         <CardContent className="text-center py-12">
           <p className="text-gray-600 mb-4">Vous n'avez encore soumis aucun symbole.</p>
-          <Button asChild>
-            <a href="/contribute">
-              <I18nText translationKey="contribute.title">Proposer un symbole</I18nText>
-            </a>
+          <Button onClick={handleCreateNew}>
+            <I18nText translationKey="contribute.title">Proposer un symbole</I18nText>
           </Button>
         </CardContent>
       </Card>
@@ -134,8 +148,8 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Mes contributions ({contributions.length})</h3>
-        <Button variant="outline" size="sm" asChild>
-          <a href="/contribute">Proposer un nouveau symbole</a>
+        <Button variant="outline" size="sm" onClick={handleCreateNew}>
+          Proposer un nouveau symbole
         </Button>
       </div>
 
@@ -175,12 +189,12 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
                 
                 <div className="flex items-center space-x-2">
                   {contribution.status === 'pending' && (
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(contribution.id)}>
                       <Edit className="h-4 w-4 mr-1" />
                       Modifier
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(contribution.id)}>
                     <Eye className="h-4 w-4 mr-1" />
                     Voir détails
                   </Button>
