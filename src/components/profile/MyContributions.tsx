@@ -18,6 +18,7 @@ interface MyContributionsProps {
 const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
   const [contributions, setContributions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   const targetUserId = userId || user?.id;
@@ -32,22 +33,26 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
     if (!targetUserId) return;
 
     try {
+      setLoading(true);
+      setError(null);
+      
+      // Simplified query without the problematic foreign key reference
       const { data, error } = await supabase
         .from('user_contributions')
-        .select(`
-          *,
-          profiles!user_contributions_reviewed_by_fkey (
-            username,
-            full_name
-          )
-        `)
+        .select('*')
         .eq('user_id', targetUserId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erreur lors du chargement des contributions:', error);
+        setError('Impossible de charger les contributions');
+        return;
+      }
+      
       setContributions(data || []);
     } catch (error) {
       console.error('Erreur lors du chargement des contributions:', error);
+      setError('Une erreur est survenue lors du chargement');
     } finally {
       setLoading(false);
     }
@@ -94,6 +99,19 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
           </Card>
         ))}
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={loadContributions} variant="outline">
+            Réessayer
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -169,19 +187,14 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
                 </div>
               </div>
 
-              {contribution.status === 'rejected' && contribution.profiles && (
+              {contribution.status === 'rejected' && contribution.reviewed_at && (
                 <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
                   <p className="text-sm text-red-800 font-medium">Commentaire du modérateur :</p>
-                  <p className="text-sm text-red-700 mt-1">
-                    Révisé par {contribution.profiles.full_name || contribution.profiles.username}
-                    {contribution.reviewed_at && (
-                      <span className="ml-2 text-red-600">
-                        le {format(new Date(contribution.reviewed_at), 'dd/MM/yyyy')}
-                      </span>
-                    )}
-                  </p>
                   <p className="text-sm text-red-700 mt-2">
                     Votre contribution nécessite des améliorations avant d'être acceptée.
+                  </p>
+                  <p className="text-xs text-red-600 mt-1">
+                    Révisé le {format(new Date(contribution.reviewed_at), 'dd/MM/yyyy')}
                   </p>
                 </div>
               )}

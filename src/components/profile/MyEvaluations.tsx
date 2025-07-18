@@ -29,6 +29,7 @@ interface MyEvaluationsProps {
 const MyEvaluations: React.FC<MyEvaluationsProps> = ({ userId }) => {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (userId) {
@@ -41,6 +42,7 @@ const MyEvaluations: React.FC<MyEvaluationsProps> = ({ userId }) => {
 
     try {
       setLoading(true);
+      setError(null);
 
       const { data, error } = await supabase
         .from('symbol_verification_community')
@@ -62,12 +64,14 @@ const MyEvaluations: React.FC<MyEvaluationsProps> = ({ userId }) => {
 
       if (error) {
         console.error('Erreur lors du chargement des évaluations:', error);
+        setError('Impossible de charger les évaluations');
         return;
       }
 
       setEvaluations(data || []);
     } catch (error) {
       console.error('Erreur lors du chargement des évaluations:', error);
+      setError('Une erreur est survenue lors du chargement');
     } finally {
       setLoading(false);
     }
@@ -142,6 +146,19 @@ const MyEvaluations: React.FC<MyEvaluationsProps> = ({ userId }) => {
           </Card>
         ))}
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={loadEvaluations} variant="outline">
+            Réessayer
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
