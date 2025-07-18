@@ -17,6 +17,16 @@ export interface UserContribution {
   updated_at: string;
   reviewed_by: string | null;
   reviewed_at: string | null;
+  // Nouveaux champs pour la validation avancée
+  significance?: string | null;
+  historical_context?: string | null;
+  sources?: any[] | null;
+  tags?: string[] | null;
+  validator_id?: string | null;
+  validator_comments?: string | null;
+  validation_score?: number | null;
+  revision_requested?: boolean | null;
+  community_score?: number | null;
   // Champs de traduction
   title_translations?: { [key: string]: string | null } | null;
   description_translations?: { [key: string]: string | null } | null;
@@ -62,7 +72,7 @@ export interface ContributionComment {
 }
 
 // Type pour une contribution complète avec ses images, tags et commentaires
-export interface CompleteContribution extends UserContribution {
+export interface CompleteContribution extends Omit<UserContribution, 'tags'> {
   images: ContributionImage[];
   tags: ContributionTag[];
   comments: ContributionComment[];
@@ -84,4 +94,38 @@ export interface ContributionFormData {
   period: string;
   contribution_type?: string;
   tags: string[];
+  // Nouveaux champs pour la proposition de symboles
+  significance?: string;
+  historical_context?: string;
+  sources?: Array<{
+    title: string;
+    url: string;
+    type: 'book' | 'article' | 'website' | 'museum' | 'other';
+    author?: string;
+    year?: string;
+  }>;
 }
+
+// Types pour les nouvelles fonctionnalités
+export interface ContributionRevision {
+  id: string;
+  contribution_id: string;
+  validator_id: string;
+  revision_type: 'content' | 'sources' | 'images' | 'classification';
+  requested_changes: string;
+  status: 'pending' | 'addressed' | 'dismissed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContributionVote {
+  id: string;
+  contribution_id: string;
+  user_id: string;
+  vote_type: 'approve' | 'reject' | 'needs_work';
+  comment?: string;
+  created_at: string;
+}
+
+// Type pour les rôles utilisateur étendus
+export type AppRole = 'admin' | 'symbol_validator' | 'user' | 'banned' | 'master_explorer';

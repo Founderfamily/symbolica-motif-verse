@@ -15,6 +15,7 @@ import SystemMonitoring from '@/components/admin/SystemMonitoring';
 import MaintenanceScheduler from '@/components/admin/MaintenanceScheduler';
 import MapboxConfigSection from '@/components/admin/MapboxConfigSection';
 import SystemBannerConfig from '@/components/admin/SystemBannerConfig';
+import ValidatorManagement from '@/components/admin/ValidatorManagement';
 
 interface SystemSettings {
   maintenanceMode: boolean;
@@ -160,7 +161,7 @@ const SystemSettings = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Général
@@ -188,6 +189,10 @@ const SystemSettings = () => {
           <TabsTrigger value="email" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
             Email
+          </TabsTrigger>
+          <TabsTrigger value="validators" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Validateurs
           </TabsTrigger>
         </TabsList>
 
@@ -350,6 +355,10 @@ const SystemSettings = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="validators">
+          <ValidatorManagement />
         </TabsContent>
       </Tabs>
     </div>

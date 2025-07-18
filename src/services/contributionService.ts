@@ -60,6 +60,10 @@ export const createContribution = async (
       contribution_type: data.contribution_type || 'symbol',
       latitude: data.latitude,
       longitude: data.longitude,
+      significance: data.significance ? SecurityUtils.validateInput(data.significance, 1000) : null,
+      historical_context: data.historical_context ? SecurityUtils.validateInput(data.historical_context, 1000) : null,
+      sources: data.sources || [],
+      tags: data.tags || []
     };
 
     // Validate image file

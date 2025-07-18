@@ -56,6 +56,8 @@ import EnterprisePage from '@/pages/EnterprisePage';
 import MCPSearchPage from '@/pages/MCPSearchPage';
 import MobileAppPage from '@/pages/MobileApp';
 import SymbolExplorer from '@/pages/SymbolExplorer';
+import ProposeSymbol from '@/pages/ProposeSymbol';
+import ValidatorDashboard from '@/pages/ValidatorDashboard';
 
 import './App.css';
 
@@ -90,10 +92,12 @@ function App() {
                   <Route path="/community" element={<CommunityPage />} />
                   <Route path="/community/groups/:groupId" element={<GroupDetailPage />} />
 
-                  {/* Contributions */}
-                  <Route path="/contributions" element={<ContributionsPage />} />
-                  <Route path="/contributions/new" element={<NewContribution />} />
-                  <Route path="/contributions/:id" element={<ContributionDetail />} />
+  {/* Contributions */}
+  <Route path="/contributions" element={<ContributionsPage />} />
+  <Route path="/contributions/new" element={<NewContribution />} />
+  <Route path="/contributions/:id" element={<ContributionDetail />} />
+  <Route path="/propose-symbol" element={<ProposeSymbol />} />
+  <Route path="/validator-dashboard" element={<ValidatorDashboard />} />
 
                   {/* User pages */}
                   <Route path="/auth" element={<Auth />} />
