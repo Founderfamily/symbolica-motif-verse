@@ -17,7 +17,8 @@ interface MyReportsProps {
 }
 
 const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
-  const [reports, setReports] = useState<any[]>([]);
+  const [myReports, setMyReports] = useState<any[]>([]); // Signalements faits par l'utilisateur
+  const [reportsAboutMe, setReportsAboutMe] = useState<any[]>([]); // Signalements concernant ses contributions
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -33,8 +34,33 @@ const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
     if (!targetUserId) return;
 
     try {
-      // Charger les signalements où l'utilisateur est l'auteur de la contribution signalée
-      const { data, error } = await supabase
+      setLoading(true);
+
+      // Charger les signalements faits par l'utilisateur (commentaires, etc.)
+      const { data: userReports, error: userReportsError } = await supabase
+        .from('symbol_moderation_items')
+        .select(`
+          *,
+          profiles!symbol_moderation_items_reviewed_by_fkey (
+            username,
+            full_name
+          ),
+          post_comments!symbol_moderation_items_item_id_fkey (
+            content,
+            user_id,
+            profiles!post_comments_user_id_fkey (
+              username,
+              full_name
+            )
+          )
+        `)
+        .eq('reported_by', targetUserId)
+        .order('created_at', { ascending: false });
+
+      if (userReportsError) throw userReportsError;
+
+      // Charger les signalements concernant les contributions de l'utilisateur
+      const { data: contributionReports, error: contributionReportsError } = await supabase
         .from('symbol_source_reports')
         .select(`
           *,
@@ -44,14 +70,17 @@ const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
           ),
           user_contributions!symbol_source_reports_source_id_fkey (
             title,
-            status
+            status,
+            user_id
           )
         `)
         .eq('user_contributions.user_id', targetUserId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setReports(data || []);
+      if (contributionReportsError) throw contributionReportsError;
+
+      setMyReports(userReports || []);
+      setReportsAboutMe(contributionReports || []);
     } catch (error) {
       console.error('Erreur lors du chargement des signalements:', error);
     } finally {
@@ -118,99 +147,139 @@ const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
     );
   }
 
-  if (reports.length === 0) {
+  if (myReports.length === 0 && reportsAboutMe.length === 0) {
     return (
       <Card>
         <CardContent className="text-center py-12">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <p className="text-gray-600 mb-2">Aucun signalement concernant vos contributions.</p>
+          <p className="text-gray-600 mb-2">Aucun signalement à afficher.</p>
           <p className="text-sm text-gray-500">
-            C'est une bonne chose ! Continuez à proposer du contenu de qualité.
+            Vous n'avez fait aucun signalement et aucun signalement ne concerne vos contributions.
           </p>
         </CardContent>
       </Card>
     );
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Signalements concernant mes contributions ({reports.length})</h3>
-        <div className="text-sm text-gray-600">
-          {reports.filter(r => r.status === 'pending').length} en cours
+  const renderReportCard = (report: any, isUserReport: boolean) => (
+    <Card key={report.id} className="hover:shadow-md transition-shadow">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle className="text-lg flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <span>
+                {isUserReport ? 'Mon signalement' : 'Signalement de contribution'}
+              </span>
+            </CardTitle>
+            {isUserReport && report.post_comments ? (
+              <p className="text-sm text-gray-600 mt-1">
+                Commentaire signalé de {report.post_comments.profiles?.full_name || report.post_comments.profiles?.username || 'utilisateur inconnu'}
+              </p>
+            ) : (
+              report.user_contributions && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Contribution: "{report.user_contributions.title}"
+                </p>
+              )
+            )}
+          </div>
+          {getStatusBadge(report.status)}
         </div>
-      </div>
+      </CardHeader>
 
-      {reports.map((report) => (
-        <Card key={report.id} className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-lg flex items-center space-x-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-600" />
-                  <span>Signalement de contribution</span>
-                </CardTitle>
-                {report.user_contributions && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    Contribution: "{report.user_contributions.title}"
-                  </p>
-                )}
-              </div>
-              {getStatusBadge(report.status)}
-            </div>
-          </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          <div className="text-sm text-gray-700">
+            <p className="font-medium">Raison du signalement:</p>
+            <p className="mt-1">{report.reason}</p>
+          </div>
 
-          <CardContent>
-            <div className="space-y-3">
-              <div className="text-sm text-gray-700">
-                <p className="font-medium">Raison du signalement:</p>
-                <p className="mt-1">{report.reason}</p>
-              </div>
-
-              <div className="text-sm text-gray-600">
-                {getStatusDescription(report.status)}
-              </div>
-
-              {report.evidence_url && (
-                <div className="text-sm">
-                  <p className="font-medium text-gray-700">Preuve fournie:</p>
-                  <Button variant="link" size="sm" className="p-0 h-auto" asChild>
-                    <a href={report.evidence_url} target="_blank" rel="noopener noreferrer">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Voir la preuve
-                    </a>
-                  </Button>
-                </div>
-              )}
-
-              {report.resolution_notes && (
-                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800 font-medium">Notes de résolution:</p>
-                  <p className="text-sm text-blue-700 mt-1">{report.resolution_notes}</p>
-                  {report.profiles && report.reviewed_at && (
-                    <p className="text-xs text-blue-600 mt-2">
-                      Traité par {report.profiles.full_name || report.profiles.username} le{' '}
-                      {format(new Date(report.reviewed_at), 'dd MMMM yyyy', { locale: fr })}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t">
-                <span>
-                  Signalé le {format(new Date(report.created_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
-                </span>
-                
-                {report.status === 'pending' && (
-                  <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                    Action requise
-                  </Badge>
-                )}
+          {isUserReport && report.post_comments && (
+            <div className="text-sm text-gray-700">
+              <p className="font-medium">Contenu signalé:</p>
+              <div className="mt-1 p-2 bg-gray-50 rounded border-l-4 border-gray-300">
+                <p className="italic">"{report.post_comments.content}"</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      ))}
+          )}
+
+          <div className="text-sm text-gray-600">
+            {getStatusDescription(report.status)}
+          </div>
+
+          {report.evidence_url && (
+            <div className="text-sm">
+              <p className="font-medium text-gray-700">Preuve fournie:</p>
+              <Button variant="link" size="sm" className="p-0 h-auto" asChild>
+                <a href={report.evidence_url} target="_blank" rel="noopener noreferrer">
+                  <Eye className="h-4 w-4 mr-1" />
+                  Voir la preuve
+                </a>
+              </Button>
+            </div>
+          )}
+
+          {report.resolution_notes && (
+            <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-800 font-medium">Notes de résolution:</p>
+              <p className="text-sm text-blue-700 mt-1">{report.resolution_notes}</p>
+              {report.profiles && report.reviewed_at && (
+                <p className="text-xs text-blue-600 mt-2">
+                  Traité par {report.profiles.full_name || report.profiles.username} le{' '}
+                  {format(new Date(report.reviewed_at), 'dd MMMM yyyy', { locale: fr })}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t">
+            <span>
+              Signalé le {format(new Date(report.created_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+            </span>
+            
+            {report.status === 'pending' && (
+              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                Action requise
+              </Badge>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Section des signalements faits par l'utilisateur */}
+      {myReports.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Mes signalements ({myReports.length})</h3>
+            <div className="text-sm text-gray-600">
+              {myReports.filter(r => r.status === 'pending').length} en cours
+            </div>
+          </div>
+          <p className="text-sm text-gray-600">Signalements que vous avez effectués</p>
+          
+          {myReports.map((report) => renderReportCard(report, true))}
+        </div>
+      )}
+
+      {/* Section des signalements concernant les contributions de l'utilisateur */}
+      {reportsAboutMe.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Signalements concernant mes contributions ({reportsAboutMe.length})</h3>
+            <div className="text-sm text-gray-600">
+              {reportsAboutMe.filter(r => r.status === 'pending').length} en cours
+            </div>
+          </div>
+          <p className="text-sm text-gray-600">Signalements reçus sur vos contributions</p>
+          
+          {reportsAboutMe.map((report) => renderReportCard(report, false))}
+        </div>
+      )}
     </div>
   );
 };
