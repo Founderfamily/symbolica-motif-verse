@@ -525,7 +525,7 @@ const SymbolDetailPage: React.FC = () => {
                           {/* Miniatures des autres images */}
                           {imagesArray.length > 1 && (
                             <div className="grid grid-cols-4 gap-2">
-                              {imagesArray.slice(0, 8).map((image, index) => (
+                              {imagesArray.filter(image => image !== null).slice(0, 8).map((image, index) => (
                                 <div 
                                   key={image.id} 
                                   className="relative aspect-square bg-slate-100 rounded border overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200"
