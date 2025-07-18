@@ -1,351 +1,185 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { SymbolData } from '@/types/supabase';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ImageIcon, PencilIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Sparkle } from 'lucide-react';
 
-const SymbolsManagement = () => {
-  const navigate = useNavigate();
-  const [symbols, setSymbols] = useState<SymbolData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedSymbol, setSelectedSymbol] = useState<SymbolData | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    culture: '',
-    period: '',
-    description: '',
-  });
-  const [isEditing, setIsEditing] = useState(false);
-  const { toast } = useToast();
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { 
+  useAdminSymbols, 
+  useSymbolStats, 
+  useSymbolFilters, 
+  useDeleteSymbols,
+  SymbolFilters, 
+  SymbolSortConfig,
+  PaginatedSymbol 
+} from '@/hooks/useAdminSymbols';
+import SymbolsDataTable from '@/components/admin/SymbolsDataTable';
+import { SymbolEditModal } from '@/components/admin/SymbolEditModal';
+import { SymbolViewModal } from '@/components/admin/SymbolViewModal';
+import { Database, Eye, Image, CheckCircle, Calendar, TrendingUp } from 'lucide-react';
 
-  useEffect(() => {
-    fetchSymbols();
-  }, []);
+export default function SymbolsManagement() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(50);
+  const [filters, setFilters] = useState<SymbolFilters>({});
+  const [sort, setSort] = useState<SymbolSortConfig>({ column: 'created_at', direction: 'DESC' });
+  const [selectedSymbol, setSelectedSymbol] = useState<PaginatedSymbol | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  const fetchSymbols = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('symbols')
-        .select('*')
-        .order('name');
+  const { data: symbolsData, isLoading } = useAdminSymbols(currentPage, pageSize, filters, sort);
+  const { data: stats } = useSymbolStats();
+  const { data: availableFilters } = useSymbolFilters();
+  const deleteSymbols = useDeleteSymbols();
 
-      if (error) throw error;
-      
-      const typedData: SymbolData[] = data.map(symbol => ({
-        ...symbol,
-        translations: symbol.translations as SymbolData['translations']
-      }));
-      
-      setSymbols(typedData);
-    } catch (error: any) {
-      console.error('Error fetching symbols:', error);
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de charger les symboles',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
-  const handleSelectSymbol = (symbol: SymbolData) => {
+  const handleFiltersChange = (newFilters: SymbolFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const handleSortChange = (newSort: SymbolSortConfig) => {
+    setSort(newSort);
+    setCurrentPage(1); // Reset to first page when sort changes
+  };
+
+  const handleSymbolEdit = (symbol: PaginatedSymbol) => {
     setSelectedSymbol(symbol);
-    setFormData({
-      name: symbol.name,
-      culture: symbol.culture,
-      period: symbol.period,
-      description: symbol.description || '',
-    });
-    setIsEditing(true);
+    setIsEditModalOpen(true);
   };
 
-  const handleCreateNew = () => {
-    setSelectedSymbol(null);
-    setFormData({
-      name: '',
-      culture: '',
-      period: '',
-      description: '',
-    });
-    setIsEditing(true);
+  const handleSymbolView = (symbol: PaginatedSymbol) => {
+    setSelectedSymbol(symbol);
+    setIsViewModalOpen(true);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (selectedSymbol) {
-        const { error } = await supabase
-          .from('symbols')
-          .update({
-            name: formData.name,
-            culture: formData.culture,
-            period: formData.period,
-            description: formData.description || null,
-          })
-          .eq('id', selectedSymbol.id);
-
-        if (error) throw error;
-
-        toast({
-          title: 'Succès',
-          description: 'Symbole mis à jour avec succès',
-        });
-      } else {
-        const { error } = await supabase.from('symbols').insert([
-          {
-            name: formData.name,
-            culture: formData.culture,
-            period: formData.period,
-            description: formData.description || null,
-          },
-        ]);
-
-        if (error) throw error;
-
-        toast({
-          title: 'Succès',
-          description: 'Symbole créé avec succès',
-        });
-      }
-
-      fetchSymbols();
-      setIsEditing(false);
-    } catch (error: any) {
-      console.error('Error saving symbol:', error);
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Une erreur est survenue',
-        variant: 'destructive',
-      });
+  const handleSymbolsDelete = async (symbolIds: string[]) => {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer ${symbolIds.length} symbole(s) ? Cette action est irréversible.`)) {
+      await deleteSymbols.mutateAsync(symbolIds);
     }
-  };
-
-  const handleDelete = async () => {
-    if (!selectedSymbol) return;
-
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce symbole ?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('symbols')
-        .delete()
-        .eq('id', selectedSymbol.id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Succès',
-        description: 'Symbole supprimé avec succès',
-      });
-
-      fetchSymbols();
-      setIsEditing(false);
-      setSelectedSymbol(null);
-    } catch (error: any) {
-      console.error('Error deleting symbol:', error);
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Une erreur est survenue',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    if (selectedSymbol) {
-      setFormData({
-        name: selectedSymbol.name,
-        culture: selectedSymbol.culture,
-        period: selectedSymbol.period,
-        description: selectedSymbol.description || '',
-      });
-    }
-  };
-
-  const handleEditImages = (symbolId: string) => {
-    navigate(`/admin/symbols/${symbolId}/edit`);
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-medium text-slate-800">Gestion des Symboles</h2>
-        <div className="flex gap-2">
-          {/* Lien vers MCP Generator */}
-          <Link 
-            to="/admin/symbol-generator"
-            className="inline-flex items-center px-3 py-2 bg-amber-100 text-amber-800 rounded hover:bg-amber-200 transition"
-            title="Générateur MCP IA"
-          >
-            <Sparkle className="w-4 h-4 mr-1" />
-            Générateur IA
-          </Link>
-          <Button onClick={handleCreateNew}>Nouveau symbole</Button>
-        </div>
+    <div className="space-y-6">
+      {/* En-tête */}
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Gestion des Symboles</h1>
+        <p className="text-muted-foreground">
+          Interface optimisée pour gérer des milliers de symboles avec recherche, filtres et pagination avancée.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1">
+      {/* Statistiques */}
+      {stats && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
           <Card>
-            <div className="p-4">
-              <h3 className="text-lg font-medium mb-3">Liste des symboles</h3>
-              {loading ? (
-                <div className="flex justify-center p-4">
-                  <div className="w-8 h-8 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin"></div>
-                </div>
-              ) : (
-                <div className="space-y-1 max-h-[500px] overflow-y-auto pr-2">
-                  {symbols.map((symbol) => (
-                    <div 
-                      key={symbol.id} 
-                      className="flex items-center justify-between"
-                    >
-                      <button
-                        onClick={() => handleSelectSymbol(symbol)}
-                        className={`flex-1 text-left px-3 py-2 rounded-md transition ${
-                          selectedSymbol?.id === symbol.id
-                            ? 'bg-amber-100 text-amber-800 font-medium'
-                            : 'hover:bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        <div className="text-sm">{symbol.name}</div>
-                        <div className="text-xs text-slate-500">{symbol.culture}</div>
-                      </button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditImages(symbol.id);
-                        }}
-                        title="Modifier les images"
-                        className="mr-1"
-                      >
-                        <ImageIcon className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  
-                  {symbols.length === 0 && (
-                    <p className="text-center text-slate-500 py-4">Aucun symbole trouvé</p>
-                  )}
-                </div>
-              )}
-            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Symboles</CardTitle>
+              <Database className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total_symbols.toLocaleString()}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Cultures</CardTitle>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.cultures_count}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Périodes</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.periods_count}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Vérifiés</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.verified_symbols}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.total_symbols > 0 ? ((stats.verified_symbols / stats.total_symbols) * 100).toFixed(1) : '0'}%
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Avec Images</CardTitle>
+              <Image className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.symbols_with_images}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.total_symbols > 0 ? ((stats.symbols_with_images / stats.total_symbols) * 100).toFixed(1) : '0'}%
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Cette semaine</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.recent_symbols_count}</div>
+              <Badge variant="secondary" className="text-xs">
+                7 derniers jours
+              </Badge>
+            </CardContent>
           </Card>
         </div>
+      )}
 
-        <div className="md:col-span-2">
-          <Card>
-            <div className="p-6">
-              <h3 className="text-lg font-medium mb-4">
-                {isEditing
-                  ? selectedSymbol
-                    ? 'Modifier le symbole'
-                    : 'Nouveau symbole'
-                  : 'Sélectionnez un symbole ou créez-en un nouveau'}
-              </h3>
+      {/* Table principale */}
+      <SymbolsDataTable
+        data={symbolsData?.data || []}
+        totalCount={symbolsData?.totalCount || 0}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        filters={filters}
+        sort={sort}
+        availableFilters={availableFilters || { cultures: [], periods: [] }}
+        isLoading={isLoading}
+        onPageChange={handlePageChange}
+        onFiltersChange={handleFiltersChange}
+        onSortChange={handleSortChange}
+        onSymbolEdit={handleSymbolEdit}
+        onSymbolView={handleSymbolView}
+        onSymbolsDelete={handleSymbolsDelete}
+      />
 
-              {isEditing ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Nom</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+      {/* Modales */}
+      <SymbolEditModal
+        symbol={selectedSymbol}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedSymbol(null);
+        }}
+      />
 
-                  <div>
-                    <Label htmlFor="culture">Culture</Label>
-                    <Input
-                      id="culture"
-                      name="culture"
-                      value={formData.culture}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="period">Période</Label>
-                    <Input
-                      id="period"
-                      name="period"
-                      value={formData.period}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      rows={4}
-                      className="flex h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    />
-                  </div>
-
-                  <div className="flex gap-2 justify-end">
-                    {selectedSymbol && (
-                      <>
-                        <Button
-                          type="button"
-                          onClick={() => handleEditImages(selectedSymbol.id)}
-                          variant="outline"
-                          className="gap-2"
-                        >
-                          <ImageIcon className="h-4 w-4" />
-                          Gérer les images
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleDelete}
-                          variant="destructive"
-                        >
-                          Supprimer
-                        </Button>
-                      </>
-                    )}
-                    <Button type="button" variant="outline" onClick={handleCancel}>
-                      Annuler
-                    </Button>
-                    <Button type="submit">Enregistrer</Button>
-                  </div>
-                </form>
-              ) : (
-                <p className="text-slate-500 text-center py-8">
-                  Sélectionnez un symbole dans la liste ou créez-en un nouveau
-                </p>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
+      <SymbolViewModal
+        symbol={selectedSymbol}
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedSymbol(null);
+        }}
+      />
     </div>
   );
-};
-
-export default SymbolsManagement;
+}

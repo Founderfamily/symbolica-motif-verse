@@ -34,7 +34,6 @@ import Dashboard from '@/pages/Admin/Dashboard';
 import UsersManagement from '@/pages/Admin/UsersManagement';
 import ContributionsManagement from '@/pages/Admin/ContributionsManagement';
 import SymbolsManagement from '@/pages/Admin/SymbolsManagement';
-import NewSymbolsManagement from '@/pages/Admin/NewSymbolsManagement';
 import CollectionsManagement from '@/pages/Admin/CollectionsManagement';
 import SystemSettings from '@/pages/Admin/SystemSettings';
 import ContentManagement from '@/pages/Admin/ContentManagement';
@@ -119,7 +118,6 @@ function App() {
                   <Route path="/admin/contributions" element={<ContributionsManagement />} />
                   <Route path="/admin/contributions/moderation" element={<ContributionsModerationPage />} />
                   <Route path="/admin/symbols" element={<SymbolsManagement />} />
-                  <Route path="/admin/symbols-new" element={<NewSymbolsManagement />} />
                   <Route path="/admin/collections" element={<CollectionsManagement />} />
                   <Route path="/admin/content" element={<ContentManagement />} />
                   <Route path="/admin/analysis-examples" element={<AnalysisExamplesManagement />} />
