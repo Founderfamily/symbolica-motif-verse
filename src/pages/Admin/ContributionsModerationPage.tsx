@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
@@ -6,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Clock, AlertTriangle, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, AlertTriangle, Eye, History } from 'lucide-react';
 import { contributionModerationService, ContributionForModeration } from '@/services/admin/contributionModerationService';
 import { useToast } from '@/hooks/use-toast';
+import ContributionDetail from '@/components/admin/ContributionDetail';
+import ContributionLogs from '@/components/admin/ContributionLogs';
 
 const ContributionsModerationPage: React.FC = () => {
   const { user, isAdmin } = useAuth();
@@ -16,6 +17,8 @@ const ContributionsModerationPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("pending");
   const [contributions, setContributions] = useState<ContributionForModeration[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedContribution, setSelectedContribution] = useState<ContributionForModeration | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
   if (!user || !isAdmin) {
     return <Navigate to="/auth" replace />;
@@ -32,6 +35,9 @@ const ContributionsModerationPage: React.FC = () => {
       
       if (activeTab === 'pending') {
         data = await contributionModerationService.getPendingContributions();
+      } else if (activeTab === 'logs') {
+        // Don't load contributions for logs tab
+        return;
       } else {
         data = await contributionModerationService.getAllContributions(activeTab);
       }
@@ -52,9 +58,13 @@ const ContributionsModerationPage: React.FC = () => {
   const handleModeration = async (contributionId: string, status: 'approved' | 'rejected') => {
     try {
       await contributionModerationService.moderateContribution(contributionId, status);
+      
+      const contribution = contributions.find(c => c.id === contributionId);
+      const actionText = status === 'approved' ? 'approuvée et convertie en symbole' : 'rejetée';
+      
       toast({
         title: "Succès",
-        description: `Contribution ${status === 'approved' ? 'approuvée' : 'rejetée'} avec succès`,
+        description: `Contribution "${contribution?.title}" ${actionText} avec succès`,
       });
       loadContributions();
     } catch (error) {
@@ -68,7 +78,8 @@ const ContributionsModerationPage: React.FC = () => {
   };
 
   const handleDelete = async (contributionId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette contribution ?')) {
+    const contribution = contributions.find(c => c.id === contributionId);
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer la contribution "${contribution?.title}" ?`)) {
       return;
     }
     
@@ -76,7 +87,7 @@ const ContributionsModerationPage: React.FC = () => {
       await contributionModerationService.deleteContribution(contributionId);
       toast({
         title: "Succès",
-        description: "Contribution supprimée avec succès",
+        description: `Contribution "${contribution?.title}" supprimée avec succès`,
       });
       loadContributions();
     } catch (error) {
@@ -87,6 +98,11 @@ const ContributionsModerationPage: React.FC = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleViewDetail = (contribution: ContributionForModeration) => {
+    setSelectedContribution(contribution);
+    setDetailDialogOpen(true);
   };
 
   const getStatusIcon = (status: string) => {
@@ -154,7 +170,11 @@ const ContributionsModerationPage: React.FC = () => {
             </Button>
           </>
         )}
-        <Button size="sm" variant="outline">
+        <Button 
+          size="sm" 
+          variant="outline"
+          onClick={() => handleViewDetail(contribution)}
+        >
           <Eye className="h-4 w-4 mr-1" />
           Voir détails
         </Button>
@@ -199,12 +219,16 @@ const ContributionsModerationPage: React.FC = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="pending">
               En attente {pendingCount > 0 && `(${pendingCount})`}
             </TabsTrigger>
             <TabsTrigger value="approved">Approuvées</TabsTrigger>
             <TabsTrigger value="rejected">Rejetées</TabsTrigger>
+            <TabsTrigger value="logs">
+              <History className="h-4 w-4 mr-2" />
+              Historique
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending" className="space-y-4">
@@ -290,8 +314,18 @@ const ContributionsModerationPage: React.FC = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="logs">
+            <ContributionLogs />
+          </TabsContent>
         </Tabs>
       </div>
+
+      <ContributionDetail
+        contribution={selectedContribution}
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+      />
     </div>
   );
 };
