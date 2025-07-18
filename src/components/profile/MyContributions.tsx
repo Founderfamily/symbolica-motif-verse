@@ -16,7 +16,7 @@ interface MyContributionsProps {
 }
 
 const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
-  const [contributions, setContributions] = useState<UserContribution[]>([]);
+  const [contributions, setContributions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -66,7 +66,7 @@ const MyContributions: React.FC<MyContributionsProps> = ({ userId }) => {
     }
   };
 
-  const getStatusDescription = (contribution: UserContribution) => {
+  const getStatusDescription = (contribution: any) => {
     if (contribution.status === 'approved') {
       return 'Votre symbole a été approuvé et ajouté à la collection.';
     }

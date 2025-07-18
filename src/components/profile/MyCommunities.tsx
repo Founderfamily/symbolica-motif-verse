@@ -10,30 +10,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-interface GroupMembership {
-  id: string;
-  role: string;
-  joined_at: string;
-  interest_groups: {
-    id: string;
-    name: string;
-    description: string;
-    slug: string;
-    is_public: boolean;
-    members_count: number;
-    discoveries_count: number;
-    created_at: string;
-    icon?: string;
-    theme_color?: string;
-  };
-}
+import { CommunityMembership } from '@/types/contributions';
 
 interface MyCommunitiesProps {
   userId?: string;
 }
 
 const MyCommunities: React.FC<MyCommunitiesProps> = ({ userId }) => {
-  const [memberships, setMemberships] = useState<GroupMembership[]>([]);
+  const [memberships, setMemberships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 

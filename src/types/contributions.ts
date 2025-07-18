@@ -80,7 +80,67 @@ export interface CompleteContribution extends Omit<UserContribution, 'tags'> {
     username: string;
     full_name: string;
   };
-  profiles?: any; // Pour la compatibilité avec les résultats de Supabase
+  profiles?: {
+    username: string;
+    full_name: string;
+  };
+}
+
+// Additional types for profile components
+export interface Report {
+  id: string;
+  source_id: string;
+  user_id: string;
+  category_id: string;
+  reason: string;
+  evidence_url?: string;
+  status: string;
+  resolution_notes?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  created_at: string;
+  profiles?: {
+    username: string;
+    full_name: string;
+  };
+  user_contributions?: {
+    title: string;
+    status: string;
+  };
+}
+
+export interface ProfileNotification {
+  id: string;
+  user_id: string;
+  group_id?: string;
+  notification_type: string;
+  entity_id?: string;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+  created_by?: string;
+  profiles?: {
+    username: string;
+    full_name: string;
+  };
+}
+
+export interface CommunityMembership {
+  id: string;
+  group_id: string;
+  user_id: string;
+  role: string;
+  joined_at: string;
+  interest_groups: {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    icon?: string;
+    members_count: number;
+    is_public: boolean;
+  };
 }
 
 // Type pour le formulaire de création de contribution

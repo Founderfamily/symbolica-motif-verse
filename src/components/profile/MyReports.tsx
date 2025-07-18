@@ -10,35 +10,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-interface Report {
-  id: string;
-  source_id: string;
-  user_id: string;
-  category_id: string;
-  reason: string;
-  evidence_url?: string;
-  status: string;
-  resolution_notes?: string;
-  reviewed_by?: string;
-  reviewed_at?: string;
-  created_at: string;
-  // Relations
-  profiles?: {
-    username: string;
-    full_name: string;
-  };
-  user_contributions?: {
-    title: string;
-    status: string;
-  };
-}
+import { Report } from '@/types/contributions';
 
 interface MyReportsProps {
   userId?: string;
 }
 
 const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 

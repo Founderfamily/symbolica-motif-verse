@@ -11,22 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-interface Notification {
-  id: string;
-  user_id: string;
-  group_id?: string;
-  notification_type: string;
-  entity_id?: string;
-  title: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-  created_by?: string;
-  profiles?: {
-    username: string;
-    full_name: string;
-  };
-}
+import { ProfileNotification } from '@/types/contributions';
 
 interface DirectMessage {
   id: string;
@@ -46,7 +31,7 @@ interface NotificationsAndMessagesProps {
 }
 
 const NotificationsAndMessages: React.FC<NotificationsAndMessagesProps> = ({ userId }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -67,11 +52,7 @@ const NotificationsAndMessages: React.FC<NotificationsAndMessagesProps> = ({ use
       const { data, error } = await supabase
         .from('group_notifications')
         .select(`
-          *,
-          profiles!group_notifications_created_by_fkey (
-            username,
-            full_name
-          )
+          *
         `)
         .eq('user_id', targetUserId)
         .order('created_at', { ascending: false })
