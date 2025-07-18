@@ -18,6 +18,10 @@ export interface SymbolData {
   historical_context?: string | null;
   related_symbols?: string[] | null;
   tags?: string[] | null;
+  // Champs taxonomiques UNESCO
+  cultural_taxonomy_code?: string | null;
+  temporal_taxonomy_code?: string | null;
+  thematic_taxonomy_codes?: string[] | null;
   sources?: Array<{
     title: string;
     url: string;
