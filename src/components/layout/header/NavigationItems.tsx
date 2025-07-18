@@ -43,13 +43,13 @@ export const NavigationItems = () => {
   ];
 
   return (
-    <div className="hidden md:flex items-center space-x-8">
+    <div className="hidden md:flex items-center space-x-4">
       {allNavigation.map((item) => (
         <Link
           key={item.href}
           to={item.href}
           className={cn(
-            'px-3 py-2 text-sm font-medium transition-colors hover:text-primary relative',
+            'px-2 py-2 text-sm font-medium transition-colors hover:text-primary relative',
             location.pathname === item.href
               ? 'text-primary'
               : 'text-muted-foreground'
@@ -72,7 +72,7 @@ export const NavigationItems = () => {
           <DropdownMenuTrigger asChild>
             <button
               className={cn(
-                'px-3 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
+                'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
                 location.pathname.startsWith('/admin')
                   ? 'text-primary'
                   : 'text-muted-foreground'
