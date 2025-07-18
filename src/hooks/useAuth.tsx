@@ -137,6 +137,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (profileData.bio) {
       sanitizedData.bio = SecurityUtils.validateInput(profileData.bio, 500);
     }
+    if (profileData.location) {
+      sanitizedData.location = SecurityUtils.validateInput(profileData.location, 100);
+    }
+    if (profileData.website) {
+      sanitizedData.website = SecurityUtils.validateInput(profileData.website, 255);
+    }
+    if (profileData.avatar_url !== undefined) {
+      sanitizedData.avatar_url = profileData.avatar_url;
+    }
 
     const { error } = await supabase
       .from('profiles')
