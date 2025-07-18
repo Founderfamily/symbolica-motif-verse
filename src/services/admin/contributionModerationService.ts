@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ContributionForModeration {
@@ -35,7 +34,7 @@ export const contributionModerationService = {
         .from('user_contributions')
         .select(`
           *,
-          user_profile:profiles!user_contributions_user_id_fkey(username, full_name)
+          user_profile:profiles!inner(username, full_name)
         `)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
@@ -61,7 +60,7 @@ export const contributionModerationService = {
         .from('user_contributions')
         .select(`
           *,
-          user_profile:profiles!user_contributions_user_id_fkey(username, full_name)
+          user_profile:profiles!inner(username, full_name)
         `)
         .order('created_at', { ascending: false });
 
