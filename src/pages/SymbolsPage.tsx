@@ -1,16 +1,17 @@
-
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
 import { useAllSymbols, useSearchSymbols } from '@/hooks/useSupabaseSymbols';
 import { Card } from '@/components/ui/card';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, Info } from 'lucide-react';
+import { Search, Filter, Info, Plus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { REGIONS } from '@/utils/regionGrouper';
 import { PERIOD_GROUPS } from '@/utils/periodGrouper';
 import { CULTURE_FAMILIES } from '@/utils/cultureGrouper';
+import { useAuth } from '@/hooks/useAuth';
 
 const SymbolsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,6 +20,7 @@ const SymbolsPage: React.FC = () => {
   const [selectedCultureFamily, setSelectedCultureFamily] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const { user } = useAuth();
 
   // Récupérer tous les symboles ou les résultats de recherche
   const { data: allSymbols, isLoading: allSymbolsLoading } = useAllSymbols();
@@ -48,9 +50,28 @@ const SymbolsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            <I18nText translationKey="symbols.title">Explorez les Symboles</I18nText>
-          </h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-4xl font-bold text-slate-900">
+              <I18nText translationKey="symbols.title">Explorez les Symboles</I18nText>
+            </h1>
+            {user && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white">
+                      <Link to="/propose-symbol" className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        <I18nText translationKey="symbols.propose">Proposer un symbole</I18nText>
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Contribuez à enrichir notre base de données en proposant un nouveau symbole</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
           <p className="text-slate-600 text-lg">
             <I18nText translationKey="symbols.subtitle">
               Découvrez la richesse des symboles à travers les cultures et les époques
