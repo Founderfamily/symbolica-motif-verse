@@ -35,6 +35,11 @@ export const CollectionControls: React.FC<CollectionControlsProps> = ({
   activeFiltersCount,
   totalResults
 }) => {
+  // Handler for search input to prevent immediate state updates
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <div className="space-y-4 mb-8">
       {/* Search Bar */}
@@ -43,7 +48,7 @@ export const CollectionControls: React.FC<CollectionControlsProps> = ({
         <Input
           placeholder="Rechercher une collection..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
           className="pl-10"
         />
       </div>

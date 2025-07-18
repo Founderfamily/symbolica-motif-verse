@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../../hooks/useCollections';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -18,7 +18,7 @@ const CollectionsLoadingSkeleton: React.FC = React.memo(() => {
     <div className="space-y-8">
       <Skeleton className="h-12 w-full" />
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <div key={i} className="space-y-3">
             <Skeleton className="h-48 w-full rounded-lg" />
             <Skeleton className="h-4 w-3/4" />
@@ -54,10 +54,16 @@ CollectionsErrorState.displayName = 'CollectionsErrorState';
 // Main component
 const CollectionCategories: React.FC = () => {
   const { currentLanguage } = useTranslation();
-  const { data: collections = [], isLoading, error, refetch } = useCollections();
+  const { data: collectionsData = [], isLoading, error, refetch } = useCollections();
   const { getTranslation } = useCollectionTranslations();
 
-  console.log('📚 [CollectionCategories] Collections reçues:', collections?.length || 0);
+  // Log received collections for debugging
+  console.log('📚 [CollectionCategories] Collections received:', collectionsData?.length || 0);
+  
+  // Ensure we have a valid array of collections
+  const collections = React.useMemo(() => {
+    return Array.isArray(collectionsData) ? collectionsData : [];
+  }, [collectionsData]);
 
   // Function to get title from collection
   const getCollectionTitle = React.useCallback((collection: any) => {
@@ -69,7 +75,7 @@ const CollectionCategories: React.FC = () => {
     return getTranslation(collection, 'description');
   }, [getTranslation]);
 
-  // Use filters hook with direct collections
+  // Use filters hook with the collections
   const {
     sortBy,
     setSortBy,
@@ -82,19 +88,33 @@ const CollectionCategories: React.FC = () => {
     filteredAndSortedCollections,
     resetFilters,
     activeFiltersCount
-  } = useCollectionFilters({ collections: collections || [] });
+  } = useCollectionFilters({ collections });
 
   // Loading state
   if (isLoading) {
-    console.log('⏳ [CollectionCategories] Affichage état de chargement');
+    console.log('⏳ [CollectionCategories] Displaying loading state');
     return <CollectionsLoadingSkeleton />;
   }
 
   // Error state
   if (error) {
-    console.error('❌ [CollectionCategories] Affichage état d\'erreur:', error);
+    console.error('❌ [CollectionCategories] Displaying error state:', error);
     return <CollectionsErrorState error={error} retry={() => refetch()} />;
   }
+
+  // Empty state check
+  if (!collections || collections.length === 0) {
+    console.log('🔍 [CollectionCategories] No collections available');
+    return (
+      <div className="text-center py-12">
+        <div className="text-slate-600 text-lg mb-4">
+          <I18nText translationKey="collections.noCollections">Aucune collection disponible</I18nText>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('🎯 [CollectionCategories] Displaying', filteredAndSortedCollections.length, 'filtered collections');
 
   return (
     <div className="space-y-8">
@@ -113,7 +133,7 @@ const CollectionCategories: React.FC = () => {
         totalResults={filteredAndSortedCollections.length}
       />
 
-      {/* Collections Grid - Affichage direct de toutes les collections */}
+      {/* Collections Grid - Direct display of all collections */}
       <FilteredCollectionGrid
         collections={filteredAndSortedCollections}
         getCollectionTitle={getCollectionTitle}
