@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from '@/i18n/useTranslation';
-import { createContribution } from '@/services/contributionService';
+import { createContribution, getContributionById, getUserContributions } from '@/services/contributionService';
 import { ContributionFormData } from '@/types/contributions';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,8 +20,14 @@ const NewContribution = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Detect if we're in edit mode
+  const editId = searchParams.get('edit');
+  const isEditMode = !!editId;
 
   const formSchema = z.object({
     title: z.string().min(5, t('contributions:form.validation.minLength', { count: 5 })),
@@ -50,19 +56,70 @@ const NewContribution = () => {
     },
   });
 
+  // Load contribution data if in edit mode
+  useEffect(() => {
+    const loadContributionForEdit = async () => {
+      if (!isEditMode || !editId || !user) return;
+
+      setLoading(true);
+      try {
+        // Get user's contributions to find the one being edited
+        const userContributions = await getUserContributions(user.id);
+        const contribution = userContributions.find(c => c.id === editId);
+
+        if (contribution && contribution.status === 'pending') {
+          // Pre-fill the form with existing data
+          form.setValue('title', contribution.title);
+          form.setValue('description', contribution.description || '');
+          form.setValue('location_name', contribution.location_name || '');
+          form.setValue('cultural_context', contribution.cultural_context || '');
+          form.setValue('period', contribution.period || '');
+          form.setValue('latitude', contribution.latitude);
+          form.setValue('longitude', contribution.longitude);
+          
+          // Set tags from contribution_tags
+          if (contribution.tags && contribution.tags.length > 0) {
+            const tagNames = contribution.tags.map(tag => tag.tag);
+            form.setValue('tags', tagNames);
+          }
+        } else {
+          // Invalid contribution or not editable
+          navigate('/profile?tab=contributions');
+        }
+      } catch (error) {
+        console.error('Error loading contribution for edit:', error);
+        navigate('/profile?tab=contributions');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadContributionForEdit();
+  }, [isEditMode, editId, user, form, navigate]);
+
   const onSubmit = async (data: ContributionFormData) => {
     if (!user) {
       navigate('/auth');
       return;
     }
     
-    if (!selectedImage) {
+    if (!selectedImage && !isEditMode) {
       form.setError('root', { message: t('contributions:form.validation.imageRequired') });
       return;
     }
 
     setSubmitting(true);
-    const contributionId = await createContribution(user.id, data, selectedImage);
+    
+    if (isEditMode) {
+      // TODO: Implement update contribution functionality
+      // For now, we'll just redirect back to contributions
+      console.log('Edit mode - would update contribution with:', data);
+      setSubmitting(false);
+      navigate('/profile?tab=contributions');
+      return;
+    }
+
+    const contributionId = await createContribution(user.id, data, selectedImage!);
     setSubmitting(false);
     
     if (contributionId) {
@@ -76,6 +133,14 @@ const NewContribution = () => {
     form.setValue('location_name', name);
   };
 
+  const handleCancel = () => {
+    if (isEditMode) {
+      navigate('/profile?tab=contributions');
+    } else {
+      navigate('/contributions');
+    }
+  };
+
   if (!user) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -85,11 +150,27 @@ const NewContribution = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="animate-pulse">
+          <div className="h-8 bg-slate-200 rounded w-1/3 mb-6"></div>
+          <div className="h-64 bg-slate-200 rounded-lg mb-6"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('contributions:form.title')}</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-2">
+        {isEditMode ? 'Modifier la contribution' : t('contributions:form.title')}
+      </h1>
       <p className="text-muted-foreground mb-6">
-        {t('contributions:form.subtitle')}
+        {isEditMode 
+          ? 'Modifiez les informations de votre contribution ci-dessous.'
+          : t('contributions:form.subtitle')
+        }
       </p>
 
       <Form {...form}>
@@ -113,6 +194,7 @@ const NewContribution = () => {
                 selectedImage={selectedImage}
                 onImageSelected={setSelectedImage}
                 formErrors={form.formState.errors}
+                isEditMode={isEditMode}
               />
               <LocationSection
                 control={form.control}
@@ -126,12 +208,15 @@ const NewContribution = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate('/contributions')}
+              onClick={handleCancel}
             >
-              {t('contributions:form.buttons.cancel')}
+              Annuler
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? t('contributions:form.buttons.submitting') : t('contributions:form.buttons.submit')}
+              {submitting 
+                ? (isEditMode ? 'Modification...' : t('contributions:form.buttons.submitting'))
+                : (isEditMode ? 'Modifier' : t('contributions:form.buttons.submit'))
+              }
             </Button>
           </div>
         </form>
