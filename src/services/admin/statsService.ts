@@ -17,6 +17,7 @@ export interface AdminStats {
   totalSymbols: number;
   verifiedSymbols: number;
   totalSymbolLocations: number;
+  verifiedSymbolLocations: number;
   topContributors: Array<{
     userId: string;
     username: string;
@@ -69,19 +70,24 @@ export const adminStatsService = {
       
       if (contributionError) throw contributionError;
 
-      // Récupérer les statistiques des symboles
-      const { data: symbolsData, error: symbolsError } = await supabase
+      // Récupérer le nombre total de symboles
+      const { count: symbolsCount, error: symbolsError } = await supabase
         .from('symbols')
-        .select('id');
+        .select('*', { count: 'exact', head: true });
       
       if (symbolsError) throw symbolsError;
 
-      // Récupérer les statistiques des emplacements de symboles
+      // Récupérer les emplacements de symboles avec statut de vérification
       const { data: symbolLocationsData, error: symbolLocationsError } = await supabase
         .from('symbol_locations')
-        .select('id, is_verified');
+        .select('id, is_verified, verification_status');
       
       if (symbolLocationsError) throw symbolLocationsError;
+
+      // Calculer les emplacements vérifiés (is_verified = true OU verification_status = 'verified')
+      const verifiedLocations = symbolLocationsData?.filter(
+        location => location.is_verified === true || location.verification_status === 'verified'
+      ).length || 0;
 
       // Récupérer les top contributeurs
       const { data: topContributorsData, error: topContributorsError } = await supabase
@@ -89,16 +95,19 @@ export const adminStatsService = {
       
       if (topContributorsError) throw topContributorsError;
 
-      // Récupérer les contributions au fil du temps (30 derniers jours)
+      // Récupérer les contributions des 30 derniers jours pour le graphique
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
       const { data: contributionsOverTimeData, error: contributionsOverTimeError } = await supabase
         .from('user_contributions')
         .select('created_at')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: true });
       
       if (contributionsOverTimeError) throw contributionsOverTimeError;
 
-      // Traiter les données des contributions au fil du temps
+      // Grouper les contributions par date
       const contributionsOverTime = contributionsOverTimeData?.reduce((acc: any[], contribution) => {
         const date = new Date(contribution.created_at).toISOString().split('T')[0];
         const existing = acc.find(item => item.date === date);
@@ -128,8 +137,6 @@ export const adminStatsService = {
         contributions_week: 0
       };
 
-      const verifiedSymbols = symbolLocationsData?.filter(location => location.is_verified).length || 0;
-
       return {
         totalUsers: Number(userStatsRow.total_users),
         activeUsersLast30Days: Number(userStatsRow.active_users_30d),
@@ -143,13 +150,14 @@ export const adminStatsService = {
         rejectedContributions: Number(contributionStatsRow.rejected_contributions),
         contributionsToday: Number(contributionStatsRow.contributions_today),
         contributionsWeek: Number(contributionStatsRow.contributions_week),
-        totalSymbols: symbolsData?.length || 0,
-        verifiedSymbols,
+        totalSymbols: symbolsCount || 0,
+        verifiedSymbols: symbolsCount || 0, // Tous les symboles dans la DB sont considérés comme vérifiés
         totalSymbolLocations: symbolLocationsData?.length || 0,
+        verifiedSymbolLocations: verifiedLocations,
         topContributors: (topContributorsData || []).map((contributor: any) => ({
           userId: contributor.user_id,
-          username: contributor.username || 'Unknown',
-          fullName: contributor.full_name || contributor.username || 'Unknown',
+          username: contributor.username || 'Utilisateur inconnu',
+          fullName: contributor.full_name || contributor.username || 'Utilisateur inconnu',
           contributionsCount: Number(contributor.contributions_count),
           pointsTotal: Number(contributor.total_points)
         })),
@@ -161,9 +169,6 @@ export const adminStatsService = {
     }
   },
 
-  /**
-   * Récupère les statistiques spécifiques aux utilisateurs
-   */
   getUserStats: async (): Promise<UserManagementStats> => {
     try {
       const { data, error } = await supabase.rpc('get_user_management_stats');
@@ -182,9 +187,6 @@ export const adminStatsService = {
     }
   },
 
-  /**
-   * Récupère les statistiques spécifiques aux contributions
-   */
   getContributionStats: async (): Promise<ContributionManagementStats> => {
     try {
       const { data, error } = await supabase.rpc('get_contribution_management_stats');

@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { I18nText } from '@/components/ui/i18n-text';
-import { Users, CheckCircle, Clock, Settings, Crown, AlertTriangle } from 'lucide-react';
+import { Users, Clock, AlertTriangle, Bookmark, Settings, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AdminStats } from '@/services/admin/statsService';
 
@@ -17,7 +16,8 @@ const QuickActionCard = ({
   title, 
   description, 
   loading, 
-  color 
+  color,
+  badge 
 }: { 
   to: string; 
   icon: React.ElementType; 
@@ -25,20 +25,21 @@ const QuickActionCard = ({
   description: string; 
   loading: boolean;
   color: string;
+  badge?: { text: string; color: string };
 }) => (
   <Link to={to}>
-    <Card className="hover:shadow-md transition-all duration-200 cursor-pointer group">
+    <Card className="hover:shadow-md transition-all duration-200 cursor-pointer group relative">
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div className={`p-2 ${color} rounded-lg group-hover:bg-opacity-80 transition-colors`}>
             <Icon className={`h-5 w-5 ${color.includes('blue') ? 'text-blue-600' : 
               color.includes('amber') ? 'text-amber-600' : 
+              color.includes('red') ? 'text-red-600' : 
               color.includes('purple') ? 'text-purple-600' : 
               color.includes('green') ? 'text-green-600' : 
-              color.includes('orange') ? 'text-orange-600' : 
-              color.includes('red') ? 'text-red-600' : 'text-green-600'}`} />
+              color.includes('orange') ? 'text-orange-600' : 'text-green-600'}`} />
           </div>
-          <div>
+          <div className="flex-1">
             <p className="font-medium">{title}</p>
             <p className="text-sm text-muted-foreground">
               {loading ? (
@@ -48,6 +49,11 @@ const QuickActionCard = ({
               )}
             </p>
           </div>
+          {badge && (
+            <span className={`px-2 py-1 text-xs rounded-full text-white ${badge.color} absolute -top-1 -right-1`}>
+              {badge.text}
+            </span>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -67,18 +73,19 @@ export default function AdminQuickActions({ stats, loading }: AdminQuickActionsP
       />
 
       <QuickActionCard
-        to="/admin/contributions"
+        to="/admin/contributions/moderation"
         icon={Clock}
-        title="Contributions"
+        title="Modération"
         description={`${stats?.pendingContributions || 0} en attente`}
         loading={loading}
         color="bg-amber-100"
+        badge={stats?.pendingContributions ? { text: stats.pendingContributions.toString(), color: "bg-amber-500" } : undefined}
       />
 
       <QuickActionCard
         to="/admin/contributions/moderation"
         icon={AlertTriangle}
-        title="Modération"
+        title="Signalements"
         description="Gérer les signalements"
         loading={loading}
         color="bg-red-100"
@@ -86,7 +93,7 @@ export default function AdminQuickActions({ stats, loading }: AdminQuickActionsP
 
       <QuickActionCard
         to="/admin/symbols"
-        icon={CheckCircle}
+        icon={Bookmark}
         title="Symboles"
         description={`${stats?.totalSymbols || 0} symboles`}
         loading={loading}
@@ -106,7 +113,7 @@ export default function AdminQuickActions({ stats, loading }: AdminQuickActionsP
         to="/admin/master-explorer"
         icon={Crown}
         title="Master Explorer"
-        description="Enrichissement des quêtes"
+        description="Gestion des quêtes"
         loading={loading}
         color="bg-orange-100"
       />

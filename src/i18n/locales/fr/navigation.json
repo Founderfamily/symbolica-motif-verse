@@ -5,10 +5,7 @@
   "collections": "Collections",
   "quests": "Quêtes",
   "community": "Communauté",
+  "contribute": "Contribuer",
   "about": "À propos",
-  "search": "Recherche",
-  "profile": "Profil",
-  "admin": "Administration",
-  "login": "Connexion",
-  "logout": "Déconnexion"
+  "navigation.admin": "Administration"
 }
