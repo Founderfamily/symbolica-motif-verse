@@ -1,36 +1,37 @@
 
 import { useState, useMemo } from 'react';
 import { CollectionWithTranslations } from '../types/collections';
-import { useStandardizedFilters } from './useStandardizedFilters';
 
 export type SortOption = 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc' | 'featured-first';
-export type FilterCategory = 'all' | 'cultures' | 'periods' | 'sciences' | 'others';
+export type FilterCategory = 'all' | 'ancient' | 'asian' | 'european' | 'middle-eastern' | 'others';
 export type FilterStatus = 'all' | 'featured' | 'regular';
 
 interface UseCollectionFiltersProps {
-  collections: any[]; // Union type from CollectionCategories
+  collections: CollectionWithTranslations[];
 }
 
 export const useCollectionFilters = ({ collections }: UseCollectionFiltersProps) => {
-  // Utilisation des nouveaux filtres standardisés
-  const standardizedFilters = useStandardizedFilters(collections);
-  
   const [sortBy, setSortBy] = useState<SortOption>('featured-first');
   const [filterCategory, setFilterCategory] = useState<FilterCategory>('all');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredAndSortedCollections = useMemo(() => {
-    // Utiliser les filtres standardisés comme base
-    let result = standardizedFilters.filteredCollections;
+    console.log('🔍 [useCollectionFilters] Filtrage et tri de', collections?.length || 0, 'collections');
+    
+    if (!collections || collections.length === 0) {
+      return [];
+    }
+
+    let result = [...collections];
 
     // Filter by search query
     if (searchQuery) {
       result = result.filter(collection => {
-        const title = 'title' in collection && typeof collection.title === 'string' 
-          ? collection.title 
-          : collection.collection_translations?.find((t: any) => t.title)?.title || '';
-        return title.toLowerCase().includes(searchQuery.toLowerCase());
+        const title = collection.collection_translations?.find((t: any) => t.title)?.title || '';
+        const slug = collection.slug || '';
+        const searchText = `${title} ${slug}`.toLowerCase();
+        return searchText.includes(searchQuery.toLowerCase());
       });
     }
 
@@ -43,12 +44,13 @@ export const useCollectionFilters = ({ collections }: UseCollectionFiltersProps)
       }
     }
 
-    // Filter by category - centralized mapping
+    // Filter by category based on slug patterns
     if (filterCategory !== 'all') {
       const categoryMapping = {
-        cultures: ['culture', 'mythologie', 'religieux', 'tradition'],
-        periods: ['ancien', 'ere', 'moderne', 'prehistoire', 'antique'],
-        sciences: ['geometrie', 'alchimie', 'esoterisme', 'mathematique', 'physique']
+        ancient: ['egypte', 'grece', 'rome', 'mesopotamie'],
+        asian: ['chine', 'inde', 'japon', 'tibet'],
+        european: ['celtique', 'nordique', 'viking', 'germanique'],
+        'middle-eastern': ['arabe', 'islamique', 'perse', 'ottoman']
       };
       
       const keywords = categoryMapping[filterCategory as keyof typeof categoryMapping] || [];
@@ -62,21 +64,13 @@ export const useCollectionFilters = ({ collections }: UseCollectionFiltersProps)
     result.sort((a, b) => {
       switch (sortBy) {
         case 'name-asc': {
-          const titleA = 'title' in a && typeof a.title === 'string' 
-            ? a.title 
-            : a.collection_translations?.find((t: any) => t.title)?.title || '';
-          const titleB = 'title' in b && typeof b.title === 'string' 
-            ? b.title 
-            : b.collection_translations?.find((t: any) => t.title)?.title || '';
+          const titleA = a.collection_translations?.find((t: any) => t.title)?.title || '';
+          const titleB = b.collection_translations?.find((t: any) => t.title)?.title || '';
           return titleA.localeCompare(titleB);
         }
         case 'name-desc': {
-          const titleA = 'title' in a && typeof a.title === 'string' 
-            ? a.title 
-            : a.collection_translations?.find((t: any) => t.title)?.title || '';
-          const titleB = 'title' in b && typeof b.title === 'string' 
-            ? b.title 
-            : b.collection_translations?.find((t: any) => t.title)?.title || '';
+          const titleA = a.collection_translations?.find((t: any) => t.title)?.title || '';
+          const titleB = b.collection_translations?.find((t: any) => t.title)?.title || '';
           return titleB.localeCompare(titleA);
         }
         case 'date-asc':
@@ -91,8 +85,9 @@ export const useCollectionFilters = ({ collections }: UseCollectionFiltersProps)
       }
     });
 
+    console.log('✅ [useCollectionFilters] Résultat final:', result.length, 'collections');
     return result;
-  }, [standardizedFilters.filteredCollections, sortBy, filterCategory, filterStatus, searchQuery]);
+  }, [collections, sortBy, filterCategory, filterStatus, searchQuery]);
 
   const resetFilters = () => {
     setSortBy('featured-first');
