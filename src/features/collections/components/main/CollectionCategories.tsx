@@ -120,10 +120,9 @@ const CollectionCategories: React.FC = () => {
   const { data: collections = [], isLoading, error, refetch } = useCollections();
   const { getTranslation } = useCollectionTranslations();
 
-  // LOGS DE DEBUG SIMPLIFIÉS
-  // Use database collections if available, otherwise show empty state
-  const hasValidCollections = collections && Array.isArray(collections) && collections.length > 0;
-  const finalCollections: UnifiedCollection[] = hasValidCollections ? collections : [];
+  // Use database collections directly
+  console.log('📚 [CollectionCategories] Collections received:', collections?.length || 0);
+  const finalCollections: UnifiedCollection[] = collections || [];
 
   // Function to get title from any collection type
   const getCollectionTitle = React.useCallback((collection: UnifiedCollection) => {
