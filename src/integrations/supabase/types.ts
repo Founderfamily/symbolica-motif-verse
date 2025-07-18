@@ -3795,6 +3795,27 @@ export type Database = {
           admin_name: string
         }[]
       }
+      get_all_contributions_with_profiles: {
+        Args: { p_status?: string }
+        Returns: {
+          id: string
+          user_id: string
+          status: string
+          title: string
+          description: string
+          location_name: string
+          latitude: number
+          longitude: number
+          cultural_context: string
+          period: string
+          created_at: string
+          updated_at: string
+          reviewed_by: string
+          reviewed_at: string
+          username: string
+          full_name: string
+        }[]
+      }
       get_community_verification_comments: {
         Args: { p_symbol_id: string }
         Returns: {
@@ -3848,6 +3869,27 @@ export type Database = {
           exploration_points: number
           validation_points: number
           community_points: number
+        }[]
+      }
+      get_pending_contributions_with_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_id: string
+          status: string
+          title: string
+          description: string
+          location_name: string
+          latitude: number
+          longitude: number
+          cultural_context: string
+          period: string
+          created_at: string
+          updated_at: string
+          reviewed_by: string
+          reviewed_at: string
+          username: string
+          full_name: string
         }[]
       }
       get_top_contributors: {

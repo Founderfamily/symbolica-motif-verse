@@ -30,20 +30,16 @@ export const contributionModerationService = {
    */
   getPendingContributions: async (): Promise<ContributionForModeration[]> => {
     try {
-      const { data, error } = await supabase
-        .from('user_contributions')
-        .select(`
-          *,
-          user_profile:profiles!inner(username, full_name)
-        `)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.rpc('get_pending_contributions_with_profiles');
 
       if (error) throw error;
       return (data || []).map(item => ({
         ...item,
         status: item.status as 'pending' | 'approved' | 'rejected',
-        user_profile: Array.isArray(item.user_profile) ? item.user_profile[0] : item.user_profile
+        user_profile: {
+          username: item.username,
+          full_name: item.full_name
+        }
       }));
     } catch (error) {
       console.error('Error fetching pending contributions:', error);
@@ -56,24 +52,19 @@ export const contributionModerationService = {
    */
   getAllContributions: async (status?: string): Promise<ContributionForModeration[]> => {
     try {
-      let query = supabase
-        .from('user_contributions')
-        .select(`
-          *,
-          user_profile:profiles!inner(username, full_name)
-        `)
-        .order('created_at', { ascending: false });
+      const statusParam = (status && status !== 'all') ? status : null;
+      const { data, error } = await supabase.rpc('get_all_contributions_with_profiles', {
+        p_status: statusParam
+      });
 
-      if (status && status !== 'all') {
-        query = query.eq('status', status);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
       return (data || []).map(item => ({
         ...item,
         status: item.status as 'pending' | 'approved' | 'rejected',
-        user_profile: Array.isArray(item.user_profile) ? item.user_profile[0] : item.user_profile
+        user_profile: {
+          username: item.username,
+          full_name: item.full_name
+        }
       }));
     } catch (error) {
       console.error('Error fetching contributions:', error);
