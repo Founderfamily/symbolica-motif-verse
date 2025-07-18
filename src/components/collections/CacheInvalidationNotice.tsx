@@ -11,10 +11,12 @@ export const CacheInvalidationNotice: React.FC = () => {
   const { invalidateAll } = useInvalidateCollectionsCache();
 
   useEffect(() => {
-    // Auto-invalidate cache on component mount to show new collections
+    // Auto-invalidate cache immediately to show new collections after restructuring
+    invalidateAll();
+    
     const timer = setTimeout(() => {
       invalidateAll();
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [invalidateAll]);
