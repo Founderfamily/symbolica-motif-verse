@@ -17,6 +17,7 @@ import { SymbolVerificationCommunity } from '@/components/symbols/SymbolVerifica
 import { SymbolVerificationAdmin } from '@/components/admin/SymbolVerificationAdmin';
 import { SourceVoting } from '@/components/symbols/SourceVoting';
 import { CommunityModeration } from '@/components/symbols/CommunityModeration';
+import { TaxonomyDisplay } from '@/components/symbols/TaxonomyDisplay';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -392,9 +393,13 @@ const SymbolDetailPage: React.FC = () => {
           </div>
 
           {activeSection === 'info' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Informations culturelles */}
-              <Card className="p-6">
+            <div className="space-y-6">
+              {/* Classification UNESCO - Nouvelle section */}
+              <TaxonomyDisplay symbol={displaySymbol} />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Informations culturelles */}
+                <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Info className="h-5 w-5 text-amber-600" />
               <h3 className="text-lg font-semibold text-slate-900">

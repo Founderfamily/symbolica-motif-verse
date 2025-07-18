@@ -1,103 +1,265 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { SymbolData, SymbolImage } from '@/types/supabase';
+import { logger } from '@/services/logService';
 
-/**
- * Service unifié pour la gestion des symboles via Supabase
- * Remplace le système statique par des requêtes à la base de données
- */
-class SupabaseSymbolService {
-  /**
-   * Récupère un symbole par son UUID
-   */
-  async getSymbolById(id: string): Promise<SymbolData | null> {
+export class SupabaseSymbolService {
+  private async uploadFile(file: File, storagePath: string): Promise<{ data: { path: string } | null; error: any }> {
     try {
-      const { data, error } = await supabase
-        .from('symbols')
-        .select('*')
-        .eq('id', id)
-        .single();
+      const { data, error } = await supabase.storage
+        .from('symbol-images')
+        .upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (error) {
-        console.error('Erreur lors de la récupération du symbole:', error);
-        return null;
+        logger.error('Error uploading file', { error, storagePath });
+        throw error;
       }
 
-      return data as SymbolData;
+      return { data, error: null };
     } catch (error) {
-      console.error('Erreur dans getSymbolById:', error);
-      return null;
+      logger.error('Error uploading file', { error, storagePath });
+      return { data: null, error };
     }
+  }
+
+  private generateStoragePath(symbolId: string, imageType: string, originalFileName: string): string {
+    const timestamp = Date.now();
+    const fileExtension = originalFileName.split('.').pop();
+    const baseName = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
+    const sanitizedBaseName = baseName.replace(/[^a-zA-Z0-9]/g, '_');
+    return `${symbolId}/${imageType}/${sanitizedBaseName}_${timestamp}.${fileExtension}`;
+  }
+
+  /**
+   * Récupère un symbole par son ID
+   */
+  async getSymbolById(id: string): Promise<SymbolData | null> {
+    const { data, error } = await supabase
+      .from('symbols')
+      .select(`
+        *,
+        cultural_taxonomy_code,
+        temporal_taxonomy_code,
+        thematic_taxonomy_codes
+      `)
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      logger.error('Error fetching symbol by ID', { error, id });
+      throw error;
+    }
+
+    return data;
   }
 
   /**
    * Récupère tous les symboles
    */
   async getAllSymbols(): Promise<SymbolData[]> {
-    try {
-      const { data, error } = await supabase
-        .from('symbols')
-        .select('*')
-        .order('name');
+    const { data, error } = await supabase
+      .from('symbols')
+      .select(`
+        *,
+        cultural_taxonomy_code,
+        temporal_taxonomy_code,
+        thematic_taxonomy_codes
+      `)
+      .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Erreur lors de la récupération des symboles:', error);
-        return [];
-      }
-
-      return data as SymbolData[];
-    } catch (error) {
-      console.error('Erreur dans getAllSymbols:', error);
-      return [];
+    if (error) {
+      logger.error('Error fetching all symbols', { error });
+      throw error;
     }
+
+    return data || [];
   }
 
   /**
    * Récupère les images d'un symbole
    */
-  async getSymbolImages(symbolId: string): Promise<SymbolImage[]> {
-    try {
-      const { data, error } = await supabase
-        .from('symbol_images')
-        .select('*')
-        .eq('symbol_id', symbolId)
-        .order('is_primary', { ascending: false })
-        .order('created_at');
+  async getSymbolImages(symbolId: string): Promise<{ [key: string]: SymbolImage | null }> {
+    const { data, error } = await supabase
+      .from('symbol_images')
+      .select('*')
+      .eq('symbol_id', symbolId);
 
-      if (error) {
-        console.error('Erreur lors de la récupération des images:', error);
-        return [];
-      }
-
-      return data as SymbolImage[];
-    } catch (error) {
-      console.error('Erreur dans getSymbolImages:', error);
-      return [];
+    if (error) {
+      logger.error('Error fetching symbol images', { error, symbolId });
+      return {
+        original: null,
+        pattern: null,
+        reuse: null,
+      };
     }
+
+    const images: { [key: string]: SymbolImage | null } = {
+      original: null,
+      pattern: null,
+      reuse: null,
+    };
+
+    if (data) {
+      data.forEach(image => {
+        if (image.image_type === 'original') {
+          images.original = image;
+        } else if (image.image_type === 'pattern') {
+          images.pattern = image;
+        } else if (image.image_type === 'reuse') {
+          images.reuse = image;
+        }
+      });
+    }
+
+    return images;
   }
 
   /**
-   * Recherche de symboles par nom (pour maintenir la compatibilité)
+   * Ajoute une nouvelle image à un symbole
    */
-  async findSymbolByName(name: string): Promise<SymbolData | null> {
-    try {
-      const { data, error } = await supabase
-        .from('symbols')
-        .select('*')
-        .ilike('name', `%${name}%`)
-        .limit(1)
-        .single();
+  async addSymbolImage(
+    symbolId: string,
+    imageType: 'original' | 'pattern' | 'reuse',
+    file: File,
+    title: string,
+    description: string | null,
+    uploadedBy: string | null,
+    location: string | null,
+    source: string | null,
+    tags: string[] | null,
+    is_primary: boolean | null,
+    translations: any | null
+  ): Promise<SymbolImage | null> {
+    const storagePath = this.generateStoragePath(symbolId, imageType, file.name);
+    const uploadResult = await this.uploadFile(file, storagePath);
 
-      if (error) {
-        console.error('Erreur lors de la recherche par nom:', error);
-        return null;
-      }
-
-      return data as SymbolData;
-    } catch (error) {
-      console.error('Erreur dans findSymbolByName:', error);
-      return null;
+    if (uploadResult.error) {
+      throw uploadResult.error;
     }
+
+    const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/symbol-images/${storagePath}`;
+
+    const { data, error } = await supabase
+      .from('symbol_images')
+      .insert([
+        {
+          symbol_id: symbolId,
+          image_url: imageUrl,
+          image_type: imageType,
+          title: title,
+          description: description,
+          uploaded_by: uploadedBy,
+          location: location,
+          source: source,
+          tags: tags,
+          is_primary: is_primary,
+          translations: translations
+        }
+      ])
+      .select('*')
+      .single();
+
+    if (error) {
+      logger.error('Error adding symbol image', { error, symbolId, imageType, imageUrl });
+      throw error;
+    }
+
+    return data;
+  }
+
+  /**
+   * Met à jour une image de symbole existante
+   */
+  async updateSymbolImage(
+    imageId: string,
+    updates: Partial<SymbolImage>
+  ): Promise<SymbolImage | null> {
+    const { data, error } = await supabase
+      .from('symbol_images')
+      .update(updates)
+      .eq('id', imageId)
+      .select('*')
+      .single();
+
+    if (error) {
+      logger.error('Error updating symbol image', { error, imageId, updates });
+      throw error;
+    }
+
+    return data;
+  }
+
+  /**
+   * Supprime une image de symbole
+   */
+  async deleteSymbolImage(imageId: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('symbol_images')
+      .delete()
+      .eq('id', imageId);
+
+    if (error) {
+      logger.error('Error deleting symbol image', { error, imageId });
+      throw error;
+    }
+
+    return true;
+  }
+
+  /**
+   * Crée un nouveau symbole
+   */
+  async createSymbol(symbolData: Omit<SymbolData, 'id'>): Promise<SymbolData | null> {
+    const { data, error } = await supabase
+      .from('symbols')
+      .insert([symbolData])
+      .select('*')
+      .single();
+
+    if (error) {
+      logger.error('Error creating symbol', { error, symbolData });
+      throw error;
+    }
+
+    return data;
+  }
+
+  /**
+   * Met à jour un symbole existant
+   */
+  async updateSymbol(id: string, updates: Partial<SymbolData>): Promise<SymbolData | null> {
+    const { data, error } = await supabase
+      .from('symbols')
+      .update(updates)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) {
+      logger.error('Error updating symbol', { error, id, updates });
+      throw error;
+    }
+
+    return data;
+  }
+
+  /**
+   * Supprime un symbole
+   */
+  async deleteSymbol(id: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('symbols')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      logger.error('Error deleting symbol', { error, id });
+      throw error;
+    }
+
+    return true;
   }
 
   /**
@@ -110,83 +272,56 @@ class SupabaseSymbolService {
     cultureFamily?: string,
     tags?: string[]
   ): Promise<SymbolData[]> {
-    try {
-      let queryBuilder = supabase.from('symbols').select('*');
+    let queryBuilder = supabase
+      .from('symbols')
+      .select(`
+        *,
+        cultural_taxonomy_code,
+        temporal_taxonomy_code,
+        thematic_taxonomy_codes
+      `);
 
-      if (query) {
-        queryBuilder = queryBuilder.or(
-          `name.ilike.%${query}%,description.ilike.%${query}%`
-        );
-      }
-
-      // Récupérer tous les résultats d'abord
-      const { data, error } = await queryBuilder.order('name');
-
-      if (error) {
-        console.error('Erreur lors de la recherche:', error);
-        return [];
-      }
-
-      let filteredSymbols = data as SymbolData[];
-
-      // Appliquer les filtres côté client pour plus de flexibilité
-      if (region && region !== 'all') {
-        const { filterSymbolsByRegion } = await import('@/utils/regionGrouper');
-        filteredSymbols = filterSymbolsByRegion(filteredSymbols, region) as SymbolData[];
-      }
-
-      if (periodGroup && periodGroup !== 'all') {
-        const { filterSymbolsByPeriodGroup } = await import('@/utils/periodGrouper');
-        filteredSymbols = filterSymbolsByPeriodGroup(filteredSymbols, periodGroup) as SymbolData[];
-      }
-
-      if (cultureFamily && cultureFamily !== 'all') {
-        const { filterSymbolsByCultureFamily } = await import('@/utils/cultureGrouper');
-        filteredSymbols = filterSymbolsByCultureFamily(filteredSymbols, cultureFamily) as SymbolData[];
-      }
-
-      if (tags && tags.length > 0) {
-        filteredSymbols = filteredSymbols.filter(symbol => 
-          tags.some(tag => symbol.tags?.includes(tag))
-        );
-      }
-
-      return filteredSymbols;
-    } catch (error) {
-      console.error('Erreur dans searchSymbols:', error);
-      return [];
+    if (query) {
+      queryBuilder = queryBuilder.ilike('name', `%${query}%`);
     }
+
+    if (region) {
+      queryBuilder = queryBuilder.eq('culture', region);
+    }
+
+    if (periodGroup) {
+      queryBuilder = queryBuilder.eq('period', periodGroup);
+    }
+
+    if (cultureFamily) {
+      queryBuilder = queryBuilder.eq('culture', cultureFamily);
+    }
+
+    if (tags && tags.length > 0) {
+      // Use the 'cs' (contains) operator to find symbols where the 'tags' array contains ALL of the specified tags
+      queryBuilder = queryBuilder.contains('tags', tags);
+    }
+
+    const { data, error } = await queryBuilder;
+
+    if (error) {
+      logger.error('Error searching symbols', { error, query, region, periodGroup, cultureFamily, tags });
+      throw error;
+    }
+
+    return data || [];
   }
 
   /**
-   * Mapping des anciens indices vers les nouveaux UUIDs (pour la transition)
+   * Incrémente le compteur de vues d'un symbole
    */
-  private static readonly LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
-    0: '550e8400-e29b-41d4-a716-446655440001', // Triskèle Celtique
-    1: '550e8400-e29b-41d4-a716-446655440002', // Fleur de Lys
-    2: '550e8400-e29b-41d4-a716-446655440003', // Mandala
-    3: '550e8400-e29b-41d4-a716-446655440004', // Méandre Grec
-    4: '550e8400-e29b-41d4-a716-446655440005', // Symbole Adinkra
-    5: '550e8400-e29b-41d4-a716-446655440006', // Motif Seigaiha
-    6: '550e8400-e29b-41d4-a716-446655440007', // Yin Yang
-    7: '550e8400-e29b-41d4-a716-446655440008', // Ankh
-    8: '550e8400-e29b-41d4-a716-446655440009', // Hamsa
-    9: '550e8400-e29b-41d4-a716-446655440010', // Attrape-rêves
-  };
+  async incrementViewCount(symbolId: string): Promise<void> {
+    const { error } = await supabase.rpc('increment_symbol_view_count', { symbol_id: symbolId });
 
-  /**
-   * Convertit un ancien index en UUID (pour la rétrocompatibilité)
-   */
-  static getLegacyUuidFromIndex(index: number): string | null {
-    return this.LEGACY_INDEX_TO_UUID_MAP[index] || null;
-  }
-
-  /**
-   * Vérifie si une chaîne est un UUID valide
-   */
-  static isValidUuid(str: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(str);
+    if (error) {
+      logger.error('Error incrementing view count', { error, symbolId });
+      // We don't throw the error here because it's not critical
+    }
   }
 }
 
