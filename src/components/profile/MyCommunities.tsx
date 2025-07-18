@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Crown, Shield, User, MessageCircle, Calendar } from 'lucide-react';
+import { Users, Crown, Shield, User, MessageCircle, Calendar, LogOut } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,6 +85,58 @@ const MyCommunities: React.FC<MyCommunitiesProps> = ({ userId }) => {
       default:
         return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Membre</Badge>;
     }
+  };
+
+  const LeaveGroupButton = ({ groupId, groupName, onLeave }: { groupId: string, groupName: string, onLeave: () => void }) => {
+    const [isLeaving, setIsLeaving] = useState(false);
+
+    const handleLeaveGroup = async () => {
+      setIsLeaving(true);
+      try {
+        const { error } = await supabase
+          .from('group_members')
+          .delete()
+          .eq('group_id', groupId)
+          .eq('user_id', targetUserId);
+
+        if (error) throw error;
+        
+        onLeave();
+      } catch (error) {
+        console.error('Erreur lors de la sortie du groupe:', error);
+      } finally {
+        setIsLeaving(false);
+      }
+    };
+
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+            <LogOut className="h-4 w-4 mr-1" />
+            Quitter
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Quitter la communauté</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir quitter la communauté "{groupName}" ? Cette action est irréversible et vous devrez demander à rejoindre à nouveau si c'est un groupe privé.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleLeaveGroup}
+              disabled={isLeaving}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isLeaving ? 'Sortie...' : 'Quitter le groupe'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
   };
 
   if (loading) {
@@ -180,11 +233,18 @@ const MyCommunities: React.FC<MyCommunitiesProps> = ({ userId }) => {
                     </span>
                   </div>
 
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={`/community/${membership.interest_groups.slug}`}>
-                      Visiter
-                    </a>
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={`/community/${membership.interest_groups.slug}`}>
+                        Visiter
+                      </a>
+                    </Button>
+                    <LeaveGroupButton 
+                      groupId={membership.interest_groups.id}
+                      groupName={membership.interest_groups.name}
+                      onLeave={() => loadMemberships()}
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>

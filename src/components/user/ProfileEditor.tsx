@@ -33,6 +33,8 @@ const profileSchema = z.object({
   website: z.string().url({
     message: "Veuillez entrer une URL valide"
   }).optional().or(z.string().length(0)),
+  profession: z.string().max(100).optional(),
+  company: z.string().max(100).optional(),
   avatar_url: z.string().optional(),
 });
 
@@ -56,6 +58,8 @@ export default function ProfileEditor() {
       bio: profile?.bio || '',
       location: profile?.location || '',
       website: profile?.website || '',
+      profession: profile?.profession || '',
+      company: profile?.company || '',
       avatar_url: profile?.avatar_url || '',
     },
   });
@@ -69,6 +73,8 @@ export default function ProfileEditor() {
         bio: profile.bio || '',
         location: profile.location || '',
         website: profile.website || '',
+        profession: profile.profession || '',
+        company: profile.company || '',
         avatar_url: profile.avatar_url || '',
       });
     }
@@ -314,6 +320,48 @@ export default function ProfileEditor() {
                     </FormItem>
                   )}
                 />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="profession"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          <I18nText translationKey="profile:edit.profession" />
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder={t('profile:edit.professionPlaceholder')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="company"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          <I18nText translationKey="profile:edit.company" />
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder={t('profile:edit.companyPlaceholder')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField

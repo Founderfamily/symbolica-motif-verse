@@ -67,4 +67,10 @@ export interface Profile {
   is_admin: boolean | null;
   created_at: string | null;
   updated_at: string | null;
+  avatar_url: string | null;
+  location: string | null;
+  website: string | null;
+  bio: string | null;
+  profession: string | null;
+  company: string | null;
 }

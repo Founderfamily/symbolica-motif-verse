@@ -114,32 +114,61 @@ export default function Profile() {
                 {/* Gamification Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <UserStatsCard />
-                  {userLevel && !gamificationLoading && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>
-                          <I18nText translationKey="profile:yourProgress">
-                            Votre Progression
-                          </I18nText>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <LevelProgressBar userLevel={userLevel} />
-                        {userPoints && (
-                          <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                            <div className="text-center">
-                              <div className="font-bold text-amber-600">{userPoints.total}</div>
-                              <div className="text-slate-600">Points totaux</div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <I18nText translationKey="profile:yourProgress">
+                          Votre Progression
+                        </I18nText>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {userLevel && !gamificationLoading ? (
+                        <>
+                          <div className="mb-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium">
+                                <I18nText 
+                                  translationKey="profile:level" 
+                                  params={{ level: userLevel.level }}
+                                >
+                                  Niveau {userLevel.level}
+                                </I18nText>
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                <I18nText 
+                                  translationKey="profile:xpToNextLevel" 
+                                  params={{ xp: userLevel.next_level_xp - userLevel.xp }}
+                                >
+                                  {userLevel.next_level_xp - userLevel.xp} XP jusqu'au niveau suivant
+                                </I18nText>
+                              </span>
                             </div>
-                            <div className="text-center">
-                              <div className="font-bold text-green-600">{userPoints.contribution_points}</div>
-                              <div className="text-slate-600">Contributions</div>
-                            </div>
+                            <LevelProgressBar userLevel={userLevel} />
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
+                          {userPoints && (
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="text-center">
+                                <div className="font-bold text-amber-600">{userPoints.total}</div>
+                                <div className="text-slate-600">Points totaux</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-bold text-green-600">{userPoints.contribution_points}</div>
+                                <div className="text-slate-600">Contributions</div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-center py-4">
+                          <div className="animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+                            <div className="h-2 bg-gray-200 rounded w-full"></div>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Quick Overview Cards */}

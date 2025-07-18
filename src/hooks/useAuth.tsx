@@ -143,6 +143,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (profileData.website) {
       sanitizedData.website = SecurityUtils.validateInput(profileData.website, 255);
     }
+    if (profileData.profession) {
+      sanitizedData.profession = SecurityUtils.validateInput(profileData.profession, 100);
+    }
+    if (profileData.company) {
+      sanitizedData.company = SecurityUtils.validateInput(profileData.company, 100);
+    }
     if (profileData.avatar_url !== undefined) {
       sanitizedData.avatar_url = profileData.avatar_url;
     }

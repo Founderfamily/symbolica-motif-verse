@@ -1477,6 +1477,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          company: string | null
           created_at: string | null
           credentials: string | null
           expertise_areas: string[] | null
@@ -1485,6 +1486,7 @@ export type Database = {
           is_admin: boolean | null
           is_banned: boolean | null
           location: string | null
+          profession: string | null
           specialization: string | null
           updated_at: string | null
           username: string | null
@@ -1493,6 +1495,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          company?: string | null
           created_at?: string | null
           credentials?: string | null
           expertise_areas?: string[] | null
@@ -1501,6 +1504,7 @@ export type Database = {
           is_admin?: boolean | null
           is_banned?: boolean | null
           location?: string | null
+          profession?: string | null
           specialization?: string | null
           updated_at?: string | null
           username?: string | null
@@ -1509,6 +1513,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          company?: string | null
           created_at?: string | null
           credentials?: string | null
           expertise_areas?: string[] | null
@@ -1517,6 +1522,7 @@ export type Database = {
           is_admin?: boolean | null
           is_banned?: boolean | null
           location?: string | null
+          profession?: string | null
           specialization?: string | null
           updated_at?: string | null
           username?: string | null

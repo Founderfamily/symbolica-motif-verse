@@ -24,6 +24,8 @@ import ContributionDetail from '@/pages/ContributionDetail';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import UserProfilePage from '@/pages/UserProfilePage';
+import ResetPassword from '@/pages/auth/ResetPassword';
+import UpdateEmail from '@/pages/auth/UpdateEmail';
 import NotFound from '@/pages/NotFound';
 
 // Admin pages
@@ -101,6 +103,8 @@ function App() {
 
                   {/* User pages */}
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth/reset-password" element={<ResetPassword />} />
+                  <Route path="/auth/update-email" element={<UpdateEmail />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/users/:userId" element={<UserProfilePage />} />
 
