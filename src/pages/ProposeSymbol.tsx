@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -7,12 +8,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Plus, X, Upload, MapPin, BookOpen, Clock, Tag } from 'lucide-react';
+import { Camera, Upload, X, BookOpen, Send, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ContributionFormData } from '@/types/contributions';
 import { createContribution } from '@/services/contributionService';
+import { useCollectionOptions } from '@/hooks/useCollectionOptions';
+import { TagSelector } from '@/components/forms/TagSelector';
+import { HISTORICAL_PERIODS, SYMBOL_TYPES } from '@/data/formOptions';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const ProposeSymbol: React.FC = () => {
   const { t } = useTranslation();
@@ -20,11 +24,15 @@ const ProposeSymbol: React.FC = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const { culturalOptions, isLoading: loadingCollections } = useCollectionOptions();
   
   const [formData, setFormData] = useState<ContributionFormData & {
     significance?: string;
     historical_context?: string;
     sources?: Array<{ title: string; url: string; type: string; author?: string; year?: string; }>;
+    symbol_type?: string;
+    custom_period?: string;
+    custom_culture?: string;
   }>({
     title: '',
     description: '',
@@ -36,12 +44,14 @@ const ProposeSymbol: React.FC = () => {
     tags: [],
     significance: '',
     historical_context: '',
-    sources: []
+    sources: [],
+    symbol_type: '',
+    custom_period: '',
+    custom_culture: ''
   });
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [newTag, setNewTag] = useState('');
   const [newSource, setNewSource] = useState({
     title: '',
     url: '',
@@ -60,23 +70,6 @@ const ProposeSymbol: React.FC = () => {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }));
-      setNewTag('');
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(t => t !== tag)
-    }));
   };
 
   const addSource = () => {
@@ -117,7 +110,14 @@ const ProposeSymbol: React.FC = () => {
         throw new Error('Vous devez être connecté pour proposer un symbole');
       }
 
-      const contributionId = await createContribution(user.id, formData, imageFile);
+      // Préparer les données avec les valeurs personnalisées si nécessaire
+      const finalFormData = {
+        ...formData,
+        cultural_context: formData.cultural_context === 'autre' ? formData.custom_culture : formData.cultural_context,
+        period: formData.period === 'autre' ? formData.custom_period : formData.period
+      };
+
+      const contributionId = await createContribution(user.id, finalFormData, imageFile);
       
       toast({
         title: "Symbole proposé avec succès !",
@@ -143,89 +143,164 @@ const ProposeSymbol: React.FC = () => {
     </div>
   );
 
+  const selectedSymbolType = SYMBOL_TYPES.find(type => type.value === formData.symbol_type);
+
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8">
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold">Proposer un Symbole</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Partagez un symbole culturel avec la communauté. Votre proposition sera examinée par nos experts avant publication.
-          </p>
-        </div>
+    <TooltipProvider>
+      <div className="container max-w-4xl mx-auto px-4 py-8">
+        <div className="space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <h1 className="text-3xl font-bold">Proposer un Symbole</h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Partagez un symbole culturel avec la communauté. Notre interface simplifiée vous guide étape par étape.
+            </p>
+          </div>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center space-x-4">
-          <StepIndicator step={1} currentStep={currentStep} />
-          <div className={`h-1 w-16 ${currentStep > 1 ? 'bg-primary' : 'bg-muted'}`} />
-          <StepIndicator step={2} currentStep={currentStep} />
-          <div className={`h-1 w-16 ${currentStep > 2 ? 'bg-primary' : 'bg-muted'}`} />
-          <StepIndicator step={3} currentStep={currentStep} />
-        </div>
+          {/* Progress Steps - Now only 2 steps */}
+          <div className="flex items-center justify-center space-x-4">
+            <StepIndicator step={1} currentStep={currentStep} />
+            <div className={`h-1 w-16 ${currentStep > 1 ? 'bg-primary' : 'bg-muted'}`} />
+            <StepIndicator step={2} currentStep={currentStep} />
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Step 1: Informations de base */}
-          {currentStep === 1 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  Informations de base
-                </CardTitle>
-                <CardDescription>
-                  Décrivez le symbole que vous souhaitez proposer
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Step 1: Informations essentielles */}
+            {currentStep === 1 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    Informations essentielles
+                  </CardTitle>
+                  <CardDescription>
+                    Décrivez votre symbole en quelques informations clés
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Nom du symbole */}
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Nom du symbole *</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="Ex: Ankh égyptien"
+                        required
+                      />
+                    </div>
+                    
+                    {/* Type de symbole */}
+                    <div className="space-y-2">
+                      <Label htmlFor="symbol_type" className="flex items-center gap-2">
+                        Type de symbole
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Choisissez le type qui correspond le mieux à votre symbole</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </Label>
+                      <Select value={formData.symbol_type} onValueChange={(value) => setFormData(prev => ({ ...prev, symbol_type: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez un type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SYMBOL_TYPES.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              <div className="flex flex-col">
+                                <span>{type.label}</span>
+                                {type.example && <span className="text-xs text-muted-foreground">{type.example}</span>}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Description */}
                   <div className="space-y-2">
-                    <Label htmlFor="title">Nom du symbole *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Ex: Ankh égyptien"
+                    <Label htmlFor="description">Description *</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder={selectedSymbolType ? 
+                        `Décrivez ce ${selectedSymbolType.label.toLowerCase()}, son apparence et sa signification...` :
+                        "Décrivez le symbole, son apparence et sa signification..."
+                      }
+                      rows={4}
                       required
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="cultural_context">Culture d'origine *</Label>
-                    <Input
-                      id="cultural_context"
-                      value={formData.cultural_context}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cultural_context: e.target.value }))}
-                      placeholder="Ex: Égypte antique"
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description *</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Décrivez le symbole, son apparence et sa signification..."
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="period">Période historique</Label>
-                    <Input
-                      id="period"
-                      value={formData.period}
-                      onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value }))}
-                      placeholder="Ex: 3000-300 av. J.-C."
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Culture d'origine - Select avec collections existantes */}
+                    <div className="space-y-2">
+                      <Label htmlFor="cultural_context">Culture d'origine *</Label>
+                      <Select 
+                        value={formData.cultural_context} 
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, cultural_context: value }))}
+                        disabled={loadingCollections}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez une culture" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {culturalOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="autre">Autre culture</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {/* Champ personnalisé si "Autre" est sélectionné */}
+                      {formData.cultural_context === 'autre' && (
+                        <Input
+                          value={formData.custom_culture}
+                          onChange={(e) => setFormData(prev => ({ ...prev, custom_culture: e.target.value }))}
+                          placeholder="Précisez la culture"
+                          required
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Période historique - Select prédéfini */}
+                    <div className="space-y-2">
+                      <Label htmlFor="period">Période historique</Label>
+                      <Select value={formData.period} onValueChange={(value) => setFormData(prev => ({ ...prev, period: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez une période" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {HISTORICAL_PERIODS.map((period) => (
+                            <SelectItem key={period.value} value={period.value}>
+                              {period.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      {/* Champ personnalisé si "Autre" est sélectionné */}
+                      {formData.period === 'autre' && (
+                        <Input
+                          value={formData.custom_period}
+                          onChange={(e) => setFormData(prev => ({ ...prev, custom_period: e.target.value }))}
+                          placeholder="Ex: 3000-300 av. J.-C."
+                        />
+                      )}
+                    </div>
                   </div>
-                  
+
+                  {/* Lieu (optionnel) */}
                   <div className="space-y-2">
-                    <Label htmlFor="location_name">Lieu de découverte/utilisation</Label>
+                    <Label htmlFor="location_name">Lieu de découverte/utilisation (optionnel)</Label>
                     <Input
                       id="location_name"
                       value={formData.location_name}
@@ -233,246 +308,203 @@ const ProposeSymbol: React.FC = () => {
                       placeholder="Ex: Vallée des Rois, Égypte"
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="significance">Signification et importance</Label>
-                  <Textarea
-                    id="significance"
-                    value={formData.significance}
-                    onChange={(e) => setFormData(prev => ({ ...prev, significance: e.target.value }))}
-                    placeholder="Expliquez la signification culturelle et l'importance de ce symbole..."
-                    rows={3}
+                  {/* Tags avec sélecteur amélioré */}
+                  <TagSelector
+                    selectedTags={formData.tags}
+                    onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
                   />
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Step 2: Image et détails */}
-          {currentStep === 2 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Camera className="w-5 h-5" />
-                  Image et détails
-                </CardTitle>
-                <CardDescription>
-                  Ajoutez une image et des informations complémentaires
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Image Upload */}
-                <div className="space-y-4">
-                  <Label>Image du symbole *</Label>
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
-                    {imagePreview ? (
-                      <div className="relative">
-                        <img
-                          src={imagePreview}
-                          alt="Aperçu"
-                          className="max-w-full h-64 object-contain mx-auto rounded"
-                        />
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          className="absolute top-2 right-2"
-                          onClick={() => {
-                            setImageFile(null);
-                            setImagePreview(null);
-                          }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                        <div>
-                          <label htmlFor="image" className="cursor-pointer">
-                            <span className="text-primary hover:text-primary/80">
-                              Cliquez pour sélectionner une image
-                            </span>
-                            <input
-                              id="image"
-                              type="file"
-                              className="hidden"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                            />
-                          </label>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          PNG, JPG, WebP jusqu'à 5MB
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Tags */}
-                <div className="space-y-4">
-                  <Label>Tags</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      placeholder="Ajouter un tag..."
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    />
-                    <Button type="button" onClick={addTag} size="sm">
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                        <Tag className="w-3 h-3" />
-                        {tag}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-0 ml-1"
-                          onClick={() => removeTag(tag)}
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Historical Context */}
-                <div className="space-y-2">
-                  <Label htmlFor="historical_context">Contexte historique</Label>
-                  <Textarea
-                    id="historical_context"
-                    value={formData.historical_context}
-                    onChange={(e) => setFormData(prev => ({ ...prev, historical_context: e.target.value }))}
-                    placeholder="Décrivez le contexte historique dans lequel ce symbole était utilisé..."
-                    rows={3}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Step 3: Sources et validation */}
-          {currentStep === 3 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  Sources et validation
-                </CardTitle>
-                <CardDescription>
-                  Ajoutez des sources pour valider votre proposition
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Sources */}
-                <div className="space-y-4">
-                  <Label>Sources (recommandé)</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      value={newSource.title}
-                      onChange={(e) => setNewSource(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Titre de la source"
-                    />
-                    <Input
-                      value={newSource.url}
-                      onChange={(e) => setNewSource(prev => ({ ...prev, url: e.target.value }))}
-                      placeholder="URL ou référence"
-                    />
-                    <Select value={newSource.type} onValueChange={(value) => setNewSource(prev => ({ ...prev, type: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="book">Livre</SelectItem>
-                        <SelectItem value="article">Article</SelectItem>
-                        <SelectItem value="website">Site web</SelectItem>
-                        <SelectItem value="museum">Musée</SelectItem>
-                        <SelectItem value="other">Autre</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button type="button" onClick={addSource} size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Ajouter source
-                    </Button>
-                  </div>
-                  
-                  {formData.sources && formData.sources.length > 0 && (
-                    <div className="space-y-2">
-                      {formData.sources.map((source, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 border rounded">
-                          <div>
-                            <div className="font-medium">{source.title}</div>
-                            <div className="text-sm text-muted-foreground">{source.url}</div>
-                            <Badge variant="outline">{source.type}</Badge>
-                          </div>
+            {/* Step 2: Image et sources */}
+            {currentStep === 2 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Camera className="w-5 h-5" />
+                    Image et sources
+                  </CardTitle>
+                  <CardDescription>
+                    Ajoutez une image de qualité et des sources pour valider votre proposition
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Image Upload */}
+                  <div className="space-y-4">
+                    <Label>Image du symbole *</Label>
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
+                      {imagePreview ? (
+                        <div className="relative">
+                          <img
+                            src={imagePreview}
+                            alt="Aperçu"
+                            className="max-w-full h-64 object-contain mx-auto rounded"
+                          />
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="secondary"
                             size="sm"
-                            onClick={() => removeSource(index)}
+                            className="absolute top-2 right-2"
+                            onClick={() => {
+                              setImageFile(null);
+                              setImagePreview(null);
+                            }}
                           >
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
-                      ))}
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                          <div>
+                            <label htmlFor="image" className="cursor-pointer">
+                              <span className="text-primary hover:text-primary/80">
+                                Cliquez pour sélectionner une image
+                              </span>
+                              <input
+                                id="image"
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                              />
+                            </label>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            PNG, JPG, WebP jusqu'à 5MB
+                          </p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-
-                {/* Summary */}
-                <div className="p-4 bg-muted rounded-lg">
-                  <h3 className="font-medium mb-2">Récapitulatif de votre proposition</h3>
-                  <div className="space-y-1 text-sm">
-                    <div><strong>Symbole:</strong> {formData.title}</div>
-                    <div><strong>Culture:</strong> {formData.cultural_context}</div>
-                    <div><strong>Tags:</strong> {formData.tags.join(', ') || 'Aucun'}</div>
-                    <div><strong>Sources:</strong> {formData.sources?.length || 0} source(s)</div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-              disabled={currentStep === 1}
-            >
-              Précédent
-            </Button>
-            
-            {currentStep < 3 ? (
+                  {/* Informations complémentaires (optionnelles) */}
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-muted-foreground">Informations complémentaires (optionnelles)</h3>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="significance">Signification et importance</Label>
+                      <Textarea
+                        id="significance"
+                        value={formData.significance}
+                        onChange={(e) => setFormData(prev => ({ ...prev, significance: e.target.value }))}
+                        placeholder="Expliquez la signification culturelle et l'importance de ce symbole..."
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="historical_context">Contexte historique</Label>
+                      <Textarea
+                        id="historical_context"
+                        value={formData.historical_context}
+                        onChange={(e) => setFormData(prev => ({ ...prev, historical_context: e.target.value }))}
+                        placeholder="Décrivez le contexte historique dans lequel ce symbole était utilisé..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sources simplifiées */}
+                  <div className="space-y-4">
+                    <Label>Sources (recommandé pour validation)</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Input
+                        value={newSource.title}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="Titre de la source"
+                      />
+                      <Input
+                        value={newSource.url}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, url: e.target.value }))}
+                        placeholder="URL ou référence"
+                      />
+                      <Button type="button" onClick={addSource} size="sm" disabled={!newSource.title || !newSource.url}>
+                        Ajouter source
+                      </Button>
+                    </div>
+                    
+                    {formData.sources && formData.sources.length > 0 && (
+                      <div className="space-y-2">
+                        {formData.sources.map((source, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded">
+                            <div>
+                              <div className="font-medium">{source.title}</div>
+                              <div className="text-sm text-muted-foreground">{source.url}</div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeSource(index)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Récapitulatif */}
+                  <div className="p-4 bg-muted rounded-lg">
+                    <h3 className="font-medium mb-2">Récapitulatif de votre proposition</h3>
+                    <div className="space-y-1 text-sm">
+                      <div><strong>Symbole:</strong> {formData.title}</div>
+                      <div><strong>Type:</strong> {selectedSymbolType?.label || 'Non spécifié'}</div>
+                      <div><strong>Culture:</strong> {formData.cultural_context === 'autre' ? formData.custom_culture : formData.cultural_context}</div>
+                      <div><strong>Période:</strong> {formData.period === 'autre' ? formData.custom_period : 
+                        HISTORICAL_PERIODS.find(p => p.value === formData.period)?.label || 'Non spécifiée'}</div>
+                      <div><strong>Tags:</strong> {formData.tags.join(', ') || 'Aucun'}</div>
+                      <div><strong>Sources:</strong> {formData.sources?.length || 0} source(s)</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between">
               <Button
                 type="button"
-                onClick={() => setCurrentStep(Math.min(3, currentStep + 1))}
-                disabled={currentStep === 1 && (!formData.title || !formData.description || !formData.cultural_context)}
+                variant="outline"
+                onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                disabled={currentStep === 1}
               >
-                Suivant
+                Précédent
               </Button>
-            ) : (
-              <Button
-                type="submit"
-                disabled={isSubmitting || !imageFile}
-                className="min-w-32"
-              >
-                {isSubmitting ? 'Envoi...' : 'Proposer le symbole'}
-              </Button>
-            )}
-          </div>
-        </form>
+              
+              {currentStep < 2 ? (
+                <Button
+                  type="button"
+                  onClick={() => setCurrentStep(Math.min(2, currentStep + 1))}
+                  disabled={!formData.title || !formData.description || !formData.cultural_context}
+                >
+                  Suivant
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || !imageFile}
+                  className="min-w-32"
+                >
+                  {isSubmitting ? (
+                    'Envoi...'
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Proposer le symbole
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
