@@ -1,5 +1,5 @@
 
--- Corriger la fonction convert_contribution_to_symbol pour résoudre le conflit de noms
+-- Corriger la fonction convert_contribution_to_symbol avec le bon type image_type
 CREATE OR REPLACE FUNCTION public.convert_contribution_to_symbol(p_contribution_id uuid)
 RETURNS uuid
 LANGUAGE plpgsql
@@ -62,7 +62,7 @@ BEGIN
     );
   END IF;
   
-  -- Copier les images de la contribution vers le symbole
+  -- Copier les images de la contribution vers le symbole (CORRECTION ICI)
   INSERT INTO public.symbol_images (symbol_id, image_url, image_type, title, description)
   SELECT 
     new_symbol_id,
