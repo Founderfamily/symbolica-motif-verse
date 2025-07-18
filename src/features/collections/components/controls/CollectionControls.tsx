@@ -35,11 +35,6 @@ export const CollectionControls: React.FC<CollectionControlsProps> = ({
   activeFiltersCount,
   totalResults
 }) => {
-  // Handler for search input to prevent immediate state updates
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
   return (
     <div className="space-y-4 mb-8">
       {/* Search Bar */}
@@ -48,7 +43,7 @@ export const CollectionControls: React.FC<CollectionControlsProps> = ({
         <Input
           placeholder="Rechercher une collection..."
           value={searchQuery}
-          onChange={handleSearchChange}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
         />
       </div>
@@ -87,24 +82,21 @@ export const CollectionControls: React.FC<CollectionControlsProps> = ({
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-600" />
             <Select value={filterCategory} onValueChange={(value: FilterCategory) => setFilterCategory(value)}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[140px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
                   <I18nText translationKey="collections.filters.allCategories">Toutes</I18nText>
                 </SelectItem>
-                <SelectItem value="ancient">
-                  <I18nText translationKey="categories.ancient">Civilisations Antiques</I18nText>
+                <SelectItem value="cultures">
+                  <I18nText translationKey="categories.cultures">Cultures</I18nText>
                 </SelectItem>
-                <SelectItem value="asian">
-                  <I18nText translationKey="categories.asian">Traditions Asiatiques</I18nText>
+                <SelectItem value="periods">
+                  <I18nText translationKey="categories.periods">Périodes</I18nText>
                 </SelectItem>
-                <SelectItem value="european">
-                  <I18nText translationKey="categories.european">Héritages Européens</I18nText>
-                </SelectItem>
-                <SelectItem value="middle-eastern">
-                  <I18nText translationKey="categories.middleEastern">Proche-Orient</I18nText>
+                <SelectItem value="sciences">
+                  <I18nText translationKey="categories.sciences">Sciences</I18nText>
                 </SelectItem>
                 <SelectItem value="others">
                   <I18nText translationKey="categories.others">Autres</I18nText>
