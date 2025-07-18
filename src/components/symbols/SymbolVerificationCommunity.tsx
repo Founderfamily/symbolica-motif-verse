@@ -132,16 +132,16 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
     }
 
     try {
-      const { error } = await supabase
-        .from('symbol_moderation_items')
-        .insert({
-          symbol_id: symbol.id,
-          item_type: 'community_comment',
-          content: commentText,
-          reported_by: userProfile.id,
-          reported_count: 1,
-          status: 'pending'
-        });
+        const { error } = await supabase
+          .from('symbol_moderation_items')
+          .insert({
+            symbol_id: symbol.id,
+            item_type: 'comment',
+            content: commentText,
+            reported_by: userProfile.id,
+            reported_count: 1,
+            status: 'pending'
+          });
 
       if (error) throw error;
 
@@ -182,7 +182,7 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
           reviewed_at: new Date().toISOString()
         })
         .eq('symbol_id', symbol.id)
-        .eq('item_type', 'community_comment')
+        .eq('item_type', 'comment')
         .eq('status', 'pending');
         
     } catch (error) {
