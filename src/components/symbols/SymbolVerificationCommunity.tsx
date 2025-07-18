@@ -13,7 +13,8 @@ import {
   Clock,
   Shield,
   Send,
-  Info
+  Info,
+  Flag
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -120,6 +121,33 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
       toast.error('Erreur lors de l\'ajout du commentaire');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const reportComment = async (commentId: string, commentText: string) => {
+    if (!userProfile?.id) {
+      toast.error("Vous devez être connecté pour signaler un commentaire");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('symbol_moderation_items')
+        .insert({
+          symbol_id: symbol.id,
+          item_type: 'community_comment',
+          content: commentText,
+          reported_by: userProfile.id,
+          reported_count: 1,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      toast.success("Commentaire signalé pour modération");
+    } catch (error) {
+      console.error('Erreur lors du signalement:', error);
+      toast.error("Erreur lors du signalement du commentaire");
     }
   };
 
@@ -321,9 +349,21 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
                 {comment.comment}
               </p>
               
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Clock className="h-4 w-4" />
-                <span>{new Date(comment.created_at).toLocaleString('fr-FR')}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <Clock className="h-4 w-4" />
+                  <span>{new Date(comment.created_at).toLocaleString('fr-FR')}</span>
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => reportComment(comment.id, comment.comment)}
+                  className="flex items-center gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                >
+                  <Flag className="h-3 w-3" />
+                  Signaler
+                </Button>
               </div>
             </Card>
           ))
