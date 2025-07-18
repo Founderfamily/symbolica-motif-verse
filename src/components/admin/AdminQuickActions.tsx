@@ -28,10 +28,10 @@ const QuickActionCard = ({
   badge?: { text: string; color: string };
 }) => (
   <Link to={to}>
-    <Card className="hover:shadow-md transition-all duration-200 cursor-pointer group relative">
+    <Card className="hover:shadow-md transition-all duration-200 cursor-pointer group relative border-2 hover:border-primary/20">
       <CardContent className="p-4">
-        <div className="flex items-center gap-3">
-          <div className={`p-2 ${color} rounded-lg group-hover:bg-opacity-80 transition-colors`}>
+        <div className="flex items-center gap-3 mb-2">
+          <div className={`p-2 ${color} rounded-lg group-hover:bg-opacity-80 transition-colors flex-shrink-0`}>
             <Icon className={`h-5 w-5 ${color.includes('blue') ? 'text-blue-600' : 
               color.includes('amber') ? 'text-amber-600' : 
               color.includes('red') ? 'text-red-600' : 
@@ -39,21 +39,21 @@ const QuickActionCard = ({
               color.includes('green') ? 'text-green-600' : 
               color.includes('orange') ? 'text-orange-600' : 'text-green-600'}`} />
           </div>
-          <div className="flex-1">
-            <p className="font-medium">{title}</p>
-            <p className="text-sm text-muted-foreground">
-              {loading ? (
-                <div className="h-4 w-16 bg-slate-200 animate-pulse rounded"></div>
-              ) : (
-                description
-              )}
-            </p>
-          </div>
           {badge && (
-            <span className={`px-2 py-1 text-xs rounded-full text-white ${badge.color} absolute -top-1 -right-1`}>
+            <span className={`px-2 py-1 text-xs rounded-full text-white ${badge.color} ml-auto`}>
               {badge.text}
             </span>
           )}
+        </div>
+        <div>
+          <h3 className="font-semibold text-base mb-1">{title}</h3>
+          <p className="text-sm text-muted-foreground">
+            {loading ? (
+              <div className="h-4 w-20 bg-slate-200 animate-pulse rounded"></div>
+            ) : (
+              description
+            )}
+          </p>
         </div>
       </CardContent>
     </Card>
@@ -62,7 +62,7 @@ const QuickActionCard = ({
 
 export default function AdminQuickActions({ stats, loading }: AdminQuickActionsProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+    <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       <QuickActionCard
         to="/admin/users"
         icon={Users}
