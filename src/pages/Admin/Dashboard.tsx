@@ -56,49 +56,50 @@ const ToolCard = ({
   badge?: { text: string; color: string };
   disabled?: boolean;
 }) => {
-  const CardWrapper = disabled ? 'div' : Link;
-  const cardProps = disabled ? {} : { to };
+  const cardContent = (
+    <Card className={`transition-all duration-200 h-full ${
+      disabled 
+        ? 'opacity-50 cursor-not-allowed' 
+        : 'hover:shadow-md cursor-pointer group'
+    }`}>
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className={`p-3 rounded-lg transition-colors ${
+            disabled 
+              ? 'bg-slate-100' 
+              : 'bg-amber-100 group-hover:bg-amber-200'
+          }`}>
+            <Icon className={`h-6 w-6 ${
+              disabled ? 'text-slate-400' : 'text-amber-600'
+            }`} />
+          </div>
+          {badge && (
+            <span className={`px-2 py-1 text-xs rounded-full text-white ${badge.color}`}>
+              {badge.text}
+            </span>
+          )}
+        </div>
+        <div>
+          <h3 className={`font-semibold mb-2 ${
+            disabled ? 'text-slate-400' : 'text-slate-900'
+          }`}>{title}</h3>
+          <p className={`text-sm ${
+            disabled ? 'text-slate-400' : 'text-slate-600'
+          }`}>{description}</p>
+          {disabled && (
+            <p className="text-xs text-red-500 mt-2 font-medium">
+              Fonctionnalité en développement
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-  return (
-    <CardWrapper {...cardProps}>
-      <Card className={`transition-all duration-200 h-full ${
-        disabled 
-          ? 'opacity-50 cursor-not-allowed' 
-          : 'hover:shadow-md cursor-pointer group'
-      }`}>
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className={`p-3 rounded-lg transition-colors ${
-              disabled 
-                ? 'bg-slate-100' 
-                : 'bg-amber-100 group-hover:bg-amber-200'
-            }`}>
-              <Icon className={`h-6 w-6 ${
-                disabled ? 'text-slate-400' : 'text-amber-600'
-              }`} />
-            </div>
-            {badge && (
-              <span className={`px-2 py-1 text-xs rounded-full text-white ${badge.color}`}>
-                {badge.text}
-              </span>
-            )}
-          </div>
-          <div>
-            <h3 className={`font-semibold mb-2 ${
-              disabled ? 'text-slate-400' : 'text-slate-900'
-            }`}>{title}</h3>
-            <p className={`text-sm ${
-              disabled ? 'text-slate-400' : 'text-slate-600'
-            }`}>{description}</p>
-            {disabled && (
-              <p className="text-xs text-red-500 mt-2 font-medium">
-                Fonctionnalité en développement
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </CardWrapper>
+  return disabled ? (
+    <div>{cardContent}</div>
+  ) : (
+    <Link to={to}>{cardContent}</Link>
   );
 };
 
