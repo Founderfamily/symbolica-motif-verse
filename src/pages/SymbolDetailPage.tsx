@@ -112,10 +112,14 @@ const SymbolDetailPage: React.FC = () => {
   // Trouver l'image principale
   const primaryImage = React.useMemo(() => {
     if (!imagesArray || imagesArray.length === 0) return null;
+    // Filter out null values and then find the primary image
+    const validImages = imagesArray.filter(img => img !== null);
+    if (validImages.length === 0) return null;
+    
     // Prioriser l'image marquée comme principale
-    return imagesArray.find(img => img.is_primary) || 
-           imagesArray.find(img => img.image_type === 'original') || 
-           imagesArray[0];
+    return validImages.find(img => img.is_primary) || 
+           validImages.find(img => img.image_type === 'original') || 
+           validImages[0];
   }, [imagesArray]);
 
   // Handler pour ouvrir la galerie
