@@ -117,7 +117,7 @@ export default function Profile() {
                   <Card>
                     <CardHeader>
                       <CardTitle>
-                        <I18nText translationKey="profile:yourProgress">
+                        <I18nText translationKey="gamification.yourProgress">
                           Votre Progression
                         </I18nText>
                       </CardTitle>
@@ -128,20 +128,10 @@ export default function Profile() {
                           <div className="mb-4">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm font-medium">
-                                <I18nText 
-                                  translationKey="profile:level" 
-                                  params={{ level: userLevel.level }}
-                                >
-                                  Niveau {userLevel.level}
-                                </I18nText>
+                                Niveau {userLevel.level}
                               </span>
                               <span className="text-sm text-muted-foreground">
-                                <I18nText 
-                                  translationKey="profile:xpToNextLevel" 
-                                  params={{ xp: userLevel.next_level_xp - userLevel.xp }}
-                                >
-                                  {userLevel.next_level_xp - userLevel.xp} XP jusqu'au niveau suivant
-                                </I18nText>
+                                {userLevel.next_level_xp - userLevel.xp} XP jusqu'au niveau suivant
                               </span>
                             </div>
                             <LevelProgressBar userLevel={userLevel} />
@@ -180,7 +170,7 @@ export default function Profile() {
                           {profile?.contributions_count || 0}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <I18nText translationKey="profile:stats.contributions">
+                          <I18nText translationKey="profile.stats.contributions">
                             Contributions
                           </I18nText>
                         </div>
@@ -191,10 +181,10 @@ export default function Profile() {
                     <CardContent className="pt-6">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-primary">
-                          {profile?.total_points || 0}
+                          {userPoints?.total || 0}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <I18nText translationKey="profile:stats.points">
+                          <I18nText translationKey="profile.stats.points">
                             Points
                           </I18nText>
                         </div>
@@ -208,7 +198,7 @@ export default function Profile() {
                           {profile?.followers_count || 0}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <I18nText translationKey="profile:stats.followers">
+                          <I18nText translationKey="profile.stats.followers">
                             Abonnés
                           </I18nText>
                         </div>
@@ -256,17 +246,17 @@ export default function Profile() {
                   {profile?.contributions_count || 0}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <I18nText translationKey="profile:stats.contributions">
+                  <I18nText translationKey="profile.stats.contributions">
                     Contributions
                   </I18nText>
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">
-                  {profile?.total_points || 0}
+                  {userPoints?.total || 0}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <I18nText translationKey="profile:stats.points">
+                  <I18nText translationKey="profile.stats.points">
                     Points
                   </I18nText>
                 </div>
@@ -276,7 +266,7 @@ export default function Profile() {
                   {profile?.followers_count || 0}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <I18nText translationKey="profile:stats.followers">
+                  <I18nText translationKey="profile.stats.followers">
                     Abonnés
                   </I18nText>
                 </div>

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserBadge } from '@/types/gamification';
 
 /**
- * Service for badge-related operations
+ * Service for badge-related gamification operations
  */
 export const badgeService = {
   /**
@@ -29,77 +29,60 @@ export const badgeService = {
    * Award a badge to a user
    */
   awardBadge: async (
-    userId: string, 
-    badgeType: string, 
+    userId: string,
+    badgeType: string,
     badgeName: string
-  ): Promise<UserBadge | null> => {
+  ): Promise<boolean> => {
     try {
       // Check if user already has this badge
-      const { data: existingBadge } = await supabase
+      const { data: existingBadge, error: checkError } = await supabase
         .from('user_badges')
         .select('*')
         .eq('user_id', userId)
-        .eq('badge_type', badgeType)
         .eq('badge_name', badgeName)
         .single();
         
+      if (checkError && checkError.code !== 'PGRST116') throw checkError;
+      
+      // Don't award duplicate badges
       if (existingBadge) {
-        return existingBadge;
+        console.log(`User ${userId} already has badge: ${badgeName}`);
+        return false;
       }
       
-      const { data, error } = await supabase
+      // Award the badge
+      const { error } = await supabase
         .from('user_badges')
         .insert({
           user_id: userId,
           badge_type: badgeType,
           badge_name: badgeName
-        })
-        .select()
-        .single();
+        });
         
       if (error) throw error;
-      return data;
+      return true;
     } catch (error) {
       console.error("Error awarding badge:", error);
-      return null;
+      return false;
     }
   },
   
   /**
-   * Get all available badge types
+   * Get available badge types
    */
-  getBadgeTypes: () => {
-    return [
-      {
-        type: 'achievement_contribution',
-        name: 'Contributor',
-        description: 'For making valuable contributions',
-        color: 'green'
-      },
-      {
-        type: 'achievement_exploration',
-        name: 'Explorer',
-        description: 'For discovering and exploring symbols',
-        color: 'blue'
-      },
-      {
-        type: 'achievement_validation',
-        name: 'Validator',
-        description: 'For helping validate contributions',
-        color: 'purple'
-      },
-      {
-        type: 'achievement_community',
-        name: 'Community Builder',
-        description: 'For active community participation',
-        color: 'pink'
-      },
-      {
-        type: 'level_milestone',
-        name: 'Level Master',
-        description: 'For reaching level milestones',
-        color: 'amber'
-      }
-    ];
+  getBadgeTypes: async (): Promise<string[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_badges')
+        .select('badge_type')
+        .distinct();
+        
+      if (error) throw error;
+      
+      return (data || []).map(item => item.badge_type).filter(Boolean);
+    } catch (error) {
+      console.error("Error fetching badge types:", error);
+      return [];
+    }
   }
 };

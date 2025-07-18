@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Award, Star, Trophy, Shield, Target, Zap } from 'lucide-react';
 import { UserBadge } from '@/types/gamification';
-import { I18nText } from '@/components/ui/i18n-text';
+import { Award, Star, Trophy, Shield } from 'lucide-react';
 
 interface BadgeDisplayProps {
   badges: UserBadge[];
@@ -13,7 +12,7 @@ interface BadgeDisplayProps {
 
 const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ 
   badges, 
-  maxVisible = 5,
+  maxVisible = 5, 
   size = 'md' 
 }) => {
   const visibleBadges = badges.slice(0, maxVisible);
@@ -21,61 +20,69 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
 
   const getBadgeIcon = (badgeType: string) => {
     switch (badgeType) {
-      case 'achievement_contribution':
-        return <Award className="h-4 w-4" />;
-      case 'achievement_exploration':
-        return <Target className="h-4 w-4" />;
-      case 'achievement_validation':
-        return <Shield className="h-4 w-4" />;
-      case 'achievement_community':
-        return <Star className="h-4 w-4" />;
       case 'level_milestone':
-        return <Trophy className="h-4 w-4" />;
+        return Trophy;
+      case 'contribution':
+        return Star;
+      case 'community':
+        return Shield;
       default:
-        return <Zap className="h-4 w-4" />;
+        return Award;
     }
   };
 
   const getBadgeColor = (badgeType: string) => {
     switch (badgeType) {
-      case 'achievement_contribution':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'achievement_exploration':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'achievement_validation':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'achievement_community':
-        return 'bg-pink-100 text-pink-800 border-pink-200';
       case 'level_milestone':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
+        return 'bg-purple-100 text-purple-800 border-purple-300';
+      case 'contribution':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'community':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
       default:
-        return 'bg-slate-100 text-slate-800 border-slate-200';
+        return 'bg-amber-100 text-amber-800 border-amber-300';
     }
   };
 
   const sizeClasses = {
     sm: 'text-xs px-2 py-1',
-    md: 'text-sm px-3 py-1.5',
+    md: 'text-sm px-3 py-1',
     lg: 'text-base px-4 py-2'
   };
 
+  const iconSizeClasses = {
+    sm: 'h-3 w-3',
+    md: 'h-4 w-4',
+    lg: 'h-5 w-5'
+  };
+
+  if (badges.length === 0) {
+    return (
+      <div className="text-center text-slate-500 text-sm py-2">
+        Aucun badge pour le moment
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {visibleBadges.map((badge) => (
-        <Badge
-          key={badge.id}
-          variant="outline"
-          className={`${getBadgeColor(badge.badge_type)} ${sizeClasses[size]} flex items-center gap-1`}
-          title={`Earned on ${new Date(badge.awarded_at).toLocaleDateString()}`}
-        >
-          {getBadgeIcon(badge.badge_type)}
-          <span>{badge.badge_name}</span>
-        </Badge>
-      ))}
+    <div className="flex flex-wrap gap-2">
+      {visibleBadges.map((badge) => {
+        const IconComponent = getBadgeIcon(badge.badge_type);
+        return (
+          <Badge
+            key={badge.id}
+            variant="outline"
+            className={`${getBadgeColor(badge.badge_type)} ${sizeClasses[size]} flex items-center gap-1`}
+          >
+            <IconComponent className={iconSizeClasses[size]} />
+            <span>{badge.badge_name}</span>
+          </Badge>
+        );
+      })}
       
       {remainingCount > 0 && (
-        <Badge variant="outline" className={`${sizeClasses[size]} bg-slate-100 text-slate-600`}>
-          +{remainingCount} <I18nText translationKey="gamification.moreBadges">more</I18nText>
+        <Badge variant="outline" className={`bg-slate-100 text-slate-600 ${sizeClasses[size]}`}>
+          +{remainingCount} de plus
         </Badge>
       )}
     </div>

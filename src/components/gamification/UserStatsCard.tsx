@@ -31,8 +31,7 @@ const UserStatsCard: React.FC = () => {
       const [points, level, badges] = await Promise.all([
         gamificationService.getUserPoints(user.id),
         gamificationService.getUserLevel(user.id),
-        // We'll need to add a getUserBadges method to the service
-        Promise.resolve([]) // Placeholder for now
+        gamificationService.getUserBadges ? gamificationService.getUserBadges(user.id) : Promise.resolve([])
       ]);
       
       setUserPoints(points);
@@ -51,7 +50,7 @@ const UserStatsCard: React.FC = () => {
         <CardContent className="p-6 text-center">
           <p className="text-slate-600">
             <I18nText translationKey="auth.loginToSeeStats">
-              Login to see your stats
+              Connectez-vous pour voir vos statistiques
             </I18nText>
           </p>
         </CardContent>
@@ -78,8 +77,8 @@ const UserStatsCard: React.FC = () => {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Trophy className="h-5 w-5 text-amber-500" />
-          <I18nText translationKey="profile.yourProgress">
-            Your Progress
+          <I18nText translationKey="gamification.yourProgress">
+            Votre Progression
           </I18nText>
         </CardTitle>
       </CardHeader>
@@ -104,7 +103,7 @@ const UserStatsCard: React.FC = () => {
               </div>
               <div className="text-xs text-slate-600">
                 <I18nText translationKey="gamification.totalPoints">
-                  Total Points
+                  Points totaux
                 </I18nText>
               </div>
             </div>
@@ -130,7 +129,7 @@ const UserStatsCard: React.FC = () => {
           <div>
             <div className="text-sm font-medium mb-2">
               <I18nText translationKey="gamification.recentBadges">
-                Recent Badges
+                Badges récents
               </I18nText>
             </div>
             <BadgeDisplay badges={userBadges} maxVisible={3} size="sm" />
@@ -139,12 +138,12 @@ const UserStatsCard: React.FC = () => {
           <div className="text-center py-4 text-slate-500">
             <div className="text-sm">
               <I18nText translationKey="gamification.noBadgesYet">
-                No badges earned yet
+                Aucun badge gagné pour le moment
               </I18nText>
             </div>
             <div className="text-xs">
               <I18nText translationKey="gamification.startContributing">
-                Start contributing to earn your first badge!
+                Commencez à contribuer pour gagner votre premier badge !
               </I18nText>
             </div>
           </div>

@@ -20,12 +20,12 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({
   const progressPercentage = (userLevel.xp / userLevel.next_level_xp) * 100;
   
   const getLevelTitle = (level: number) => {
-    if (level >= 100) return "Cultural Guardian";
-    if (level >= 50) return "Symbol Sage";
-    if (level >= 25) return "Journey Master";
-    if (level >= 10) return "Apprentice Scholar";
-    if (level >= 5) return "Novice Explorer";
-    return "Newcomer";
+    if (level >= 100) return "Gardien Culturel";
+    if (level >= 50) return "Sage des Symboles";
+    if (level >= 25) return "Maître du Voyage";
+    if (level >= 10) return "Érudit Apprenti";
+    if (level >= 5) return "Explorateur Novice";
+    return "Nouveau venu";
   };
 
   const getLevelColor = (level: number) => {
@@ -41,7 +41,7 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({
       <div className="flex items-center gap-2">
         <Trophy className={`h-4 w-4 ${getLevelColor(userLevel.level)}`} />
         <Badge variant="outline" className="text-xs">
-          <I18nText translationKey="profile.level" values={{ level: userLevel.level }} />
+          Niveau {userLevel.level}
         </Badge>
         <div className="flex-1 max-w-20">
           <Progress value={progressPercentage} className="h-2" />
@@ -57,7 +57,7 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({
           <Trophy className={`h-5 w-5 ${getLevelColor(userLevel.level)}`} />
           <div>
             <div className="font-semibold">
-              <I18nText translationKey="profile.level" values={{ level: userLevel.level }} />
+              Niveau {userLevel.level}
             </div>
             {showDetails && (
               <div className={`text-sm ${getLevelColor(userLevel.level)}`}>
@@ -71,12 +71,7 @@ const LevelProgressBar: React.FC<LevelProgressBarProps> = ({
           <div className="text-right text-sm text-slate-600">
             <div>{userLevel.xp} / {userLevel.next_level_xp} XP</div>
             <div className="text-xs">
-              <I18nText 
-                translationKey="profile.xpToNextLevel" 
-                values={{ xp: userLevel.next_level_xp - userLevel.xp }}
-              >
-                {userLevel.next_level_xp - userLevel.xp} XP to next level
-              </I18nText>
+              {userLevel.next_level_xp - userLevel.xp} XP jusqu'au niveau suivant
             </div>
           </div>
         )}
