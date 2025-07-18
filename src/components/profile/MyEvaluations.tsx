@@ -12,7 +12,7 @@ interface Evaluation {
   id: string;
   symbol_id: string;
   comment: string;
-  verification_rating: 'verified' | 'disputed' | 'unverified';
+  verification_rating: string;
   expertise_level: string;
   created_at: string;
   symbols?: {
@@ -51,7 +51,7 @@ const MyEvaluations: React.FC<MyEvaluationsProps> = ({ userId }) => {
           verification_rating,
           expertise_level,
           created_at,
-          symbols (
+          symbols!symbol_verification_community_symbol_id_fkey (
             name,
             culture,
             period
