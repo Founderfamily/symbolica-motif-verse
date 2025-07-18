@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ContributionFormData, CompleteContribution, ContributionImage, ContributionTag, ContributionComment } from '@/types/contributions';
 import { SecurityUtils } from '@/utils/securityUtils';
@@ -50,6 +49,8 @@ export const createContribution = async (
   imageFile: File
 ): Promise<string | null> => {
   try {
+    console.log('Creating contribution with data:', data);
+    
     // Input validation and sanitization
     const sanitizedData = {
       title: SecurityUtils.validateInput(data.title, 200),
@@ -57,7 +58,6 @@ export const createContribution = async (
       cultural_context: SecurityUtils.validateInput(data.cultural_context, 100),
       period: SecurityUtils.validateInput(data.period, 100),
       location_name: data.location_name ? SecurityUtils.validateInput(data.location_name, 200) : null,
-      contribution_type: data.contribution_type || 'symbol',
       latitude: data.latitude,
       longitude: data.longitude,
       significance: data.significance ? SecurityUtils.validateInput(data.significance, 1000) : null,
@@ -65,6 +65,8 @@ export const createContribution = async (
       sources: data.sources || [],
       tags: data.tags || []
     };
+
+    console.log('Sanitized data:', sanitizedData);
 
     // Validate image file
     if (!SecurityUtils.validateFileName(imageFile.name)) {
@@ -85,26 +87,51 @@ export const createContribution = async (
       throw new Error('Rate limit exceeded. You can only submit 3 contributions per hour');
     }
 
-    // Create the contribution record first
+    // Create the contribution record first - only include existing columns
+    const contributionPayload = {
+      user_id: userId,
+      title: sanitizedData.title,
+      description: sanitizedData.description,
+      cultural_context: sanitizedData.cultural_context,
+      period: sanitizedData.period,
+      location_name: sanitizedData.location_name,
+      latitude: sanitizedData.latitude,
+      longitude: sanitizedData.longitude,
+      status: 'pending'
+    };
+
+    // Only add new columns if they exist in the database
+    if (sanitizedData.significance) {
+      (contributionPayload as any).significance = sanitizedData.significance;
+    }
+    if (sanitizedData.historical_context) {
+      (contributionPayload as any).historical_context = sanitizedData.historical_context;
+    }
+    if (sanitizedData.sources && sanitizedData.sources.length > 0) {
+      (contributionPayload as any).sources = sanitizedData.sources;
+    }
+
+    console.log('Creating contribution with payload:', contributionPayload);
+
     const { data: contribution, error: contributionError } = await supabase
       .from('user_contributions')
-      .insert({
-        user_id: userId,
-        ...sanitizedData,
-        status: 'pending'
-      })
+      .insert(contributionPayload)
       .select()
       .single();
 
     if (contributionError) {
       console.error('Error creating contribution:', contributionError);
-      throw contributionError;
+      throw new Error(`Failed to create contribution: ${contributionError.message}`);
     }
+
+    console.log('Contribution created successfully:', contribution);
 
     // Upload image with secure file naming
     const fileExtension = imageFile.name.split('.').pop();
     const sanitizedFileName = `${contribution.id}_${Date.now()}.${fileExtension}`;
     
+    console.log('Uploading image:', sanitizedFileName);
+
     const { error: uploadError } = await supabase.storage
       .from('contribution-images')
       .upload(sanitizedFileName, imageFile, {
@@ -116,13 +143,15 @@ export const createContribution = async (
       console.error('Error uploading image:', uploadError);
       // Clean up the contribution record if image upload fails
       await supabase.from('user_contributions').delete().eq('id', contribution.id);
-      throw uploadError;
+      throw new Error(`Failed to upload image: ${uploadError.message}`);
     }
 
     // Get the public URL for the uploaded image
     const { data: urlData } = supabase.storage
       .from('contribution-images')
       .getPublicUrl(sanitizedFileName);
+
+    console.log('Image uploaded, creating image record with URL:', urlData.publicUrl);
 
     // Create the image record
     const { error: imageError } = await supabase
@@ -135,11 +164,13 @@ export const createContribution = async (
 
     if (imageError) {
       console.error('Error creating image record:', imageError);
-      throw imageError;
+      throw new Error(`Failed to create image record: ${imageError.message}`);
     }
 
     // Process tags if provided
     if (data.tags && data.tags.length > 0) {
+      console.log('Processing tags:', data.tags);
+      
       const tagInserts = data.tags.map(tag => ({
         contribution_id: contribution.id,
         tag: SecurityUtils.validateInput(tag, 50)
@@ -155,7 +186,7 @@ export const createContribution = async (
       }
     }
 
-    console.log('Contribution created successfully:', contribution.id);
+    console.log('Contribution created successfully with ID:', contribution.id);
     return contribution.id;
 
   } catch (error) {

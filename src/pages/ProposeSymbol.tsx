@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -94,21 +93,26 @@ const ProposeSymbol: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!imageFile) {
       toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner une image",
+        title: "Image requise",
+        description: "Veuillez sélectionner une image pour votre symbole",
         variant: "destructive"
       });
       return;
     }
 
     setIsSubmitting(true);
+    console.log('Starting form submission...');
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Vous devez être connecté pour proposer un symbole');
       }
+
+      console.log('User authenticated:', user.id);
 
       // Préparer les données avec les valeurs personnalisées si nécessaire
       const finalFormData = {
@@ -117,7 +121,12 @@ const ProposeSymbol: React.FC = () => {
         period: formData.period === 'autre' ? formData.custom_period : formData.period
       };
 
+      console.log('Final form data:', finalFormData);
+      console.log('Image file:', imageFile);
+
       const contributionId = await createContribution(user.id, finalFormData, imageFile);
+      
+      console.log('Contribution created with ID:', contributionId);
       
       toast({
         title: "Symbole proposé avec succès !",
@@ -126,9 +135,30 @@ const ProposeSymbol: React.FC = () => {
       
       navigate('/profile?tab=contributions');
     } catch (error: any) {
+      console.error('Submission error:', error);
+      
+      let errorMessage = "Une erreur est survenue lors de la soumission";
+      
+      // Provide more specific error messages
+      if (error.message?.includes('rate limit')) {
+        errorMessage = "Vous avez atteint la limite de 3 propositions par heure. Veuillez réessayer plus tard.";
+      } else if (error.message?.includes('file type')) {
+        errorMessage = "Format d'image non supporté. Utilisez JPG, PNG ou WebP.";
+      } else if (error.message?.includes('file size')) {
+        errorMessage = "L'image est trop volumineuse. Taille maximale : 5MB.";
+      } else if (error.message?.includes('Invalid file name')) {
+        errorMessage = "Nom de fichier invalide. Évitez les caractères spéciaux.";
+      } else if (error.message?.includes('Failed to upload image')) {
+        errorMessage = "Échec de l'upload de l'image. Vérifiez votre connexion.";
+      } else if (error.message?.includes('Failed to create contribution')) {
+        errorMessage = "Erreur lors de l'enregistrement. Vérifiez que tous les champs requis sont remplis.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la soumission",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
