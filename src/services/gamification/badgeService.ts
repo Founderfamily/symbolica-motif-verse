@@ -74,12 +74,13 @@ export const badgeService = {
     try {
       const { data, error } = await supabase
         .from('user_badges')
-        .select('badge_type')
-        .distinct();
+        .select('badge_type');
         
       if (error) throw error;
       
-      return (data || []).map(item => item.badge_type).filter(Boolean);
+      // Get unique badge types manually
+      const uniqueTypes = [...new Set((data || []).map(item => item.badge_type).filter(Boolean))];
+      return uniqueTypes;
     } catch (error) {
       console.error("Error fetching badge types:", error);
       return [];
