@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../hooks/useCollections';
 import { CollectionStatsDisplay } from '@/components/collections/CollectionStatsDisplay';
-import { CacheInvalidationNotice } from '@/components/collections/CacheInvalidationNotice';
+import { SystemBanner } from '@/components/ui/system-banner';
 
 const CollectionsPage = () => {
   const { currentLanguage } = useTranslation();
@@ -19,8 +19,8 @@ const CollectionsPage = () => {
     <CollectionErrorBoundary>
       <div className="min-h-screen bg-slate-50">
         <div className="container mx-auto px-4 py-8">
-          {/* Cache invalidation notice for new collections structure */}
-          <CacheInvalidationNotice />
+          {/* System banner replaces the cache invalidation notice */}
+          <SystemBanner />
           
           {/* Hero Section */}
           <section className="text-center mb-12">
