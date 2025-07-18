@@ -14,7 +14,10 @@ import {
   ThumbsDown,
   User,
   Clock,
-  MessageSquare
+  MessageSquare,
+  Trash2,
+  Filter,
+  Search
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -42,6 +45,7 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [filterType, setFilterType] = useState<string>('all');
 
   useEffect(() => {
     checkUser();
@@ -170,6 +174,32 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
     }
   };
 
+  const deleteItem = async (itemId: string) => {
+    if (!userProfile?.is_admin) {
+      toast.error('Action réservée aux administrateurs');
+      return;
+    }
+
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cet élément ?")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('symbol_moderation_items')
+        .delete()
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      await loadModerationItems();
+      toast.success('Élément supprimé définitivement');
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -203,8 +233,12 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
     }
   };
 
-  const pendingItems = moderationItems.filter(item => item.status === 'pending');
-  const processedItems = moderationItems.filter(item => item.status !== 'pending');
+  const filteredItems = moderationItems.filter(item => 
+    filterType === 'all' || item.type === filterType
+  );
+  
+  const pendingItems = filteredItems.filter(item => item.status === 'pending');
+  const processedItems = filteredItems.filter(item => item.status !== 'pending');
 
   if (loading) {
     return (
@@ -216,16 +250,32 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Shield className="h-5 w-5 text-blue-600" />
-        <h3 className="text-lg font-semibold text-slate-900">
-          Modération communautaire
-        </h3>
-        {pendingItems.length > 0 && (
-          <Badge variant="outline" className="bg-red-50 text-red-700">
-            {pendingItems.length} en attente
-          </Badge>
-        )}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Shield className="h-5 w-5 text-blue-600" />
+          <h3 className="text-lg font-semibold text-slate-900">
+            Modération communautaire
+          </h3>
+          {pendingItems.length > 0 && (
+            <Badge variant="outline" className="bg-red-50 text-red-700">
+              {pendingItems.length} en attente
+            </Badge>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-slate-500" />
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="px-3 py-1 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">Tous les types</option>
+            <option value="comment">Commentaires</option>
+            <option value="source">Sources</option>
+            <option value="symbol_info">Informations</option>
+          </select>
+        </div>
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
@@ -315,6 +365,15 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
                           <ThumbsDown className="h-4 w-4" />
                           Rejeter
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => deleteItem(item.id)}
+                          className="flex items-center gap-1 text-red-700 border-red-400 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Supprimer
+                        </Button>
                       </>
                     )}
                   </div>
@@ -353,15 +412,29 @@ export const CommunityModeration: React.FC<CommunityModerationProps> = ({ symbol
                   <p className="text-slate-700">{item.content}</p>
                 </div>
                 
-                <div className="flex items-center gap-4 text-sm text-slate-500">
-                  <div className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    <span>{item.user.full_name || item.user.username}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-sm text-slate-500">
+                    <div className="flex items-center gap-1">
+                      <User className="h-4 w-4" />
+                      <span>{item.user.full_name || item.user.username}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{new Date(item.created_at).toLocaleDateString('fr-FR')}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{new Date(item.created_at).toLocaleDateString('fr-FR')}</span>
-                  </div>
+
+                  {userProfile?.is_admin && item.status === 'rejected' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => deleteItem(item.id)}
+                      className="flex items-center gap-1 text-red-700 border-red-400 hover:bg-red-100"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Supprimer définitivement
+                    </Button>
+                  )}
                 </div>
               </Card>
             ))

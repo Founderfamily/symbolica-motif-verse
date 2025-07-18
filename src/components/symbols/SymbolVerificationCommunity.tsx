@@ -14,7 +14,8 @@ import {
   Shield,
   Send,
   Info,
-  Flag
+  Flag,
+  Trash2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -148,6 +149,45 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
     } catch (error) {
       console.error('Erreur lors du signalement:', error);
       toast.error("Erreur lors du signalement du commentaire");
+    }
+  };
+
+  const deleteComment = async (commentId: string) => {
+    if (!userProfile?.is_admin) {
+      toast.error("Action réservée aux administrateurs");
+      return;
+    }
+
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('symbol_verification_community' as any)
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      toast.success("Commentaire supprimé avec succès");
+      loadCommunityComments();
+      
+      // Marquer les signalements liés comme traités
+      await supabase
+        .from('symbol_moderation_items')
+        .update({ 
+          status: 'rejected',
+          reviewed_by: userProfile.id,
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('symbol_id', symbol.id)
+        .eq('item_type', 'community_comment')
+        .eq('status', 'pending');
+        
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast.error("Erreur lors de la suppression du commentaire");
     }
   };
 
@@ -355,15 +395,29 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
                   <span>{new Date(comment.created_at).toLocaleString('fr-FR')}</span>
                 </div>
                 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => reportComment(comment.id, comment.comment)}
-                  className="flex items-center gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                >
-                  <Flag className="h-3 w-3" />
-                  Signaler
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => reportComment(comment.id, comment.comment)}
+                    className="flex items-center gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  >
+                    <Flag className="h-3 w-3" />
+                    Signaler
+                  </Button>
+                  
+                  {isAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => deleteComment(comment.id)}
+                      className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Supprimer
+                    </Button>
+                  )}
+                </div>
               </div>
             </Card>
           ))
