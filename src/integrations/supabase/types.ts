@@ -2887,6 +2887,7 @@ export type Database = {
       symbols: {
         Row: {
           created_at: string | null
+          cultural_taxonomy_code: string | null
           culture: string
           description: string | null
           function: string[] | null
@@ -2900,11 +2901,14 @@ export type Database = {
           sources: Json | null
           tags: string[] | null
           technique: string[] | null
+          temporal_taxonomy_code: string | null
+          thematic_taxonomy_codes: string[] | null
           translations: Json | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          cultural_taxonomy_code?: string | null
           culture: string
           description?: string | null
           function?: string[] | null
@@ -2918,11 +2922,14 @@ export type Database = {
           sources?: Json | null
           tags?: string[] | null
           technique?: string[] | null
+          temporal_taxonomy_code?: string | null
+          thematic_taxonomy_codes?: string[] | null
           translations?: Json | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          cultural_taxonomy_code?: string | null
           culture?: string
           description?: string | null
           function?: string[] | null
@@ -2936,6 +2943,8 @@ export type Database = {
           sources?: Json | null
           tags?: string[] | null
           technique?: string[] | null
+          temporal_taxonomy_code?: string | null
+          thematic_taxonomy_codes?: string[] | null
           translations?: Json | null
           updated_at?: string | null
         }

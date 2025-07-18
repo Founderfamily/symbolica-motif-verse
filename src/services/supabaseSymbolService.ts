@@ -38,7 +38,12 @@ export class SupabaseSymbolService {
   async getSymbolById(id: string): Promise<SymbolData | null> {
     const { data, error } = await supabase
       .from('symbols')
-      .select('*')
+      .select(`
+        *,
+        cultural_taxonomy_code,
+        temporal_taxonomy_code,
+        thematic_taxonomy_codes
+      `)
       .eq('id', id)
       .maybeSingle();
 
@@ -57,7 +62,10 @@ export class SupabaseSymbolService {
     const { data, error } = await supabase
       .from('symbols')
       .select(`
-        *
+        *,
+        cultural_taxonomy_code,
+        temporal_taxonomy_code,
+        thematic_taxonomy_codes
       `)
       .order('created_at', { ascending: false });
 
@@ -244,7 +252,12 @@ export class SupabaseSymbolService {
   ): Promise<SymbolData[]> {
     let queryBuilder = supabase
       .from('symbols')
-      .select('*');
+      .select(`
+        *,
+        cultural_taxonomy_code,
+        temporal_taxonomy_code,
+        thematic_taxonomy_codes
+      `);
 
     if (query) {
       queryBuilder = queryBuilder.ilike('name', `%${query}%`);
