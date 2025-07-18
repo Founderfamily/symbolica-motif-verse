@@ -38,12 +38,7 @@ export class SupabaseSymbolService {
   async getSymbolById(id: string): Promise<SymbolData | null> {
     const { data, error } = await supabase
       .from('symbols')
-      .select(`
-        *,
-        cultural_taxonomy_code,
-        temporal_taxonomy_code,
-        thematic_taxonomy_codes
-      `)
+      .select('*')
       .eq('id', id)
       .maybeSingle();
 
@@ -62,10 +57,7 @@ export class SupabaseSymbolService {
     const { data, error } = await supabase
       .from('symbols')
       .select(`
-        *,
-        cultural_taxonomy_code,
-        temporal_taxonomy_code,
-        thematic_taxonomy_codes
+        *
       `)
       .order('created_at', { ascending: false });
 
@@ -80,7 +72,7 @@ export class SupabaseSymbolService {
   /**
    * Récupère les images d'un symbole
    */
-  async getSymbolImages(symbolId: string): Promise<{ [key: string]: SymbolImage | null }> {
+  async getSymbolImages(symbolId: string): Promise<SymbolImage[]> {
     const { data, error } = await supabase
       .from('symbol_images')
       .select('*')
@@ -88,32 +80,10 @@ export class SupabaseSymbolService {
 
     if (error) {
       logger.error('Error fetching symbol images', { error, symbolId });
-      return {
-        original: null,
-        pattern: null,
-        reuse: null,
-      };
+      return [];
     }
 
-    const images: { [key: string]: SymbolImage | null } = {
-      original: null,
-      pattern: null,
-      reuse: null,
-    };
-
-    if (data) {
-      data.forEach(image => {
-        if (image.image_type === 'original') {
-          images.original = image;
-        } else if (image.image_type === 'pattern') {
-          images.pattern = image;
-        } else if (image.image_type === 'reuse') {
-          images.reuse = image;
-        }
-      });
-    }
-
-    return images;
+    return data || [];
   }
 
   /**
@@ -274,12 +244,7 @@ export class SupabaseSymbolService {
   ): Promise<SymbolData[]> {
     let queryBuilder = supabase
       .from('symbols')
-      .select(`
-        *,
-        cultural_taxonomy_code,
-        temporal_taxonomy_code,
-        thematic_taxonomy_codes
-      `);
+      .select('*');
 
     if (query) {
       queryBuilder = queryBuilder.ilike('name', `%${query}%`);
@@ -313,15 +278,29 @@ export class SupabaseSymbolService {
   }
 
   /**
-   * Incrémente le compteur de vues d'un symbole
+   * Trouve un symbole par son nom
    */
-  async incrementViewCount(symbolId: string): Promise<void> {
-    const { error } = await supabase.rpc('increment_symbol_view_count', { symbol_id: symbolId });
+  async findSymbolByName(name: string): Promise<SymbolData | null> {
+    const { data, error } = await supabase
+      .from('symbols')
+      .select('*')
+      .eq('name', name)
+      .maybeSingle();
 
     if (error) {
-      logger.error('Error incrementing view count', { error, symbolId });
-      // We don't throw the error here because it's not critical
+      logger.error('Error finding symbol by name', { error, name });
+      return null;
     }
+
+    return data;
+  }
+
+  /**
+   * Incrémente le compteur de vues d'un symbole (désactivé pour l'instant)
+   */
+  async incrementViewCount(symbolId: string): Promise<void> {
+    // Function disabled until database function is created
+    logger.info('View count increment requested', { symbolId });
   }
 }
 
