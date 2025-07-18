@@ -36,7 +36,7 @@ const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
     try {
       setLoading(true);
 
-      // Charger les signalements faits par l'utilisateur (commentaires, etc.)
+      // Charger les signalements faits par l'utilisateur depuis symbol_moderation_items
       const { data: userReports, error: userReportsError } = await supabase
         .from('symbol_moderation_items')
         .select(`
@@ -44,20 +44,14 @@ const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
           profiles!symbol_moderation_items_reviewed_by_fkey (
             username,
             full_name
-          ),
-          post_comments!symbol_moderation_items_item_id_fkey (
-            content,
-            user_id,
-            profiles!post_comments_user_id_fkey (
-              username,
-              full_name
-            )
           )
         `)
         .eq('reported_by', targetUserId)
         .order('created_at', { ascending: false });
 
-      if (userReportsError) throw userReportsError;
+      if (userReportsError) {
+        console.error('Erreur lors du chargement des signalements utilisateur:', userReportsError);
+      }
 
       // Charger les signalements concernant les contributions de l'utilisateur
       const { data: contributionReports, error: contributionReportsError } = await supabase
@@ -77,7 +71,9 @@ const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
         .eq('user_contributions.user_id', targetUserId)
         .order('created_at', { ascending: false });
 
-      if (contributionReportsError) throw contributionReportsError;
+      if (contributionReportsError) {
+        console.error('Erreur lors du chargement des signalements de contributions:', contributionReportsError);
+      }
 
       setMyReports(userReports || []);
       setReportsAboutMe(contributionReports || []);
@@ -172,9 +168,9 @@ const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
                 {isUserReport ? 'Mon signalement' : 'Signalement de contribution'}
               </span>
             </CardTitle>
-            {isUserReport && report.post_comments ? (
+            {isUserReport ? (
               <p className="text-sm text-gray-600 mt-1">
-                Commentaire signalé de {report.post_comments.profiles?.full_name || report.post_comments.profiles?.username || 'utilisateur inconnu'}
+                Signalement de contenu ({report.item_type || 'élément'})
               </p>
             ) : (
               report.user_contributions && (
@@ -192,17 +188,8 @@ const MyReports: React.FC<MyReportsProps> = ({ userId }) => {
         <div className="space-y-3">
           <div className="text-sm text-gray-700">
             <p className="font-medium">Raison du signalement:</p>
-            <p className="mt-1">{report.reason}</p>
+            <p className="mt-1">{report.content || report.reason || 'Aucune raison spécifiée'}</p>
           </div>
-
-          {isUserReport && report.post_comments && (
-            <div className="text-sm text-gray-700">
-              <p className="font-medium">Contenu signalé:</p>
-              <div className="mt-1 p-2 bg-gray-50 rounded border-l-4 border-gray-300">
-                <p className="italic">"{report.post_comments.content}"</p>
-              </div>
-            </div>
-          )}
 
           <div className="text-sm text-gray-600">
             {getStatusDescription(report.status)}
