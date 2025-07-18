@@ -3612,6 +3612,17 @@ export type Database = {
       }
     }
     Views: {
+      collection_taxonomy_audit: {
+        Row: {
+          collection_slug: string | null
+          collection_title: string | null
+          cultural_taxonomy_code: string | null
+          symbol_culture: string | null
+          symbol_name: string | null
+          taxonomy_status: string | null
+        }
+        Relationships: []
+      }
       collections_with_symbols: {
         Row: {
           collection_symbols: Json | null
@@ -3952,6 +3963,10 @@ export type Database = {
           symbol_id: string
           collection_found: boolean
         }[]
+      }
+      redistribute_symbols_by_unesco_taxonomy: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       toggle_user_ban: {
         Args: { p_user_id: string; p_admin_id: string; p_banned: boolean }
