@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PaginatedSymbol, useUpdateSymbol } from '@/hooks/useAdminSymbols';
 import { useSymbolSources, useAddSymbolSource, useDeleteSymbolSource } from '@/hooks/useSymbolSources';
-import { useSymbolImages, useSymbolImageUpload, useDeleteSymbolImage } from '@/hooks/useSymbolImageUpload';
+import { useSymbolImageUpload, useDeleteSymbolImage } from '@/hooks/useSymbolImageUpload';
+import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { useSymbolCommunityVerification } from '@/hooks/useSymbolCommunityVerification';
 import { Plus, Trash2, Upload, ExternalLink } from 'lucide-react';
 
