@@ -49,6 +49,7 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
         symbol={symbol}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onSymbolUpdated={onSymbolUpdated}
       />
     </>
   );

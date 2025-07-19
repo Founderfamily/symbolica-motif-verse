@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PaginatedSymbol, useUpdateSymbol } from '@/hooks/useAdminSymbols';
 import { SymbolData } from '@/types/supabase';
@@ -12,20 +13,27 @@ import { useSymbolSources, useAddSymbolSource, useDeleteSymbolSource } from '@/h
 import { useSymbolImageUpload, useDeleteSymbolImage } from '@/hooks/useSymbolImageUpload';
 import { useSymbolImages } from '@/hooks/useSymbolImages';
 import { useSymbolCommunityVerification } from '@/hooks/useSymbolCommunityVerification';
-import { Plus, Trash2, Upload, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Upload, ExternalLink, X } from 'lucide-react';
 
 interface SymbolEditModalProps {
   symbol: PaginatedSymbol | SymbolData | null;
   isOpen: boolean;
   onClose: () => void;
+  onSymbolUpdated?: (updatedSymbol: SymbolData) => void;
 }
 
-export function SymbolEditModal({ symbol, isOpen, onClose }: SymbolEditModalProps) {
+export function SymbolEditModal({ symbol, isOpen, onClose, onSymbolUpdated }: SymbolEditModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     culture: '',
     period: '',
-    description: ''
+    description: '',
+    significance: '',
+    historical_context: '',
+    tags: [] as string[],
+    medium: [] as string[],
+    technique: [] as string[],
+    function: [] as string[]
   });
 
   const [newSource, setNewSource] = useState({
@@ -34,6 +42,11 @@ export function SymbolEditModal({ symbol, isOpen, onClose }: SymbolEditModalProp
     source_type: 'academic',
     description: ''
   });
+
+  const [newTag, setNewTag] = useState('');
+  const [newMedium, setNewMedium] = useState('');
+  const [newTechnique, setNewTechnique] = useState('');
+  const [newFunction, setNewFunction] = useState('');
 
   const updateSymbol = useUpdateSymbol();
   const { data: sources } = useSymbolSources(symbol?.id || null);
@@ -50,7 +63,13 @@ export function SymbolEditModal({ symbol, isOpen, onClose }: SymbolEditModalProp
         name: symbol.name || '',
         culture: symbol.culture || '',
         period: symbol.period || '',
-        description: symbol.description || ''
+        description: symbol.description || '',
+        significance: symbol.significance || '',
+        historical_context: symbol.historical_context || '',
+        tags: symbol.tags || [],
+        medium: symbol.medium || [],
+        technique: symbol.technique || [],
+        function: symbol.function || []
       });
     }
   }, [symbol]);
@@ -60,10 +79,15 @@ export function SymbolEditModal({ symbol, isOpen, onClose }: SymbolEditModalProp
     if (!symbol) return;
 
     try {
-      await updateSymbol.mutateAsync({
+      const updatedSymbol = await updateSymbol.mutateAsync({
         id: symbol.id,
         updates: formData
       });
+      
+      if (onSymbolUpdated && updatedSymbol) {
+        onSymbolUpdated(updatedSymbol);
+      }
+      
       onClose();
     } catch (error) {
       console.error('Error updating symbol:', error);
@@ -72,6 +96,23 @@ export function SymbolEditModal({ symbol, isOpen, onClose }: SymbolEditModalProp
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addToArray = (field: keyof typeof formData, value: string, setValue: (value: string) => void) => {
+    if (value.trim() && !formData[field].includes(value.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        [field]: [...prev[field], value.trim()]
+      }));
+      setValue('');
+    }
+  };
+
+  const removeFromArray = (field: keyof typeof formData, index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index)
+    }));
   };
 
   const handleAddSource = async () => {
@@ -176,8 +217,172 @@ export function SymbolEditModal({ symbol, isOpen, onClose }: SymbolEditModalProp
                   id="description"
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
-                  rows={4}
+                  rows={3}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="significance">Signification</Label>
+                <Textarea
+                  id="significance"
+                  value={formData.significance}
+                  onChange={(e) => handleChange('significance', e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="historical_context">Contexte historique</Label>
+                <Textarea
+                  id="historical_context"
+                  value={formData.historical_context}
+                  onChange={(e) => handleChange('historical_context', e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              {/* Tags Section */}
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Ajouter un tag..."
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addToArray('tags', newTag, setNewTag);
+                      }
+                    }}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={() => addToArray('tags', newTag, setNewTag)}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      {tag}
+                      <X 
+                        className="h-3 w-3 cursor-pointer" 
+                        onClick={() => removeFromArray('tags', index)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Medium Section */}
+              <div className="space-y-2">
+                <Label>Support/Matériau</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newMedium}
+                    onChange={(e) => setNewMedium(e.target.value)}
+                    placeholder="Ajouter un support..."
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addToArray('medium', newMedium, setNewMedium);
+                      }
+                    }}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={() => addToArray('medium', newMedium, setNewMedium)}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.medium.map((item, index) => (
+                    <Badge key={index} variant="outline" className="flex items-center gap-1">
+                      {item}
+                      <X 
+                        className="h-3 w-3 cursor-pointer" 
+                        onClick={() => removeFromArray('medium', index)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Technique Section */}
+              <div className="space-y-2">
+                <Label>Technique</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newTechnique}
+                    onChange={(e) => setNewTechnique(e.target.value)}
+                    placeholder="Ajouter une technique..."
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addToArray('technique', newTechnique, setNewTechnique);
+                      }
+                    }}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={() => addToArray('technique', newTechnique, setNewTechnique)}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.technique.map((item, index) => (
+                    <Badge key={index} variant="default" className="flex items-center gap-1">
+                      {item}
+                      <X 
+                        className="h-3 w-3 cursor-pointer" 
+                        onClick={() => removeFromArray('technique', index)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Function Section */}
+              <div className="space-y-2">
+                <Label>Fonction</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newFunction}
+                    onChange={(e) => setNewFunction(e.target.value)}
+                    placeholder="Ajouter une fonction..."
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addToArray('function', newFunction, setNewFunction);
+                      }
+                    }}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={() => addToArray('function', newFunction, setNewFunction)}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.function.map((item, index) => (
+                    <Badge key={index} variant="destructive" className="flex items-center gap-1">
+                      {item}
+                      <X 
+                        className="h-3 w-3 cursor-pointer" 
+                        onClick={() => removeFromArray('function', index)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
               </div>
 
               <DialogFooter>
