@@ -246,7 +246,18 @@ export const useUpdateSymbol = () => {
   return useMutation({
     mutationFn: async ({ id, updates }: { 
       id: string; 
-      updates: Partial<{ name: string; culture: string; period: string; description: string }> 
+      updates: Partial<{ 
+        name: string; 
+        culture: string; 
+        period: string; 
+        description: string;
+        significance: string;
+        historical_context: string;
+        tags: string[];
+        medium: string[];
+        technique: string[];
+        function: string[];
+      }> 
     }) => {
       const { error } = await supabase
         .from('symbols')

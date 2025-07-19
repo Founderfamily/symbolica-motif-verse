@@ -57,12 +57,12 @@ export function SymbolEditModalAdvanced({
         culture: symbol.culture || '',
         period: symbol.period || '',
         description: symbol.description || '',
-        significance: symbol.significance || '',
-        historical_context: symbol.historical_context || '',
-        tags: symbol.tags || [],
-        medium: symbol.medium || [],
-        technique: symbol.technique || [],
-        function: symbol.function || []
+        significance: (symbol as SymbolData).significance || '',
+        historical_context: (symbol as SymbolData).historical_context || '',
+        tags: (symbol as SymbolData).tags || [],
+        medium: (symbol as SymbolData).medium || [],
+        technique: (symbol as SymbolData).technique || [],
+        function: (symbol as SymbolData).function || []
       });
     }
   }, [symbol]);
