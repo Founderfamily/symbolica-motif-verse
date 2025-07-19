@@ -3763,6 +3763,18 @@ export type Database = {
         Args: { p_contribution_id: string }
         Returns: string
       }
+      create_notification: {
+        Args: {
+          p_user_id: string
+          p_type: string
+          p_title: string
+          p_message: string
+          p_action_url?: string
+          p_entity_id?: string
+          p_entity_type?: string
+        }
+        Returns: string
+      }
       create_user_as_admin: {
         Args: {
           p_admin_id: string
