@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -66,10 +65,10 @@ export function SymbolEditModal({ symbol, isOpen, onClose, onSymbolUpdated }: Sy
         description: symbol.description || '',
         significance: symbol.significance || '',
         historical_context: symbol.historical_context || '',
-        tags: symbol.tags || [],
-        medium: symbol.medium || [],
-        technique: symbol.technique || [],
-        function: symbol.function || []
+        tags: Array.isArray(symbol.tags) ? symbol.tags : [],
+        medium: Array.isArray(symbol.medium) ? symbol.medium : [],
+        technique: Array.isArray(symbol.technique) ? symbol.technique : [],
+        function: Array.isArray(symbol.function) ? symbol.function : []
       });
     }
   }, [symbol]);
@@ -79,14 +78,10 @@ export function SymbolEditModal({ symbol, isOpen, onClose, onSymbolUpdated }: Sy
     if (!symbol) return;
 
     try {
-      const updatedSymbol = await updateSymbol.mutateAsync({
+      await updateSymbol.mutateAsync({
         id: symbol.id,
         updates: formData
       });
-      
-      if (onSymbolUpdated && updatedSymbol) {
-        onSymbolUpdated(updatedSymbol);
-      }
       
       onClose();
     } catch (error) {
@@ -99,20 +94,26 @@ export function SymbolEditModal({ symbol, isOpen, onClose, onSymbolUpdated }: Sy
   };
 
   const addToArray = (field: keyof typeof formData, value: string, setValue: (value: string) => void) => {
-    if (value.trim() && !formData[field].includes(value.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        [field]: [...prev[field], value.trim()]
-      }));
-      setValue('');
+    if (value.trim()) {
+      const currentArray = formData[field];
+      if (Array.isArray(currentArray) && !currentArray.includes(value.trim())) {
+        setFormData(prev => ({
+          ...prev,
+          [field]: [...currentArray, value.trim()]
+        }));
+        setValue('');
+      }
     }
   };
 
   const removeFromArray = (field: keyof typeof formData, index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field].filter((_, i) => i !== index)
-    }));
+    const currentArray = formData[field];
+    if (Array.isArray(currentArray)) {
+      setFormData(prev => ({
+        ...prev,
+        [field]: currentArray.filter((_, i) => i !== index)
+      }));
+    }
   };
 
   const handleAddSource = async () => {

@@ -26,6 +26,12 @@ export interface PaginatedSymbol {
   image_count: number;
   verification_count: number;
   total_count: number;
+  significance?: string | null;
+  historical_context?: string | null;
+  tags?: string[] | null;
+  medium?: string[] | null;
+  technique?: string[] | null;
+  function?: string[] | null;
 }
 
 export const useAdminSymbols = (
@@ -49,7 +55,13 @@ export const useAdminSymbols = (
           period,
           description,
           created_at,
-          updated_at
+          updated_at,
+          significance,
+          historical_context,
+          tags,
+          medium,
+          technique,
+          function
         `, { count: 'exact' });
 
       // Appliquer les filtres de base
