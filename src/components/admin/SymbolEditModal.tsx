@@ -40,6 +40,8 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
 }) => {
   const [open, setOpen] = useState(trigger ? false : true);
   
+  console.log('SymbolEditModal - Montage du composant, trigger:', trigger, 'open initial:', open);
+  
   // Helper function to ensure sources is an array
   const getSourcesArray = (sources: any): Array<{title: string, url: string, type: string}> => {
     if (!sources) return [];

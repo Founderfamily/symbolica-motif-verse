@@ -24,7 +24,9 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
   }
 
   const handleClick = () => {
+    console.log('AdminFloatingEditButton - Bouton cliqué, showModal avant:', showModal);
     setShowModal(true);
+    console.log('AdminFloatingEditButton - setShowModal(true) appelé');
   };
 
   const handleSymbolUpdated = (updatedSymbol: SymbolData) => {
