@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { X, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUpdateSymbol } from '@/hooks/useAdminSymbols';
@@ -137,7 +138,7 @@ export function SymbolEditModalAdvanced({
                 <CardTitle className="text-sm">Image principale</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="aspect-square bg-slate-100 rounded-lg overflow-hidden">
+                <AspectRatio ratio={1} className="bg-slate-100 rounded-lg overflow-hidden">
                   {primaryImage ? (
                     <img
                       src={primaryImage.image_url}
@@ -153,7 +154,7 @@ export function SymbolEditModalAdvanced({
                       Aucune image
                     </div>
                   )}
-                </div>
+                </AspectRatio>
               </CardContent>
             </Card>
 
@@ -166,7 +167,7 @@ export function SymbolEditModalAdvanced({
                 <CardContent>
                   <div className="grid grid-cols-3 gap-2">
                     {imagesArray.slice(0, 6).map((image, index) => (
-                      <div key={image?.id || index} className="relative aspect-square bg-slate-100 rounded overflow-hidden">
+                      <AspectRatio key={image?.id || index} ratio={1} className="bg-slate-100 rounded overflow-hidden">
                         {image && (
                           <img
                             src={image.image_url}
@@ -178,7 +179,7 @@ export function SymbolEditModalAdvanced({
                             }}
                           />
                         )}
-                      </div>
+                      </AspectRatio>
                     ))}
                   </div>
                   {imagesArray.length > 6 && (
