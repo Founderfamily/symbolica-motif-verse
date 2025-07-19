@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PaginatedSymbol, useUpdateSymbol } from '@/hooks/useAdminSymbols';
+import { SymbolData } from '@/types/supabase';
 import { useSymbolSources, useAddSymbolSource, useDeleteSymbolSource } from '@/hooks/useSymbolSources';
 import { useSymbolImageUpload, useDeleteSymbolImage } from '@/hooks/useSymbolImageUpload';
 import { useSymbolImages } from '@/hooks/useSymbolImages';
@@ -14,7 +15,7 @@ import { useSymbolCommunityVerification } from '@/hooks/useSymbolCommunityVerifi
 import { Plus, Trash2, Upload, ExternalLink } from 'lucide-react';
 
 interface SymbolEditModalProps {
-  symbol: PaginatedSymbol | null;
+  symbol: PaginatedSymbol | SymbolData | null;
   isOpen: boolean;
   onClose: () => void;
 }
