@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,9 @@ import {
   Search, 
   ShieldCheck,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Info,
+  History
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -77,6 +79,129 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
   const [results, setResults] = useState<Record<string, VerificationResult>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('overview');
+  const [verificationHistory, setVerificationHistory] = useState<any[]>([]);
+  const [currentVerification, setCurrentVerification] = useState<any | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    loadVerificationHistory();
+  }, [symbol.id, refreshKey]);
+
+  // Auto-refresh every 30 seconds to catch new verifications
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadVerificationHistory = async () => {
+    try {
+      setHistoryLoading(true);
+      
+      const { data: verifications, error } = await supabase
+        .from('symbol_verifications')
+        .select('*')
+        .eq('symbol_id', symbol.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (verifications && verifications.length > 0) {
+        const groupedVerifications = groupVerificationsBySession(verifications);
+        
+        const history = groupedVerifications.map(group => {
+          const averageConfidence = Math.round(
+            group.reduce((acc, v) => acc + v.confidence, 0) / group.length
+          );
+          
+          const overallStatus = determineOverallStatus(group, averageConfidence);
+          
+          return {
+            id: group[0].id,
+            timestamp: group[0].created_at,
+            overallStatus,
+            averageConfidence,
+            verifiedBy: 'Système automatique',
+            results: group.map(v => ({
+              api: v.api,
+              status: v.status,
+              confidence: v.confidence,
+              summary: v.summary,
+              sources: v.sources
+            }))
+          };
+        });
+
+        setVerificationHistory(history);
+        setCurrentVerification(history[0] || null);
+      } else {
+        setVerificationHistory([]);
+        setCurrentVerification(null);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement de l\'historique:', error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const groupVerificationsBySession = (verifications: any[]) => {
+    const sessions: any[][] = [];
+    const sortedVerifications = [...verifications].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    for (const verification of sortedVerifications) {
+      const verificationTime = new Date(verification.created_at).getTime();
+      
+      const existingSession = sessions.find(session => {
+        const sessionTime = new Date(session[0].created_at).getTime();
+        return Math.abs(verificationTime - sessionTime) < 15 * 60 * 1000;
+      });
+
+      if (existingSession) {
+        existingSession.push(verification);
+      } else {
+        sessions.push([verification]);
+      }
+    }
+
+    return sessions;
+  };
+
+  const determineOverallStatus = (verifications: any[], averageConfidence: number): 'verified' | 'disputed' | 'unverified' => {
+    if (averageConfidence >= 70) {
+      return 'verified';
+    } else if (averageConfidence >= 50) {
+      return 'disputed';
+    } else {
+      return 'unverified';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'verified': return 'Vérifié';
+      case 'disputed': return 'Contesté';
+      case 'unverified': return 'Non vérifié';
+      default: return 'Inconnu';
+    }
+  };
+
+  const getStatusDescription = (status: string, confidence: number) => {
+    switch (status) {
+      case 'verified':
+        return `Les informations de ce symbole ont été vérifiées par plusieurs sources d'IA avec un niveau de confiance de ${confidence}%.`;
+      case 'disputed':
+        return `Les informations de ce symbole présentent des incohérences ou des sources contradictoires. Niveau de confiance: ${confidence}%.`;
+      case 'unverified':
+        return `Les informations de ce symbole n'ont pas pu être vérifiées ou manquent de sources fiables. Niveau de confiance: ${confidence}%.`;
+      default:
+        return 'Aucune vérification n\'a encore été effectuée pour ce symbole.';
+    }
+  };
 
   const verifyWithAPI = async (apiKey: string) => {
     setLoading(prev => ({ ...prev, [apiKey]: true }));
@@ -108,6 +233,8 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
         }
       }));
       
+      // Reload history after successful verification
+      loadVerificationHistory();
       toast.success(`Vérification ${API_CONFIGS[apiKey as keyof typeof API_CONFIGS].name} terminée`);
     } catch (error) {
       console.error(`Erreur lors de la vérification ${apiKey}:`, error);
@@ -131,6 +258,7 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
   const verifyAll = async () => {
     const apis = Object.keys(API_CONFIGS);
     await Promise.all(apis.map(api => verifyWithAPI(api)));
+    // History will be reloaded by individual verifyWithAPI calls
   };
 
   const getStatusIcon = (status: VerificationResult['status']) => {
@@ -205,9 +333,10 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="details">Détails par API</TabsTrigger>
+          <TabsTrigger value="history">Historique</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -360,6 +489,149 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
               </AlertDescription>
             </Alert>
           )}
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <History className="h-5 w-5 text-amber-600" />
+              <h3 className="text-lg font-semibold text-slate-900">
+                Historique des vérifications
+              </h3>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setRefreshKey(prev => prev + 1)}
+              disabled={historyLoading}
+              className="flex items-center gap-2"
+            >
+              <Clock className="h-4 w-4" />
+              Actualiser
+            </Button>
+          </div>
+
+          {historyLoading && (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
+              <p className="text-slate-600">Chargement des vérifications...</p>
+            </div>
+          )}
+
+          {!historyLoading && currentVerification ? (
+            <div className="space-y-4">
+              {/* Résultat global actuel */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(currentVerification.overallStatus)}
+                    <h3 className="text-lg font-semibold">
+                      Analyse de vérification actuelle
+                    </h3>
+                  </div>
+                  <Badge 
+                    variant="outline" 
+                    className={`${getStatusColor(currentVerification.overallStatus)} text-white border-none`}
+                  >
+                    {getStatusText(currentVerification.overallStatus)}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-slate-600">Consensus des sources:</span>
+                    <span className="text-sm font-semibold">{currentVerification.averageConfidence}%</span>
+                  </div>
+                  
+                  <p className="text-sm text-slate-600">
+                    {getStatusDescription(currentVerification.overallStatus, currentVerification.averageConfidence)}
+                  </p>
+                  
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-xs text-amber-800">
+                        <strong>Analyse multicritère :</strong> Les variations entre sources reflètent souvent la complexité historique et la nature parfois "cachée" ou symbolique de certains éléments patrimoniaux.
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-slate-500">
+                    Dernière analyse: {new Date(currentVerification.timestamp).toLocaleDateString('fr-FR')}
+                  </div>
+                </div>
+              </Card>
+
+              {/* Détails par API pour la vérification actuelle */}
+              <Card className="p-6">
+                <h4 className="text-md font-semibold mb-4">Analyse détaillée par source</h4>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {currentVerification.results.map((result: any, index: number) => (
+                    <div key={index} className="p-3 border rounded-lg bg-slate-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium capitalize">{result.api}</span>
+                        <Badge 
+                          variant="outline" 
+                          className={`${getStatusColor(result.status)} text-white border-none text-xs`}
+                        >
+                          {getStatusText(result.status)}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-slate-600 mb-2">
+                        Niveau de confiance: {result.confidence}%
+                      </div>
+                      {result.summary && (
+                        <div className="text-xs text-slate-500 line-clamp-2">
+                          {result.summary.substring(0, 120)}...
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Historique complet */}
+              {verificationHistory.length > 1 && (
+                <Card className="p-6">
+                  <h4 className="font-medium text-slate-900 mb-4">Historique complet</h4>
+                  <div className="space-y-3">
+                    {verificationHistory.map((verification: any) => (
+                      <div key={verification.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          {getStatusIcon(verification.overallStatus)}
+                          <div>
+                            <div className="font-medium text-sm">
+                              {getStatusText(verification.overallStatus)} • {verification.averageConfidence}% de confiance
+                            </div>
+                            <div className="text-xs text-slate-600">
+                              {new Date(verification.timestamp).toLocaleDateString('fr-FR', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {verification.results.length} API{verification.results.length > 1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+            </div>
+          ) : !historyLoading ? (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Aucune vérification n'a encore été effectuée pour ce symbole. 
+                Utilisez l'onglet "Vue d'ensemble" pour lancer une nouvelle vérification.
+              </AlertDescription>
+            </Alert>
+          ) : null}
         </TabsContent>
       </Tabs>
     </div>
