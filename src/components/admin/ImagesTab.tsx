@@ -1,217 +1,269 @@
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Upload, Trash2, Edit, Star, Loader2 } from 'lucide-react';
-import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
-import { useSymbolImageUpload, useDeleteSymbolImage, useSetPrimaryImage } from '@/hooks/useSymbolImageUpload';
+import { Upload, ImageIcon, Edit, Trash2, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ImagesTabProps {
-  symbolId?: string;
+  symbolId: string;
 }
 
 export function ImagesTab({ symbolId }: ImagesTabProps) {
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
-  const [generating, setGenerating] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [images, setImages] = useState([
+    {
+      id: '1',
+      url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400',
+      title: 'Symbole principal',
+      type: 'original',
+      isPrimary: true,
+      uploadedAt: '2024-01-15T10:30:00Z'
+    },
+    {
+      id: '2',
+      url: 'https://images.unsplash.com/photo-1620421680010-0766ff230392?w=400',
+      title: 'Variante historique',
+      type: 'variant',
+      isPrimary: false,
+      uploadedAt: '2024-01-15T11:45:00Z'
+    },
+    {
+      id: '3',
+      url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400',
+      title: 'Contexte culturel',
+      type: 'context',
+      isPrimary: false,
+      uploadedAt: '2024-01-15T12:15:00Z'
+    }
+  ]);
 
-  const { data: images, isLoading: imagesLoading } = useSymbolImages(symbolId);
-  const uploadImage = useSymbolImageUpload();
-  const deleteImage = useDeleteSymbolImage();
-  const setPrimaryImage = useSetPrimaryImage();
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !symbolId) return;
+    if (!file) return;
 
+    setUploadingImage(true);
     try {
-      await uploadImage.mutateAsync({
-        symbolId,
-        file,
-        imageType: 'original',
-        title: `Image de ${symbolId}`
-      });
+      // Simulate upload
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newImage = {
+        id: Date.now().toString(),
+        url: URL.createObjectURL(file),
+        title: file.name,
+        type: 'original',
+        isPrimary: false,
+        uploadedAt: new Date().toISOString()
+      };
+      
+      setImages(prev => [...prev, newImage]);
+      toast.success('Image uploadée avec succès');
     } catch (error) {
-      console.error('Error uploading image:', error);
-    }
-  };
-
-  const handleDeleteImage = async (imageId: string) => {
-    if (!symbolId) return;
-    
-    try {
-      await deleteImage.mutateAsync({ id: imageId, symbolId });
-    } catch (error) {
-      console.error('Error deleting image:', error);
-    }
-  };
-
-  const handleSetPrimaryImage = async (imageId: string) => {
-    if (!symbolId) return;
-    
-    try {
-      await setPrimaryImage.mutateAsync({ id: imageId, symbolId });
-    } catch (error) {
-      console.error('Error setting primary image:', error);
+      toast.error('Erreur lors de l\'upload de l\'image');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
   const handleGenerateImage = async () => {
-    if (!aiPrompt.trim() || !symbolId) return;
-    
-    setGenerating(true);
-    // Simulate AI image generation
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    setGenerating(false);
-    setAiPrompt('');
+    if (!aiPrompt.trim()) return;
+
+    setGeneratingImage(true);
+    try {
+      // Simulate AI generation
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      const generatedImage = {
+        id: Date.now().toString(),
+        url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400',
+        title: `Image générée: ${aiPrompt.substring(0, 30)}...`,
+        type: 'generated',
+        isPrimary: false,
+        uploadedAt: new Date().toISOString()
+      };
+      
+      setImages(prev => [...prev, generatedImage]);
+      setAiPrompt('');
+      toast.success('Image générée avec succès');
+    } catch (error) {
+      toast.error('Erreur lors de la génération de l\'image');
+    } finally {
+      setGeneratingImage(false);
+    }
   };
 
-  // Convert images data to array format if needed
-  const imagesArray = images ? (Array.isArray(images) ? images : Object.values(images)) : [];
+  const handleDeleteImage = (imageId: string) => {
+    setImages(prev => prev.filter(img => img.id !== imageId));
+    toast.success('Image supprimée');
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'original': return 'bg-blue-100 text-blue-800';
+      case 'variant': return 'bg-green-100 text-green-800';
+      case 'context': return 'bg-purple-100 text-purple-800';
+      case 'generated': return 'bg-amber-100 text-amber-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'original': return 'Original';
+      case 'variant': return 'Variante';
+      case 'context': return 'Contexte';
+      case 'generated': return 'Générée';
+      default: return 'Autre';
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Upload d'images */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Télécharger des images</h3>
-        
-        <div 
-          className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-slate-400 transition-colors"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Upload className="h-12 w-12 mx-auto text-slate-400 mb-4" />
-          <p className="text-slate-600 mb-2">
-            Cliquez pour sélectionner des images ou glissez-déposez ici
-          </p>
-          <p className="text-sm text-slate-500">
-            PNG, JPG, GIF jusqu'à 10MB
-          </p>
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
-        </div>
-      </div>
+      {/* Upload d'image */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Ajouter une image
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+            <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 mb-4">
+              Glissez et déposez une image ici, ou cliquez pour sélectionner
+            </p>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploadingImage}
+              className="hidden"
+              id="image-upload"
+            />
+            <Label htmlFor="image-upload" className="cursor-pointer">
+              <Button disabled={uploadingImage} variant="outline">
+                {uploadingImage ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Upload en cours...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Sélectionner une image
+                  </>
+                )}
+              </Button>
+            </Label>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Génération d'image avec IA */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Générer une image avec IA</h3>
-        
-        <div className="space-y-3">
+      <Card>
+        <CardHeader>
+          <CardTitle>Générer une image avec IA</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="ai-prompt">Description pour l'IA</Label>
+            <Label htmlFor="ai-prompt">Description de l'image souhaitée</Label>
             <Textarea
               id="ai-prompt"
+              placeholder="Décrivez l'image que vous souhaitez générer..."
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder="Décrivez l'image que vous souhaitez générer..."
               rows={3}
             />
           </div>
-          
           <Button
             onClick={handleGenerateImage}
-            disabled={generating || !aiPrompt.trim() || !symbolId}
-            className="w-full bg-purple-600 hover:bg-purple-700"
+            disabled={generatingImage || !aiPrompt.trim()}
+            className="bg-blue-600 hover:bg-blue-700"
           >
-            {generating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {generating ? 'Génération en cours...' : 'Générer l\'image'}
+            {generatingImage ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Génération en cours...
+              </>
+            ) : (
+              'Générer l\'image'
+            )}
           </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Images existantes */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Images existantes ({imagesArray.length})</h3>
-        
-        {imagesLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        ) : imagesArray.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {imagesArray.map((image, index) => (
-              <Card key={image?.id || index} className="overflow-hidden">
-                <div className="relative aspect-square bg-slate-100">
-                  {image && (
-                    <>
-                      <img
-                        src={image.image_url}
-                        alt={image.title || `Image ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder.svg';
-                        }}
-                      />
-                      
-                      {image.is_primary && (
-                        <div className="absolute top-2 left-2">
-                          <Badge className="bg-yellow-100 text-yellow-800 text-xs">
-                            <Star className="h-3 w-3 mr-1" />
-                            Principale
-                          </Badge>
-                        </div>
-                      )}
-                      
-                      <div className="absolute top-2 right-2 flex gap-1">
-                        {!image.is_primary && (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => handleSetPrimaryImage(image.id)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Star className="h-3 w-3" />
-                          </Button>
-                        )}
-                        
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteImage(image.id)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </>
-                  )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Images existantes ({images.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {images.map((image) => (
+              <div key={image.id} className="relative group">
+                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                  <img
+                    src={image.url}
+                    alt={image.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 
-                {image?.title && (
-                  <CardContent className="p-3">
-                    <p className="text-sm font-medium truncate">{image.title}</p>
-                    <p className="text-xs text-slate-500">
-                      {image.image_type === 'original' ? 'Image originale' : 'Image générée'}
-                    </p>
-                  </CardContent>
-                )}
-              </Card>
+                {/* Overlay avec actions */}
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="secondary">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDeleteImage(image.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Informations */}
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm truncate">{image.title}</h4>
+                    {image.isPrimary && (
+                      <Badge className="bg-blue-100 text-blue-800 text-xs">
+                        Principal
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={`${getTypeColor(image.type)} text-xs`}>
+                      {getTypeLabel(image.type)}
+                    </Badge>
+                    <span className="text-xs text-gray-500">
+                      {new Date(image.uploadedAt).toLocaleDateString('fr-FR')}
+                    </span>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-8 text-slate-500">
-            <Upload className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Aucune image pour ce symbole</p>
-            <p className="text-sm">Téléchargez ou générez des images pour commencer</p>
-          </div>
-        )}
-      </div>
+
+          {images.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <ImageIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p>Aucune image pour ce symbole</p>
+              <p className="text-sm">Ajoutez une image pour commencer</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

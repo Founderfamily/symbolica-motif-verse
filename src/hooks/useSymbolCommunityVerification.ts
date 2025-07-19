@@ -27,7 +27,17 @@ export const useSymbolCommunityVerification = (symbolId: string | null) => {
         .rpc('get_community_verification_comments', { p_symbol_id: symbolId });
 
       if (error) throw error;
-      return data || [];
+      
+      // Transform the data to match our interface
+      return (data || []).map((item: any) => ({
+        id: item.id,
+        user_id: item.user_id,
+        comment: item.comment,
+        verification_rating: item.verification_rating,
+        expertise_level: item.expertise_level,
+        created_at: item.created_at,
+        profiles: typeof item.profiles === 'object' ? item.profiles : undefined
+      }));
     },
     enabled: !!symbolId,
   });
