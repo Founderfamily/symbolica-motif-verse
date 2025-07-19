@@ -27,15 +27,15 @@ import { toast } from 'sonner';
 interface ModerationItem {
   id: string;
   item_type: string;
-  item_id: string;
-  reason: string;
-  evidence_url?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  symbol_id: string;
+  content: string;
+  status: 'pending' | 'rejected' | 'resolved';
   created_at: string;
+  updated_at: string;
   reported_by: string;
+  reported_count: number;
   reviewed_by?: string;
   reviewed_at?: string;
-  resolution_notes?: string;
   profiles?: {
     username: string;
     full_name: string;
@@ -76,7 +76,7 @@ export default function ModerationPage() {
         return;
       }
 
-      setModerationItems(data || []);
+      setModerationItems((data || []) as ModerationItem[]);
     } catch (error) {
       console.error('Erreur:', error);
       toast.error('Erreur lors du chargement');
@@ -95,10 +95,9 @@ export default function ModerationPage() {
       const { error } = await supabase
         .from('symbol_moderation_items')
         .update({
-          status: action === 'approve' ? 'resolved' : 'dismissed',
+          status: action === 'approve' ? 'resolved' : 'rejected',
           reviewed_by: user.id,
-          reviewed_at: new Date().toISOString(),
-          resolution_notes: notes || null
+          reviewed_at: new Date().toISOString()
         })
         .eq('id', itemId);
 
@@ -150,7 +149,7 @@ export default function ModerationPage() {
         return <Badge variant="outline" className="bg-yellow-50 text-yellow-700">En attente</Badge>;
       case 'resolved':
         return <Badge variant="default" className="bg-green-600">Résolu</Badge>;
-      case 'dismissed':
+      case 'rejected':
         return <Badge variant="destructive">Rejeté</Badge>;
       default:
         return <Badge variant="outline">Inconnu</Badge>;
@@ -173,13 +172,13 @@ export default function ModerationPage() {
   const filterItems = (status: string) => {
     if (status === 'all') return moderationItems;
     if (status === 'resolved') return moderationItems.filter(item => item.status === 'resolved');
-    if (status === 'dismissed') return moderationItems.filter(item => item.status === 'dismissed');
+    if (status === 'rejected') return moderationItems.filter(item => item.status === 'rejected');
     return moderationItems.filter(item => item.status === 'pending');
   };
 
   const pendingCount = moderationItems.filter(item => item.status === 'pending').length;
   const resolvedCount = moderationItems.filter(item => item.status === 'resolved').length;
-  const dismissedCount = moderationItems.filter(item => item.status === 'dismissed').length;
+  const rejectedCount = moderationItems.filter(item => item.status === 'rejected').length;
 
   if (!isAdmin) {
     return (
@@ -243,7 +242,7 @@ export default function ModerationPage() {
               <X className="h-4 w-4 text-red-600" />
               <div>
                 <p className="text-sm font-medium text-slate-500">Rejetés</p>
-                <p className="text-2xl font-bold">{dismissedCount}</p>
+                <p className="text-2xl font-bold">{rejectedCount}</p>
               </div>
             </div>
           </CardContent>
@@ -261,18 +260,18 @@ export default function ModerationPage() {
               <TabsTrigger value="resolved">
                 Résolus ({resolvedCount})
               </TabsTrigger>
-              <TabsTrigger value="dismissed">
-                Rejetés ({dismissedCount})
+              <TabsTrigger value="rejected">
+                Rejetés ({rejectedCount})
               </TabsTrigger>
             </TabsList>
 
-            {['pending', 'resolved', 'dismissed'].map((status) => (
+            {['pending', 'resolved', 'rejected'].map((status) => (
               <TabsContent key={status} value={status}>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Type</TableHead>
-                      <TableHead>Raison</TableHead>
+                      <TableHead>Contenu</TableHead>
                       <TableHead>Signalé par</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Date</TableHead>
@@ -287,11 +286,11 @@ export default function ModerationPage() {
                             {getItemTypeLabel(item.item_type)}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-xs truncate">
-                            {item.reason}
-                          </div>
-                        </TableCell>
+                         <TableCell>
+                           <div className="max-w-xs truncate">
+                             {item.content}
+                           </div>
+                         </TableCell>
                         <TableCell>
                           {item.profiles?.full_name || item.profiles?.username || 'Utilisateur inconnu'}
                         </TableCell>
@@ -321,16 +320,6 @@ export default function ModerationPage() {
                                 </Button>
                               </>
                             )}
-                            {item.evidence_url && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => window.open(item.evidence_url, '_blank')}
-                                className="text-blue-600 hover:text-blue-700"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            )}
                             <Button 
                               variant="ghost" 
                               size="sm"
@@ -349,7 +338,7 @@ export default function ModerationPage() {
                 {filterItems(status).length === 0 && (
                   <div className="text-center py-8">
                     <p className="text-slate-500">
-                      Aucun signalement {status === 'pending' ? 'en attente' : status === 'resolved' ? 'résolu' : 'rejeté'}
+                       Aucun signalement {status === 'pending' ? 'en attente' : status === 'resolved' ? 'résolu' : 'rejeté'}
                     </p>
                   </div>
                 )}
