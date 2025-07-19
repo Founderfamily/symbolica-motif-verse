@@ -5,17 +5,12 @@ import { toast } from 'sonner';
 
 export interface CommunityVerificationComment {
   id: string;
-  symbol_id: string;
   user_id: string;
   comment: string;
-  verification_rating: 'very_confident' | 'somewhat_confident' | 'not_confident';
-  expertise_level: 'expert' | 'knowledgeable' | 'amateur';
+  verification_rating: string;
+  expertise_level: string;
   created_at: string;
-  profiles?: {
-    username: string;
-    full_name: string;
-    is_admin: boolean;
-  };
+  profiles?: any;
 }
 
 export const useSymbolCommunityVerification = (symbolId: string | null) => {
