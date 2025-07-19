@@ -10,7 +10,11 @@ export interface CommunityVerificationComment {
   verification_rating: string;
   expertise_level: string;
   created_at: string;
-  profiles?: any;
+  profiles?: {
+    username?: string;
+    full_name?: string;
+    is_admin?: boolean;
+  };
 }
 
 export const useSymbolCommunityVerification = (symbolId: string | null) => {
@@ -44,13 +48,13 @@ export const useAddCommunityVerificationComment = () => {
       verificationRating: string;
       expertiseLevel: string;
     }) => {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('User not authenticated');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await supabase
         .rpc('add_community_verification_comment', {
           p_symbol_id: symbolId,
-          p_user_id: user.user.id,
+          p_user_id: user.id,
           p_comment: comment,
           p_verification_rating: verificationRating,
           p_expertise_level: expertiseLevel
@@ -60,8 +64,9 @@ export const useAddCommunityVerificationComment = () => {
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['symbol-community-verification', variables.symbolId] });
-      queryClient.invalidateQueries({ queryKey: ['symbol-verification', variables.symbolId] });
+      queryClient.invalidateQueries({ 
+        queryKey: ['symbol-community-verification', variables.symbolId] 
+      });
       toast.success('Commentaire de vérification ajouté avec succès');
     },
     onError: (error) => {
