@@ -86,7 +86,7 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
 
   useEffect(() => {
     loadVerificationHistory();
-  }, [symbol.id, refreshKey]);
+  }, [symbol.id, refreshKey, results]); // Add results dependency
 
   // Auto-refresh every 30 seconds to catch new verifications
   useEffect(() => {
@@ -134,11 +134,61 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
           };
         });
 
-        setVerificationHistory(history);
         setCurrentVerification(history[0] || null);
+        
+        // Merge with current session results if any
+        if (Object.keys(results).length > 0) {
+          const sessionVerification = {
+            id: 'current-session',
+            timestamp: new Date().toISOString(),
+            overallStatus: getOverallStatus(),
+            averageConfidence: getAverageConfidence(),
+            verifiedBy: 'Session actuelle',
+            results: Object.values(results).map(r => ({
+              api: r.api,
+              status: r.status,
+              confidence: r.confidence,
+              summary: r.summary,
+              sources: r.sources
+            }))
+          };
+          
+          // Add current session at the beginning if it's different from the latest saved
+          const combinedHistory = history.length > 0 && 
+            Math.abs(new Date(history[0].timestamp).getTime() - new Date().getTime()) < 5 * 60 * 1000
+            ? history // Recent verification exists, don't duplicate
+            : [sessionVerification, ...history]; // Add current session
+            
+          setVerificationHistory(combinedHistory);
+          setCurrentVerification(sessionVerification);
+        } else {
+          setVerificationHistory(history);
+          setCurrentVerification(history[0] || null);
+        }
       } else {
-        setVerificationHistory([]);
-        setCurrentVerification(null);
+        // No saved verifications, but check if we have current session results
+        if (Object.keys(results).length > 0) {
+          const sessionVerification = {
+            id: 'current-session',
+            timestamp: new Date().toISOString(),
+            overallStatus: getOverallStatus(),
+            averageConfidence: getAverageConfidence(),
+            verifiedBy: 'Session actuelle',
+            results: Object.values(results).map(r => ({
+              api: r.api,
+              status: r.status,
+              confidence: r.confidence,
+              summary: r.summary,
+              sources: r.sources
+            }))
+          };
+          
+          setVerificationHistory([sessionVerification]);
+          setCurrentVerification(sessionVerification);
+        } else {
+          setVerificationHistory([]);
+          setCurrentVerification(null);
+        }
       }
     } catch (error) {
       console.error('Erreur lors du chargement de l\'historique:', error);
@@ -233,8 +283,10 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
         }
       }));
       
-      // Reload history after successful verification
-      loadVerificationHistory();
+      // Reload history after successful verification  
+      setTimeout(() => {
+        loadVerificationHistory();
+      }, 1000); // Small delay to ensure DB is updated
       toast.success(`Vérification ${API_CONFIGS[apiKey as keyof typeof API_CONFIGS].name} terminée`);
     } catch (error) {
       console.error(`Erreur lors de la vérification ${apiKey}:`, error);
