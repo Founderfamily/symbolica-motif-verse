@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { SymbolData } from '@/types/supabase';
-import { SymbolEditModalAdvanced } from './SymbolEditModalAdvanced';
+import { SymbolEditModal } from './SymbolEditModal';
 
 interface AdminFloatingEditButtonProps {
   symbol: SymbolData;
@@ -31,10 +31,16 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
     setIsModalOpen(false);
   };
 
-  const handleSymbolUpdated = (updatedSymbol: SymbolData) => {
-    onSymbolUpdated(updatedSymbol);
-    setIsModalOpen(false);
-  };
+  // Convertir SymbolData vers le format attendu par SymbolEditModal
+  const convertedSymbol = symbol ? {
+    id: symbol.id,
+    name: symbol.name,
+    culture: symbol.culture,
+    period: symbol.period,
+    description: symbol.description || '',
+    created_at: symbol.created_at,
+    updated_at: symbol.updated_at
+  } : null;
 
   return (
     <>
@@ -50,11 +56,10 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
         </Button>
       </div>
 
-      <SymbolEditModalAdvanced
-        symbol={symbol}
+      <SymbolEditModal
+        symbol={convertedSymbol}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onSymbolUpdated={handleSymbolUpdated}
       />
     </>
   );
