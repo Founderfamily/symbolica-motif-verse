@@ -15,9 +15,10 @@ import { toast } from 'sonner';
 import { useUpdateSymbol } from '@/hooks/useAdminSymbols';
 import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { SymbolData } from '@/types/supabase';
+import { PaginatedSymbol } from '@/hooks/useAdminSymbols';
 
 interface SymbolEditModalAdvancedProps {
-  symbol: SymbolData | null;
+  symbol: SymbolData | PaginatedSymbol | null;
   isOpen: boolean;
   onClose: () => void;
   onSymbolUpdated?: (symbol: SymbolData) => void;
@@ -74,14 +75,15 @@ export function SymbolEditModalAdvanced({
     try {
       const updatedSymbol = await updateSymbol.mutateAsync({
         id: symbol.id,
-        updates: {
-          ...formData,
-          updated_at: new Date().toISOString()
-        }
+        updates: formData
       });
       
       toast.success('Symbole mis à jour avec succès');
-      onSymbolUpdated?.(updatedSymbol);
+      onSymbolUpdated?.({
+        ...symbol,
+        ...formData,
+        updated_at: new Date().toISOString()
+      });
       onClose();
     } catch (error) {
       console.error('Error updating symbol:', error);

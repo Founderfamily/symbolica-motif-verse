@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Eye, Edit, Trash2, Search, Filter, ChevronUp, ChevronDown, Image } from 'lucide-react';
 import { toast } from 'sonner';
-import { useDeleteSymbol, type PaginatedSymbol } from '@/hooks/useAdminSymbols';
+import { useDeleteSymbols, type PaginatedSymbol } from '@/hooks/useAdminSymbols';
 import { SymbolEditModalAdvanced } from './SymbolEditModalAdvanced';
 import { SymbolViewModal } from './SymbolViewModal';
 import { SymbolData } from '@/types/supabase';
@@ -24,11 +24,11 @@ export function SymbolsDataTable({ symbols, isLoading, onRefresh }: SymbolsDataT
   const [sortField, setSortField] = useState<keyof PaginatedSymbol>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterImages, setFilterImages] = useState<'all' | 'with' | 'without'>('all');
-  const [selectedSymbol, setSelectedSymbol] = useState<SymbolData | null>(null);
+  const [selectedSymbol, setSelectedSymbol] = useState<PaginatedSymbol | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  const deleteSymbol = useDeleteSymbol();
+  const deleteSymbols = useDeleteSymbols();
 
   const filteredAndSortedSymbols = useMemo(() => {
     let filtered = symbols.filter(symbol => {
@@ -76,61 +76,19 @@ export function SymbolsDataTable({ symbols, isLoading, onRefresh }: SymbolsDataT
   };
 
   const handleEdit = (symbol: PaginatedSymbol) => {
-    const symbolData: SymbolData = {
-      id: symbol.id,
-      name: symbol.name,
-      culture: symbol.culture,
-      period: symbol.period,
-      description: symbol.description,
-      created_at: symbol.created_at,
-      updated_at: symbol.updated_at,
-      significance: symbol.significance,
-      historical_context: symbol.historical_context,
-      related_symbols: symbol.related_symbols,
-      tags: symbol.tags,
-      medium: symbol.medium,
-      technique: symbol.technique,
-      function: symbol.function,
-      cultural_taxonomy_code: symbol.cultural_taxonomy_code,
-      temporal_taxonomy_code: symbol.temporal_taxonomy_code,
-      thematic_taxonomy_codes: symbol.thematic_taxonomy_codes,
-      sources: symbol.sources,
-      translations: symbol.translations
-    };
-    setSelectedSymbol(symbolData);
+    setSelectedSymbol(symbol);
     setIsEditModalOpen(true);
   };
 
   const handleView = (symbol: PaginatedSymbol) => {
-    const symbolData: SymbolData = {
-      id: symbol.id,
-      name: symbol.name,
-      culture: symbol.culture,
-      period: symbol.period,
-      description: symbol.description,
-      created_at: symbol.created_at,
-      updated_at: symbol.updated_at,
-      significance: symbol.significance,
-      historical_context: symbol.historical_context,
-      related_symbols: symbol.related_symbols,
-      tags: symbol.tags,
-      medium: symbol.medium,
-      technique: symbol.technique,
-      function: symbol.function,
-      cultural_taxonomy_code: symbol.cultural_taxonomy_code,
-      temporal_taxonomy_code: symbol.temporal_taxonomy_code,
-      thematic_taxonomy_codes: symbol.thematic_taxonomy_codes,
-      sources: symbol.sources,
-      translations: symbol.translations
-    };
-    setSelectedSymbol(symbolData);
+    setSelectedSymbol(symbol);
     setIsViewModalOpen(true);
   };
 
   const handleDelete = async (symbolId: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce symbole ?')) {
       try {
-        await deleteSymbol.mutateAsync(symbolId);
+        await deleteSymbols.mutateAsync([symbolId]);
         toast.success('Symbole supprimé avec succès');
         onRefresh();
       } catch (error) {
@@ -253,7 +211,7 @@ export function SymbolsDataTable({ symbols, isLoading, onRefresh }: SymbolsDataT
                           size="sm"
                           variant="outline"
                           onClick={() => handleDelete(symbol.id)}
-                          disabled={deleteSymbol.isPending}
+                          disabled={deleteSymbols.isPending}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

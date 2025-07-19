@@ -26,6 +26,19 @@ export interface PaginatedSymbol {
   image_count: number;
   verification_count: number;
   total_count: number;
+  // Additional fields from SymbolData
+  significance?: string | null;
+  historical_context?: string | null;
+  related_symbols?: string[] | null;
+  tags?: string[] | null;
+  medium?: string[] | null;
+  technique?: string[] | null;
+  function?: string[] | null;
+  cultural_taxonomy_code?: string | null;
+  temporal_taxonomy_code?: string | null;
+  thematic_taxonomy_codes?: string[] | null;
+  sources?: any;
+  translations?: any;
 }
 
 export const useAdminSymbols = (
@@ -246,14 +259,34 @@ export const useUpdateSymbol = () => {
   return useMutation({
     mutationFn: async ({ id, updates }: { 
       id: string; 
-      updates: Partial<{ name: string; culture: string; period: string; description: string }> 
+      updates: Partial<{
+        name: string;
+        culture: string;
+        period: string;
+        description: string;
+        significance: string;
+        historical_context: string;
+        related_symbols: string[];
+        tags: string[];
+        medium: string[];
+        technique: string[];
+        function: string[];
+        cultural_taxonomy_code: string;
+        temporal_taxonomy_code: string;
+        thematic_taxonomy_codes: string[];
+        sources: any;
+        translations: any;
+      }>
     }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('symbols')
         .update(updates)
-        .eq('id', id);
+        .eq('id', id)
+        .select()
+        .single();
         
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-symbols'] });

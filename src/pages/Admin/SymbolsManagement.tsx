@@ -11,7 +11,7 @@ import {
   SymbolSortConfig,
   PaginatedSymbol 
 } from '@/hooks/useAdminSymbols';
-import SymbolsDataTable from '@/components/admin/SymbolsDataTable';
+import { SymbolsDataTable } from '@/components/admin/SymbolsDataTable';
 import { SymbolEditModal } from '@/components/admin/SymbolEditModal';
 import { SymbolViewModal } from '@/components/admin/SymbolViewModal';
 import { Database, Eye, Image, CheckCircle, Calendar, TrendingUp } from 'lucide-react';
@@ -146,20 +146,9 @@ export default function SymbolsManagement() {
 
       {/* Table principale */}
       <SymbolsDataTable
-        data={symbolsData?.data || []}
-        totalCount={symbolsData?.totalCount || 0}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        filters={filters}
-        sort={sort}
-        availableFilters={availableFilters || { cultures: [], periods: [] }}
+        symbols={symbolsData?.data || []}
         isLoading={isLoading}
-        onPageChange={handlePageChange}
-        onFiltersChange={handleFiltersChange}
-        onSortChange={handleSortChange}
-        onSymbolEdit={handleSymbolEdit}
-        onSymbolView={handleSymbolView}
-        onSymbolsDelete={handleSymbolsDelete}
+        onRefresh={() => window.location.reload()}
       />
 
       {/* Modales */}
