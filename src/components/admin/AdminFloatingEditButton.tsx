@@ -9,13 +9,11 @@ import { SymbolEditModalAdvanced } from './SymbolEditModalAdvanced';
 interface AdminFloatingEditButtonProps {
   symbol: SymbolData;
   onSymbolUpdated: (updatedSymbol: SymbolData) => void;
-  onImageGalleryClose?: () => void;
 }
 
 export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = ({
   symbol,
-  onSymbolUpdated,
-  onImageGalleryClose
+  onSymbolUpdated
 }) => {
   const { user, profile } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,10 +24,6 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
   }
 
   const handleOpenModal = () => {
-    // Fermer la galerie d'images si elle est ouverte
-    if (onImageGalleryClose) {
-      onImageGalleryClose();
-    }
     setIsModalOpen(true);
   };
 
