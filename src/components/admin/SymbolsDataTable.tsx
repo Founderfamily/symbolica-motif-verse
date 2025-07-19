@@ -164,6 +164,42 @@ export default function SymbolsDataTable({
                 ))}
               </SelectContent>
             </Select>
+
+            <Select
+              value={filters.has_images || 'all'}
+              onValueChange={(value) => onFiltersChange({ 
+                ...filters, 
+                has_images: value === 'all' ? undefined : (value as 'with_images' | 'without_images')
+              })}
+            >
+              <SelectTrigger className="w-48">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Images" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="with_images">Avec images</SelectItem>
+                <SelectItem value="without_images">Sans images</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filters.verified || 'all'}
+              onValueChange={(value) => onFiltersChange({ 
+                ...filters, 
+                verified: value === 'all' ? undefined : (value as 'verified' | 'unverified')
+              })}
+            >
+              <SelectTrigger className="w-48">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Vérification" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="verified">Vérifiés</SelectItem>
+                <SelectItem value="unverified">Non vérifiés</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -227,8 +263,24 @@ export default function SymbolsDataTable({
                     {getSortIcon('period')}
                   </div>
                 </TableHead>
-                <TableHead>Images</TableHead>
-                <TableHead>Vérifications</TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('image_count')}
+                >
+                  <div className="flex items-center">
+                    Images
+                    {getSortIcon('image_count')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('verification_count')}
+                >
+                  <div className="flex items-center">
+                    Vérifications
+                    {getSortIcon('verification_count')}
+                  </div>
+                </TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => handleSort('created_at')}

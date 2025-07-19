@@ -54,7 +54,7 @@ export function SymbolEditModal({ symbol, isOpen, onClose }: SymbolEditModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Modifier le symbole</DialogTitle>
         </DialogHeader>

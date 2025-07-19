@@ -6,10 +6,12 @@ export interface SymbolFilters {
   search?: string;
   culture?: string;
   period?: string;
+  has_images?: 'with_images' | 'without_images';
+  verified?: 'verified' | 'unverified';
 }
 
 export interface SymbolSortConfig {
-  column: 'name' | 'culture' | 'period' | 'created_at' | 'updated_at';
+  column: 'name' | 'culture' | 'period' | 'created_at' | 'updated_at' | 'image_count' | 'verification_count';
   direction: 'ASC' | 'DESC';
 }
 
@@ -37,7 +39,7 @@ export const useAdminSymbols = (
     queryFn: async () => {
       const offset = (page - 1) * limit;
       
-      // Construire la requête de base
+      // Construire la requête avec jointures pour les compteurs
       let query = supabase
         .from('symbols')
         .select(`
@@ -50,7 +52,7 @@ export const useAdminSymbols = (
           updated_at
         `, { count: 'exact' });
 
-      // Appliquer les filtres
+      // Appliquer les filtres de base
       if (filters.search) {
         query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,culture.ilike.%${filters.search}%`);
       }
@@ -96,9 +98,33 @@ export const useAdminSymbols = (
         })
       );
 
+      // Appliquer les filtres avancés après récupération des compteurs
+      let filteredSymbols = symbolsWithCounts;
+
+      if (filters.has_images === 'with_images') {
+        filteredSymbols = filteredSymbols.filter(s => s.image_count > 0);
+      } else if (filters.has_images === 'without_images') {
+        filteredSymbols = filteredSymbols.filter(s => s.image_count === 0);
+      }
+
+      if (filters.verified === 'verified') {
+        filteredSymbols = filteredSymbols.filter(s => s.verification_count > 0);
+      } else if (filters.verified === 'unverified') {
+        filteredSymbols = filteredSymbols.filter(s => s.verification_count === 0);
+      }
+
+      // Tri personnalisé pour les compteurs
+      if (sort.column === 'image_count' || sort.column === 'verification_count') {
+        filteredSymbols.sort((a, b) => {
+          const aVal = a[sort.column as keyof PaginatedSymbol] as number;
+          const bVal = b[sort.column as keyof PaginatedSymbol] as number;
+          return sort.direction === 'ASC' ? aVal - bVal : bVal - aVal;
+        });
+      }
+
       return {
-        data: symbolsWithCounts as PaginatedSymbol[],
-        totalCount: count || 0
+        data: filteredSymbols as PaginatedSymbol[],
+        totalCount: filteredSymbols.length
       };
     },
     staleTime: 30 * 1000, // 30 secondes

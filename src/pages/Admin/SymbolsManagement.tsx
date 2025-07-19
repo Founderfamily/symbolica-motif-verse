@@ -179,6 +179,11 @@ export default function SymbolsManagement() {
           setIsViewModalOpen(false);
           setSelectedSymbol(null);
         }}
+        onEdit={(symbol) => {
+          setIsViewModalOpen(false);
+          setSelectedSymbol(symbol);
+          setIsEditModalOpen(true);
+        }}
       />
     </div>
   );
