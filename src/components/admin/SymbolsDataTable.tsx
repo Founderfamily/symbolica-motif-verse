@@ -1,452 +1,290 @@
-import { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+import React, { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Search, 
-  Filter, 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronsLeft, 
-  ChevronsRight,
-  Trash2,
-  Edit,
-  Eye,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown
-} from 'lucide-react';
-import { PaginatedSymbol, SymbolFilters, SymbolSortConfig } from '@/hooks/useAdminSymbols';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Eye, Edit, Trash2, Search, Filter, ChevronUp, ChevronDown, Image } from 'lucide-react';
+import { toast } from 'sonner';
+import { useDeleteSymbol, type PaginatedSymbol } from '@/hooks/useAdminSymbols';
+import { SymbolEditModalAdvanced } from './SymbolEditModalAdvanced';
+import { SymbolViewModal } from './SymbolViewModal';
+import { SymbolData } from '@/types/supabase';
 
 interface SymbolsDataTableProps {
-  data: PaginatedSymbol[];
-  totalCount: number;
-  currentPage: number;
-  pageSize: number;
-  filters: SymbolFilters;
-  sort: SymbolSortConfig;
-  availableFilters: {
-    cultures: Array<{ filter_value: string; count: number }>;
-    periods: Array<{ filter_value: string; count: number }>;
-  };
+  symbols: PaginatedSymbol[];
   isLoading: boolean;
-  onPageChange: (page: number) => void;
-  onFiltersChange: (filters: SymbolFilters) => void;
-  onSortChange: (sort: SymbolSortConfig) => void;
-  onSymbolEdit: (symbol: PaginatedSymbol) => void;
-  onSymbolView: (symbol: PaginatedSymbol) => void;
-  onSymbolsDelete: (symbolIds: string[]) => void;
+  onRefresh: () => void;
 }
 
-export default function SymbolsDataTable({
-  data,
-  totalCount,
-  currentPage,
-  pageSize,
-  filters,
-  sort,
-  availableFilters,
-  isLoading,
-  onPageChange,
-  onFiltersChange,
-  onSortChange,
-  onSymbolEdit,
-  onSymbolView,
-  onSymbolsDelete
-}: SymbolsDataTableProps) {
-  const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
-  const [searchValue, setSearchValue] = useState(filters.search || '');
+export function SymbolsDataTable({ symbols, isLoading, onRefresh }: SymbolsDataTableProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<keyof PaginatedSymbol>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [filterImages, setFilterImages] = useState<'all' | 'with' | 'without'>('all');
+  const [selectedSymbol, setSelectedSymbol] = useState<SymbolData | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const deleteSymbol = useDeleteSymbol();
 
-  const handleSort = (column: SymbolSortConfig['column']) => {
-    const direction = sort.column === column && sort.direction === 'ASC' ? 'DESC' : 'ASC';
-    onSortChange({ column, direction });
-  };
+  const filteredAndSortedSymbols = useMemo(() => {
+    let filtered = symbols.filter(symbol => {
+      const matchesSearch = !searchTerm || 
+        symbol.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        symbol.culture.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        symbol.period.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedSymbols(data.map(symbol => symbol.id));
+      const matchesImageFilter = 
+        filterImages === 'all' ||
+        (filterImages === 'with' && symbol.image_count > 0) ||
+        (filterImages === 'without' && symbol.image_count === 0);
+
+      return matchesSearch && matchesImageFilter;
+    });
+
+    return filtered.sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+      
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sortDirection === 'asc' ? comparison : -comparison;
+      }
+      
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        const comparison = aValue - bValue;
+        return sortDirection === 'asc' ? comparison : -comparison;
+      }
+      
+      return 0;
+    });
+  }, [symbols, searchTerm, sortField, sortDirection, filterImages]);
+
+  const handleSort = (field: keyof PaginatedSymbol) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      setSelectedSymbols([]);
+      setSortField(field);
+      setSortDirection('asc');
     }
   };
 
-  const handleSelectSymbol = (symbolId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedSymbols([...selectedSymbols, symbolId]);
-    } else {
-      setSelectedSymbols(selectedSymbols.filter(id => id !== symbolId));
+  const handleEdit = (symbol: PaginatedSymbol) => {
+    const symbolData: SymbolData = {
+      id: symbol.id,
+      name: symbol.name,
+      culture: symbol.culture,
+      period: symbol.period,
+      description: symbol.description,
+      created_at: symbol.created_at,
+      updated_at: symbol.updated_at,
+      significance: symbol.significance,
+      historical_context: symbol.historical_context,
+      related_symbols: symbol.related_symbols,
+      tags: symbol.tags,
+      medium: symbol.medium,
+      technique: symbol.technique,
+      function: symbol.function,
+      cultural_taxonomy_code: symbol.cultural_taxonomy_code,
+      temporal_taxonomy_code: symbol.temporal_taxonomy_code,
+      thematic_taxonomy_codes: symbol.thematic_taxonomy_codes,
+      sources: symbol.sources,
+      translations: symbol.translations
+    };
+    setSelectedSymbol(symbolData);
+    setIsEditModalOpen(true);
+  };
+
+  const handleView = (symbol: PaginatedSymbol) => {
+    const symbolData: SymbolData = {
+      id: symbol.id,
+      name: symbol.name,
+      culture: symbol.culture,
+      period: symbol.period,
+      description: symbol.description,
+      created_at: symbol.created_at,
+      updated_at: symbol.updated_at,
+      significance: symbol.significance,
+      historical_context: symbol.historical_context,
+      related_symbols: symbol.related_symbols,
+      tags: symbol.tags,
+      medium: symbol.medium,
+      technique: symbol.technique,
+      function: symbol.function,
+      cultural_taxonomy_code: symbol.cultural_taxonomy_code,
+      temporal_taxonomy_code: symbol.temporal_taxonomy_code,
+      thematic_taxonomy_codes: symbol.thematic_taxonomy_codes,
+      sources: symbol.sources,
+      translations: symbol.translations
+    };
+    setSelectedSymbol(symbolData);
+    setIsViewModalOpen(true);
+  };
+
+  const handleDelete = async (symbolId: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce symbole ?')) {
+      try {
+        await deleteSymbol.mutateAsync(symbolId);
+        toast.success('Symbole supprimé avec succès');
+        onRefresh();
+      } catch (error) {
+        console.error('Error deleting symbol:', error);
+        toast.error('Erreur lors de la suppression');
+      }
     }
   };
 
-  const handleSearch = (value: string) => {
-    setSearchValue(value);
-    onFiltersChange({ ...filters, search: value || undefined });
+  const handleSymbolUpdated = () => {
+    onRefresh();
+    setIsEditModalOpen(false);
+    setSelectedSymbol(null);
   };
 
-  const getSortIcon = (column: SymbolSortConfig['column']) => {
-    if (sort.column !== column) return <ArrowUpDown className="ml-2 h-4 w-4" />;
-    return sort.direction === 'ASC' ? 
-      <ArrowUp className="ml-2 h-4 w-4" /> : 
-      <ArrowDown className="ml-2 h-4 w-4" />;
-  };
+  const SortableHeader = ({ field, children }: { field: keyof PaginatedSymbol; children: React.ReactNode }) => (
+    <TableHead 
+      className="cursor-pointer hover:bg-slate-50 select-none"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center gap-2">
+        {children}
+        {sortField === field && (
+          sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+        )}
+      </div>
+    </TableHead>
+  );
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Gestion des Symboles</span>
-          <Badge variant="secondary">
-            {totalCount.toLocaleString()} symboles
-          </Badge>
-        </CardTitle>
-        
-        {/* Filtres et recherche */}
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Symboles ({filteredAndSortedSymbols.length})</CardTitle>
+          <div className="flex gap-4 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Rechercher par nom, description ou culture..."
-                value={searchValue}
-                onChange={(e) => handleSearch(e.target.value)}
+                placeholder="Rechercher un symbole..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <Select
-              value={filters.culture || 'all'}
-              onValueChange={(value) => onFiltersChange({ 
-                ...filters, 
-                culture: value === 'all' ? undefined : value 
-              })}
-            >
+            <Select value={filterImages} onValueChange={(value: 'all' | 'with' | 'without') => setFilterImages(value)}>
               <SelectTrigger className="w-48">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Culture" />
+                <SelectValue placeholder="Filtrer par images" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes les cultures</SelectItem>
-                {availableFilters.cultures.map((culture) => (
-                  <SelectItem key={culture.filter_value} value={culture.filter_value}>
-                    {culture.filter_value} ({culture.count})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.period || 'all'}
-              onValueChange={(value) => onFiltersChange({ 
-                ...filters, 
-                period: value === 'all' ? undefined : value 
-              })}
-            >
-              <SelectTrigger className="w-48">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Période" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes les périodes</SelectItem>
-                {availableFilters.periods.map((period) => (
-                  <SelectItem key={period.filter_value} value={period.filter_value}>
-                    {period.filter_value} ({period.count})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.has_images || 'all'}
-              onValueChange={(value) => onFiltersChange({ 
-                ...filters, 
-                has_images: value === 'all' ? undefined : (value as 'with_images' | 'without_images')
-              })}
-            >
-              <SelectTrigger className="w-48">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Images" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous</SelectItem>
-                <SelectItem value="with_images">Avec images</SelectItem>
-                <SelectItem value="without_images">Sans images</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.verified || 'all'}
-              onValueChange={(value) => onFiltersChange({ 
-                ...filters, 
-                verified: value === 'all' ? undefined : (value as 'verified' | 'unverified')
-              })}
-            >
-              <SelectTrigger className="w-48">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Vérification" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous</SelectItem>
-                <SelectItem value="verified">Vérifiés</SelectItem>
-                <SelectItem value="unverified">Non vérifiés</SelectItem>
+                <SelectItem value="all">Tous les symboles</SelectItem>
+                <SelectItem value="with">Avec images</SelectItem>
+                <SelectItem value="without">Sans images</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        {/* Actions sur sélection */}
-        {selectedSymbols.length > 0 && (
-          <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-            <span className="text-sm font-medium">
-              {selectedSymbols.length} symbole(s) sélectionné(s)
-            </span>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => {
-                onSymbolsDelete(selectedSymbols);
-                setSelectedSymbols([]);
-              }}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Supprimer
-            </Button>
-          </div>
-        )}
-      </CardHeader>
-
-      <CardContent>
-        {/* Tableau */}
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={selectedSymbols.length === data.length && data.length > 0}
-                    onCheckedChange={handleSelectAll}
-                  />
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('name')}
-                >
-                  <div className="flex items-center">
-                    Nom
-                    {getSortIcon('name')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('culture')}
-                >
-                  <div className="flex items-center">
-                    Culture
-                    {getSortIcon('culture')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('period')}
-                >
-                  <div className="flex items-center">
-                    Période
-                    {getSortIcon('period')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('image_count')}
-                >
-                  <div className="flex items-center">
-                    Images
-                    {getSortIcon('image_count')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('verification_count')}
-                >
-                  <div className="flex items-center">
-                    Vérifications
-                    {getSortIcon('verification_count')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('created_at')}
-                >
-                  <div className="flex items-center">
-                    Créé le
-                    {getSortIcon('created_at')}
-                  </div>
-                </TableHead>
-                <TableHead className="w-32">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                // Skeleton rows
-                Array.from({ length: pageSize }).map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell><div className="h-4 w-4 bg-muted animate-pulse rounded" /></TableCell>
-                    <TableCell><div className="h-4 w-32 bg-muted animate-pulse rounded" /></TableCell>
-                    <TableCell><div className="h-4 w-24 bg-muted animate-pulse rounded" /></TableCell>
-                    <TableCell><div className="h-4 w-20 bg-muted animate-pulse rounded" /></TableCell>
-                    <TableCell><div className="h-4 w-12 bg-muted animate-pulse rounded" /></TableCell>
-                    <TableCell><div className="h-4 w-12 bg-muted animate-pulse rounded" /></TableCell>
-                    <TableCell><div className="h-4 w-20 bg-muted animate-pulse rounded" /></TableCell>
-                    <TableCell><div className="h-4 w-24 bg-muted animate-pulse rounded" /></TableCell>
-                  </TableRow>
-                ))
-              ) : data.length === 0 ? (
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    Aucun symbole trouvé
-                  </TableCell>
+                  <SortableHeader field="name">Nom</SortableHeader>
+                  <SortableHeader field="culture">Culture</SortableHeader>
+                  <SortableHeader field="period">Période</SortableHeader>
+                  <SortableHeader field="image_count">Images</SortableHeader>
+                  <SortableHeader field="verification_count">Vérifications</SortableHeader>
+                  <SortableHeader field="created_at">Créé le</SortableHeader>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ) : (
-                data.map((symbol) => (
-                  <TableRow key={symbol.id} className="hover:bg-muted/50">
+              </TableHeader>
+              <TableBody>
+                {filteredAndSortedSymbols.map((symbol) => (
+                  <TableRow key={symbol.id}>
+                    <TableCell className="font-medium">{symbol.name}</TableCell>
+                    <TableCell>{symbol.culture}</TableCell>
+                    <TableCell>{symbol.period}</TableCell>
                     <TableCell>
-                      <Checkbox
-                        checked={selectedSymbols.includes(symbol.id)}
-                        onCheckedChange={(checked) => handleSelectSymbol(symbol.id, checked as boolean)}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <div className="max-w-48 truncate" title={symbol.name}>
-                        {symbol.name}
+                      <div className="flex items-center gap-2">
+                        <Image className="h-4 w-4" />
+                        <Badge variant={symbol.image_count > 0 ? "default" : "secondary"}>
+                          {symbol.image_count}
+                        </Badge>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">
-                        {symbol.culture || 'Non définie'}
-                      </Badge>
+                      <Badge variant="outline">{symbol.verification_count}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">
-                        {symbol.period || 'Non définie'}
-                      </Badge>
+                      {symbol.created_at ? new Date(symbol.created_at).toLocaleDateString('fr-FR') : 'N/A'}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={symbol.image_count > 0 ? 'default' : 'secondary'}>
-                        {symbol.image_count}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={symbol.verification_count > 0 ? 'default' : 'secondary'}>
-                        {symbol.verification_count}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(symbol.created_at), 'dd/MM/yyyy', { locale: fr })}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
+                      <div className="flex gap-2">
                         <Button
-                          variant="ghost"
                           size="sm"
-                          onClick={() => onSymbolView(symbol)}
+                          variant="outline"
+                          onClick={() => handleView(symbol)}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
                           size="sm"
-                          onClick={() => onSymbolEdit(symbol)}
+                          variant="outline"
+                          onClick={() => handleEdit(symbol)}
                         >
                           <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(symbol.id)}
+                          disabled={deleteSymbol.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4">
-            <div className="text-sm text-muted-foreground">
-              Affichage de {((currentPage - 1) * pageSize) + 1} à {Math.min(currentPage * pageSize, totalCount)} sur {totalCount} symboles
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => onPageChange(pageNum)}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-              </div>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(totalPages)}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <SymbolEditModalAdvanced
+        symbol={selectedSymbol}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedSymbol(null);
+        }}
+        onSymbolUpdated={handleSymbolUpdated}
+      />
+
+      <SymbolViewModal
+        symbol={selectedSymbol}
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedSymbol(null);
+        }}
+      />
+    </>
   );
 }
