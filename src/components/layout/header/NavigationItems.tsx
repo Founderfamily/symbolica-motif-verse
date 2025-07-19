@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Settings, Users, Database, Shield, BarChart3 } from 'lucide-react';
+import { ChevronDown, Settings, Users, Database, Shield, BarChart3, Flag } from 'lucide-react';
 
 export const NavigationItems = () => {
   const location = useLocation();
@@ -37,7 +37,8 @@ export const NavigationItems = () => {
   const adminMenuItems = [
     { name: 'Tableau de bord', href: '/admin', icon: BarChart3 },
     { name: 'Gestion des utilisateurs', href: '/admin/users', icon: Users },
-    { name: 'Modération', href: '/admin/contributions/moderation', icon: Shield },
+    { name: 'Modération', href: '/admin/moderation', icon: Flag },
+    { name: 'Modération contributions', href: '/admin/contributions/moderation', icon: Shield },
     { name: 'Gestion des symboles', href: '/admin/symbols', icon: Database },
     { name: 'Paramètres', href: '/admin/settings', icon: Settings },
   ];

@@ -42,6 +42,7 @@ import MasterExplorer from '@/pages/Admin/MasterExplorer';
 import ContributionsModerationPage from '@/pages/Admin/ContributionsModerationPage';
 import QuestEnrichmentPage from '@/pages/Admin/QuestEnrichmentPage';
 import SymbolMCPGenerator from '@/pages/Admin/SymbolMCPGenerator';
+import ModerationPage from '@/pages/Admin/ModerationPage';
 
 // Other specialized pages
 import AnalysisPage from '@/pages/AnalysisPage';
@@ -117,6 +118,7 @@ function App() {
                   <Route path="/admin/users" element={<UsersManagement />} />
                   <Route path="/admin/contributions" element={<ContributionsManagement />} />
                   <Route path="/admin/contributions/moderation" element={<ContributionsModerationPage />} />
+                  <Route path="/admin/moderation" element={<ModerationPage />} />
                   <Route path="/admin/symbols" element={<SymbolsManagement />} />
                   <Route path="/admin/collections" element={<CollectionsManagement />} />
                   <Route path="/admin/content" element={<ContentManagement />} />
