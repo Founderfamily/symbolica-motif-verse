@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -387,29 +386,74 @@ RÉPONSE ATTENDUE:
 };
 
 function extractConfidenceScore(text: string, api: string): number {
+  // Debug logging pour tracer les extractions
   console.log(`Extracting confidence from ${api} response (first 400 chars): ${text.substring(0, 400)}`);
   
+  // Normalize text for better matching
   const normalizedText = text.toLowerCase().replace(/\s+/g, ' ');
   
+  // Enhanced patterns to extract confidence score, prioritizing explicit percentage statements
   const patterns = [
+    // PRIORITY 1: Direct confidence statements with specific percentages
     /niveau de confiance[:\s]*(\d+)\s*%/gi,
     /confiance[:\s]*(\d+)\s*%/gi,
     /confidence[:\s]*(\d+)\s*%/gi,
     /(\d+)\s*%\s*de confiance/gi,
     /(\d+)\s*%\s*confidence/gi,
+    
+    // PRIORITY 2: Gemini-specific markdown formatted patterns (double asterisks)
     /\*\*niveau de confiance[:\s]*(\d+)\s*%\*\*/gi,
     /\*\*confiance[:\s]*(\d+)\s*%\*\*/gi,
     /\*\*(\d+)\s*%\*\*/g,
     /\*(\d+)\s*%\*/g,
+    
+    // PRIORITY 3: Gemini specific patterns for common response formats
+    /statut.*?confiance[:\s]*(\d+)\s*%/gi,
+    /évaluation.*?(\d+)\s*%/gi,
+    
+    // PRIORITY 3: Score/evaluation patterns with percentages
+    /score[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*score/gi,
+    /évaluation[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*d'évaluation/gi,
+    
+    // PRIORITY 4: Reliability/fiabilité patterns
+    /fiabilité[:\s]*(\d+)\s*%/gi,
+    /reliability[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*de fiabilité/gi,
+    /(\d+)\s*%\s*fiabilité/gi,
+    /(\d+)\s*%\s*reliability/gi,
+    
+    // PRIORITY 5: Certainty/certitude patterns
+    /certitude[:\s]*(\d+)\s*%/gi,
+    /certainty[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*de certitude/gi,
+    /(\d+)\s*%\s*certitude/gi,
+    /(\d+)\s*%\s*certainty/gi,
+    
+    // PRIORITY 6: Accuracy patterns
+    /précision[:\s]*(\d+)\s*%/gi,
+    /accuracy[:\s]*(\d+)\s*%/gi,
+    /(\d+)\s*%\s*de précision/gi,
+    /(\d+)\s*%\s*précision/gi,
+    /(\d+)\s*%\s*accuracy/gi,
+    
+    // PRIORITY 7: Specific Gemini patterns (French responses, common patterns)
+    /(\d+)\s*%\s*\([^)]*confiance[^)]*\)/gi,
+    /\(.*confiance.*(\d+)\s*%.*\)/gi,
+    
+    // PRIORITY 8: Generic percentage patterns (least specific, last resort)
     /\b(\d+)\s*%\b/g
   ];
 
   let foundScores: number[] = [];
   let patternUsed = '';
   
+  // Try each pattern in priority order and collect valid scores
   for (let i = 0; i < patterns.length; i++) {
     const pattern = patterns[i];
     let match;
+    // Reset regex index for each pattern
     pattern.lastIndex = 0;
     
     while ((match = pattern.exec(normalizedText)) !== null) {
@@ -418,6 +462,7 @@ function extractConfidenceScore(text: string, api: string): number {
         foundScores.push(score);
         patternUsed = `Pattern ${i + 1}: ${pattern.source.substring(0, 50)}...`;
         
+        // For high-priority confidence patterns (patterns 1-3), return immediately
         if (i < 3 && (pattern.source.includes('confiance') || pattern.source.includes('confidence'))) {
           console.log(`Found confidence score: ${score}% for API: ${api} using ${patternUsed}`);
           return score;
@@ -425,17 +470,22 @@ function extractConfidenceScore(text: string, api: string): number {
       }
     }
     
+    // If we found scores in high-priority patterns, don't continue to lower priority ones
     if (foundScores.length > 0 && i < 6) {
       break;
     }
   }
   
+  // If we found any valid percentage scores, use the highest reasonable one
   if (foundScores.length > 0) {
+    // Remove extremely low scores that are likely not confidence scores
     const meaningfulScores = foundScores.filter(s => s >= 10);
     if (meaningfulScores.length > 0) {
+      // Take the highest score from meaningful scores (more likely to be the actual confidence)
       const selectedScore = Math.max(...meaningfulScores);
       console.log(`Selected confidence score: ${selectedScore}% for API: ${api} from scores: [${foundScores.join(', ')}] using ${patternUsed}`);
       
+      // Special handling for Gemini: if we found sources and have a decent score, boost it
       if (api === 'gemini' && hasReliableSourcesIndicators(text) && selectedScore >= 50) {
         const boostedScore = Math.min(95, selectedScore + 25);
         console.log(`Gemini source bonus applied: ${boostedScore}% (was ${selectedScore}%)`);
@@ -444,13 +494,16 @@ function extractConfidenceScore(text: string, api: string): number {
       
       return selectedScore;
     }
+    // If no meaningful scores, return the highest found score anyway
     const fallbackScore = Math.max(...foundScores);
     console.log(`Using fallback score: ${fallbackScore}% for API: ${api} from low scores: [${foundScores.join(', ')}]`);
     return fallbackScore;
   }
 
+  // Fallback: Check for textual confidence indicators
   console.log(`No percentage found, checking textual indicators for API: ${api}`);
   
+  // Check for reliable sources indicators first
   if (hasReliableSourcesIndicators(text)) {
     const baseScore = extractBasicConfidence(text);
     const finalScore = Math.min(95, baseScore + 20);
@@ -458,13 +511,15 @@ function extractConfidenceScore(text: string, api: string): number {
     return finalScore;
   }
   
+  // Check for no sources indicators - strict scoring
   if (hasNoSourcesIndicators(text)) {
     const finalScore = Math.min(25, extractBasicConfidence(text));
     console.log(`No sources penalty applied: ${finalScore}% for API: ${api}`);
     return finalScore;
   }
 
-  let textualScore = 25;
+  // API-specific textual patterns
+  let textualScore = 25; // Default fallback
   
   if (api === 'openai') {
     if (text.includes('highly confident') || text.includes('très confiant')) textualScore = 75;
@@ -474,6 +529,66 @@ function extractConfidenceScore(text: string, api: string): number {
     else if (text.includes('uncertain') || text.includes('unclear') || text.includes('incertain')) textualScore = 15;
   }
   
+  if (api === 'anthropic') {
+    if (text.includes('high confidence') || text.includes('haute confiance')) textualScore = 70;
+    else if (text.includes('moderate confidence') || text.includes('confiance modérée')) textualScore = 50;
+    else if (text.includes('low confidence') || text.includes('faible confiance')) textualScore = 25;
+    else if (text.includes('uncertain') || text.includes('incertain')) textualScore = 15;
+  }
+  
+  if (api === 'deepseek') {
+    if (text.includes('very reliable') || text.includes('highly accurate')) textualScore = 70;
+    else if (text.includes('reliable') || text.includes('accurate')) textualScore = 55;
+    else if (text.includes('somewhat reliable') || text.includes('partiellement fiable')) textualScore = 35;
+    else if (text.includes('unreliable') || text.includes('inaccurate') || text.includes('peu fiable')) textualScore = 15;
+  }
+  
+  if (api === 'perplexity') {
+    if (text.includes('well-documented') || text.includes('multiple sources') || text.includes('bien documenté')) textualScore = 75;
+    else if (text.includes('documented') || text.includes('sources available') || text.includes('documenté')) textualScore = 55;
+    else if (text.includes('limited sources') || text.includes('few references') || text.includes('sources limitées')) textualScore = 25;
+    else if (text.includes('no clear sources') || text.includes('unverified') || text.includes('pas de sources claires')) textualScore = 10;
+  }
+  
+  if (api === 'gemini') {
+    // Enhanced Gemini pattern matching with debug logging
+    console.log(`Analyzing Gemini textual patterns in: ${text.substring(0, 200)}...`);
+    
+    // Look for French responses from Gemini (it often responds in French)
+    if (text.includes('très fiable') || text.includes('haute fiabilité') || text.includes('bien établi')) {
+      textualScore = 85;
+      console.log(`Gemini high confidence French pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('fiable') || text.includes('documenté') || text.includes('vérifié') || text.includes('établi')) {
+      textualScore = 70;
+      console.log(`Gemini moderate confidence French pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('partiellement') || text.includes('en partie') || text.includes('moyennement')) {
+      textualScore = 45;
+      console.log(`Gemini partial confidence French pattern detected: ${textualScore}%`);
+    }
+    // English patterns
+    else if (text.includes('high certainty') || text.includes('well-established') || text.includes('highly reliable')) {
+      textualScore = 85;
+      console.log(`Gemini high confidence English pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('moderate certainty') || text.includes('established') || text.includes('reliable')) {
+      textualScore = 70;
+      console.log(`Gemini moderate confidence English pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('low certainty') || text.includes('uncertain') || text.includes('peu certain')) {
+      textualScore = 25;
+      console.log(`Gemini low confidence pattern detected: ${textualScore}%`);
+    }
+    else if (text.includes('very uncertain') || text.includes('unestablished') || text.includes('très incertain')) {
+      textualScore = 15;
+      console.log(`Gemini very low confidence pattern detected: ${textualScore}%`);
+    }
+    else {
+      console.log(`No specific Gemini pattern found, using default: ${textualScore}%`);
+    }
+  }
+  
   console.log(`Using textual pattern score: ${textualScore}% for API: ${api}`);
   return textualScore;
 }
@@ -481,6 +596,7 @@ function extractConfidenceScore(text: string, api: string): number {
 function hasReliableSourcesIndicators(text: string): boolean {
   const lowerText = text.toLowerCase();
   const reliableSourcesIndicators = [
+    // English indicators
     'france bleu',
     'reliable sources',
     'documented sources',
@@ -499,6 +615,8 @@ function hasReliableSourcesIndicators(text: string): boolean {
     'archive sources',
     'reputable sources',
     'established sources',
+    
+    // French indicators
     'sources fiables',
     'sources documentées',
     'sources crédibles',
@@ -521,6 +639,7 @@ function hasReliableSourcesIndicators(text: string): boolean {
 }
 
 function extractBasicConfidence(text: string): number {
+  // Helper function to extract basic confidence without source penalty
   const patterns = [
     /confidence[:\s]*(\d+)%/i,
     /(\d+)%\s*confidence/i,
@@ -542,6 +661,7 @@ function extractBasicConfidence(text: string): number {
 function hasNoSourcesIndicators(text: string): boolean {
   const lowerText = text.toLowerCase();
   const noSourcesIndicators = [
+    // English indicators
     'no reliable sources',
     'insufficient information',
     'cannot verify',
@@ -566,6 +686,8 @@ function hasNoSourcesIndicators(text: string): boolean {
     'no supporting evidence',
     'lacks evidence',
     'insufficient data',
+    
+    // French indicators
     'pas de sources fiables',
     'informations insuffisantes',
     'sources manquantes',
@@ -591,26 +713,133 @@ function hasNoSourcesIndicators(text: string): boolean {
     'informations peu fiables',
     'aucune preuve à l\'appui',
     'manque de preuves',
-    'données insuffisantes'
+    'données insuffisantes',
+    
+    // German indicators (common in academic sources)
+    'keine zuverlässigen quellen',
+    'unzureichende informationen',
+    'nicht verifizierbar',
+    'keine quellen',
+    'mangel an quellen',
+    
+    // Spanish indicators
+    'no hay fuentes fiables',
+    'información insuficiente',
+    'no se puede verificar',
+    'sin fuentes',
+    'falta de fuentes',
+    
+    // Italian indicators
+    'nessuna fonte affidabile',
+    'informazioni insufficienti',
+    'non verificabile',
+    'mancanza di fonti'
   ];
   
   return noSourcesIndicators.some(indicator => lowerText.includes(indicator));
 }
 
+function extractSourcesFromResponse(response: string): Array<{title: string, url: string, type: string, description?: string}> {
+  const sources: Array<{title: string, url: string, type: string, description?: string}> = [];
+  
+  // Enhanced patterns to extract sources from AI responses
+  const sourcePatterns = [
+    // French patterns
+    /SOURCES SUPPLÉMENTAIRES TROUVÉES:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    /NOUVELLES SOURCES TROUVÉES:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    /SOURCES ACADÉMIQUES TROUVÉES:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    
+    // English patterns
+    /ADDITIONAL SOURCES FOUND:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    /NEW SOURCES FOUND:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+    /ACADEMIC SOURCES FOUND:\s*([\s\S]*?)(?=\n\n|PHASE|$)/i,
+  ];
+  
+  for (const pattern of sourcePatterns) {
+    const match = response.match(pattern);
+    if (match && match[1]) {
+      const sourcesText = match[1].trim();
+      
+      // Split by lines and parse each source
+      const lines = sourcesText.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+      
+      for (const line of lines) {
+        const cleanLine = line.replace(/^[-•]\s*/, '').trim();
+        
+        // Try to parse structured source format: "Description - Citation"
+        const parts = cleanLine.split(' - ');
+        if (parts.length >= 2) {
+          const description = parts[0].trim();
+          const citation = parts.slice(1).join(' - ').trim();
+          
+          // Try to extract URL from citation
+          const urlMatch = citation.match(/(https?:\/\/[^\s]+)/);
+          const url = urlMatch ? urlMatch[1] : '';
+          
+          // Determine source type based on content
+          let type = 'academic';
+          if (citation.toLowerCase().includes('musée') || citation.toLowerCase().includes('museum')) {
+            type = 'museum';
+          } else if (citation.toLowerCase().includes('archive') || citation.toLowerCase().includes('archiv')) {
+            type = 'archive';
+          } else if (citation.toLowerCase().includes('journal') || citation.toLowerCase().includes('revue')) {
+            type = 'journal';
+          } else if (citation.toLowerCase().includes('livre') || citation.toLowerCase().includes('book')) {
+            type = 'book';
+          } else if (url) {
+            type = 'website';
+          }
+          
+          sources.push({
+            title: description,
+            url: url || citation,
+            type: type,
+            description: citation
+          });
+        } else if (cleanLine.length > 10) {
+          // Fallback: treat entire line as a source
+          const urlMatch = cleanLine.match(/(https?:\/\/[^\s]+)/);
+          sources.push({
+            title: cleanLine.substring(0, 100) + (cleanLine.length > 100 ? '...' : ''),
+            url: urlMatch ? urlMatch[1] : '',
+            type: 'reference',
+            description: cleanLine
+          });
+        }
+      }
+      
+      if (sources.length > 0) {
+        console.log(`Extracted ${sources.length} sources from ${pattern.source}`);
+        break; // Stop after first successful extraction
+      }
+    }
+  }
+  
+  return sources;
+}
+
 const parseVerificationResponse = (response: string, api: string, sources?: string[]) => {
+  // Extract status from response with improved patterns for different APIs
   let statusMatch = response.toLowerCase().match(/status:?\s*(verified|disputed|unverified)/);
   
+  // Special handling for Perplexity format: "Statut : **verified**"
   if (!statusMatch && api === 'perplexity') {
     statusMatch = response.match(/statut\s*:\s*\*\*(verified|disputed|unverified)\*\*/i);
   }
   
+  // Use improved confidence extraction
   const confidence = extractConfidenceScore(response, api);
   
+  // Extract new sources from AI response
+  const extractedSources = extractSourcesFromResponse(response);
+  
+  // Determine status based on content analysis
   let status = 'unverified';
   
   if (statusMatch) {
     status = statusMatch[1].toLowerCase();
   } else {
+    // Analyze content for verification keywords and lack of sources
     const lowerResponse = response.toLowerCase();
     
     if (hasNoSourcesIndicators(response)) {
@@ -627,6 +856,8 @@ const parseVerificationResponse = (response: string, api: string, sources?: stri
     }
   }
   
+  // Prioritize confidence over content analysis for final status
+  // If confidence is high (≥70%), force verified status regardless of source mentions
   if (confidence >= 70) {
     status = 'verified';
   } else if (confidence >= 50) {
@@ -635,6 +866,7 @@ const parseVerificationResponse = (response: string, api: string, sources?: stri
     status = 'unverified';
   }
   
+  // Extract summary (first paragraph or first few sentences)
   const sentences = response.split(/[.!?]+/).filter(s => s.trim().length > 10);
   const summary = sentences.slice(0, 2).join('. ').trim() + '.';
   
@@ -645,6 +877,7 @@ const parseVerificationResponse = (response: string, api: string, sources?: stri
     summary: summary || 'Analyse terminée',
     details: response,
     sources: sources || [],
+    extractedSources: extractedSources, // New field for AI-found sources
   };
 };
 
@@ -669,6 +902,7 @@ serve(async (req) => {
       );
     }
 
+    // If we only have symbolId, fetch symbol data from database
     let symbolData: SymbolData;
     if (symbol) {
       symbolData = symbol;
@@ -714,6 +948,7 @@ serve(async (req) => {
         };
       } catch (dbError) {
         console.error('Error fetching symbol from database:', dbError);
+        // Fallback to minimal data if available
         symbolData = {
           name: symbolName || 'Symbole inconnu',
           culture: 'Culture non spécifiée',
@@ -756,6 +991,76 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         );
+    }
+
+    // Auto-save if requested
+    if (autoSave && symbolId && userId) {
+      try {
+        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.49.4');
+        
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        );
+
+        // Save verification result
+        await supabase.from('symbol_verifications').insert({
+          symbol_id: symbolId,
+          api: result.api,
+          status: result.status,
+          confidence: result.confidence,
+          summary: result.summary,
+          details: result.details,
+          sources: result.sources || [],
+          verified_by: userId
+        });
+
+        // If AI found new sources, add them to the symbol
+        if (result.extractedSources && result.extractedSources.length > 0) {
+          // Get current symbol sources
+          const { data: currentSymbol } = await supabase
+            .from('symbols')
+            .select('sources')
+            .eq('id', symbolId)
+            .single();
+
+          const currentSources = currentSymbol?.sources || [];
+          
+          // Merge with new sources, avoiding duplicates
+          const newSources = [...currentSources];
+          for (const newSource of result.extractedSources) {
+            const isDuplicate = currentSources.some(existing => 
+              existing.title === newSource.title || 
+              (existing.url && newSource.url && existing.url === newSource.url)
+            );
+            
+            if (!isDuplicate) {
+              newSources.push(newSource);
+            }
+          }
+
+          // Update symbol with new sources
+          if (newSources.length > currentSources.length) {
+            await supabase
+              .from('symbols')
+              .update({ sources: newSources })
+              .eq('id', symbolId);
+            
+            console.log(`Added ${newSources.length - currentSources.length} new sources to symbol ${symbolId}`);
+          }
+        }
+
+        console.log(`Auto-saved verification result for ${api} on symbol ${symbolId}`);
+      } catch (saveError) {
+        console.error('Error auto-saving verification result:', saveError);
+        // Continue with the response even if save fails
+      }
     }
 
     return new Response(

@@ -6,12 +6,10 @@ export interface SymbolFilters {
   search?: string;
   culture?: string;
   period?: string;
-  has_images?: 'with_images' | 'without_images';
-  verified?: 'verified' | 'unverified';
 }
 
 export interface SymbolSortConfig {
-  column: 'name' | 'culture' | 'period' | 'created_at' | 'updated_at' | 'image_count' | 'verification_count';
+  column: 'name' | 'culture' | 'period' | 'created_at' | 'updated_at';
   direction: 'ASC' | 'DESC';
 }
 
@@ -26,12 +24,6 @@ export interface PaginatedSymbol {
   image_count: number;
   verification_count: number;
   total_count: number;
-  significance?: string | null;
-  historical_context?: string | null;
-  tags?: string[] | null;
-  medium?: string[] | null;
-  technique?: string[] | null;
-  function?: string[] | null;
 }
 
 export const useAdminSymbols = (
@@ -45,7 +37,7 @@ export const useAdminSymbols = (
     queryFn: async () => {
       const offset = (page - 1) * limit;
       
-      // Construire la requête avec jointures pour les compteurs
+      // Construire la requête de base
       let query = supabase
         .from('symbols')
         .select(`
@@ -55,16 +47,10 @@ export const useAdminSymbols = (
           period,
           description,
           created_at,
-          updated_at,
-          significance,
-          historical_context,
-          tags,
-          medium,
-          technique,
-          function
+          updated_at
         `, { count: 'exact' });
 
-      // Appliquer les filtres de base
+      // Appliquer les filtres
       if (filters.search) {
         query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,culture.ilike.%${filters.search}%`);
       }
@@ -110,33 +96,9 @@ export const useAdminSymbols = (
         })
       );
 
-      // Appliquer les filtres avancés après récupération des compteurs
-      let filteredSymbols = symbolsWithCounts;
-
-      if (filters.has_images === 'with_images') {
-        filteredSymbols = filteredSymbols.filter(s => s.image_count > 0);
-      } else if (filters.has_images === 'without_images') {
-        filteredSymbols = filteredSymbols.filter(s => s.image_count === 0);
-      }
-
-      if (filters.verified === 'verified') {
-        filteredSymbols = filteredSymbols.filter(s => s.verification_count > 0);
-      } else if (filters.verified === 'unverified') {
-        filteredSymbols = filteredSymbols.filter(s => s.verification_count === 0);
-      }
-
-      // Tri personnalisé pour les compteurs
-      if (sort.column === 'image_count' || sort.column === 'verification_count') {
-        filteredSymbols.sort((a, b) => {
-          const aVal = a[sort.column as keyof PaginatedSymbol] as number;
-          const bVal = b[sort.column as keyof PaginatedSymbol] as number;
-          return sort.direction === 'ASC' ? aVal - bVal : bVal - aVal;
-        });
-      }
-
       return {
-        data: filteredSymbols as PaginatedSymbol[],
-        totalCount: filteredSymbols.length
+        data: symbolsWithCounts as PaginatedSymbol[],
+        totalCount: count || 0
       };
     },
     staleTime: 30 * 1000, // 30 secondes
@@ -258,18 +220,7 @@ export const useUpdateSymbol = () => {
   return useMutation({
     mutationFn: async ({ id, updates }: { 
       id: string; 
-      updates: Partial<{ 
-        name: string; 
-        culture: string; 
-        period: string; 
-        description: string;
-        significance: string;
-        historical_context: string;
-        tags: string[];
-        medium: string[];
-        technique: string[];
-        function: string[];
-      }> 
+      updates: Partial<{ name: string; culture: string; period: string; description: string }> 
     }) => {
       const { error } = await supabase
         .from('symbols')
