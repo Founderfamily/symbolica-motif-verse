@@ -146,6 +146,21 @@ export const SymbolVerificationCommunity: React.FC<SymbolVerificationCommunityPr
 
       if (error) throw error;
 
+      // Créer une notification immédiate pour l'utilisateur en utilisant le bon format
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: userProfile.id,
+          type: 'system',
+          content: {
+            title: 'Signalement enregistré',
+            message: 'Votre signalement a été transmis à nos modérateurs. Nous vous tiendrons informé du traitement.',
+            action_url: '/profile/reports',
+            entity_id: symbol.id,
+            entity_type: 'symbol'
+          }
+        });
+
       toast.success("Commentaire signalé pour modération");
     } catch (error) {
       console.error('Erreur lors du signalement:', error);
