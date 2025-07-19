@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { SymbolData } from '@/types/supabase';
-import { SymbolEditModalAdvanced } from './SymbolEditModalAdvanced';
+import { PaginatedSymbol } from '@/hooks/useAdminSymbols';
 
 interface AdminFloatingEditButtonProps {
   symbol: SymbolData;
@@ -16,42 +16,30 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
   onSymbolUpdated
 }) => {
   const { user, profile } = useAuth();
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Ne pas afficher le bouton si l'utilisateur n'est pas admin
   if (!user || !profile?.is_admin) {
     return null;
   }
 
-  const handleEditClick = () => {
-    setIsEditModalOpen(true);
-  };
-
-  const handleSymbolUpdated = (updatedSymbol: SymbolData) => {
-    onSymbolUpdated(updatedSymbol);
-    setIsEditModalOpen(false);
+  // Convertir SymbolData vers PaginatedSymbol
+  const convertedSymbol: PaginatedSymbol = {
+    ...symbol,
+    image_count: 0, // Ces valeurs seront récupérées dynamiquement
+    verification_count: 0,
+    total_count: 0
   };
 
   return (
-    <>
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button
-          type="button"
-          size="lg"
-          onClick={handleEditClick}
-          className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-amber-600 hover:bg-amber-700 gap-2"
-        >
-          <Edit className="h-5 w-5" />
-          Éditer ce symbole
-        </Button>
-      </div>
-
-      <SymbolEditModalAdvanced
-        symbol={symbol}
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSymbolUpdated={handleSymbolUpdated}
-      />
-    </>
+    <div className="fixed bottom-6 right-6 z-50">
+      <Button
+        type="button"
+        size="lg"
+        className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-amber-600 hover:bg-amber-700 gap-2"
+      >
+        <Edit className="h-5 w-5" />
+        Éditer ce symbole
+      </Button>
+    </div>
   );
 };
