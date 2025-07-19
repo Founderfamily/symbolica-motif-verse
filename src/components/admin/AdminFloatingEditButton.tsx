@@ -31,7 +31,7 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
     setIsModalOpen(false);
   };
 
-  // Convertir SymbolData vers le format attendu par SymbolEditModal
+  // Convertir SymbolData vers le format attendu par SymbolEditModal (PaginatedSymbol)
   const convertedSymbol = symbol ? {
     id: symbol.id,
     name: symbol.name,
@@ -39,7 +39,10 @@ export const AdminFloatingEditButton: React.FC<AdminFloatingEditButtonProps> = (
     period: symbol.period,
     description: symbol.description || '',
     created_at: symbol.created_at,
-    updated_at: symbol.updated_at
+    updated_at: symbol.updated_at,
+    image_count: 0,
+    verification_count: 0,
+    total_count: 0
   } : null;
 
   return (
