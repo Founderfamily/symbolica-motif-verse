@@ -239,7 +239,7 @@ export function SymbolEditModalAdvanced({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden">
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden z-60">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Modifier le symbole : {symbol.name}</span>
