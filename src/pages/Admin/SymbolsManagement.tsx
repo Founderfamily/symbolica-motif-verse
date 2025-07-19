@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Edit } from 'lucide-react';
 import { 
   useAdminSymbols, 
   useSymbolStats, 
@@ -25,7 +27,7 @@ export default function SymbolsManagement() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  const { data: symbolsData, isLoading } = useAdminSymbols(currentPage, pageSize, filters, sort);
+  const { data: symbolsData, isLoading, refetch } = useAdminSymbols(currentPage, pageSize, filters, sort);
   const { data: stats } = useSymbolStats();
   const { data: availableFilters } = useSymbolFilters();
   const deleteSymbols = useDeleteSymbols();
@@ -163,14 +165,17 @@ export default function SymbolsManagement() {
       />
 
       {/* Modales */}
-      <SymbolEditModal
-        symbol={selectedSymbol}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedSymbol(null);
-        }}
-      />
+      {selectedSymbol && isEditModalOpen && (
+        <SymbolEditModal
+          symbol={selectedSymbol}
+          onSymbolUpdated={(updatedSymbol) => {
+            // Refresh the symbols list
+            refetch();
+            setIsEditModalOpen(false);
+            setSelectedSymbol(null);
+          }}
+        />
+      )}
 
       <SymbolViewModal
         symbol={selectedSymbol}

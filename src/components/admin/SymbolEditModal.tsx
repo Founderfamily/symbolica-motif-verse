@@ -89,10 +89,24 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
       if (!symbol.id) return;
       
       try {
+        // Simplified query without JOIN since the relationship might not exist
         const { data, error } = await supabase
           .from('collection_symbols')
-          .select(`
-            collections (
+          .select('collection_id')
+          .eq('symbol_id', symbol.id);
+
+        if (error) {
+          console.error('Database error:', error);
+          setSelectedCollections([]);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          // Get collection details separately
+          const collectionIds = data.map(item => item.collection_id);
+          const { data: collectionsData, error: collectionsError } = await supabase
+            .from('collections')
+            .select(`
               id,
               slug,
               collection_translations (
@@ -100,19 +114,22 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
                 title,
                 description
               )
-            )
-          `)
-          .eq('symbol_id', symbol.id);
+            `)
+            .in('id', collectionIds);
 
-        if (error) throw error;
-        
-        const collections = data
-          ?.filter(item => item.collections)
-          .map(item => item.collections) || [];
-        
-        setSelectedCollections(collections);
+          if (collectionsError) {
+            console.error('Collections error:', collectionsError);
+            setSelectedCollections([]);
+            return;
+          }
+
+          setSelectedCollections(collectionsData || []);
+        } else {
+          setSelectedCollections([]);
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des collections:', error);
+        setSelectedCollections([]);
       }
     };
 
@@ -259,11 +276,20 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
     </Button>
   );
 
+  // For controlled usage, open the modal when symbol changes
+  React.useEffect(() => {
+    if (symbol && !trigger) {
+      setOpen(true);
+    }
+  }, [symbol, trigger]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || defaultTrigger}
-      </DialogTrigger>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Éditer le symbole</DialogTitle>
