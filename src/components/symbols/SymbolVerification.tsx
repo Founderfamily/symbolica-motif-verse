@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SymbolVerificationProps {
   symbol: {
@@ -76,6 +77,7 @@ const API_CONFIGS = {
 };
 
 export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }) => {
+  const { user } = useAuth();
   const [results, setResults] = useState<Record<string, VerificationResult>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('overview');
