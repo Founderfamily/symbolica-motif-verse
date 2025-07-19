@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { useSymbolById, useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { AdminFloatingEditButton } from '@/components/admin/AdminFloatingEditButton';
 import { ImageGalleryModal } from '@/components/symbols/ImageGalleryModal';
-import { SymbolVerificationPublic } from '@/components/symbols/SymbolVerificationPublic';
+import { SymbolVerification } from '@/components/symbols/SymbolVerification';
 import { SymbolVerificationCommunity } from '@/components/symbols/SymbolVerificationCommunity';
 import { SymbolVerificationAdmin } from '@/components/admin/SymbolVerificationAdmin';
 import { SourceVoting } from '@/components/symbols/SourceVoting';
@@ -576,11 +576,15 @@ const SymbolDetailPage: React.FC = () => {
 
           {activeSection === 'verification' && (
             <div key={refreshKey}>
-              <SymbolVerificationPublic 
+              <SymbolVerification 
                 symbol={{
                   id: displaySymbol.id,
                   name: displaySymbol.name,
-                  sources: Array.isArray(displaySymbol.sources) ? displaySymbol.sources : []
+                  culture: displaySymbol.culture || '',
+                  period: displaySymbol.period || '',
+                  description: displaySymbol.description,
+                  significance: displaySymbol.significance,
+                  historical_context: displaySymbol.historical_context
                 }} 
               />
             </div>
