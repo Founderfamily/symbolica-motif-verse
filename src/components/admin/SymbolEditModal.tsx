@@ -38,7 +38,7 @@ export const SymbolEditModal: React.FC<SymbolEditModalProps> = ({
   onSymbolUpdated,
   trigger
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(trigger ? false : true);
   
   // Helper function to ensure sources is an array
   const getSourcesArray = (sources: any): Array<{title: string, url: string, type: string}> => {
