@@ -1,101 +1,162 @@
-
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Check, Info, AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Bell, X, Check, ExternalLink, AlertCircle, CheckCircle, AlertTriangle, Star, Users, Award, Settings } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/hooks/useAuth';
-
-interface Notification {
-  id: string;
-  type: 'info' | 'success' | 'warning' | 'contribution' | 'community';
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-  actionUrl?: string;
-}
+} from "@/components/ui/dropdown-menu";
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { NotificationService, type Notification } from '@/services/notificationService';
+import { toast } from 'sonner';
 
 export const NotificationCenter: React.FC = () => {
-  const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'contribution',
-      title: 'Contribution approuvée',
-      message: 'Votre symbole "Triskelion Celtique" a été approuvé par la communauté',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30),
-      read: false,
-      actionUrl: '/contributions'
-    },
-    {
-      id: '2',
-      type: 'community',
-      title: 'Nouveau membre',
-      message: 'Marie a rejoint le groupe "Symboles Nordiques"',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-      read: false,
-      actionUrl: '/community'
-    },
-    {
-      id: '3',
-      type: 'info',
-      title: 'Nouvelle fonctionnalité',
-      message: 'Découvrez notre nouvelle interface de recherche avancée',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      read: true,
-      actionUrl: '/search'
-    }
-  ]);
-
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Load notifications on component mount
+  useEffect(() => {
+    loadNotifications();
+    setupRealtimeSubscription();
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const userNotifications = await NotificationService.getUserNotifications(user.id);
+        setNotifications(userNotifications);
+      }
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const setupRealtimeSubscription = () => {
+    const channel = supabase
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications'
+        },
+        () => {
+          loadNotifications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  // Fonction pour obtenir l'icône selon le type de notification
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <Check className="h-4 w-4 text-green-600" />;
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-amber-600" />;
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      case 'info':
+        return <AlertCircle className="h-4 w-4 text-blue-500" />;
       case 'contribution':
-        return <div className="h-4 w-4 rounded-full bg-blue-600" />;
+        return <Star className="h-4 w-4 text-purple-500" />;
       case 'community':
-        return <div className="h-4 w-4 rounded-full bg-purple-600" />;
+        return <Users className="h-4 w-4 text-green-500" />;
+      case 'achievement':
+        return <Award className="h-4 w-4 text-yellow-500" />;
+      case 'system':
+        return <Settings className="h-4 w-4 text-blue-500" />;
       default:
-        return <Info className="h-4 w-4 text-blue-600" />;
+        return <Bell className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
-  const formatRelativeTime = (date: Date) => {
+  // Fonction pour marquer une notification comme lue
+  const markAsRead = async (id: string) => {
+    const success = await NotificationService.markAsRead(id);
+    if (success) {
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === id 
+            ? { ...notification, read: true }
+            : notification
+        )
+      );
+    } else {
+      toast.error('Erreur lors de la mise à jour de la notification');
+    }
+  };
+
+  // Fonction pour marquer toutes les notifications comme lues
+  const markAllAsRead = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const success = await NotificationService.markAllAsRead(user.id);
+      if (success) {
+        setNotifications(prev => 
+          prev.map(notification => ({ ...notification, read: true }))
+        );
+        toast.success('Toutes les notifications ont été marquées comme lues');
+      } else {
+        toast.error('Erreur lors de la mise à jour des notifications');
+      }
+    }
+  };
+
+  // Fonction pour supprimer une notification
+  const removeNotification = async (id: string) => {
+    const success = await NotificationService.deleteNotification(id);
+    if (success) {
+      setNotifications(prev => prev.filter(notification => notification.id !== id));
+      toast.success('Notification supprimée');
+    } else {
+      toast.error('Erreur lors de la suppression de la notification');
+    }
+  };
+
+  // Handle notification click with navigation
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+    if (notification.action_url) {
+      navigate(notification.action_url);
+      setIsOpen(false);
+    }
+  };
+
+  // Fonction pour formater l'heure relative
+  const formatRelativeTime = (dateString: string): string => {
+    const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return 'À l\'instant';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
-    return `${Math.floor(diffInSeconds / 86400)}j`;
-  };
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
+    if (diffInSeconds < 60) {
+      return "À l'instant";
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes}min`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours}h`;
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days}j`;
+    } else {
+      return date.toLocaleDateString('fr-FR');
+    }
   };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
-
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  if (!user) return null;
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -103,24 +164,17 @@ export const NotificationCenter: React.FC = () => {
         <Button variant="ghost" size="sm" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs"
-            >
+            <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-destructive-foreground rounded-full text-xs flex items-center justify-center">
               {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
+            </span>
           )}
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent 
-        className="w-80 p-0" 
-        align="end"
-        sideOffset={5}
-      >
+      <DropdownMenuContent className="w-80 p-0" align="end" sideOffset={5}>
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Notifications</h3>
+            <h3 className="font-semibold text-lg">Notifications</h3>
             {unreadCount > 0 && (
               <Button 
                 variant="ghost" 
@@ -135,68 +189,79 @@ export const NotificationCenter: React.FC = () => {
         </div>
 
         <div className="max-h-96 overflow-y-auto">
-          {notifications.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Aucune notification</p>
+          {loading ? (
+            <div className="text-center text-muted-foreground py-8">
+              Chargement des notifications...
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              Aucune notification
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="space-y-2">
               {notifications.map((notification) => (
-                <Card key={notification.id} className="border-0 rounded-none shadow-none">
-                  <CardContent className="p-4 relative">
-                    <div className="flex items-start gap-3">
+                <div
+                  key={notification.id}
+                  className={`p-3 rounded-lg border transition-colors cursor-pointer ${
+                    !notification.read
+                      ? 'bg-primary/5 border-primary/20'
+                      : 'bg-muted/20 border-border'
+                  }`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-3 flex-1">
                       <div className="flex-shrink-0 mt-1">
                         {getNotificationIcon(notification.type)}
                       </div>
-                      
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className={`text-sm font-medium ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium text-foreground truncate">
                             {notification.title}
                           </h4>
-                          <div className="flex items-center gap-1">
-                            <span className="text-xs text-muted-foreground">
-                              {formatRelativeTime(notification.timestamp)}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0"
-                              onClick={() => removeNotification(notification.id)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {formatRelativeTime(notification.created_at)}
+                          </span>
                         </div>
-                        
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        
-                        {!notification.read && (
-                          <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-blue-600 rounded-full" />
+                        {notification.action_url && (
+                          <div className="flex items-center mt-2 text-xs text-primary">
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            Voir plus
+                          </div>
                         )}
                       </div>
                     </div>
-                    
-                    {notification.actionUrl && (
+                    <div className="flex items-center space-x-1 ml-2">
+                      {!notification.read && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAsRead(notification.id);
+                          }}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Check className="h-3 w-3" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full mt-2 text-xs"
-                        onClick={() => {
-                          markAsRead(notification.id);
-                          setIsOpen(false);
-                          // Navigate to action URL
-                          window.location.href = notification.actionUrl!;
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeNotification(notification.id);
                         }}
+                        className="h-6 w-6 p-0"
                       >
-                        Voir plus
+                        <X className="h-3 w-3" />
                       </Button>
-                    )}
-                  </CardContent>
-                </Card>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}
@@ -204,7 +269,14 @@ export const NotificationCenter: React.FC = () => {
 
         {notifications.length > 0 && (
           <div className="p-4 border-t">
-            <Button variant="ghost" className="w-full text-sm">
+            <Button 
+              variant="ghost" 
+              className="w-full text-sm"
+              onClick={() => {
+                navigate('/notifications');
+                setIsOpen(false);
+              }}
+            >
               Voir toutes les notifications
             </Button>
           </div>
