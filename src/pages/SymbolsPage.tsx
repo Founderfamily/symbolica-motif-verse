@@ -5,13 +5,13 @@ import { SymbolData } from '@/types/supabase';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
 import { EmptyStateCard } from '@/components/search/EmptyStateCard';
 import { Button } from '@/components/ui/button';
-import { Filter, BarChart3 } from 'lucide-react';
+import { Filter, BarChart3, AlertCircle, Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ImageStatsWidget } from '@/components/admin/ImageStatsWidget';
 
 import { SymbolCompletenessService, SymbolWithCompleteness } from '@/services/symbolCompletenessService';
 import { CompletenessBadge } from '@/components/ui/completeness-badge';
 import { Link } from 'react-router-dom';
-import { Clock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Badge } from '@/components/ui/badge';
@@ -88,16 +88,26 @@ const SymbolsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">Chargement des symboles...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <div className="h-10 bg-slate-200 rounded-lg w-64 mx-auto mb-4 animate-pulse"></div>
+            <div className="h-6 bg-slate-200 rounded-lg w-96 mx-auto animate-pulse"></div>
+          </div>
+          <EnhancedSymbolGrid symbols={[]} loading={true} />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl text-red-600">Erreur lors du chargement des symboles.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-xl text-red-600 mb-2">Erreur lors du chargement des symboles</p>
+          <p className="text-slate-600">Veuillez réessayer plus tard</p>
+        </div>
       </div>
     );
   }
@@ -111,7 +121,7 @@ const SymbolsPage: React.FC = () => {
             Symboles Culturels
           </h1>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Découvrez notre collection de symboles, triés par qualité de documentation
+            Découvrez notre collection de symboles, avec un système de chargement d'images optimisé
           </p>
         </div>
 
@@ -125,70 +135,79 @@ const SymbolsPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* Statistics and filters */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-blue-900 font-semibold mb-1">
-                  {processedSymbols.length} symboles disponibles
-                </p>
-                {completenessStats && (
-                  <div className="flex items-center gap-4 text-sm text-blue-700">
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-green-400"></span>
-                      <span>{completenessStats.complete} complets</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-                      <span>{completenessStats.wellDocumented} bien documentés</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-orange-400"></span> 
-                      <span>{completenessStats.partiallyDocumented} partiels</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-red-400"></span>
-                      <span>{completenessStats.toComplete} à compléter</span>
-                    </div>
-                    <div className="text-blue-600 font-medium ml-2">
-                      Score moyen: {completenessStats.averageScore}
-                    </div>
+        {/* Statistics and filters with image stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-blue-900 font-semibold mb-1">
+                      {processedSymbols.length} symboles disponibles
+                    </p>
+                    {completenessStats && (
+                      <div className="flex items-center gap-4 text-sm text-blue-700">
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                          <span>{completenessStats.complete} complets</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                          <span>{completenessStats.wellDocumented} bien documentés</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-orange-400"></span> 
+                          <span>{completenessStats.partiallyDocumented} partiels</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-red-400"></span>
+                          <span>{completenessStats.toComplete} à compléter</span>
+                        </div>
+                        <div className="text-blue-600 font-medium ml-2">
+                          Score moyen: {completenessStats.averageScore}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+              </div>
+              
+              {/* Filters */}
+              <div className="flex flex-wrap gap-4">
+                <Button
+                  variant={showOnlyWithPhotos ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowOnlyWithPhotos(!showOnlyWithPhotos)}
+                  className="flex items-center gap-2"
+                >
+                  <Filter className="h-4 w-4" />
+                  {showOnlyWithPhotos ? "Tous" : "Avec photos"}
+                </Button>
+
+                <Select value={selectedCompletenessLevel} onValueChange={(value) => setSelectedCompletenessLevel(value as any)}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Niveau de complétude" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les niveaux</SelectItem>
+                    <SelectItem value="complete">Complets</SelectItem>
+                    <SelectItem value="well_documented">Bien documentés</SelectItem>
+                    <SelectItem value="partially_documented">Partiellement documentés</SelectItem>
+                    <SelectItem value="to_complete">À compléter</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
           
-          {/* Filters */}
-          <div className="flex flex-wrap gap-4">
-            <Button
-              variant={showOnlyWithPhotos ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowOnlyWithPhotos(!showOnlyWithPhotos)}
-              className="flex items-center gap-2"
-            >
-              <Filter className="h-4 w-4" />
-              {showOnlyWithPhotos ? "Tous" : "Avec photos"}
-            </Button>
-
-            <Select value={selectedCompletenessLevel} onValueChange={(value) => setSelectedCompletenessLevel(value as any)}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Niveau de complétude" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les niveaux</SelectItem>
-                <SelectItem value="complete">Complets</SelectItem>
-                <SelectItem value="well_documented">Bien documentés</SelectItem>
-                <SelectItem value="partially_documented">Partiellement documentés</SelectItem>
-                <SelectItem value="to_complete">À compléter</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Image Statistics Widget */}
+          <div className="lg:col-span-1">
+            <ImageStatsWidget />
           </div>
         </div>
 
-        {/* Symbols Grid with Completeness */}
+        {/* Symbols Grid with optimized loading */}
         <EnhancedSymbolGrid symbols={processedSymbols} />
 
         {/* Empty state for filters */}
@@ -206,9 +225,10 @@ const SymbolsPage: React.FC = () => {
 // Enhanced Symbol Grid component
 interface EnhancedSymbolGridProps {
   symbols: SymbolWithCompleteness[];
+  loading?: boolean;
 }
 
-const EnhancedSymbolGrid: React.FC<EnhancedSymbolGridProps> = ({ symbols }) => {
+const EnhancedSymbolGrid: React.FC<EnhancedSymbolGridProps> = ({ symbols, loading }) => {
   if (symbols.length === 0) {
     return <EmptyStateCard />;
   }
