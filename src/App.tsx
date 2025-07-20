@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -63,6 +64,13 @@ import SymbolExplorer from '@/pages/SymbolExplorer';
 import ProposeSymbol from '@/pages/ProposeSymbol';
 import ValidatorDashboard from '@/pages/ValidatorDashboard';
 
+// Innovation Lab pages
+import InnovationGraphPage from '@/pages/Innovation/GraphPage';
+import InnovationTabsPage from '@/pages/Innovation/TabsPage';
+import InnovationGamifyPage from '@/pages/Innovation/GamifyPage';
+import InnovationImmersionPage from '@/pages/Innovation/ImmersionPage';
+import InnovationTimelinePage from '@/pages/Innovation/TimelinePage';
+
 import './App.css';
 
 const queryClient = new QueryClient({
@@ -96,6 +104,13 @@ function App() {
                   <Route path="/quests/:questId" element={<QuestDetailPage />} />
                   <Route path="/community" element={<CommunityPage />} />
                   <Route path="/community/groups/:groupId" element={<GroupDetailPage />} />
+
+                  {/* Innovation Lab routes */}
+                  <Route path="/innovation/graph" element={<InnovationGraphPage />} />
+                  <Route path="/innovation/tabs" element={<InnovationTabsPage />} />
+                  <Route path="/innovation/gamify" element={<InnovationGamifyPage />} />
+                  <Route path="/innovation/immersion" element={<InnovationImmersionPage />} />
+                  <Route path="/innovation/timeline" element={<InnovationTimelinePage />} />
 
   {/* Contributions */}
   <Route path="/contributions" element={<ContributionsPage />} />
