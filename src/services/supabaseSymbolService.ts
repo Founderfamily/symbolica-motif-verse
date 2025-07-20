@@ -56,7 +56,7 @@ export class SupabaseSymbolService {
   }
 
   /**
-   * Récupère tous les symboles
+   * Récupère tous les symboles avec tri intelligent (symboles avec images en premier)
    */
   async getAllSymbols(): Promise<SymbolData[]> {
     const { data, error } = await supabase
@@ -65,7 +65,8 @@ export class SupabaseSymbolService {
         *,
         cultural_taxonomy_code,
         temporal_taxonomy_code,
-        thematic_taxonomy_codes
+        thematic_taxonomy_codes,
+        symbol_images!inner(id)
       `)
       .order('created_at', { ascending: false });
 
@@ -74,7 +75,20 @@ export class SupabaseSymbolService {
       throw error;
     }
 
-    return data || [];
+    // Tri intelligent : symboles avec images en premier, puis par date
+    const symbolsData = (data || []).map(symbol => ({
+      ...symbol,
+      hasImages: symbol.symbol_images && symbol.symbol_images.length > 0
+    }));
+
+    return symbolsData.sort((a, b) => {
+      // D'abord par présence d'images (avec images en premier)
+      if (a.hasImages && !b.hasImages) return -1;
+      if (!a.hasImages && b.hasImages) return 1;
+      
+      // Ensuite par date de création (plus récent en premier)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
   }
 
   /**
@@ -241,7 +255,7 @@ export class SupabaseSymbolService {
   }
 
   /**
-   * Recherche de symboles avec filtres hiérarchiques
+   * Recherche de symboles avec filtres hiérarchiques et tri intelligent
    */
   async searchSymbols(
     query?: string,
@@ -256,7 +270,8 @@ export class SupabaseSymbolService {
         *,
         cultural_taxonomy_code,
         temporal_taxonomy_code,
-        thematic_taxonomy_codes
+        thematic_taxonomy_codes,
+        symbol_images!left(id)
       `);
 
     if (query) {
@@ -287,7 +302,28 @@ export class SupabaseSymbolService {
       throw error;
     }
 
-    return data || [];
+    // Tri intelligent pour les résultats de recherche aussi
+    const symbolsData = (data || []).map(symbol => ({
+      ...symbol,
+      hasImages: symbol.symbol_images && symbol.symbol_images.length > 0
+    }));
+
+    return symbolsData.sort((a, b) => {
+      // D'abord par présence d'images (avec images en premier)
+      if (a.hasImages && !b.hasImages) return -1;
+      if (!a.hasImages && b.hasImages) return 1;
+      
+      // Ensuite par pertinence de recherche si il y a une query
+      if (query) {
+        const aNameMatch = a.name.toLowerCase().includes(query.toLowerCase());
+        const bNameMatch = b.name.toLowerCase().includes(query.toLowerCase());
+        if (aNameMatch && !bNameMatch) return -1;
+        if (!aNameMatch && bNameMatch) return 1;
+      }
+      
+      // Finalement par date de création (plus récent en premier)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
   }
 
   /**
