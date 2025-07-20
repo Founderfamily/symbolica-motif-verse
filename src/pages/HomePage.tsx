@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Hero from '@/components/sections/Hero';
-import SimpleFeaturedCollections from '@/components/sections/SimpleFeaturedCollections';
+import EnhancedFeaturedCollections from '@/components/sections/EnhancedFeaturedCollections';
 import Standards from '@/components/sections/Standards';
 import Community from '@/components/sections/Community';
 import QuestsSection from '@/components/sections/QuestsSection';
@@ -59,14 +59,14 @@ const HomePage = () => {
         </section>
       </ErrorBoundary>
 
-      {/* Collections Section */}
+      {/* Enhanced Collections Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'SimpleFeaturedCollections')
+          ErrorHandler.handleComponentError(error, errorInfo, 'EnhancedFeaturedCollections')
         }
       >
         <section className="relative py-12 bg-gradient-to-r from-stone-100/50 to-amber-50/30">
-          <SimpleFeaturedCollections />
+          <EnhancedFeaturedCollections />
         </section>
       </ErrorBoundary>
 
