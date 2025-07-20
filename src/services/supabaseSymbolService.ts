@@ -66,7 +66,7 @@ export class SupabaseSymbolService {
         cultural_taxonomy_code,
         temporal_taxonomy_code,
         thematic_taxonomy_codes,
-        symbol_images!inner(id)
+        symbol_images!symbol_images_symbol_id_fkey(id)
       `)
       .order('created_at', { ascending: false });
 
@@ -271,7 +271,7 @@ export class SupabaseSymbolService {
         cultural_taxonomy_code,
         temporal_taxonomy_code,
         thematic_taxonomy_codes,
-        symbol_images!left(id)
+        symbol_images!symbol_images_symbol_id_fkey(id)
       `);
 
     if (query) {
