@@ -17,7 +17,7 @@ export class GetFeaturedCollectionsQuery {
         .select('*')
         .eq('is_featured', true)
         .order('created_at', { ascending: false })
-        .limit(6);
+        .limit(12);
 
       if (error) {
         logger.error('Featured collections query failed', { error });
