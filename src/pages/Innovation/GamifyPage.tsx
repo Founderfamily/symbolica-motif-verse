@@ -296,24 +296,6 @@ const GamifyPage = () => {
           </div>
         </div>
 
-        {/* Interactive Demo Section */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Démonstration Interactive</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Explorez les connexions culturelles en temps réel
-            </p>
-          </div>
-          
-          <div className="max-w-4xl mx-auto">
-            <InteractiveDemo 
-              onExplore={(nodeId) => {
-                console.log(`Exploring node: ${nodeId}`);
-              }}
-            />
-          </div>
-        </div>
-
         {/* Call to Action */}
         <div className="text-center">
           <Button size="lg" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700">
