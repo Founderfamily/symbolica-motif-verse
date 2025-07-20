@@ -7,6 +7,7 @@ import Standards from '@/components/sections/Standards';
 import Community from '@/components/sections/Community';
 import QuestsSection from '@/components/sections/QuestsSection';
 import CallToAction from '@/components/sections/CallToAction';
+import { InteractiveTimeline } from '@/components/timeline/InteractiveTimeline';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ErrorHandler } from '@/utils/errorHandler';
 
@@ -77,6 +78,17 @@ const HomePage = () => {
         }
       >
         <Standards />
+      </ErrorBoundary>
+
+      {/* Interactive Timeline Section */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'InteractiveTimeline')
+        }
+      >
+        <section className="relative py-12 bg-gradient-to-r from-stone-50 via-amber-50/20 to-stone-100/50">
+          <InteractiveTimeline />
+        </section>
       </ErrorBoundary>
 
       {/* Community Section */}
