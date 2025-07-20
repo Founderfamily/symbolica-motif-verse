@@ -1,7 +1,6 @@
 
 import React from 'react';
 import Hero from '@/components/sections/Hero';
-import SymbolTriptychSection from '@/components/sections/SymbolTriptychSection';
 import SimpleFeaturedCollections from '@/components/sections/SimpleFeaturedCollections';
 import Standards from '@/components/sections/Standards';
 import Community from '@/components/sections/Community';
@@ -49,14 +48,14 @@ const HomePage = () => {
         </section>
       </ErrorBoundary>
 
-      {/* Symbol Discovery Section */}
+      {/* Interactive Timeline Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'SymbolTriptychSection')
+          ErrorHandler.handleComponentError(error, errorInfo, 'InteractiveTimeline')
         }
       >
         <section className="relative py-12">
-          <SymbolTriptychSection />
+          <InteractiveTimeline />
         </section>
       </ErrorBoundary>
 
@@ -78,17 +77,6 @@ const HomePage = () => {
         }
       >
         <Standards />
-      </ErrorBoundary>
-
-      {/* Interactive Timeline Section */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'InteractiveTimeline')
-        }
-      >
-        <section className="relative py-12 bg-gradient-to-r from-stone-50 via-amber-50/20 to-stone-100/50">
-          <InteractiveTimeline />
-        </section>
       </ErrorBoundary>
 
       {/* Community Section */}
