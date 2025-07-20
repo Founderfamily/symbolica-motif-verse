@@ -3,15 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Network, Filter, Info, Zap, Users, TrendingUp, ArrowRight } from 'lucide-react';
+import { Network, Filter, Info, Zap, Users, TrendingUp, ArrowRight, Maximize2, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useAllSymbols } from '@/hooks/useSupabaseSymbols';
 import { useGraphData } from '@/hooks/useGraphData';
 import ForceDirectedGraph from '@/components/graph/ForceDirectedGraph';
+import GraphInfoPanel from '@/components/graph/GraphInfoPanel';
+import FullScreenGraphModal from '@/components/graph/FullScreenGraphModal';
 import { toast } from 'sonner';
 
 const GraphPage = () => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'symbol' | 'culture' | 'period' | 'tag'>('all');
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const { data: symbols, isLoading, error } = useAllSymbols();
   const { nodes, links } = useGraphData(symbols || []);
@@ -45,6 +50,29 @@ const GraphPage = () => {
 
   const selectedNodeData = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
   const connectedNodes = selectedNode ? getConnectedNodes(selectedNode) : [];
+
+  // Filtrage intelligent par recherche
+  const filteredNodes = searchQuery.length > 0 
+    ? nodes.filter(node => 
+        node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (node.culture && node.culture.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (node.tags && node.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+      )
+    : nodes;
+
+  // Recherche intelligente avec auto-sélection
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.length > 2) {
+      const foundNode = filteredNodes.find(node => 
+        node.name.toLowerCase().includes(query.toLowerCase())
+      );
+      if (foundNode && foundNode.id !== selectedNode) {
+        setSelectedNode(foundNode.id);
+        toast.success(`Symbole trouvé: ${foundNode.name}`);
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -86,6 +114,48 @@ const GraphPage = () => {
           </p>
         </div>
 
+        {/* Recherche et contrôles rapides */}
+        <div className="mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                Recherche et Navigation
+              </CardTitle>
+              <CardDescription>
+                Trouvez rapidement un symbole ou explorez par catégories
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Recherche intelligente */}
+              <div className="flex gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Rechercher un symbole, culture, tag..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Button 
+                  onClick={() => setIsFullScreen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Maximize2 className="h-4 w-4" />
+                  Mode Plein Écran
+                </Button>
+              </div>
+
+              {searchQuery && (
+                <div className="text-sm text-muted-foreground">
+                  {filteredNodes.length} résultat(s) trouvé(s) pour "{searchQuery}"
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Filtres */}
         <div className="mb-6">
           <Card>
@@ -101,11 +171,11 @@ const GraphPage = () => {
             <CardContent>
               <div className="flex gap-2 flex-wrap">
                 {[
-                  { key: 'all', label: 'Tout', count: nodes.length },
-                  { key: 'symbol', label: 'Symboles', count: nodes.filter(n => n.type === 'symbol').length },
-                  { key: 'culture', label: 'Cultures', count: nodes.filter(n => n.type === 'culture').length },
-                  { key: 'period', label: 'Périodes', count: nodes.filter(n => n.type === 'period').length },
-                  { key: 'tag', label: 'Tags', count: nodes.filter(n => n.type === 'tag').length }
+                  { key: 'all', label: 'Tout', count: filteredNodes.length },
+                  { key: 'symbol', label: 'Symboles', count: filteredNodes.filter(n => n.type === 'symbol').length },
+                  { key: 'culture', label: 'Cultures', count: filteredNodes.filter(n => n.type === 'culture').length },
+                  { key: 'period', label: 'Périodes', count: filteredNodes.filter(n => n.type === 'period').length },
+                  { key: 'tag', label: 'Tags', count: filteredNodes.filter(n => n.type === 'tag').length }
                 ].map(({ key, label, count }) => (
                   <Button
                     key={key}
@@ -135,12 +205,12 @@ const GraphPage = () => {
                   Graphe Interactif
                 </CardTitle>
                 <CardDescription>
-                  {nodes.length} nœuds • {links.length} connexions
+                  {filteredNodes.length} nœuds • {links.length} connexions
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[500px]">
                 <ForceDirectedGraph
-                  nodes={nodes}
+                  nodes={filteredNodes}
                   links={links}
                   selectedNode={selectedNode}
                   onNodeClick={handleNodeClick}
@@ -150,92 +220,21 @@ const GraphPage = () => {
             </Card>
           </div>
 
-          {/* Panneau d'informations */}
+          {/* Panneau d'informations enrichi */}
           <div className="space-y-6">
-            {/* Informations du nœud sélectionné */}
-            {selectedNodeData ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Info className="h-5 w-5" />
-                    Nœud Sélectionné
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h3 className="font-bold text-lg">{selectedNodeData.name}</h3>
-                    <Badge variant="outline" className="mt-1">
-                      {selectedNodeData.type}
-                    </Badge>
-                  </div>
-                  
-                  {selectedNodeData.description && (
-                    <p className="text-sm text-gray-600">{selectedNodeData.description}</p>
-                  )}
-                  
-                  {selectedNodeData.culture && (
-                    <div>
-                      <span className="text-sm font-medium">Culture: </span>
-                      <span className="text-sm">{selectedNodeData.culture}</span>
-                    </div>
-                  )}
-                  
-                  {selectedNodeData.period && (
-                    <div>
-                      <span className="text-sm font-medium">Période: </span>
-                      <span className="text-sm">{selectedNodeData.period}</span>
-                    </div>
-                  )}
+            <GraphInfoPanel
+              selectedNode={selectedNodeData}
+              connectedNodes={connectedNodes}
+              onFullScreen={() => setIsFullScreen(true)}
+              onNodeSelect={handleNodeClick}
+            />
 
-                  <div className="pt-3 border-t">
-                    <span className="text-sm font-medium">Connexions: </span>
-                    <Badge variant="secondary">{selectedNodeData.connections}</Badge>
-                  </div>
-
-                  {connectedNodes.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Connecté à:</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {connectedNodes.slice(0, 10).map(node => (
-                          <Badge key={node.id} variant="secondary" className="text-xs">
-                            {node.name}
-                          </Badge>
-                        ))}
-                        {connectedNodes.length > 10 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{connectedNodes.length - 10} autres
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Info className="h-5 w-5" />
-                    Instructions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm space-y-2">
-                    <p>• Cliquez sur un nœud pour voir ses détails</p>
-                    <p>• Glissez-déposez pour repositionner</p>
-                    <p>• Utilisez la molette pour zoomer</p>
-                    <p>• Filtrez par type pour explorer</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Statistiques */}
+            {/* Statistiques enrichies */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  Statistiques
+                  Statistiques du Réseau
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -244,24 +243,26 @@ const GraphPage = () => {
                   <Badge variant="secondary">{nodes.length}</Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Total connexions</span>
+                  <span className="text-sm">Connexions totales</span>
                   <Badge variant="secondary">{links.length}</Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Symboles</span>
-                  <Badge variant="secondary">{nodes.filter(n => n.type === 'symbol').length}</Badge>
+                  <span className="text-sm">Symboles enrichis</span>
+                  <Badge variant="secondary">
+                    {symbols?.filter(s => s.historical_context || s.significance).length || 0}
+                  </Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Cultures</span>
-                  <Badge variant="secondary">{nodes.filter(n => n.type === 'culture').length}</Badge>
+                  <span className="text-sm">Classifications UNESCO</span>
+                  <Badge variant="secondary">
+                    {symbols?.filter(s => s.cultural_taxonomy_code).length || 0}
+                  </Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm">Périodes</span>
-                  <Badge variant="secondary">{nodes.filter(n => n.type === 'period').length}</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Tags</span>
-                  <Badge variant="secondary">{nodes.filter(n => n.type === 'tag').length}</Badge>
+                  <span className="text-sm">Avec sources</span>
+                  <Badge variant="secondary">
+                    {symbols?.filter(s => s.sources && Array.isArray(s.sources) && s.sources.length > 0).length || 0}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
@@ -278,14 +279,14 @@ const GraphPage = () => {
                   Exploration Sémantique Avancée
                 </h3>
                 <p className="text-sm opacity-80 mb-4">
-                  Découvrez les relations cachées entre les symboles culturels
+                  Découvrez les relations cachées entre les symboles culturels avec notre interface enrichie
                 </p>
                 <Button 
                   variant="secondary" 
                   size="lg"
-                  onClick={() => toast.success("Fonctionnalité à venir !")}
+                  onClick={() => setIsFullScreen(true)}
                 >
-                  Adopter cette Approche
+                  Explorer en Plein Écran
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </div>
@@ -293,6 +294,18 @@ const GraphPage = () => {
           </Card>
         </div>
       </div>
+
+      {/* Modal plein écran */}
+      <FullScreenGraphModal
+        isOpen={isFullScreen}
+        onClose={() => setIsFullScreen(false)}
+        nodes={nodes}
+        links={links}
+        selectedNode={selectedNode}
+        onNodeClick={handleNodeClick}
+        filter={filter}
+        onFilterChange={setFilter}
+      />
     </div>
   );
 };
