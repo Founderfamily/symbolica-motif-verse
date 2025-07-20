@@ -3,142 +3,68 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Network, Zap, Users, TrendingUp, ArrowRight, Play, CheckCircle, Lightbulb, BookOpen, Eye, MousePointer, Sparkles, Filter } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Network, Filter, Info, Zap, Users, TrendingUp, ArrowRight } from 'lucide-react';
+import { useAllSymbols } from '@/hooks/useSupabaseSymbols';
+import { useGraphData } from '@/hooks/useGraphData';
+import ForceDirectedGraph from '@/components/graph/ForceDirectedGraph';
 import { toast } from 'sonner';
-
-interface SymbolNode {
-  id: string;
-  name: string;
-  culture: string;
-  period: string;
-  description: string;
-  connections: number;
-  tags: string[];
-  classification: string;
-  type: 'symbol' | 'culture' | 'period' | 'tag';
-}
 
 const GraphPage = () => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [symbols, setSymbols] = useState<SymbolNode[]>([]);
-  const [connections, setConnections] = useState<SymbolNode[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'culture' | 'period' | 'tag'>('all');
+  const [filter, setFilter] = useState<'all' | 'symbol' | 'culture' | 'period' | 'tag'>('all');
+  
+  const { data: symbols, isLoading, error } = useAllSymbols();
+  const { nodes, links } = useGraphData(symbols || []);
 
-  useEffect(() => {
-    loadSymbols();
-  }, []);
-
-  const loadSymbols = async () => {
-    try {
-      const { data: symbolsData, error } = await supabase
-        .from('symbols')
-        .select('id, name, culture, period, description')
-        .limit(10);
-
-      if (error) throw error;
-
-      if (symbolsData) {
-        const nodes: SymbolNode[] = symbolsData.map(symbol => ({
-          id: symbol.id,
-          name: symbol.name,
-          culture: symbol.culture || 'Inconnu',
-          period: symbol.period || 'Indéterminé',
-          description: symbol.description || '',
-          connections: Math.floor(Math.random() * 20) + 5, // Temporary
-          tags: [symbol.culture, symbol.period].filter(Boolean),
-          classification: symbol.culture || 'Général',
-          type: 'symbol' as const
-        }));
-
-        // Add culture and period nodes
-        const cultures = [...new Set(symbolsData.map(s => s.culture).filter(Boolean))];
-        const periods = [...new Set(symbolsData.map(s => s.period).filter(Boolean))];
-
-        const cultureNodes: SymbolNode[] = cultures.map(culture => ({
-          id: `culture-${culture}`,
-          name: culture,
-          culture,
-          period: '',
-          description: `Culture ${culture}`,
-          connections: symbolsData.filter(s => s.culture === culture).length,
-          tags: [culture],
-          classification: 'Culture',
-          type: 'culture' as const
-        }));
-
-        const periodNodes: SymbolNode[] = periods.map(period => ({
-          id: `period-${period}`,
-          name: period,
-          culture: '',
-          period,
-          description: `Période ${period}`,
-          connections: symbolsData.filter(s => s.period === period).length,
-          tags: [period],
-          classification: 'Période',
-          type: 'period' as const
-        }));
-
-        setSymbols([...nodes, ...cultureNodes, ...periodNodes]);
-      }
-    } catch (error) {
-      console.error('Error loading symbols:', error);
-      toast.error('Erreur lors du chargement des symboles');
-    } finally {
-      setLoading(false);
+  const handleNodeClick = (nodeId: string) => {
+    setSelectedNode(selectedNode === nodeId ? null : nodeId);
+    
+    // Trouver le nœud sélectionné et afficher ses informations
+    const node = nodes.find(n => n.id === nodeId);
+    if (node) {
+      toast.success(`${node.name} sélectionné - ${node.connections} connexions`);
     }
   };
 
   const getConnectedNodes = (nodeId: string) => {
-    const selectedSymbol = symbols.find(s => s.id === nodeId);
-    if (!selectedSymbol) return [];
-
-    return symbols.filter(symbol => {
-      if (symbol.id === nodeId) return false;
+    const connectedNodeIds = new Set<string>();
+    
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
+      const targetId = typeof link.target === 'string' ? link.target : link.target.id;
       
-      // Connect by culture
-      if (selectedSymbol.culture && symbol.culture === selectedSymbol.culture) return true;
-      
-      // Connect by period  
-      if (selectedSymbol.period && symbol.period === selectedSymbol.period) return true;
-      
-      // Connect if same type (culture nodes connect to their symbols)
-      if (selectedSymbol.type === 'culture' && symbol.culture === selectedSymbol.name) return true;
-      if (selectedSymbol.type === 'period' && symbol.period === selectedSymbol.name) return true;
-      if (symbol.type === 'culture' && selectedSymbol.culture === symbol.name) return true;
-      if (symbol.type === 'period' && selectedSymbol.period === symbol.name) return true;
-      
-      return false;
+      if (sourceId === nodeId) {
+        connectedNodeIds.add(targetId);
+      } else if (targetId === nodeId) {
+        connectedNodeIds.add(sourceId);
+      }
     });
+    
+    return nodes.filter(node => connectedNodeIds.has(node.id));
   };
 
-  const handleNodeClick = (nodeId: string) => {
-    setSelectedNode(selectedNode === nodeId ? null : nodeId);
-    setConnections(getConnectedNodes(nodeId));
-  };
+  const selectedNodeData = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
+  const connectedNodes = selectedNode ? getConnectedNodes(selectedNode) : [];
 
-  const getNodeColor = (type: string) => {
-    switch (type) {
-      case 'symbol': return 'bg-purple-500';
-      case 'culture': return 'bg-blue-500';
-      case 'period': return 'bg-green-500';
-      case 'tag': return 'bg-orange-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const filteredSymbols = symbols.filter(symbol => {
-    if (filter === 'all') return true;
-    return symbol.type === filter;
-  });
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mb-4"></div>
-          <p className="text-lg text-muted-foreground">Chargement des symboles...</p>
+          <p className="text-lg text-muted-foreground">Chargement du graphe sémantique...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-red-600">Erreur lors du chargement des données</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Réessayer
+          </Button>
         </div>
       </div>
     );
@@ -147,317 +73,195 @@ const GraphPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
-        {/* What is it? Section */}
-        <div className="text-center mb-12">
+        {/* Header */}
+        <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Network className="h-8 w-8 text-purple-600" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               Navigateur de Graphe Sémantique
             </h1>
           </div>
-          
-          <div className="max-w-4xl mx-auto space-y-6">
-            <p className="text-xl text-muted-foreground">
-              <strong>Qu'est-ce que c'est ?</strong> Une nouvelle façon d'explorer les symboles culturels 
-              en suivant leurs <span className="text-purple-600 font-semibold">relations naturelles</span> 
-              plutôt que des catégories artificielles.
-            </p>
-
-            <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-6 border border-purple-200">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-bold text-purple-800 mb-3 flex items-center gap-2">
-                    <Eye className="h-5 w-5" />
-                    Navigation Classique
-                  </h3>
-                  <ul className="text-sm text-purple-700 space-y-1">
-                    <li>• Catégories rigides (Religion, Histoire, Art...)</li>
-                    <li>• Recherche par mots-clés</li>
-                    <li>• Découvertes limitées</li>
-                    <li>• Pas de contexte culturel</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-blue-800 mb-3 flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
-                    Navigation par Graphe
-                  </h3>
-                  <ul className="text-sm text-blue-700 space-y-1">
-                    <li>• Connexions sémantiques naturelles</li>
-                    <li>• Exploration par associations</li>
-                    <li>• Découvertes surprenantes</li>
-                    <li>• Contexte culturel riche</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Explorez les connexions entre symboles, cultures, périodes et tags de manière interactive
+          </p>
         </div>
 
         {/* Filtres */}
-        <div className="mb-8">
-          <div className="max-w-4xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Filter className="h-5 w-5" />
-                  Explorez par Type
-                </CardTitle>
-                <CardDescription>
-                  Filtrez les nœuds pour voir différents types de connexions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2 flex-wrap">
-                  {[
-                    { key: 'all', label: 'Tout', count: symbols.length },
-                    { key: 'symbol', label: 'Symboles', count: symbols.filter(s => s.type === 'symbol').length },
-                    { key: 'culture', label: 'Cultures', count: symbols.filter(s => s.type === 'culture').length },
-                    { key: 'period', label: 'Périodes', count: symbols.filter(s => s.type === 'period').length }
-                  ].map(({ key, label, count }) => (
-                    <Button
-                      key={key}
-                      variant={filter === key ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setFilter(key as typeof filter)}
-                      className="flex items-center gap-2"
-                    >
-                      {label}
-                      <Badge variant="secondary" className="text-xs">
-                        {count}
-                      </Badge>
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          {/* Interactive Demo */}
-          <Card className="relative overflow-hidden">
+        <div className="mb-6">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Play className="h-5 w-5" />
-                Démonstration Interactive
+                <Filter className="h-5 w-5" />
+                Filtres de Visualisation
               </CardTitle>
               <CardDescription>
-                Cliquez sur les nœuds pour explorer les connexions entre symboles, cultures et périodes
+                Filtrez les nœuds pour explorer différents aspects du graphe
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="bg-slate-900 rounded-lg p-6 min-h-[500px] relative overflow-hidden">
-                {/* Interactive nodes */}
-                <div className="relative z-10 h-full">
-                  {filteredSymbols.map((node, index) => (
-                    <div
-                      key={node.id}
-                      className={`absolute cursor-pointer transition-all duration-300 ${
-                        selectedNode === node.id ? 'scale-110 z-20' : 'hover:scale-105'
-                      }`}
-                      style={{
-                        left: `${15 + (index % 5) * 18}%`,
-                        top: `${20 + Math.floor(index / 5) * 25}%`,
-                        transform: selectedNode === node.id ? 'translate(-50%, -50%) scale(1.1)' : 'translate(-50%, -50%)'
-                      }}
-                      onClick={() => handleNodeClick(node.id)}
-                    >
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xs transition-all ${
-                        getNodeColor(node.type)
-                      } ${selectedNode === node.id ? 'ring-4 ring-yellow-400' : ''}`}>
-                        {node.name.length > 6 ? 
-                          node.name.split(' ').map(w => w[0]).join('').slice(0, 3) :
-                          node.name.slice(0, 3)
-                        }
-                      </div>
-                      <div className="text-xs text-center mt-1 text-white font-medium max-w-20 truncate">
-                        {node.name}
-                      </div>
-                      <div className="text-xs text-center text-gray-400">
-                        {node.connections} liens
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Connection lines */}
-                  {selectedNode && connections.length > 0 && (
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                      {connections.map((connectedNode) => {
-                        const selectedIndex = filteredSymbols.findIndex(n => n.id === selectedNode);
-                        const connectedIndex = filteredSymbols.findIndex(n => n.id === connectedNode.id);
-                        if (selectedIndex === -1 || connectedIndex === -1) return null;
-                        
-                        return (
-                          <line
-                            key={connectedNode.id}
-                            x1={`${15 + (selectedIndex % 5) * 18}%`}
-                            y1={`${20 + Math.floor(selectedIndex / 5) * 25}%`}
-                            x2={`${15 + (connectedIndex % 5) * 18}%`}
-                            y2={`${20 + Math.floor(connectedIndex / 5) * 25}%`}
-                            stroke="#fbbf24"
-                            strokeWidth="2"
-                            className="animate-pulse"
-                          />
-                        );
-                      })}
-                    </svg>
-                  )}
-                </div>
-
-                {/* Selected node info */}
-                {selectedNode && (
-                  <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-4">
-                    {(() => {
-                      const node = symbols.find(n => n.id === selectedNode);
-                      if (!node) return null;
-                      
-                      return (
-                        <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-bold text-slate-900">{node.name}</h3>
-                            <Badge variant="outline" className="text-xs">
-                              {node.type}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-slate-600 mb-2">{node.description}</p>
-                          {node.culture && (
-                            <p className="text-xs text-slate-500">
-                              <strong>Culture:</strong> {node.culture}
-                            </p>
-                          )}
-                          {node.period && (
-                            <p className="text-xs text-slate-500">
-                              <strong>Période:</strong> {node.period}
-                            </p>
-                          )}
-                          <p className="text-xs text-slate-500 mt-2">
-                            <strong>Connexions trouvées:</strong> {connections.length}
-                          </p>
-                          {connections.length > 0 && (
-                            <div className="mt-2">
-                              <p className="text-xs font-medium text-slate-700 mb-1">Connecté à:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {connections.slice(0, 5).map(conn => (
-                                  <Badge key={conn.id} variant="secondary" className="text-xs">
-                                    {conn.name}
-                                  </Badge>
-                                ))}
-                                {connections.length > 5 && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    +{connections.length - 5} autres
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
+              <div className="flex gap-2 flex-wrap">
+                {[
+                  { key: 'all', label: 'Tout', count: nodes.length },
+                  { key: 'symbol', label: 'Symboles', count: nodes.filter(n => n.type === 'symbol').length },
+                  { key: 'culture', label: 'Cultures', count: nodes.filter(n => n.type === 'culture').length },
+                  { key: 'period', label: 'Périodes', count: nodes.filter(n => n.type === 'period').length },
+                  { key: 'tag', label: 'Tags', count: nodes.filter(n => n.type === 'tag').length }
+                ].map(({ key, label, count }) => (
+                  <Button
+                    key={key}
+                    variant={filter === key ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilter(key as typeof filter)}
+                    className="flex items-center gap-2"
+                  >
+                    {label}
+                    <Badge variant="secondary" className="text-xs">
+                      {count}
+                    </Badge>
+                  </Button>
+                ))}
               </div>
             </CardContent>
           </Card>
+        </div>
 
-          {/* Why it's Revolutionary */}
-          <div className="space-y-6">
-            <Card>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Graphe principal */}
+          <div className="lg:col-span-2">
+            <Card className="h-[600px]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-yellow-500" />
-                  Pourquoi c'est Révolutionnaire ?
+                  <Network className="h-5 w-5" />
+                  Graphe Interactif
                 </CardTitle>
+                <CardDescription>
+                  {nodes.length} nœuds • {links.length} connexions
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  {[
-                    {
-                      title: "Découvertes Naturelles",
-                      desc: "Suivez votre curiosité naturelle au lieu de catégories imposées"
-                    },
-                    {
-                      title: "Apprentissage Contextuel", 
-                      desc: "Chaque symbole est présenté dans son réseau de relations culturelles"
-                    },
-                    {
-                      title: "Connexions Surprenantes",
-                      desc: "Découvrez des liens inattendus entre cultures et époques"
-                    },
-                    {
-                      title: "Mémorisation Améliorée",
-                      desc: "L'information liée en réseau se retient mieux que des faits isolés"
-                    }
-                  ].map((benefit, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
-                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <h4 className="font-semibold text-sm text-slate-800">{benefit.title}</h4>
-                        <p className="text-xs text-slate-600 mt-1">{benefit.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="h-[500px]">
+                <ForceDirectedGraph
+                  nodes={nodes}
+                  links={links}
+                  selectedNode={selectedNode}
+                  onNodeClick={handleNodeClick}
+                  filter={filter}
+                />
               </CardContent>
             </Card>
+          </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-green-500" />
-                  Impact Mesuré
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Symboles chargés</span>
-                  <Badge variant="secondary" className="text-green-600">
-                    {symbols.filter(s => s.type === 'symbol').length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Cultures représentées</span>
-                  <Badge variant="secondary" className="text-green-600">
-                    {symbols.filter(s => s.type === 'culture').length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Périodes historiques</span>
-                  <Badge variant="secondary" className="text-green-600">
-                    {symbols.filter(s => s.type === 'period').length}
-                  </Badge>
-                </div>
-                {selectedNode && (
-                  <div className="flex justify-between items-center border-t pt-2">
-                    <span className="text-sm font-medium">Connexions actives</span>
-                    <Badge variant="secondary" className="text-blue-600">
-                      {connections.length}
+          {/* Panneau d'informations */}
+          <div className="space-y-6">
+            {/* Informations du nœud sélectionné */}
+            {selectedNodeData ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Info className="h-5 w-5" />
+                    Nœud Sélectionné
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <h3 className="font-bold text-lg">{selectedNodeData.name}</h3>
+                    <Badge variant="outline" className="mt-1">
+                      {selectedNodeData.type}
                     </Badge>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-80" />
-                  <h3 className="text-lg font-bold mb-2">
-                    Symboles Connectés
-                  </h3>
-                  <div className="text-3xl font-bold">
-                    {symbols.length}
-                  </div>
-                  <p className="text-sm opacity-80 mt-2">
-                    Symboles dans la base de données
-                  </p>
-                  {selectedNode && (
-                    <div className="mt-4 pt-4 border-t border-white/20">
-                      <p className="text-sm opacity-90">
-                        <strong>{connections.length}</strong> connexions trouvées
-                      </p>
+                  
+                  {selectedNodeData.description && (
+                    <p className="text-sm text-gray-600">{selectedNodeData.description}</p>
+                  )}
+                  
+                  {selectedNodeData.culture && (
+                    <div>
+                      <span className="text-sm font-medium">Culture: </span>
+                      <span className="text-sm">{selectedNodeData.culture}</span>
                     </div>
                   )}
+                  
+                  {selectedNodeData.period && (
+                    <div>
+                      <span className="text-sm font-medium">Période: </span>
+                      <span className="text-sm">{selectedNodeData.period}</span>
+                    </div>
+                  )}
+
+                  <div className="pt-3 border-t">
+                    <span className="text-sm font-medium">Connexions: </span>
+                    <Badge variant="secondary">{selectedNodeData.connections}</Badge>
+                  </div>
+
+                  {connectedNodes.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Connecté à:</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {connectedNodes.slice(0, 10).map(node => (
+                          <Badge key={node.id} variant="secondary" className="text-xs">
+                            {node.name}
+                          </Badge>
+                        ))}
+                        {connectedNodes.length > 10 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{connectedNodes.length - 10} autres
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Info className="h-5 w-5" />
+                    Instructions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm space-y-2">
+                    <p>• Cliquez sur un nœud pour voir ses détails</p>
+                    <p>• Glissez-déposez pour repositionner</p>
+                    <p>• Utilisez la molette pour zoomer</p>
+                    <p>• Filtrez par type pour explorer</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Statistiques */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Statistiques
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm">Total nœuds</span>
+                  <Badge variant="secondary">{nodes.length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Total connexions</span>
+                  <Badge variant="secondary">{links.length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Symboles</span>
+                  <Badge variant="secondary">{nodes.filter(n => n.type === 'symbol').length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Cultures</span>
+                  <Badge variant="secondary">{nodes.filter(n => n.type === 'culture').length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Périodes</span>
+                  <Badge variant="secondary">{nodes.filter(n => n.type === 'period').length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Tags</span>
+                  <Badge variant="secondary">{nodes.filter(n => n.type === 'tag').length}</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -465,14 +269,28 @@ const GraphPage = () => {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center">
-          <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-            Adopter cette Approche
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <p className="text-sm text-muted-foreground mt-4">
-            Transformez votre homepage avec la navigation par graphe sémantique
-          </p>
+        <div className="text-center mt-12">
+          <Card className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-80" />
+                <h3 className="text-lg font-bold mb-2">
+                  Exploration Sémantique Avancée
+                </h3>
+                <p className="text-sm opacity-80 mb-4">
+                  Découvrez les relations cachées entre les symboles culturels
+                </p>
+                <Button 
+                  variant="secondary" 
+                  size="lg"
+                  onClick={() => toast.success("Fonctionnalité à venir !")}
+                >
+                  Adopter cette Approche
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
