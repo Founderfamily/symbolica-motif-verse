@@ -3,55 +3,146 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Network, Zap, Users, TrendingUp, ArrowRight, Play, CheckCircle, Lightbulb, BookOpen, Eye, MousePointer, Sparkles } from 'lucide-react';
+import { Network, Zap, Users, TrendingUp, ArrowRight, Play, CheckCircle, Lightbulb, BookOpen, Eye, MousePointer, Sparkles, Filter } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface SymbolNode {
+  id: string;
+  name: string;
+  culture: string;
+  period: string;
+  description: string;
+  connections: number;
+  tags: string[];
+  classification: string;
+  type: 'symbol' | 'culture' | 'period' | 'tag';
+}
 
 const GraphPage = () => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [connections, setConnections] = useState<number>(0);
-  const [isActive, setIsActive] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState(0);
-
-  const mockNodes = [
-    { id: 'ankh', name: 'Ankh Égyptien', type: 'symbol', connections: 12, description: 'Symbole de vie éternelle' },
-    { id: 'tree', name: 'Arbre de Vie', type: 'concept', connections: 8, description: 'Concept universel de croissance' },
-    { id: 'mandala', name: 'Mandala', type: 'symbol', connections: 15, description: 'Cercle sacré tibétain' },
-    { id: 'eternal', name: 'Vie Éternelle', type: 'theme', connections: 20, description: 'Thème philosophique central' },
-    { id: 'buddhism', name: 'Bouddhisme', type: 'culture', connections: 25, description: 'Tradition spirituelle asiatique' },
-  ];
-
-  const mockMetrics = {
-    engagement: '+340%',
-    discoveryRate: '+180%',
-    sessionTime: '+220%',
-    userSatisfaction: '9.2/10'
-  };
-
-  const tutorialSteps = [
-    "Cliquez sur le nœud 'Ankh Égyptien' pour voir ses connexions",
-    "Observez les lignes qui apparaissent - chaque ligne est une relation culturelle",
-    "Cliquez sur 'Vie Éternelle' pour explorer un autre concept",
-    "Voyez comment les symboles se connectent à travers les cultures !"
-  ];
+  const [symbols, setSymbols] = useState<SymbolNode[]>([]);
+  const [connections, setConnections] = useState<SymbolNode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'culture' | 'period' | 'tag'>('all');
 
   useEffect(() => {
-    if (isActive) {
-      const interval = setInterval(() => {
-        setConnections(prev => prev + Math.floor(Math.random() * 3));
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [isActive]);
+    loadSymbols();
+  }, []);
 
-  const handleTutorialNext = () => {
-    if (tutorialStep < tutorialSteps.length - 1) {
-      setTutorialStep(tutorialStep + 1);
-      if (tutorialStep === 0) setSelectedNode('ankh');
-      if (tutorialStep === 2) setSelectedNode('eternal');
-    } else {
-      setTutorialStep(0);
-      setSelectedNode(null);
+  const loadSymbols = async () => {
+    try {
+      const { data: symbolsData, error } = await supabase
+        .from('symbols')
+        .select('id, name, culture, period, description')
+        .limit(10);
+
+      if (error) throw error;
+
+      if (symbolsData) {
+        const nodes: SymbolNode[] = symbolsData.map(symbol => ({
+          id: symbol.id,
+          name: symbol.name,
+          culture: symbol.culture || 'Inconnu',
+          period: symbol.period || 'Indéterminé',
+          description: symbol.description || '',
+          connections: Math.floor(Math.random() * 20) + 5, // Temporary
+          tags: [symbol.culture, symbol.period].filter(Boolean),
+          classification: symbol.culture || 'Général',
+          type: 'symbol' as const
+        }));
+
+        // Add culture and period nodes
+        const cultures = [...new Set(symbolsData.map(s => s.culture).filter(Boolean))];
+        const periods = [...new Set(symbolsData.map(s => s.period).filter(Boolean))];
+
+        const cultureNodes: SymbolNode[] = cultures.map(culture => ({
+          id: `culture-${culture}`,
+          name: culture,
+          culture,
+          period: '',
+          description: `Culture ${culture}`,
+          connections: symbolsData.filter(s => s.culture === culture).length,
+          tags: [culture],
+          classification: 'Culture',
+          type: 'culture' as const
+        }));
+
+        const periodNodes: SymbolNode[] = periods.map(period => ({
+          id: `period-${period}`,
+          name: period,
+          culture: '',
+          period,
+          description: `Période ${period}`,
+          connections: symbolsData.filter(s => s.period === period).length,
+          tags: [period],
+          classification: 'Période',
+          type: 'period' as const
+        }));
+
+        setSymbols([...nodes, ...cultureNodes, ...periodNodes]);
+      }
+    } catch (error) {
+      console.error('Error loading symbols:', error);
+      toast.error('Erreur lors du chargement des symboles');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const getConnectedNodes = (nodeId: string) => {
+    const selectedSymbol = symbols.find(s => s.id === nodeId);
+    if (!selectedSymbol) return [];
+
+    return symbols.filter(symbol => {
+      if (symbol.id === nodeId) return false;
+      
+      // Connect by culture
+      if (selectedSymbol.culture && symbol.culture === selectedSymbol.culture) return true;
+      
+      // Connect by period  
+      if (selectedSymbol.period && symbol.period === selectedSymbol.period) return true;
+      
+      // Connect if same type (culture nodes connect to their symbols)
+      if (selectedSymbol.type === 'culture' && symbol.culture === selectedSymbol.name) return true;
+      if (selectedSymbol.type === 'period' && symbol.period === selectedSymbol.name) return true;
+      if (symbol.type === 'culture' && selectedSymbol.culture === symbol.name) return true;
+      if (symbol.type === 'period' && selectedSymbol.period === symbol.name) return true;
+      
+      return false;
+    });
+  };
+
+  const handleNodeClick = (nodeId: string) => {
+    setSelectedNode(selectedNode === nodeId ? null : nodeId);
+    setConnections(getConnectedNodes(nodeId));
+  };
+
+  const getNodeColor = (type: string) => {
+    switch (type) {
+      case 'symbol': return 'bg-purple-500';
+      case 'culture': return 'bg-blue-500';
+      case 'period': return 'bg-green-500';
+      case 'tag': return 'bg-orange-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const filteredSymbols = symbols.filter(symbol => {
+    if (filter === 'all') return true;
+    return symbol.type === filter;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mb-4"></div>
+          <p className="text-lg text-muted-foreground">Chargement des symboles...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
@@ -103,74 +194,40 @@ const GraphPage = () => {
           </div>
         </div>
 
-        {/* Concrete Example */}
-        <div className="mb-12">
+        {/* Filtres */}
+        <div className="mb-8">
           <div className="max-w-4xl mx-auto">
-            <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-amber-800">
-                  <BookOpen className="h-6 w-6" />
-                  Exemple Concret : Parcours de Découverte
+                <CardTitle className="flex items-center gap-2">
+                  <Filter className="h-5 w-5" />
+                  Explorez par Type
                 </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-amber-700">
-                    <strong>Scénario :</strong> Vous explorez l'Ankh égyptien...
-                  </p>
-                  <div className="bg-white rounded-lg p-4 border border-amber-200">
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="bg-purple-500 text-white px-3 py-1 rounded-full">Ankh Égyptien</span>
-                      <ArrowRight className="h-4 w-4 text-amber-600" />
-                      <span className="bg-green-500 text-white px-3 py-1 rounded-full">Vie Éternelle</span>
-                      <ArrowRight className="h-4 w-4 text-amber-600" />
-                      <span className="bg-blue-500 text-white px-3 py-1 rounded-full">Arbre de Vie</span>
-                      <ArrowRight className="h-4 w-4 text-amber-600" />
-                      <span className="bg-orange-500 text-white px-3 py-1 rounded-full">Bouddhisme</span>
-                    </div>
-                  </div>
-                  <p className="text-amber-700 text-sm">
-                    <strong>Résultat :</strong> En 4 clics, vous découvrez comment un symbole égyptien 
-                    se connecte aux traditions bouddhistes via le concept universel de vie éternelle !
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Tutorial Section */}
-        <div className="mb-12">
-          <div className="max-w-2xl mx-auto">
-            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-green-800">
-                  <MousePointer className="h-6 w-6" />
-                  Tutoriel Interactif
-                </CardTitle>
-                <CardDescription className="text-green-700">
-                  Suivez ces étapes pour comprendre comment ça marche
+                <CardDescription>
+                  Filtrez les nœuds pour voir différents types de connexions
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 border border-green-200">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                        {tutorialStep + 1}
-                      </span>
-                      <span className="font-medium text-green-800">Étape {tutorialStep + 1}/4</span>
-                    </div>
-                    <p className="text-green-700 mb-3">{tutorialSteps[tutorialStep]}</p>
-                    <Button 
-                      onClick={handleTutorialNext}
-                      className="bg-green-600 hover:bg-green-700"
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { key: 'all', label: 'Tout', count: symbols.length },
+                    { key: 'symbol', label: 'Symboles', count: symbols.filter(s => s.type === 'symbol').length },
+                    { key: 'culture', label: 'Cultures', count: symbols.filter(s => s.type === 'culture').length },
+                    { key: 'period', label: 'Périodes', count: symbols.filter(s => s.type === 'period').length }
+                  ].map(({ key, label, count }) => (
+                    <Button
+                      key={key}
+                      variant={filter === key ? 'default' : 'outline'}
                       size="sm"
+                      onClick={() => setFilter(key as typeof filter)}
+                      className="flex items-center gap-2"
                     >
-                      {tutorialStep < tutorialSteps.length - 1 ? 'Étape Suivante' : 'Recommencer'}
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      {label}
+                      <Badge variant="secondary" className="text-xs">
+                        {count}
+                      </Badge>
                     </Button>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -186,61 +243,58 @@ const GraphPage = () => {
                 Démonstration Interactive
               </CardTitle>
               <CardDescription>
-                {tutorialStep > 0 ? tutorialSteps[tutorialStep - 1] : "Cliquez sur les nœuds pour explorer les connexions"}
+                Cliquez sur les nœuds pour explorer les connexions entre symboles, cultures et périodes
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="bg-slate-900 rounded-lg p-6 min-h-[400px] relative overflow-hidden">
-                {/* Animated background grid */}
-                <div className="absolute inset-0 opacity-20">
-                  <div className="grid grid-cols-8 grid-rows-8 h-full w-full">
-                    {Array.from({ length: 64 }).map((_, i) => (
-                      <div key={i} className="border border-blue-500/20"></div>
-                    ))}
-                  </div>
-                </div>
-
+              <div className="bg-slate-900 rounded-lg p-6 min-h-[500px] relative overflow-hidden">
                 {/* Interactive nodes */}
-                <div className="relative z-10">
-                  {mockNodes.map((node, index) => (
+                <div className="relative z-10 h-full">
+                  {filteredSymbols.map((node, index) => (
                     <div
                       key={node.id}
                       className={`absolute cursor-pointer transition-all duration-300 ${
                         selectedNode === node.id ? 'scale-110 z-20' : 'hover:scale-105'
-                      } ${tutorialStep > 0 && ((tutorialStep === 1 && node.id === 'ankh') || (tutorialStep === 3 && node.id === 'eternal')) ? 'animate-pulse ring-4 ring-yellow-400' : ''}`}
+                      }`}
                       style={{
-                        left: `${20 + (index * 15)}%`,
-                        top: `${30 + (index % 2 === 0 ? 0 : 40)}%`,
+                        left: `${15 + (index % 5) * 18}%`,
+                        top: `${20 + Math.floor(index / 5) * 25}%`,
                         transform: selectedNode === node.id ? 'translate(-50%, -50%) scale(1.1)' : 'translate(-50%, -50%)'
                       }}
-                      onClick={() => setSelectedNode(selectedNode === node.id ? null : node.id)}
+                      onClick={() => handleNodeClick(node.id)}
                     >
                       <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xs transition-all ${
-                        node.type === 'symbol' ? 'bg-purple-500' :
-                        node.type === 'concept' ? 'bg-blue-500' : 
-                        node.type === 'theme' ? 'bg-green-500' : 'bg-orange-500'
+                        getNodeColor(node.type)
                       } ${selectedNode === node.id ? 'ring-4 ring-yellow-400' : ''}`}>
-                        {node.name.split(' ').map(w => w[0]).join('')}
+                        {node.name.length > 6 ? 
+                          node.name.split(' ').map(w => w[0]).join('').slice(0, 3) :
+                          node.name.slice(0, 3)
+                        }
                       </div>
-                      <div className="text-xs text-center mt-1 text-white font-medium">
+                      <div className="text-xs text-center mt-1 text-white font-medium max-w-20 truncate">
+                        {node.name}
+                      </div>
+                      <div className="text-xs text-center text-gray-400">
                         {node.connections} liens
                       </div>
                     </div>
                   ))}
 
                   {/* Connection lines */}
-                  {selectedNode && (
+                  {selectedNode && connections.length > 0 && (
                     <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                      {mockNodes.map((node, index) => {
-                        if (node.id === selectedNode) return null;
-                        const selectedIndex = mockNodes.findIndex(n => n.id === selectedNode);
+                      {connections.map((connectedNode) => {
+                        const selectedIndex = filteredSymbols.findIndex(n => n.id === selectedNode);
+                        const connectedIndex = filteredSymbols.findIndex(n => n.id === connectedNode.id);
+                        if (selectedIndex === -1 || connectedIndex === -1) return null;
+                        
                         return (
                           <line
-                            key={node.id}
-                            x1={`${20 + (selectedIndex * 15)}%`}
-                            y1={`${30 + (selectedIndex % 2 === 0 ? 0 : 40)}%`}
-                            x2={`${20 + (index * 15)}%`}
-                            y2={`${30 + (index % 2 === 0 ? 0 : 40)}%`}
+                            key={connectedNode.id}
+                            x1={`${15 + (selectedIndex % 5) * 18}%`}
+                            y1={`${20 + Math.floor(selectedIndex / 5) * 25}%`}
+                            x2={`${15 + (connectedIndex % 5) * 18}%`}
+                            y2={`${20 + Math.floor(connectedIndex / 5) * 25}%`}
                             stroke="#fbbf24"
                             strokeWidth="2"
                             className="animate-pulse"
@@ -253,28 +307,56 @@ const GraphPage = () => {
 
                 {/* Selected node info */}
                 {selectedNode && (
-                  <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-4">
-                    <h3 className="font-bold text-slate-900">
-                      {mockNodes.find(n => n.id === selectedNode)?.name}
-                    </h3>
-                    <p className="text-sm text-slate-600 mt-1">
-                      {mockNodes.find(n => n.id === selectedNode)?.description}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-2">
-                      Découvrez {mockNodes.find(n => n.id === selectedNode)?.connections} connexions fascinantes
-                    </p>
+                  <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-4">
+                    {(() => {
+                      const node = symbols.find(n => n.id === selectedNode);
+                      if (!node) return null;
+                      
+                      return (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-bold text-slate-900">{node.name}</h3>
+                            <Badge variant="outline" className="text-xs">
+                              {node.type}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-slate-600 mb-2">{node.description}</p>
+                          {node.culture && (
+                            <p className="text-xs text-slate-500">
+                              <strong>Culture:</strong> {node.culture}
+                            </p>
+                          )}
+                          {node.period && (
+                            <p className="text-xs text-slate-500">
+                              <strong>Période:</strong> {node.period}
+                            </p>
+                          )}
+                          <p className="text-xs text-slate-500 mt-2">
+                            <strong>Connexions trouvées:</strong> {connections.length}
+                          </p>
+                          {connections.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-xs font-medium text-slate-700 mb-1">Connecté à:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {connections.slice(0, 5).map(conn => (
+                                  <Badge key={conn.id} variant="secondary" className="text-xs">
+                                    {conn.name}
+                                  </Badge>
+                                ))}
+                                {connections.length > 5 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{connections.length - 5} autres
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
-
-              <Button 
-                onClick={() => setIsActive(!isActive)}
-                className="w-full mt-4"
-                variant={isActive ? "destructive" : "default"}
-              >
-                {isActive ? "Arrêter la simulation" : "Démarrer la simulation"}
-                <Zap className="ml-2 h-4 w-4" />
-              </Button>
             </CardContent>
           </Card>
 
@@ -327,18 +409,32 @@ const GraphPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {Object.entries(mockMetrics).map(([key, value]) => (
-                  <div key={key} className="flex justify-between items-center">
-                    <span className="text-sm font-medium capitalize">
-                      {key === 'discoveryRate' ? 'Taux de découverte' :
-                       key === 'sessionTime' ? 'Temps de session' :
-                       key === 'userSatisfaction' ? 'Satisfaction utilisateur' : 'Engagement'}
-                    </span>
-                    <Badge variant="secondary" className="text-green-600">
-                      {value}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Symboles chargés</span>
+                  <Badge variant="secondary" className="text-green-600">
+                    {symbols.filter(s => s.type === 'symbol').length}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Cultures représentées</span>
+                  <Badge variant="secondary" className="text-green-600">
+                    {symbols.filter(s => s.type === 'culture').length}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Périodes historiques</span>
+                  <Badge variant="secondary" className="text-green-600">
+                    {symbols.filter(s => s.type === 'period').length}
+                  </Badge>
+                </div>
+                {selectedNode && (
+                  <div className="flex justify-between items-center border-t pt-2">
+                    <span className="text-sm font-medium">Connexions actives</span>
+                    <Badge variant="secondary" className="text-blue-600">
+                      {connections.length}
                     </Badge>
                   </div>
-                ))}
+                )}
               </CardContent>
             </Card>
 
@@ -347,14 +443,21 @@ const GraphPage = () => {
                 <div className="text-center">
                   <Users className="h-12 w-12 mx-auto mb-4 opacity-80" />
                   <h3 className="text-lg font-bold mb-2">
-                    Connexions Découvertes
+                    Symboles Connectés
                   </h3>
                   <div className="text-3xl font-bold">
-                    {connections + 1247}
+                    {symbols.length}
                   </div>
                   <p className="text-sm opacity-80 mt-2">
-                    Nouvelles relations explorées ce mois
+                    Symboles dans la base de données
                   </p>
+                  {selectedNode && (
+                    <div className="mt-4 pt-4 border-t border-white/20">
+                      <p className="text-sm opacity-90">
+                        <strong>{connections.length}</strong> connexions trouvées
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
