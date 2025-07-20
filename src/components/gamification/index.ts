@@ -7,6 +7,8 @@ export { default as UserRanking } from './UserRanking';
 export { default as BadgeDisplay } from './BadgeDisplay';
 export { default as LevelProgressBar } from './LevelProgressBar';
 export { default as UserStatsCard } from './UserStatsCard';
+export { default as AdventurerQuiz } from './AdventurerQuiz';
+export { default as InteractiveDemo } from './InteractiveDemo';
 export { 
   showGamificationNotification, 
   useGamificationNotifications, 

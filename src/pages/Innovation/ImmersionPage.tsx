@@ -86,14 +86,14 @@ const ImmersionPage = () => {
               {/* Breadcrumb/Path */}
               <div className="flex items-center gap-1 flex-wrap p-3 bg-slate-700 rounded-lg">
                 {currentPath.map((step, index) => (
-                  <React.Fragment key={index}>
+                  <div key={index} className="flex items-center gap-1">
                     <span className="text-sm text-purple-300 px-2 py-1 bg-slate-600 rounded">
                       {step}
                     </span>
                     {index < currentPath.length - 1 && (
                       <ChevronRight className="h-3 w-3 text-purple-400" />
                     )}
-                  </React.Fragment>
+                  </div>
                 ))}
               </div>
 
