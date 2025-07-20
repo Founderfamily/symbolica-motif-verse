@@ -1,8 +1,5 @@
 import { supabaseSymbolService } from '@/services/supabaseSymbolService';
 import { SymbolData } from '@/types/supabase';
-import { imageOptimizationService } from '@/services/imageOptimizationService';
-import { validateImageUrl } from '@/services/imageValidationService';
-import { logger } from '@/services/logService';
 
 export interface ImageHealthStatus {
   symbolId: string;
@@ -10,23 +7,12 @@ export interface ImageHealthStatus {
   hasSupabaseImage: boolean;
   supabaseImageValid: boolean;
   hasLocalFallback: boolean;
-  needsOptimization: boolean;
-  optimizationSavings?: number;
-  recommendedAction: 'none' | 'add_local_mapping' | 'fix_supabase_image' | 'optimize' | 'both';
+  recommendedAction: 'none' | 'add_local_mapping' | 'fix_supabase_image' | 'both';
   imageUrl?: string;
   error?: string;
-  backupAvailable?: boolean;
 }
 
-export interface OptimizationReport {
-  totalImages: number;
-  optimized: number;
-  failed: number;
-  totalSavings: number;
-  averageCompression: number;
-}
-
-// Mapping des images locales (amélioré avec plus de symboles)
+// Mapping des images locales (même que dans SymbolCard)
 const symbolToLocalImageMapping: Record<string, string> = {
   "Triskèle Celtique": "/images/symbols/triskelion.png",
   "Triskèle celtique": "/images/symbols/triskelion.png",
@@ -46,10 +32,6 @@ const symbolToLocalImageMapping: Record<string, string> = {
   "Ankh": "/images/symbols/adinkra.png",
   "Attrape-rêves": "/images/symbols/triskelion.png",
   "Dreamcatcher": "/images/symbols/triskelion.png",
-  "Art Aborigène": "/images/symbols/aboriginal.png",
-  "Motif Viking": "/images/symbols/viking.png",
-  "Arabesque": "/images/symbols/arabesque.png",
-  "Motif Aztèque": "/images/symbols/aztec.png",
   // Fallbacks par culture
   "Celtique": "/images/symbols/triskelion.png",
   "Japonaise": "/images/symbols/seigaiha.png",
@@ -57,33 +39,19 @@ const symbolToLocalImageMapping: Record<string, string> = {
   "Indienne": "/images/symbols/mandala.png",
   "Africaine": "/images/symbols/adinkra.png",
   "Française": "/images/symbols/fleur-de-lys.png",
-  "Viking": "/images/symbols/viking.png",
-  "Nordique": "/images/symbols/viking.png",
-  "Aborigène": "/images/symbols/aboriginal.png",
-  "Aztèque": "/images/symbols/aztec.png",
-  "Islamique": "/images/symbols/arabesque.png",
-  "Arabe": "/images/symbols/arabesque.png"
 };
 
 /**
- * Vérifie si une URL d'image est accessible avec retry
+ * Vérifie si une URL d'image est accessible
  */
-async function checkImageUrlWithRetry(url: string, maxRetries: number = 2): Promise<boolean> {
-  for (let i = 0; i <= maxRetries; i++) {
-    try {
-      const response = await fetch(url, { method: 'HEAD' });
-      if (response.ok) return true;
-    } catch (error) {
-      if (i === maxRetries) {
-        console.error(`Error checking image URL ${url} after ${maxRetries} retries:`, error);
-      }
-      // Attendre avant de réessayer
-      if (i < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-      }
-    }
+async function checkImageUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    console.error(`Error checking image URL ${url}:`, error);
+    return false;
   }
-  return false;
 }
 
 /**
@@ -112,7 +80,7 @@ function findLocalImage(symbolName: string, culture: string): string | null {
 }
 
 /**
- * Vérifie l'état de santé des images pour un symbole avec optimisation
+ * Vérifie l'état de santé des images pour un symbole
  */
 export async function checkSymbolImageHealth(symbol: SymbolData): Promise<ImageHealthStatus> {
   const status: ImageHealthStatus = {
@@ -121,7 +89,6 @@ export async function checkSymbolImageHealth(symbol: SymbolData): Promise<ImageH
     hasSupabaseImage: false,
     supabaseImageValid: false,
     hasLocalFallback: false,
-    needsOptimization: false,
     recommendedAction: 'none'
   };
   
@@ -135,38 +102,18 @@ export async function checkSymbolImageHealth(symbol: SymbolData): Promise<ImageH
       status.imageUrl = primaryImage.image_url;
       
       // Vérifier si l'URL est accessible
-      status.supabaseImageValid = await checkImageUrlWithRetry(primaryImage.image_url);
-      
-      // Vérifier si l'image a besoin d'optimisation
-      if (status.supabaseImageValid) {
-        status.needsOptimization = await imageOptimizationService.needsOptimization(primaryImage.image_url);
-        
-        if (status.needsOptimization) {
-          // Calculer les économies potentielles
-          try {
-            const response = await fetch(primaryImage.image_url, { method: 'HEAD' });
-            const size = parseInt(response.headers.get('content-length') || '0');
-            // Estimation des économies (typiquement 30-50% avec WebP)
-            status.optimizationSavings = Math.round(size * 0.4);
-          } catch {}
-        }
-      }
+      status.supabaseImageValid = await checkImageUrl(primaryImage.image_url);
     }
     
     // Vérifier si on a un fallback local
     const localImage = findLocalImage(symbol.name, symbol.culture);
     status.hasLocalFallback = !!localImage;
     
-    // Vérifier si une sauvegarde est disponible
-    status.backupAvailable = await checkBackupAvailability(symbol.id);
-    
     // Déterminer l'action recommandée
     if (!status.hasSupabaseImage && !status.hasLocalFallback) {
       status.recommendedAction = 'both';
     } else if (!status.hasSupabaseImage || !status.supabaseImageValid) {
       status.recommendedAction = status.hasLocalFallback ? 'fix_supabase_image' : 'both';
-    } else if (status.needsOptimization) {
-      status.recommendedAction = 'optimize';
     } else if (!status.hasLocalFallback) {
       status.recommendedAction = 'add_local_mapping';
     }
@@ -180,176 +127,17 @@ export async function checkSymbolImageHealth(symbol: SymbolData): Promise<ImageH
 }
 
 /**
- * Vérifie si une sauvegarde est disponible pour un symbole
- */
-async function checkBackupAvailability(symbolId: string): Promise<boolean> {
-  try {
-    // Vérifier dans le cache d'optimisation
-    const cacheStats = imageOptimizationService.getCacheStats();
-    return cacheStats.entries.some(entry => entry.includes(symbolId));
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Corrige automatiquement les images cassées
- */
-export async function autoFixBrokenImages(symbolIds?: string[]): Promise<{
-  fixed: number;
-  failed: number;
-  details: Array<{ symbolId: string; status: 'fixed' | 'failed'; error?: string }>;
-}> {
-  const result = {
-    fixed: 0,
-    failed: 0,
-    details: [] as Array<{ symbolId: string; status: 'fixed' | 'failed'; error?: string }>
-  };
-  
-  try {
-    const symbols = symbolIds ? 
-      await Promise.all(symbolIds.map(id => supabaseSymbolService.getSymbolById(id))) :
-      await supabaseSymbolService.getAllSymbols();
-    
-    const validSymbols = symbols.filter(Boolean) as SymbolData[];
-    
-    for (const symbol of validSymbols) {
-      try {
-        const health = await checkSymbolImageHealth(symbol);
-        
-        if (health.recommendedAction === 'fix_supabase_image' || health.recommendedAction === 'both') {
-          // Essayer de trouver une image locale de remplacement
-          const localImage = findLocalImage(symbol.name, symbol.culture);
-          
-          if (localImage) {
-            // Ici, on devrait idéalement mettre à jour la base avec l'image locale
-            // Pour l'instant, on log juste l'action
-            logger.info('Image cassée corrigée avec image locale', {
-              symbolId: symbol.id,
-              symbolName: symbol.name,
-              localImage
-            });
-            
-            result.fixed++;
-            result.details.push({ symbolId: symbol.id, status: 'fixed' });
-          } else {
-            result.failed++;
-            result.details.push({ 
-              symbolId: symbol.id, 
-              status: 'failed', 
-              error: 'No local fallback available' 
-            });
-          }
-        }
-      } catch (error) {
-        result.failed++;
-        result.details.push({ 
-          symbolId: symbol.id, 
-          status: 'failed', 
-          error: error instanceof Error ? error.message : 'Unknown error' 
-        });
-      }
-    }
-    
-  } catch (error) {
-    logger.error('Error in autoFixBrokenImages', { error });
-  }
-  
-  return result;
-}
-
-/**
- * Optimise automatiquement les images qui en ont besoin
- */
-export async function autoOptimizeImages(symbolIds?: string[]): Promise<OptimizationReport> {
-  const report: OptimizationReport = {
-    totalImages: 0,
-    optimized: 0,
-    failed: 0,
-    totalSavings: 0,
-    averageCompression: 0
-  };
-  
-  const compressionRatios: number[] = [];
-  
-  try {
-    const symbols = symbolIds ? 
-      await Promise.all(symbolIds.map(id => supabaseSymbolService.getSymbolById(id))) :
-      await supabaseSymbolService.getAllSymbols();
-    
-    const validSymbols = symbols.filter(Boolean) as SymbolData[];
-    
-    for (const symbol of validSymbols) {
-      try {
-        const images = await supabaseSymbolService.getSymbolImages(symbol.id);
-        
-        for (const image of images) {
-          if (!image.image_url) continue;
-          
-          report.totalImages++;
-          
-          const needsOptimization = await imageOptimizationService.needsOptimization(image.image_url);
-          
-          if (needsOptimization) {
-            try {
-              const optimized = await imageOptimizationService.optimizeExistingImage(image.image_url);
-              
-              if (optimized) {
-                report.optimized++;
-                report.totalSavings += (optimized.originalSize - optimized.optimizedSize);
-                compressionRatios.push(optimized.compressionRatio);
-                
-                logger.info('Image optimisée avec succès', {
-                  symbolId: symbol.id,
-                  imageId: image.id,
-                  compressionRatio: optimized.compressionRatio,
-                  savings: optimized.originalSize - optimized.optimizedSize
-                });
-              } else {
-                report.failed++;
-              }
-            } catch (error) {
-              report.failed++;
-              logger.error('Échec de l\'optimisation d\'image', {
-                symbolId: symbol.id,
-                imageId: image.id,
-                error
-              });
-            }
-          }
-        }
-      } catch (error) {
-        logger.error('Error processing symbol for optimization', {
-          symbolId: symbol.id,
-          error
-        });
-      }
-    }
-    
-    // Calculer la compression moyenne
-    if (compressionRatios.length > 0) {
-      report.averageCompression = compressionRatios.reduce((a, b) => a + b, 0) / compressionRatios.length;
-    }
-    
-  } catch (error) {
-    logger.error('Error in autoOptimizeImages', { error });
-  }
-  
-  return report;
-}
-
-/**
- * Vérifie l'état de santé des images pour tous les symboles avec optimisations
+ * Vérifie l'état de santé des images pour tous les symboles
  */
 export async function checkAllSymbolsImageHealth(): Promise<ImageHealthStatus[]> {
-  console.log('Starting comprehensive image health check with optimization analysis...');
+  console.log('Starting comprehensive image health check...');
   
   try {
     const symbols = await supabaseSymbolService.getAllSymbols();
     const results: ImageHealthStatus[] = [];
     
     // Traiter les symboles par petits lots pour éviter de surcharger
-    const batchSize = 3; // Réduit pour les analyses plus complexes
+    const batchSize = 5;
     for (let i = 0; i < symbols.length; i += batchSize) {
       const batch = symbols.slice(i, i + batchSize);
       const batchPromises = batch.map(symbol => checkSymbolImageHealth(symbol));
@@ -358,11 +146,11 @@ export async function checkAllSymbolsImageHealth(): Promise<ImageHealthStatus[]>
       
       // Petit délai entre les lots
       if (i + batchSize < symbols.length) {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
     
-    console.log('Image health check completed with optimization analysis:', results);
+    console.log('Image health check completed:', results);
     return results;
     
   } catch (error) {
@@ -372,15 +160,13 @@ export async function checkAllSymbolsImageHealth(): Promise<ImageHealthStatus[]>
 }
 
 /**
- * Génère un rapport de santé des images avec métriques d'optimisation
+ * Génère un rapport de santé des images
  */
 export function generateImageHealthReport(healthStatuses: ImageHealthStatus[]): {
   total: number;
   healthy: number;
   needsAttention: number;
   critical: number;
-  needsOptimization: number;
-  totalOptimizationSavings: number;
   byAction: Record<string, number>;
 } {
   const report = {
@@ -388,26 +174,16 @@ export function generateImageHealthReport(healthStatuses: ImageHealthStatus[]): 
     healthy: 0,
     needsAttention: 0,
     critical: 0,
-    needsOptimization: 0,
-    totalOptimizationSavings: 0,
     byAction: {
       none: 0,
       add_local_mapping: 0,
       fix_supabase_image: 0,
-      optimize: 0,
       both: 0
     }
   };
   
   healthStatuses.forEach(status => {
     report.byAction[status.recommendedAction]++;
-    
-    if (status.needsOptimization) {
-      report.needsOptimization++;
-      if (status.optimizationSavings) {
-        report.totalOptimizationSavings += status.optimizationSavings;
-      }
-    }
     
     if (status.recommendedAction === 'none') {
       report.healthy++;
@@ -419,42 +195,6 @@ export function generateImageHealthReport(healthStatuses: ImageHealthStatus[]): 
   });
   
   return report;
-}
-
-/**
- * Tâche de maintenance programmée
- */
-export async function runMaintenanceTask(): Promise<{
-  healthCheck: ImageHealthStatus[];
-  autoFix: Awaited<ReturnType<typeof autoFixBrokenImages>>;
-  optimization: OptimizationReport;
-}> {
-  console.log('Running scheduled maintenance task...');
-  
-  // 1. Vérification de santé
-  const healthCheck = await checkAllSymbolsImageHealth();
-  
-  // 2. Correction automatique des images cassées
-  const brokenImages = healthCheck
-    .filter(status => status.recommendedAction === 'fix_supabase_image' || status.recommendedAction === 'both')
-    .map(status => status.symbolId);
-  
-  const autoFix = await autoFixBrokenImages(brokenImages);
-  
-  // 3. Optimisation automatique
-  const needOptimization = healthCheck
-    .filter(status => status.needsOptimization)
-    .map(status => status.symbolId);
-  
-  const optimization = await autoOptimizeImages(needOptimization);
-  
-  console.log('Maintenance task completed', {
-    healthCheck: healthCheck.length,
-    autoFix,
-    optimization
-  });
-  
-  return { healthCheck, autoFix, optimization };
 }
 
 /**
@@ -479,17 +219,6 @@ export async function debugSymbolImages(symbolId: string): Promise<void> {
     
     const healthStatus = await checkSymbolImageHealth(symbol);
     console.log('État de santé:', healthStatus);
-    
-    // Informations d'optimisation
-    if (healthStatus.imageUrl) {
-      const needsOptimization = await imageOptimizationService.needsOptimization(healthStatus.imageUrl);
-      console.log('Besoin d\'optimisation:', needsOptimization);
-      
-      if (needsOptimization) {
-        const optimizationResult = await imageOptimizationService.optimizeExistingImage(healthStatus.imageUrl);
-        console.log('Résultat d\'optimisation:', optimizationResult);
-      }
-    }
     
   } catch (error) {
     console.error('Erreur lors du debug:', error);

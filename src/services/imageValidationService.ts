@@ -1,18 +1,14 @@
-
 import { SymbolImage } from '../types/supabase';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logService';
-import { imageOptimizationService } from './imageOptimizationService';
 
 // Types d'images prises en charge
 export type ImageType = 'original' | 'pattern' | 'reuse';
 
-// Cache pour les validations
-const validationCache = new Map<string, { isValid: boolean; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
 /**
- * Nettoie et valide une URL d'image avec cache
+ * Nettoie et valide une URL d'image
+ * @param url URL à nettoyer
+ * @returns URL nettoyée ou chaîne vide si invalide
  */
 export function sanitizeImageUrl(url: string): string {
   if (!url) {
@@ -22,6 +18,8 @@ export function sanitizeImageUrl(url: string): string {
   
   // Vérifier si c'est un chemin local (commençant par '/')
   if (url.startsWith('/')) {
+    // Pour les chemins locaux, on vérifie juste qu'ils ne sont pas vides
+    // et qu'ils pointent vers un format d'image valide
     const validImageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'];
     const hasValidExtension = validImageExtensions.some(ext => url.toLowerCase().endsWith(ext));
     
@@ -30,6 +28,7 @@ export function sanitizeImageUrl(url: string): string {
       return url;
     } else {
       logger.warning('Chemin d\'image local potentiellement invalide', { url });
+      // On retourne quand même l'URL car c'est peut-être un chemin valide sans extension
       return url;
     }
   }
@@ -65,18 +64,12 @@ export function getImageDescription(
 }
 
 /**
- * Valide qu'une URL d'image est accessible avec cache
+ * Valide qu'une URL d'image est accessible
  */
 export async function validateImageUrl(url: string): Promise<boolean> {
   if (!url || url.trim() === '') {
     logger.warning('Tentative de validation d\'URL vide');
     return false;
-  }
-
-  // Vérifier le cache
-  const cached = validationCache.get(url);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.isValid;
   }
   
   // Vérifier si l'URL est valide
@@ -84,46 +77,36 @@ export async function validateImageUrl(url: string): Promise<boolean> {
     new URL(url);
   } catch (e) {
     logger.error("URL invalide", { url });
-    validationCache.set(url, { isValid: false, timestamp: Date.now() });
     return false;
   }
 
   // Pour les URL de Supabase Storage
   if (url.includes('supabase') && url.includes('storage')) {
-    validationCache.set(url, { isValid: true, timestamp: Date.now() });
+    // Nous faisons confiance à nos propres URL de stockage
     return true;
   }
 
   try {
     // Vérifier si l'image est accessible
     const response = await fetch(url, { method: 'HEAD' });
-    const isValid = response.ok;
-    validationCache.set(url, { isValid, timestamp: Date.now() });
-    return isValid;
+    return response.ok;
   } catch (error) {
     logger.error("Erreur lors de la vérification de l'URL", {
       url,
       error: (error as Error).message
     });
-    validationCache.set(url, { isValid: false, timestamp: Date.now() });
     return false;
   }
 }
 
 /**
- * Valide les dimensions d'une image avec cache
+ * Valide les dimensions d'une image
  */
 export async function validateImageDimensions(
   url: string,
   minWidth: number = 100,
   minHeight: number = 100
 ): Promise<boolean> {
-  const cacheKey = `${url}-${minWidth}x${minHeight}`;
-  const cached = validationCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.isValid;
-  }
-
   return new Promise((resolve) => {
     const img = new Image();
     
@@ -138,13 +121,11 @@ export async function validateImageDimensions(
           minHeight
         });
       }
-      validationCache.set(cacheKey, { isValid: valid, timestamp: Date.now() });
       resolve(valid);
     };
     
     img.onerror = () => {
       logger.error("Erreur lors du chargement de l'image", { url });
-      validationCache.set(cacheKey, { isValid: false, timestamp: Date.now() });
       resolve(false);
     };
     
@@ -153,21 +134,12 @@ export async function validateImageDimensions(
 }
 
 /**
- * Valide le type MIME d'une image avec cache
+ * Valide le type MIME d'une image
  */
 export async function validateImageType(url: string): Promise<boolean> {
-  const cacheKey = `mime-${url}`;
-  const cached = validationCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.isValid;
-  }
-
   try {
     const response = await fetch(url, { method: 'HEAD' });
-    if (!response.ok) {
-      validationCache.set(cacheKey, { isValid: false, timestamp: Date.now() });
-      return false;
-    }
+    if (!response.ok) return false;
     
     const contentType = response.headers.get('content-type');
     const isImage = contentType !== null && contentType.startsWith('image/');
@@ -179,48 +151,41 @@ export async function validateImageType(url: string): Promise<boolean> {
       });
     }
     
-    validationCache.set(cacheKey, { isValid: isImage, timestamp: Date.now() });
     return isImage;
   } catch (error) {
     logger.error("Erreur lors de la vérification du type MIME", {
       url,
       error: (error as Error).message
     });
-    validationCache.set(cacheKey, { isValid: false, timestamp: Date.now() });
     return false;
   }
 }
 
 /**
- * Valide une image complètement avec optimisation recommandée
+ * Valide une image complètement (URL, dimensions, type)
  */
 export async function validateImage(
   url: string,
   minWidth: number = 100,
   minHeight: number = 100
-): Promise<{ isValid: boolean; needsOptimization?: boolean }> {
+): Promise<boolean> {
   // Pour les URL locales, on les considère comme valides sans vérification
   if (url.startsWith('/')) {
-    return { isValid: true, needsOptimization: false };
+    return true;
   }
   
   const urlValid = await validateImageUrl(url);
-  if (!urlValid) return { isValid: false };
+  if (!urlValid) return false;
   
   const dimensionsValid = await validateImageDimensions(url, minWidth, minHeight);
-  if (!dimensionsValid) return { isValid: false };
+  if (!dimensionsValid) return false;
   
   const typeValid = await validateImageType(url);
-  if (!typeValid) return { isValid: false };
-
-  // Vérifier si l'image a besoin d'optimisation
-  const needsOptimization = await imageOptimizationService.needsOptimization(url);
-  
-  return { isValid: true, needsOptimization };
+  return typeValid;
 }
 
 /**
- * Traite et met à jour une image avec optimisation automatique
+ * Traite et met à jour une image en cas de problème
  */
 export async function processAndUpdateImage(
   symbolName: string,
@@ -235,26 +200,10 @@ export async function processAndUpdateImage(
     return imageUrl;
   }
   
-  // Vérifier si l'image est valide et a besoin d'optimisation
-  const validation = await validateImage(imageUrl);
+  // Vérifier si l'image est valide
+  const isValid = await validateImageUrl(imageUrl);
   
-  if (validation.isValid) {
-    // Si l'image a besoin d'optimisation, essayer de l'optimiser
-    if (validation.needsOptimization) {
-      try {
-        const optimized = await imageOptimizationService.optimizeExistingImage(imageUrl);
-        if (optimized) {
-          logger.info('Image optimisée avec succès', { 
-            originalUrl: imageUrl,
-            optimizedUrl: optimized.optimizedUrl,
-            compressionRatio: optimized.compressionRatio
-          });
-          return optimized.optimizedUrl;
-        }
-      } catch (error) {
-        logger.warning('Échec de l\'optimisation, utilisation de l\'URL originale', { error });
-      }
-    }
+  if (isValid) {
     return imageUrl; // Image valide, renvoyer l'URL originale
   }
   
@@ -267,6 +216,7 @@ export async function processAndUpdateImage(
   
   let alternativeUrl = "";
   
+  // Utiliser le switch avec tous les types possibles définis dans ImageType
   switch (type) {
     case 'original':
       alternativeUrl = `https://source.unsplash.com/featured/?${encodeURIComponent(symbolName.toLowerCase())}+${symbolCulture.toLowerCase()}+historical+artifact`;
@@ -291,43 +241,7 @@ export async function processAndUpdateImage(
 }
 
 /**
- * Sauvegarde une image optimisée dans Supabase Storage
- */
-export async function saveOptimizedImageToStorage(
-  file: File,
-  bucket: string,
-  path: string
-): Promise<string | null> {
-  try {
-    logger.info('Sauvegarde d\'image optimisée dans Storage', { bucket, path });
-    
-    // Utiliser le service d'optimisation pour upload avec compression automatique
-    const result = await imageOptimizationService.uploadOptimizedImage(file, bucket, path);
-    
-    if (result) {
-      logger.info('Image optimisée et sauvegardée avec succès', { 
-        url: result.optimizedUrl,
-        compressionRatio: result.compressionRatio,
-        originalSize: result.originalSize,
-        optimizedSize: result.optimizedSize
-      });
-      return result.optimizedUrl;
-    }
-    
-    // Fallback vers l'ancienne méthode si l'optimisation échoue
-    return await saveImageToStorage(file, bucket, path);
-  } catch (error) {
-    logger.error("Erreur lors de l'enregistrement de l'image optimisée", {
-      bucket,
-      path,
-      error: (error as Error).message
-    });
-    return null;
-  }
-}
-
-/**
- * Sauvegarde une image dans Supabase Storage (méthode originale)
+ * Sauvegarde une image dans Supabase Storage
  */
 export async function saveImageToStorage(
   file: File,
@@ -366,33 +280,15 @@ export async function saveImageToStorage(
   }
 }
 
-// Fonctions spécifiques pour chaque type d'image avec validation améliorée
-export async function validateOriginalImage(url: string): Promise<{ isValid: boolean; needsOptimization?: boolean }> {
+// Fonctions spécifiques pour chaque type d'image
+export function validateOriginalImage(url: string): Promise<boolean> {
   return validateImage(url, 300, 300);
 }
 
-export async function validatePatternImage(url: string): Promise<{ isValid: boolean; needsOptimization?: boolean }> {
+export function validatePatternImage(url: string): Promise<boolean> {
   return validateImage(url, 200, 200);
 }
 
-export async function validateReuseImage(url: string): Promise<{ isValid: boolean; needsOptimization?: boolean }> {
+export function validateReuseImage(url: string): Promise<boolean> {
   return validateImage(url, 250, 250);
-}
-
-/**
- * Nettoie le cache de validation
- */
-export function clearValidationCache(): void {
-  validationCache.clear();
-  logger.info('Cache de validation nettoyé');
-}
-
-/**
- * Obtient les statistiques du cache de validation
- */
-export function getValidationCacheStats(): { size: number; entries: number } {
-  return {
-    size: validationCache.size,
-    entries: validationCache.size
-  };
 }

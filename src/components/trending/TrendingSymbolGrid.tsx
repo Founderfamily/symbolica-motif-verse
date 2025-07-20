@@ -1,12 +1,10 @@
+
 import React from 'react';
 import { TrendingSymbol } from '@/services/trendingService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PhotoStatusBadge } from '@/components/ui/photo-status-badge';
-import { Eye, Heart, TrendingUp, Plus, Sparkles, Image, Filter } from 'lucide-react';
+import { Eye, Heart, TrendingUp, Plus, Sparkles } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { SymbolVisibilityService, SymbolWithVisibility } from '@/services/symbolVisibilityService';
-import { Button } from '@/components/ui/button';
 
 interface TrendingSymbolGridProps {
   symbols: TrendingSymbol[];
@@ -14,30 +12,7 @@ interface TrendingSymbolGridProps {
 }
 
 export const TrendingSymbolGrid: React.FC<TrendingSymbolGridProps> = ({ symbols, isLoading }) => {
-  const [showOnlyWithPhotos, setShowOnlyWithPhotos] = React.useState(false);
-  
   console.log('🎨 [TrendingSymbolGrid] Rendering with:', { symbolsCount: symbols?.length, isLoading });
-
-  // Enrichir les symboles avec les données de visibilité
-  const enrichedSymbols = React.useMemo(() => {
-    if (!symbols || symbols.length === 0) return [];
-    
-    const withVisibility = SymbolVisibilityService.enrichWithVisibility(symbols);
-    const sorted = SymbolVisibilityService.sortByVisibility(withVisibility);
-    
-    // Filtrer par présence de photos si nécessaire
-    if (showOnlyWithPhotos) {
-      return sorted.filter(s => s.hasPhoto);
-    }
-    
-    return sorted;
-  }, [symbols, showOnlyWithPhotos]);
-
-  // Statistiques des photos
-  const photoStats = React.useMemo(() => {
-    if (!symbols || symbols.length === 0) return null;
-    return SymbolVisibilityService.getPhotoStats(symbols);
-  }, [symbols]);
 
   if (isLoading) {
     console.log('⏳ [TrendingSymbolGrid] Showing loading skeletons');
@@ -124,170 +99,80 @@ export const TrendingSymbolGrid: React.FC<TrendingSymbolGridProps> = ({ symbols,
     );
   }
 
-  console.log('✅ [TrendingSymbolGrid] Displaying', enrichedSymbols.length, 'symbols with visibility system');
+  console.log('✅ [TrendingSymbolGrid] Displaying', symbols.length, 'symbols');
 
   return (
     <div className="space-y-6">
-      {/* En-tête avec statistiques et filtres */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <p className="text-blue-900 font-semibold mb-1">
-                {enrichedSymbols.length} symboles tendance
-              </p>
-              {photoStats && (
-                <div className="flex items-center gap-4 text-sm text-blue-700">
-                  <div className="flex items-center gap-1">
-                    <Image className="h-4 w-4" />
-                    <span>{photoStats.withPhoto} avec photos</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span>{photoStats.withoutPhoto} sans photos</span>
-                  </div>
-                  <div className="text-blue-600 font-medium">
-                    ({photoStats.percentageWithPhoto.toFixed(1)}% illustrés)
-                  </div>
-                </div>
-              )}
-            </div>
+        <div className="flex items-start gap-3">
+          <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
+          <div>
+            <p className="text-blue-900 font-semibold mb-1">
+              {symbols.length} symboles tendance
+            </p>
+            <p className="text-blue-700 text-sm">
+              Découvrez les symboles les plus récents et populaires de notre collection.
+            </p>
           </div>
-          
-          {/* Filtre photo */}
-          <Button
-            variant={showOnlyWithPhotos ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowOnlyWithPhotos(!showOnlyWithPhotos)}
-            className="flex items-center gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            {showOnlyWithPhotos ? "Tous" : "Avec photos"}
-          </Button>
         </div>
       </div>
 
-      {/* Grille des symboles */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {enrichedSymbols.map((symbol, index) => (
-          <SymbolVisibilityCard 
-            key={symbol.id} 
-            symbol={symbol} 
-            index={index}
-          />
+        {symbols.map((symbol, index) => (
+          <Card key={symbol.id} className="hover:shadow-lg transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-blue-400">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <CardTitle className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                    {symbol.name}
+                  </CardTitle>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {symbol.culture} • {symbol.period}
+                  </p>
+                </div>
+                {index < 3 && (
+                  <Badge variant="secondary" className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    #{index + 1}
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {symbol.description && (
+                  <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                    {symbol.description}
+                  </p>
+                )}
+                
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-4 text-sm text-slate-500">
+                    <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                      <Eye className="w-4 h-4" />
+                      <span>{symbol.view_count.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1 hover:text-red-600 transition-colors">
+                      <Heart className="w-4 h-4" />
+                      <span>{symbol.like_count.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs font-medium ${
+                      symbol.trending_score >= 90 ? 'border-green-200 text-green-700 bg-green-50' :
+                      symbol.trending_score >= 70 ? 'border-blue-200 text-blue-700 bg-blue-50' :
+                      'border-slate-200 text-slate-600 bg-slate-50'
+                    }`}
+                  >
+                    {symbol.trending_score.toFixed(1)}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
-
-      {/* Message si filtrage et aucun résultat */}
-      {showOnlyWithPhotos && enrichedSymbols.length === 0 && (
-        <div className="text-center py-8 text-slate-500">
-          <Image className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>Aucun symbole avec photo trouvé dans cette sélection.</p>
-        </div>
-      )}
     </div>
-  );
-};
-
-// Composant pour une carte de symbole avec système de visibilité
-interface SymbolVisibilityCardProps {
-  symbol: SymbolWithVisibility;
-  index: number;
-}
-
-const SymbolVisibilityCard: React.FC<SymbolVisibilityCardProps> = ({ symbol, index }) => {
-  const isTopRanked = index < 3;
-  const hasPhotoBonus = symbol.hasPhoto;
-  
-  return (
-    <Card 
-      className={`hover:shadow-lg transition-all cursor-pointer group border-l-4 ${
-        hasPhotoBonus 
-          ? 'border-l-green-400 hover:border-l-green-500' 
-          : 'border-l-orange-300 hover:border-l-orange-400'
-      } ${!hasPhotoBonus ? 'opacity-90' : ''}`}
-    >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className={`text-lg font-semibold transition-colors line-clamp-1 ${
-              hasPhotoBonus 
-                ? 'text-slate-900 group-hover:text-green-600' 
-                : 'text-slate-700 group-hover:text-orange-600'
-            }`}>
-              {symbol.name}
-            </CardTitle>
-            <p className="text-sm text-slate-500 mt-1">
-              {symbol.culture} • {symbol.period}
-            </p>
-          </div>
-          
-          <div className="flex flex-col gap-2 items-end">
-            {/* Badge de rang */}
-            {isTopRanked && (
-              <Badge variant="secondary" className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                #{index + 1}
-              </Badge>
-            )}
-            
-            {/* Badge photo */}
-            <PhotoStatusBadge hasPhoto={symbol.hasPhoto} />
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="space-y-3">
-          {symbol.description && (
-            <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
-              {symbol.description}
-            </p>
-          )}
-          
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-            <div className="flex items-center gap-4 text-sm text-slate-500">
-              <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                <Eye className="w-4 h-4" />
-                <span>{symbol.view_count.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center gap-1 hover:text-red-600 transition-colors">
-                <Heart className="w-4 h-4" />
-                <span>{symbol.like_count.toLocaleString()}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {/* Score de visibilité */}
-              <Badge 
-                variant="outline" 
-                className={`text-xs font-medium ${
-                  symbol.visibilityScore >= 90 ? 'border-green-200 text-green-700 bg-green-50' :
-                  symbol.visibilityScore >= 70 ? 'border-blue-200 text-blue-700 bg-blue-50' :
-                  'border-slate-200 text-slate-600 bg-slate-50'
-                }`}
-              >
-                {symbol.visibilityScore.toFixed(1)}
-              </Badge>
-              
-              {/* Indicateur de bonus/malus */}
-              {hasPhotoBonus && (
-                <div className="w-2 h-2 rounded-full bg-green-400" title="Bonus photo" />
-              )}
-              {!hasPhotoBonus && (
-                <div className="w-2 h-2 rounded-full bg-orange-400" title="Malus sans photo" />
-              )}
-            </div>
-          </div>
-          
-          {/* Message d'encouragement pour les symboles sans photo */}
-          {!hasPhotoBonus && (
-            <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
-              💡 Ajoutez une photo pour améliorer la visibilité de ce symbole
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
   );
 };

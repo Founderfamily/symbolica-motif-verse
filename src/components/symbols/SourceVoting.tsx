@@ -24,8 +24,7 @@ import {
   Wrench,
   Link,
   Bot,
-  Users,
-  FileText
+  Users
 } from 'lucide-react';
 
 interface Source {
@@ -77,20 +76,11 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
     setUser(user);
   };
 
-  const isValidUrl = (url: string): boolean => {
-    if (!url || url.trim() === '') return false;
-    try {
-      new URL(url.startsWith('http') ? url : `https://${url}`);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   const loadSources = async () => {
     try {
       setLoading(true);
       
+      // Récupérer les sources communauté depuis la table symbol_sources
       const { data: communitySourcesData, error: communityError } = await supabase
         .from('symbol_sources')
         .select(`
@@ -108,6 +98,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
         console.error('Erreur lors du chargement des sources communauté:', communityError);
       }
 
+      // Récupérer les sources IA depuis symbols.sources
       const { data: symbolData, error: symbolError } = await supabase
         .from('symbols')
         .select('sources')
@@ -118,6 +109,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
         console.error('Erreur lors du chargement des sources IA:', symbolError);
       }
 
+      // Récupérer les votes de l'utilisateur actuel si connecté
       let userVotes: any[] = [];
       if (user) {
         const { data: votesData } = await supabase
@@ -128,6 +120,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
         userVotes = votesData || [];
       }
 
+      // Mapper les sources communauté avec les votes de l'utilisateur
       const communitySourcesWithVotes = (communitySourcesData || []).map(source => ({
         ...source,
         user_vote: userVotes.find(vote => vote.source_id === source.id)?.vote_type || null,
@@ -135,12 +128,13 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
         source_type: 'community' as const
       }));
 
+      // Mapper les sources IA
       const aiSources: Source[] = [];
       if (symbolData?.sources && Array.isArray(symbolData.sources)) {
         (symbolData.sources as unknown as AISource[]).forEach((aiSource: AISource, index: number) => {
           aiSources.push({
             id: `ai-${index}`,
-            url: aiSource.url || '',
+            url: aiSource.url,
             title: aiSource.title,
             description: aiSource.description,
             added_by: 'system',
@@ -157,6 +151,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
         });
       }
 
+      // Combiner toutes les sources
       const allSources = [...communitySourcesWithVotes, ...aiSources];
       setSources(allSources as Source[]);
     } catch (error) {
@@ -173,6 +168,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
       return;
     }
 
+    // Ne pas permettre de voter sur les sources IA pour l'instant
     const source = sources.find(s => s.id === sourceId);
     if (source?.source_type === 'ai') {
       toast.info('Le vote sur les sources IA sera bientôt disponible');
@@ -180,10 +176,12 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
     }
 
     try {
+      // Vérifier si l'utilisateur a déjà voté
       const currentSource = sources.find(s => s.id === sourceId);
       const isTogglingVote = currentSource?.user_vote === voteType;
 
       if (isTogglingVote) {
+        // Supprimer le vote existant
         const { error } = await supabase
           .from('symbol_source_votes')
           .delete()
@@ -192,6 +190,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
 
         if (error) throw error;
       } else {
+        // Ajouter ou modifier le vote
         const { error } = await supabase
           .from('symbol_source_votes')
           .upsert({
@@ -203,6 +202,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
         if (error) throw error;
       }
 
+      // Recharger les sources pour mettre à jour les compteurs
       await loadSources();
       toast.success(isTogglingVote ? 'Vote retiré !' : 'Vote enregistré !');
     } catch (error) {
@@ -298,6 +298,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
     );
   }
 
+  // Séparer les sources par type
   const aiSources = sources.filter(source => source.source_type === 'ai');
   const communitySources = sources.filter(source => source.source_type === 'community');
 
@@ -310,6 +311,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
         </h3>
       </div>
 
+      {/* Sources trouvées par l'IA */}
       {aiSources.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -322,76 +324,52 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
             </Badge>
           </div>
           <div className="space-y-3">
-            {aiSources.map((source) => {
-              const hasValidUrl = isValidUrl(source.url);
-              
-              return (
-                <Card key={source.id} className="p-4 border-blue-200 bg-blue-50/50">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {hasValidUrl ? (
-                          <a 
-                            href={source.url.startsWith('http') ? source.url : `https://${source.url}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-lg font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                          >
-                            {source.title}
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg font-medium text-slate-800">
-                              {source.title}
-                            </span>
-                            <Badge className="bg-gray-100 text-gray-700">
-                              <FileText className="h-3 w-3 mr-1" />
-                              Référence
-                            </Badge>
-                          </div>
-                        )}
-                        
-                        <Badge className="bg-blue-100 text-blue-800">
-                          <Bot className="h-3 w-3 mr-1" />
-                          IA
-                        </Badge>
-                      </div>
+            {aiSources.map((source) => (
+              <Card key={source.id} className="p-4 border-blue-200 bg-blue-50/50">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <a 
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-lg font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      >
+                        {source.title}
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
                       
-                      {source.description && (
-                        <p className="text-slate-600 mb-2">{source.description}</p>
-                      )}
-                      
-                      <div className="flex items-center gap-4 text-sm text-slate-500">
-                        <div className="flex items-center gap-1">
-                          <Bot className="h-4 w-4" />
-                          <span>Trouvée automatiquement</span>
-                        </div>
-                        {!hasValidUrl && (
-                          <div className="flex items-center gap-1 text-amber-600">
-                            <FileText className="h-4 w-4" />
-                            <span>Référence bibliographique</span>
-                          </div>
-                        )}
+                      <Badge className="bg-blue-100 text-blue-800">
+                        <Bot className="h-3 w-3 mr-1" />
+                        IA
+                      </Badge>
+                    </div>
+                    
+                    {source.description && (
+                      <p className="text-slate-600 mb-2">{source.description}</p>
+                    )}
+                    
+                    <div className="flex items-center gap-4 text-sm text-slate-500">
+                      <div className="flex items-center gap-1">
+                        <Bot className="h-4 w-4" />
+                        <span>Trouvée automatiquement</span>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-slate-500">
-                      {hasValidUrl 
-                        ? "Cette source a été trouvée automatiquement par l'IA lors de la vérification du symbole."
-                        : "Cette référence bibliographique a été identifiée par l'IA mais le lien n'est pas disponible."
-                      }
-                    </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-slate-500">
+                    Cette source a été trouvée automatiquement par l'IA lors de la vérification du symbole.
                   </div>
-                </Card>
-              );
-            })}
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
       )}
 
+      {/* Sources communauté */}
       {communitySources.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
