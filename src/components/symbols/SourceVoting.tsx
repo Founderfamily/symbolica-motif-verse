@@ -131,7 +131,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
       // Mapper les sources IA
       const aiSources: Source[] = [];
       if (symbolData?.sources && Array.isArray(symbolData.sources)) {
-        symbolData.sources.forEach((aiSource: AISource, index: number) => {
+        (symbolData.sources as unknown as AISource[]).forEach((aiSource: AISource, index: number) => {
           aiSources.push({
             id: `ai-${index}`,
             url: aiSource.url,
