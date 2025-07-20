@@ -30,8 +30,8 @@ const GraphPage = () => {
     const connectedNodeIds = new Set<string>();
     
     links.forEach(link => {
-      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
-      const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+      const sourceId = typeof link.source === 'string' ? link.source : (link.source as any)?.id || link.source;
+      const targetId = typeof link.target === 'string' ? link.target : (link.target as any)?.id || link.target;
       
       if (sourceId === nodeId) {
         connectedNodeIds.add(targetId);
