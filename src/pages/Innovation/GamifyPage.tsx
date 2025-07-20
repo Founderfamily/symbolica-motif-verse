@@ -72,6 +72,69 @@ const GamifyPage = () => {
           </p>
         </div>
 
+        {/* Quiz d'Aventurier Section */}
+        <div className="mb-12">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
+              <Compass className="h-8 w-8 text-orange-600" />
+              Découvrez Votre Type d'Aventurier
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Quiz personnalisé pour définir votre profil d'explorateur culturel
+            </p>
+          </div>
+
+          {!showQuiz ? (
+            <div className="max-w-2xl mx-auto">
+              <Card className="text-center">
+                <CardContent className="py-12">
+                  <Compass className="h-16 w-16 mx-auto mb-4 text-orange-500" />
+                  <h3 className="text-2xl font-bold mb-4">Quiz Personnalisé</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Répondez à 5 questions pour découvrir quel type d'aventurier vous êtes.
+                    Votre profil influencera les quêtes et récompenses qui vous sont proposées.
+                  </p>
+                  <Button 
+                    onClick={() => setShowQuiz(true)}
+                    size="lg"
+                    className="bg-gradient-to-r from-orange-600 to-red-600"
+                  >
+                    Commencer le Quiz
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <AdventurerQuiz 
+              onComplete={(type) => {
+                setAdventurerType(type);
+                setShowQuiz(false);
+              }}
+            />
+          )}
+
+          {adventurerType && (
+            <div className="max-w-2xl mx-auto mt-8">
+              <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
+                <CardContent className="py-6">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-4 text-orange-600">
+                      {adventurerType.icon}
+                    </div>
+                    <h4 className="text-xl font-bold text-orange-800 mb-2">
+                      Profil Confirmé : {adventurerType.name}
+                    </h4>
+                    <p className="text-orange-700">
+                      Votre profil personnalisera votre expérience de jeu et vos récompenses.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Interactive Demo */}
           <Card className="relative overflow-hidden">
@@ -231,69 +294,6 @@ const GamifyPage = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Quiz d'Aventurier Section */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
-              <Compass className="h-8 w-8 text-orange-600" />
-              Découvrez Votre Type d'Aventurier
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Quiz personnalisé pour définir votre profil d'explorateur culturel
-            </p>
-          </div>
-
-          {!showQuiz ? (
-            <div className="max-w-2xl mx-auto">
-              <Card className="text-center">
-                <CardContent className="py-12">
-                  <Compass className="h-16 w-16 mx-auto mb-4 text-orange-500" />
-                  <h3 className="text-2xl font-bold mb-4">Quiz Personnalisé</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Répondez à 5 questions pour découvrir quel type d'aventurier vous êtes.
-                    Votre profil influencera les quêtes et récompenses qui vous sont proposées.
-                  </p>
-                  <Button 
-                    onClick={() => setShowQuiz(true)}
-                    size="lg"
-                    className="bg-gradient-to-r from-orange-600 to-red-600"
-                  >
-                    Commencer le Quiz
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          ) : (
-            <AdventurerQuiz 
-              onComplete={(type) => {
-                setAdventurerType(type);
-                setShowQuiz(false);
-              }}
-            />
-          )}
-
-          {adventurerType && (
-            <div className="max-w-2xl mx-auto mt-8">
-              <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
-                <CardContent className="py-6">
-                  <div className="text-center">
-                    <div className="flex justify-center mb-4 text-orange-600">
-                      {adventurerType.icon}
-                    </div>
-                    <h4 className="text-xl font-bold text-orange-800 mb-2">
-                      Profil Confirmé : {adventurerType.name}
-                    </h4>
-                    <p className="text-orange-700">
-                      Votre profil personnalisera votre expérience de jeu et vos récompenses.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </div>
 
         {/* Interactive Demo Section */}
