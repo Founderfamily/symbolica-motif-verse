@@ -447,7 +447,6 @@ const symbolToLocalImageEnhanced: Record<string, string> = {
   "Hexagon": "/images/symbols/arabesque.png",
   "Octogone": "/images/symbols/arabesque.png",
   "Octagon": "/images/symbols/arabesque.png",
-  "Étoile": "/images/symbols/arabesque.png",
   "Spirale": "/images/symbols/triskelion.png",
   "Spiral": "/images/symbols/triskelion.png",
   "Labyrinthe": "/images/symbols/greek-meander.png",
@@ -465,7 +464,6 @@ const culturalFallbacks: Record<string, string> = {
   "Scottish": "/images/symbols/triskelion.png",
   "Gallois": "/images/symbols/triskelion.png",
   "Welsh": "/images/symbols/triskelion.png",
-  "Breton": "/images/symbols/triskelion.png",
   "Breton": "/images/symbols/triskelion.png",
   
   "Japonaise": "/images/symbols/seigaiha.png",
