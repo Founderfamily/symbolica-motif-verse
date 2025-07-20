@@ -330,7 +330,7 @@ export const SourceVoting: React.FC<SourceVotingProps> = ({ symbolId }) => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <a 
-                        href={source.url}
+                        href={source.url.startsWith('http') ? source.url : `https://${source.url}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-lg font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
