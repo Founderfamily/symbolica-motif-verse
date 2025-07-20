@@ -12,12 +12,15 @@ import { SymbolCompletenessService, SymbolWithCompleteness } from '@/services/sy
 import { CompletenessBadge } from '@/components/ui/completeness-badge';
 import { Link } from 'react-router-dom';
 import { Clock } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Badge } from '@/components/ui/badge';
 
 const SymbolsPage: React.FC = () => {
   const [showOnlyWithPhotos, setShowOnlyWithPhotos] = useState(false);
   const [selectedCompletenessLevel, setSelectedCompletenessLevel] = useState<'all' | 'complete' | 'well_documented' | 'partially_documented' | 'to_complete'>('all');
 
-  const { data: symbols, loading, error } = useQuery({
+  const { data: symbols, isLoading, error } = useQuery({
     queryKey: ['symbols'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -83,7 +86,7 @@ const SymbolsPage: React.FC = () => {
     return SymbolCompletenessService.getCompletenessStats(processedSymbols);
   }, [processedSymbols]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-xl text-gray-600">Chargement des symboles...</p>
