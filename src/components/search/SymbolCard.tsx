@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Info, AlertCircle, Wifi, WifiOff, RefreshCw, Loader2 } from 'lucide-react';
+import { Info, Wifi, WifiOff, RefreshCw, Loader2 } from 'lucide-react';
 import { getSymbolThemeColor } from '@/utils/symbolImageUtils';
 import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { useSymbolVerification } from '@/hooks/useSymbolVerification';
@@ -149,32 +149,16 @@ export const SymbolCard: React.FC<SymbolCardProps> = React.memo(({ symbol, prior
             )}
           </div>
           
-          {/* Image avec fallback intelligent */}
-          {imageSource === "/placeholder.svg" ? (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-2 ${getSymbolThemeColor(symbol.culture)}`}>
-                <div className="text-white text-2xl font-bold">
-                  {symbol.name.charAt(0).toUpperCase()}
-                </div>
-              </div>
-              <div className="text-slate-600 text-xs text-center px-2 font-medium">
-                {symbol.name}
-              </div>
-              <div className="text-slate-400 text-xs mt-1">
-                Image en attente
-              </div>
-            </div>
-          ) : (
-            <img
-              src={imageSource}
-              alt={symbol.name}
-              className={`object-cover w-full h-full transition-all duration-500 ${
-                isLoading ? 'opacity-0' : 'opacity-100'
-              } ${isHovered ? 'scale-110' : 'scale-100'}`}
-              onError={handleImageError}
-              loading={priority ? 'eager' : 'lazy'}
-            />
-          )}
+          {/* Image - TOUJOURS AFFICHER, même si c'est un placeholder */}
+          <img
+            src={imageSource}
+            alt={symbol.name}
+            className={`object-cover w-full h-full transition-all duration-500 ${
+              isLoading ? 'opacity-0' : 'opacity-100'
+            } ${isHovered ? 'scale-110' : 'scale-100'}`}
+            onError={handleImageError}
+            loading={priority ? 'eager' : 'lazy'}
+          />
           
           {/* Overlay informatif au hover */}
           {isHovered && !isLoading && (

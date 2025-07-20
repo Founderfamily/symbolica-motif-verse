@@ -6,7 +6,7 @@ interface UseOptimizedImageProps {
   supabaseUrl?: string;
   symbolName: string;
   culture: string;
-  priority?: boolean; // Pour le preloading prioritaire
+  priority?: boolean;
 }
 
 interface UseOptimizedImageReturn {
@@ -33,17 +33,22 @@ export const useOptimizedImage = ({
   const loadImage = useCallback(async () => {
     setIsLoading(true);
     setHasError(false);
-    setLoadingProgress(20);
+    setLoadingProgress(10);
 
-    console.log(`🖼️ [useOptimizedImage] Chargement image pour "${symbolName}"`);
+    console.log(`🖼️ [useOptimizedImage] Chargement pour "${symbolName}" (culture: ${culture})`);
 
     try {
-      // Essayer d'abord l'image Supabase si disponible
+      // D'abord, essayer de trouver une image locale optimisée
+      setLoadingProgress(30);
+      const localImage = ImageService.findBestLocalImage(symbolName, culture);
+      console.log(`🏠 [useOptimizedImage] Image locale trouvée: ${localImage}`);
+      
+      // Si on a une URL Supabase ET qu'on n'a pas encore beaucoup d'échecs
       if (supabaseUrl && retryCount < 2) {
-        setLoadingProgress(40);
-        console.log(`🌐 [useOptimizedImage] Tentative Supabase: ${supabaseUrl}`);
+        setLoadingProgress(50);
+        console.log(`🌐 [useOptimizedImage] Test image Supabase: ${supabaseUrl}`);
         
-        const isValid = await ImageService.verifyImageUrl(supabaseUrl, 2);
+        const isValid = await ImageService.verifyImageUrl(supabaseUrl, 1); // Une seule tentative pour Supabase
         
         if (isValid) {
           console.log(`✅ [useOptimizedImage] Image Supabase valide pour "${symbolName}"`);
@@ -52,15 +57,14 @@ export const useOptimizedImage = ({
           setIsLoading(false);
           return;
         } else {
-          console.log(`❌ [useOptimizedImage] Image Supabase invalide pour "${symbolName}"`);
+          console.log(`❌ [useOptimizedImage] Image Supabase invalide pour "${symbolName}", utilisation du local`);
           setRetryCount(prev => prev + 1);
         }
       }
 
-      // Fallback vers image locale
-      setLoadingProgress(70);
-      const localImage = ImageService.findBestLocalImage(symbolName, culture);
-      console.log(`🏠 [useOptimizedImage] Utilisation image locale: ${localImage}`);
+      // Utiliser l'image locale (qui ne sera JAMAIS "/placeholder.svg" maintenant)
+      setLoadingProgress(80);
+      console.log(`🏠 [useOptimizedImage] Utilisation image locale finale: ${localImage}`);
       
       setImageSource(localImage);
       setLoadingProgress(100);
@@ -70,44 +74,47 @@ export const useOptimizedImage = ({
       console.error(`❌ [useOptimizedImage] Erreur lors du chargement:`, error);
       setHasError(true);
       
-      // Fallback final vers image locale
+      // Fallback vers image locale
       const localImage = ImageService.findBestLocalImage(symbolName, culture);
+      console.log(`🆘 [useOptimizedImage] Fallback d'urgence vers: ${localImage}`);
       setImageSource(localImage);
       setIsLoading(false);
     }
   }, [supabaseUrl, symbolName, culture, retryCount]);
 
   const retryLoad = useCallback(() => {
+    console.log(`🔄 [useOptimizedImage] Retry pour "${symbolName}"`);
     setRetryCount(0);
     loadImage();
-  }, [loadImage]);
+  }, [loadImage, symbolName]);
 
   // Effet principal de chargement
   useEffect(() => {
     loadImage();
   }, [loadImage]);
 
-  // Preloading prioritaire
+  // Preloading prioritaire pour les images Supabase
   useEffect(() => {
     if (priority && supabaseUrl) {
+      console.log(`⚡ [useOptimizedImage] Preloading prioritaire pour ${symbolName}`);
       ImageService.preloadImage(supabaseUrl).catch(() => {
         console.log(`⚠️ [useOptimizedImage] Preloading échoué pour ${symbolName}`);
       });
     }
   }, [supabaseUrl, symbolName, priority]);
 
-  // Timeout de sécurité
+  // Timeout de sécurité réduit
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => {
         if (isLoading) {
-          console.log(`⏰ [useOptimizedImage] Timeout pour "${symbolName}", utilisation du fallback`);
+          console.log(`⏰ [useOptimizedImage] Timeout pour "${symbolName}", finalisation avec image locale`);
           const localImage = ImageService.findBestLocalImage(symbolName, culture);
           setImageSource(localImage);
           setIsLoading(false);
           setHasError(true);
         }
-      }, 8000); // Timeout augmenté à 8 secondes
+      }, 5000); // Timeout réduit à 5 secondes
 
       return () => clearTimeout(timeout);
     }

@@ -2,152 +2,164 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Image, AlertCircle, CheckCircle, Clock, Upload } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Camera, Image, AlertTriangle, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface ImageStatsData {
+  totalSymbols: number;
+  symbolsWithImages: number;
+  symbolsWithoutImages: number;
+  imagesBySource: {
+    supabase: number;
+    local: number;
+    placeholder: number;
+  };
+  missingByPriority: Array<{
+    name: string;
+    culture: string;
+    priority: 'high' | 'medium' | 'low';
+    reason: string;
+  }>;
+}
+
+// Données simulées pour l'exemple
+const mockStats: ImageStatsData = {
+  totalSymbols: 132,
+  symbolsWithImages: 89,
+  symbolsWithoutImages: 43,
+  imagesBySource: {
+    supabase: 45,
+    local: 44,
+    placeholder: 43
+  },
+  missingByPriority: [
+    { name: 'Ankh Égyptien', culture: 'Égyptienne', priority: 'high', reason: 'Symbole populaire' },
+    { name: 'Rune Algiz', culture: 'Nordique', priority: 'high', reason: 'Demande fréquente' },
+    { name: 'Mudra Bouddhiste', culture: 'Indienne', priority: 'medium', reason: 'Collection incomplète' },
+    { name: 'Calligraphie Chinoise', culture: 'Chinoise', priority: 'medium', reason: 'Diversité culturelle' },
+    { name: 'Motif Maori', culture: 'Polynésienne', priority: 'low', reason: 'Rare mais authentique' }
+  ]
+};
 
 export const ImageStatsWidget: React.FC = () => {
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['image-stats'],
-    queryFn: async () => {
-      const [symbolsResult, imagesResult] = await Promise.all([
-        supabase.from('symbols').select('id, name, culture').limit(1000),
-        supabase.from('symbol_images').select('symbol_id, image_type').limit(1000)
-      ]);
+  const { isAdmin } = useAuth();
 
-      if (symbolsResult.error) throw symbolsResult.error;
-      if (imagesResult.error) throw imagesResult.error;
-
-      const symbols = symbolsResult.data || [];
-      const images = imagesResult.data || [];
-      
-      const symbolsWithImages = new Set(images.map(img => img.symbol_id));
-      const symbolsWithoutImages = symbols.filter(s => !symbolsWithImages.has(s.id));
-      
-      // Grouper par culture
-      const cultureStats = symbols.reduce((acc, symbol) => {
-        if (!acc[symbol.culture]) {
-          acc[symbol.culture] = { total: 0, withImages: 0 };
-        }
-        acc[symbol.culture].total++;
-        if (symbolsWithImages.has(symbol.id)) {
-          acc[symbol.culture].withImages++;
-        }
-        return acc;
-      }, {} as Record<string, { total: number; withImages: number }>);
-
-      return {
-        totalSymbols: symbols.length,
-        symbolsWithImages: symbolsWithImages.size,
-        symbolsWithoutImages: symbolsWithoutImages.length,
-        coveragePercentage: Math.round((symbolsWithImages.size / symbols.length) * 100),
-        cultureStats,
-        missingImages: symbolsWithoutImages.slice(0, 10) // Top 10 pour l'affichage
-      };
-    },
-    staleTime: 5 * 60 * 1000 // 5 minutes
-  });
-
-  if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="animate-pulse">
-          <div className="h-4 bg-slate-200 rounded w-1/4 mb-4"></div>
-          <div className="space-y-2">
-            <div className="h-3 bg-slate-200 rounded"></div>
-            <div className="h-3 bg-slate-200 rounded w-3/4"></div>
-          </div>
-        </div>
-      </Card>
-    );
+  // Ne rien afficher si l'utilisateur n'est pas admin
+  if (!isAdmin) {
+    return null;
   }
 
-  if (!stats) return null;
+  const coveragePercentage = Math.round((mockStats.symbolsWithImages / mockStats.totalSymbols) * 100);
+  
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'high': return '🔥';
+      case 'medium': return '⚡';
+      case 'low': return '💫';
+      default: return '📝';
+    }
+  };
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Image className="h-5 w-5" />
-          État des Images
-        </h3>
-        <Badge variant={stats.coveragePercentage > 80 ? "default" : stats.coveragePercentage > 50 ? "secondary" : "destructive"}>
-          {stats.coveragePercentage}% couverture
+    <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Camera className="w-5 h-5 text-blue-600" />
+          <h3 className="text-lg font-semibold text-blue-900">Couverture Images</h3>
+        </div>
+        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+          Admin Only
         </Badge>
       </div>
 
       {/* Statistiques principales */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="text-center p-3 bg-green-50 rounded-lg">
-          <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-1" />
-          <div className="text-2xl font-bold text-green-700">{stats.symbolsWithImages}</div>
-          <div className="text-xs text-green-600">Avec images</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="text-center p-4 bg-white/60 rounded-lg border border-blue-100">
+          <div className="text-2xl font-bold text-green-600">{mockStats.symbolsWithImages}</div>
+          <div className="text-sm text-green-700">Avec images</div>
         </div>
-        
-        <div className="text-center p-3 bg-orange-50 rounded-lg">
-          <AlertCircle className="h-6 w-6 text-orange-600 mx-auto mb-1" />
-          <div className="text-2xl font-bold text-orange-700">{stats.symbolsWithoutImages}</div>
-          <div className="text-xs text-orange-600">Sans images</div>
+        <div className="text-center p-4 bg-white/60 rounded-lg border border-blue-100">
+          <div className="text-2xl font-bold text-orange-600">{mockStats.symbolsWithoutImages}</div>
+          <div className="text-sm text-orange-700">Sans images</div>
         </div>
-        
-        <div className="text-center p-3 bg-blue-50 rounded-lg">
-          <Clock className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-          <div className="text-2xl font-bold text-blue-700">{stats.totalSymbols}</div>
-          <div className="text-xs text-blue-600">Total</div>
+        <div className="text-center p-4 bg-white/60 rounded-lg border border-blue-100">
+          <div className="text-2xl font-bold text-blue-600">{coveragePercentage}%</div>
+          <div className="text-sm text-blue-700">Couverture</div>
         </div>
       </div>
 
-      {/* Top des cultures manquantes */}
-      <div className="mb-4">
-        <h4 className="text-sm font-medium mb-3">Cultures avec le plus d'images manquantes:</h4>
-        <div className="space-y-2">
-          {Object.entries(stats.cultureStats)
-            .sort(([,a], [,b]) => (b.total - b.withImages) - (a.total - a.withImages))
-            .slice(0, 5)
-            .map(([culture, data]) => {
-              const missing = data.total - data.withImages;
-              if (missing === 0) return null;
-              
-              return (
-                <div key={culture} className="flex items-center justify-between text-sm">
-                  <span className="text-slate-700">{culture}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-orange-600">{missing} manquantes</span>
-                    <Badge variant="outline" className="text-xs">
-                      {data.withImages}/{data.total}
-                    </Badge>
-                  </div>
-                </div>
-              );
-            })}
+      {/* Barre de progression */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-blue-800">Progression globale</span>
+          <span className="text-sm text-blue-600">{coveragePercentage}%</span>
         </div>
+        <Progress value={coveragePercentage} className="h-3 bg-blue-100" />
       </div>
 
-      {/* Symboles prioritaires à illustrer */}
-      {stats.missingImages.length > 0 && (
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-medium mb-2">Symboles prioritaires à illustrer:</h4>
-          <div className="space-y-1 mb-3">
-            {stats.missingImages.slice(0, 3).map((symbol) => (
-              <div key={symbol.id} className="text-xs text-slate-600 bg-slate-50 px-2 py-1 rounded">
-                <span className="font-medium">{symbol.name}</span>
-                <span className="text-slate-400 ml-2">({symbol.culture})</span>
-              </div>
-            ))}
-            {stats.missingImages.length > 3 && (
-              <div className="text-xs text-slate-400">
-                ... et {stats.missingImages.length - 3} autres
-              </div>
-            )}
+      {/* Répartition par source */}
+      <div className="mb-6">
+        <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+          <Image className="w-4 h-4" />
+          Sources d'images
+        </h4>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-2 bg-green-50 rounded border border-green-200">
+            <div className="text-lg font-bold text-green-600">{mockStats.imagesBySource.supabase}</div>
+            <div className="text-xs text-green-700">Supabase</div>
           </div>
-          
-          <Button size="sm" variant="outline" className="w-full">
-            <Upload className="h-4 w-4 mr-2" />
-            Gérer les images manquantes
-          </Button>
+          <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
+            <div className="text-lg font-bold text-blue-600">{mockStats.imagesBySource.local}</div>
+            <div className="text-xs text-blue-700">Locales</div>
+          </div>
+          <div className="text-center p-2 bg-gray-50 rounded border border-gray-200">
+            <div className="text-lg font-bold text-gray-600">{mockStats.imagesBySource.placeholder}</div>
+            <div className="text-xs text-gray-700">Placeholder</div>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Symboles prioritaires manquants */}
+      <div>
+        <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4" />
+          Images prioritaires manquantes
+        </h4>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {mockStats.missingByPriority.map((symbol, index) => (
+            <div key={index} className="flex items-center justify-between p-3 bg-white/60 rounded border border-blue-100 hover:bg-white/80 transition-colors">
+              <div className="flex-1">
+                <div className="font-medium text-blue-900 text-sm">{symbol.name}</div>
+                <div className="text-xs text-blue-600">{symbol.culture} • {symbol.reason}</div>
+              </div>
+              <Badge className={`text-xs border ${getPriorityColor(symbol.priority)}`}>
+                {getPriorityIcon(symbol.priority)} {symbol.priority}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Action suggérée */}
+      <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
+        <div className="flex items-center gap-2 text-blue-800">
+          <TrendingUp className="w-4 h-4" />
+          <span className="text-sm font-medium">Suggestion d'amélioration</span>
+        </div>
+        <p className="text-xs text-blue-700 mt-1">
+          Concentrez-vous sur les symboles haute priorité pour améliorer rapidement l'expérience utilisateur.
+        </p>
+      </div>
     </Card>
   );
 };
