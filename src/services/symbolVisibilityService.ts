@@ -45,7 +45,7 @@ export class SymbolVisibilityService {
     }
     
     // Pour les symboles statiques, vérifier la présence d'une source d'image valide
-    if ('src' in symbol && symbol.src) {
+    if ('src' in symbol && symbol.src && typeof symbol.src === 'string') {
       return !symbol.src.includes('placeholder.svg');
     }
     

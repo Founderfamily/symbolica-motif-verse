@@ -38,7 +38,10 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
 
   // Vérifier si le symbole a une photo
   const hasPhoto = React.useMemo(() => {
-    return SymbolVisibilityService.hasPhoto({ ...symbol, images: images || [] });
+    // Pour les symboles de base, utiliser directement les images récupérées
+    if (images && images.length > 0) return true;
+    // Pour les symboles statiques, vérifier avec le service
+    return SymbolVisibilityService.hasPhoto(symbol);
   }, [symbol, images]);
   
   // Images de fallback locales
