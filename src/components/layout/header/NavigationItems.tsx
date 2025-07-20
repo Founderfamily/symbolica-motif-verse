@@ -46,6 +46,12 @@ export const NavigationItems = () => {
   // Menu Innovation avec les 5 approches
   const innovationMenuItems = [
     { 
+      name: 'Vue d\'ensemble', 
+      href: '/innovation', 
+      icon: Lightbulb,
+      description: 'Découvrez toutes les approches'
+    },
+    { 
       name: 'Navigateur de Graphe', 
       href: '/innovation/graph', 
       icon: Network,
@@ -126,18 +132,29 @@ export const NavigationItems = () => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <div className="px-2 py-1 text-xs text-muted-foreground text-center">
-            Explorez les nouvelles façons de naviguer dans les symboles culturels
+            5 nouvelles façons révolutionnaires d'explorer les symboles culturels
           </div>
           <DropdownMenuSeparator />
           {innovationMenuItems.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link
                 to={item.href}
-                className="flex items-start gap-3 cursor-pointer p-3 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50"
+                className={cn(
+                  "flex items-start gap-3 cursor-pointer p-3 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50",
+                  item.href === '/innovation' && "bg-gradient-to-r from-purple-100 to-pink-100 font-semibold"
+                )}
               >
-                <item.icon className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                <item.icon className={cn(
+                  "h-5 w-5 mt-0.5 flex-shrink-0",
+                  item.href === '/innovation' ? "text-purple-600" : "text-purple-500"
+                )} />
                 <div className="flex-1">
-                  <div className="font-medium text-sm">{item.name}</div>
+                  <div className={cn(
+                    "text-sm",
+                    item.href === '/innovation' ? "font-semibold text-purple-800" : "font-medium"
+                  )}>
+                    {item.name}
+                  </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
                     {item.description}
                   </div>
@@ -147,7 +164,7 @@ export const NavigationItems = () => {
           ))}
           <DropdownMenuSeparator />
           <div className="px-3 py-2 text-xs text-center text-muted-foreground">
-            💡 Testez et choisissez votre interface préférée
+            💡 Trouvez votre style d'exploration préféré
           </div>
         </DropdownMenuContent>
       </DropdownMenu>

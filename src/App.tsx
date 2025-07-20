@@ -65,6 +65,7 @@ import ProposeSymbol from '@/pages/ProposeSymbol';
 import ValidatorDashboard from '@/pages/ValidatorDashboard';
 
 // Innovation Lab pages
+import InnovationHomePage from '@/pages/Innovation/InnovationHomePage';
 import InnovationGraphPage from '@/pages/Innovation/GraphPage';
 import InnovationTabsPage from '@/pages/Innovation/TabsPage';
 import InnovationGamifyPage from '@/pages/Innovation/GamifyPage';
@@ -106,6 +107,7 @@ function App() {
                   <Route path="/community/groups/:groupId" element={<GroupDetailPage />} />
 
                   {/* Innovation Lab routes */}
+                  <Route path="/innovation" element={<InnovationHomePage />} />
                   <Route path="/innovation/graph" element={<InnovationGraphPage />} />
                   <Route path="/innovation/tabs" element={<InnovationTabsPage />} />
                   <Route path="/innovation/gamify" element={<InnovationGamifyPage />} />
