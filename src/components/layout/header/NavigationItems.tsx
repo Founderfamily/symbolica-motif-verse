@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Settings, Users, Database, Shield, BarChart3, Flag, Lightbulb, Network, Tabs, Trophy, Compass, Clock } from 'lucide-react';
+import { ChevronDown, Settings, Users, Database, Shield, BarChart3, Flag, Lightbulb, Network, Layout, Trophy, Compass, Clock } from 'lucide-react';
 
 export const NavigationItems = () => {
   const location = useLocation();
@@ -54,7 +54,7 @@ export const NavigationItems = () => {
     { 
       name: 'Onglets Métaphoriques', 
       href: '/innovation/tabs', 
-      icon: Tabs,
+      icon: Layout,
       description: 'Interface inspirée des navigateurs web'
     },
     { 

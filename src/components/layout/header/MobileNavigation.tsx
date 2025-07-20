@@ -18,7 +18,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Settings, Users, Database, Shield, BarChart3, Flag, Lightbulb, Network, Tabs, Trophy, Compass, Clock } from 'lucide-react';
+import { Settings, Users, Database, Shield, BarChart3, Flag, Lightbulb, Network, Layout, Trophy, Compass, Clock } from 'lucide-react';
 
 export const MobileNavigation = () => {
   const location = useLocation();
@@ -61,7 +61,7 @@ export const MobileNavigation = () => {
     { 
       name: 'Onglets Métaphoriques', 
       href: '/innovation/tabs', 
-      icon: Tabs,
+      icon: Layout,
       description: 'Interface inspirée des navigateurs web'
     },
     { 

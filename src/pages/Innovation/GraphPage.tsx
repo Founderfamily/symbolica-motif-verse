@@ -200,7 +200,7 @@ const GraphPage = () => {
                     Connexions Découvertes
                   </h3>
                   <div className="text-3xl font-bold">
-                    {connections + 1,247}
+                    {connections + 1247}
                   </div>
                   <p className="text-sm opacity-80 mt-2">
                     Nouvelles relations explorées ce mois
