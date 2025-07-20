@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Network, Filter, Info, Zap, Users, TrendingUp, ArrowRight, Maximize2, Search } from 'lucide-react';
+import { Network, Filter, Info, Zap, Users, TrendingUp, ArrowRight, Maximize2, Search, Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useAllSymbols } from '@/hooks/useSupabaseSymbols';
-import { useGraphData } from '@/hooks/useGraphData';
 import ForceDirectedGraph from '@/components/graph/ForceDirectedGraph';
 import GraphInfoPanel from '@/components/graph/GraphInfoPanel';
 import FullScreenGraphModal from '@/components/graph/FullScreenGraphModal';
+import GraphPreFilters, { GraphFilters } from '@/components/graph/GraphPreFilters';
+import { useFilteredGraphData } from '@/hooks/useFilteredGraphData';
 import { toast } from 'sonner';
 
 const GraphPage = () => {
@@ -17,14 +18,15 @@ const GraphPage = () => {
   const [filter, setFilter] = useState<'all' | 'symbol' | 'culture' | 'period' | 'tag'>('all');
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showPreFilters, setShowPreFilters] = useState(true);
+  const [appliedFilters, setAppliedFilters] = useState<GraphFilters | null>(null);
   
   const { data: symbols, isLoading, error } = useAllSymbols();
-  const { nodes, links } = useGraphData(symbols || []);
+  const { nodes, links, totalCount } = useFilteredGraphData(symbols || [], appliedFilters);
 
   const handleNodeClick = (nodeId: string) => {
     setSelectedNode(selectedNode === nodeId ? null : nodeId);
     
-    // Trouver le nœud sélectionné et afficher ses informations
     const node = nodes.find(n => n.id === nodeId);
     if (node) {
       toast.success(`${node.name} sélectionné - ${node.connections} connexions`);
@@ -51,7 +53,19 @@ const GraphPage = () => {
   const selectedNodeData = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
   const connectedNodes = selectedNode ? getConnectedNodes(selectedNode) : [];
 
-  // Filtrage intelligent par recherche
+  const handleApplyFilters = (filters: GraphFilters) => {
+    setAppliedFilters(filters);
+    setShowPreFilters(false);
+    toast.success(`Graphe généré avec ${nodes.length} nœuds!`);
+  };
+
+  const handleResetFilters = () => {
+    setAppliedFilters(null);
+    setShowPreFilters(true);
+    setSelectedNode(null);
+  };
+
+  // Recherche intelligente
   const filteredNodes = searchQuery.length > 0 
     ? nodes.filter(node => 
         node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -60,7 +74,6 @@ const GraphPage = () => {
       )
     : nodes;
 
-  // Recherche intelligente avec auto-sélection
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     if (query.length > 2) {
@@ -114,198 +127,189 @@ const GraphPage = () => {
           </p>
         </div>
 
-        {/* Recherche et contrôles rapides */}
-        <div className="mb-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5" />
-                Recherche et Navigation
-              </CardTitle>
-              <CardDescription>
-                Trouvez rapidement un symbole ou explorez par catégories
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Recherche intelligente */}
-              <div className="flex gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Rechercher un symbole, culture, tag..."
-                    value={searchQuery}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Button 
-                  onClick={() => setIsFullScreen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                  Mode Plein Écran
-                </Button>
-              </div>
-
-              {searchQuery && (
-                <div className="text-sm text-muted-foreground">
-                  {filteredNodes.length} résultat(s) trouvé(s) pour "{searchQuery}"
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filtres */}
-        <div className="mb-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                Filtres de Visualisation
-              </CardTitle>
-              <CardDescription>
-                Filtrez les nœuds pour explorer différents aspects du graphe
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2 flex-wrap">
-                {[
-                  { key: 'all', label: 'Tout', count: filteredNodes.length },
-                  { key: 'symbol', label: 'Symboles', count: filteredNodes.filter(n => n.type === 'symbol').length },
-                  { key: 'culture', label: 'Cultures', count: filteredNodes.filter(n => n.type === 'culture').length },
-                  { key: 'period', label: 'Périodes', count: filteredNodes.filter(n => n.type === 'period').length },
-                  { key: 'tag', label: 'Tags', count: filteredNodes.filter(n => n.type === 'tag').length }
-                ].map(({ key, label, count }) => (
-                  <Button
-                    key={key}
-                    variant={filter === key ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFilter(key as typeof filter)}
-                    className="flex items-center gap-2"
-                  >
-                    {label}
-                    <Badge variant="secondary" className="text-xs">
-                      {count}
-                    </Badge>
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Graphe principal */}
-          <div className="lg:col-span-2">
-            <Card className="h-[600px]">
+        {/* Mode pré-filtres */}
+        {showPreFilters && (
+          <div className="max-w-4xl mx-auto">
+            <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Network className="h-5 w-5" />
-                  Graphe Interactif
+                  <Settings className="h-5 w-5" />
+                  Configuration de l'Exploration
                 </CardTitle>
                 <CardDescription>
-                  {filteredNodes.length} nœuds • {links.length} connexions
+                  Avec {symbols?.length || 0} symboles disponibles, configurez vos filtres pour une exploration optimale
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[500px]">
-                <ForceDirectedGraph
-                  nodes={filteredNodes}
-                  links={links}
-                  selectedNode={selectedNode}
-                  onNodeClick={handleNodeClick}
-                  filter={filter}
+              <CardContent>
+                <GraphPreFilters
+                  onApplyFilters={handleApplyFilters}
+                  totalSymbols={symbols?.length || 0}
+                  estimatedNodes={Math.min(100, (symbols?.length || 0) * 0.3)}
+                  estimatedLinks={Math.min(300, (symbols?.length || 0) * 1.5)}
                 />
               </CardContent>
             </Card>
           </div>
+        )}
 
-          {/* Panneau d'informations enrichi */}
-          <div className="space-y-6">
-            <GraphInfoPanel
-              selectedNode={selectedNodeData}
-              connectedNodes={connectedNodes}
-              onFullScreen={() => setIsFullScreen(true)}
-              onNodeSelect={handleNodeClick}
-            />
+        {/* Mode graphe actif */}
+        {!showPreFilters && appliedFilters && (
+          <>
+            {/* Contrôles du graphe */}
+            <div className="mb-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Search className="h-5 w-5" />
+                      Exploration Active
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">
+                        {nodes.length} nœuds • {links.length} liens
+                      </Badge>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleResetFilters}
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Reconfigurer
+                      </Button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex gap-4">
+                    <div className="flex-1 relative">
+                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Rechercher un symbole, culture, tag..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <Button 
+                      onClick={() => setIsFullScreen(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <Maximize2 className="h-4 w-4" />
+                      Plein Écran
+                    </Button>
+                  </div>
 
-            {/* Statistiques enrichies */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Statistiques du Réseau
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm">Total nœuds</span>
-                  <Badge variant="secondary">{nodes.length}</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Connexions totales</span>
-                  <Badge variant="secondary">{links.length}</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Symboles enrichis</span>
-                  <Badge variant="secondary">
-                    {symbols?.filter(s => s.historical_context || s.significance).length || 0}
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Classifications UNESCO</span>
-                  <Badge variant="secondary">
-                    {symbols?.filter(s => s.cultural_taxonomy_code).length || 0}
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Avec sources</span>
-                  <Badge variant="secondary">
-                    {symbols?.filter(s => s.sources && Array.isArray(s.sources) && s.sources.length > 0).length || 0}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                  {searchQuery && (
+                    <div className="text-sm text-muted-foreground">
+                      {filteredNodes.length} résultat(s) trouvé(s) pour "{searchQuery}"
+                    </div>
+                  )}
 
-        {/* Call to Action */}
-        <div className="text-center mt-12">
-          <Card className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Users className="h-12 w-12 mx-auto mb-4 opacity-80" />
-                <h3 className="text-lg font-bold mb-2">
-                  Exploration Sémantique Avancée
-                </h3>
-                <p className="text-sm opacity-80 mb-4">
-                  Découvrez les relations cachées entre les symboles culturels avec notre interface enrichie
-                </p>
-                <Button 
-                  variant="secondary" 
-                  size="lg"
-                  onClick={() => setIsFullScreen(true)}
-                >
-                  Explorer en Plein Écran
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                  {/* Filtres de vue */}
+                  <div className="flex gap-2 flex-wrap">
+                    {[
+                      { key: 'all', label: 'Tout', count: filteredNodes.length },
+                      { key: 'symbol', label: 'Symboles', count: filteredNodes.filter(n => n.type === 'symbol').length },
+                      { key: 'culture', label: 'Cultures', count: filteredNodes.filter(n => n.type === 'culture').length },
+                      { key: 'period', label: 'Périodes', count: filteredNodes.filter(n => n.type === 'period').length },
+                      { key: 'tag', label: 'Tags', count: filteredNodes.filter(n => n.type === 'tag').length }
+                    ].map(({ key, label, count }) => (
+                      <Button
+                        key={key}
+                        variant={filter === key ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilter(key as typeof filter)}
+                        className="flex items-center gap-2"
+                      >
+                        {label}
+                        <Badge variant="secondary" className="text-xs">
+                          {count}
+                        </Badge>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Graphe principal */}
+              <div className="lg:col-span-2">
+                <Card className="h-[600px]">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Network className="h-5 w-5" />
+                      Graphe Interactif
+                    </CardTitle>
+                    <CardDescription>
+                      {filteredNodes.length} nœuds visibles • {links.length} connexions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-[500px]">
+                    <ForceDirectedGraph
+                      nodes={filteredNodes}
+                      links={links}
+                      selectedNode={selectedNode}
+                      onNodeClick={handleNodeClick}
+                      filter={filter}
+                    />
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
 
-      {/* Modal plein écran */}
-      <FullScreenGraphModal
-        isOpen={isFullScreen}
-        onClose={() => setIsFullScreen(false)}
-        nodes={nodes}
-        links={links}
-        selectedNode={selectedNode}
-        onNodeClick={handleNodeClick}
-        filter={filter}
-        onFilterChange={setFilter}
-      />
+              {/* Panneau d'informations */}
+              <div className="space-y-6">
+                <GraphInfoPanel
+                  selectedNode={selectedNodeData}
+                  connectedNodes={connectedNodes}
+                  onFullScreen={() => setIsFullScreen(true)}
+                  onNodeSelect={handleNodeClick}
+                />
+
+                {/* Statistiques de session */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Session d'Exploration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Nœuds affichés</span>
+                      <Badge variant="secondary">{nodes.length}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Connexions visibles</span>
+                      <Badge variant="secondary">{links.length}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Symboles filtrés</span>
+                      <Badge variant="secondary">{totalCount}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Mode</span>
+                      <Badge variant="outline">{appliedFilters.mode}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Modal plein écran */}
+        <FullScreenGraphModal
+          isOpen={isFullScreen}
+          onClose={() => setIsFullScreen(false)}
+          nodes={nodes}
+          links={links}
+          selectedNode={selectedNode}
+          onNodeClick={handleNodeClick}
+          filter={filter}
+          onFilterChange={setFilter}
+        />
+      </div>
     </div>
   );
 };

@@ -13,12 +13,22 @@ interface GraphNode extends d3.SimulationNodeDatum {
   connections: number;
   tags?: string[];
   color: string;
+  // Données enrichies
+  historical_context?: string;
+  significance?: string;
+  cultural_taxonomy_code?: string;
+  temporal_taxonomy_code?: string;
+  thematic_taxonomy_codes?: string[];
+  sources?: Array<{ title: string; url: string; type: string }>;
+  medium?: string[];
+  technique?: string[];
+  function?: string[];
 }
 
 interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
   source: string | GraphNode;
   target: string | GraphNode;
-  type: 'culture' | 'period' | 'tag';
+  type: 'culture' | 'period' | 'tag' | 'taxonomy';
 }
 
 interface Props {
@@ -82,7 +92,15 @@ const ForceDirectedGraph: React.FC<Props> = ({
       .selectAll("line")
       .data(filteredLinks)
       .enter().append("line")
-      .attr("stroke", "#94a3b8")
+      .attr("stroke", d => {
+        switch(d.type) {
+          case 'culture': return '#3b82f6';
+          case 'period': return '#10b981';
+          case 'tag': return '#f97316';
+          case 'taxonomy': return '#ec4899';
+          default: return '#94a3b8';
+        }
+      })
       .attr("stroke-opacity", 0.6)
       .attr("stroke-width", 2);
 
@@ -190,9 +208,9 @@ const ForceDirectedGraph: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Légende */}
+      {/* Légende enrichie */}
       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
-        <div className="text-sm font-medium text-gray-800 mb-2">Types</div>
+        <div className="text-sm font-medium text-gray-800 mb-2">Types & Connexions</div>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-purple-500"></div>
@@ -210,6 +228,31 @@ const ForceDirectedGraph: React.FC<Props> = ({
             <div className="w-4 h-4 rounded-full bg-orange-500"></div>
             <span className="text-xs">Tags</span>
           </div>
+          <hr className="my-2" />
+          <div className="text-xs text-gray-600">Liens :</div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-1 bg-blue-500"></div>
+            <span className="text-xs">Culture</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-1 bg-green-500"></div>
+            <span className="text-xs">Période</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-1 bg-orange-500"></div>
+            <span className="text-xs">Tag</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-1 bg-pink-500"></div>
+            <span className="text-xs">Taxonomie</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistiques */}
+      <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+        <div className="text-xs text-gray-600">
+          {nodes.length} nœuds • {links.length} liens
         </div>
       </div>
     </div>
