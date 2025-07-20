@@ -6,12 +6,15 @@ import { Card } from '@/components/ui/card';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, Info, Plus } from 'lucide-react';
+import { Search, Filter, Info, Plus, Camera, CameraOff } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { REGIONS } from '@/utils/regionGrouper';
 import { PERIOD_GROUPS } from '@/utils/periodGrouper';
 import { CULTURE_FAMILIES } from '@/utils/cultureGrouper';
 import { useAuth } from '@/hooks/useAuth';
+import { SymbolVisibilityService } from '@/services/symbolVisibilityService';
+import { Badge } from '@/components/ui/badge';
+import { TrendingSymbol } from '@/services/trendingService';
 
 const SymbolsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,6 +23,7 @@ const SymbolsPage: React.FC = () => {
   const [selectedCultureFamily, setSelectedCultureFamily] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [showOnlyWithPhotos, setShowOnlyWithPhotos] = useState(false);
   const { user } = useAuth();
 
   // Récupérer tous les symboles ou les résultats de recherche
@@ -32,10 +36,62 @@ const SymbolsPage: React.FC = () => {
     selectedTags.length > 0 ? selectedTags : undefined
   );
 
-  // Déterminer quelles données utiliser
-  const hasActiveFilters = searchQuery || selectedRegion || selectedPeriodGroup || selectedCultureFamily || selectedTags.length > 0;
-  const symbols = hasActiveFilters ? (searchResults || []) : (allSymbols || []);
+  // Déterminer quelles données utiliser et les enrichir avec le système de visibilité
+  const hasActiveFilters = searchQuery || selectedRegion || selectedPeriodGroup || selectedCultureFamily || selectedTags.length > 0 || showOnlyWithPhotos;
+  const rawSymbols = hasActiveFilters ? (searchResults || []) : (allSymbols || []);
   const isLoading = hasActiveFilters ? searchLoading : allSymbolsLoading;
+
+  // Traiter les symboles avec le système de visibilité et filtrage
+  const processedSymbols = React.useMemo(() => {
+    if (!rawSymbols || rawSymbols.length === 0) return [];
+    
+    // Calculer la visibilité pour chaque symbole et créer un tableau avec métadonnées
+    const symbolsWithVisibility = rawSymbols.map(symbol => {
+      const hasPhoto = SymbolVisibilityService.hasPhoto(symbol);
+      const visibilityScore = SymbolVisibilityService.calculateVisibilityScore(0, hasPhoto);
+      return {
+        symbol,
+        hasPhoto,
+        visibilityScore
+      };
+    });
+    
+    // Filtrer par présence de photos si demandé
+    const filteredSymbols = showOnlyWithPhotos 
+      ? symbolsWithVisibility.filter(s => s.hasPhoto)
+      : symbolsWithVisibility;
+    
+    // Trier par visibilité (symboles avec photos en premier, puis par nom)
+    const sortedSymbols = filteredSymbols.sort((a, b) => {
+      // Prioriser les symboles avec photos
+      if (a.hasPhoto !== b.hasPhoto) {
+        return a.hasPhoto ? -1 : 1;
+      }
+      // En cas d'égalité, trier par score de visibilité puis par nom
+      if (b.visibilityScore !== a.visibilityScore) {
+        return b.visibilityScore - a.visibilityScore;
+      }
+      return a.symbol.name.localeCompare(b.symbol.name);
+    });
+    
+    // Retourner seulement les symboles
+    return sortedSymbols.map(s => s.symbol);
+  }, [rawSymbols, showOnlyWithPhotos]);
+
+  // Statistiques sur les photos
+  const photoStats = React.useMemo(() => {
+    if (!rawSymbols || rawSymbols.length === 0) return null;
+    
+    // Convertir pour les stats
+    const trendingSymbols: TrendingSymbol[] = rawSymbols.map(symbol => ({
+      ...symbol,
+      trending_score: 0,
+      view_count: 0,
+      like_count: 0
+    }));
+    
+    return SymbolVisibilityService.getPhotoStats(trendingSymbols);
+  }, [rawSymbols]);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -43,6 +99,7 @@ const SymbolsPage: React.FC = () => {
     setSelectedPeriodGroup('');
     setSelectedCultureFamily('');
     setSelectedTags([]);
+    setShowOnlyWithPhotos(false);
   };
 
   return (
@@ -110,76 +167,109 @@ const SymbolsPage: React.FC = () => {
 
             {/* Filtres avancés hiérarchiques */}
             {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <I18nText translationKey="searchFilters.regions">Région</I18nText>
-                  </label>
-                  <select
-                    value={selectedRegion}
-                    onChange={(e) => setSelectedRegion(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  >
-                    <option value="">
-                      <I18nText translationKey="symbols.page.filters.allRegions">Toutes les régions</I18nText>
-                    </option>
-                    {REGIONS.map(region => (
-                      <option key={region.id} value={region.id}>{region.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-                    <I18nText translationKey="searchFilters.periodGroups">Époque</I18nText>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-4 w-4 text-slate-400 hover:text-slate-600 cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs">
-                          <div className="space-y-2">
-                            <p className="font-medium">Classification Internationale UNESCO</p>
-                            <p className="text-sm">
-                              Standards académiques mondiaux avec bornes chronologiques précises :
-                              Préhistoire, Antiquité, Moyen Âge, Moderne, Contemporain.
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              Algorithme intelligent pour périodes multi-séculaires
-                            </p>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </label>
-                  <select
-                    value={selectedPeriodGroup}
-                    onChange={(e) => setSelectedPeriodGroup(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  >
-                    <option value="">
-                      <I18nText translationKey="symbols.page.filters.allPeriods">Toutes les époques</I18nText>
-                    </option>
-                    {PERIOD_GROUPS.map(group => (
-                      <option key={group.id} value={group.id}>{group.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    <I18nText translationKey="searchFilters.cultureFamilies">Famille culturelle</I18nText>
-                  </label>
-                  <select
-                    value={selectedCultureFamily}
-                    onChange={(e) => setSelectedCultureFamily(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  >
-                    <option value="">
-                      <I18nText translationKey="symbols.page.filters.allCultures">Toutes les familles</I18nText>
-                    </option>
-                    {CULTURE_FAMILIES.map(family => (
-                      <option key={family.id} value={family.id}>{family.name}</option>
-                    ))}
-                  </select>
+              <div className="space-y-4 pt-4 border-t">
+                {/* Filtre photo et statistiques */}
+                {photoStats && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant={showOnlyWithPhotos ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShowOnlyWithPhotos(!showOnlyWithPhotos)}
+                        className="flex items-center gap-2"
+                      >
+                        <Camera className="h-4 w-4" />
+                        Avec photos ({photoStats.withPhoto})
+                      </Button>
+                      
+                      <div className="text-sm text-slate-600">
+                        <Badge variant="outline" className="mr-2 text-green-600 border-green-200">
+                          <Camera className="h-3 w-3 mr-1" />
+                          {photoStats.withPhoto} avec photos
+                        </Badge>
+                        <Badge variant="outline" className="text-orange-600 border-orange-200">
+                          <CameraOff className="h-3 w-3 mr-1" />
+                          {photoStats.withoutPhoto} sans photos
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="text-sm text-slate-500">
+                      {photoStats.percentageWithPhoto.toFixed(1)}% avec photos
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      <I18nText translationKey="searchFilters.regions">Région</I18nText>
+                    </label>
+                    <select
+                      value={selectedRegion}
+                      onChange={(e) => setSelectedRegion(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="">
+                        <I18nText translationKey="symbols.page.filters.allRegions">Toutes les régions</I18nText>
+                      </option>
+                      {REGIONS.map(region => (
+                        <option key={region.id} value={region.id}>{region.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                      <I18nText translationKey="searchFilters.periodGroups">Époque</I18nText>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-slate-400 hover:text-slate-600 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <div className="space-y-2">
+                              <p className="font-medium">Classification Internationale UNESCO</p>
+                              <p className="text-sm">
+                                Standards académiques mondiaux avec bornes chronologiques précises :
+                                Préhistoire, Antiquité, Moyen Âge, Moderne, Contemporain.
+                              </p>
+                              <p className="text-xs text-slate-400">
+                                Algorithme intelligent pour périodes multi-séculaires
+                              </p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </label>
+                    <select
+                      value={selectedPeriodGroup}
+                      onChange={(e) => setSelectedPeriodGroup(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="">
+                        <I18nText translationKey="symbols.page.filters.allPeriods">Toutes les époques</I18nText>
+                      </option>
+                      {PERIOD_GROUPS.map(group => (
+                        <option key={group.id} value={group.id}>{group.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      <I18nText translationKey="searchFilters.cultureFamilies">Famille culturelle</I18nText>
+                    </label>
+                    <select
+                      value={selectedCultureFamily}
+                      onChange={(e) => setSelectedCultureFamily(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="">
+                        <I18nText translationKey="symbols.page.filters.allCultures">Toutes les familles</I18nText>
+                      </option>
+                      {CULTURE_FAMILIES.map(family => (
+                        <option key={family.id} value={family.id}>{family.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
@@ -205,8 +295,8 @@ const SymbolsPage: React.FC = () => {
                 <I18nText translationKey="common.loading">Chargement...</I18nText>
               ) : (
                 <>
-                  {symbols.length} 
-                  {symbols.length <= 1 ? (
+                  {processedSymbols.length} 
+                  {processedSymbols.length <= 1 ? (
                     <I18nText translationKey="symbols.symbolCount.singular"> symbole</I18nText>
                   ) : (
                     <I18nText translationKey="symbols.symbolCount.plural"> symboles</I18nText>
@@ -223,25 +313,25 @@ const SymbolsPage: React.FC = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
           </div>
         ) : (
-          <SymbolGrid symbols={symbols} />
+          <SymbolGrid symbols={processedSymbols} />
         )}
 
         {/* Statistiques */}
-        {!isLoading && symbols.length > 0 && (
+        {!isLoading && processedSymbols.length > 0 && (
           <Card className="mt-8 p-6">
             <h3 className="text-lg font-semibold text-slate-900 mb-4">
               <I18nText translationKey="symbols.statistics">Statistiques</I18nText>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-2xl font-bold text-amber-600">{symbols.length}</div>
+                <div className="text-2xl font-bold text-amber-600">{processedSymbols.length}</div>
                 <div className="text-sm text-slate-500">
                   <I18nText translationKey="symbols.stats.total">Symboles au total</I18nText>
                 </div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-amber-600">
-                  {new Set(symbols.map(s => s.culture)).size}
+                  {new Set(processedSymbols.map(s => s.culture)).size}
                 </div>
                 <div className="text-sm text-slate-500">
                   <I18nText translationKey="symbols.stats.cultures">Cultures représentées</I18nText>
@@ -249,7 +339,7 @@ const SymbolsPage: React.FC = () => {
               </div>
               <div>
                 <div className="text-2xl font-bold text-amber-600">
-                  {new Set(symbols.map(s => s.period)).size}
+                  {new Set(processedSymbols.map(s => s.period)).size}
                 </div>
                 <div className="text-sm text-slate-500">
                   <I18nText translationKey="symbols.stats.periods">Périodes historiques</I18nText>
