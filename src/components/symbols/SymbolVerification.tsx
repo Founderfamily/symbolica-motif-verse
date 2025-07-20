@@ -268,7 +268,10 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
           description: symbol.description,
           significance: symbol.significance,
           historical_context: symbol.historical_context
-        }
+        },
+        autoSave: true,
+        symbolId: symbol.id,
+        userId: user?.id
       };
 
       const { data, error } = await supabase.functions.invoke('verify-symbol', {
