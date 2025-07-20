@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { SymbolVisibilityService } from './symbolVisibilityService';
 
 export interface TrendingSymbol {
   id: string;
@@ -33,7 +34,7 @@ export interface RecentActivity {
 
 class TrendingService {
   async getTrendingSymbols(timeFrame: 'day' | 'week' | 'month' = 'week', limit = 12): Promise<TrendingSymbol[]> {
-    console.log('🔍 [TrendingService] Getting trending symbols with timeout...');
+    console.log('🔍 [TrendingService] Getting trending symbols with visibility system...');
     
     try {
       // Add timeout to prevent hanging
@@ -43,9 +44,16 @@ class TrendingService {
 
       const dataPromise = supabase
         .from('symbols')
-        .select('*')
+        .select(`
+          *,
+          symbol_images!left (
+            id,
+            image_url,
+            image_type
+          )
+        `)
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .limit(limit * 2); // Récupérer plus pour permettre le tri par visibilité
 
       const { data, error } = await Promise.race([dataPromise, timeoutPromise]) as any;
 
@@ -61,20 +69,36 @@ class TrendingService {
         return this.getFallbackSymbols();
       }
 
-      const trendingSymbols: TrendingSymbol[] = data.map((symbol: any, index: number) => ({
-        id: symbol.id,
-        name: symbol.name,
-        culture: symbol.culture,
-        period: symbol.period,
-        description: symbol.description,
-        created_at: symbol.created_at,
-        trending_score: Math.max(100 - index * 5, 50),
-        view_count: Math.floor(Math.random() * 200) + 50,
-        like_count: Math.floor(Math.random() * 50) + 10
-      }));
+      const trendingSymbols: TrendingSymbol[] = data.map((symbol: any, index: number) => {
+        // Vérifier la présence d'images
+        const hasImages = symbol.symbol_images && symbol.symbol_images.length > 0;
+        
+        // Calculer le score de base
+        const baseScore = Math.max(100 - index * 5, 50);
+        
+        // Appliquer le bonus/malus de visibilité
+        const finalScore = SymbolVisibilityService.calculateVisibilityScore(baseScore, hasImages);
 
-      console.log('✅ [TrendingService] Successfully processed symbols:', trendingSymbols.length);
-      return trendingSymbols;
+        return {
+          id: symbol.id,
+          name: symbol.name,
+          culture: symbol.culture,
+          period: symbol.period,
+          description: symbol.description,
+          created_at: symbol.created_at,
+          trending_score: finalScore,
+          view_count: Math.floor(Math.random() * 200) + 50,
+          like_count: Math.floor(Math.random() * 50) + 10
+        };
+      });
+
+      // Trier par score de visibilité et limiter les résultats
+      const sortedSymbols = trendingSymbols
+        .sort((a, b) => b.trending_score - a.trending_score)
+        .slice(0, limit);
+
+      console.log('✅ [TrendingService] Successfully processed symbols with visibility:', sortedSymbols.length);
+      return sortedSymbols;
     } catch (err) {
       console.error('💥 [TrendingService] Exception or timeout in getTrendingSymbols:', err);
       return this.getFallbackSymbols();
@@ -220,8 +244,9 @@ class TrendingService {
   }
 
   private getFallbackSymbols(): TrendingSymbol[] {
-    console.log('🔄 [TrendingService] Using fallback symbols');
-    return [
+    console.log('🔄 [TrendingService] Using fallback symbols with visibility system');
+    
+    const fallbackSymbols = [
       {
         id: '1',
         name: 'Triskèle Celtique',
@@ -243,8 +268,34 @@ class TrendingService {
         trending_score: 87,
         view_count: 123,
         like_count: 28
+      },
+      {
+        id: '3',
+        name: 'Croix Ankh',
+        culture: 'Égyptienne',
+        period: 'Antiquité',
+        description: 'Symbole de vie éternelle dans l\'Égypte ancienne',
+        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        trending_score: 75,
+        view_count: 98,
+        like_count: 22
       }
     ];
+
+    // Appliquer le système de visibilité aux symboles de fallback
+    // Simuler que certains ont des photos et d'autres non
+    return fallbackSymbols.map((symbol, index) => {
+      const hasPhoto = index < 2; // Les 2 premiers ont des photos
+      const adjustedScore = SymbolVisibilityService.calculateVisibilityScore(
+        symbol.trending_score, 
+        hasPhoto
+      );
+      
+      return {
+        ...symbol,
+        trending_score: adjustedScore
+      };
+    }).sort((a, b) => b.trending_score - a.trending_score);
   }
 
   private getFallbackCategories(): TrendingCategory[] {

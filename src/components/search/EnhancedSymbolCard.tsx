@@ -1,14 +1,15 @@
-
 import React from 'react';
 import { SymbolData } from '@/types/supabase';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Badge } from '@/components/ui/badge';
+import { PhotoStatusBadge } from '@/components/ui/photo-status-badge';
 import { VerificationBadge } from '@/components/ui/verification-badge';
 import { useToast } from '@/hooks/use-toast';
 import { Info, Heart, Eye, Wifi, WifiOff, Share2 } from 'lucide-react';
 import { useSymbolImages } from '@/hooks/useSupabaseSymbols';
 import { useSymbolVerification } from '@/hooks/useSymbolVerification';
+import { SymbolVisibilityService } from '@/services/symbolVisibilityService';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -29,10 +30,16 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
   
   // Récupérer les vérifications IA pour ce symbole
   const { data: verification } = useSymbolVerification(symbol.id);
+  
   const primaryImage = React.useMemo(() => {
     if (!images || images.length === 0) return null;
     return images.find(img => img.image_type === 'original') || images[0];
   }, [images]);
+
+  // Vérifier si le symbole a une photo
+  const hasPhoto = React.useMemo(() => {
+    return SymbolVisibilityService.hasPhoto({ ...symbol, images: images || [] });
+  }, [symbol, images]);
   
   // Images de fallback locales
   const PLACEHOLDER = "/placeholder.svg";
@@ -96,9 +103,9 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
     });
   }, [symbol, toast]);
   
-  // Gradient culturel adapté
+  // Gradient culturel adapté avec bonus/malus de visibilité
   const culturalGradient = React.useMemo(() => {
-    const cultures: Record<string, string> = {
+    const baseGradients: Record<string, string> = {
       "Celtique": "hover:bg-gradient-to-br from-green-50 to-green-100 hover:border-green-200",
       "Japonaise": "hover:bg-gradient-to-br from-red-50 to-red-100 hover:border-red-200",
       "Grecque": "hover:bg-gradient-to-br from-blue-50 to-blue-100 hover:border-blue-200", 
@@ -107,17 +114,24 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
       "Française": "hover:bg-gradient-to-br from-purple-50 to-purple-100 hover:border-purple-200",
     };
     
-    return cultures[symbol.culture] || "hover:bg-gradient-to-br from-slate-50 to-slate-100 hover:border-slate-200";
-  }, [symbol.culture]);
+    const baseGradient = baseGradients[symbol.culture] || "hover:bg-gradient-to-br from-slate-50 to-slate-100 hover:border-slate-200";
+    
+    // Ajouter un effet subtil basé sur la présence de photos
+    if (hasPhoto) {
+      return `${baseGradient} ring-1 ring-green-200/50`;
+    } else {
+      return `${baseGradient} opacity-95`;
+    }
+  }, [symbol.culture, hasPhoto]);
 
   const getSymbolLink = () => `/symbols/${symbol.id}`;
   
   return (
     <Link to={getSymbolLink()} className="block group">
       <Card 
-        className={`overflow-hidden shadow-sm hover:shadow-xl border-2 border-white transition-all duration-300 symbol-card ${culturalGradient} ${
+        className={`overflow-hidden shadow-sm hover:shadow-xl border-2 transition-all duration-300 symbol-card ${culturalGradient} ${
           featured ? 'transform hover:scale-105' : 'hover:-translate-y-1'
-        }`}
+        } ${hasPhoto ? 'border-green-200/30' : 'border-orange-200/30'}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -129,7 +143,10 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
           )}
           
           {/* Indicateurs et contrôles */}
-          <div className="absolute top-2 left-2 z-20 flex gap-2">
+          <div className="absolute top-2 left-2 z-20 flex gap-2 flex-wrap max-w-[calc(100%-4rem)]">
+            {/* Badge de statut photo - NOUVEAU */}
+            <PhotoStatusBadge hasPhoto={hasPhoto} size="sm" />
+            
             {/* Badge de vérification IA */}
             {verification && (
               <VerificationBadge 
@@ -139,6 +156,7 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
                 className="shadow-sm"
               />
             )}
+            
             <Badge variant="secondary" className={`${isLocalImage ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'} text-xs`}>
               {isLocalImage ? <WifiOff className="w-3 h-3 mr-1" /> : <Wifi className="w-3 h-3 mr-1" />}
               {isLocalImage ? 'Local' : 'Live'}
@@ -168,10 +186,11 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
             src={imageSource}
             alt={symbol.name}
             className={`object-cover w-full h-full transition-all duration-500 ${loading ? 'opacity-0' : 'opacity-100'} ${isHovered ? 'scale-110' : 'scale-100'}`}
-            onError={handleImageError}
-            onLoad={handleImageLoad}
+            onError={setError ? () => setError(true) : undefined}
+            onLoad={() => setLoading(false)}
           />
           
+          {/* Overlay avec information de statut photo */}
           {isHovered && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-4 transition-all duration-300">
               <div className="text-white text-sm">
@@ -185,6 +204,11 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
                 <div className="flex items-center gap-2 mt-2 text-xs opacity-75">
                   <Eye className="w-3 h-3" />
                   <span>Voir détails</span>
+                  {!hasPhoto && (
+                    <span className="ml-2 px-2 py-1 bg-orange-500/80 rounded text-white">
+                      📸 Photo manquante
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -192,11 +216,15 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
         </AspectRatio>
         
         <div className={`${featured ? 'p-6' : 'p-3'} bg-white/90 backdrop-blur-sm relative`}>
-          <h4 className={`${featured ? 'text-lg' : 'text-sm'} font-serif text-slate-900 font-medium truncate`}>
+          <h4 className={`${featured ? 'text-lg' : 'text-sm'} font-serif font-medium truncate ${
+            hasPhoto ? 'text-slate-900' : 'text-slate-700'
+          }`}>
             {symbol.name}
           </h4>
           <div className="flex justify-between items-center mt-2">
-            <span className={`${featured ? 'text-sm' : 'text-xs'} text-slate-600 truncate flex-1`}>
+            <span className={`${featured ? 'text-sm' : 'text-xs'} truncate flex-1 ${
+              hasPhoto ? 'text-slate-600' : 'text-slate-500'
+            }`}>
               {symbol.culture}
             </span>
             <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 cursor-pointer hover:bg-amber-200 transition-colors ml-2" title={`${symbol.name} info`}>
@@ -217,6 +245,13 @@ export const EnhancedSymbolCard: React.FC<EnhancedSymbolCardProps> = React.memo(
                   +{symbol.tags.length - (featured ? 3 : 2)}
                 </Badge>
               )}
+            </div>
+          )}
+
+          {/* Message d'encouragement pour les symboles sans photo */}
+          {!hasPhoto && (
+            <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
+              💡 Ce symbole gagnerait à avoir une illustration
             </div>
           )}
         </div>
