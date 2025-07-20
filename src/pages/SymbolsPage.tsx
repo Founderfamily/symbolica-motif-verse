@@ -1,356 +1,320 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { SymbolData } from '@/types/supabase';
 import { SymbolGrid } from '@/components/search/SymbolGrid';
-import { useAllSymbols, useSearchSymbols } from '@/hooks/useSupabaseSymbols';
-import { Card } from '@/components/ui/card';
-import { I18nText } from '@/components/ui/i18n-text';
-import { Input } from '@/components/ui/input';
+import { EmptyStateCard } from '@/components/search/EmptyStateCard';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, Info, Plus, Camera, CameraOff } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { REGIONS } from '@/utils/regionGrouper';
-import { PERIOD_GROUPS } from '@/utils/periodGrouper';
-import { CULTURE_FAMILIES } from '@/utils/cultureGrouper';
-import { useAuth } from '@/hooks/useAuth';
-import { SymbolVisibilityService } from '@/services/symbolVisibilityService';
-import { Badge } from '@/components/ui/badge';
-import { TrendingSymbol } from '@/services/trendingService';
+import { Filter, BarChart3 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+import { SymbolCompletenessService, SymbolWithCompleteness } from '@/services/symbolCompletenessService';
+import { CompletenessBadge } from '@/components/ui/completeness-badge';
+import { Link } from 'react-router-dom';
+import { Clock } from 'lucide-react';
 
 const SymbolsPage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRegion, setSelectedRegion] = useState('');
-  const [selectedPeriodGroup, setSelectedPeriodGroup] = useState('');
-  const [selectedCultureFamily, setSelectedCultureFamily] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [showOnlyWithPhotos, setShowOnlyWithPhotos] = useState(false);
-  const { user } = useAuth();
+  const [selectedCompletenessLevel, setSelectedCompletenessLevel] = useState<'all' | 'complete' | 'well_documented' | 'partially_documented' | 'to_complete'>('all');
 
-  // Récupérer tous les symboles ou les résultats de recherche
-  const { data: allSymbols, isLoading: allSymbolsLoading } = useAllSymbols();
-  const { data: searchResults, isLoading: searchLoading } = useSearchSymbols(
-    searchQuery || undefined,
-    selectedRegion || undefined, 
-    selectedPeriodGroup || undefined,
-    selectedCultureFamily || undefined,
-    selectedTags.length > 0 ? selectedTags : undefined
-  );
+  const { data: symbols, loading, error } = useQuery({
+    queryKey: ['symbols'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('symbols')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  // Déterminer quelles données utiliser et les enrichir avec le système de visibilité
-  const hasActiveFilters = searchQuery || selectedRegion || selectedPeriodGroup || selectedCultureFamily || selectedTags.length > 0 || showOnlyWithPhotos;
-  const rawSymbols = hasActiveFilters ? (searchResults || []) : (allSymbols || []);
-  const isLoading = hasActiveFilters ? searchLoading : allSymbolsLoading;
-
-  // Traiter les symboles avec le système de visibilité et filtrage
-  const processedSymbols = React.useMemo(() => {
-    if (!rawSymbols || rawSymbols.length === 0) return [];
-    
-    // Calculer la visibilité pour chaque symbole et créer un tableau avec métadonnées
-    const symbolsWithVisibility = rawSymbols.map(symbol => {
-      const hasPhoto = SymbolVisibilityService.hasPhoto(symbol);
-      const visibilityScore = SymbolVisibilityService.calculateVisibilityScore(0, hasPhoto);
-      return {
-        symbol,
-        hasPhoto,
-        visibilityScore
-      };
-    });
-    
-    // Filtrer par présence de photos si demandé
-    const filteredSymbols = showOnlyWithPhotos 
-      ? symbolsWithVisibility.filter(s => s.hasPhoto)
-      : symbolsWithVisibility;
-    
-    // Trier par visibilité (symboles avec photos en premier, puis par nom)
-    const sortedSymbols = filteredSymbols.sort((a, b) => {
-      // Prioriser les symboles avec photos
-      if (a.hasPhoto !== b.hasPhoto) {
-        return a.hasPhoto ? -1 : 1;
+      if (error) {
+        console.error("Error fetching symbols:", error);
+        throw error;
       }
-      // En cas d'égalité, trier par score de visibilité puis par nom
-      if (b.visibilityScore !== a.visibilityScore) {
-        return b.visibilityScore - a.visibilityScore;
-      }
-      return a.symbol.name.localeCompare(b.symbol.name);
-    });
-    
-    // Retourner seulement les symboles
-    return sortedSymbols.map(s => s.symbol);
-  }, [rawSymbols, showOnlyWithPhotos]);
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2
+  });
 
-  // Statistiques sur les photos
-  const photoStats = React.useMemo(() => {
-    if (!rawSymbols || rawSymbols.length === 0) return null;
+  // Process symbols with completeness scoring
+  const processedSymbols = useMemo(() => {
+    if (!symbols || symbols.length === 0) return [];
     
-    // Convertir pour les stats
-    const trendingSymbols: TrendingSymbol[] = rawSymbols.map(symbol => ({
-      ...symbol,
-      trending_score: 0,
-      view_count: 0,
-      like_count: 0
+    console.log('🔍 [SymbolsPage] Processing symbols with completeness system...');
+    
+    // Convert SymbolData to TrendingSymbol format for compatibility
+    const trendingSymbols = symbols.map((symbol, index) => ({
+      id: symbol.id,
+      name: symbol.name,
+      culture: symbol.culture,
+      period: symbol.period,
+      description: symbol.description,
+      created_at: symbol.created_at || '',
+      trending_score: Math.max(100 - index * 2, 20), // Base score
+      view_count: Math.floor(Math.random() * 200) + 50,
+      like_count: Math.floor(Math.random() * 50) + 10,
+      // Add fields for completeness evaluation
+      significance: symbol.significance,
+      historical_context: symbol.historical_context,
+      tags: symbol.tags
     }));
-    
-    return SymbolVisibilityService.getPhotoStats(trendingSymbols);
-  }, [rawSymbols]);
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedRegion('');
-    setSelectedPeriodGroup('');
-    setSelectedCultureFamily('');
-    setSelectedTags([]);
-    setShowOnlyWithPhotos(false);
-  };
+    // Enrich with completeness data
+    let enriched = SymbolCompletenessService.enrichWithCompleteness(trendingSymbols);
+    
+    // Apply filters
+    if (showOnlyWithPhotos) {
+      enriched = enriched.filter(s => s.completeness.hasImage);
+    }
+    
+    if (selectedCompletenessLevel !== 'all') {
+      enriched = SymbolCompletenessService.filterByCompletenessLevel(enriched, selectedCompletenessLevel);
+    }
+    
+    // Sort by completeness priority
+    const sorted = SymbolCompletenessService.sortByCompleteness(enriched);
+    
+    console.log('✅ [SymbolsPage] Processed', sorted.length, 'symbols with completeness scoring');
+    return sorted;
+  }, [symbols, showOnlyWithPhotos, selectedCompletenessLevel]);
+
+  // Calculate completeness statistics
+  const completenessStats = useMemo(() => {
+    if (processedSymbols.length === 0) return null;
+    return SymbolCompletenessService.getCompletenessStats(processedSymbols);
+  }, [processedSymbols]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-gray-600">Chargement des symboles...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-red-600">Erreur lors du chargement des symboles.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-4xl font-bold text-slate-900">
-              <I18nText translationKey="symbols.title">Explorez les Symboles</I18nText>
-            </h1>
-            {user && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white">
-                      <Link to="/propose-symbol" className="flex items-center gap-2">
-                        <Plus className="h-4 w-4" />
-                        <I18nText translationKey="symbols.propose">Proposer un symbole</I18nText>
-                      </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Contribuez à enrichir notre base de données en proposant un nouveau symbole</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-          <p className="text-slate-600 text-lg">
-            <I18nText translationKey="symbols.subtitle">
-              Découvrez la richesse des symboles à travers les cultures et les époques
-            </I18nText>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">
+            Symboles Culturels
+          </h1>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Découvrez notre collection de symboles, triés par qualité de documentation
           </p>
         </div>
 
-        {/* Barre de recherche et filtres */}
-        <Card className="mb-8 p-6">
-          <div className="space-y-4">
-            {/* Recherche principale */}
-            <div className="flex gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  placeholder="Rechercher un symbole..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2"
-              >
-                <Filter className="h-4 w-4" />
-                Filtres
-              </Button>
-              {hasActiveFilters && (
-                <Button variant="ghost" onClick={clearFilters}>
-                  Effacer
-                </Button>
-              )}
-            </div>
+        {/* Navigation to Timeline */}
+        <div className="mb-6 text-center">
+          <Link to="/timeline">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Voir la Timeline Historique
+            </Button>
+          </Link>
+        </div>
 
-            {/* Filtres avancés hiérarchiques */}
-            {showFilters && (
-              <div className="space-y-4 pt-4 border-t">
-                {/* Filtre photo et statistiques */}
-                {photoStats && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <Button
-                        variant={showOnlyWithPhotos ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setShowOnlyWithPhotos(!showOnlyWithPhotos)}
-                        className="flex items-center gap-2"
-                      >
-                        <Camera className="h-4 w-4" />
-                        Avec photos ({photoStats.withPhoto})
-                      </Button>
-                      
-                      <div className="text-sm text-slate-600">
-                        <Badge variant="outline" className="mr-2 text-green-600 border-green-200">
-                          <Camera className="h-3 w-3 mr-1" />
-                          {photoStats.withPhoto} avec photos
-                        </Badge>
-                        <Badge variant="outline" className="text-orange-600 border-orange-200">
-                          <CameraOff className="h-3 w-3 mr-1" />
-                          {photoStats.withoutPhoto} sans photos
-                        </Badge>
-                      </div>
+        {/* Statistics and filters */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-8">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-blue-900 font-semibold mb-1">
+                  {processedSymbols.length} symboles disponibles
+                </p>
+                {completenessStats && (
+                  <div className="flex items-center gap-4 text-sm text-blue-700">
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                      <span>{completenessStats.complete} complets</span>
                     </div>
-                    <div className="text-sm text-slate-500">
-                      {photoStats.percentageWithPhoto.toFixed(1)}% avec photos
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                      <span>{completenessStats.wellDocumented} bien documentés</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-orange-400"></span> 
+                      <span>{completenessStats.partiallyDocumented} partiels</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-red-400"></span>
+                      <span>{completenessStats.toComplete} à compléter</span>
+                    </div>
+                    <div className="text-blue-600 font-medium ml-2">
+                      Score moyen: {completenessStats.averageScore}
                     </div>
                   </div>
                 )}
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      <I18nText translationKey="searchFilters.regions">Région</I18nText>
-                    </label>
-                    <select
-                      value={selectedRegion}
-                      onChange={(e) => setSelectedRegion(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    >
-                      <option value="">
-                        <I18nText translationKey="symbols.page.filters.allRegions">Toutes les régions</I18nText>
-                      </option>
-                      {REGIONS.map(region => (
-                        <option key={region.id} value={region.id}>{region.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-                      <I18nText translationKey="searchFilters.periodGroups">Époque</I18nText>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-4 w-4 text-slate-400 hover:text-slate-600 cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            <div className="space-y-2">
-                              <p className="font-medium">Classification Internationale UNESCO</p>
-                              <p className="text-sm">
-                                Standards académiques mondiaux avec bornes chronologiques précises :
-                                Préhistoire, Antiquité, Moyen Âge, Moderne, Contemporain.
-                              </p>
-                              <p className="text-xs text-slate-400">
-                                Algorithme intelligent pour périodes multi-séculaires
-                              </p>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </label>
-                    <select
-                      value={selectedPeriodGroup}
-                      onChange={(e) => setSelectedPeriodGroup(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    >
-                      <option value="">
-                        <I18nText translationKey="symbols.page.filters.allPeriods">Toutes les époques</I18nText>
-                      </option>
-                      {PERIOD_GROUPS.map(group => (
-                        <option key={group.id} value={group.id}>{group.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      <I18nText translationKey="searchFilters.cultureFamilies">Famille culturelle</I18nText>
-                    </label>
-                    <select
-                      value={selectedCultureFamily}
-                      onChange={(e) => setSelectedCultureFamily(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    >
-                      <option value="">
-                        <I18nText translationKey="symbols.page.filters.allCultures">Toutes les familles</I18nText>
-                      </option>
-                      {CULTURE_FAMILIES.map(family => (
-                        <option key={family.id} value={family.id}>{family.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
               </div>
-            )}
+            </div>
           </div>
-        </Card>
+          
+          {/* Filters */}
+          <div className="flex flex-wrap gap-4">
+            <Button
+              variant={showOnlyWithPhotos ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowOnlyWithPhotos(!showOnlyWithPhotos)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              {showOnlyWithPhotos ? "Tous" : "Avec photos"}
+            </Button>
 
-        {/* Résultats */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">
-              {hasActiveFilters ? (
-                <I18nText translationKey="symbols.searchResults">
-                  Résultats de recherche
-                </I18nText>
-              ) : (
-                <I18nText translationKey="symbols.allSymbols">
-                  Tous les symboles
-                </I18nText>
-              )}
-            </h2>
-            <span className="text-sm text-slate-500">
-              {isLoading ? (
-                <I18nText translationKey="common.loading">Chargement...</I18nText>
-              ) : (
-                <>
-                  {processedSymbols.length} 
-                  {processedSymbols.length <= 1 ? (
-                    <I18nText translationKey="symbols.symbolCount.singular"> symbole</I18nText>
-                  ) : (
-                    <I18nText translationKey="symbols.symbolCount.plural"> symboles</I18nText>
-                  )}
-                </>
-              )}
-            </span>
+            <Select value={selectedCompletenessLevel} onValueChange={(value) => setSelectedCompletenessLevel(value as any)}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Niveau de complétude" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les niveaux</SelectItem>
+                <SelectItem value="complete">Complets</SelectItem>
+                <SelectItem value="well_documented">Bien documentés</SelectItem>
+                <SelectItem value="partially_documented">Partiellement documentés</SelectItem>
+                <SelectItem value="to_complete">À compléter</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Grille de symboles */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-          </div>
-        ) : (
-          <SymbolGrid symbols={processedSymbols} />
-        )}
+        {/* Symbols Grid with Completeness */}
+        <EnhancedSymbolGrid symbols={processedSymbols} />
 
-        {/* Statistiques */}
-        {!isLoading && processedSymbols.length > 0 && (
-          <Card className="mt-8 p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">
-              <I18nText translationKey="symbols.statistics">Statistiques</I18nText>
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-amber-600">{processedSymbols.length}</div>
-                <div className="text-sm text-slate-500">
-                  <I18nText translationKey="symbols.stats.total">Symboles au total</I18nText>
-                </div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-amber-600">
-                  {new Set(processedSymbols.map(s => s.culture)).size}
-                </div>
-                <div className="text-sm text-slate-500">
-                  <I18nText translationKey="symbols.stats.cultures">Cultures représentées</I18nText>
-                </div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-amber-600">
-                  {new Set(processedSymbols.map(s => s.period)).size}
-                </div>
-                <div className="text-sm text-slate-500">
-                  <I18nText translationKey="symbols.stats.periods">Périodes historiques</I18nText>
-                </div>
-              </div>
-            </div>
-          </Card>
+        {/* Empty state for filters */}
+        {(showOnlyWithPhotos || selectedCompletenessLevel !== 'all') && processedSymbols.length === 0 && (
+          <div className="text-center py-8 text-slate-500">
+            <Filter className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>Aucun symbole trouvé avec ces filtres.</p>
+          </div>
         )}
       </div>
     </div>
   );
 };
+
+// Enhanced Symbol Grid component
+interface EnhancedSymbolGridProps {
+  symbols: SymbolWithCompleteness[];
+}
+
+const EnhancedSymbolGrid: React.FC<EnhancedSymbolGridProps> = ({ symbols }) => {
+  if (symbols.length === 0) {
+    return <EmptyStateCard />;
+  }
+  
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {symbols.map(symbol => (
+        <EnhancedSymbolCardWithCompleteness key={symbol.id} symbol={symbol} />
+      ))}
+    </div>
+  );
+};
+
+// Enhanced Symbol Card with completeness
+interface EnhancedSymbolCardWithCompletenessProps {
+  symbol: SymbolWithCompleteness;
+}
+
+const EnhancedSymbolCardWithCompleteness: React.FC<EnhancedSymbolCardWithCompletenessProps> = ({ symbol }) => {
+  const { completeness } = symbol;
+  
+  return (
+    <Link to={`/symbols/${symbol.id}`} className="block group">
+      <Card className={`
+        overflow-hidden shadow-sm hover:shadow-xl border-2 transition-all duration-300
+        hover:-translate-y-1
+        ${completeness.level === 'complete' ? 'border-green-200 ring-1 ring-green-100' : ''}
+        ${completeness.level === 'well_documented' ? 'border-blue-200 ring-1 ring-blue-100' : ''}
+        ${completeness.level === 'partially_documented' ? 'border-orange-200 ring-1 ring-orange-100' : ''}
+        ${completeness.level === 'to_complete' ? 'opacity-90 border-red-200' : ''}
+      `}>
+        <AspectRatio ratio={1} className="w-full bg-slate-50 relative overflow-hidden">
+          <div className="absolute top-2 left-2 z-20 flex gap-2 flex-wrap max-w-[calc(100%-4rem)]">
+            <CompletenessBadge 
+              level={completeness.level} 
+              size="sm"
+              completionPercentage={completeness.completionPercentage}
+            />
+            {completeness.hasImage && (
+              <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                📸 Image
+              </Badge>
+            )}
+          </div>
+
+          <img
+            src={getSymbolImageSource(symbol)}
+            alt={symbol.name}
+            className="object-cover w-full h-full transition-all duration-500 group-hover:scale-110"
+          />
+        </AspectRatio>
+        
+        <div className="p-4 bg-white/90 backdrop-blur-sm relative">
+          <h4 className={`text-lg font-serif font-medium truncate mb-2 ${
+            completeness.level === 'to_complete' ? 'text-slate-600' : 'text-slate-900'
+          }`}>
+            {symbol.name}
+          </h4>
+          
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-slate-500 truncate flex-1">
+              {symbol.culture} • {symbol.period}
+            </span>
+            <Badge variant="outline" className="text-xs ml-2">
+              Score: {completeness.score}
+            </Badge>
+          </div>
+
+          {symbol.description && (
+            <p className="text-sm text-slate-600 line-clamp-2 mb-3">
+              {symbol.description}
+            </p>
+          )}
+
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+            <span>{Math.round(completeness.completionPercentage)}% complété</span>
+            <div className="flex items-center gap-2">
+              <span>{symbol.view_count} vues</span>
+              <span>•</span>
+              <span>{symbol.like_count} likes</span>
+            </div>
+          </div>
+
+          {/* Missing fields encouragement */}
+          {completeness.missingFields.length > 0 && (
+            <div className="p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
+              💡 Manque: {completeness.missingFields.slice(0, 2).join(', ')}
+              {completeness.missingFields.length > 2 && ` (+${completeness.missingFields.length - 2})`}
+            </div>
+          )}
+        </div>
+      </Card>
+    </Link>
+  );
+};
+
+// Helper function to get image source
+function getSymbolImageSource(symbol: SymbolWithCompleteness): string {
+  // Use existing image mapping logic or fallback
+  const symbolToLocalImage: Record<string, string> = {
+    "Triskèle Celtique": "/images/symbols/triskelion.png",
+    "Fleur de Lys": "/images/symbols/fleur-de-lys.png", 
+    "Méandre Grec": "/images/symbols/greek-meander.png",
+    "Mandala": "/images/symbols/mandala.png",
+    "Symbole Adinkra": "/images/symbols/adinkra.png",
+    "Motif Seigaiha": "/images/symbols/seigaiha.png",
+  };
+  
+  return symbolToLocalImage[symbol.name] || "/placeholder.svg";
+}
 
 export default SymbolsPage;
