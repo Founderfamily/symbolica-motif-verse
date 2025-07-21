@@ -120,197 +120,242 @@ export const CollectionSymbolsTimeline: React.FC = () => {
         <div className="absolute left-1/2 transform -translate-x-2 w-4 h-4 bg-primary rounded-full bottom-0" />
 
         <div className="space-y-20">
-          {/* Affichage des événements historiques français pour la collection patrimoine-français */}
-          {shouldShowEvents && historicalEvents.length > 0 && (
-            <motion.div
-              className="mb-16"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4 text-primary">Dates importantes de l'Histoire de France</h2>
-                <p className="text-muted-foreground">30 événements marquants du patrimoine français</p>
-              </div>
-              
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {historicalEvents
-                  .sort((a, b) => a.year - b.year)
-                  .map((event, eventIndex) => (
-                    <motion.div
-                      key={event.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: eventIndex * 0.05 }}
-                    >
-                      <Card className="p-4 h-full bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 hover:shadow-lg transition-all duration-300">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-primary rounded-full" />
-                            <span className="font-bold text-primary text-lg">{event.year}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {event.period_category}
-                            </Badge>
-                          </div>
-                          
-                          <div className="text-sm text-muted-foreground">
-                            {event.date_text}
-                          </div>
-                          
-                          <h3 className="font-bold text-foreground leading-tight">
-                            {event.event_name}
-                          </h3>
-                          
-                          {event.description && (
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {event.description}
-                            </p>
-                          )}
-                          
-                          <div className="flex items-center justify-between mt-4">
-                            <div className="flex items-center gap-1">
-                              {[...Array(event.importance_level)].map((_, i) => (
-                                <div key={i} className="w-1.5 h-1.5 bg-primary rounded-full" />
-                              ))}
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              Importance: {event.importance_level}/10
-                            </span>
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  ))}
-              </div>
-            </motion.div>
-          )}
-          
-          {/* Timeline des symboles */}
-          {symbols
-            .sort((a, b) => a.temporal_period_order - b.temporal_period_order)
-            .map((symbol, index) => {
-            const isLeft = index % 2 === 0;
-            const currentPeriod = symbol.temporal_period_name || symbol.period;
-            const previousPeriod = index > 0 ? (symbols[index - 1].temporal_period_name || symbols[index - 1].period) : null;
-            const isPeriodChange = currentPeriod !== previousPeriod && index > 0;
+          {/* Créer une timeline mixte avec symboles et événements historiques */}
+          {(() => {
+            // Créer un tableau mixte avec symboles et événements
+            const timelineItems = [];
             
-            return (
-              <div key={symbol.id}>
-                {/* Séparateur d'ère */}
-                {isPeriodChange && (
+            // Ajouter les symboles
+            symbols.forEach((symbol, index) => {
+              timelineItems.push({
+                type: 'symbol',
+                data: symbol,
+                year: symbol.temporal_period_order || 2024, // Utiliser l'année ou ordre temporel
+                originalIndex: index
+              });
+            });
+            
+            // Ajouter les événements historiques français si c'est la bonne collection
+            if (shouldShowEvents && historicalEvents.length > 0) {
+              historicalEvents.forEach((event) => {
+                timelineItems.push({
+                  type: 'event',
+                  data: event,
+                  year: event.year,
+                  originalIndex: 0
+                });
+              });
+            }
+            
+            // Trier par année
+            timelineItems.sort((a, b) => a.year - b.year);
+            
+            console.log('🔍 Timeline items:', timelineItems);
+            
+            return timelineItems.map((item, timelineIndex) => {
+              if (item.type === 'event') {
+                const event = item.data;
+                const isLeft = timelineIndex % 2 === 0;
+                
+                return (
                   <motion.div
-                    className="relative flex items-center justify-center my-16"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
+                    key={`event-${event.id}`}
+                    className={`relative flex items-center ${isLeft ? 'justify-start' : 'justify-end'}`}
+                    initial={{ opacity: 0, x: isLeft ? -100 : 100 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6, delay: timelineIndex * 0.1 }}
                   >
-                    {/* Ligne de séparation */}
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t-2 border-primary/30"></div>
-                    </div>
+                    {/* Point de connexion sur la ligne */}
+                    <div className="absolute left-1/2 transform -translate-x-3 w-6 h-6 bg-background border-4 border-primary rounded-full z-10" />
                     
-                    {/* Badge de la nouvelle ère */}
-                    <div className="relative bg-gradient-to-r from-primary/10 to-primary/20 backdrop-blur-sm border border-primary/30 rounded-full px-8 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                        <span className="text-lg font-bold text-primary">
-                          {currentPeriod}
-                        </span>
-                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                    {/* Ligne de connexion vers la carte */}
+                    <div 
+                      className={`absolute left-1/2 w-16 h-0.5 bg-primary/30 ${
+                        isLeft ? 'transform -translate-x-16' : 'transform translate-x-3'
+                      }`} 
+                    />
+
+                    {/* Carte d'événement historique */}
+                    <Card className={`w-96 p-6 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 hover:shadow-xl transition-all duration-500 ${
+                      isLeft ? 'mr-20' : 'ml-20'
+                    }`}>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-primary" />
+                          <span className="font-bold text-primary text-lg">{event.year}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {event.period_category}
+                          </Badge>
+                        </div>
+                        
+                        <div className="text-sm text-muted-foreground">
+                          {event.date_text}
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-foreground leading-tight">
+                          {event.event_name}
+                        </h3>
+                        
+                        {event.description && (
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {event.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="flex items-center gap-1">
+                            {[...Array(event.importance_level)].map((_, i) => (
+                              <div key={i} className="w-1.5 h-1.5 bg-primary rounded-full" />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            Importance: {event.importance_level}/10
+                          </span>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Numéro d'ordre avec année */}
+                    <div className={`absolute ${
+                      isLeft ? 'left-0' : 'right-0'
+                    } flex flex-col items-center`}>
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold text-primary mb-2">
+                        {event.year}
+                      </div>
+                      <div className="text-xs text-center text-muted-foreground max-w-24">
+                        Histoire
                       </div>
                     </div>
                   </motion.div>
-                )}
-
-                <motion.div
-                  className={`relative flex items-center ${isLeft ? 'justify-start' : 'justify-end'}`}
-                  initial={{ opacity: 0, x: isLeft ? -100 : 100 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                {/* Point de connexion sur la ligne */}
-                <div className="absolute left-1/2 transform -translate-x-3 w-6 h-6 bg-background border-4 border-primary rounded-full z-10" />
+                );
+              } else {
+                // Symbole existant
+                const symbol = item.data;
+                const isLeft = timelineIndex % 2 === 0;
+                const currentPeriod = symbol.temporal_period_name || symbol.period;
+                const previousItem = timelineIndex > 0 ? timelineItems[timelineIndex - 1] : null;
+                const previousPeriod = previousItem && previousItem.type === 'symbol' ? 
+                  (previousItem.data.temporal_period_name || previousItem.data.period) : null;
+                const isPeriodChange = currentPeriod !== previousPeriod && timelineIndex > 0 && previousItem?.type === 'symbol';
                 
-                {/* Ligne de connexion vers la carte */}
-                <div 
-                  className={`absolute left-1/2 w-16 h-0.5 bg-primary/30 ${
-                    isLeft ? 'transform -translate-x-16' : 'transform translate-x-3'
-                  }`} 
-                />
+                return (
+                  <div key={symbol.id}>
+                    {/* Séparateur d'ère */}
+                    {isPeriodChange && (
+                      <motion.div
+                        className="relative flex items-center justify-center my-16"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {/* Ligne de séparation */}
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t-2 border-primary/30"></div>
+                        </div>
+                        
+                        {/* Badge de la nouvelle ère */}
+                        <div className="relative bg-gradient-to-r from-primary/10 to-primary/20 backdrop-blur-sm border border-primary/30 rounded-full px-8 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                            <span className="text-lg font-bold text-primary">
+                              {currentPeriod}
+                            </span>
+                            <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
 
-                {/* Carte de symbole */}
-                <Card className={`w-96 p-6 bg-gradient-to-br from-background to-muted/30 border border-muted hover:shadow-xl transition-all duration-500 ${
-                  isLeft ? 'mr-20' : 'ml-20'
-                }`}>
-                  <div className="space-y-4">
-                    {/* Image */}
-                    <div className="w-full h-40 bg-muted/50 rounded-lg flex items-center justify-center overflow-hidden">
-                      {symbol.image_url ? (
-                        <img 
-                          src={symbol.image_url} 
-                          alt={symbol.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                      )}
-                    </div>
+                    <motion.div
+                      className={`relative flex items-center ${isLeft ? 'justify-start' : 'justify-end'}`}
+                      initial={{ opacity: 0, x: isLeft ? -100 : 100 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: "-100px" }}
+                      transition={{ duration: 0.6, delay: timelineIndex * 0.1 }}
+                    >
+                      {/* Point de connexion sur la ligne */}
+                      <div className="absolute left-1/2 transform -translate-x-3 w-6 h-6 bg-background border-4 border-primary rounded-full z-10" />
+                      
+                      {/* Ligne de connexion vers la carte */}
+                      <div 
+                        className={`absolute left-1/2 w-16 h-0.5 bg-primary/30 ${
+                          isLeft ? 'transform -translate-x-16' : 'transform translate-x-3'
+                        }`} 
+                      />
 
-                    {/* Titre du symbole */}
-                    <h3 className="text-2xl font-bold text-foreground">
-                      {symbol.name}
-                    </h3>
+                      {/* Carte de symbole */}
+                      <Card className={`w-96 p-6 bg-gradient-to-br from-background to-muted/30 border border-muted hover:shadow-xl transition-all duration-500 ${
+                        isLeft ? 'mr-20' : 'ml-20'
+                      }`}>
+                        <div className="space-y-4">
+                          {/* Image */}
+                          <div className="w-full h-40 bg-muted/50 rounded-lg flex items-center justify-center overflow-hidden">
+                            {symbol.image_url ? (
+                              <img 
+                                src={symbol.image_url} 
+                                alt={symbol.name} 
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                            )}
+                          </div>
 
-                    {/* Description */}
-                    <p className="text-sm text-muted-foreground">
-                      {symbol.description}
-                    </p>
+                          {/* Titre du symbole */}
+                          <h3 className="text-2xl font-bold text-foreground">
+                            {symbol.name}
+                          </h3>
 
-                    {/* Métadonnées */}
-                    <div className="space-y-2 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3 h-3" />
-                        <span>{symbol.temporal_period_name || symbol.period}</span>
-                        {symbol.cultural_period_name && (
-                          <span className="text-primary">({symbol.cultural_period_name})</span>
-                        )}
+                          {/* Description */}
+                          <p className="text-sm text-muted-foreground">
+                            {symbol.description}
+                          </p>
+
+                          {/* Métadonnées */}
+                          <div className="space-y-2 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-3 h-3" />
+                              <span>{symbol.temporal_period_name || symbol.period}</span>
+                              {symbol.cultural_period_name && (
+                                <span className="text-primary">({symbol.cultural_period_name})</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Scroll className="w-3 h-3" />
+                              <span>{symbol.culture}</span>
+                            </div>
+                            {/* Position dans la collection */}
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium">Position: {symbol.symbol_position}</span>
+                            </div>
+                          </div>
+
+                          {/* Bouton d'action */}
+                          <Button variant="outline" size="sm" className="w-full">
+                            <I18nText translationKey="symbols.learnMore">En savoir plus</I18nText>
+                          </Button>
+                        </div>
+                      </Card>
+
+                      {/* Numéro d'ordre avec période */}
+                      <div className={`absolute ${
+                        isLeft ? 'left-0' : 'right-0'
+                      } flex flex-col items-center`}>
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold text-primary mb-2">
+                          {item.originalIndex + 1}
+                        </div>
+                        <div className="text-xs text-center text-muted-foreground max-w-24">
+                          {new Date(symbol.created_at).getFullYear()}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Scroll className="w-3 h-3" />
-                        <span>{symbol.culture}</span>
-                      </div>
-                      {/* Position dans la collection */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium">Position: {symbol.symbol_position}</span>
-                      </div>
-                    </div>
-
-                    {/* Bouton d'action */}
-                    <Button variant="outline" size="sm" className="w-full">
-                      <I18nText translationKey="symbols.learnMore">En savoir plus</I18nText>
-                    </Button>
+                    </motion.div>
                   </div>
-                </Card>
-
-                {/* Numéro d'ordre avec période */}
-                <div className={`absolute ${
-                  isLeft ? 'left-0' : 'right-0'
-                } flex flex-col items-center`}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold text-primary mb-2">
-                    {index + 1}
-                  </div>
-                  <div className="text-xs text-center text-muted-foreground max-w-24">
-                    {new Date(symbol.created_at).getFullYear()}
-                  </div>
-                </div>
-                </motion.div>
-              </div>
-            );
-          })}
+                );
+              }
+            });
+          })()}
         </div>
 
         {/* Footer de la timeline */}
