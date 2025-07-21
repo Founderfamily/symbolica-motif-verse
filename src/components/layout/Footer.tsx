@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { Heart, Github, Mail, Globe, Users, BookOpen, Sparkles, Trophy } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n/useTranslation';
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -28,7 +30,7 @@ const Footer: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-2 max-w-sm mx-auto">
             <input 
               type="email" 
-              placeholder="Entrez votre email"
+              placeholder={t('footer.newsletter.placeholder')}
               className="flex-1 px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
             <Button className="px-6">
