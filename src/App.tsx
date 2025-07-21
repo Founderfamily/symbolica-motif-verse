@@ -66,6 +66,10 @@ import SymbolExplorer from '@/pages/SymbolExplorer';
 import ProposeSymbol from '@/pages/ProposeSymbol';
 import ValidatorDashboard from '@/pages/ValidatorDashboard';
 
+// Parcours pages
+import ParcoursAcademique from '@/pages/ParcoursAcademique';
+import ParcoursAventure from '@/pages/ParcoursAventure';
+
 // Innovation Lab pages
 import InnovationHomePage from '@/pages/Innovation/InnovationHomePage';
 import InnovationGraphPage from '@/pages/Innovation/GraphPage';
@@ -109,6 +113,10 @@ function App() {
                   <Route path="/quests/:questId" element={<QuestDetailPage />} />
                   <Route path="/community" element={<CommunityPage />} />
                   <Route path="/community/groups/:slug" element={<GroupDetailPage />} />
+
+                  {/* Parcours routes */}
+                  <Route path="/parcours/academique" element={<ParcoursAcademique />} />
+                  <Route path="/parcours/aventure" element={<ParcoursAventure />} />
 
                   {/* Innovation Lab routes */}
                   <Route path="/innovation" element={<InnovationHomePage />} />
