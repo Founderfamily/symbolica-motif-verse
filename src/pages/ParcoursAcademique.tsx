@@ -28,39 +28,39 @@ const ParcoursAcademique = () => {
       badge: "25K+ symboles"
     },
     {
-      title: "Publications et Recherches",
-      description: "Articles peer-reviewed et études comparatives",
-      icon: FileText,
-      action: () => navigate('/research'),
-      badge: "50+ publications"
+      title: "Collections Thématiques",
+      description: "Collections organisées par périodes, cultures et thèmes",
+      icon: BookOpen,
+      action: () => navigate('/collections'),
+      badge: "50+ collections"
     },
     {
-      title: "Outils d'Analyse IA",
-      description: "Intelligence artificielle pour l'analyse symbolique avancée",
-      icon: Cpu,
-      action: () => navigate('/analysis'),
-      badge: "IA avancée"
-    },
-    {
-      title: "Collaboration Recherche",
-      description: "Réseau de chercheurs et institutions partenaires",
-      icon: Users,
-      action: () => navigate('/community'),
-      badge: "500+ chercheurs"
-    },
-    {
-      title: "Données Ouvertes",
-      description: "API et datasets pour vos recherches",
-      icon: Download,
-      action: () => navigate('/api-docs'),
-      badge: "Open Data"
-    },
-    {
-      title: "Métriques et Analytics",
-      description: "Statistiques détaillées et analyses quantitatives",
+      title: "Outils d'Analyse",
+      description: "Analysez les patterns et connexions entre symboles",
       icon: BarChart3,
-      action: () => navigate('/analytics'),
-      badge: "Métriques"
+      action: () => navigate('/analysis'),
+      badge: "Analytics"
+    },
+    {
+      title: "Recherche Avancée",
+      description: "Moteur de recherche sémantique et filtres précis",
+      icon: Search,
+      action: () => navigate('/search'),
+      badge: "IA Search"
+    },
+    {
+      title: "Contribution Recherche",
+      description: "Soumettez vos découvertes pour validation académique",
+      icon: FileText,
+      action: () => navigate('/contributions'),
+      badge: "Peer-review"
+    },
+    {
+      title: "Timeline Historique",
+      description: "Explorez l'évolution des symboles à travers les époques",
+      icon: Cpu,
+      action: () => navigate('/symbols/timeline'),
+      badge: "5000 ans"
     }
   ];
 
@@ -155,17 +155,17 @@ const ParcoursAcademique = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               variant="secondary" 
-              className="bg-white text-blue-600 hover:bg-blue-50"
-              onClick={() => navigate('/scientific-credentials')}
+              className="bg-white text-blue-600 hover:bg-blue-50 hover-scale"
+              onClick={() => navigate('/')}
             >
-              Voir nos Certifications
+              Voir Excellence Scientifique
             </Button>
             <Button 
               variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-blue-600"
-              onClick={() => navigate('/contact')}
+              className="border-white text-white hover:bg-white hover:text-blue-600 hover-scale"
+              onClick={() => navigate('/community')}
             >
-              Collaborer avec nous
+              Rejoindre la Communauté
             </Button>
           </div>
         </div>

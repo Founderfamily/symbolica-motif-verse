@@ -30,26 +30,26 @@ const ParcoursAventure = () => {
     },
     {
       title: "Exploration Interactive",
-      description: "Parcourez le monde des symboles de façon ludique",
-      icon: Compass,
+      description: "Parcourez le monde des symboles avec la carte interactive",
+      icon: Map,
       action: () => navigate('/map'),
-      badge: "Monde ouvert",
+      badge: "Carte monde",
       color: "blue"
     },
     {
-      title: "Défis Communautaires",
-      description: "Participez à des challenges avec d'autres aventuriers",
+      title: "Communauté d'Aventuriers",
+      description: "Rejoignez des groupes et participez aux discussions",
       icon: Users,
       action: () => navigate('/community'),
-      badge: "1000+ joueurs",
+      badge: "1000+ membres",
       color: "purple"
     },
     {
-      title: "Système de Récompenses",
-      description: "Gagnez des badges et débloquez du contenu exclusif",
-      icon: Trophy,
-      action: () => navigate('/achievements'),
-      badge: "100+ badges",
+      title: "Collections Découvertes",
+      description: "Explorez les collections par thèmes et époques",
+      icon: Compass,
+      action: () => navigate('/collections'),
+      badge: "50+ collections",
       color: "yellow"
     },
     {
@@ -61,11 +61,11 @@ const ParcoursAventure = () => {
       color: "indigo"
     },
     {
-      title: "Mode Découverte",
-      description: "Explorez au hasard et faites des découvertes surprenantes",
+      title: "Tendances Populaires",
+      description: "Découvrez les symboles les plus explorés",
       icon: Zap,
-      action: () => navigate('/discover'),
-      badge: "Surprise",
+      action: () => navigate('/trending'),
+      badge: "Trending",
       color: "pink"
     }
   ];
@@ -136,10 +136,10 @@ const ParcoursAventure = () => {
         {/* Adventure Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {adventureFeatures.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
+            <Card key={index} className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover-scale animate-fade-in">
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <feature.icon className={`h-8 w-8 ${getColorClasses(feature.color)}`} />
+                  <feature.icon className={`h-8 w-8 ${getColorClasses(feature.color)} transition-colors duration-200`} />
                   <Badge variant="outline" className="text-xs">
                     {feature.badge}
                   </Badge>
@@ -207,15 +207,15 @@ const ParcoursAventure = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               variant="secondary" 
-              className="bg-white text-emerald-600 hover:bg-emerald-50"
-              onClick={() => navigate('/leaderboard')}
+              className="bg-white text-emerald-600 hover:bg-emerald-50 hover-scale"
+              onClick={() => navigate('/community')}
             >
               <Trophy className="h-4 w-4 mr-2" />
-              Voir le Classement
+              Rejoindre la Communauté
             </Button>
             <Button 
               variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-emerald-600"
+              className="border-white text-white hover:bg-white hover:text-emerald-600 hover-scale"
               onClick={() => navigate('/quests')}
             >
               <Target className="h-4 w-4 mr-2" />
