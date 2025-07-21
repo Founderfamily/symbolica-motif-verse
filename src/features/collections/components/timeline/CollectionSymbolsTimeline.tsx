@@ -210,50 +210,52 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                       }`} 
                     />
 
-                    {/* Carte de symbole */}
+                    {/* Carte de symbole cliquable */}
                     <div className={`flex ${isLeft ? 'justify-start' : 'justify-end'}`}>
-                      <Card className={`w-80 p-4 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow ${
-                        isLeft ? 'mr-20' : 'ml-20'
-                      }`}>
-                        {/* Image */}
-                        <div className="w-full h-40 bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                          {symbol.image_url ? (
-                            <img 
-                              src={symbol.image_url} 
-                              alt={symbol.name} 
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="w-12 h-12 text-gray-400" />
+                      <Link to={`/symbols/${symbol.id}`} className="block">
+                        <Card className={`w-80 p-4 bg-white border border-gray-200 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer ${
+                          isLeft ? 'mr-20' : 'ml-20'
+                        }`}>
+                          {/* Image */}
+                          <div className="w-full h-40 bg-gray-100 rounded-lg mb-4 overflow-hidden">
+                            {symbol.image_url ? (
+                              <img 
+                                src={symbol.image_url} 
+                                alt={symbol.name} 
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <ImageIcon className="w-12 h-12 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Titre */}
+                          <h3 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
+                            {symbol.name}
+                          </h3>
+
+                          {/* Année */}
+                          <div className="text-sm text-gray-600 mb-1">
+                            {item.year > 0 ? `${item.year}` : `${Math.abs(item.year)} av. J.-C.`}
+                          </div>
+
+                          {/* Période */}
+                          <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                            <Calendar className="w-3 h-3" />
+                            <span>{symbol.temporal_period_name || symbol.period}</span>
+                          </div>
+
+                          {/* Région */}
+                          {symbol.region_name && (
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <MapPin className="w-3 h-3" />
+                              <span>{symbol.region_name}</span>
                             </div>
                           )}
-                        </div>
-
-                        {/* Titre */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
-                          {symbol.name}
-                        </h3>
-
-                        {/* Année */}
-                        <div className="text-sm text-gray-600 mb-1">
-                          {item.year > 0 ? `${item.year}` : `${Math.abs(item.year)} av. J.-C.`}
-                        </div>
-
-                        {/* Période */}
-                        <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-                          <Calendar className="w-3 h-3" />
-                          <span>{symbol.temporal_period_name || symbol.period}</span>
-                        </div>
-
-                        {/* Région */}
-                        {symbol.region_name && (
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <MapPin className="w-3 h-3" />
-                            <span>{symbol.region_name}</span>
-                          </div>
-                        )}
-                      </Card>
+                        </Card>
+                      </Link>
                     </div>
                   </motion.div>
                 );
