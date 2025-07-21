@@ -82,7 +82,7 @@ const GroupDiscussion: React.FC<GroupDiscussionProps> = ({
               </Avatar>
               <div className="flex-1">
                 <Textarea
-                  placeholder="What's on your mind about cultural symbols?"
+                  placeholder="Que pensez-vous des symboles culturels ?"
                   value={newPostContent}
                   onChange={(e) => setNewPostContent(e.target.value)}
                   rows={3}
