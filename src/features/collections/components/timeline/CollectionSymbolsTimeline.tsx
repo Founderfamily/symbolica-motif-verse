@@ -391,7 +391,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                           {item.originalIndex + 1}
                         </div>
                         <div className="text-xs text-center text-muted-foreground max-w-24">
-                          {new Date(symbol.created_at).getFullYear()}
+                          {item.year > 0 ? item.year : `${Math.abs(item.year)} av. J.-C.`}
                         </div>
                       </div>
                     </motion.div>
