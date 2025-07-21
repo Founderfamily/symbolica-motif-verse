@@ -21,73 +21,42 @@ export const CollectionsTimeline: React.FC<CollectionsTimelineProps> = ({
   getCollectionDescription,
   organizationMode,
 }) => {
-  // Organiser les collections selon le mode sélectionné
+  // Organiser les collections selon le mode sélectionné (simple filtrage)
   const organizeCollections = () => {
     switch (organizationMode) {
       case 'thematic':
-        return [
-          { id: 'cultures', label: 'Cultures du monde', period: 'Découvrez les symboles à travers les civilisations', color: 'from-amber-500 to-orange-500' },
-          { id: 'spirituality', label: 'Spiritualité & Religion', period: 'Symboles sacrés et mystiques', color: 'from-purple-500 to-indigo-500' },
-          { id: 'art', label: 'Art & Artisanat', period: 'Expression artistique et créative', color: 'from-green-500 to-teal-500' },
-          { id: 'history', label: 'Histoire & Patrimoine', period: 'Héritage culturel et historique', color: 'from-blue-500 to-cyan-500' },
-        ];
+        // Grouper par thème (exemple simple)
+        return collections;
       case 'geographic':
-        return [
-          { id: 'europe', label: 'Europe', period: 'Patrimoine européen', color: 'from-blue-500 to-indigo-500' },
-          { id: 'asia', label: 'Asie', period: 'Sagesse orientale', color: 'from-red-500 to-pink-500' },
-          { id: 'africa', label: 'Afrique', period: 'Traditions ancestrales', color: 'from-yellow-500 to-orange-500' },
-          { id: 'americas', label: 'Amériques', period: 'Cultures du nouveau monde', color: 'from-green-500 to-teal-500' },
-        ];
+        // Grouper par région
+        return collections;
       case 'popularity':
-        return [
-          { id: 'most-viewed', label: 'Plus consultées', period: 'Les collections favorites', color: 'from-yellow-500 to-amber-500' },
-          { id: 'trending', label: 'Tendances', period: 'Actuellement populaires', color: 'from-pink-500 to-rose-500' },
-          { id: 'new', label: 'Nouveautés', period: 'Récemment ajoutées', color: 'from-emerald-500 to-green-500' },
-        ];
+        // Trier par popularité (featured en premier)
+        return [...collections].sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0));
       case 'difficulty':
-        return [
-          { id: 'beginner', label: 'Découverte', period: 'Pour débuter', color: 'from-green-500 to-emerald-500' },
-          { id: 'intermediate', label: 'Approfondissement', period: 'Niveau intermédiaire', color: 'from-blue-500 to-cyan-500' },
-          { id: 'expert', label: 'Expertise', period: 'Niveau avancé', color: 'from-purple-500 to-indigo-500' },
-        ];
+        // Organiser par difficulté
+        return collections;
       case 'chronological':
       default:
-        return [
-          { id: 'ancient', label: 'Antiquité', period: '3000 av. J.-C. - 500 ap. J.-C.', color: 'from-amber-500 to-orange-500' },
-          { id: 'medieval', label: 'Moyen Âge', period: '500 - 1500', color: 'from-purple-500 to-indigo-500' },
-          { id: 'renaissance', label: 'Renaissance', period: '1400 - 1700', color: 'from-green-500 to-teal-500' },
-          { id: 'modern', label: 'Époque moderne', period: '1700 - 1900', color: 'from-blue-500 to-cyan-500' },
-          { id: 'contemporary', label: 'Contemporain', period: '1900 - aujourd\'hui', color: 'from-pink-500 to-rose-500' },
-        ];
+        // Trier par date de création
+        return [...collections].sort((a, b) => 
+          new Date(b.created_at || '2024-01-01').getTime() - new Date(a.created_at || '2024-01-01').getTime()
+        );
     }
   };
 
-  const organizeCollectionsByPeriod = () => {
-    const periods = organizeCollections();
-    
-    return periods.map((period, index) => {
-      // Pour l'exemple, on distribue les collections dans les périodes
-      const periodCollections = collections.slice(index * Math.ceil(collections.length / periods.length), (index + 1) * Math.ceil(collections.length / periods.length));
-      return {
-        ...period,
-        collections: periodCollections,
-      };
-    }).filter(period => period.collections.length > 0);
-  };
-
-  const organizedPeriods = organizeCollectionsByPeriod();
+  const organizedCollections = organizeCollections();
   
   console.log('🔍 [CollectionsTimeline] Données:', {
     collections: collections.length,
     organizationMode,
-    organizedPeriods: organizedPeriods.length,
-    periodsData: organizedPeriods
+    organizedCollections: organizedCollections.length
   });
 
-  if (organizedPeriods.length === 0) {
+  if (organizedCollections.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Aucune collection disponible pour ce mode d'organisation</p>
+        <p className="text-muted-foreground">Aucune collection disponible</p>
       </div>
     );
   }
@@ -101,40 +70,21 @@ export const CollectionsTimeline: React.FC<CollectionsTimelineProps> = ({
       <div className="absolute left-1/2 transform -translate-x-2 w-4 h-4 bg-primary rounded-full top-0" />
       <div className="absolute left-1/2 transform -translate-x-2 w-4 h-4 bg-primary rounded-full bottom-0" />
 
-      <div className="space-y-24">
-        {organizedPeriods.map((period, periodIndex) => (
-          <div key={period.id} className="space-y-8">
-            {/* Titre de la période */}
+      <div className="space-y-16">
+        {organizedCollections.map((collection, index) => {
+          const isLeft = index % 2 === 0;
+          const title = getCollectionTitle(collection);
+          const description = getCollectionDescription(collection);
+          
+          return (
             <motion.div
-              className="text-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              key={collection.id}
+              className={`relative flex items-center ${isLeft ? 'justify-start' : 'justify-end'}`}
+              initial={{ opacity: 0, x: isLeft ? -100 : 100 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <div className={`inline-block px-6 py-3 rounded-full bg-gradient-to-r ${period.color} text-white shadow-lg`}>
-                <h2 className="text-2xl font-bold">{period.label}</h2>
-                <p className="text-sm opacity-90">{period.period}</p>
-              </div>
-            </motion.div>
-
-            {/* Collections de cette période */}
-            <div className="space-y-16">
-              {period.collections.map((collection, index) => {
-                const globalIndex = periodIndex * 10 + index; // Pour l'animation
-                const isLeft = index % 2 === 0;
-                const title = getCollectionTitle(collection);
-                const description = getCollectionDescription(collection);
-                
-                return (
-                  <motion.div
-                    key={collection.id}
-                    className={`relative flex items-center ${isLeft ? 'justify-start' : 'justify-end'}`}
-                    initial={{ opacity: 0, x: isLeft ? -100 : 100 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.6, delay: globalIndex * 0.1 }}
-                  >
               {/* Point de connexion sur la ligne */}
               <div className="absolute left-1/2 transform -translate-x-3 w-6 h-6 bg-background border-4 border-primary rounded-full z-10" />
               
@@ -189,13 +139,21 @@ export const CollectionsTimeline: React.FC<CollectionsTimelineProps> = ({
                     )}
                   </div>
 
-                  {/* Bouton d'action */}
-                  <Link to={`/collections/${collection.slug}`}>
-                    <Button variant="outline" size="sm" className="w-full group">
-                      <I18nText translationKey="collections.explore">Explorer</I18nText>
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
+                  {/* Boutons d'action */}
+                  <div className="flex gap-2">
+                    <Link to={`/collections/${collection.slug}`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full group">
+                        <I18nText translationKey="collections.explore">Explorer</I18nText>
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                    <Link to={`/collections/${collection.slug}/timeline`} className="flex-1">
+                      <Button size="sm" className="w-full group">
+                        <I18nText translationKey="collections.timeline">Timeline</I18nText>
+                        <Calendar className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </Card>
 
@@ -205,12 +163,9 @@ export const CollectionsTimeline: React.FC<CollectionsTimelineProps> = ({
               } w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-sm font-bold text-primary`}>
                 {index + 1}
               </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Footer de la timeline */}
@@ -222,8 +177,8 @@ export const CollectionsTimeline: React.FC<CollectionsTimelineProps> = ({
         transition={{ duration: 0.6 }}
       >
         <h3 className="text-lg font-semibold mb-4">
-          <I18nText translationKey="collections.timelineEnd">
-            Fin du parcours temporel
+          <I18nText translationKey="collections.exploreMore">
+            Explorez plus de collections
           </I18nText>
         </h3>
         <p className="text-muted-foreground mb-6">

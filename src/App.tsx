@@ -16,6 +16,7 @@ import SymbolsPage from '@/pages/SymbolsPage';
 import SymbolDetailPage from '@/pages/SymbolDetailPage';
 import CollectionsPage from '@/pages/CollectionsPage';
 import CollectionDetailPage from '@/pages/CollectionDetailPage';
+import { CollectionSymbolsTimeline } from '@/features/collections/components/timeline/CollectionSymbolsTimeline';
 import QuestsPage from '@/pages/QuestsPage';
 import QuestDetailPage from '@/pages/QuestDetailPage';
 import CommunityPage from '@/pages/CommunityPage';
@@ -101,6 +102,7 @@ function App() {
                   <Route path="/symbol-explorer" element={<SymbolExplorer />} />
                   <Route path="/collections" element={<CollectionsPage />} />
                   <Route path="/collections/:slug" element={<CollectionDetailPage />} />
+                  <Route path="/collections/:slug/timeline" element={<CollectionSymbolsTimeline />} />
                   <Route path="/quests" element={<QuestsPage />} />
                   <Route path="/quests/:questId" element={<QuestDetailPage />} />
                   <Route path="/community" element={<CommunityPage />} />
