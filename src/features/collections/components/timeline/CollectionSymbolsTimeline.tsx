@@ -202,7 +202,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                       </div>
                       {/* Position dans la collection */}
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium">Position: {symbol.position}</span>
+                        <span className="text-xs font-medium">Position: {symbol.symbol_position}</span>
                       </div>
                     </div>
 

@@ -4088,6 +4088,22 @@ export type Database = {
           full_name: string
         }[]
       }
+      get_collection_symbols_with_temporal_periods: {
+        Args: { p_collection_id: string }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          culture: string
+          period: string
+          created_at: string
+          symbol_position: number
+          image_url: string
+          temporal_period_order: number
+          temporal_period_name: string
+          cultural_period_name: string
+        }[]
+      }
       get_community_verification_comments: {
         Args: { p_symbol_id: string }
         Returns: {

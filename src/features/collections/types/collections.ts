@@ -55,3 +55,17 @@ export interface CreateCollectionData {
   };
   symbol_ids?: string[];
 }
+
+export interface CollectionSymbolWithTemporal {
+  id: string;
+  name: string;
+  description?: string;
+  culture: string;
+  period: string;
+  created_at: string;
+  symbol_position: number;
+  image_url?: string;
+  temporal_period_order: number;
+  temporal_period_name?: string;
+  cultural_period_name?: string;
+}
