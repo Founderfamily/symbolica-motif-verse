@@ -8,3 +8,6 @@ enable_confirmations = false
 enabled = false
 client_id = ""
 secret = ""
+
+[functions.get-mapbox-token]
+verify_jwt = false

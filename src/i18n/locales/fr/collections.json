@@ -4,6 +4,7 @@
     "title": "Collections",
     "featured": {
       "title": "Collections en Vedette",
+      "description": "Explorez notre sélection de symboles organisés par thèmes et époques",
       "subtitle": "Explorez notre sélection de symboles organisés par thèmes et époques",
       "exploreAll": "Voir toutes les collections",
       "geometry": "Géométrie Sacrée",
@@ -14,6 +15,16 @@
       "traditionsDesc": "Explorez les symboles qui perdurent à travers les âges",
       "universal": "Patrimoine Universel",
       "universalDesc": "Les symboles qui unissent l'humanité"
+    },
+    "heroStats": {
+      "cultures": "Cultures",
+      "periods": "Périodes",
+      "mythologies": "Mythologies",
+      "art": "Arts"
+    },
+    "worldMap": {
+      "title": "Explorez les cultures du monde",
+      "subtitle": "Cliquez sur les marqueurs pour découvrir les symboles de chaque région"
     },
     "categories": {
       "historical": "Périodes Historiques",
