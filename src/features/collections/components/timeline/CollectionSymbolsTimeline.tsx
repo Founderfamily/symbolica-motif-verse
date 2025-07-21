@@ -110,10 +110,12 @@ export const CollectionSymbolsTimeline: React.FC = () => {
         <div className="absolute left-1/2 transform -translate-x-2 w-4 h-4 bg-primary rounded-full bottom-0" />
 
         <div className="space-y-20">
-          {symbols.map((symbol, index) => {
+          {symbols
+            .sort((a, b) => a.temporal_period_order - b.temporal_period_order)
+            .map((symbol, index) => {
             const isLeft = index % 2 === 0;
-            const currentPeriod = symbol.period;
-            const previousPeriod = index > 0 ? symbols[index - 1].period : null;
+            const currentPeriod = symbol.temporal_period_name || symbol.period;
+            const previousPeriod = index > 0 ? (symbols[index - 1].temporal_period_name || symbols[index - 1].period) : null;
             const isPeriodChange = currentPeriod !== previousPeriod && index > 0;
             
             return (
@@ -194,7 +196,10 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                     <div className="space-y-2 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3 h-3" />
-                        <span>{symbol.period}</span>
+                        <span>{symbol.temporal_period_name || symbol.period}</span>
+                        {symbol.cultural_period_name && (
+                          <span className="text-primary">({symbol.cultural_period_name})</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <Scroll className="w-3 h-3" />
