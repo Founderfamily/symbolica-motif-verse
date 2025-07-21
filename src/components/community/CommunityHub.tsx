@@ -118,18 +118,18 @@ const CommunityHub: React.FC = () => {
 
         {/* Content layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-200/40">
-              {renderContent()}
-            </div>
+          <div className="lg:col-span-4">
+            {/* Les groupes sont déjà affichés dans CommunityTabs ci-dessus */}
           </div>
 
-          <div className="space-y-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
-              <TopContributors />
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
-              <ActivityFeed />
+          <div className="lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-1 space-y-8">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
+                <TopContributors />
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
+                <ActivityFeed />
+              </div>
             </div>
           </div>
         </div>
