@@ -32,6 +32,11 @@ export const CollectionSymbolsTimeline: React.FC = () => {
   const { data: historicalEvents = [], isLoading: eventsLoading } = useFrenchHistoricalEvents();
   const shouldShowEvents = collection?.slug === 'patrimoine-français';
   
+  console.log('🔍 CollectionSymbolsTimeline - collection slug:', collection?.slug);
+  console.log('🔍 CollectionSymbolsTimeline - shouldShowEvents:', shouldShowEvents);
+  console.log('🔍 CollectionSymbolsTimeline - historicalEvents:', historicalEvents);
+  console.log('🔍 CollectionSymbolsTimeline - eventsLoading:', eventsLoading);
+  
   const isLoading = collectionsLoading || symbolsLoading || (shouldShowEvents && eventsLoading);
 
   if (isLoading) {
