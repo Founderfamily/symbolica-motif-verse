@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, MessageCircle, Edit3, Trash2, Reply } from 'lucide-react';
+import { Send, MessageCircle, Edit3, Trash2, Reply, WifiOff, Wifi } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { groupChatService, ChatMessage } from '@/services/groupChatService';
@@ -21,11 +22,13 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<any>(null);
   const auth = useAuth();
 
   // Auto-scroll vers le bas
@@ -42,7 +45,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
         setIsLoading(true);
         const chatMessages = await groupChatService.getMessages(groupId);
         setMessages(chatMessages);
-        scrollToBottom();
+        setTimeout(scrollToBottom, 100);
       } catch (error) {
         console.error('Erreur lors du chargement des messages:', error);
         toast.error('Impossible de charger les messages');
@@ -54,36 +57,73 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
     loadMessages();
   }, [groupId]);
 
-  // S'abonner aux nouveaux messages en temps réel
+  // Gérer la connexion en temps réel
   useEffect(() => {
     if (!groupId || !auth?.user) return;
 
-    const channel = groupChatService.subscribeToMessages(
-      groupId,
-      (newMessage: ChatMessage) => {
-        setMessages(prev => {
-          // Éviter les doublons
-          if (prev.find(msg => msg.id === newMessage.id)) return prev;
-          return [...prev, newMessage];
+    const setupRealtimeConnection = () => {
+      try {
+        // Nettoyer le canal précédent s'il existe
+        if (channelRef.current) {
+          console.log('Nettoyage du canal précédent');
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
+
+        // Créer un nouveau canal
+        channelRef.current = groupChatService.subscribeToMessages(
+          groupId,
+          (newMessage: ChatMessage) => {
+            setMessages(prev => {
+              // Éviter les doublons
+              if (prev.find(msg => msg.id === newMessage.id)) return prev;
+              const updated = [...prev, newMessage];
+              setTimeout(scrollToBottom, 100);
+              return updated;
+            });
+          }
+        );
+
+        // Gérer les états de connexion
+        channelRef.current.subscribe((status: string) => {
+          console.log('📡 Chat real-time status:', status);
+          
+          switch (status) {
+            case 'SUBSCRIBED':
+              setIsConnected(true);
+              setIsReconnecting(false);
+              break;
+            case 'CHANNEL_ERROR':
+            case 'TIMED_OUT':
+              setIsConnected(false);
+              setIsReconnecting(true);
+              break;
+            case 'CLOSED':
+              setIsConnected(false);
+              setIsReconnecting(false);
+              break;
+            default:
+              setIsConnected(false);
+          }
         });
-        scrollToBottom();
+
+      } catch (error) {
+        console.error('Erreur lors de la configuration Realtime:', error);
+        setIsConnected(false);
       }
-    );
+    };
 
-    channel.subscribe((status: string) => {
-      console.log('📡 Chat real-time status:', status);
-      setIsConnected(status === 'SUBSCRIBED');
-    });
+    setupRealtimeConnection();
 
+    // Nettoyage au démontage du composant
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        console.log('Nettoyage du canal au démontage');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [groupId, auth?.user]);
-
-  // Auto-scroll quand de nouveaux messages arrivent
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !auth?.user) return;
@@ -167,9 +207,24 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
             {groupName && <span className="text-sm text-muted-foreground">- {groupName}</span>}
           </CardTitle>
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-xs text-muted-foreground">
-              {isConnected ? <I18nText translationKey="community.online">En ligne</I18nText> : <I18nText translationKey="community.offline">Hors ligne</I18nText>}
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : isReconnecting ? 'bg-yellow-500' : 'bg-red-500'}`} />
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              {isConnected ? (
+                <>
+                  <Wifi className="h-3 w-3" />
+                  <I18nText translationKey="community.online">En ligne</I18nText>
+                </>
+              ) : isReconnecting ? (
+                <>
+                  <div className="animate-spin rounded-full h-3 w-3 border border-yellow-500 border-t-transparent" />
+                  Reconnexion...
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3 w-3" />
+                  <I18nText translationKey="community.offline">Hors ligne</I18nText>
+                </>
+              )}
             </span>
           </div>
         </div>
@@ -209,7 +264,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
           messages.map((message) => (
             <div
               key={message.id}
-              className={`flex gap-3 ${
+              className={`group flex gap-3 ${
                 message.user_id === auth?.user?.id ? 'flex-row-reverse' : 'flex-row'
               }`}
             >
@@ -343,15 +398,20 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName }) => {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              disabled={!isConnected}
+              disabled={!isConnected && !isReconnecting}
             />
             <Button
               onClick={handleSendMessage}
-              disabled={!newMessage.trim() || !isConnected}
+              disabled={!newMessage.trim() || (!isConnected && !isReconnecting)}
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
+          {!isConnected && !isReconnecting && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Chat hors ligne - vos messages seront envoyés à la reconnexion
+            </p>
+          )}
         </div>
       )}
     </Card>

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ChatMessage {
@@ -18,36 +19,33 @@ export interface ChatMessage {
 }
 
 export const groupChatService = {
-  // Récupérer les messages d'un groupe
+  // Récupérer les messages d'un groupe avec les profils en une seule requête
   async getMessages(groupId: string, limit = 50): Promise<ChatMessage[]> {
-    const { data, error } = await supabase
-      .from('group_chat_messages')
-      .select('*')
-      .eq('group_id', groupId)
-      .order('created_at', { ascending: true })
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from('group_chat_messages')
+        .select(`
+          *,
+          profiles:user_id (
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('group_id', groupId)
+        .order('created_at', { ascending: true })
+        .limit(limit);
 
-    if (error) {
-      console.error('Error fetching chat messages:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching chat messages:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Service error fetching messages:', error);
+      return [];
     }
-
-    if (!data) return [];
-
-    // Récupérer les profils des utilisateurs séparément
-    const userIds = [...new Set(data.map(msg => msg.user_id))];
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, username, full_name, avatar_url')
-      .in('id', userIds);
-
-    // Associer les profils aux messages
-    const messagesWithProfiles = data.map(message => ({
-      ...message,
-      profiles: profiles?.find(profile => profile.id === message.user_id)
-    }));
-
-    return messagesWithProfiles;
   },
 
   // Envoyer un nouveau message
@@ -64,7 +62,14 @@ export const groupChatService = {
         message_type: 'text',
         reply_to_id: replyToId
       })
-      .select('*')
+      .select(`
+        *,
+        profiles:user_id (
+          username,
+          full_name,
+          avatar_url
+        )
+      `)
       .single();
 
     if (error) {
@@ -72,17 +77,7 @@ export const groupChatService = {
       throw error;
     }
 
-    // Récupérer le profil de l'utilisateur
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('username, full_name, avatar_url')
-      .eq('id', user.id)
-      .single();
-
-    return {
-      ...data,
-      profiles: profile
-    };
+    return data;
   },
 
   // Modifier un message
@@ -115,10 +110,13 @@ export const groupChatService = {
     }
   },
 
-  // S'abonner aux nouveaux messages en temps réel
+  // S'abonner aux nouveaux messages en temps réel avec gestion améliorée
   subscribeToMessages(groupId: string, onNewMessage: (message: ChatMessage) => void) {
+    // Créer un identifiant unique pour ce canal
+    const channelId = `group-chat-${groupId}-${Date.now()}`;
+    
     const channel = supabase
-      .channel(`group-chat-${groupId}`)
+      .channel(channelId)
       .on(
         'postgres_changes',
         {
@@ -128,28 +126,29 @@ export const groupChatService = {
           filter: `group_id=eq.${groupId}`
         },
         async (payload) => {
-          // Récupérer le message complet avec le profil utilisateur
-          const { data: message } = await supabase
-            .from('group_chat_messages')
-            .select('*')
-            .eq('id', payload.new.id)
-            .single();
-
-          if (message) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('username, full_name, avatar_url')
-              .eq('id', message.user_id)
+          try {
+            // Récupérer le message complet avec le profil utilisateur
+            const { data: message } = await supabase
+              .from('group_chat_messages')
+              .select(`
+                *,
+                profiles:user_id (
+                  username,
+                  full_name,
+                  avatar_url
+                )
+              `)
+              .eq('id', payload.new.id)
               .single();
 
-            onNewMessage({
-              ...message,
-              profiles: profile
-            });
+            if (message) {
+              onNewMessage(message);
+            }
+          } catch (error) {
+            console.error('Error processing real-time message:', error);
           }
         }
-      )
-      .subscribe();
+      );
 
     return channel;
   }
