@@ -18,7 +18,7 @@ export const useCollectionSymbols = (collectionId?: string) => {
             culture,
             period,
             created_at,
-            symbol_images (
+            symbol_images!fk_symbol_images_symbol_id (
               image_url,
               is_primary
             )
