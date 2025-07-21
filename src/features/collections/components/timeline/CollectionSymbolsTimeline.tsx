@@ -3,19 +3,9 @@ import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Clock } from "lucide-react";
+import { Loader2, Clock, Calendar, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TimelineItem } from "./TimelineItem";
-
-interface Symbol {
-  id: string;
-  name: string;
-  description: string;
-  created_at: string;
-  period: string;
-  culture: string;
-}
 
 interface Collection {
   id: string;
@@ -34,8 +24,6 @@ interface TimelineEvent {
   year: number;
   period: string;
   culture?: string;
-  image_url?: string;
-  position?: number;
   type: 'symbol' | 'event';
   originalIndex: number;
 }
@@ -43,97 +31,37 @@ interface TimelineEvent {
 // Fonction pour mapper les périodes aux années
 function mapPeriodToYear(period: string): number {
   const periodMappings: { [key: string]: number } = {
-    // Périodes antiques
     'Antiquité': -100,
     'Époque gallo-romaine': -50,
     'Gallo-Roman': -50,
-    'Antiquité tardive': 300,
-    
-    // Moyen Âge
     'Moyen Âge': 1000,
-    'Haut Moyen Âge': 700,
-    'Moyen Âge classique': 1100,
-    'Bas Moyen Âge': 1300,
-    
-    // Époques modernes
-    'Renaissance': 1500,
-    'Époque moderne': 1600,
-    'Temps modernes': 1700,
-    'Époque contemporaine': 1800,
-    'XXe siècle': 1950,
-    'XXIe siècle': 2000,
-    
-    // Âges spécifiques
-    'Âge du Bronze': -1200,
     'Âge du Fer': -500,
-    'Paléolithique': -30000,
-    'Néolithique': -5000,
-    
-    // Siècles spécifiques
     'XVIe siècle': 1550,
     'XVIIe siècle': 1650,
     'XVIIIe siècle': 1750,
     'XIXe siècle': 1850,
+    'XXe siècle': 1950,
   };
 
-  // Recherche exacte d'abord
   for (const [key, year] of Object.entries(periodMappings)) {
     if (period.toLowerCase().includes(key.toLowerCase())) {
       return year;
     }
   }
 
-  // Extraction de siècles en chiffres romains
-  const centuryMatch = period.match(/(\w+)e siècle/i);
-  if (centuryMatch) {
-    const romanNumerals: { [key: string]: number } = {
-      'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5,
-      'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10,
-      'XI': 11, 'XII': 12, 'XIII': 13, 'XIV': 14, 'XV': 15,
-      'XVI': 16, 'XVII': 17, 'XVIII': 18, 'XIX': 19, 'XX': 20, 'XXI': 21
-    };
-    
-    const roman = centuryMatch[1].toUpperCase();
-    if (romanNumerals[roman]) {
-      return (romanNumerals[roman] - 1) * 100 + 50; // Milieu du siècle
-    }
-  }
-
-  return new Date().getFullYear(); // Fallback
+  return new Date().getFullYear();
 }
 
-// Événements historiques français
+// Événements historiques français (sélection réduite)
 const historicalEvents = [
-  { title: "Vercingétorix et la résistance gauloise", description: "Dernière grande résistance gauloise face à Rome", year: -52, period: "Antiquité", culture: "Gaule" },
-  { title: "Conquête romaine de la Gaule", description: "Jules César achève la conquête de la Gaule", year: -50, period: "Antiquité", culture: "Rome" },
-  { title: "Baptême de Clovis", description: "Le roi des Francs se convertit au christianisme", year: 496, period: "Haut Moyen Âge", culture: "Royaume franc" },
-  { title: "Couronnement de Charlemagne", description: "Empereur d'Occident couronné par le pape", year: 800, period: "Haut Moyen Âge", culture: "Empire carolingien" },
-  { title: "Bataille de Hastings", description: "Guillaume le Conquérant devient roi d'Angleterre", year: 1066, period: "Moyen Âge", culture: "Normandie" },
-  { title: "Première Croisade", description: "Appel du pape Urbain II à la croisade", year: 1095, period: "Moyen Âge", culture: "Chrétienté" },
-  { title: "Construction de Notre-Dame", description: "Début de la construction de la cathédrale", year: 1163, period: "Moyen Âge", culture: "France capétienne" },
-  { title: "Règne de Philippe Auguste", description: "Consolidation du royaume de France", year: 1200, period: "Moyen Âge", culture: "France capétienne" },
-  { title: "Bataille de Bouvines", description: "Victoire française face à la coalition", year: 1214, period: "Moyen Âge", culture: "France capétienne" },
-  { title: "Règne de Louis IX (Saint Louis)", description: "Apogée de la France médiévale", year: 1250, period: "Moyen Âge", culture: "France capétienne" },
-  { title: "Début de la Guerre de Cent Ans", description: "Conflit entre la France et l'Angleterre", year: 1337, period: "Bas Moyen Âge", culture: "France" },
-  { title: "Peste noire en France", description: "Grande épidémie qui décime l'Europe", year: 1348, period: "Bas Moyen Âge", culture: "Europe" },
+  { title: "Vercingétorix et la résistance gauloise", description: "Dernière grande résistance gauloise", year: -52, period: "Antiquité", culture: "Gaule" },
+  { title: "Baptême de Clovis", description: "Conversion au christianisme", year: 496, period: "Haut Moyen Âge", culture: "Royaume franc" },
+  { title: "Couronnement de Charlemagne", description: "Empereur d'Occident", year: 800, period: "Haut Moyen Âge", culture: "Empire carolingien" },
+  { title: "Construction de Notre-Dame", description: "Début de la construction", year: 1163, period: "Moyen Âge", culture: "France capétienne" },
   { title: "Jeanne d'Arc libère Orléans", description: "Tournant de la Guerre de Cent Ans", year: 1429, period: "Bas Moyen Âge", culture: "France" },
-  { title: "Fin de la Guerre de Cent Ans", description: "Victoire française à Castillon", year: 1453, period: "Bas Moyen Âge", culture: "France" },
-  { title: "Renaissance française", description: "Influence italienne sur les arts français", year: 1515, period: "Renaissance", culture: "France" },
-  { title: "Guerres de Religion", description: "Conflits entre catholiques et protestants", year: 1562, period: "XVIe siècle", culture: "France" },
-  { title: "Édit de Nantes", description: "Henri IV proclame la tolérance religieuse", year: 1598, period: "XVIe siècle", culture: "France" },
-  { title: "Règne de Louis XIV", description: "Le Roi-Soleil et l'apogée de la monarchie", year: 1650, period: "XVIIe siècle", culture: "France" },
-  { title: "Construction de Versailles", description: "Symbole de la puissance royale française", year: 1661, period: "XVIIe siècle", culture: "France" },
-  { title: "Siècle des Lumières", description: "Rayonnement intellectuel français en Europe", year: 1750, period: "XVIIIe siècle", culture: "France" },
+  { title: "Renaissance française", description: "Influence italienne sur les arts", year: 1515, period: "Renaissance", culture: "France" },
   { title: "Révolution française", description: "Chute de l'Ancien Régime", year: 1789, period: "XVIIIe siècle", culture: "France" },
-  { title: "Empire napoléonien", description: "Napoléon redessine l'Europe", year: 1804, period: "XIXe siècle", culture: "France" },
-  { title: "Restauration monarchique", description: "Retour des Bourbons sur le trône", year: 1815, period: "XIXe siècle", culture: "France" },
-  { title: "Révolution de 1848", description: "Établissement de la IIe République", year: 1848, period: "XIXe siècle", culture: "France" },
-  { title: "Second Empire", description: "Règne de Napoléon III", year: 1852, period: "XIXe siècle", culture: "France" },
-  { title: "IIIe République", description: "Longue période républicaine", year: 1870, period: "XIXe siècle", culture: "France" },
-  { title: "Belle Époque", description: "Prospérité et rayonnement culturel", year: 1900, period: "XXe siècle", culture: "France" },
-  { title: "Première Guerre mondiale", description: "La Grande Guerre transforme la France", year: 1914, period: "XXe siècle", culture: "France" },
-  { title: "Front populaire", description: "Gouvernement de gauche en France", year: 1936, period: "XXe siècle", culture: "France" },
-  { title: "Libération de la France", description: "Fin de l'occupation allemande", year: 1944, period: "XXe siècle", culture: "France" }
+  { title: "Empire napoléonien", description: "Napoléon redessine l'Europe", year: 1804, period: "XIXe siècle", culture: "France" }
 ];
 
 export function CollectionSymbolsTimeline() {
@@ -166,19 +94,12 @@ export function CollectionSymbolsTimeline() {
   // Récupération des symboles
   const { data: symbols, isLoading: symbolsLoading } = useQuery({
     queryKey: ['collection-symbols', collection?.id],
-    queryFn: async (): Promise<Symbol[]> => {
+    queryFn: async () => {
       if (!collection?.id) return [];
       
       const { data, error } = await supabase
         .from('symbols')
-        .select(`
-          id,
-          name,
-          description,
-          created_at,
-          period,
-          culture
-        `)
+        .select('id, name, description, period, culture, created_at')
         .eq('collection_id', collection.id);
 
       if (error) throw error;
@@ -191,24 +112,17 @@ export function CollectionSymbolsTimeline() {
   useEffect(() => {
     if (!symbols) return;
 
-    console.log('🔍 CollectionSymbolsTimeline - found collection:', collection);
-    console.log(`📊 CollectionSymbolsTimeline - processing ${symbols.length} symbols`);
-
     // Conversion des symboles en événements de timeline
     const symbolEvents: TimelineEvent[] = symbols.map((symbol, index) => {
-      const symbolYear = mapPeriodToYear(symbol.temporal_period_name || symbol.period);
-      
-      console.log(`🎯 Symbol ${symbol.name}: ${symbol.temporal_period_name || symbol.period} → ${symbolYear}`);
+      const symbolYear = mapPeriodToYear(symbol.period);
       
       return {
         id: `symbol-${symbol.id}`,
         title: symbol.name,
         description: symbol.description,
         year: symbolYear,
-        period: symbol.temporal_period_name || symbol.period,
+        period: symbol.period,
         culture: symbol.culture,
-        image_url: symbol.image_url,
-        position: symbol.symbol_position,
         type: 'symbol' as const,
         originalIndex: index
       };
@@ -228,8 +142,6 @@ export function CollectionSymbolsTimeline() {
 
     // Fusion et tri chronologique
     const allEvents = [...symbolEvents, ...eventEvents].sort((a, b) => a.year - b.year);
-    
-    console.log(`📅 Timeline created with ${allEvents.length} events (${symbolEvents.length} symbols + ${eventEvents.length} historical events)`);
     setTimelineEvents(allEvents);
   }, [symbols, collection]);
 
@@ -238,9 +150,7 @@ export function CollectionSymbolsTimeline() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground">
-            <I18nText translationKey="collections.loading">Chargement de la timeline...</I18nText>
-          </p>
+          <p className="text-muted-foreground">Chargement de la timeline...</p>
         </div>
       </div>
     );
@@ -277,16 +187,104 @@ export function CollectionSymbolsTimeline() {
       </div>
 
       {/* Timeline */}
-      <div className="max-w-6xl mx-auto px-6 pb-16">
+      <div className="max-w-4xl mx-auto px-6 pb-16">
         <div className="relative">
           {/* Timeline Line */}
           <div className="absolute left-1/2 transform -translate-x-0.5 w-0.5 bg-gradient-to-b from-primary/50 via-primary to-primary/50 h-full" />
           
           {/* Timeline Items */}
-          <div className="space-y-16 pt-8">
-            {timelineEvents.map((event, index) => (
-              <TimelineItem key={event.id} {...event} index={index} />
-            ))}
+          <div className="space-y-12 pt-8">
+            {timelineEvents.map((event, index) => {
+              const isLeft = index % 2 === 0;
+              const yearDisplay = event.year > 0 ? `${event.year}` : `${Math.abs(event.year)} av. J.-C.`;
+
+              return (
+                <div key={event.id} className="relative flex items-center justify-center">
+                  {/* Timeline Point */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={`absolute z-10 w-4 h-4 rounded-full border-4 border-background shadow-lg ${
+                      event.type === 'symbol' ? 'bg-primary' : 'bg-muted-foreground'
+                    }`}
+                  />
+                  
+                  {/* Year Label */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    className="absolute z-20 -bottom-8 bg-background border border-muted rounded-full px-3 py-1 text-xs font-medium text-primary shadow-sm"
+                  >
+                    {yearDisplay}
+                  </motion.div>
+
+                  {/* Connection Line */}
+                  <div 
+                    className={`absolute w-16 h-0.5 bg-primary/30 ${
+                      isLeft ? '-left-16' : '-right-16'
+                    }`}
+                  />
+
+                  {/* Card */}
+                  <div className={`${isLeft ? '-ml-16' : '-mr-16'} w-full max-w-xs`}>
+                    <motion.div
+                      initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
+                      className={`flex ${isLeft ? 'justify-start' : 'justify-end'}`}
+                    >
+                      <Card className={`
+                        relative max-w-sm w-full p-4 
+                        ${event.type === 'symbol' ? 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20' : 'bg-gradient-to-br from-muted/30 to-muted/50'}
+                        hover:shadow-lg transition-all duration-300
+                      `}>
+                        {/* Type Badge */}
+                        <Badge 
+                          variant={event.type === 'symbol' ? 'default' : 'secondary'} 
+                          className="absolute -top-2 -right-2 text-xs"
+                        >
+                          {event.type === 'symbol' ? `#${event.originalIndex + 1}` : 'Événement'}
+                        </Badge>
+
+                        <div className="space-y-3">
+                          {/* Title */}
+                          <div>
+                            <h3 className="font-bold text-base leading-tight mb-1 line-clamp-2">
+                              {event.title}
+                            </h3>
+                            {event.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {event.description}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Metadata */}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Calendar className="w-3.5 h-3.5 text-primary" />
+                              <span className="text-muted-foreground text-xs">{event.period}</span>
+                            </div>
+                            
+                            {event.culture && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+                                <span className="text-muted-foreground text-xs line-clamp-1">{event.culture}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
