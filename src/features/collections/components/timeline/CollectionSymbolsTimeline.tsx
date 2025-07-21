@@ -34,8 +34,10 @@ export const CollectionSymbolsTimeline: React.FC = () => {
   
   console.log('🔍 CollectionSymbolsTimeline - collection slug:', collection?.slug);
   console.log('🔍 CollectionSymbolsTimeline - shouldShowEvents:', shouldShowEvents);
-  console.log('🔍 CollectionSymbolsTimeline - historicalEvents:', historicalEvents);
+  console.log('🔍 CollectionSymbolsTimeline - historicalEvents COUNT:', historicalEvents.length);
+  console.log('🔍 CollectionSymbolsTimeline - symbols COUNT:', symbols.length);
   console.log('🔍 CollectionSymbolsTimeline - eventsLoading:', eventsLoading);
+  console.log('🔍 CollectionSymbolsTimeline - symbolsLoading:', symbolsLoading);
   
   const isLoading = collectionsLoading || symbolsLoading || (shouldShowEvents && eventsLoading);
 
@@ -125,20 +127,47 @@ export const CollectionSymbolsTimeline: React.FC = () => {
             // Créer un tableau mixte avec symboles et événements
             const timelineItems = [];
             
-            // Ajouter les symboles avec des années réalistes pour les mélanger
+            // Ajouter les symboles avec des années réalistes basées sur leur période
             symbols.forEach((symbol, index) => {
-              // Attribuer des années basées sur la période ou distribuer entre les événements
               let symbolYear = 2024; // par défaut
               
-              // Essayer d'extraire une année de la période du symbole
+              // Mapping intelligent des périodes vers des années
               if (symbol.period) {
+                const period = symbol.period.toLowerCase();
+                
+                // Chercher une année explicite d'abord
                 const yearMatch = symbol.period.match(/(\d{4})/);
                 if (yearMatch) {
                   symbolYear = parseInt(yearMatch[1]);
                 } else {
-                  // Distribuer les symboles entre les périodes historiques
-                  const baseYears = [1200, 1400, 1600, 1800, 1900, 1950, 2000];
-                  symbolYear = baseYears[index % baseYears.length] || 2020;
+                  // Mapping des périodes historiques vers des années représentatives
+                  if (period.includes('antiquité') || period.includes('gaulois') || period.includes('gaul') || period.includes('av. j.-c.')) {
+                    symbolYear = -100 + (index * 50); // Antiquité : -100 à 300
+                  } else if (period.includes('gallo-romain')) {
+                    symbolYear = 200 + (index * 30);
+                  } else if (period.includes('haut moyen âge') || period.includes('haut moyen-âge')) {
+                    symbolYear = 500 + (index * 40);
+                  } else if (period.includes('moyen âge') || period.includes('moyen-âge') || period.includes('médiéval')) {
+                    symbolYear = 1000 + (index * 50); // Moyen Âge : 1000-1500
+                  } else if (period.includes('renaissance')) {
+                    symbolYear = 1500 + (index * 20); // Renaissance : 1500-1600
+                  } else if (period.includes('moderne') || period.includes('époque moderne')) {
+                    symbolYear = 1600 + (index * 30); // Époque moderne : 1600-1800
+                  } else if (period.includes('seconde guerre') || period.includes('guerre mondiale')) {
+                    symbolYear = 1940 + (index * 5);
+                  } else if (period.includes('xvie')) {
+                    symbolYear = 1550 + (index * 10);
+                  } else if (period.includes('xviie')) {
+                    symbolYear = 1650 + (index * 10);
+                  } else if (period.includes('xviiie')) {
+                    symbolYear = 1750 + (index * 10);
+                  } else if (period.includes('xixe') || period.includes('19e')) {
+                    symbolYear = 1850 + (index * 10);
+                  } else {
+                    // Distribution par défaut
+                    const baseYears = [800, 1100, 1300, 1500, 1700, 1850, 1950];
+                    symbolYear = baseYears[index % baseYears.length] || (1200 + index * 100);
+                  }
                 }
               }
               
