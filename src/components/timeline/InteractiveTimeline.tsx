@@ -1,17 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Search, Filter, Zap, ArrowLeft, ChevronDown } from 'lucide-react';
+import { Search, Filter, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { TaxonomyService } from '@/services/taxonomyService';
 import { supabase } from '@/integrations/supabase/client';
+import { TaxonomyService } from '@/services/taxonomyService';
 import { SymbolData } from '@/types/supabase';
-import { Link } from 'react-router-dom';
 import { AdvancedFiltersPanel } from './AdvancedFiltersPanel';
 import { TimelineBreadcrumb } from './TimelineBreadcrumb';
+import { ParallaxPeriodHeader } from './ParallaxPeriodHeader';
+import { AnimatedSymbolGrid } from './AnimatedSymbolGrid';
+import { TimelineNavigation } from './TimelineNavigation';
 
 interface SymbolWithImages extends SymbolData {
   symbol_images?: Array<{
@@ -262,82 +262,58 @@ export function InteractiveTimeline() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <motion.div
+          className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        />
       </div>
     );
   }
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
+      {/* Enhanced Header with parallax */}
+      <motion.div 
+        className="text-center space-y-4 relative overflow-hidden rounded-2xl p-8 bg-gradient-to-br from-primary/5 to-secondary/5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="absolute inset-0 pattern-dots-lg opacity-5" />
         <motion.h1 
-          className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          className="text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent relative z-10"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
           Timeline Interactive des Symboles
         </motion.h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <motion.p 
+          className="text-muted-foreground max-w-2xl mx-auto text-lg relative z-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
           Explorez l'évolution des symboles à travers les époques selon la classification UNESCO
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
       {/* Breadcrumb */}
       <TimelineBreadcrumb items={breadcrumbItems} />
 
       {/* Timeline Navigation - Only show if not in sub-period */}
       {!selectedSubPeriod && (
-        <div className="relative">
-          <div className="flex items-center justify-between mb-8">
-            <Button variant="outline" size="icon" onClick={prevPeriod}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <div className="flex-1 mx-4">
-              <div className="flex justify-between items-center relative">
-                {periods.map((period, index) => (
-                  <motion.button
-                    key={period.id}
-                    className={`flex flex-col items-center p-3 rounded-lg transition-all ${
-                      index === selectedPeriod 
-                        ? 'bg-primary/10 text-primary' 
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                    onClick={() => setSelectedPeriod(index)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <div className={`w-4 h-4 rounded-full mb-2 ${
-                      index === selectedPeriod ? 'bg-primary' : 'bg-muted'
-                    }`} />
-                    <span className="text-sm font-medium">{period.name}</span>
-                    <span className="text-xs text-muted-foreground">{period.dateRange}</span>
-                    {period.subPeriods.length > 0 && (
-                      <ChevronDown className="h-3 w-3 mt-1 text-muted-foreground" />
-                    )}
-                  </motion.button>
-                ))}
-                
-                {/* Progress Line */}
-                <div className="absolute top-6 left-0 w-full h-0.5 bg-muted -z-10">
-                  <motion.div 
-                    className="h-full bg-primary"
-                    style={{ width: `${((selectedPeriod + 1) / periods.length) * 100}%` }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <Button variant="outline" size="icon" onClick={nextPeriod}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <TimelineNavigation
+          periods={periods}
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={setSelectedPeriod}
+          onNext={nextPeriod}
+          onPrev={prevPeriod}
+        />
       )}
 
-      {/* Period/Sub-period Details */}
+      {/* Period/Sub-period Details with Parallax */}
       <AnimatePresence mode="wait">
         {currentPeriod && (
           <motion.div
@@ -345,158 +321,130 @@ export function InteractiveTimeline() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-6"
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="space-y-8"
           >
             {/* Back Button for Sub-periods */}
             {selectedSubPeriod && (
-              <Button variant="outline" onClick={goBackToPeriod} className="mb-4">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour à {currentPeriod.name}
-              </Button>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Button variant="outline" onClick={goBackToPeriod} className="mb-6 hover:shadow-md transition-shadow">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Retour à {currentPeriod.name}
+                </Button>
+              </motion.div>
             )}
 
-            {/* Period/Sub-period Info */}
-            <Card className={`bg-gradient-to-r ${currentSubPeriod ? 'from-muted to-muted/50' : currentPeriod.gradient} border-none`}>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <h3 className="text-2xl font-bold mb-2">
-                      {currentSubPeriod ? currentSubPeriod.name : currentPeriod.name}
-                    </h3>
-                    <p className="text-sm opacity-90">
-                      {currentSubPeriod ? currentSubPeriod.description : currentPeriod.description}
-                    </p>
-                    <p className="text-xs mt-2 opacity-75">
-                      {currentSubPeriod ? currentSubPeriod.dateRange : currentPeriod.dateRange}
-                    </p>
-                  </div>
-                  
-                  {!currentSubPeriod && (
-                    <>
-                      <div>
-                        <h4 className="font-semibold mb-2">Classification UNESCO</h4>
-                        <Badge variant="secondary">{currentPeriod.unescoCode}</Badge>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold mb-2">Cultures Principales</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {currentPeriod.cultures.map((culture) => (
-                            <Badge key={culture} variant="outline" className="text-xs">
-                              {culture}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Parallax Period Header */}
+            <ParallaxPeriodHeader 
+              period={currentSubPeriod || currentPeriod} 
+              isSubPeriod={!!currentSubPeriod}
+            />
 
             {/* Sub-periods Navigation - Only show if in main period */}
             {!selectedSubPeriod && currentPeriod.subPeriods.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {currentPeriod.subPeriods.map((subPeriod) => (
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, staggerChildren: 0.1 }}
+              >
+                {currentPeriod.subPeriods.map((subPeriod, index) => (
                   <motion.button
                     key={subPeriod.id}
                     onClick={() => goToSubPeriod(subPeriod.id)}
-                    className="p-4 text-left bg-background border rounded-lg hover:shadow-md transition-all"
-                    whileHover={{ scale: 1.02 }}
+                    className="group p-6 text-left bg-gradient-to-br from-background to-muted/30 border border-muted/50 rounded-xl hover:shadow-xl hover:border-primary/20 transition-all duration-300"
+                    whileHover={{ scale: 1.02, y: -4 }}
                     whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
-                    <h4 className="font-medium mb-1">{subPeriod.name}</h4>
-                    <p className="text-xs text-muted-foreground mb-2">{subPeriod.dateRange}</p>
-                    <p className="text-xs text-muted-foreground">{subPeriod.description}</p>
-                    <div className="mt-2">
-                      <Badge variant="outline" className="text-xs">
-                        {subPeriod.symbols.length} symboles
-                      </Badge>
+                    <div className="relative">
+                      <h4 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                        {subPeriod.name}
+                      </h4>
+                      <p className="text-sm text-muted-foreground mb-3">{subPeriod.dateRange}</p>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{subPeriod.description}</p>
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs group-hover:border-primary/50">
+                          {subPeriod.symbols.length} symboles
+                        </Badge>
+                        <motion.div
+                          className="w-2 h-2 bg-primary rounded-full opacity-0 group-hover:opacity-100"
+                          whileHover={{ scale: 1.5 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                      </div>
                     </div>
                   </motion.button>
                 ))}
-              </div>
+              </motion.div>
             )}
 
-            {/* Search and Filters */}
-            <div className="flex items-center gap-4">
+            {/* Enhanced Search and Filters */}
+            <motion.div 
+              className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Rechercher un symbole ou une culture..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background/80 backdrop-blur-sm"
                 />
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(true)}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Filtres
-                {(filters.cultures.length > 0 || filters.themes.length > 0) && (
-                  <Badge variant="secondary" className="ml-2">
-                    {filters.cultures.length + filters.themes.length}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(true)}
+                  className="hover:shadow-md transition-shadow bg-background/80 backdrop-blur-sm"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filtres
+                  {(filters.cultures.length > 0 || filters.themes.length > 0) && (
+                    <Badge variant="secondary" className="ml-2">
+                      {filters.cultures.length + filters.themes.length}
+                    </Badge>
+                  )}
+                </Button>
+              </motion.div>
+            </motion.div>
 
-            {/* Symbols Grid */}
-            <div className={`grid gap-4 ${
-              filters.viewMode === 'list' ? 'grid-cols-1' :
-              filters.viewMode === 'mosaic' ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-8' :
-              'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6'
-            }`}>
-              {filteredSymbols.map((symbol) => (
-                <motion.div
-                  key={symbol.id}
+            {/* Enhanced Symbols Grid */}
+            <div className="min-h-[400px]">
+              <AnimatedSymbolGrid 
+                symbols={filteredSymbols}
+                viewMode={filters.viewMode}
+                isVisible={true}
+              />
+
+              {filteredSymbols.length === 0 && (
+                <motion.div 
+                  className="text-center py-16"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.4 }}
                 >
-                  <Link to={`/symbols/${symbol.id}`}>
-                    <Card className="group hover:shadow-lg transition-all duration-200 hover-scale">
-                      <CardContent className={filters.viewMode === 'list' ? 'p-4 flex gap-4 items-center' : 'p-3'}>
-                        <div className={`bg-muted rounded-lg overflow-hidden ${
-                          filters.viewMode === 'list' ? 'w-16 h-16 flex-shrink-0' :
-                          filters.viewMode === 'mosaic' ? 'aspect-square' :
-                          'aspect-square mb-3'
-                        }`}>
-                          {symbol.symbol_images?.[0]?.image_url ? (
-                            <img
-                              src={symbol.symbol_images[0].image_url}
-                              alt={symbol.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Zap className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                        {filters.viewMode !== 'mosaic' && (
-                          <div className="flex-1">
-                            <h4 className="font-medium text-sm mb-1 line-clamp-1">{symbol.name}</h4>
-                            <p className="text-xs text-muted-foreground line-clamp-1">{symbol.culture}</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Link>
+                  <div className="w-24 h-24 mx-auto mb-6 bg-muted/50 rounded-full flex items-center justify-center">
+                    <Search className="h-12 w-12 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-muted-foreground text-lg">
+                    Aucun symbole trouvé pour cette période ou cette recherche.
+                  </p>
+                  <p className="text-muted-foreground/70 text-sm mt-2">
+                    Essayez de modifier vos filtres ou votre recherche.
+                  </p>
                 </motion.div>
-              ))}
+              )}
             </div>
-
-            {filteredSymbols.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  Aucun symbole trouvé pour cette période ou cette recherche.
-                </p>
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
