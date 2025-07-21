@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { I18nText } from '@/components/ui/i18n-text';
+import { mapboxConfigService } from '@/services/admin/mapboxConfigService';
 
 interface WorldMapProps {
   onRegionClick?: (region: string) => void;
@@ -253,19 +254,34 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onRegionClick, className = '
     spinGlobe();
   };
 
-  const handleTokenSubmit = (token: string) => {
-    localStorage.setItem('mapbox_token', token);
-    setMapboxToken(token);
-    initializeMap(token);
+  const handleTokenSubmit = async (token: string) => {
+    try {
+      // Sauvegarder la configuration dans la base de données
+      await mapboxConfigService.saveConfig({
+        token: token,
+        enabled: true
+      });
+      setMapboxToken(token);
+      initializeMap(token);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+    }
   };
 
   useEffect(() => {
-    // Vérifier si un token est déjà stocké
-    const storedToken = localStorage.getItem('mapbox_token');
-    if (storedToken) {
-      setMapboxToken(storedToken);
-      initializeMap(storedToken);
-    }
+    const loadMapboxConfig = async () => {
+      try {
+        const config = await mapboxConfigService.getConfig();
+        if (config && config.enabled && config.token) {
+          setMapboxToken(config.token);
+          initializeMap(config.token);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement de la config Mapbox:', error);
+      }
+    };
+
+    loadMapboxConfig();
 
     return () => {
       map.current?.remove();
