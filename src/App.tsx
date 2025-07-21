@@ -10,7 +10,7 @@ import { ThemeProvider } from 'next-themes';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 // Import pages
-import SimpleHome from '@/pages/SimpleHome';
+import HomePage from '@/pages/HomePage';
 import AboutPage from '@/pages/AboutPage';
 import SymbolsPage from '@/pages/SymbolsPage';
 import SymbolDetailPage from '@/pages/SymbolDetailPage';
@@ -94,7 +94,7 @@ function App() {
                 <Layout>
                   <Routes>
                   {/* Main pages */}
-                  <Route path="/" element={<SimpleHome />} />
+                  <Route path="/" element={<HomePage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/symbols" element={<SymbolsPage />} />
                   <Route path="/symbols/:id" element={<SymbolDetailPage />} />
