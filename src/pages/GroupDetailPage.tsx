@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, MessageCircle, Share2, UserPlus, Settings, ArrowLeft, Folder, Eye } from 'lucide-react';
+import { Users, MessageCircle, Share2, UserPlus, Settings, ArrowLeft, Folder, Eye, MessageSquare } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useAuth } from '@/hooks/useAuth';
 import { InterestGroup, GroupPost } from '@/types/interest-groups';
@@ -20,6 +20,7 @@ import GroupCollections from '@/components/community/GroupCollections';
 import GroupSymbols from '@/components/community/GroupSymbols';
 import InviteUsersDialog from '@/components/community/InviteUsersDialog';
 import RealTimeNotifications from '@/components/community/RealTimeNotifications';
+import GroupChat from '@/components/community/GroupChat';
 
 const GroupDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -31,7 +32,7 @@ const GroupDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isMember, setIsMember] = useState(false);
   const [joining, setJoining] = useState(false);
-  const [activeTab, setActiveTab] = useState('discussion');
+  const [activeTab, setActiveTab] = useState('chat');
 
   useEffect(() => {
     if (slug) {
@@ -253,6 +254,10 @@ const GroupDetailPage: React.FC = () => {
         {canViewContent ? (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
+              <TabsTrigger value="chat" className="gap-2">
+                <MessageSquare className="h-4 w-4" />
+                <I18nText translationKey="community.chat">Chat</I18nText>
+              </TabsTrigger>
               <TabsTrigger value="discussion" className="gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <I18nText translationKey="community.discussion">Discussion</I18nText>
@@ -270,6 +275,13 @@ const GroupDetailPage: React.FC = () => {
                 <I18nText translationKey="community.groupMembers">Members</I18nText>
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="chat">
+              <GroupChat 
+                groupId={group.id}
+                groupName={group.name}
+              />
+            </TabsContent>
 
             <TabsContent value="discussion">
               <GroupDiscussion

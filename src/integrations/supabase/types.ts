@@ -737,6 +737,50 @@ export type Database = {
         }
         Relationships: []
       }
+      group_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          group_id: string
+          id: string
+          is_edited: boolean
+          message_type: string
+          reply_to_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          group_id: string
+          id?: string
+          is_edited?: boolean
+          message_type?: string
+          reply_to_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          is_edited?: boolean
+          message_type?: string
+          reply_to_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "group_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_discoveries: {
         Row: {
           comments_count: number
