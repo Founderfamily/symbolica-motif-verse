@@ -30,7 +30,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
   
   // Récupérer les événements historiques français si c'est la collection patrimoine-français
   const { data: historicalEvents = [], isLoading: eventsLoading } = useFrenchHistoricalEvents();
-  const shouldShowEvents = collection?.slug === 'patrimoine-français';
+  const shouldShowEvents = collection?.slug === 'patrimoine-francais';
   
   console.log('🔍 CollectionSymbolsTimeline - collection slug:', collection?.slug);
   console.log('🔍 CollectionSymbolsTimeline - shouldShowEvents:', shouldShowEvents);
