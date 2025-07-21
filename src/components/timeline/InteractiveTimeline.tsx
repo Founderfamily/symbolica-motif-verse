@@ -349,7 +349,7 @@ export function InteractiveTimeline() {
             {/* Sub-periods Navigation - Only show if in main period */}
             {!selectedSubPeriod && currentPeriod.subPeriods.length > 0 && (
               <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                className="grid grid-cols-2 md:grid-cols-4 gap-3"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, staggerChildren: 0.1 }}
@@ -358,25 +358,25 @@ export function InteractiveTimeline() {
                   <motion.button
                     key={subPeriod.id}
                     onClick={() => goToSubPeriod(subPeriod.id)}
-                    className="group p-6 text-left bg-gradient-to-br from-background to-muted/30 border border-muted/50 rounded-xl hover:shadow-xl hover:border-primary/20 transition-all duration-300"
-                    whileHover={{ scale: 1.02, y: -4 }}
+                    className="group p-4 text-left bg-gradient-to-br from-background to-muted/30 border border-muted/50 rounded-lg hover:shadow-lg hover:border-primary/20 transition-all duration-300"
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
                     <div className="relative">
-                      <h4 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                      <h4 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">
                         {subPeriod.name}
                       </h4>
-                      <p className="text-sm text-muted-foreground mb-3">{subPeriod.dateRange}</p>
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{subPeriod.description}</p>
+                      <p className="text-xs text-muted-foreground mb-2">{subPeriod.dateRange}</p>
+                      <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{subPeriod.description}</p>
                       <div className="flex items-center justify-between">
                         <Badge variant="outline" className="text-xs group-hover:border-primary/50">
                           {subPeriod.symbols.length} symboles
                         </Badge>
                         <motion.div
-                          className="w-2 h-2 bg-primary rounded-full opacity-0 group-hover:opacity-100"
+                          className="w-1.5 h-1.5 bg-primary rounded-full opacity-0 group-hover:opacity-100"
                           whileHover={{ scale: 1.5 }}
                           transition={{ duration: 0.2 }}
                         />
