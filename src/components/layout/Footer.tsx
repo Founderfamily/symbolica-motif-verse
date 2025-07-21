@@ -211,10 +211,10 @@ const Footer: React.FC = () => {
             </p>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <Link to="/terms" className="hover:text-foreground transition-colors">
-                Conditions
+                <I18nText translationKey="footer.terms_short">Conditions</I18nText>
               </Link>
               <Link to="/privacy" className="hover:text-foreground transition-colors">
-                Confidentialité
+                <I18nText translationKey="footer.privacy_short">Confidentialité</I18nText>
               </Link>
               <div className="flex items-center gap-1">
                 <span><I18nText translationKey="footer.made_with">Fait avec</I18nText></span>
