@@ -7,6 +7,7 @@ import TreasureHunting from '@/components/sections/TreasureHunting';
 import HistoricalTours from '@/components/sections/HistoricalTours';
 import CommunityChat from '@/components/sections/CommunityChat';
 import ImprovedCallToAction from '@/components/sections/ImprovedCallToAction';
+import { ScientificCredibility } from '@/components/sections/ScientificCredibility';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ErrorHandler } from '@/utils/errorHandler';
 
@@ -100,6 +101,17 @@ const HomePage = () => {
       >
         <section className="relative py-0">
           <CommunityChat />
+        </section>
+      </ErrorBoundary>
+
+      {/* Scientific Credibility Section */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'ScientificCredibility')
+        }
+      >
+        <section className="relative py-0">
+          <ScientificCredibility />
         </section>
       </ErrorBoundary>
 

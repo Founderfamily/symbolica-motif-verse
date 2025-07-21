@@ -18,12 +18,28 @@ export const NavigationItems = () => {
   const location = useLocation();
   const { isAdmin, user } = useAuth();
   
-  // Navigation principale avec Innovation
+  // Navigation principale
   const navigation = [
     { name: 'Accueil', href: '/', translationKey: 'home' },
     { name: 'Collections', href: '/collections', translationKey: 'collections' },
     { name: 'Quêtes', href: '/quests', translationKey: 'quests' },
     { name: 'Communauté', href: '/community', translationKey: 'community' },
+  ];
+
+  // Menu Parcours avec 2 voies
+  const parcoursMenuItems = [
+    { 
+      name: 'Parcours Académique', 
+      href: '/parcours/academique', 
+      icon: Database,
+      description: 'Exploration scientifique et recherche approfondie'
+    },
+    { 
+      name: 'Parcours Aventure', 
+      href: '/parcours/aventure', 
+      icon: Compass,
+      description: 'Quêtes gamifiées et découvertes ludiques'
+    },
   ];
 
   // Menu Symboles avec timeline
@@ -121,6 +137,47 @@ export const NavigationItems = () => {
           )}
         </Link>
       ))}
+
+      {/* Menu Parcours dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className={cn(
+              'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
+              location.pathname.startsWith('/parcours')
+                ? 'text-primary'
+                : 'text-muted-foreground'
+            )}
+          >
+            Parcours
+            <ChevronDown className="h-3 w-3" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-80 bg-white border shadow-md z-[100]">
+          <DropdownMenuLabel className="text-center font-bold text-emerald-600">
+            🎯 Choisissez Votre Parcours
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {parcoursMenuItems.map((item) => (
+            <DropdownMenuItem key={item.href} asChild>
+              <Link
+                to={item.href}
+                className="flex items-start gap-3 cursor-pointer p-3 hover:bg-emerald-50"
+              >
+                <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-emerald-500" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium">
+                    {item.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {item.description}
+                  </div>
+                </div>
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Menu Symboles dropdown */}
       <DropdownMenu>
