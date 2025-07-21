@@ -16,11 +16,16 @@ export const CollectionSymbolsTimeline: React.FC = () => {
   const { data: collections = [], isLoading: collectionsLoading } = useCollections();
   const { getTranslation } = useCollectionTranslations();
   
+  console.log('🔍 CollectionSymbolsTimeline - slug:', slug);
+  console.log('🔍 CollectionSymbolsTimeline - collections:', collections);
+  
   // Trouver la collection par slug
   const collection = collections.find(c => c.slug === slug);
+  console.log('🔍 CollectionSymbolsTimeline - found collection:', collection);
   
   // Récupérer les symboles de cette collection
   const { data: symbols = [], isLoading: symbolsLoading } = useCollectionSymbols(collection?.id);
+  console.log('🔍 CollectionSymbolsTimeline - symbols:', symbols);
   
   const isLoading = collectionsLoading || symbolsLoading;
 
