@@ -701,6 +701,42 @@ export type Database = {
           },
         ]
       }
+      french_historical_events: {
+        Row: {
+          created_at: string | null
+          date_text: string
+          description: string | null
+          event_name: string
+          id: string
+          importance_level: number | null
+          period_category: string
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          created_at?: string | null
+          date_text: string
+          description?: string | null
+          event_name: string
+          id?: string
+          importance_level?: number | null
+          period_category: string
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          created_at?: string | null
+          date_text?: string
+          description?: string | null
+          event_name?: string
+          id?: string
+          importance_level?: number | null
+          period_category?: string
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
       group_discoveries: {
         Row: {
           comments_count: number

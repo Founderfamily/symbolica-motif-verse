@@ -9,6 +9,7 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../../hooks/useCollections';
 import { useCollectionTranslations } from '@/hooks/useCollectionTranslations';
 import { useCollectionSymbols } from '../../hooks/useCollectionSymbols';
+import { useFrenchHistoricalEvents } from '../../hooks/useFrenchHistoricalEvents';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const CollectionSymbolsTimeline: React.FC = () => {
