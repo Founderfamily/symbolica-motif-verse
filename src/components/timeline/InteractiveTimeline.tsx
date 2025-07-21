@@ -150,8 +150,9 @@ export function InteractiveTimeline() {
   };
 
   const filteredSymbols = currentPeriod?.symbols.filter(symbol =>
-    symbol.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    symbol.culture.toLowerCase().includes(searchQuery.toLowerCase())
+    symbol.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    symbol.culture?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    symbol.description?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   if (loading) {
