@@ -19,19 +19,13 @@ export interface ChatMessage {
 }
 
 export const groupChatService = {
-  // Récupérer les messages d'un groupe avec les profils en une seule requête
+  // Récupérer les messages d'un groupe avec les profils
   async getMessages(groupId: string, limit = 50): Promise<ChatMessage[]> {
     try {
-      const { data, error } = await supabase
+      // D'abord récupérer les messages
+      const { data: messages, error } = await supabase
         .from('group_chat_messages')
-        .select(`
-          *,
-          profiles:user_id (
-            username,
-            full_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('group_id', groupId)
         .order('created_at', { ascending: true })
         .limit(limit);
@@ -41,7 +35,27 @@ export const groupChatService = {
         throw error;
       }
 
-      return data || [];
+      if (!messages || messages.length === 0) {
+        return [];
+      }
+
+      // Récupérer les profils utilisateurs uniques
+      const userIds = [...new Set(messages.map(msg => msg.user_id))];
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        // Continuer sans les profils plutôt que de tout échouer
+      }
+
+      // Combiner messages et profils
+      return messages.map(message => ({
+        ...message,
+        profiles: profiles?.find(profile => profile.id === message.user_id) || undefined
+      }));
     } catch (error) {
       console.error('Service error fetching messages:', error);
       return [];
@@ -53,7 +67,7 @@ export const groupChatService = {
     const user = (await supabase.auth.getUser()).data.user;
     if (!user) throw new Error('User not authenticated');
 
-    const { data, error } = await supabase
+    const { data: message, error } = await supabase
       .from('group_chat_messages')
       .insert({
         group_id: groupId,
@@ -62,14 +76,7 @@ export const groupChatService = {
         message_type: 'text',
         reply_to_id: replyToId
       })
-      .select(`
-        *,
-        profiles:user_id (
-          username,
-          full_name,
-          avatar_url
-        )
-      `)
+      .select('*')
       .single();
 
     if (error) {
@@ -77,7 +84,17 @@ export const groupChatService = {
       throw error;
     }
 
-    return data;
+    // Récupérer le profil utilisateur
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, avatar_url')
+      .eq('id', user.id)
+      .single();
+
+    return {
+      ...message,
+      profiles: profile || undefined
+    };
   },
 
   // Modifier un message
@@ -127,22 +144,25 @@ export const groupChatService = {
         },
         async (payload) => {
           try {
-            // Récupérer le message complet avec le profil utilisateur
+            // Récupérer le message
             const { data: message } = await supabase
               .from('group_chat_messages')
-              .select(`
-                *,
-                profiles:user_id (
-                  username,
-                  full_name,
-                  avatar_url
-                )
-              `)
+              .select('*')
               .eq('id', payload.new.id)
               .single();
 
             if (message) {
-              onNewMessage(message);
+              // Récupérer le profil utilisateur
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('id, username, full_name, avatar_url')
+                .eq('id', message.user_id)
+                .single();
+
+              onNewMessage({
+                ...message,
+                profiles: profile || undefined
+              });
             }
           } catch (error) {
             console.error('Error processing real-time message:', error);
