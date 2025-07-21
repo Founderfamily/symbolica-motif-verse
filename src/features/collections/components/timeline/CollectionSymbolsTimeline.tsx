@@ -140,36 +140,36 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                 if (yearMatch) {
                   symbolYear = parseInt(yearMatch[1]);
                 } else {
-                  // Mapping des périodes historiques vers des années représentatives
-                  if (period.includes('antiquité') || period.includes('gaulois') || period.includes('gaul') || period.includes('av. j.-c.')) {
-                    symbolYear = -100 + (index * 50); // Antiquité : -100 à 300
-                  } else if (period.includes('gallo-romain')) {
-                    symbolYear = 200 + (index * 30);
+                  // Mapping intelligent des périodes historiques vers des années
+                  if (period.includes('antiquité') || period.includes('gaulois') || period.includes('gaul') || period.includes('av. j.-c.') || period.includes('gallo-romain')) {
+                    symbolYear = -100 + (index * 20); // Antiquité : -100 à 400
                   } else if (period.includes('haut moyen âge') || period.includes('haut moyen-âge')) {
-                    symbolYear = 500 + (index * 40);
+                    symbolYear = 500 + (index * 30);
                   } else if (period.includes('moyen âge') || period.includes('moyen-âge') || period.includes('médiéval')) {
-                    symbolYear = 1000 + (index * 50); // Moyen Âge : 1000-1500
+                    symbolYear = 1000 + (index * 15); // Moyen Âge : 1000-1500
                   } else if (period.includes('renaissance')) {
-                    symbolYear = 1500 + (index * 20); // Renaissance : 1500-1600
+                    symbolYear = 1500 + (index * 10); // Renaissance : 1500-1600
                   } else if (period.includes('moderne') || period.includes('époque moderne')) {
-                    symbolYear = 1600 + (index * 30); // Époque moderne : 1600-1800
+                    symbolYear = 1600 + (index * 10); // Époque moderne : 1600-1800
                   } else if (period.includes('seconde guerre') || period.includes('guerre mondiale')) {
-                    symbolYear = 1940 + (index * 5);
+                    symbolYear = 1940 + (index * 2);
                   } else if (period.includes('xvie')) {
-                    symbolYear = 1550 + (index * 10);
+                    symbolYear = 1550 + (index * 5);
                   } else if (period.includes('xviie')) {
-                    symbolYear = 1650 + (index * 10);
+                    symbolYear = 1650 + (index * 5);
                   } else if (period.includes('xviiie')) {
-                    symbolYear = 1750 + (index * 10);
+                    symbolYear = 1750 + (index * 5);
                   } else if (period.includes('xixe') || period.includes('19e')) {
-                    symbolYear = 1850 + (index * 10);
+                    symbolYear = 1850 + (index * 5);
                   } else {
-                    // Distribution par défaut
+                    // Distribution par défaut plus serrée
                     const baseYears = [800, 1100, 1300, 1500, 1700, 1850, 1950];
-                    symbolYear = baseYears[index % baseYears.length] || (1200 + index * 100);
+                    symbolYear = baseYears[index % baseYears.length] || (1200 + index * 50);
                   }
                 }
               }
+              
+              console.log(`🔍 Symbol "${symbol.name}" - Period: "${symbol.period}" - Mapped Year: ${symbolYear}`);
               
               timelineItems.push({
                 type: 'symbol',
