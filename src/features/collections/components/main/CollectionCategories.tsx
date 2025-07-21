@@ -125,9 +125,10 @@ const CollectionCategories: React.FC = () => {
   const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
   const [organizationMode, setOrganizationMode] = useState<'thematic' | 'geographic' | 'popularity' | 'difficulty' | 'chronological'>('thematic');
 
-  // Use database collections directly
+  // Use database collections directly or static ones if empty
   console.log('📚 [CollectionCategories] Collections received:', collections?.length || 0);
-  const finalCollections: UnifiedCollection[] = collections || [];
+  const staticCollections = getStaticCollections(currentLanguage);
+  const finalCollections: UnifiedCollection[] = collections && collections.length > 0 ? collections : staticCollections;
 
   // Function to get title from any collection type
   const getCollectionTitle = React.useCallback((collection: UnifiedCollection) => {
@@ -345,22 +346,13 @@ const CollectionCategories: React.FC = () => {
       </div>
 
       {/* Vue conditionnelle */}
-      <div className="mb-4 p-4 bg-muted/30 rounded-lg text-sm">
-        <p>Mode de vue actuel: {viewMode}</p>
-        <p>Collections disponibles: {filteredAndSortedCollections.length}</p>
-        <p>Mode d'organisation: {organizationMode}</p>
-      </div>
-      
       {viewMode === 'timeline' ? (
-        <div>
-          <p className="text-center mb-4 text-lg font-semibold">Mode Timeline activé</p>
-          <CollectionsTimeline
-            collections={filteredAndSortedCollections}
-            getCollectionTitle={getCollectionTitle}
-            getCollectionDescription={getCollectionDescription}
-            organizationMode={organizationMode}
-          />
-        </div>
+        <CollectionsTimeline
+          collections={filteredAndSortedCollections}
+          getCollectionTitle={getCollectionTitle}
+          getCollectionDescription={getCollectionDescription}
+          organizationMode={organizationMode}
+        />
       ) : (
         <>
           {/* Controls Section pour la vue grille */}
