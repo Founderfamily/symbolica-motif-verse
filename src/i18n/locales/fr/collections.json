@@ -1,64 +1,61 @@
-
 {
-  "collections": {
-    "title": "Collections",
-    "featured": {
-      "title": "Collections en Vedette",
-      "description": "Explorez notre sélection de symboles organisés par thèmes et époques",
-      "subtitle": "Explorez notre sélection de symboles organisés par thèmes et époques",
-      "exploreAll": "Voir toutes les collections",
-      "geometry": "Géométrie Sacrée",
-      "geometryDesc": "Découvrez les formes et proportions qui transcendent les cultures",
-      "mysteries": "Mystères Anciens",
-      "mysteriesDesc": "Plongez dans les symboles énigmatiques du passé",
-      "traditions": "Traditions Vivantes",
-      "traditionsDesc": "Explorez les symboles qui perdurent à travers les âges",
-      "universal": "Patrimoine Universel",
-      "universalDesc": "Les symboles qui unissent l'humanité"
-    },
-    "heroStats": {
-      "cultures": "Cultures",
-      "periods": "Périodes",
-      "mythologies": "Mythologies",
-      "art": "Arts"
-    },
-    "worldMap": {
-      "title": "Explorez les cultures du monde",
-      "subtitle": "Cliquez sur les marqueurs pour découvrir les symboles de chaque région"
-    },
-    "categories": {
-      "historical": "Périodes Historiques",
-      "cultural": "Cultures du Monde", 
-      "mystical": "Mystères & Sacré",
-      "others": "Autres Collections"
-    },
-    "featuredBadge": "En vedette",
-    "explore": "Explorer →",
-    "noCollections": "Aucune collection disponible",
-    "noCollectionsMessage": "Les collections seront bientôt disponibles. Revenez plus tard !",
-    "noFeaturedCollections": "Aucune collection en vedette",
-    "noFeaturedCollectionsMessage": "Les collections en vedette seront bientôt disponibles.",
-    "errorTitle": "Erreur de chargement",
-    "noResults": "Aucune collection trouvée",
-    "noResultsMessage": "Essayez de modifier vos critères de recherche ou de filtrage.",
-    "retry": "Réessayer",
-    "sort": {
-      "featuredFirst": "Vedettes d'abord",
-      "nameAsc": "Nom A-Z",
-      "nameDesc": "Nom Z-A", 
-      "dateDesc": "Plus récent",
-      "dateAsc": "Plus ancien"
-    },
-    "filters": {
-      "allCategories": "Toutes catégories",
-      "allStatus": "Tous statuts",
-      "featured": "Vedettes",
-      "regular": "Régulières",
-      "reset": "Réinitialiser"
-    },
-    "results": "résultat(s)",
-    "activeFilters": "filtre(s) actif(s)",
-    "backToCollections": "Retour aux collections",
-    "searchPlaceholder": "Rechercher une collection..."
-  }
+  "title": "Collections",
+  "featured": {
+    "title": "Collections en Vedette",
+    "description": "Explorez notre sélection de symboles organisés par thèmes et époques",
+    "subtitle": "Explorez notre sélection de symboles organisés par thèmes et époques",
+    "exploreAll": "Voir toutes les collections",
+    "geometry": "Géométrie Sacrée",
+    "geometryDesc": "Découvrez les formes et proportions qui transcendent les cultures",
+    "mysteries": "Mystères Anciens",
+    "mysteriesDesc": "Plongez dans les symboles énigmatiques du passé",
+    "traditions": "Traditions Vivantes",
+    "traditionsDesc": "Explorez les symboles qui perdurent à travers les âges",
+    "universal": "Patrimoine Universel",
+    "universalDesc": "Les symboles qui unissent l'humanité"
+  },
+  "heroStats": {
+    "cultures": "Cultures",
+    "periods": "Périodes",
+    "mythologies": "Mythologies",
+    "art": "Arts"
+  },
+  "worldMap": {
+    "title": "Explorez les cultures du monde",
+    "subtitle": "Cliquez sur les marqueurs pour découvrir les symboles de chaque région"
+  },
+  "categories": {
+    "historical": "Périodes Historiques",
+    "cultural": "Cultures du Monde", 
+    "mystical": "Mystères & Sacré",
+    "others": "Autres Collections"
+  },
+  "featuredBadge": "En vedette",
+  "explore": "Explorer →",
+  "noCollections": "Aucune collection disponible",
+  "noCollectionsMessage": "Les collections seront bientôt disponibles. Revenez plus tard !",
+  "noFeaturedCollections": "Aucune collection en vedette",
+  "noFeaturedCollectionsMessage": "Les collections en vedette seront bientôt disponibles.",
+  "errorTitle": "Erreur de chargement",
+  "noResults": "Aucune collection trouvée",
+  "noResultsMessage": "Essayez de modifier vos critères de recherche ou de filtrage.",
+  "retry": "Réessayer",
+  "sort": {
+    "featuredFirst": "Vedettes d'abord",
+    "nameAsc": "Nom A-Z",
+    "nameDesc": "Nom Z-A", 
+    "dateDesc": "Plus récent",
+    "dateAsc": "Plus ancien"
+  },
+  "filters": {
+    "allCategories": "Toutes catégories",
+    "allStatus": "Tous statuts",
+    "featured": "Vedettes",
+    "regular": "Régulières",
+    "reset": "Réinitialiser"
+  },
+  "results": "résultat(s)",
+  "activeFilters": "filtre(s) actif(s)",
+  "backToCollections": "Retour aux collections",
+  "searchPlaceholder": "Rechercher une collection..."
 }
