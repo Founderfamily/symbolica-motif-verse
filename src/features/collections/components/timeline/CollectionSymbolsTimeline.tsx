@@ -330,12 +330,12 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                       />
 
                       {/* Carte de symbole */}
-                      <Card className={`w-96 p-6 bg-gradient-to-br from-background to-muted/30 border border-muted hover:shadow-xl transition-all duration-500 ${
-                        isLeft ? 'mr-20' : 'ml-20'
+                      <Card className={`w-72 p-4 bg-gradient-to-br from-background to-muted/30 border border-muted hover:shadow-lg transition-all duration-300 ${
+                        isLeft ? 'mr-16' : 'ml-16'
                       }`}>
-                        <div className="space-y-4">
-                          {/* Image */}
-                          <div className="w-full h-40 bg-muted/50 rounded-lg flex items-center justify-center overflow-hidden">
+                        <div className="space-y-3">
+                          {/* Image plus petite */}
+                          <div className="w-full h-24 bg-muted/50 rounded-md flex items-center justify-center overflow-hidden">
                             {symbol.image_url ? (
                               <img 
                                 src={symbol.image_url} 
@@ -343,41 +343,34 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                              <ImageIcon className="w-8 h-8 text-muted-foreground" />
                             )}
                           </div>
 
-                          {/* Titre du symbole */}
-                          <h3 className="text-2xl font-bold text-foreground">
+                          {/* Titre plus compact */}
+                          <h3 className="text-lg font-bold text-foreground leading-tight">
                             {symbol.name}
                           </h3>
 
-                          {/* Description */}
-                          <p className="text-sm text-muted-foreground">
+                          {/* Description tronquée */}
+                          <p className="text-xs text-muted-foreground line-clamp-2">
                             {symbol.description}
                           </p>
 
-                          {/* Métadonnées */}
-                          <div className="space-y-2 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-3 h-3" />
-                              <span>{symbol.temporal_period_name || symbol.period}</span>
-                              {symbol.cultural_period_name && (
-                                <span className="text-primary">({symbol.cultural_period_name})</span>
-                              )}
+                          {/* Métadonnées condensées */}
+                          <div className="space-y-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate">{symbol.temporal_period_name || symbol.period}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Scroll className="w-3 h-3" />
-                              <span>{symbol.culture}</span>
-                            </div>
-                            {/* Position dans la collection */}
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium">Position: {symbol.symbol_position}</span>
+                            <div className="flex items-center gap-1">
+                              <Scroll className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate">{symbol.culture}</span>
                             </div>
                           </div>
 
-                          {/* Bouton d'action */}
-                          <Button variant="outline" size="sm" className="w-full">
+                          {/* Bouton plus petit */}
+                          <Button variant="outline" size="sm" className="w-full text-xs h-8">
                             <I18nText translationKey="symbols.learnMore">En savoir plus</I18nText>
                           </Button>
                         </div>
