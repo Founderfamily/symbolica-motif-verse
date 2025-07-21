@@ -3,19 +3,47 @@ import { supabase } from '@/integrations/supabase/client';
 import type { CollectionSymbolWithTemporal } from '../types/collections';
 
 export const useCollectionSymbols = (collectionId?: string) => {
-  return useQuery<CollectionSymbolWithTemporal[]>({
+  return useQuery({
     queryKey: ['collection-symbols', collectionId],
     queryFn: async () => {
       if (!collectionId) return [];
 
       const { data, error } = await supabase
-        .rpc('get_collection_symbols_with_temporal_periods', {
-          p_collection_id: collectionId
-        });
+        .from('collection_symbols')
+        .select(`
+          symbol_id,
+          symbols (
+            id,
+            name,
+            description,
+            culture,
+            period,
+            created_at
+          )
+        `)
+        .eq('collection_id', collectionId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching collection symbols:', error);
+        throw error;
+      }
 
-      return data || [];
+      // Transformer les données pour correspondre au format attendu
+      const symbols = (data || []).map((item: any, index: number) => ({
+        id: item.symbols?.id || '',
+        name: item.symbols?.name || '',
+        description: item.symbols?.description || '',
+        culture: item.symbols?.culture || '',
+        period: item.symbols?.period || '',
+        created_at: item.symbols?.created_at || '',
+        symbol_position: index,
+        temporal_period_order: index,
+        temporal_period_name: item.symbols?.period || null,
+        cultural_period_name: item.symbols?.culture || null
+      }));
+
+      console.log('🔍 useCollectionSymbols - fetched symbols:', symbols);
+      return symbols;
     },
     enabled: !!collectionId,
     staleTime: 5 * 60 * 1000,

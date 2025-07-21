@@ -31,12 +31,12 @@ export const CollectionSymbolsTimeline: React.FC = () => {
   
   // Récupérer les événements historiques pour cette collection
   const { data: historicalEvents = [], isLoading: eventsLoading } = useHistoricalEvents(collection?.slug);
-  const shouldShowEvents = historicalEvents.length > 0;
+  const shouldShowEvents = (historicalEvents || []).length > 0;
   
   console.log('🔍 CollectionSymbolsTimeline - collection slug:', collection?.slug);
   console.log('🔍 CollectionSymbolsTimeline - shouldShowEvents:', shouldShowEvents);
-  console.log('🔍 CollectionSymbolsTimeline - historicalEvents COUNT:', historicalEvents.length);
-  console.log('🔍 CollectionSymbolsTimeline - symbols COUNT:', symbols.length);
+  console.log('🔍 CollectionSymbolsTimeline - historicalEvents COUNT:', (historicalEvents || []).length);
+  console.log('🔍 CollectionSymbolsTimeline - symbols COUNT:', (symbols || []).length);
   console.log('🔍 CollectionSymbolsTimeline - eventsLoading:', eventsLoading);
   console.log('🔍 CollectionSymbolsTimeline - symbolsLoading:', symbolsLoading);
   
@@ -71,7 +71,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
     );
   }
 
-  if (symbols.length === 0 && !isLoading) {
+  if ((symbols || []).length === 0 && !isLoading) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold mb-4">Aucun symbole dans cette collection</h2>
@@ -128,7 +128,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
             const timelineItems = [];
             
             // Ajouter les symboles avec des années réalistes basées sur leur période
-            symbols.forEach((symbol, index) => {
+            (symbols || []).forEach((symbol, index) => {
               let symbolYear = 2024; // par défaut
               
               // Utiliser le mapping intelligent universel
