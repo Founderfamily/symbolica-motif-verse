@@ -18,10 +18,21 @@ const CommunityHub: React.FC = () => {
     const fetchGroups = async () => {
       try {
         setLoading(true);
+        console.log('🔍 [CommunityHub] Fetching groups...');
         const fetchedGroups = await getInterestGroups();
-        setGroups(fetchedGroups || []);
+        console.log('📋 [CommunityHub] Fetched groups:', fetchedGroups?.length, 'groups');
+        console.log('📋 [CommunityHub] Group names:', fetchedGroups?.map(g => g.name));
+        
+        // Ensure unique groups by ID
+        const uniqueGroups = fetchedGroups?.filter((group, index, self) => 
+          index === self.findIndex(g => g.id === group.id)
+        ) || [];
+        
+        console.log('✅ [CommunityHub] Unique groups:', uniqueGroups.length, 'groups');
+        setGroups(uniqueGroups);
       } catch (error) {
         console.error('Error fetching interest groups:', error);
+        setGroups([]);
       } finally {
         setLoading(false);
       }
@@ -36,12 +47,16 @@ const CommunityHub: React.FC = () => {
     }
 
     let filteredGroups = [...groups];
+    console.log('🎛️ [CommunityHub] Before filtering - activeTab:', activeTab, 'groups:', filteredGroups.length);
 
     if (activeTab === 'popular') {
       filteredGroups = filteredGroups.sort((a, b) => b.members_count - a.members_count).slice(0, 5);
     } else if (activeTab === 'active') {
       filteredGroups = filteredGroups.sort((a, b) => b.discoveries_count - a.discoveries_count).slice(0, 5);
     }
+
+    console.log('🎯 [CommunityHub] After filtering - rendering:', filteredGroups.length, 'groups');
+    console.log('🎯 [CommunityHub] Filtered group names:', filteredGroups.map(g => g.name));
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
