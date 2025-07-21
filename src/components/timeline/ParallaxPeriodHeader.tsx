@@ -79,7 +79,7 @@ export function ParallaxPeriodHeader({ period, isSubPeriod = false }: ParallaxPe
   return (
     <div 
       ref={containerRef}
-      className={`relative overflow-hidden rounded-xl ${isSubPeriod ? 'h-32' : 'h-48'} mb-8`}
+      className={`relative overflow-hidden rounded-xl ${isSubPeriod ? 'h-20' : 'h-24'} mb-4`}
     >
       {/* Background with parallax */}
       <motion.div 
@@ -121,20 +121,18 @@ export function ParallaxPeriodHeader({ period, isSubPeriod = false }: ParallaxPe
       />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex items-center p-8">
-        <div className="w-full">
+      <div className="relative z-10 h-full flex items-center p-4">
+        <div className="w-full flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={isVisible ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8, ease: "easeOut" }}
+            className="flex-1"
           >
-            <h2 className={`${isSubPeriod ? 'text-2xl' : 'text-4xl'} font-bold text-white mb-2 text-shadow-lg`}>
+            <h2 className={`${isSubPeriod ? 'text-lg' : 'text-xl'} font-bold text-white mb-1 text-shadow-lg`}>
               {period.name}
             </h2>
-            <p className="text-white/90 text-lg mb-3 text-shadow">
-              {period.description}
-            </p>
-            <p className="text-white/80 text-sm mb-4 text-shadow">
+            <p className="text-white/80 text-sm text-shadow">
               {period.dateRange}
             </p>
           </motion.div>
@@ -143,20 +141,25 @@ export function ParallaxPeriodHeader({ period, isSubPeriod = false }: ParallaxPe
             initial={{ opacity: 0, y: 20 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-wrap gap-2"
+            className="flex flex-wrap gap-1 ml-4"
           >
-            {period.cultures.map((culture, index) => (
+            {period.cultures.slice(0, 3).map((culture, index) => (
               <motion.div
                 key={culture}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={isVisible ? { opacity: 1, scale: 1 } : {}}
                 transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
               >
-                <Badge variant="secondary" className="bg-white/20 text-white border-white/30 hover:bg-white/30 transition-colors">
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/30 hover:bg-white/30 transition-colors text-xs">
                   {culture}
                 </Badge>
               </motion.div>
             ))}
+            {period.cultures.length > 3 && (
+              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 text-xs">
+                +{period.cultures.length - 3}
+              </Badge>
+            )}
           </motion.div>
         </div>
       </div>
