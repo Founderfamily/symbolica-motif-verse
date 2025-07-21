@@ -18,34 +18,34 @@ interface ParallaxPeriodHeaderProps {
 
 const PERIOD_THEMES = {
   prehistoire: {
-    texture: 'bg-gradient-to-br from-stone-800/20 via-amber-900/10 to-stone-700/20',
+    texture: 'bg-gradient-to-br from-chart-1/20 via-chart-1/10 to-chart-1/30',
     pattern: 'pattern-dots-lg opacity-10',
     particles: '🗿',
-    overlay: 'bg-gradient-to-r from-amber-900/80 to-stone-800/80'
+    overlay: 'bg-gradient-to-r from-chart-1/80 to-chart-1/70'
   },
   antiquite: {
-    texture: 'bg-gradient-to-br from-amber-100/30 via-yellow-50/20 to-amber-200/30',
+    texture: 'bg-gradient-to-br from-chart-2/20 via-chart-2/10 to-chart-2/30',
     pattern: 'pattern-grid-lg opacity-20',
     particles: '🏛️',
-    overlay: 'bg-gradient-to-r from-amber-600/85 to-yellow-600/85'
+    overlay: 'bg-gradient-to-r from-chart-2/80 to-chart-2/70'
   },
   'moyen-age': {
-    texture: 'bg-gradient-to-br from-blue-900/20 via-indigo-800/15 to-purple-900/20',
+    texture: 'bg-gradient-to-br from-chart-3/20 via-chart-3/10 to-chart-3/30',
     pattern: 'pattern-dots-lg opacity-15',
     particles: '⚔️',
-    overlay: 'bg-gradient-to-r from-blue-700/80 to-indigo-700/80'
+    overlay: 'bg-gradient-to-r from-chart-3/80 to-chart-3/70'
   },
   renaissance: {
-    texture: 'bg-gradient-to-br from-purple-100/30 via-pink-50/20 to-purple-200/30',
+    texture: 'bg-gradient-to-br from-chart-4/20 via-chart-4/10 to-chart-4/30',
     pattern: 'pattern-grid-lg opacity-25',
     particles: '🎨',
-    overlay: 'bg-gradient-to-r from-purple-600/85 to-pink-600/85'
+    overlay: 'bg-gradient-to-r from-chart-4/80 to-chart-4/70'
   },
   moderne: {
-    texture: 'bg-gradient-to-br from-green-100/30 via-emerald-50/20 to-teal-200/30',
+    texture: 'bg-gradient-to-br from-chart-5/20 via-chart-5/10 to-chart-5/30',
     pattern: 'pattern-dots-lg opacity-20',
     particles: '⚡',
-    overlay: 'bg-gradient-to-r from-green-600/85 to-teal-600/85'
+    overlay: 'bg-gradient-to-r from-chart-5/80 to-chart-5/70'
   }
 };
 
