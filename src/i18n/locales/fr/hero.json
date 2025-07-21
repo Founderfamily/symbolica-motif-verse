@@ -2,8 +2,20 @@
 {
   "heading": "Découvrez le patrimoine symbolique mondial",
   "subheading": "Explorez, contribuez et apprenez sur les symboles culturels à travers les âges",
-  "community": "Explorer la communauté",
+  "community": "Rejoindre une communauté",
   "explore": "Commencer l'exploration",
+  "heritage": {
+    "title": "Découvrez l'héritage symbolique mondial",
+    "subtitle": "Explorez et apprenez sur les symboles culturels à travers les civilisations. Une approche académique et rigoureuse du patrimoine mondial.",
+    "exploreButton": "Explorer le Patrimoine",
+    "analysisButton": "Analyses Académiques"
+  },
+  "treasure": {
+    "title": "Rejoignez la quête des trésors oubliés",
+    "subtitle": "Participez à de vraies découvertes, suivez des indices en temps réel et rejoignez une communauté d'explorateurs passionnés.",
+    "adventureButton": "Rejoindre l'Aventure",
+    "communityButton": "Communauté d'Explorateurs"
+  },
   "features": {
     "realTimeAnalytics": "Analytics temps réel",
     "hybridData": "Données hybrides en/hors ligne",

@@ -2,8 +2,20 @@
 {
   "heading": "Discover the world's symbolic heritage",
   "subheading": "Explore, contribute and learn about cultural symbols through the ages",
-  "community": "Explore the community",
-  "explore": "Start exploring", 
+  "community": "Join a community",
+  "explore": "Start exploring",
+  "heritage": {
+    "title": "Discover the world's symbolic heritage",
+    "subtitle": "Explore and learn about cultural symbols across civilizations. A rigorous and academic approach to world heritage.",
+    "exploreButton": "Explore Heritage",
+    "analysisButton": "Academic Analysis"
+  },
+  "treasure": {
+    "title": "Join the quest for forgotten treasures",
+    "subtitle": "Participate in real discoveries, follow real-time clues and join a community of passionate explorers.",
+    "adventureButton": "Join the Adventure", 
+    "communityButton": "Explorer Community"
+  },
   "features": {
     "realTimeAnalytics": "Real-time analytics",
     "hybridData": "Hybrid online/offline data",

@@ -1,19 +1,19 @@
 
 import React from 'react';
-import Hero from '@/components/sections/Hero';
-import EnhancedFeaturedCollections from '@/components/sections/EnhancedFeaturedCollections';
-import Standards from '@/components/sections/Standards';
-import Community from '@/components/sections/Community';
-import QuestsSection from '@/components/sections/QuestsSection';
-import CallToAction from '@/components/sections/CallToAction';
-import { InteractiveTimeline } from '@/components/timeline/InteractiveTimeline';
+import DualHero from '@/components/sections/DualHero';
+import AIDiscoveries from '@/components/sections/AIDiscoveries';
+import HeritageSection from '@/components/sections/HeritageSection';
+import TreasureHunting from '@/components/sections/TreasureHunting';
+import HistoricalTours from '@/components/sections/HistoricalTours';
+import CommunityChat from '@/components/sections/CommunityChat';
+import ImprovedCallToAction from '@/components/sections/ImprovedCallToAction';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ErrorHandler } from '@/utils/errorHandler';
 
 const HomePage = () => {
   return (
     <div className="min-h-screen bg-stone-50">
-      {/* Subtle adventure background */}
+      {/* Elegant adventure background */}
       <div className="fixed inset-0 -z-20">
         {/* Elegant paper texture base */}
         <div className="absolute inset-0 bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-100"></div>
@@ -37,78 +37,80 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Hero Section */}
+      {/* Dual Hero Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'Hero')
+          ErrorHandler.handleComponentError(error, errorInfo, 'DualHero')
         }
       >
         <section className="relative">
-          <Hero />
+          <DualHero />
         </section>
       </ErrorBoundary>
 
-      {/* Interactive Timeline Section */}
+      {/* AI Discoveries Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'InteractiveTimeline')
+          ErrorHandler.handleComponentError(error, errorInfo, 'AIDiscoveries')
         }
       >
-        <section className="relative py-12">
-          <InteractiveTimeline />
+        <section className="relative py-0">
+          <AIDiscoveries />
         </section>
       </ErrorBoundary>
 
-      {/* Enhanced Collections Section */}
+      {/* Heritage Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'EnhancedFeaturedCollections')
+          ErrorHandler.handleComponentError(error, errorInfo, 'HeritageSection')
         }
       >
-        <section className="relative py-12 bg-gradient-to-r from-stone-100/50 to-amber-50/30">
-          <EnhancedFeaturedCollections />
+        <section className="relative py-0">
+          <HeritageSection />
         </section>
       </ErrorBoundary>
 
-      {/* Standards Section */}
+      {/* Treasure Hunting Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'Standards')
+          ErrorHandler.handleComponentError(error, errorInfo, 'TreasureHunting')
         }
       >
-        <Standards />
-      </ErrorBoundary>
-
-      {/* Community Section */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'Community')
-        }
-      >
-        <section className="relative py-12">
-          <Community />
+        <section className="relative py-0">
+          <TreasureHunting />
         </section>
       </ErrorBoundary>
 
-      {/* Quests Section */}
+      {/* Historical Tours Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'QuestsSection')
+          ErrorHandler.handleComponentError(error, errorInfo, 'HistoricalTours')
         }
       >
-        <section className="relative py-12 bg-gradient-to-r from-amber-50/30 to-stone-100/50">
-          <QuestsSection />
+        <section className="relative py-0">
+          <HistoricalTours />
         </section>
       </ErrorBoundary>
 
-      {/* Call to Action Section */}
+      {/* Community Chat Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'CallToAction')
+          ErrorHandler.handleComponentError(error, errorInfo, 'CommunityChat')
         }
       >
-        <section className="relative py-12 bg-gradient-to-r from-amber-50/30 to-stone-100/50">
-          <CallToAction />
+        <section className="relative py-0">
+          <CommunityChat />
+        </section>
+      </ErrorBoundary>
+
+      {/* Improved Call to Action Section */}
+      <ErrorBoundary 
+        onError={(error, errorInfo) => 
+          ErrorHandler.handleComponentError(error, errorInfo, 'ImprovedCallToAction')
+        }
+      >
+        <section className="relative py-0">
+          <ImprovedCallToAction />
         </section>
       </ErrorBoundary>
     </div>
