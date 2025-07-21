@@ -28,7 +28,11 @@ export const CollectionSymbolsTimeline: React.FC = () => {
   const { data: symbols = [], isLoading: symbolsLoading } = useCollectionSymbols(collection?.id);
   console.log('🔍 CollectionSymbolsTimeline - symbols:', symbols);
   
-  const isLoading = collectionsLoading || symbolsLoading;
+  // Récupérer les événements historiques français si c'est la collection patrimoine-français
+  const { data: historicalEvents = [], isLoading: eventsLoading } = useFrenchHistoricalEvents();
+  const shouldShowEvents = collection?.slug === 'patrimoine-français';
+  
+  const isLoading = collectionsLoading || symbolsLoading || (shouldShowEvents && eventsLoading);
 
   if (isLoading) {
     return (
@@ -111,6 +115,74 @@ export const CollectionSymbolsTimeline: React.FC = () => {
         <div className="absolute left-1/2 transform -translate-x-2 w-4 h-4 bg-primary rounded-full bottom-0" />
 
         <div className="space-y-20">
+          {/* Affichage des événements historiques français pour la collection patrimoine-français */}
+          {shouldShowEvents && historicalEvents.length > 0 && (
+            <motion.div
+              className="mb-16"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold mb-4 text-primary">Dates importantes de l'Histoire de France</h2>
+                <p className="text-muted-foreground">30 événements marquants du patrimoine français</p>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {historicalEvents
+                  .sort((a, b) => a.year - b.year)
+                  .map((event, eventIndex) => (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: eventIndex * 0.05 }}
+                    >
+                      <Card className="p-4 h-full bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 hover:shadow-lg transition-all duration-300">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-primary rounded-full" />
+                            <span className="font-bold text-primary text-lg">{event.year}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {event.period_category}
+                            </Badge>
+                          </div>
+                          
+                          <div className="text-sm text-muted-foreground">
+                            {event.date_text}
+                          </div>
+                          
+                          <h3 className="font-bold text-foreground leading-tight">
+                            {event.event_name}
+                          </h3>
+                          
+                          {event.description && (
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {event.description}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center justify-between mt-4">
+                            <div className="flex items-center gap-1">
+                              {[...Array(event.importance_level)].map((_, i) => (
+                                <div key={i} className="w-1.5 h-1.5 bg-primary rounded-full" />
+                              ))}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              Importance: {event.importance_level}/10
+                            </span>
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+              </div>
+            </motion.div>
+          )}
+          
+          {/* Timeline des symboles */}
           {symbols
             .sort((a, b) => a.temporal_period_order - b.temporal_period_order)
             .map((symbol, index) => {
