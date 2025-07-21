@@ -480,6 +480,50 @@ export type Database = {
           },
         ]
       }
+      cultural_periods: {
+        Row: {
+          created_at: string | null
+          cultural_taxonomy_code: string
+          end_year: number | null
+          id: string
+          specific_name: string
+          start_year: number | null
+          temporal_period_id: string | null
+          translations: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cultural_taxonomy_code: string
+          end_year?: number | null
+          id?: string
+          specific_name: string
+          start_year?: number | null
+          temporal_period_id?: string | null
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cultural_taxonomy_code?: string
+          end_year?: number | null
+          id?: string
+          specific_name?: string
+          start_year?: number | null
+          temporal_period_id?: string | null
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cultural_periods_temporal_period_id_fkey"
+            columns: ["temporal_period_id"]
+            isOneToOne: false
+            referencedRelation: "temporal_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       direct_messages: {
         Row: {
           content: string
@@ -1277,32 +1321,187 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_groups: {
+        Row: {
+          created_at: string
+          group_type: string
+          id: string
+          notification_count: number | null
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_type: string
+          id?: string
+          notification_count?: number | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_type?: string
+          id?: string
+          notification_count?: number | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_metrics: {
+        Row: {
+          channel: Database["public"]["Enums"]["notification_channel"] | null
+          created_at: string
+          event_type: string
+          id: string
+          notification_id: string
+          user_id: string
+        }
+        Insert: {
+          channel?: Database["public"]["Enums"]["notification_channel"] | null
+          created_at?: string
+          event_type: string
+          id?: string
+          notification_id: string
+          user_id: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["notification_channel"] | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          notification_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_metrics_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          channels: Database["public"]["Enums"]["notification_channel"][]
+          created_at: string
+          enabled: boolean
+          frequency: Database["public"]["Enums"]["notification_frequency"]
+          id: string
+          notification_category: Database["public"]["Enums"]["notification_category"]
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channels?: Database["public"]["Enums"]["notification_channel"][]
+          created_at?: string
+          enabled?: boolean
+          frequency?: Database["public"]["Enums"]["notification_frequency"]
+          id?: string
+          notification_category: Database["public"]["Enums"]["notification_category"]
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channels?: Database["public"]["Enums"]["notification_channel"][]
+          created_at?: string
+          enabled?: boolean
+          frequency?: Database["public"]["Enums"]["notification_frequency"]
+          id?: string
+          notification_category?: Database["public"]["Enums"]["notification_category"]
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
+          category: Database["public"]["Enums"]["notification_category"] | null
+          channels: Database["public"]["Enums"]["notification_channel"][] | null
           content: Json
           created_at: string
+          expires_at: string | null
+          grouped_with: string | null
           id: string
+          interaction_count: number | null
+          last_interaction_at: string | null
+          notification_type:
+            | Database["public"]["Enums"]["notification_type"]
+            | null
+          priority: Database["public"]["Enums"]["notification_priority"] | null
           read: boolean
+          relevance_score: number | null
           type: string
           user_id: string
         }
         Insert: {
+          category?: Database["public"]["Enums"]["notification_category"] | null
+          channels?:
+            | Database["public"]["Enums"]["notification_channel"][]
+            | null
           content: Json
           created_at?: string
+          expires_at?: string | null
+          grouped_with?: string | null
           id?: string
+          interaction_count?: number | null
+          last_interaction_at?: string | null
+          notification_type?:
+            | Database["public"]["Enums"]["notification_type"]
+            | null
+          priority?: Database["public"]["Enums"]["notification_priority"] | null
           read?: boolean
+          relevance_score?: number | null
           type: string
           user_id: string
         }
         Update: {
+          category?: Database["public"]["Enums"]["notification_category"] | null
+          channels?:
+            | Database["public"]["Enums"]["notification_channel"][]
+            | null
           content?: Json
           created_at?: string
+          expires_at?: string | null
+          grouped_with?: string | null
           id?: string
+          interaction_count?: number | null
+          last_interaction_at?: string | null
+          notification_type?:
+            | Database["public"]["Enums"]["notification_type"]
+            | null
+          priority?: Database["public"]["Enums"]["notification_priority"] | null
           read?: boolean
+          relevance_score?: number | null
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_grouped_with_fkey"
+            columns: ["grouped_with"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partners: {
         Row: {
@@ -3115,6 +3314,39 @@ export type Database = {
         }
         Relationships: []
       }
+      temporal_periods: {
+        Row: {
+          code: string
+          created_at: string | null
+          end_year: number | null
+          id: string
+          order_index: number
+          start_year: number | null
+          translations: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          end_year?: number | null
+          id?: string
+          order_index: number
+          start_year?: number | null
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          end_year?: number | null
+          id?: string
+          order_index?: number
+          start_year?: number | null
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           created_at: string | null
@@ -3727,6 +3959,15 @@ export type Database = {
         Args: { p_evidence_id: string }
         Returns: number
       }
+      calculate_notification_relevance: {
+        Args: {
+          p_user_id: string
+          p_notification_type: Database["public"]["Enums"]["notification_type"]
+          p_category: Database["public"]["Enums"]["notification_category"]
+          p_entity_id?: string
+        }
+        Returns: number
+      }
       calculate_quest_completion: {
         Args: { p_quest_id: string; p_user_id: string }
         Returns: number
@@ -3761,6 +4002,25 @@ export type Database = {
       }
       convert_contribution_to_symbol: {
         Args: { p_contribution_id: string }
+        Returns: string
+      }
+      create_default_notification_preferences: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      create_enhanced_notification: {
+        Args: {
+          p_user_id: string
+          p_notification_type: Database["public"]["Enums"]["notification_type"]
+          p_category: Database["public"]["Enums"]["notification_category"]
+          p_priority: Database["public"]["Enums"]["notification_priority"]
+          p_title: string
+          p_message: string
+          p_action_url?: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_expires_at?: string
+        }
         Returns: string
       }
       create_notification: {
@@ -3902,6 +4162,15 @@ export type Database = {
           reviewed_at: string
           username: string
           full_name: string
+        }[]
+      }
+      get_symbol_temporal_period: {
+        Args: { symbol_period: string; cultural_code: string }
+        Returns: {
+          period_code: string
+          period_name: string
+          period_order: number
+          specific_name: string
         }[]
       }
       get_top_contributors: {
@@ -4055,6 +4324,32 @@ export type Database = {
     Enums: {
       app_role: "user" | "admin" | "master_explorer" | "banned"
       image_type: "original" | "pattern" | "reuse"
+      notification_category:
+        | "moderation"
+        | "contribution"
+        | "community"
+        | "system"
+        | "security"
+        | "update"
+        | "interaction"
+        | "content"
+        | "milestone"
+        | "review"
+        | "report"
+      notification_channel: "in_app" | "email" | "push" | "sms"
+      notification_frequency:
+        | "immediate"
+        | "daily_digest"
+        | "weekly_digest"
+        | "never"
+      notification_priority: "urgent" | "high" | "medium" | "low"
+      notification_type:
+        | "critical"
+        | "important"
+        | "informational"
+        | "promotional"
+        | "social"
+        | "achievement"
       symbol_location_verification_status:
         | "unverified"
         | "verified"
@@ -4188,6 +4483,35 @@ export const Constants = {
     Enums: {
       app_role: ["user", "admin", "master_explorer", "banned"],
       image_type: ["original", "pattern", "reuse"],
+      notification_category: [
+        "moderation",
+        "contribution",
+        "community",
+        "system",
+        "security",
+        "update",
+        "interaction",
+        "content",
+        "milestone",
+        "review",
+        "report",
+      ],
+      notification_channel: ["in_app", "email", "push", "sms"],
+      notification_frequency: [
+        "immediate",
+        "daily_digest",
+        "weekly_digest",
+        "never",
+      ],
+      notification_priority: ["urgent", "high", "medium", "low"],
+      notification_type: [
+        "critical",
+        "important",
+        "informational",
+        "promotional",
+        "social",
+        "achievement",
+      ],
       symbol_location_verification_status: [
         "unverified",
         "verified",
