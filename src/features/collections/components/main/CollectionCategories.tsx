@@ -350,6 +350,7 @@ const CollectionCategories: React.FC = () => {
           collections={filteredAndSortedCollections}
           getCollectionTitle={getCollectionTitle}
           getCollectionDescription={getCollectionDescription}
+          organizationMode={organizationMode}
         />
       ) : (
         <>
