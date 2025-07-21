@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Search, Filter, SortAsc, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { I18nText } from '@/components/ui/i18n-text';
+import { useTranslation } from '@/i18n/useTranslation';
 import { SortOption, FilterCategory, FilterStatus } from '../../hooks/useCollectionFilters';
 
 interface CollectionControlsProps {
@@ -35,13 +35,15 @@ export const CollectionControls: React.FC<CollectionControlsProps> = ({
   activeFiltersCount,
   totalResults
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-4 mb-8">
       {/* Search Bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
         <Input
-          placeholder="Rechercher une collection..."
+          placeholder={t('collections.searchPlaceholder', 'Rechercher une collection...')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
@@ -87,7 +89,7 @@ export const CollectionControls: React.FC<CollectionControlsProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
-                  <I18nText translationKey="collections.filters.allCategories">Toutes</I18nText>
+                  <I18nText translationKey="collections.filters.allCategories">Toutes catégories</I18nText>
                 </SelectItem>
                 <SelectItem value="cultures">
                   <I18nText translationKey="categories.cultures">Cultures</I18nText>
@@ -112,7 +114,7 @@ export const CollectionControls: React.FC<CollectionControlsProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">
-                <I18nText translationKey="collections.filters.allStatus">Toutes</I18nText>
+                <I18nText translationKey="collections.filters.allStatus">Tous statuts</I18nText>
               </SelectItem>
               <SelectItem value="featured">
                 <I18nText translationKey="collections.filters.featured">Vedettes</I18nText>

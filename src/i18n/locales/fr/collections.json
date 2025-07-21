@@ -41,6 +41,24 @@
     "errorTitle": "Erreur de chargement",
     "noResults": "Aucune collection trouvée",
     "noResultsMessage": "Essayez de modifier vos critères de recherche ou de filtrage.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "sort": {
+      "featuredFirst": "Vedettes d'abord",
+      "nameAsc": "Nom A-Z",
+      "nameDesc": "Nom Z-A", 
+      "dateDesc": "Plus récent",
+      "dateAsc": "Plus ancien"
+    },
+    "filters": {
+      "allCategories": "Toutes catégories",
+      "allStatus": "Tous statuts",
+      "featured": "Vedettes",
+      "regular": "Régulières",
+      "reset": "Réinitialiser"
+    },
+    "results": "résultat(s)",
+    "activeFilters": "filtre(s) actif(s)",
+    "backToCollections": "Retour aux collections",
+    "searchPlaceholder": "Rechercher une collection..."
   }
 }

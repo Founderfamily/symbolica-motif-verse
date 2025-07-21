@@ -25,5 +25,11 @@
   "share": "Partager",
   "backToSymbols": "Retour aux symboles",
   "viewDetails": "Voir les détails",
-  "learnMore": "En savoir plus"
+  "learnMore": "En savoir plus",
+  "categories": {
+    "cultures": "Cultures",
+    "periods": "Périodes",
+    "sciences": "Sciences",
+    "others": "Autres"
+  }
 }
