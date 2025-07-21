@@ -49,13 +49,19 @@ export const usePaginatedGroups = (searchQuery?: string): PaginatedGroupsResult 
         throw error;
       }
 
-      // Transform the raw data to match InterestGroup interface
-      const groups: InterestGroup[] = (rawGroups || []).map(group => ({
-        ...group,
-        translations: typeof group.translations === 'string' 
-          ? JSON.parse(group.translations) 
-          : group.translations || { en: {}, fr: {} }
-      }));
+      // Transform the raw data to match InterestGroup interface and ensure uniqueness
+      const groups: InterestGroup[] = (rawGroups || [])
+        .filter((group, index, self) => 
+          index === self.findIndex(g => g.id === group.id)
+        )
+        .map(group => ({
+          ...group,
+          translations: typeof group.translations === 'string' 
+            ? JSON.parse(group.translations) 
+            : group.translations || { en: {}, fr: {} }
+        }));
+
+      console.log('📊 [usePaginatedGroups] Unique groups processed:', groups.length);
 
       return {
         groups,

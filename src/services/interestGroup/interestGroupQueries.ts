@@ -29,24 +29,31 @@ export const getInterestGroups = async (limit?: number): Promise<InterestGroup[]
 
     if (error) {
       console.error('❌ [getInterestGroups] Supabase error:', error);
-      console.log('🔄 [getInterestGroups] Using sample data');
-      return limit ? sampleGroups.slice(0, limit) : sampleGroups;
+      console.log('🔄 [getInterestGroups] Returning empty array instead of sample data');
+      return [];
     }
     
     if (!data || data.length === 0) {
-      console.log('📝 [getInterestGroups] No data in Supabase, using sample data');
-      return limit ? sampleGroups.slice(0, limit) : sampleGroups;
+      console.log('📝 [getInterestGroups] No data in Supabase');
+      return [];
     }
 
     console.log('✅ [getInterestGroups] Supabase data:', data.length, 'groups');
 
-    // Type cast to fix the type issue with translations
-    return data.map(group => ({
-      ...group,
-      translations: typeof group.translations === 'string' 
-        ? JSON.parse(group.translations)
-        : group.translations
-    })) as InterestGroup[];
+    // Ensure unique groups by ID and fix translations
+    const uniqueGroups = data
+      .filter((group, index, self) => 
+        index === self.findIndex(g => g.id === group.id)
+      )
+      .map(group => ({
+        ...group,
+        translations: typeof group.translations === 'string' 
+          ? JSON.parse(group.translations)
+          : group.translations
+      })) as InterestGroup[];
+
+    console.log('✅ [getInterestGroups] Unique groups after dedup:', uniqueGroups.length);
+    return uniqueGroups;
   } catch (error) {
     console.error('❌ [getInterestGroups] Network error or timeout:', error);
     console.log('🔄 [getInterestGroups] Using sample data as fallback');
