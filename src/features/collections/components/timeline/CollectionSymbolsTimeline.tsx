@@ -130,7 +130,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
               timelineItems.push({
                 type: 'symbol',
                 data: symbol,
-                year: symbol.temporal_period_order || 2024, // Utiliser l'année ou ordre temporel
+                year: 2024, // Mettre les symboles à la fin de la timeline
                 originalIndex: index
               });
             });
