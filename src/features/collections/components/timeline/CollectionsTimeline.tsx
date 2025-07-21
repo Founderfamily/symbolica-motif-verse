@@ -76,6 +76,22 @@ export const CollectionsTimeline: React.FC<CollectionsTimelineProps> = ({
   };
 
   const organizedPeriods = organizeCollectionsByPeriod();
+  
+  console.log('🔍 [CollectionsTimeline] Données:', {
+    collections: collections.length,
+    organizationMode,
+    organizedPeriods: organizedPeriods.length,
+    periodsData: organizedPeriods
+  });
+
+  if (organizedPeriods.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Aucune collection disponible pour ce mode d'organisation</p>
+      </div>
+    );
+  }
+
   return (
     <div className="relative max-w-6xl mx-auto py-8">
       {/* Ligne centrale verticale */}
