@@ -345,13 +345,22 @@ const CollectionCategories: React.FC = () => {
       </div>
 
       {/* Vue conditionnelle */}
+      <div className="mb-4 p-4 bg-muted/30 rounded-lg text-sm">
+        <p>Mode de vue actuel: {viewMode}</p>
+        <p>Collections disponibles: {filteredAndSortedCollections.length}</p>
+        <p>Mode d'organisation: {organizationMode}</p>
+      </div>
+      
       {viewMode === 'timeline' ? (
-        <CollectionsTimeline
-          collections={filteredAndSortedCollections}
-          getCollectionTitle={getCollectionTitle}
-          getCollectionDescription={getCollectionDescription}
-          organizationMode={organizationMode}
-        />
+        <div>
+          <p className="text-center mb-4 text-lg font-semibold">Mode Timeline activé</p>
+          <CollectionsTimeline
+            collections={filteredAndSortedCollections}
+            getCollectionTitle={getCollectionTitle}
+            getCollectionDescription={getCollectionDescription}
+            organizationMode={organizationMode}
+          />
+        </div>
       ) : (
         <>
           {/* Controls Section pour la vue grille */}
