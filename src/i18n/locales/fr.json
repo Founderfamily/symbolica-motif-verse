@@ -36,6 +36,31 @@
     "logout": "Déconnexion",
     "admin": "Administration"
   },
+  "collections": {
+    "title": "Collections",
+    "featured": {
+      "title": "Collections Thématiques",
+      "description": "Explorez des parcours fascinants à travers les symboles du monde entier. Chaque collection raconte une histoire unique.",
+      "discoverAll": "Découvrir toutes les collections"
+    },
+    "heroStats": {
+      "cultures": "Cultures du Monde",
+      "periods": "Époques Historiques",
+      "mythologies": "Mythologies",
+      "art": "Art Symbolique"
+    },
+    "featuredBadge": "En vedette",
+    "backToCollections": "Retour aux collections",
+    "notFound": "Collection introuvable",
+    "share": "Partager",
+    "viewOnMap": "Voir sur la carte",
+    "symbolsCount": "Symboles",
+    "culturesCount": "Cultures",
+    "periodsCount": "Périodes",
+    "symbolsInCollection": "Symboles dans la collection",
+    "noSymbols": "Aucun symbole dans cette collection",
+    "explore": "Explorer →"
+  },
   "common": {
     "loading": "Chargement...",
     "error": "Erreur",
