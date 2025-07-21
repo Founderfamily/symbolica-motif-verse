@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { WorldMap } from '@/components/ui/WorldMap';
 
 interface FilteredCollectionGridProps {
   collections: any[];
@@ -35,21 +34,7 @@ export const FilteredCollectionGrid: React.FC<FilteredCollectionGridProps> = ({
   }
 
   return (
-    <>
-      {/* Carte du Monde Interactive Mapbox */}
-      <div className="mb-12">
-        <WorldMap 
-          onRegionClick={(region) => {
-            console.log('Région sélectionnée:', region);
-            // TODO: Filtrer les collections par région
-          }}
-          className="w-full"
-        />
-      </div>
-
-      {/* Grille des Collections */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {collections.map((collection) => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">{collections.map((collection) => (
           <Card key={collection.id} className="h-full hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start mb-2">
@@ -77,7 +62,6 @@ export const FilteredCollectionGrid: React.FC<FilteredCollectionGridProps> = ({
             </CardContent>
           </Card>
         ))}
-      </div>
-    </>
+    </div>
   );
 };

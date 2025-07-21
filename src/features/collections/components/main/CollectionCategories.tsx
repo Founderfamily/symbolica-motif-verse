@@ -13,6 +13,7 @@ import { useCollectionFilters } from '../../hooks/useCollectionFilters';
 import { CollectionControls } from '../controls/CollectionControls';
 import { FilteredCollectionGrid } from '../grids/FilteredCollectionGrid';
 import { useCollectionTranslations } from '@/hooks/useCollectionTranslations';
+import { WorldMap } from '@/components/ui/WorldMap';
 
 // Static collection type
 interface StaticCollection {
@@ -172,6 +173,17 @@ const CollectionCategories: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* Carte du Monde Interactive Mapbox */}
+      <div className="mb-12">
+        <WorldMap 
+          onRegionClick={(region) => {
+            console.log('Région sélectionnée:', region);
+            // TODO: Filtrer les collections par région
+          }}
+          className="w-full"
+        />
+      </div>
+
       {/* Controls Section */}
       <CollectionControls
         sortBy={sortBy}
