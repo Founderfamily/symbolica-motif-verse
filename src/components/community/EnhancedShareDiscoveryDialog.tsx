@@ -99,26 +99,26 @@ const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> 
   const handleShare = async () => {
     if (!auth?.user) return;
     if (!entityId.trim() || !title.trim()) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-    if (validationStatus !== 'valid') {
-      toast.error('Please select a valid entity');
-      return;
+       toast.error('Veuillez renseigner tous les champs obligatoires');
+       return;
+     }
+     if (validationStatus !== 'valid') {
+       toast.error('Veuillez sélectionner une entité valide');
+       return;
     }
 
     setLoading(true);
     try {
-      await shareDiscovery(groupId, auth.user.id, entityType, entityId, title, description);
-      toast.success('Discovery shared successfully!');
-      setOpen(false);
-      resetForm();
-      if (onDiscoveryShared) {
-        onDiscoveryShared();
-      }
-    } catch (error) {
-      console.error('Error sharing discovery:', error);
-      toast.error('Failed to share discovery');
+       await shareDiscovery(groupId, auth.user.id, entityType, entityId, title, description);
+       toast.success('Découverte partagée avec succès !');
+       setOpen(false);
+       resetForm();
+       if (onDiscoveryShared) {
+         onDiscoveryShared();
+       }
+     } catch (error) {
+       console.error('Error sharing discovery:', error);
+       toast.error('Échec du partage de la découverte');
     } finally {
       setLoading(false);
     }
@@ -233,7 +233,9 @@ const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> 
                     ) : searchQuery ? (
                       <span className="truncate">{searchQuery}</span>
                     ) : (
-                      <span className="text-slate-500">Search or enter ID...</span>
+                      <span className="text-slate-500">
+                        <I18nText translationKey="community.searchOrEnterId">Search or enter ID...</I18nText>
+                      </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
@@ -245,14 +247,16 @@ const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> 
               <PopoverContent className="w-full p-0">
                 <Command>
                   <CommandInput 
-                    placeholder="Search or enter ID..." 
+                    placeholder="Rechercher ou saisir l'ID..." 
                     value={searchQuery}
                     onValueChange={setSearchQuery}
                   />
                   <CommandList>
-                    <CommandEmpty>
-                      {searchQuery.length >= 2 ? 'No results found.' : 'Type to search...'}
-                    </CommandEmpty>
+                     <CommandEmpty>
+                       <I18nText translationKey="community.noResultsFound">
+                         {searchQuery.length >= 2 ? 'No results found.' : 'Type to search...'}
+                       </I18nText>
+                     </CommandEmpty>
                     {searchResults.length > 0 && (
                       <CommandGroup>
                         {searchResults.map((entity) => (
@@ -288,9 +292,11 @@ const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> 
                             setSearchOpen(false);
                           }}
                         >
-                          <div className="flex items-center gap-2">
-                            <div className="font-medium">Use ID: {searchQuery}</div>
-                          </div>
+                           <div className="flex items-center gap-2">
+                             <div className="font-medium">
+                               <I18nText translationKey="community.useId">Use ID:</I18nText> {searchQuery}
+                             </div>
+                           </div>
                         </CommandItem>
                       </CommandGroup>
                     )}
@@ -302,7 +308,7 @@ const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> 
             {/* Manual ID Input */}
             <div className="mt-2">
               <Input
-                placeholder="Or enter ID directly..."
+                placeholder="Ou saisir l'ID directement..."
                 value={entityId}
                 onChange={(e) => {
                   setEntityId(e.target.value);
@@ -346,10 +352,10 @@ const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> 
           {/* Validation Error */}
           {validationStatus === 'invalid' && entityId && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                Entity not found. Please check the ID and try again.
-              </div>
+               <div className="flex items-center gap-2">
+                 <AlertCircle className="h-4 w-4" />
+                 <I18nText translationKey="community.entityNotFound">Entity not found. Please check the ID and try again.</I18nText>
+               </div>
             </div>
           )}
 
@@ -361,7 +367,7 @@ const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> 
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Give your discovery a descriptive title..."
+              placeholder="Donnez un titre descriptif à votre découverte..."
             />
           </div>
 
@@ -373,7 +379,7 @@ const EnhancedShareDiscoveryDialog: React.FC<EnhancedShareDiscoveryDialogProps> 
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe why this discovery is interesting..."
+              placeholder="Décrivez pourquoi cette découverte est intéressante..."
               rows={3}
             />
           </div>
