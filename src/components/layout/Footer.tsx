@@ -13,31 +13,6 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-gradient-to-b from-background to-muted/20 border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
-        {/* Newsletter Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <h3 className="text-xl font-semibold">
-              <I18nText translationKey="footer.newsletter.title">Restez Informé</I18nText>
-            </h3>
-          </div>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            <I18nText translationKey="footer.newsletter.description">
-              Recevez les dernières mises à jour sur les nouveaux symboles et fonctionnalités
-            </I18nText>
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 max-w-sm mx-auto">
-            <input 
-              type="email" 
-              placeholder={t('footer.newsletter.placeholder')}
-              className="flex-1 px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-            <Button className="px-6">
-              <I18nText translationKey="footer.newsletter.subscribe">S'abonner</I18nText>
-            </Button>
-          </div>
-        </div>
 
         {/* Stats Section */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
