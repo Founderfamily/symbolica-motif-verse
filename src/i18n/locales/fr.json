@@ -49,6 +49,10 @@
       "mythologies": "Mythologies",
       "art": "Art Symbolique"
     },
+    "worldMap": {
+      "title": "Explorez les cultures du monde",
+      "subtitle": "Cliquez sur les marqueurs pour découvrir les symboles de chaque région"
+    },
     "featuredBadge": "En vedette",
     "backToCollections": "Retour aux collections",
     "notFound": "Collection introuvable",
