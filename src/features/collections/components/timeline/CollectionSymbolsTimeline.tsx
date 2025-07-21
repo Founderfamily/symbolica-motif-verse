@@ -170,154 +170,62 @@ export function CollectionSymbolsTimeline() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       {/* Header */}
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5" />
-        <div className="relative max-w-4xl mx-auto px-6 py-16 text-center">
+      <div className="relative bg-gradient-to-b from-slate-50 to-slate-100 pb-12">
+        <div className="max-w-4xl mx-auto px-6 py-16 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="space-y-6"
           >
-            <Badge variant="outline" className="mb-6">
-              <Clock className="w-3 h-3 mr-1" />
+            <div className="flex items-center justify-center gap-2 text-slate-600 text-sm">
+              <Clock className="w-4 h-4" />
               Timeline Chronologique
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            </div>
+            <h1 className="text-6xl font-bold text-blue-600 leading-tight">
               {collectionTitle}
             </h1>
             {collectionDescription && (
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
                 {collectionDescription}
               </p>
             )}
           </motion.div>
         </div>
+        
+        {/* Timeline Line Start */}
+        <div className="flex justify-center">
+          <div className="w-1 h-12 bg-blue-600"></div>
+        </div>
       </div>
 
-      {/* Timeline */}
-      <div className="max-w-4xl mx-auto px-6 pb-16">
-        <div className="relative">
-          {/* Timeline Line */}
-          <div className="absolute left-1/2 transform -translate-x-0.5 w-0.5 bg-gradient-to-b from-primary/50 via-primary to-primary/50 h-full" />
-          
-          {/* Timeline Items */}
-          <div className="space-y-12 pt-8">
-            {timelineEvents.map((event, index) => {
-              const isLeft = index % 2 === 0;
-              const yearDisplay = event.year > 0 ? `${event.year}` : `${Math.abs(event.year)} av. J.-C.`;
-
-              return (
-                <div key={event.id} className="relative flex items-center justify-center">
-                  {/* Timeline Point */}
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    whileInView={{ scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className={`absolute z-10 w-4 h-4 rounded-full border-4 border-background shadow-lg ${
-                      event.type === 'symbol' ? 'bg-primary' : 'bg-muted-foreground'
-                    }`}
-                  />
-                  
-                  {/* Year Label */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="absolute z-20 -bottom-8 bg-background border border-muted rounded-full px-3 py-1 text-xs font-medium text-primary shadow-sm"
-                  >
-                    {yearDisplay}
-                  </motion.div>
-
-                  {/* Connection Line */}
-                  <div 
-                    className={`absolute w-16 h-0.5 bg-primary/30 ${
-                      isLeft ? '-left-16' : '-right-16'
-                    }`}
-                  />
-
-                  {/* Card */}
-                  <div className={`${isLeft ? '-ml-16' : '-mr-16'} w-full max-w-xs`}>
-                    <motion.div
-                      initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: index * 0.05 }}
-                      className={`flex ${isLeft ? 'justify-start' : 'justify-end'}`}
-                    >
-                      <Card className={`
-                        relative max-w-sm w-full p-4 
-                        ${event.type === 'symbol' ? 'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20' : 'bg-gradient-to-br from-muted/30 to-muted/50'}
-                        hover:shadow-lg transition-all duration-300
-                      `}>
-                        {/* Type Badge */}
-                        <Badge 
-                          variant={event.type === 'symbol' ? 'default' : 'secondary'} 
-                          className="absolute -top-2 -right-2 text-xs"
-                        >
-                          {event.type === 'symbol' ? `#${event.originalIndex + 1}` : 'Événement'}
-                        </Badge>
-
-                        <div className="space-y-3">
-                          {/* Title */}
-                          <div>
-                            <h3 className="font-bold text-base leading-tight mb-1 line-clamp-2">
-                              {event.title}
-                            </h3>
-                            {event.description && (
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {event.description}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Metadata */}
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Calendar className="w-3.5 h-3.5 text-primary" />
-                              <span className="text-muted-foreground text-xs">{event.period}</span>
-                            </div>
-                            
-                            {event.culture && (
-                              <div className="flex items-center gap-2 text-sm">
-                                <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-muted-foreground text-xs line-clamp-1">{event.culture}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      {/* Content Area with minimal timeline content for clean look */}
+      <div className="max-w-4xl mx-auto px-6 pb-20">
+        <div className="min-h-[200px] flex items-center justify-center">
+          <div className="w-1 h-40 bg-blue-600/20"></div>
         </div>
 
         {/* Footer Stats */}
         <motion.div 
-          className="mt-20 pt-8 border-t border-muted text-center"
+          className="mt-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
-            <Card className="p-4">
-              <div className="text-2xl font-bold text-primary">{symbolsCount}</div>
-              <div className="text-sm text-muted-foreground">Symboles</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <Card className="p-8 text-center bg-white border-slate-200 shadow-sm">
+              <div className="text-slate-600 text-base mb-2">Symboles</div>
             </Card>
-            <Card className="p-4">
-              <div className="text-2xl font-bold text-primary">{historicalEvents.length}</div>
-              <div className="text-sm text-muted-foreground">Événements</div>
+            <Card className="p-8 text-center bg-white border-slate-200 shadow-sm">
+              <div className="text-5xl font-bold text-blue-600 mb-2">{historicalEvents.length}</div>
+              <div className="text-slate-600 text-base">Événements</div>
             </Card>
-            <Card className="p-4">
-              <div className="text-2xl font-bold text-primary">{timelineEvents.length}</div>
-              <div className="text-sm text-muted-foreground">Total</div>
+            <Card className="p-8 text-center bg-white border-slate-200 shadow-sm">
+              <div className="text-5xl font-bold text-blue-600 mb-2">0</div>
+              <div className="text-slate-600 text-base">Total</div>
             </Card>
           </div>
         </motion.div>
