@@ -1,21 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Clock, Calendar, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-interface Collection {
-  id: string;
-  slug: string;
-  collection_translations: Array<{
-    title: string;
-    description: string;
-    language: string;
-  }>;
-}
 
 interface TimelineEvent {
   id: string;
@@ -67,85 +55,110 @@ const historicalEvents = [
 export function CollectionSymbolsTimeline() {
   const { slug } = useParams<{ slug: string }>();
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [collectionTitle, setCollectionTitle] = useState<string>("");
+  const [collectionDescription, setCollectionDescription] = useState<string>("");
+  const [symbolsCount, setSymbolsCount] = useState(0);
 
-  // Récupération de la collection
-  const { data: collection, isLoading: collectionLoading } = useQuery({
-    queryKey: ['collection', slug],
-    queryFn: async (): Promise<Collection> => {
-      const { data, error } = await supabase
-        .from('collections')
-        .select(`
-          id,
-          slug,
-          collection_translations (
-            title,
-            description,
-            language
-          )
-        `)
-        .eq('slug', slug)
-        .single();
-
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  // Récupération des symboles
-  const { data: symbols, isLoading: symbolsLoading } = useQuery({
-    queryKey: ['collection-symbols', collection?.id],
-    queryFn: async () => {
-      if (!collection?.id) return [];
-      
-      const { data, error } = await supabase
-        .from('symbols')
-        .select('id, name, description, period, culture, created_at')
-        .eq('collection_id', collection.id);
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!collection?.id
-  });
-
-  // Création de la timeline mixte
   useEffect(() => {
-    if (!symbols) return;
+    async function fetchData() {
+      try {
+        setLoading(true);
 
-    // Conversion des symboles en événements de timeline
-    const symbolEvents: TimelineEvent[] = symbols.map((symbol, index) => {
-      const symbolYear = mapPeriodToYear(symbol.period);
-      
-      return {
-        id: `symbol-${symbol.id}`,
-        title: symbol.name,
-        description: symbol.description,
-        year: symbolYear,
-        period: symbol.period,
-        culture: symbol.culture,
-        type: 'symbol' as const,
-        originalIndex: index
-      };
-    });
+        // Requête simple pour la collection
+        const collectionResponse = await fetch(
+          `https://djczgpmhrbirbqrycodq.supabase.co/rest/v1/collections?slug=eq.${slug}&select=id`,
+          {
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqY3pncG1ocmJpcmJxcnljb2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxNDc0MDMsImV4cCI6MjA2MjcyMzQwM30.hFrbeO7mmXXYdAkzoVT88O8enMOMqd8C94EfermuCas',
+            }
+          }
+        );
+        const collections = await collectionResponse.json();
+        
+        if (collections.length === 0) {
+          setLoading(false);
+          return;
+        }
 
-    // Conversion des événements historiques
-    const eventEvents: TimelineEvent[] = historicalEvents.map((event, index) => ({
-      id: `event-${index}`,
-      title: event.title,
-      description: event.description,
-      year: event.year,
-      period: event.period,
-      culture: event.culture,
-      type: 'event' as const,
-      originalIndex: index
-    }));
+        const collection = collections[0];
 
-    // Fusion et tri chronologique
-    const allEvents = [...symbolEvents, ...eventEvents].sort((a, b) => a.year - b.year);
-    setTimelineEvents(allEvents);
-  }, [symbols, collection]);
+        // Requête pour les traductions
+        const translationsResponse = await fetch(
+          `https://djczgpmhrbirbqrycodq.supabase.co/rest/v1/collection_translations?collection_id=eq.${collection.id}&language=eq.fr&select=title,description`,
+          {
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqY3pncG1ocmJpcmJxcnljb2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxNDc0MDMsImV4cCI6MjA2MjcyMzQwM30.hFrbeO7mmXXYdAkzoVT88O8enMOMqd8C94EfermuCas',
+            }
+          }
+        );
+        const translations = await translationsResponse.json();
+        
+        if (translations.length > 0) {
+          setCollectionTitle(translations[0].title || slug || "");
+          setCollectionDescription(translations[0].description || "");
+        } else {
+          setCollectionTitle(slug || "");
+        }
 
-  if (collectionLoading || symbolsLoading) {
+        // Requête pour les symboles
+        const symbolsResponse = await fetch(
+          `https://djczgpmhrbirbqrycodq.supabase.co/rest/v1/symbols?collection_id=eq.${collection.id}&select=id,name,description,period,culture`,
+          {
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqY3pncG1ocmJpcmJxcnljb2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxNDc0MDMsImV4cCI6MjA2MjcyMzQwM30.hFrbeO7mmXXYdAkzoVT88O8enMOMqd8C94EfermuCas',
+            }
+          }
+        );
+        const symbols = await symbolsResponse.json();
+
+        setSymbolsCount(symbols.length);
+
+        // Conversion des symboles en événements de timeline
+        const symbolEvents: TimelineEvent[] = symbols.map((symbol: any, index: number) => {
+          const symbolYear = mapPeriodToYear(symbol.period || "");
+          
+          return {
+            id: `symbol-${symbol.id}`,
+            title: symbol.name || "Symbole sans nom",
+            description: symbol.description,
+            year: symbolYear,
+            period: symbol.period || "Période inconnue",
+            culture: symbol.culture,
+            type: 'symbol' as const,
+            originalIndex: index
+          };
+        });
+
+        // Conversion des événements historiques
+        const eventEvents: TimelineEvent[] = historicalEvents.map((event, index) => ({
+          id: `event-${index}`,
+          title: event.title,
+          description: event.description,
+          year: event.year,
+          period: event.period,
+          culture: event.culture,
+          type: 'event' as const,
+          originalIndex: index
+        }));
+
+        // Fusion et tri chronologique
+        const allEvents = [...symbolEvents, ...eventEvents].sort((a, b) => a.year - b.year);
+        setTimelineEvents(allEvents);
+
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (slug) {
+      fetchData();
+    }
+  }, [slug]);
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -155,9 +168,6 @@ export function CollectionSymbolsTimeline() {
       </div>
     );
   }
-
-  const collectionTitle = collection?.collection_translations?.[0]?.title || collection?.slug;
-  const collectionDescription = collection?.collection_translations?.[0]?.description;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -298,7 +308,7 @@ export function CollectionSymbolsTimeline() {
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
             <Card className="p-4">
-              <div className="text-2xl font-bold text-primary">{symbols?.length || 0}</div>
+              <div className="text-2xl font-bold text-primary">{symbolsCount}</div>
               <div className="text-sm text-muted-foreground">Symboles</div>
             </Card>
             <Card className="p-4">
