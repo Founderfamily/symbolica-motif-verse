@@ -17,6 +17,7 @@ import SymbolDetailPage from '@/pages/SymbolDetailPage';
 import CollectionsPage from '@/pages/CollectionsPage';
 import CollectionDetailPage from '@/pages/CollectionDetailPage';
 import { CollectionSymbolsTimeline } from '@/features/collections/components/timeline/CollectionSymbolsTimeline';
+import { InteractiveTimeline } from '@/components/timeline/InteractiveTimeline';
 import QuestsPage from '@/pages/QuestsPage';
 import QuestDetailPage from '@/pages/QuestDetailPage';
 import CommunityPage from '@/pages/CommunityPage';
@@ -98,6 +99,7 @@ function App() {
                   <Route path="/" element={<HomePage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/symbols" element={<SymbolsPage />} />
+                  <Route path="/symbols/timeline" element={<InteractiveTimeline />} />
                   <Route path="/symbols/:id" element={<SymbolDetailPage />} />
                   <Route path="/symbol-explorer" element={<SymbolExplorer />} />
                   <Route path="/collections" element={<CollectionsPage />} />

@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Settings, Users, Database, Shield, BarChart3, Flag, Lightbulb, Network, Layout, Trophy, Compass, Clock } from 'lucide-react'; 
+import { ChevronDown, Settings, Users, Database, Shield, BarChart3, Flag, Lightbulb, Network, Layout, Trophy, Compass, Clock, History } from 'lucide-react'; 
 
 export const NavigationItems = () => {
   const location = useLocation();
@@ -21,10 +21,25 @@ export const NavigationItems = () => {
   // Navigation principale avec Innovation
   const navigation = [
     { name: 'Accueil', href: '/', translationKey: 'home' },
-    { name: 'Symboles', href: '/symbols', translationKey: 'symbols' },
     { name: 'Collections', href: '/collections', translationKey: 'collections' },
     { name: 'Quêtes', href: '/quests', translationKey: 'quests' },
     { name: 'Communauté', href: '/community', translationKey: 'community' },
+  ];
+
+  // Menu Symboles avec timeline
+  const symbolsMenuItems = [
+    { 
+      name: 'Explorer les symboles', 
+      href: '/symbols', 
+      icon: Database,
+      description: 'Découvrez notre collection de symboles'
+    },
+    { 
+      name: 'Timeline Interactive', 
+      href: '/symbols/timeline', 
+      icon: History,
+      description: 'Explorez les symboles à travers l\'histoire'
+    },
   ];
 
   // Navigation pour utilisateurs connectés
@@ -106,6 +121,49 @@ export const NavigationItems = () => {
           )}
         </Link>
       ))}
+
+      {/* Menu Symboles dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className={cn(
+              'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
+              location.pathname.startsWith('/symbols')
+                ? 'text-primary'
+                : 'text-muted-foreground'
+            )}
+          >
+            <I18nText translationKey="symbols" ns="navigation">
+              Symboles
+            </I18nText>
+            <ChevronDown className="h-3 w-3" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-72 bg-white border shadow-md z-[100]">
+          <DropdownMenuLabel className="text-center font-bold text-blue-600">
+            🔍 Exploration des Symboles
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {symbolsMenuItems.map((item) => (
+            <DropdownMenuItem key={item.href} asChild>
+              <Link
+                to={item.href}
+                className="flex items-start gap-3 cursor-pointer p-3 hover:bg-blue-50"
+              >
+                <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium">
+                    {item.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {item.description}
+                  </div>
+                </div>
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Menu Innovation dropdown */}
       <DropdownMenu>
