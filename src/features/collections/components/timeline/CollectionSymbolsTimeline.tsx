@@ -112,16 +112,46 @@ export const CollectionSymbolsTimeline: React.FC = () => {
         <div className="space-y-20">
           {symbols.map((symbol, index) => {
             const isLeft = index % 2 === 0;
+            const currentPeriod = symbol.period;
+            const previousPeriod = index > 0 ? symbols[index - 1].period : null;
+            const isPeriodChange = currentPeriod !== previousPeriod && index > 0;
             
             return (
-              <motion.div
-                key={symbol.id}
-                className={`relative flex items-center ${isLeft ? 'justify-start' : 'justify-end'}`}
-                initial={{ opacity: 0, x: isLeft ? -100 : 100 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
+              <div key={symbol.id}>
+                {/* Séparateur d'ère */}
+                {isPeriodChange && (
+                  <motion.div
+                    className="relative flex items-center justify-center my-16"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {/* Ligne de séparation */}
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t-2 border-primary/30"></div>
+                    </div>
+                    
+                    {/* Badge de la nouvelle ère */}
+                    <div className="relative bg-gradient-to-r from-primary/10 to-primary/20 backdrop-blur-sm border border-primary/30 rounded-full px-8 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                        <span className="text-lg font-bold text-primary">
+                          {currentPeriod}
+                        </span>
+                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                <motion.div
+                  className={`relative flex items-center ${isLeft ? 'justify-start' : 'justify-end'}`}
+                  initial={{ opacity: 0, x: isLeft ? -100 : 100 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
                 {/* Point de connexion sur la ligne */}
                 <div className="absolute left-1/2 transform -translate-x-3 w-6 h-6 bg-background border-4 border-primary rounded-full z-10" />
                 
@@ -194,7 +224,8 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                     {new Date(symbol.created_at).getFullYear()}
                   </div>
                 </div>
-              </motion.div>
+                </motion.div>
+              </div>
             );
           })}
         </div>
