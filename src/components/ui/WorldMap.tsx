@@ -1,63 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { I18nText } from '@/components/ui/i18n-text';
-import { mapboxConfigService } from '@/services/admin/mapboxConfigService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface WorldMapProps {
   onRegionClick?: (region: string) => void;
   className?: string;
 }
-
-interface MapboxSecretFormProps {
-  onTokenSubmit: (token: string) => void;
-}
-
-const MapboxSecretForm: React.FC<MapboxSecretFormProps> = ({ onTokenSubmit }) => {
-  const [token, setToken] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (token.trim()) {
-      onTokenSubmit(token.trim());
-    }
-  };
-
-  return (
-    <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg">
-      <h3 className="text-lg font-semibold text-blue-900 mb-2">
-        Configuration Mapbox requise
-      </h3>
-      <p className="text-blue-700 mb-4 text-sm">
-        Pour afficher la carte interactive, veuillez entrer votre token Mapbox public.
-        Vous pouvez l'obtenir sur{' '}
-        <a 
-          href="https://mapbox.com/" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="underline hover:text-blue-900"
-        >
-          mapbox.com
-        </a>
-      </p>
-      
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <Input
-          type="text"
-          placeholder="pk.eyJ1IjoieW91ci11c2VybmFtZSIs..."
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          className="font-mono text-sm"
-        />
-        <Button type="submit" className="w-full">
-          Configurer la carte
-        </Button>
-      </form>
-    </div>
-  );
-};
 
 export const WorldMap: React.FC<WorldMapProps> = ({ onRegionClick, className = '' }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -254,34 +204,29 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onRegionClick, className = '
     spinGlobe();
   };
 
-  const handleTokenSubmit = async (token: string) => {
-    try {
-      // Sauvegarder la configuration dans la base de données
-      await mapboxConfigService.saveConfig({
-        token: token,
-        enabled: true
-      });
-      setMapboxToken(token);
-      initializeMap(token);
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-    }
-  };
-
   useEffect(() => {
-    const loadMapboxConfig = async () => {
+    const loadMapboxToken = async () => {
       try {
-        const config = await mapboxConfigService.getConfig();
-        if (config && config.enabled && config.token) {
-          setMapboxToken(config.token);
-          initializeMap(config.token);
+        // Récupérer le token depuis l'edge function
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        
+        if (error) {
+          console.error('Erreur lors de la récupération du token Mapbox:', error);
+          return;
+        }
+
+        if (data && data.token) {
+          setMapboxToken(data.token);
+          initializeMap(data.token);
+        } else {
+          console.warn('Token Mapbox non configuré dans les secrets Supabase');
         }
       } catch (error) {
-        console.error('Erreur lors du chargement de la config Mapbox:', error);
+        console.error('Erreur lors du chargement du token Mapbox:', error);
       }
     };
 
-    loadMapboxConfig();
+    loadMapboxToken();
 
     return () => {
       map.current?.remove();
@@ -291,7 +236,14 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onRegionClick, className = '
   return (
     <div className={`relative ${className}`}>
       {!mapboxToken ? (
-        <MapboxSecretForm onTokenSubmit={handleTokenSubmit} />
+        <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">
+            Configuration de la carte
+          </h3>
+          <p className="text-blue-700 text-sm">
+            Chargement de la configuration Mapbox depuis les secrets Supabase...
+          </p>
+        </div>
       ) : (
         <>
           <div className="text-center mb-4">
