@@ -289,7 +289,7 @@ const GroupDetailPage: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="symbols">
-              <GroupSymbols groupId={group.id} isMember={isMember} />
+              <GroupSymbols groupId={group.id} groupSlug={group.slug} isMember={isMember} />
             </TabsContent>
 
             <TabsContent value="collections">
