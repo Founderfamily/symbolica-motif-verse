@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Calendar } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 import { WorldMap } from '@/components/ui/WorldMap';
 
@@ -67,22 +67,13 @@ export const FilteredCollectionGrid: React.FC<FilteredCollectionGridProps> = ({
               <p className="text-gray-600 text-sm line-clamp-3 mb-6 leading-relaxed">
                 {getCollectionDescription(collection)}
               </p>
-              
-              {/* Boutons d'action améliorés */}
-              <div className="space-y-2">
-                <Link to={`/collections/${collection.slug}`} className="block">
-                  <Button variant="outline" size="sm" className="w-full group hover:bg-gray-50 border-gray-300">
-                    <I18nText translationKey="collections.explore">explorer</I18nText>
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Link to={`/collections/${collection.slug}/timeline`} className="block">
-                  <Button size="sm" className="w-full group bg-blue-600 hover:bg-blue-700">
-                    <I18nText translationKey="collections.timeline">timeline</I18nText>
-                    <Calendar className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
+              {/* Bouton d'action */}
+              <Link to={`/collections/${collection.slug}`} className="block">
+                <Button variant="outline" size="sm" className="w-full group hover:bg-gray-50 border-gray-300">
+                  <I18nText translationKey="collections.explore">explorer</I18nText>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         ))}

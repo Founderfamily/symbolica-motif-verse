@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Grid3X3, Clock, Map, Layers, Star, BookOpen, Globe } from 'lucide-react';
+import { ArrowRight, Map, Layers, Star, BookOpen, Globe } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../../hooks/useCollections';
@@ -12,9 +12,7 @@ import { CollectionWithTranslations } from '../../types/collections';
 import { useCollectionFilters } from '../../hooks/useCollectionFilters';
 import { CollectionControls } from '../controls/CollectionControls';
 import { FilteredCollectionGrid } from '../grids/FilteredCollectionGrid';
-import { CollectionsTimeline } from '../timeline/CollectionsTimeline';
 import { useCollectionTranslations } from '@/hooks/useCollectionTranslations';
-import { useState } from 'react';
 
 // Static collection type
 interface StaticCollection {
@@ -122,7 +120,7 @@ const CollectionCategories: React.FC = () => {
   const { currentLanguage } = useTranslation();
   const { data: collections = [], isLoading, error, refetch } = useCollections();
   const { getTranslation } = useCollectionTranslations();
-  const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('grid');
+  
 
   // Use database collections directly or static ones if empty
   console.log('📚 [CollectionCategories] Collections received:', collections?.length || 0);
@@ -174,66 +172,27 @@ const CollectionCategories: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Boutons de vue (Timeline/Grille) */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button
-            variant={viewMode === 'timeline' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('timeline')}
-            className="flex items-center gap-2"
-          >
-            <Clock className="w-4 h-4" />
-            <I18nText translationKey="collections.timelineView">Timeline</I18nText>
-          </Button>
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-            className="flex items-center gap-2"
-          >
-            <Grid3X3 className="w-4 h-4" />
-            <I18nText translationKey="collections.gridView">Grille</I18nText>
-          </Button>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {filteredAndSortedCollections.length} collections
-        </div>
-      </div>
+      {/* Controls Section */}
+      <CollectionControls
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        resetFilters={resetFilters}
+        activeFiltersCount={activeFiltersCount}
+        totalResults={filteredAndSortedCollections.length}
+      />
 
-      {/* Vue conditionnelle */}
-      {viewMode === 'timeline' ? (
-        <CollectionsTimeline
-          collections={filteredAndSortedCollections}
-          getCollectionTitle={getCollectionTitle}
-          getCollectionDescription={getCollectionDescription}
-          organizationMode="chronological"
-        />
-      ) : (
-        <>
-          {/* Controls Section pour la vue grille */}
-          <CollectionControls
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            filterCategory={filterCategory}
-            setFilterCategory={setFilterCategory}
-            filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            resetFilters={resetFilters}
-            activeFiltersCount={activeFiltersCount}
-            totalResults={filteredAndSortedCollections.length}
-          />
-
-          {/* Collections Grid */}
-          <FilteredCollectionGrid
-            collections={filteredAndSortedCollections}
-            getCollectionTitle={getCollectionTitle}
-            getCollectionDescription={getCollectionDescription}
-          />
-        </>
-      )}
+      {/* Collections Grid */}
+      <FilteredCollectionGrid
+        collections={filteredAndSortedCollections}
+        getCollectionTitle={getCollectionTitle}
+        getCollectionDescription={getCollectionDescription}
+      />
     </div>
   );
 };
