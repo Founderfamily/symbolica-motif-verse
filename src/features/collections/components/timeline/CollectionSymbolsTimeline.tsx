@@ -330,12 +330,12 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                       />
 
                       {/* Carte de symbole */}
-                      <Card className={`w-72 p-4 bg-gradient-to-br from-background to-muted/30 border border-muted hover:shadow-lg transition-all duration-300 ${
-                        isLeft ? 'mr-16' : 'ml-16'
+                      <Card className={`w-56 p-3 bg-gradient-to-br from-background to-muted/30 border border-muted hover:shadow-md transition-all duration-200 ${
+                        isLeft ? 'mr-12' : 'ml-12'
                       }`}>
-                        <div className="space-y-3">
-                          {/* Image plus petite */}
-                          <div className="w-full h-24 bg-muted/50 rounded-md flex items-center justify-center overflow-hidden">
+                        <div className="space-y-2">
+                          {/* Image très compacte */}
+                          <div className="w-full h-16 bg-muted/50 rounded-sm flex items-center justify-center overflow-hidden">
                             {symbol.image_url ? (
                               <img 
                                 src={symbol.image_url} 
@@ -343,36 +343,26 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                              <ImageIcon className="w-6 h-6 text-muted-foreground" />
                             )}
                           </div>
 
-                          {/* Titre plus compact */}
-                          <h3 className="text-lg font-bold text-foreground leading-tight">
+                          {/* Titre compact */}
+                          <h3 className="text-sm font-bold text-foreground leading-tight line-clamp-1">
                             {symbol.name}
                           </h3>
 
-                          {/* Description tronquée */}
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {symbol.description}
-                          </p>
-
-                          {/* Métadonnées condensées */}
+                          {/* Métadonnées essentielles seulement */}
                           <div className="space-y-1 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3 flex-shrink-0" />
+                              <Calendar className="w-2.5 h-2.5 flex-shrink-0" />
                               <span className="truncate">{symbol.temporal_period_name || symbol.period}</span>
                             </div>
                             <div className="flex items-center gap-1">
-                              <Scroll className="w-3 h-3 flex-shrink-0" />
+                              <Scroll className="w-2.5 h-2.5 flex-shrink-0" />
                               <span className="truncate">{symbol.culture}</span>
                             </div>
                           </div>
-
-                          {/* Bouton plus petit */}
-                          <Button variant="outline" size="sm" className="w-full text-xs h-8">
-                            <I18nText translationKey="symbols.learnMore">En savoir plus</I18nText>
-                          </Button>
                         </div>
                       </Card>
 
