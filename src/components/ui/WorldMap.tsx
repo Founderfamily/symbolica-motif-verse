@@ -207,22 +207,27 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onRegionClick, className = '
   useEffect(() => {
     const loadMapboxToken = async () => {
       try {
+        console.log('🗺️ Tentative de récupération du token Mapbox...');
+        
         // Récupérer le token depuis l'edge function
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
         
+        console.log('🗺️ Réponse de l\'edge function:', { data, error });
+        
         if (error) {
-          console.error('Erreur lors de la récupération du token Mapbox:', error);
+          console.error('❌ Erreur lors de la récupération du token Mapbox:', error);
           return;
         }
 
         if (data && data.token) {
+          console.log('✅ Token Mapbox récupéré avec succès');
           setMapboxToken(data.token);
           initializeMap(data.token);
         } else {
-          console.warn('Token Mapbox non configuré dans les secrets Supabase');
+          console.warn('⚠️ Token Mapbox non configuré dans les secrets Supabase. Réponse:', data);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement du token Mapbox:', error);
+        console.error('💥 Erreur lors du chargement du token Mapbox:', error);
       }
     };
 
