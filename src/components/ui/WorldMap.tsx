@@ -241,7 +241,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onRegionClick, className = '
             Configuration de la carte
           </h3>
           <p className="text-blue-700 text-sm">
-            Chargement de la configuration Mapbox depuis les secrets Supabase...
+            La carte se charge automatiquement avec la configuration Mapbox...
           </p>
         </div>
       ) : (
