@@ -166,7 +166,7 @@ const GroupSymbols: React.FC<GroupSymbolsProps> = ({ groupId, groupSlug, isMembe
                       <Eye className="h-3 w-3 mr-1" />
                       Voir
                     </Button>
-                    {isMember && (
+                     {auth?.profile?.is_admin && (
                       <Button 
                         size="sm" 
                         variant="ghost"
@@ -216,8 +216,8 @@ const GroupSymbols: React.FC<GroupSymbolsProps> = ({ groupId, groupSlug, isMembe
         </div>
       )}
 
-      {/* Bouton pour ajouter des symboles */}
-      {isMember && auth?.user && (
+      {/* Bouton pour ajouter des symboles - Admins seulement */}
+      {auth?.profile?.is_admin && (
         <div className="flex justify-center">
           <AddSymbolDialog
             groupId={groupId}
@@ -244,7 +244,7 @@ const GroupSymbols: React.FC<GroupSymbolsProps> = ({ groupId, groupSlug, isMembe
             <p className="text-slate-600 mb-6">
               Ce groupe n'a pas encore de symboles associés.
             </p>
-            {isMember && auth?.user && (
+            {auth?.profile?.is_admin && (
               <AddSymbolDialog
                 groupId={groupId}
                 userId={auth.user.id}

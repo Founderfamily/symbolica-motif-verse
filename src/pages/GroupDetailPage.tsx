@@ -265,10 +265,6 @@ const GroupDetailPage: React.FC = () => {
                 <Eye className="h-4 w-4" />
                 <I18nText translationKey="community.symbols">Symboles</I18nText>
               </TabsTrigger>
-              <TabsTrigger value="collections" className="gap-2">
-                <Folder className="h-4 w-4" />
-                <I18nText translationKey="community.collections">Collections</I18nText>
-              </TabsTrigger>
               <TabsTrigger value="members" className="gap-2">
                 <Users className="h-4 w-4" />
                 <I18nText translationKey="community.groupMembers">Members</I18nText>
@@ -290,14 +286,6 @@ const GroupDetailPage: React.FC = () => {
 
             <TabsContent value="symbols">
               <GroupSymbols groupId={group.id} groupSlug={group.slug} isMember={isMember} />
-            </TabsContent>
-
-            <TabsContent value="collections">
-              <GroupCollections 
-                groupId={group.id} 
-                isMember={isMember}
-                isAdmin={isMember} // TODO: implement proper admin role check
-              />
             </TabsContent>
 
             <TabsContent value="members">
