@@ -33,6 +33,18 @@
     "social": {
       "title": "Follow Us",
       "description": "Join our community on social media"
-    }
+    },
+    "parcours": {
+      "title": "Learning Paths",
+      "academic": "Academic Path",
+      "adventure": "Adventure Path"
+    },
+    "links": {
+      "collections": "Collections",
+      "innovation": "Innovation Lab",
+      "trending": "Trending"
+    },
+    "made_with": "Made with",
+    "for_heritage": "for cultural heritage"
   }
 }

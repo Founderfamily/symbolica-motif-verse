@@ -33,6 +33,18 @@
     "social": {
       "title": "Suivez-nous",
       "description": "Rejoignez notre communauté sur les réseaux sociaux"
-    }
+    },
+    "parcours": {
+      "title": "Parcours",
+      "academic": "Parcours Académique",
+      "adventure": "Parcours Aventure"
+    },
+    "links": {
+      "collections": "Collections",
+      "innovation": "Innovation Lab",
+      "trending": "Tendances"
+    },
+    "made_with": "Fait avec",
+    "for_heritage": "pour le patrimoine culturel"
   }
 }

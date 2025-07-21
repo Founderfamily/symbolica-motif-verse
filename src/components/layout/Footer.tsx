@@ -118,7 +118,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/collections" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  Collections
+                  <I18nText translationKey="footer.links.collections">Collections</I18nText>
                 </Link>
               </li>
               <li>
@@ -128,7 +128,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/innovation" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  Innovation Lab
+                  <I18nText translationKey="footer.links.innovation">Innovation Lab</I18nText>
                 </Link>
               </li>
             </ul>
@@ -138,17 +138,19 @@ const Footer: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Trophy className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">Parcours</h3>
+              <h3 className="font-semibold">
+                <I18nText translationKey="footer.parcours.title">Parcours</I18nText>
+              </h3>
             </div>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link to="/parcours/academique" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  Parcours Académique
+                  <I18nText translationKey="footer.parcours.academic">Parcours Académique</I18nText>
                 </Link>
               </li>
               <li>
                 <Link to="/parcours/aventure" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  Parcours Aventure
+                  <I18nText translationKey="footer.parcours.adventure">Parcours Aventure</I18nText>
                 </Link>
               </li>
               <li>
@@ -158,7 +160,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/trending" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  Tendances
+                  <I18nText translationKey="footer.links.trending">Tendances</I18nText>
                 </Link>
               </li>
             </ul>
@@ -213,9 +215,9 @@ const Footer: React.FC = () => {
                 Confidentialité
               </Link>
               <div className="flex items-center gap-1">
-                <span>Made with</span>
+                <span><I18nText translationKey="footer.made_with">Fait avec</I18nText></span>
                 <Heart className="h-4 w-4 text-red-500" />
-                <span>for cultural heritage</span>
+                <span><I18nText translationKey="footer.for_heritage">pour le patrimoine culturel</I18nText></span>
               </div>
             </div>
           </div>
