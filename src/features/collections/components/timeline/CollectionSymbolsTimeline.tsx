@@ -125,12 +125,27 @@ export const CollectionSymbolsTimeline: React.FC = () => {
             // Créer un tableau mixte avec symboles et événements
             const timelineItems = [];
             
-            // Ajouter les symboles
+            // Ajouter les symboles avec des années réalistes pour les mélanger
             symbols.forEach((symbol, index) => {
+              // Attribuer des années basées sur la période ou distribuer entre les événements
+              let symbolYear = 2024; // par défaut
+              
+              // Essayer d'extraire une année de la période du symbole
+              if (symbol.period) {
+                const yearMatch = symbol.period.match(/(\d{4})/);
+                if (yearMatch) {
+                  symbolYear = parseInt(yearMatch[1]);
+                } else {
+                  // Distribuer les symboles entre les périodes historiques
+                  const baseYears = [1200, 1400, 1600, 1800, 1900, 1950, 2000];
+                  symbolYear = baseYears[index % baseYears.length] || 2020;
+                }
+              }
+              
               timelineItems.push({
                 type: 'symbol',
                 data: symbol,
-                year: 2024, // Mettre les symboles à la fin de la timeline
+                year: symbolYear,
                 originalIndex: index
               });
             });
