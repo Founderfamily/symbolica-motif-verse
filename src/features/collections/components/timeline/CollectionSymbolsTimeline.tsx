@@ -8,59 +8,21 @@ import { ArrowLeft, Calendar, MapPin, Scroll, Image as ImageIcon } from 'lucide-
 import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../../hooks/useCollections';
 import { useCollectionTranslations } from '@/hooks/useCollectionTranslations';
+import { useCollectionSymbols } from '../../hooks/useCollectionSymbols';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const CollectionSymbolsTimeline: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: collections = [], isLoading } = useCollections();
+  const { data: collections = [], isLoading: collectionsLoading } = useCollections();
   const { getTranslation } = useCollectionTranslations();
   
   // Trouver la collection par slug
   const collection = collections.find(c => c.slug === slug);
   
-  // Données de démonstration pour les symboles (à remplacer par de vraies données)
-  const demoSymbols = [
-    {
-      id: '1',
-      name: 'Torii',
-      description: 'Portail traditionnel japonais marquant l\'entrée des sanctuaires shintoïstes',
-      period: 'Période Heian (794-1185)',
-      culture: 'Japon',
-      location: 'Itsukushima, Hiroshima',
-      image_url: null,
-      created_at: '800-01-01'
-    },
-    {
-      id: '2', 
-      name: 'Enso',
-      description: 'Cercle zen symbolisant l\'illumination, la force et l\'univers',
-      period: 'Période Kamakura (1185-1333)',
-      culture: 'Japon',
-      location: 'Monastères zen',
-      image_url: null,
-      created_at: '1200-01-01'
-    },
-    {
-      id: '3',
-      name: 'Sakura',
-      description: 'Fleur de cerisier symbolisant la beauté éphémère de la vie',
-      period: 'Période Edo (1603-1868)',
-      culture: 'Japon',
-      location: 'Tout le Japon',
-      image_url: null,
-      created_at: '1650-01-01'
-    },
-    {
-      id: '4',
-      name: 'Maneki Neko',
-      description: 'Chat porte-bonheur attirant la fortune et la prospérité',
-      period: 'Période Edo (1603-1868)',
-      culture: 'Japon',
-      location: 'Tokyo',
-      image_url: null,
-      created_at: '1700-01-01'
-    }
-  ];
+  // Récupérer les symboles de cette collection
+  const { data: symbols = [], isLoading: symbolsLoading } = useCollectionSymbols(collection?.id);
+  
+  const isLoading = collectionsLoading || symbolsLoading;
 
   if (isLoading) {
     return (
@@ -81,6 +43,21 @@ export const CollectionSymbolsTimeline: React.FC = () => {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold mb-4">Collection non trouvée</h2>
+        <Link to="/collections">
+          <Button variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Retour aux collections
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  if (symbols.length === 0 && !isLoading) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold mb-4">Aucun symbole dans cette collection</h2>
+        <p className="text-muted-foreground mb-6">Cette collection ne contient pas encore de symboles.</p>
         <Link to="/collections">
           <Button variant="outline">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -128,7 +105,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
         <div className="absolute left-1/2 transform -translate-x-2 w-4 h-4 bg-primary rounded-full bottom-0" />
 
         <div className="space-y-20">
-          {demoSymbols.map((symbol, index) => {
+          {symbols.map((symbol, index) => {
             const isLeft = index % 2 === 0;
             
             return (
@@ -155,9 +132,17 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                   isLeft ? 'mr-20' : 'ml-20'
                 }`}>
                   <div className="space-y-4">
-                    {/* Image placeholder */}
-                    <div className="w-full h-40 bg-muted/50 rounded-lg flex items-center justify-center">
-                      <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                    {/* Image */}
+                    <div className="w-full h-40 bg-muted/50 rounded-lg flex items-center justify-center overflow-hidden">
+                      {symbol.image_url ? (
+                        <img 
+                          src={symbol.image_url} 
+                          alt={symbol.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                      )}
                     </div>
 
                     {/* Titre du symbole */}
@@ -180,9 +165,9 @@ export const CollectionSymbolsTimeline: React.FC = () => {
                         <Scroll className="w-3 h-3" />
                         <span>{symbol.culture}</span>
                       </div>
+                      {/* Position dans la collection */}
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-3 h-3" />
-                        <span>{symbol.location}</span>
+                        <span className="text-xs font-medium">Position: {symbol.position}</span>
                       </div>
                     </div>
 
