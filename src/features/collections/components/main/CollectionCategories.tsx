@@ -2,7 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Grid3X3, Clock } from 'lucide-react';
+import { ArrowRight, Grid3X3, Clock, Map, Layers, Star, BookOpen, Globe } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../../hooks/useCollections';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -122,6 +123,7 @@ const CollectionCategories: React.FC = () => {
   const { data: collections = [], isLoading, error, refetch } = useCollections();
   const { getTranslation } = useCollectionTranslations();
   const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
+  const [organizationMode, setOrganizationMode] = useState<'thematic' | 'geographic' | 'popularity' | 'difficulty' | 'chronological'>('thematic');
 
   // Use database collections directly
   console.log('📚 [CollectionCategories] Collections received:', collections?.length || 0);
@@ -170,9 +172,152 @@ const CollectionCategories: React.FC = () => {
     return <CollectionsErrorState error={error} retry={() => refetch()} />;
   }
 
+  // Obtenir les options d'organisation selon le mode
+  const getOrganizationOptions = () => {
+    switch (organizationMode) {
+      case 'thematic':
+        return [
+          { id: 'cultures', label: 'Cultures du monde', icon: Globe },
+          { id: 'spirituality', label: 'Spiritualité & Religion', icon: Star },
+          { id: 'art', label: 'Art & Artisanat', icon: Layers },
+          { id: 'history', label: 'Histoire & Patrimoine', icon: BookOpen }
+        ];
+      case 'geographic':
+        return [
+          { id: 'europe', label: 'Europe', icon: Map },
+          { id: 'asia', label: 'Asie', icon: Map },
+          { id: 'africa', label: 'Afrique', icon: Map },
+          { id: 'americas', label: 'Amériques', icon: Map }
+        ];
+      case 'popularity':
+        return [
+          { id: 'most-viewed', label: 'Plus consultées', icon: Star },
+          { id: 'trending', label: 'Tendances', icon: ArrowRight },
+          { id: 'new', label: 'Nouveautés', icon: Clock }
+        ];
+      case 'difficulty':
+        return [
+          { id: 'beginner', label: 'Découverte', icon: Star },
+          { id: 'intermediate', label: 'Approfondissement', icon: Layers },
+          { id: 'expert', label: 'Expertise', icon: BookOpen }
+        ];
+      case 'chronological':
+        return [
+          { id: 'ancient', label: 'Antiquité', icon: Clock },
+          { id: 'medieval', label: 'Moyen Âge', icon: Clock },
+          { id: 'modern', label: 'Époque moderne', icon: Clock },
+          { id: 'contemporary', label: 'Contemporain', icon: Clock }
+        ];
+      default:
+        return [];
+    }
+  };
+
   return (
     <div className="space-y-8">
-      {/* Bouton de basculement de vue */}
+      {/* Menu de sélection d'organisation */}
+      <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg p-6 border border-muted">
+        <h3 className="text-lg font-semibold mb-4 text-foreground">
+          <I18nText translationKey="collections.organizationMode">Mode d'organisation</I18nText>
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <Button
+            variant={organizationMode === 'thematic' ? 'default' : 'outline'}
+            className="h-auto p-4 flex flex-col items-start gap-2"
+            onClick={() => setOrganizationMode('thematic')}
+          >
+            <div className="flex items-center gap-2 w-full">
+              <Layers className="w-5 h-5" />
+              <span className="font-medium">Organisation thématique</span>
+            </div>
+            <p className="text-xs text-left opacity-80">Par domaines : cultures, art, spiritualité...</p>
+          </Button>
+
+          <Button
+            variant={organizationMode === 'geographic' ? 'default' : 'outline'}
+            className="h-auto p-4 flex flex-col items-start gap-2"
+            onClick={() => setOrganizationMode('geographic')}
+          >
+            <div className="flex items-center gap-2 w-full">
+              <Map className="w-5 h-5" />
+              <span className="font-medium">Organisation géographique</span>
+            </div>
+            <p className="text-xs text-left opacity-80">Par régions et continents</p>
+          </Button>
+
+          <Button
+            variant={organizationMode === 'popularity' ? 'default' : 'outline'}
+            className="h-auto p-4 flex flex-col items-start gap-2"
+            onClick={() => setOrganizationMode('popularity')}
+          >
+            <div className="flex items-center gap-2 w-full">
+              <Star className="w-5 h-5" />
+              <span className="font-medium">Par popularité</span>
+            </div>
+            <p className="text-xs text-left opacity-80">Selon l'engagement des utilisateurs</p>
+          </Button>
+
+          <Button
+            variant={organizationMode === 'difficulty' ? 'default' : 'outline'}
+            className="h-auto p-4 flex flex-col items-start gap-2"
+            onClick={() => setOrganizationMode('difficulty')}
+          >
+            <div className="flex items-center gap-2 w-full">
+              <BookOpen className="w-5 h-5" />
+              <span className="font-medium">Par niveau</span>
+            </div>
+            <p className="text-xs text-left opacity-80">Découverte, approfondissement, expertise</p>
+          </Button>
+
+          <Button
+            variant={organizationMode === 'chronological' ? 'default' : 'outline'}
+            className="h-auto p-4 flex flex-col items-start gap-2"
+            onClick={() => setOrganizationMode('chronological')}
+          >
+            <div className="flex items-center gap-2 w-full">
+              <Clock className="w-5 h-5" />
+              <span className="font-medium">Chronologique</span>
+            </div>
+            <p className="text-xs text-left opacity-80">Par époques historiques</p>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="h-auto p-4 flex flex-col items-start gap-2 opacity-60"
+            disabled
+          >
+            <div className="flex items-center gap-2 w-full">
+              <Grid3X3 className="w-5 h-5" />
+              <span className="font-medium">Vue classique</span>
+            </div>
+            <p className="text-xs text-left opacity-80">Grille simple avec filtres</p>
+          </Button>
+        </div>
+
+        {/* Aperçu des catégories selon le mode sélectionné */}
+        <div className="border-t border-muted pt-4">
+          <h4 className="font-medium mb-3 text-sm text-muted-foreground">
+            Catégories disponibles dans ce mode :
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {getOrganizationOptions().map((option) => {
+              const IconComponent = option.icon;
+              return (
+                <div
+                  key={option.id}
+                  className="flex items-center gap-2 bg-muted/50 rounded-full px-3 py-1 text-xs"
+                >
+                  <IconComponent className="w-3 h-3" />
+                  <span>{option.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Boutons de vue (Timeline/Grille) */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
@@ -195,7 +340,7 @@ const CollectionCategories: React.FC = () => {
           </Button>
         </div>
         <div className="text-sm text-muted-foreground">
-          {filteredAndSortedCollections.length} collections
+          {filteredAndSortedCollections.length} collections • Mode: {organizationMode}
         </div>
       </div>
 
