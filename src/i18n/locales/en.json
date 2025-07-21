@@ -54,12 +54,18 @@
     }
   },
   "collections": {
+    "title": "Collections",
     "featured": {
       "title": "Thematic Collections",
       "description": "Explore fascinating journeys through symbols from around the world. Each collection tells a unique story.",
       "discoverAll": "Discover all collections"
     },
-    "title": "Collections",
+    "heroStats": {
+      "cultures": "World Cultures",
+      "periods": "Historical Periods", 
+      "mythologies": "Mythologies",
+      "art": "Symbolic Art"
+    },
     "featuredBadge": "Featured",
     "backToCollections": "Back to collections",
     "notFound": "Collection not found",
