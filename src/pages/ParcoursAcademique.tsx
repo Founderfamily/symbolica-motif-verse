@@ -12,7 +12,8 @@ import {
   BarChart3,
   Download,
   Cpu,
-  Award
+  Award,
+  Clock
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,6 +36,13 @@ const ParcoursAcademique = () => {
       badge: "50+ collections"
     },
     {
+      title: "Laboratoire Innovation",
+      description: "Expérimentez les nouvelles approches de visualisation",
+      icon: Microscope,
+      action: () => navigate('/innovation'),
+      badge: "Lab R&D"
+    },
+    {
       title: "Outils d'Analyse",
       description: "Analysez les patterns et connexions entre symboles",
       icon: BarChart3,
@@ -47,13 +55,6 @@ const ParcoursAcademique = () => {
       icon: Search,
       action: () => navigate('/search'),
       badge: "IA Search"
-    },
-    {
-      title: "Contribution Recherche",
-      description: "Soumettez vos découvertes pour validation académique",
-      icon: FileText,
-      action: () => navigate('/contributions'),
-      badge: "Peer-review"
     },
     {
       title: "Timeline Historique",
@@ -124,6 +125,51 @@ const ParcoursAcademique = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Innovation Lab Section */}
+        <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Microscope className="h-6 w-6 text-blue-600" />
+            <h2 className="text-2xl font-semibold text-gray-900">Laboratoire d'Innovation</h2>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Explorez nos approches expérimentales de visualisation et d'analyse des données symboliques
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Button 
+              variant="outline" 
+              className="p-4 h-auto flex-col gap-2"
+              onClick={() => navigate('/innovation/graph')}
+            >
+              <BarChart3 className="h-6 w-6" />
+              <span className="text-sm font-medium">Visualisation Graphique</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="p-4 h-auto flex-col gap-2"
+              onClick={() => navigate('/innovation/tabs')}
+            >
+              <Database className="h-6 w-6" />
+              <span className="text-sm font-medium">Interface Avancée</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="p-4 h-auto flex-col gap-2"
+              onClick={() => navigate('/innovation/immersion')}
+            >
+              <Cpu className="h-6 w-6" />
+              <span className="text-sm font-medium">Expérience Immersive</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="p-4 h-auto flex-col gap-2"
+              onClick={() => navigate('/innovation/timeline')}
+            >
+              <Clock className="h-6 w-6" />
+              <span className="text-sm font-medium">Timeline Innovation</span>
+            </Button>
+          </div>
         </div>
 
         {/* Research Areas */}

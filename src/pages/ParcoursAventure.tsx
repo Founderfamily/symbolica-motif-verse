@@ -37,11 +37,11 @@ const ParcoursAventure = () => {
       color: "blue"
     },
     {
-      title: "Communauté d'Aventuriers",
-      description: "Rejoignez des groupes et participez aux discussions",
-      icon: Users,
-      action: () => navigate('/community'),
-      badge: "1000+ membres",
+      title: "Innovation Gamifiée",
+      description: "Découvrez nos expériences ludiques innovantes",
+      icon: Gamepad2,
+      action: () => navigate('/innovation/gamify'),
+      badge: "Gamification",
       color: "purple"
     },
     {
@@ -157,6 +157,51 @@ const ParcoursAventure = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Innovation Lab Section */}
+        <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Gamepad2 className="h-6 w-6 text-emerald-600" />
+            <h2 className="text-2xl font-semibold text-gray-900">Lab Innovation Ludique</h2>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Testez nos expériences interactives les plus innovantes et amusantes
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Button 
+              variant="outline" 
+              className="p-4 h-auto flex-col gap-2 hover-scale"
+              onClick={() => navigate('/innovation/gamify')}
+            >
+              <Trophy className="h-6 w-6" />
+              <span className="text-sm font-medium">Gamification</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="p-4 h-auto flex-col gap-2 hover-scale"
+              onClick={() => navigate('/innovation/immersion')}
+            >
+              <Star className="h-6 w-6" />
+              <span className="text-sm font-medium">Immersion 3D</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="p-4 h-auto flex-col gap-2 hover-scale"
+              onClick={() => navigate('/innovation/timeline')}
+            >
+              <Clock className="h-6 w-6" />
+              <span className="text-sm font-medium">Timeline Interactive</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="p-4 h-auto flex-col gap-2 hover-scale"
+              onClick={() => navigate('/innovation')}
+            >
+              <Zap className="h-6 w-6" />
+              <span className="text-sm font-medium">Voir Tout</span>
+            </Button>
+          </div>
         </div>
 
         {/* Quest Types */}
