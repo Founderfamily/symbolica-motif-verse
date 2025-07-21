@@ -1092,6 +1092,48 @@ export type Database = {
           },
         ]
       }
+      historical_events: {
+        Row: {
+          collection_slug: string
+          created_at: string | null
+          culture_region: string
+          date_text: string
+          description: string | null
+          event_name: string
+          id: string
+          importance_level: number | null
+          period_category: string
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          collection_slug: string
+          created_at?: string | null
+          culture_region: string
+          date_text: string
+          description?: string | null
+          event_name: string
+          id?: string
+          importance_level?: number | null
+          period_category: string
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          collection_slug?: string
+          created_at?: string | null
+          culture_region?: string
+          date_text?: string
+          description?: string | null
+          event_name?: string
+          id?: string
+          importance_level?: number | null
+          period_category?: string
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
       image_annotations: {
         Row: {
           annotation_data: Json

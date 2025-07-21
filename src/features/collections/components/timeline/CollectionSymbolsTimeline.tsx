@@ -9,8 +9,9 @@ import { I18nText } from '@/components/ui/i18n-text';
 import { useCollections } from '../../hooks/useCollections';
 import { useCollectionTranslations } from '@/hooks/useCollectionTranslations';
 import { useCollectionSymbols } from '../../hooks/useCollectionSymbols';
-import { useFrenchHistoricalEvents } from '../../hooks/useFrenchHistoricalEvents';
+import { useHistoricalEvents } from '../../hooks/useHistoricalEvents';
 import { Skeleton } from '@/components/ui/skeleton';
+import { mapPeriodToYear } from '../../utils/periodToYearMapping';
 
 export const CollectionSymbolsTimeline: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -28,9 +29,9 @@ export const CollectionSymbolsTimeline: React.FC = () => {
   const { data: symbols = [], isLoading: symbolsLoading } = useCollectionSymbols(collection?.id);
   console.log('🔍 CollectionSymbolsTimeline - symbols:', symbols);
   
-  // Récupérer les événements historiques français si c'est la collection patrimoine-français
-  const { data: historicalEvents = [], isLoading: eventsLoading } = useFrenchHistoricalEvents();
-  const shouldShowEvents = collection?.slug === 'patrimoine-francais';
+  // Récupérer les événements historiques pour cette collection
+  const { data: historicalEvents = [], isLoading: eventsLoading } = useHistoricalEvents(collection?.slug);
+  const shouldShowEvents = historicalEvents.length > 0;
   
   console.log('🔍 CollectionSymbolsTimeline - collection slug:', collection?.slug);
   console.log('🔍 CollectionSymbolsTimeline - shouldShowEvents:', shouldShowEvents);
@@ -101,6 +102,18 @@ export const CollectionSymbolsTimeline: React.FC = () => {
         
         <div className="text-center">
           <h1 className="text-3xl font-bold text-blue-600 mb-6">{title}</h1>
+          {shouldShowEvents && (
+            <div className="flex justify-center gap-6 text-sm text-gray-600 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></div>
+                <span>Symboles</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-50 border border-blue-200 rounded-sm"></div>
+                <span>Événements historiques</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -118,42 +131,14 @@ export const CollectionSymbolsTimeline: React.FC = () => {
             symbols.forEach((symbol, index) => {
               let symbolYear = 2024; // par défaut
               
-              // Mapping intelligent des périodes vers des années
+              // Utiliser le mapping intelligent universel
               if (symbol.period) {
-                const period = symbol.period.toLowerCase();
-                
-                // Chercher une année explicite d'abord
-                const yearMatch = symbol.period.match(/(\d{4})/);
-                if (yearMatch) {
-                  symbolYear = parseInt(yearMatch[1]);
-                } else {
-                  // Mapping intelligent des périodes historiques vers des années
-                  if (period.includes('antiquité') || period.includes('gaulois') || period.includes('gaul') || period.includes('av. j.-c.') || period.includes('gallo-romain')) {
-                    symbolYear = -100 + (index * 20); // Antiquité : -100 à 400
-                  } else if (period.includes('haut moyen âge') || period.includes('haut moyen-âge')) {
-                    symbolYear = 500 + (index * 30);
-                  } else if (period.includes('moyen âge') || period.includes('moyen-âge') || period.includes('médiéval')) {
-                    symbolYear = 1000 + (index * 15); // Moyen Âge : 1000-1500
-                  } else if (period.includes('renaissance')) {
-                    symbolYear = 1500 + (index * 10); // Renaissance : 1500-1600
-                  } else if (period.includes('moderne') || period.includes('époque moderne')) {
-                    symbolYear = 1600 + (index * 10); // Époque moderne : 1600-1800
-                  } else if (period.includes('seconde guerre') || period.includes('guerre mondiale')) {
-                    symbolYear = 1940 + (index * 2);
-                  } else if (period.includes('xvie')) {
-                    symbolYear = 1550 + (index * 5);
-                  } else if (period.includes('xviie')) {
-                    symbolYear = 1650 + (index * 5);
-                  } else if (period.includes('xviiie')) {
-                    symbolYear = 1750 + (index * 5);
-                  } else if (period.includes('xixe') || period.includes('19e')) {
-                    symbolYear = 1850 + (index * 5);
-                  } else {
-                    // Distribution par défaut plus serrée
-                    const baseYears = [800, 1100, 1300, 1500, 1700, 1850, 1950];
-                    symbolYear = baseYears[index % baseYears.length] || (1200 + index * 50);
-                  }
-                }
+                const mappingResult = mapPeriodToYear(
+                  symbol.period, 
+                  symbol.culture || collection?.slug || 'unknown', 
+                  index
+                );
+                symbolYear = mappingResult.year;
               }
               
               console.log(`🔍 Symbol "${symbol.name}" - Period: "${symbol.period}" - Mapped Year: ${symbolYear}`);
@@ -166,7 +151,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
               });
             });
             
-            // Ajouter les événements historiques français si c'est la bonne collection
+            // Ajouter les événements historiques pour cette collection
             if (shouldShowEvents && historicalEvents.length > 0) {
               historicalEvents.forEach((event) => {
                 timelineItems.push({
@@ -296,7 +281,7 @@ export const CollectionSymbolsTimeline: React.FC = () => {
 
                         {/* Année */}
                         <div className="text-sm text-blue-600 mb-1 font-medium">
-                          {event.year}
+                          {event.year > 0 ? `${event.year}` : `${Math.abs(event.year)} av. J.-C.`}
                         </div>
 
                         {/* Catégorie */}
