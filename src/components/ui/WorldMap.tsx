@@ -118,7 +118,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onRegionClick, className = '
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: 'mapbox://styles/mapbox/satellite-v9',
       projection: 'globe' as any,
       zoom: 1.5,
       center: [20, 20],
