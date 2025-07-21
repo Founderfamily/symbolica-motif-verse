@@ -52,13 +52,20 @@ export const FilteredCollectionGrid: React.FC<FilteredCollectionGridProps> = ({
               <p className="text-gray-600 text-sm line-clamp-3 mb-6 leading-relaxed">
                 {getCollectionDescription(collection)}
               </p>
-              {/* Bouton d'action */}
-              <Link to={`/collections/${collection.slug}`} className="block">
-                <Button variant="outline" size="sm" className="w-full group hover:bg-gray-50 border-gray-300">
-                  <I18nText translationKey="collections.explore">explorer</I18nText>
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
+              {/* Boutons d'action */}
+              <div className="flex gap-2">
+                <Link to={`/collections/${collection.slug}`} className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full group hover:bg-gray-50 border-gray-300">
+                    <I18nText translationKey="collections.explore">explorer</I18nText>
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+                <Link to={`/collections/${collection.slug}/timeline`}>
+                  <Button variant="outline" size="sm" className="group hover:bg-blue-50 border-blue-300">
+                    📅
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         ))}
