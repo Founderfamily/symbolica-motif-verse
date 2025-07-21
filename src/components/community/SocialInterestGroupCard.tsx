@@ -23,7 +23,7 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const shareUrl = `${window.location.origin}/groups/${group.slug}`;
+  const shareUrl = `${window.location.origin}/community/groups/${group.slug}`;
   const shareTitle = `Rejoignez le groupe "${group.name}" sur Cultural Heritage Symbols`;
   const shareDescription = group.description || `Découvrez et partagez des symboles culturels dans le groupe ${group.name}`;
 
@@ -69,7 +69,7 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
   };
 
   const handleViewGroup = () => {
-    navigate(`/groups/${group.slug}`);
+    navigate(`/community/groups/${group.slug}`);
   };
 
   const getButtonContent = () => {

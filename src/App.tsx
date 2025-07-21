@@ -106,7 +106,7 @@ function App() {
                   <Route path="/quests" element={<QuestsPage />} />
                   <Route path="/quests/:questId" element={<QuestDetailPage />} />
                   <Route path="/community" element={<CommunityPage />} />
-                  <Route path="/community/groups/:groupId" element={<GroupDetailPage />} />
+                  <Route path="/community/groups/:slug" element={<GroupDetailPage />} />
 
                   {/* Innovation Lab routes */}
                   <Route path="/innovation" element={<InnovationHomePage />} />

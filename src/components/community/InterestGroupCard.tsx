@@ -56,7 +56,7 @@ const InterestGroupCard: React.FC<InterestGroupCardProps> = ({ group }) => {
             }
           </Badge>
           <Link 
-            to={`/groups/${group.slug}`}
+            to={`/community/groups/${group.slug}`}
             className="text-amber-700 hover:text-amber-800 text-sm font-medium"
           >
             <I18nText translationKey="community.viewGroup">Voir le Groupe</I18nText>
