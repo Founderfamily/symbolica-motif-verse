@@ -47,16 +47,39 @@ export const CollectionsTimeline: React.FC<CollectionsTimelineProps> = ({
 
   const organizedCollections = organizeCollections();
   
-  console.log('🔍 [CollectionsTimeline] Données:', {
-    collections: collections.length,
+  console.log('🔍 [CollectionsTimeline] Debug:', {
+    totalCollections: collections.length,
     organizationMode,
-    organizedCollections: organizedCollections.length
+    organizedLength: organizedCollections.length,
+    firstCollection: organizedCollections[0],
+    collectionsData: collections
   });
 
-  if (organizedCollections.length === 0) {
+  // Fallback simple si pas de collections
+  if (!collections || collections.length === 0) {
+    console.log('❌ [CollectionsTimeline] Aucune collection disponible');
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 space-y-4">
         <p className="text-muted-foreground">Aucune collection disponible</p>
+        <div className="bg-muted/30 p-4 rounded-lg">
+          <p className="text-sm">Mode: {organizationMode}</p>
+          <p className="text-sm">Collections reçues: {collections?.length || 0}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Affichage simple pour déboguer
+  if (organizedCollections.length === 0) {
+    console.log('❌ [CollectionsTimeline] Collections organisées vides');
+    return (
+      <div className="text-center py-12 space-y-4">
+        <p className="text-muted-foreground">Collections organisées vides</p>
+        <div className="bg-muted/30 p-4 rounded-lg text-sm">
+          <p>Mode: {organizationMode}</p>
+          <p>Collections originales: {collections.length}</p>
+          <p>Collections organisées: {organizedCollections.length}</p>
+        </div>
       </div>
     );
   }
