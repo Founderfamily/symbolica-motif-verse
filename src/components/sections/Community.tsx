@@ -136,7 +136,7 @@ const Community = () => {
         {/* Section Header */}
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-semibold mb-3 text-stone-800">
-            <I18nText translationKey="app.community.title">Communauté d'Explorateurs en Croissance</I18nText>
+            <I18nText translationKey="app.community.title">Aperçu de la Communauté</I18nText>
           </h2>
           
           <p className="text-base text-stone-600 max-w-2xl mx-auto mb-6 leading-relaxed">
