@@ -122,7 +122,7 @@ const CollectionCategories: React.FC = () => {
   const { currentLanguage } = useTranslation();
   const { data: collections = [], isLoading, error, refetch } = useCollections();
   const { getTranslation } = useCollectionTranslations();
-  const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
+  const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('grid'); // Retour à grid par défaut
   const [organizationMode, setOrganizationMode] = useState<'thematic' | 'geographic' | 'popularity' | 'difficulty' | 'chronological'>('thematic');
 
   // Use database collections directly or static ones if empty

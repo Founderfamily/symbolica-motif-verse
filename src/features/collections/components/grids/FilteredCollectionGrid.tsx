@@ -3,6 +3,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Calendar } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
 
 interface FilteredCollectionGridProps {
@@ -34,34 +36,41 @@ export const FilteredCollectionGrid: React.FC<FilteredCollectionGridProps> = ({
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {collections.map((collection) => (
-        <Link
-          key={collection.id}
-          to={`/collections/${collection.slug}`}
-          className="block transition-transform hover:scale-105"
-        >
-          <Card className="h-full hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex justify-between items-start mb-2">
-                <CardTitle className="text-lg">
-                  {getCollectionTitle(collection)}
-                </CardTitle>
-                {collection.is_featured && (
-                  <Badge variant="default">
-                    <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600 text-sm line-clamp-3">
-                {getCollectionDescription(collection)}
-              </p>
-              <div className="mt-4 text-sm text-amber-600 font-medium">
-                <I18nText translationKey="collections.explore">Explorer →</I18nText>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+        <Card key={collection.id} className="h-full hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <div className="flex justify-between items-start mb-2">
+              <CardTitle className="text-lg">
+                {getCollectionTitle(collection)}
+              </CardTitle>
+              {collection.is_featured && (
+                <Badge variant="default">
+                  <I18nText translationKey="collections.featuredBadge">Vedette</I18nText>
+                </Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-slate-600 text-sm line-clamp-3 mb-4">
+              {getCollectionDescription(collection)}
+            </p>
+            
+            {/* Boutons d'action */}
+            <div className="flex gap-2">
+              <Link to={`/collections/${collection.slug}`} className="flex-1">
+                <Button variant="outline" size="sm" className="w-full group">
+                  <I18nText translationKey="collections.explore">Explorer</I18nText>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link to={`/collections/${collection.slug}/timeline`} className="flex-1">
+                <Button size="sm" className="w-full group">
+                  <I18nText translationKey="collections.timeline">Timeline</I18nText>
+                  <Calendar className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
