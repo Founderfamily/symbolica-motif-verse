@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Calendar, Heart, UserPlus, Eye, CheckCircle } from 'lucide-react';
+import { Users, Calendar, Heart, UserPlus, Eye, CheckCircle, Globe, Lock } from 'lucide-react';
 import { InterestGroup } from '@/types/interest-groups';
 import { ShareButton } from '@/components/social/ShareButton';
 import { GroupInviteDialog } from '@/components/social/GroupInviteDialog';
@@ -109,7 +110,7 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
     return {
       variant: "default" as const,
       icon: isJoining ? <UserPlus className="w-4 h-4 mr-1 animate-spin" /> : <UserPlus className="w-4 h-4 mr-1" />,
-      text: isJoining ? 'Adhésion...' : 'Rejoindre',
+      text: isJoining ? 'Inscription...' : 'Rejoindre',
       disabled: isJoining,
       onClick: handleJoinGroup,
       className: "flex-1 bg-amber-600 hover:bg-amber-700 text-white border-amber-600"
@@ -200,17 +201,24 @@ export const SocialInterestGroupCard: React.FC<SocialInterestGroupCardProps> = (
             <Calendar className="w-3 h-3" />
             <span>Créé le {new Date(group.created_at).toLocaleDateString()}</span>
           </div>
-          {group.is_public && (
-            <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 border-amber-200">
-              Public
+          {group.is_public ? (
+            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 border-green-200">
+              <Globe className="w-3 h-3 mr-1" />
+              Ouvert
             </Badge>
-          )}
-          {!group.is_public && (
+          ) : (
             <Badge variant="outline" className="text-xs border-stone-300 text-stone-600">
+              <Lock className="w-3 h-3 mr-1" />
               Privé
             </Badge>
           )}
         </div>
+        
+        {!user && (
+          <div className="mt-2 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded">
+            Connexion requise pour rejoindre
+          </div>
+        )}
       </CardContent>
     </Card>
   );

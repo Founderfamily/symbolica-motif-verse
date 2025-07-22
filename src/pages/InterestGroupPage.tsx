@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Share, MessageCircle, Hash, Eye, Calendar, Globe } from 'lucide-react';
@@ -46,7 +47,8 @@ const InterestGroupPage: React.FC = () => {
 
   const handleJoinGroup = async () => {
     if (!auth?.user) {
-      toast.error('Veuillez vous connecter pour rejoindre un groupe.');
+      toast.error('Veuillez vous connecter pour rejoindre ce groupe.');
+      navigate('/auth');
       return;
     }
 
@@ -135,9 +137,9 @@ const InterestGroupPage: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-2xl font-bold text-stone-800">{group.name}</h1>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                     <Globe className="w-3 h-3 mr-1" />
-                    Public
+                    Ouvert
                   </Badge>
                 </div>
                 <p className="text-stone-600 mb-2">{group.description}</p>
@@ -152,6 +154,12 @@ const InterestGroupPage: React.FC = () => {
                     {group.discoveries_count} Découvertes
                   </span>
                 </div>
+                
+                {!auth?.user && (
+                  <p className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded mt-2 inline-block">
+                    Connexion requise pour rejoindre ce groupe
+                  </p>
+                )}
               </div>
             </div>
             
@@ -169,7 +177,7 @@ const InterestGroupPage: React.FC = () => {
               ) : (
                 <Button 
                   onClick={handleJoinGroup} 
-                  disabled={isJoining || !auth?.user}
+                  disabled={isJoining}
                   className="bg-amber-600 hover:bg-amber-700 text-white"
                   size="sm"
                 >
@@ -240,14 +248,22 @@ const InterestGroupPage: React.FC = () => {
               <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <div className="text-center text-stone-500 py-12">
                   <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">Rejoignez le groupe</h3>
-                  <p className="mb-4">Vous devez être membre du groupe pour participer au chat.</p>
+                  <h3 className="text-lg font-medium mb-2">Accès réservé aux membres</h3>
+                  <p className="mb-4">
+                    {auth?.user 
+                      ? "Vous devez être membre du groupe pour participer au chat."
+                      : "Connectez-vous et rejoignez le groupe pour participer au chat."
+                    }
+                  </p>
                   <Button 
                     onClick={handleJoinGroup} 
-                    disabled={isJoining || !auth?.user}
+                    disabled={isJoining}
                     className="bg-amber-600 hover:bg-amber-700 text-white"
                   >
-                    {isJoining ? 'Inscription...' : 'Rejoindre le groupe'}
+                    {!auth?.user 
+                      ? 'Se connecter et rejoindre' 
+                      : (isJoining ? 'Inscription...' : 'Rejoindre le groupe')
+                    }
                   </Button>
                 </div>
               </div>
