@@ -212,17 +212,13 @@ const CommunityHub: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Tabs - Collections, Académique et Aventure */}
+        {/* Main Tabs - Collections et Aventure */}
         <div className="mb-8">
           <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="collections" className="flex items-center gap-2">
                 <Palette className="w-4 h-4" />
-                Collections
-              </TabsTrigger>
-              <TabsTrigger value="academique" className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                Groupes Académiques
+                Groupes d'Intérêt
               </TabsTrigger>
               <TabsTrigger value="aventure" className="flex items-center gap-2">
                 <Compass className="w-4 h-4" />
@@ -230,7 +226,7 @@ const CommunityHub: React.FC = () => {
               </TabsTrigger>
             </TabsList>
 
-            {/* Section Collections - Communautés par collection */}
+            {/* Section Collections - Groupes d'Intérêt par culture */}
             <TabsContent value="collections" className="mt-6">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
                 {collectionsGroups.length === 0 ? (
@@ -317,80 +313,6 @@ const CommunityHub: React.FC = () => {
                     })}
                   </div>
                 )}
-              </div>
-            </TabsContent>
-
-            {/* Section Académique - Groupes Culturels */}
-            <TabsContent value="academique" className="mt-6">
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {collectionsGroups.map(group => {
-                    // Fonction pour assigner une icône et couleur selon le nom du groupe
-                    const getGroupDisplay = (name: string) => {
-                      const lowerName = name.toLowerCase();
-                      if (lowerName.includes('celt')) return { icon: Compass, color: 'green' };
-                      if (lowerName.includes('nordique') || lowerName.includes('viking')) return { icon: BookOpen, color: 'blue' };
-                      if (lowerName.includes('egypt') || lowerName.includes('égypt')) return { icon: Crown, color: 'amber' };
-                      if (lowerName.includes('chin')) return { icon: History, color: 'orange' };
-                      if (lowerName.includes('japon')) return { icon: Mountain, color: 'pink' };
-                      if (lowerName.includes('grec')) return { icon: Building, color: 'blue' };
-                      if (lowerName.includes('afric')) return { icon: Users, color: 'orange' };
-                      if (lowerName.includes('océan') || lowerName.includes('pacif')) return { icon: Compass, color: 'blue' };
-                      if (lowerName.includes('slave')) return { icon: History, color: 'purple' };
-                      if (lowerName.includes('médiév') || lowerName.includes('europe')) return { icon: Crown, color: 'amber' };
-                      if (lowerName.includes('amér') || lowerName.includes('indig')) return { icon: Mountain, color: 'green' };
-                      if (lowerName.includes('arab') || lowerName.includes('islam')) return { icon: BookOpen, color: 'blue' };
-                      if (lowerName.includes('perse') || lowerName.includes('iran')) return { icon: Palette, color: 'purple' };
-                      return { icon: BookOpen, color: 'blue' };
-                    };
-
-                    const { icon: GroupIcon, color } = getGroupDisplay(group.name);
-                    const onlineMembers = Math.max(0, Math.floor(group.members_count * 0.1)); // 10% en ligne max
-
-                    return (
-                      <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${getColorClasses(color)}`}>
-                              <GroupIcon className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-stone-800">{group.name}</h3>
-                            </div>
-                          </div>
-                          {onlineMembers > 0 && (
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                              {onlineMembers} en ligne
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-2 text-sm text-stone-600 mb-4">
-                          <div className="flex justify-between">
-                            <span>Membres</span>
-                            <span className="font-medium">{group.members_count}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Découvertes</span>
-                            <span className="font-medium">{group.discoveries_count}</span>
-                          </div>
-                        </div>
-                        
-                        <p className="text-stone-700 text-sm mb-4 italic">
-                          {group.description || "Description à venir..."}
-                        </p>
-                        
-                        <Button 
-                          onClick={() => navigate(`/groups/${group.slug}`)}
-                          variant="outline"
-                          className="w-full border-stone-300 hover:bg-stone-50"
-                        >
-                          {group.members_count > 0 ? 'Rejoindre la Discussion' : 'Être le Premier Membre'}
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
             </TabsContent>
 
