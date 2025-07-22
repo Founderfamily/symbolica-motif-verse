@@ -115,39 +115,35 @@ export const NavigationItems = () => {
   return (
     <div className="hidden md:flex items-center justify-between w-full">
       <div className="flex items-center space-x-4">
-        {/* Accueil */}
-        <Link
-          to="/"
-          className={cn(
-            'px-2 py-2 text-sm font-medium transition-colors hover:text-primary relative',
-            location.pathname === '/'
-              ? 'text-primary'
-              : 'text-muted-foreground'
-          )}
-        >
-          <I18nText translationKey="home" ns="navigation">
-            Accueil
-          </I18nText>
-        </Link>
-
-        {/* Menu Parcours dropdown */}
+        {/* Accueil avec sous-menu Parcours */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               className={cn(
                 'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
-                location.pathname.startsWith('/parcours')
+                location.pathname === '/' || location.pathname.startsWith('/parcours')
                   ? 'text-primary'
                   : 'text-muted-foreground'
               )}
             >
-              Parcours
+              <I18nText translationKey="home" ns="navigation">
+                Accueil
+              </I18nText>
               <ChevronDown className="h-3 w-3" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 bg-white border shadow-md z-[100]">
+          <DropdownMenuContent align="start" className="w-80 bg-white border shadow-md z-[100]">
+            <DropdownMenuItem asChild>
+              <Link
+                to="/"
+                className="flex items-center gap-2 cursor-pointer p-3 hover:bg-muted/50"
+              >
+                <div className="text-sm font-medium">Page d'accueil</div>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-center font-bold text-emerald-600">
-              🎯 Choisissez Votre Parcours
+              🎯 Parcours d'Exploration
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {parcoursMenuItems.map((item) => (
