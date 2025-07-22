@@ -157,7 +157,10 @@ const InterestGroupPage: React.FC = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsContent value="chat" className="mt-0">
             {isMember ? (
-              <GroupChat groupId={group.id} />
+              <GroupChat 
+                groupId={group.id} 
+                groupName={group.name}
+              />
             ) : (
               <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
                 <div className="text-center text-stone-500 py-12">

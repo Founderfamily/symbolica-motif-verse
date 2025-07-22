@@ -77,7 +77,11 @@ const WelcomeGroupPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Discussion Area */}
           <div className="lg:col-span-2">
-            <GroupChat groupId={welcomeGroupData.id} isWelcomeGroup={true} />
+            <GroupChat 
+              groupId={welcomeGroupData.id} 
+              groupName={welcomeGroupData.name}
+              isWelcomeGroup={true} 
+            />
           </div>
 
           {/* Sidebar */}
