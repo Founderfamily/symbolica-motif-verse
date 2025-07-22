@@ -195,7 +195,11 @@ const CommunityChat = () => {
                       "Sujet actuel : {group.topic}"
                     </p>
                     
-                    <Button className="w-full" variant="outline">
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => navigate('/community')}
+                    >
                       Rejoindre la Discussion
                     </Button>
                   </CardContent>
@@ -237,7 +241,10 @@ const CommunityChat = () => {
                       "Sujet actuel : {group.topic}"
                     </p>
                     
-                    <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">
+                    <Button 
+                      className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                      onClick={() => navigate('/community')}
+                    >
                       Rejoindre l'Aventure
                     </Button>
                   </CardContent>

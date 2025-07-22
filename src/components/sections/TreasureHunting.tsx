@@ -192,7 +192,11 @@ const TreasureHunting = () => {
                   <Badge className={getDifficultyColor(quest.difficulty)}>
                     {quest.difficulty}
                   </Badge>
-                  <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+                  <Button 
+                    size="sm" 
+                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                    onClick={() => navigate('/quests')}
+                  >
                     Rejoindre
                   </Button>
                 </div>
