@@ -441,7 +441,7 @@ const CommunityHub: React.FC = () => {
                             </div>
                           </div>
                           <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                            {Math.floor(group.members_count * 0.1)} en ligne
+                            {Math.floor(group.members_count * 0.15)} en ligne
                           </span>
                         </div>
                         
