@@ -22,6 +22,7 @@ import QuestsPage from '@/pages/QuestsPage';
 import QuestDetailPage from '@/pages/QuestDetailPage';
 import CommunityPage from '@/pages/CommunityPage';
 import GroupDetailPage from '@/pages/GroupDetailPage';
+import InterestGroupPage from '@/pages/InterestGroupPage';
 import WelcomeGroupPage from '@/pages/WelcomeGroupPage';
 import ContributionsPage from '@/pages/ContributionsPage';
 import NewContribution from '@/pages/NewContribution';
@@ -113,6 +114,7 @@ function App() {
                   <Route path="/quests" element={<QuestsPage />} />
                   <Route path="/quests/:questId" element={<QuestDetailPage />} />
                   <Route path="/community" element={<CommunityPage />} />
+                  <Route path="/groups/:slug" element={<InterestGroupPage />} />
                   <Route path="/community/groups/:slug" element={<GroupDetailPage />} />
                   <Route path="/welcome-group/:groupId" element={<WelcomeGroupPage />} />
 
