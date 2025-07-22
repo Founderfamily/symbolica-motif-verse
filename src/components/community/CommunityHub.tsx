@@ -1,6 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { I18nText } from '@/components/ui/i18n-text';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CommunityStats from '@/components/community/CommunityStats';
 import CommunityTabs from '@/components/community/CommunityTabs';
 import InterestGroupCard from '@/components/community/InterestGroupCard';
@@ -8,63 +11,131 @@ import TopContributors from '@/components/community/TopContributors';
 import ActivityFeed from '@/components/community/ActivityFeed';
 import { getInterestGroups } from '@/services/interestGroupService';
 import { InterestGroup } from '@/types/interest-groups';
+import { Users, BookOpen, Crown, Compass, History, Building, Palette, Mountain, MessageCircle } from 'lucide-react';
 
 const CommunityHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('all');
-  const [groups, setGroups] = useState<InterestGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [activeMainTab, setActiveMainTab] = useState('aventure');
 
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        setLoading(true);
-        console.log('🔍 [CommunityHub] Fetching groups...');
-        const fetchedGroups = await getInterestGroups();
-        console.log('📋 [CommunityHub] Fetched groups:', fetchedGroups?.length, 'groups');
-        console.log('📋 [CommunityHub] Group names:', fetchedGroups?.map(g => g.name));
-        
-        // Ensure unique groups by ID
-        const uniqueGroups = fetchedGroups?.filter((group, index, self) => 
-          index === self.findIndex(g => g.id === group.id)
-        ) || [];
-        
-        console.log('✅ [CommunityHub] Unique groups:', uniqueGroups.length, 'groups');
-        setGroups(uniqueGroups);
-      } catch (error) {
-        console.error('Error fetching interest groups:', error);
-        setGroups([]);
-      } finally {
-        setLoading(false);
-      }
+  // Groupes d'aventure (quêtes)
+  const aventureGroups = [
+    {
+      id: '1',
+      title: 'Le Mystère des Templiers',
+      location: 'France, Europe',
+      description: 'Suivez les indices laissés par les Templiers à travers l\'Europe',
+      participants: 127,
+      clues: 8,
+      reward: 500,
+      difficulty: 'Expert',
+      icon: Crown,
+      color: 'green'
+    },
+    {
+      id: '2', 
+      title: 'Trésors Mayas Perdus',
+      location: 'Mexique, Amérique',
+      description: 'Découvrez les symboles cachés dans les temples mayas',
+      participants: 89,
+      clues: 5,
+      reward: 350,
+      difficulty: 'Intermédiaire',
+      icon: Mountain,
+      color: 'blue'
+    },
+    {
+      id: '3',
+      title: 'Secrets des Pharaons',
+      location: 'Égypte, Afrique', 
+      description: 'Percez les mystères des hiéroglyphes royaux',
+      participants: 156,
+      clues: 12,
+      reward: 750,
+      difficulty: 'Maître',
+      icon: Crown,
+      color: 'red'
+    }
+  ];
+
+  // Groupes académiques
+  const academiqueGroups = [
+    {
+      id: 'welcome',
+      title: 'Bienvenue - Nouveaux Membres',
+      members: 245,
+      online: 18,
+      topic: 'Présentation et conseils pour débuter',
+      icon: MessageCircle,
+      color: 'purple',
+      isWelcome: true
+    },
+    {
+      id: 'historiens',
+      title: 'Historiens & Archéologues',
+      members: 342,
+      online: 28,
+      topic: 'Débat sur l\'origine des symboles celtiques',
+      icon: History,
+      color: 'blue'
+    },
+    {
+      id: 'unesco',
+      title: 'Experts UNESCO',
+      members: 156,
+      online: 12,
+      topic: 'Classification des patrimoines mondiaux',
+      icon: Building,
+      color: 'green'
+    },
+    {
+      id: 'symbologie',
+      title: 'Chercheurs en Symbologie',
+      members: 498,
+      online: 45,
+      topic: 'Nouvelles découvertes en Mésopotamie',
+      icon: BookOpen,
+      color: 'amber'
+    },
+    {
+      id: 'patrimoine',
+      title: 'Patrimoine & Culture',
+      members: 287,
+      online: 22,
+      topic: 'Préservation des traditions orales',
+      icon: Palette,
+      color: 'pink'
+    },
+    {
+      id: 'traditions',
+      title: 'Traditions Ancestrales',
+      members: 193,
+      online: 15,
+      topic: 'Rituels et symboles chamaniques',
+      icon: Compass,
+      color: 'orange'
+    }
+  ];
+
+  const getColorClasses = (color: string) => {
+    const colors = {
+      blue: 'bg-blue-50 border-blue-200 text-blue-900',
+      green: 'bg-green-50 border-green-200 text-green-900',
+      purple: 'bg-purple-50 border-purple-200 text-purple-900',
+      amber: 'bg-amber-50 border-amber-200 text-amber-900',
+      pink: 'bg-pink-50 border-pink-200 text-pink-900',
+      orange: 'bg-orange-50 border-orange-200 text-orange-900',
+      red: 'bg-red-50 border-red-200 text-red-900'
     };
+    return colors[color as keyof typeof colors] || colors.blue;
+  };
 
-    fetchGroups();
-  }, []);
-
-  const renderContent = () => {
-    if (loading) {
-      return <p className="text-stone-600">Loading groups...</p>;
-    }
-
-    let filteredGroups = [...groups];
-    console.log('🎛️ [CommunityHub] Before filtering - activeTab:', activeTab, 'groups:', filteredGroups.length);
-
-    if (activeTab === 'popular') {
-      filteredGroups = filteredGroups.sort((a, b) => b.members_count - a.members_count).slice(0, 5);
-    } else if (activeTab === 'active') {
-      filteredGroups = filteredGroups.sort((a, b) => b.discoveries_count - a.discoveries_count).slice(0, 5);
-    }
-
-    console.log('🎯 [CommunityHub] After filtering - rendering:', filteredGroups.length, 'groups');
-    console.log('🎯 [CommunityHub] Filtered group names:', filteredGroups.map(g => g.name));
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredGroups.map(group => (
-          <InterestGroupCard key={group.id} group={group} />
-        ))}
-      </div>
-    );
+  const getDifficultyColor = (difficulty: string) => {
+    const colors = {
+      'Expert': 'bg-orange-100 text-orange-800',
+      'Intermédiaire': 'bg-yellow-100 text-yellow-800', 
+      'Maître': 'bg-red-100 text-red-800'
+    };
+    return colors[difficulty as keyof typeof colors] || colors['Intermédiaire'];
   };
 
   return (
@@ -104,32 +175,143 @@ const CommunityHub: React.FC = () => {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Main Tabs - Aventure vs Académique */}
         <div className="mb-8">
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-            <CommunityTabs 
-              groups={groups}
-              loading={loading}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-            />
-          </div>
+          <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="aventure" className="flex items-center gap-2">
+                <Compass className="w-4 h-4" />
+                Aventure
+              </TabsTrigger>
+              <TabsTrigger value="academique" className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                Académique
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Section Aventure - Quêtes */}
+            <TabsContent value="aventure" className="mt-6">
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {aventureGroups.map(quest => (
+                    <div key={quest.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${getColorClasses(quest.color)}`}>
+                            <quest.icon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-stone-800">{quest.title}</h3>
+                            <p className="text-sm text-stone-600 flex items-center gap-1 mt-1">
+                              <span className="w-2 h-2 bg-stone-400 rounded-full"></span>
+                              {quest.location}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(quest.difficulty)}`}>
+                          {quest.difficulty}
+                        </span>
+                      </div>
+                      
+                      <p className="text-stone-700 text-sm mb-4">{quest.description}</p>
+                      
+                      <div className="space-y-2 text-sm text-stone-600 mb-4">
+                        <div className="flex justify-between">
+                          <span>Participants</span>
+                          <span className="font-medium">{quest.participants}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Indices</span>
+                          <span className="font-medium">{quest.clues} disponibles</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Récompense</span>
+                          <span className="font-medium text-amber-600">{quest.reward} points</span>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        onClick={() => navigate('/quests')}
+                        className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                      >
+                        Rejoindre
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="text-center">
+                  <Button 
+                    onClick={() => navigate('/quests')}
+                    size="lg"
+                    className="bg-amber-600 hover:bg-amber-700 text-white px-8"
+                  >
+                    <Compass className="w-5 h-5 mr-2" />
+                    Voir Toutes les Quêtes
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Section Académique - Discussions */}
+            <TabsContent value="academique" className="mt-6">
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {academiqueGroups.map(group => (
+                    <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${getColorClasses(group.color)}`}>
+                            <group.icon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-stone-800">{group.title}</h3>
+                            {group.isWelcome && (
+                              <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mt-1">
+                                Groupe d'accueil
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          {group.online} en ligne
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm text-stone-600 mb-4">
+                        <div className="flex justify-between">
+                          <span>Membres</span>
+                          <span className="font-medium">{group.members}</span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-stone-700 text-sm mb-4 italic">
+                        "Sujet actuel : {group.topic}"
+                      </p>
+                      
+                      <Button 
+                        onClick={() => navigate('/community')}
+                        variant="outline"
+                        className="w-full border-stone-300 hover:bg-stone-50"
+                      >
+                        Rejoindre la Discussion
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
-        {/* Content layout */}
+        {/* Sidebar Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-4">
-            {/* Les groupes sont déjà affichés dans CommunityTabs ci-dessus */}
-          </div>
-
-          <div className="lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-1 space-y-8">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
-                <TopContributors />
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
-                <ActivityFeed />
-              </div>
+          <div className="lg:col-span-1 space-y-8">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
+              <TopContributors />
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow border border-stone-100/60">
+              <ActivityFeed />
             </div>
           </div>
         </div>
