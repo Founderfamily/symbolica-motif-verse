@@ -88,10 +88,10 @@ const InterestGroupPage: React.FC = () => {
             <div className="flex gap-2">
               <Button size="sm">
                 <Users className="w-4 h-4 mr-2" />
-                Invite Users
+                Inviter des utilisateurs
               </Button>
               <Button variant="outline" size="sm">
-                leave
+                Quitter
               </Button>
             </div>
           </div>
@@ -184,7 +184,7 @@ const InterestGroupPage: React.FC = () => {
                     </div>
                   </div>
                   <Avatar className="w-10 h-10">
-                    <AvatarImage src="/lovable-uploads/629bff5a-e156-4e67-86a1-4d8ccb9552b1.png" alt="Abdou" />
+                    <AvatarImage src="/lovable-uploads/5f02d740-1670-402d-8428-aad900265280.png" alt="Abdou" />
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-semibold">
                       A
                     </AvatarFallback>
@@ -210,40 +210,191 @@ const InterestGroupPage: React.FC = () => {
 
           <TabsContent value="discussion" className="mt-0">
             <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
-              <div className="text-center text-stone-500 py-12">
-                <Hash className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Aucune discussion</h3>
-                <p>Les discussions apparaîtront ici une fois créées.</p>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-stone-800">Discussions du groupe</h3>
+                <Button size="sm" variant="outline">
+                  <Hash className="w-4 h-4 mr-2" />
+                  Nouvelle discussion
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-stone-800 mb-1">Art tribal et masques traditionnels</h4>
+                      <p className="text-sm text-stone-600 mb-2">Discussion sur les différents styles d'art tribal africain et leur signification culturelle...</p>
+                      <div className="flex items-center gap-4 text-xs text-stone-500">
+                        <span>12 réponses</span>
+                        <span>Dernière activité il y a 2h</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-stone-800 mb-1">Adinkra et leurs significations</h4>
+                      <p className="text-sm text-stone-600 mb-2">Échangeons sur les symboles Adinkra du Ghana et leur importance spirituelle...</p>
+                      <div className="flex items-center gap-4 text-xs text-stone-500">
+                        <span>8 réponses</span>
+                        <span>Dernière activité il y a 1 jour</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="discoveries" className="mt-0">
             <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
-              <div className="text-center text-stone-500 py-12">
-                <Share className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Aucune découverte</h3>
-                <p>Les découvertes partagées apparaîtront ici.</p>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-stone-800">Découvertes partagées</h3>
+                <Button size="sm" variant="outline">
+                  <Share className="w-4 h-4 mr-2" />
+                  Partager une découverte
+                </Button>
+              </div>
+              
+              <div className="grid gap-4">
+                <div className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Share className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-stone-800 mb-1">Masques Dan de Côte d'Ivoire</h4>
+                      <p className="text-sm text-stone-600 mb-2">Découverte fascinante sur les masques traditionnels Dan et leur rôle dans les cérémonies...</p>
+                      <div className="flex items-center gap-4 text-xs text-stone-500">
+                        <span>Partagé par Marie</span>
+                        <span>il y a 3 jours</span>
+                        <span>5 commentaires</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Share className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-stone-800 mb-1">Textile Bogolan du Mali</h4>
+                      <p className="text-sm text-stone-600 mb-2">Technique ancestrale de teinture du tissu avec des éléments naturels...</p>
+                      <div className="flex items-center gap-4 text-xs text-stone-500">
+                        <span>Partagé par Abdou</span>
+                        <span>il y a 1 semaine</span>
+                        <span>8 commentaires</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="symbols" className="mt-0">
             <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
-              <div className="text-center text-stone-500 py-12">
-                <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Aucun symbole</h3>
-                <p>Les symboles liés à ce groupe apparaîtront ici.</p>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-stone-800">Symboles de l'Afrique Traditionnelle</h3>
+                <Button size="sm" variant="outline">
+                  <Eye className="w-4 h-4 mr-2" />
+                  Ajouter un symbole
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <span className="text-white text-2xl font-bold">Ψ</span>
+                    </div>
+                    <h4 className="font-medium text-stone-800 mb-1">Adinkra - Gye Nyame</h4>
+                    <p className="text-sm text-stone-600">Symbole de la suprématie de Dieu</p>
+                  </div>
+                </div>
+                
+                <div className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <span className="text-white text-2xl font-bold">⚆</span>
+                    </div>
+                    <h4 className="font-medium text-stone-800 mb-1">Sankofa</h4>
+                    <p className="text-sm text-stone-600">Retourner aux sources</p>
+                  </div>
+                </div>
+                
+                <div className="p-4 border border-stone-200 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <span className="text-white text-2xl font-bold">⊕</span>
+                    </div>
+                    <h4 className="font-medium text-stone-800 mb-1">Dwennimmen</h4>
+                    <p className="text-sm text-stone-600">Force et humilité</p>
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="members" className="mt-0">
             <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
-              <div className="text-center text-stone-500 py-12">
-                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Membres du groupe</h3>
-                <p>{group.members_count} membres dans ce groupe.</p>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-stone-800">Membres du groupe ({group.members_count})</h3>
+                <Button size="sm" variant="outline">
+                  <Users className="w-4 h-4 mr-2" />
+                  Inviter des membres
+                </Button>
+              </div>
+              
+              <div className="grid gap-4">
+                <div className="flex items-center gap-3 p-3 hover:bg-stone-50 rounded-lg">
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src="/lovable-uploads/5f02d740-1670-402d-8428-aad900265280.png" alt="Abdou" />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">A</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-stone-800">Abdou</h4>
+                    <p className="text-sm text-stone-500">Administrateur • En ligne</p>
+                  </div>
+                  <Badge variant="secondary" className="bg-amber-100 text-amber-800">Admin</Badge>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 hover:bg-stone-50 rounded-lg">
+                  <Avatar className="w-12 h-12">
+                    <AvatarFallback className="bg-gradient-to-br from-green-500 to-green-600 text-white">M</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-stone-800">Marie</h4>
+                    <p className="text-sm text-stone-500">Membre • Hors ligne</p>
+                  </div>
+                  <Badge variant="outline">Membre</Badge>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 hover:bg-stone-50 rounded-lg">
+                  <Avatar className="w-12 h-12">
+                    <AvatarFallback className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">K</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-stone-800">Kofi</h4>
+                    <p className="text-sm text-stone-500">Membre • En ligne</p>
+                  </div>
+                  <Badge variant="outline">Membre</Badge>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 hover:bg-stone-50 rounded-lg">
+                  <Avatar className="w-12 h-12">
+                    <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">A</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-stone-800">Ama</h4>
+                    <p className="text-sm text-stone-500">Membre • Hors ligne</p>
+                  </div>
+                  <Badge variant="outline">Membre</Badge>
+                </div>
               </div>
             </div>
           </TabsContent>
