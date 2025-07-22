@@ -6,8 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useGroupBySlug } from '@/hooks/useInterestGroups';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import GroupSymbols from '@/components/community/GroupSymbols';
+import EnhancedGroupDiscoveries from '@/components/community/EnhancedGroupDiscoveries';
+import GroupMembersList from '@/components/community/GroupMembersList';
+import GroupChat from '@/components/community/GroupChat';
 
 const InterestGroupPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -15,6 +20,10 @@ const InterestGroupPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('chat');
   
   const { data: group, isLoading, error } = useGroupBySlug(slug!);
+  const auth = useAuth();
+  
+  // Check if user is member (simplified check for now)
+  const isMember = !!auth?.user;
 
   if (isLoading) {
     return (
@@ -147,65 +156,17 @@ const InterestGroupPage: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsContent value="chat" className="mt-0">
-            <div className="bg-white rounded-xl shadow-sm border border-stone-200">
-              {/* Chat Header */}
-              <div className="p-4 border-b border-stone-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-stone-800 flex items-center gap-2">
-                      <MessageCircle className="w-5 h-5" />
-                      Chat du groupe 
-                      <span className="text-stone-500 font-normal">- {group.name}</span>
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-green-600">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    En ligne
-                  </div>
+            {isMember ? (
+              <GroupChat groupId={group.id} />
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                <div className="text-center text-stone-500 py-12">
+                  <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">Rejoignez le groupe</h3>
+                  <p>Vous devez être membre du groupe pour participer au chat.</p>
                 </div>
               </div>
-
-              {/* Chat Messages */}
-              <div className="p-6 min-h-[400px]">
-                <div className="text-center text-stone-500 mb-8">
-                  <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>Début de la conversation dans {group.name}</p>
-                </div>
-
-                {/* Sample message */}
-                <div className="flex items-end gap-3 mb-4 justify-end">
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs text-stone-500">17:52</span>
-                      <span className="font-semibold text-stone-800">Abdou</span>
-                    </div>
-                    <div className="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-md inline-block max-w-xs">
-                      bonjour
-                    </div>
-                  </div>
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src="/lovable-uploads/5f02d740-1670-402d-8428-aad900265280.png" alt="Abdou" />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-semibold">
-                      A
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-
-                {/* Message input */}
-                <div className="mt-8 pt-4 border-t border-stone-200">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Écrire un message..."
-                      className="flex-1 px-4 py-2 border border-stone-300 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                    <Button size="sm" className="rounded-full bg-amber-600 hover:bg-amber-700">
-                      Envoyer
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="discussion" className="mt-0">
@@ -219,33 +180,15 @@ const InterestGroupPage: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="discoveries" className="mt-0">
-            <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
-              <div className="text-center text-stone-500 py-12">
-                <Share className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Aucune découverte</h3>
-                <p>Les découvertes partagées apparaîtront ici.</p>
-              </div>
-            </div>
+            <EnhancedGroupDiscoveries groupId={group.id} isMember={isMember} />
           </TabsContent>
 
           <TabsContent value="symbols" className="mt-0">
-            <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
-              <div className="text-center text-stone-500 py-12">
-                <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Aucun symbole</h3>
-                <p>Les symboles liés à ce groupe apparaîtront ici.</p>
-              </div>
-            </div>
+            <GroupSymbols groupId={group.id} groupSlug={group.slug} isMember={isMember} />
           </TabsContent>
 
           <TabsContent value="members" className="mt-0">
-            <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
-              <div className="text-center text-stone-500 py-12">
-                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Membres du groupe</h3>
-                <p>{group.members_count} membres dans ce groupe.</p>
-              </div>
-            </div>
+            <GroupMembersList groupId={group.id} />
           </TabsContent>
         </Tabs>
       </div>
