@@ -21,12 +21,12 @@ const Hero = () => {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <h1 className="text-3xl md:text-5xl font-bold text-stone-800 font-adventure leading-tight">
-            <I18nText translationKey="hero.heading">Découvrez le patrimoine symbolique mondial</I18nText>
+            <I18nText translationKey="hero.heading">Explorez le patrimoine symbolique mondial</I18nText>
           </h1>
-          <p className="text-lg md:text-xl text-stone-600 max-w-2xl mx-auto font-light">
-            <I18nText translationKey="hero.subheading">Explorez, contribuez et apprenez sur les symboles culturels à travers les âges</I18nText>
+          <p className="text-lg md:text-xl text-stone-600 max-w-3xl mx-auto font-light">
+            <I18nText translationKey="hero.subheading">Découvrez des symboles culturels authentiques, leurs significations et leurs histoires à travers les civilisations</I18nText>
           </p>
         </div>
       </div>

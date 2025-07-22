@@ -1,13 +1,10 @@
 
 import React from 'react';
-import DualHero from '@/components/sections/DualHero';
-import AIDiscoveries from '@/components/sections/AIDiscoveries';
+import Hero from '@/components/sections/Hero';
 import HeritageSection from '@/components/sections/HeritageSection';
 import TreasureHunting from '@/components/sections/TreasureHunting';
-import HistoricalTours from '@/components/sections/HistoricalTours';
 import CommunityChat from '@/components/sections/CommunityChat';
 import ImprovedCallToAction from '@/components/sections/ImprovedCallToAction';
-import { ScientificCredibility } from '@/components/sections/ScientificCredibility';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ErrorHandler } from '@/utils/errorHandler';
 
@@ -38,25 +35,14 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Dual Hero Section */}
+      {/* Hero Section */}
       <ErrorBoundary 
         onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'DualHero')
+          ErrorHandler.handleComponentError(error, errorInfo, 'Hero')
         }
       >
         <section className="relative">
-          <DualHero />
-        </section>
-      </ErrorBoundary>
-
-      {/* AI Discoveries Section */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'AIDiscoveries')
-        }
-      >
-        <section className="relative py-0">
-          <AIDiscoveries />
+          <Hero />
         </section>
       </ErrorBoundary>
 
@@ -82,16 +68,6 @@ const HomePage = () => {
         </section>
       </ErrorBoundary>
 
-      {/* Historical Tours Section */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'HistoricalTours')
-        }
-      >
-        <section className="relative py-0">
-          <HistoricalTours />
-        </section>
-      </ErrorBoundary>
 
       {/* Community Chat Section */}
       <ErrorBoundary 
@@ -104,16 +80,6 @@ const HomePage = () => {
         </section>
       </ErrorBoundary>
 
-      {/* Scientific Credibility Section */}
-      <ErrorBoundary 
-        onError={(error, errorInfo) => 
-          ErrorHandler.handleComponentError(error, errorInfo, 'ScientificCredibility')
-        }
-      >
-        <section className="relative py-0">
-          <ScientificCredibility />
-        </section>
-      </ErrorBoundary>
 
       {/* Improved Call to Action Section */}
       <ErrorBoundary 
