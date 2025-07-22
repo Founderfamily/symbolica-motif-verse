@@ -28,19 +28,20 @@ export const MobileNavigation = () => {
   const [innovationOpen, setInnovationOpen] = useState(false);
 
   const navigation = [
-    { name: 'Accueil', href: '/', translationKey: 'home' },
-    { name: 'Symboles', href: '/symbols', translationKey: 'symbols' },
+    { name: 'Home', href: '/', translationKey: 'home' },
+    { name: 'Symbols', href: '/symbols', translationKey: 'symbols' },
     { name: 'Collections', href: '/collections', translationKey: 'collections' },
-    { name: 'Quêtes', href: '/quests', translationKey: 'quests' },
-    { name: 'Communauté', href: '/community', translationKey: 'community' },
-    { name: 'À propos', href: '/about', translationKey: 'about' },
+    { name: 'Community', href: '/community', translationKey: 'community' },
+    { name: 'Trending', href: '/trending', translationKey: 'trending' },
+    { name: 'Analysis', href: '/analysis', translationKey: 'analysis' },
+    { name: 'Map', href: '/map', translationKey: 'map' },
   ];
 
   const userNavigation = user ? [
-    { name: 'Contribuer', href: '/propose-symbol', translationKey: 'contribute' },
+    { name: 'Contribute', href: '/contribute', translationKey: 'contribute' },
   ] : [];
 
-  const allNavigation = [...navigation.slice(0, -1), ...userNavigation, navigation[navigation.length - 1]];
+  const allNavigation = [...navigation, ...userNavigation];
 
   const adminMenuItems = [
     { name: 'Tableau de bord', href: '/admin', icon: BarChart3 },
@@ -122,14 +123,14 @@ export const MobileNavigation = () => {
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   )}
                 >
-                  <I18nText translationKey={item.translationKey} ns="navigation">
-                    {item.name}
-                  </I18nText>
-                  {item.href === '/propose-symbol' && (
-                    <span className="ml-2 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
-                      Nouveau
-                    </span>
-                  )}
+                   <I18nText translationKey={item.translationKey} ns="navigation">
+                     {item.name}
+                   </I18nText>
+                   {item.href === '/contribute' && (
+                     <span className="ml-2 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
+                       <I18nText translationKey="new" ns="navigation">Nouveau</I18nText>
+                     </span>
+                   )}
                 </Link>
               ))}
 
@@ -180,10 +181,10 @@ export const MobileNavigation = () => {
               {isAdmin && (
                 <Collapsible open={adminOpen} onOpenChange={setAdminOpen}>
                   <CollapsibleTrigger asChild>
-                    <button className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-                      <I18nText translationKey="navigation.admin" ns="navigation">
-                        Administration
-                      </I18nText>
+                     <button className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+                       <I18nText translationKey="admin" ns="header">
+                         Administration
+                       </I18nText>
                       <ChevronDown className={cn("h-3 w-3 transition-transform", adminOpen && "rotate-180")} />
                     </button>
                   </CollapsibleTrigger>
