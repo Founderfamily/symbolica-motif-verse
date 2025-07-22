@@ -115,7 +115,64 @@ export const NavigationItems = () => {
   return (
     <div className="hidden md:flex items-center justify-between w-full">
       <div className="flex items-center space-x-4">
-        {allNavigation.map((item) => (
+        {/* Accueil */}
+        <Link
+          to="/"
+          className={cn(
+            'px-2 py-2 text-sm font-medium transition-colors hover:text-primary relative',
+            location.pathname === '/'
+              ? 'text-primary'
+              : 'text-muted-foreground'
+          )}
+        >
+          <I18nText translationKey="home" ns="navigation">
+            Accueil
+          </I18nText>
+        </Link>
+
+        {/* Menu Parcours dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={cn(
+                'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
+                location.pathname.startsWith('/parcours')
+                  ? 'text-primary'
+                  : 'text-muted-foreground'
+              )}
+            >
+              Parcours
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 bg-white border shadow-md z-[100]">
+            <DropdownMenuLabel className="text-center font-bold text-emerald-600">
+              🎯 Choisissez Votre Parcours
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {parcoursMenuItems.map((item) => (
+              <DropdownMenuItem key={item.href} asChild>
+                <Link
+                  to={item.href}
+                  className="flex items-start gap-3 cursor-pointer p-3 hover:bg-emerald-50"
+                >
+                  <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-emerald-500" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">
+                      {item.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {item.description}
+                    </div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Autres éléments de navigation */}
+        {allNavigation.slice(1).map((item) => (
           <Link
             key={item.href}
             to={item.href}
@@ -132,46 +189,6 @@ export const NavigationItems = () => {
           </Link>
         ))}
 
-      {/* Menu Parcours dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className={cn(
-              'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
-              location.pathname.startsWith('/parcours')
-                ? 'text-primary'
-                : 'text-muted-foreground'
-            )}
-          >
-            Parcours
-            <ChevronDown className="h-3 w-3" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 bg-white border shadow-md z-[100]">
-          <DropdownMenuLabel className="text-center font-bold text-emerald-600">
-            🎯 Choisissez Votre Parcours
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {parcoursMenuItems.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link
-                to={item.href}
-                className="flex items-start gap-3 cursor-pointer p-3 hover:bg-emerald-50"
-              >
-                <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-emerald-500" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium">
-                    {item.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {item.description}
-                  </div>
-                </div>
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
 
       {/* Menu Symboles dropdown */}
       <DropdownMenu>
