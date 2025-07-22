@@ -227,9 +227,7 @@ export const NavigationItems = () => {
                 : 'text-muted-foreground'
             )}
           >
-            <Lightbulb className="h-3 w-3" />
-            Innovation
-            <ChevronDown className="h-3 w-3" />
+            <Lightbulb className="h-4 w-4" />
             <span className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold animate-pulse">
               Beta
             </span>
@@ -290,9 +288,7 @@ export const NavigationItems = () => {
                   : 'text-muted-foreground'
               )}
             >
-              <I18nText translationKey="navigation.admin" ns="navigation">
-                Administration
-              </I18nText>
+              <Shield className="h-4 w-4" />
               <ChevronDown className="h-3 w-3" />
             </button>
           </DropdownMenuTrigger>
