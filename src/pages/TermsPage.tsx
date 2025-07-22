@@ -31,7 +31,7 @@ const TermsPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              En accédant et en utilisant Symbolica Museum, vous acceptez d'être lié par ces 
+              En accédant et en utilisant cette plateforme, vous acceptez d'être lié par ces 
               conditions d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas 
               utiliser notre service.
             </p>
@@ -79,14 +79,14 @@ const TermsPage: React.FC = () => {
               <h4 className="font-semibold mb-2">Vos contributions</h4>
               <p className="text-sm text-muted-foreground">
                 Vous conservez les droits sur le contenu que vous créez. En le partageant sur 
-                Symbolica Museum, vous accordez une licence d'utilisation à des fins éducatives 
+                cette plateforme, vous accordez une licence d'utilisation à des fins éducatives 
                 et culturelles.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-2">Notre plateforme</h4>
               <p className="text-sm text-muted-foreground">
-                Symbolica Museum et sa technologie sont protégés par des droits de propriété 
+                La plateforme et sa technologie sont protégés par des droits de propriété 
                 intellectuelle. L'utilisation est limitée aux fins prévues de la plateforme.
               </p>
             </div>
@@ -128,7 +128,7 @@ const TermsPage: React.FC = () => {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               Pour toute question concernant ces conditions d'utilisation, 
-              contactez-nous à : <span className="font-medium">legal@symbolica-museum.org</span>
+              contactez-nous à : <span className="font-medium">legal@pureplayer.fr</span>
             </p>
           </CardContent>
         </Card>

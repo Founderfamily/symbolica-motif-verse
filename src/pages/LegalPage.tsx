@@ -27,15 +27,18 @@ const LegalPage: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h4 className="font-semibold mb-2">Symbolica Museum</h4>
+              <h4 className="font-semibold mb-2">PurePlayer SAS</h4>
               <p className="text-sm text-muted-foreground">
                 Plateforme dédiée à la préservation et à la célébration du patrimoine symbolique mondial.
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                266 avenue Daumesnil, 75012 Paris, France
               </p>
             </div>
             <Separator />
             <div>
               <h4 className="font-semibold mb-2">Contact</h4>
-              <p className="text-sm">Email: contact@symbolica-museum.org</p>
+              <p className="text-sm">Email: contact@pureplayer.fr</p>
             </div>
           </CardContent>
         </Card>
@@ -50,7 +53,7 @@ const LegalPage: React.FC = () => {
             <div>
               <h4 className="font-semibold mb-2">Acceptation des conditions</h4>
               <p className="text-sm text-muted-foreground">
-                En utilisant Symbolica Museum, vous acceptez ces conditions d'utilisation dans leur intégralité.
+                En utilisant cette plateforme, vous acceptez ces conditions d'utilisation dans leur intégralité.
               </p>
             </div>
             <div>
@@ -63,7 +66,7 @@ const LegalPage: React.FC = () => {
               <h4 className="font-semibold mb-2">Propriété intellectuelle</h4>
               <p className="text-sm text-muted-foreground">
                 Les contenus partagés restent la propriété de leurs auteurs respectifs. 
-                Symbolica Museum facilite le partage dans un but éducatif et culturel.
+                La plateforme facilite le partage dans un but éducatif et culturel.
               </p>
             </div>
           </CardContent>
@@ -77,7 +80,7 @@ const LegalPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Symbolica Museum s'efforce de fournir des informations exactes mais ne peut garantir 
+              PurePlayer SAS s'efforce de fournir des informations exactes mais ne peut garantir 
               l'exactitude complète de tous les contenus partagés par la communauté.
             </p>
           </CardContent>

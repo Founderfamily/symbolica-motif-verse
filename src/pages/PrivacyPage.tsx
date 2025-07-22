@@ -100,7 +100,7 @@ const PrivacyPage: React.FC = () => {
             <div className="pt-4 border-t">
               <p className="text-sm">
                 Pour exercer ces droits, contactez-nous à : 
-                <span className="font-medium"> privacy@symbolica-museum.org</span>
+                <span className="font-medium"> privacy@pureplayer.fr</span>
               </p>
             </div>
           </CardContent>
