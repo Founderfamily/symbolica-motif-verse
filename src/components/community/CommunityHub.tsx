@@ -11,11 +11,13 @@ import TopContributors from '@/components/community/TopContributors';
 import ActivityFeed from '@/components/community/ActivityFeed';
 import { getInterestGroups } from '@/services/interestGroupService';
 import { InterestGroup } from '@/types/interest-groups';
+import { useWelcomeGroup } from '@/hooks/useCommunityGroups';
 import { Users, BookOpen, Crown, Compass, History, Building, Palette, Mountain, MessageCircle } from 'lucide-react';
 
 const CommunityHub: React.FC = () => {
   const navigate = useNavigate();
   const [activeMainTab, setActiveMainTab] = useState('aventure');
+  const { data: welcomeGroupData, isLoading: isLoadingWelcome } = useWelcomeGroup();
 
   // Groupes d'aventure (quêtes)
   const aventureGroups = [
@@ -57,16 +59,23 @@ const CommunityHub: React.FC = () => {
     }
   ];
 
-  // Groupe de bienvenue (séparé)
-  const welcomeGroup = {
+  // Utiliser les vraies données du groupe de bienvenue
+  const welcomeGroup = welcomeGroupData ? {
+    id: welcomeGroupData.id,
+    title: welcomeGroupData.name,
+    members: welcomeGroupData.totalMembers,
+    online: welcomeGroupData.onlineMembers,
+    topic: welcomeGroupData.topic || 'Présentation et conseils pour débuter',
+    icon: MessageCircle,
+    color: 'purple'
+  } : {
     id: 'welcome',
     title: 'Bienvenue - Nouveaux Membres',
-    members: 245,
-    online: 18,
+    members: 0,
+    online: 0,
     topic: 'Présentation et conseils pour débuter',
     icon: MessageCircle,
-    color: 'purple',
-    isWelcome: true
+    color: 'purple'
   };
 
   // Groupes académiques
@@ -307,7 +316,7 @@ const CommunityHub: React.FC = () => {
               </p>
               
               <Button 
-                onClick={() => navigate('/community')}
+                onClick={() => navigate(`/welcome-group/${welcomeGroup.id}`)}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                 size="lg"
               >
