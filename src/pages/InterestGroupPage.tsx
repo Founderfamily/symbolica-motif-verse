@@ -13,7 +13,7 @@ import GroupSymbols from '@/components/community/GroupSymbols';
 import EnhancedGroupDiscoveries from '@/components/community/EnhancedGroupDiscoveries';
 import GroupMembersList from '@/components/community/GroupMembersList';
 import GroupChat from '@/components/community/GroupChat';
-import { checkGroupMembership, joinGroup } from '@/services/communityService';
+import { checkGroupMembership, joinGroup, leaveGroup } from '@/services/communityService';
 import { toast } from 'sonner';
 
 const InterestGroupPage: React.FC = () => {
@@ -60,6 +60,27 @@ const InterestGroupPage: React.FC = () => {
     } catch (error) {
       console.error('Error joining group:', error);
       toast.error('Erreur lors de l\'inscription au groupe');
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (!auth?.user) {
+      toast.error('Vous devez être connecté.');
+      return;
+    }
+
+    if (!group) return;
+
+    setIsJoining(true);
+    try {
+      await leaveGroup(group.id, auth.user.id);
+      setIsMember(false);
+      toast.success('Vous avez quitté le groupe.');
+    } catch (error) {
+      console.error('Error leaving group:', error);
+      toast.error('Erreur lors de la sortie du groupe');
     } finally {
       setIsJoining(false);
     }
@@ -141,7 +162,7 @@ const InterestGroupPage: React.FC = () => {
                     <Users className="w-4 h-4 mr-2" />
                     Inviter des utilisateurs
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleLeaveGroup} disabled={isJoining}>
                     Quitter
                   </Button>
                 </>
