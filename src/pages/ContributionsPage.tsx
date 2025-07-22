@@ -141,7 +141,7 @@ const ContributionsPage = () => {
   };
 
   const handleCreateNew = () => {
-    navigate('/contribute');
+    navigate('/contributions/new');
   };
 
   const handleViewDetail = (id: string) => {
@@ -155,8 +155,13 @@ const ContributionsPage = () => {
   if (!user) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">{t('auth.loginTitle')}</h1>
-        <Button onClick={() => navigate('/auth')}>{t('auth.login')}</Button>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-6">Connexion requise</h1>
+          <p className="text-muted-foreground mb-6">
+            Vous devez être connecté pour accéder à vos contributions.
+          </p>
+          <Button onClick={() => navigate('/auth')}>Se connecter</Button>
+        </div>
       </div>
     );
   }
