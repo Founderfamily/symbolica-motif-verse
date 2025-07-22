@@ -4,6 +4,7 @@ import { ArrowLeft, Users, Share, MessageCircle, Hash, Eye, Calendar, Globe } fr
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useGroupBySlug } from '@/hooks/useInterestGroups';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -172,19 +173,22 @@ const InterestGroupPage: React.FC = () => {
                 </div>
 
                 {/* Sample message */}
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                    A
-                  </div>
-                  <div className="flex-1">
+                <div className="flex items-end gap-3 mb-4 justify-end">
+                  <div className="flex flex-col items-end">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-stone-800">Abdou</span>
                       <span className="text-xs text-stone-500">17:52</span>
+                      <span className="font-semibold text-stone-800">Abdou</span>
                     </div>
-                    <div className="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tl-md inline-block">
+                    <div className="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-tr-md inline-block max-w-xs">
                       bonjour
                     </div>
                   </div>
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src="/lovable-uploads/629bff5a-e156-4e67-86a1-4d8ccb9552b1.png" alt="Abdou" />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-semibold">
+                      A
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
 
                 {/* Message input */}
