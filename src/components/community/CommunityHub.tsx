@@ -154,63 +154,21 @@ const CommunityHub: React.FC = () => {
     }
   ];
 
-  // Groupes dédiés aux collections
-  const collectionsGroups = [
-    {
-      id: 'symboles-celtiques',
-      title: 'Symboles Celtiques',
-      members: 432,
-      online: 37,
-      topic: 'Discussion sur les triquetra et spirales',
-      icon: Compass,
-      color: 'green'
-    },
-    {
-      id: 'runes-nordiques',
-      title: 'Runes Nordiques',
-      members: 298,
-      online: 23,
-      topic: 'Interprétation des inscriptions runiques',
-      icon: BookOpen,
-      color: 'blue'
-    },
-    {
-      id: 'hieroglyphes',
-      title: 'Hiéroglyphes Égyptiens',
-      members: 387,
-      online: 31,
-      topic: 'Déchiffrage de nouveaux papyrus',
-      icon: Crown,
-      color: 'amber'
-    },
-    {
-      id: 'art-rupestre',
-      title: 'Art Rupestre',
-      members: 254,
-      online: 19,
-      topic: 'Découvertes en Australie et Amérique',
-      icon: Mountain,
-      color: 'orange'
-    },
-    {
-      id: 'symboles-alchimiques',
-      title: 'Symboles Alchimiques',
-      members: 189,
-      online: 14,
-      topic: 'Manuscrits médiévaux et Renaissance',
-      icon: Palette,
-      color: 'purple'
-    },
-    {
-      id: 'motifs-indigenes',
-      title: 'Motifs Indigènes',
-      members: 167,
-      online: 12,
-      topic: 'Traditions des peuples autochtones',
-      icon: Users,
-      color: 'pink'
-    }
-  ];
+  // Hook pour récupérer les vrais groupes depuis la base de données
+  const [collectionsGroups, setCollectionsGroups] = useState<InterestGroup[]>([]);
+  
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const groups = await getInterestGroups();
+        setCollectionsGroups(groups);
+      } catch (error) {
+        console.error('Error fetching groups:', error);
+      }
+    };
+    
+    fetchGroups();
+  }, []);
 
   const getColorClasses = (color: string) => {
     const colors = {
@@ -449,42 +407,69 @@ const CommunityHub: React.FC = () => {
             <TabsContent value="collections" className="mt-6">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {collectionsGroups.map(group => (
-                    <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${getColorClasses(group.color)}`}>
-                            <group.icon className="w-5 h-5" />
+                  {collectionsGroups.map(group => {
+                    // Fonction pour assigner une icône et couleur selon le nom du groupe
+                    const getGroupDisplay = (name: string) => {
+                      const lowerName = name.toLowerCase();
+                      if (lowerName.includes('celt')) return { icon: Compass, color: 'green' };
+                      if (lowerName.includes('nordique') || lowerName.includes('viking')) return { icon: BookOpen, color: 'blue' };
+                      if (lowerName.includes('egypt') || lowerName.includes('égypt')) return { icon: Crown, color: 'amber' };
+                      if (lowerName.includes('chin')) return { icon: History, color: 'orange' };
+                      if (lowerName.includes('japon')) return { icon: Mountain, color: 'pink' };
+                      if (lowerName.includes('grec')) return { icon: Building, color: 'blue' };
+                      if (lowerName.includes('afric')) return { icon: Users, color: 'orange' };
+                      if (lowerName.includes('océan') || lowerName.includes('pacif')) return { icon: Compass, color: 'blue' };
+                      if (lowerName.includes('slave')) return { icon: History, color: 'purple' };
+                      if (lowerName.includes('médiév') || lowerName.includes('europe')) return { icon: Crown, color: 'amber' };
+                      if (lowerName.includes('amér') || lowerName.includes('indig')) return { icon: Mountain, color: 'green' };
+                      if (lowerName.includes('arab') || lowerName.includes('islam')) return { icon: BookOpen, color: 'blue' };
+                      if (lowerName.includes('perse') || lowerName.includes('iran')) return { icon: Palette, color: 'purple' };
+                      return { icon: BookOpen, color: 'blue' };
+                    };
+
+                    const { icon: GroupIcon, color } = getGroupDisplay(group.name);
+
+                    return (
+                      <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${getColorClasses(color)}`}>
+                              <GroupIcon className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-stone-800">{group.name}</h3>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-stone-800">{group.title}</h3>
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                            {Math.floor(group.members_count * 0.1)} en ligne
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm text-stone-600 mb-4">
+                          <div className="flex justify-between">
+                            <span>Membres</span>
+                            <span className="font-medium">{group.members_count}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Découvertes</span>
+                            <span className="font-medium">{group.discoveries_count}</span>
                           </div>
                         </div>
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                          {group.online} en ligne
-                        </span>
+                        
+                        <p className="text-stone-700 text-sm mb-4 italic">
+                          "{group.description}"
+                        </p>
+                        
+                        <Button 
+                          onClick={() => navigate(`/groups/${group.slug}`)}
+                          variant="outline"
+                          className="w-full border-stone-300 hover:bg-stone-50"
+                        >
+                          Rejoindre la Discussion
+                        </Button>
                       </div>
-                      
-                      <div className="space-y-2 text-sm text-stone-600 mb-4">
-                        <div className="flex justify-between">
-                          <span>Membres</span>
-                          <span className="font-medium">{group.members}</span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-stone-700 text-sm mb-4 italic">
-                        "Sujet actuel : {group.topic}"
-                      </p>
-                      
-                      <Button 
-                        onClick={() => navigate('/community')}
-                        variant="outline"
-                        className="w-full border-stone-300 hover:bg-stone-50"
-                      >
-                        Rejoindre la Discussion
-                      </Button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </TabsContent>
