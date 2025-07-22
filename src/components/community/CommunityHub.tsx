@@ -19,14 +19,14 @@ const CommunityHub: React.FC = () => {
   const [activeMainTab, setActiveMainTab] = useState('aventure');
   const { data: welcomeGroupData, isLoading: isLoadingWelcome } = useWelcomeGroup();
 
-  // Groupes d'aventure (quêtes)
+  // Groupes d'aventure (quêtes) - données plus réalistes
   const aventureGroups = [
     {
       id: '1',
       title: 'Le Mystère des Templiers',
       location: 'France, Europe',
       description: 'Suivez les indices laissés par les Templiers à travers l\'Europe',
-      participants: 127,
+      participants: 15,
       clues: 8,
       reward: 500,
       difficulty: 'Expert',
@@ -38,7 +38,7 @@ const CommunityHub: React.FC = () => {
       title: 'Trésors Mayas Perdus',
       location: 'Mexique, Amérique',
       description: 'Découvrez les symboles cachés dans les temples mayas',
-      participants: 89,
+      participants: 7,
       clues: 5,
       reward: 350,
       difficulty: 'Intermédiaire',
@@ -50,7 +50,7 @@ const CommunityHub: React.FC = () => {
       title: 'Secrets des Pharaons',
       location: 'Égypte, Afrique', 
       description: 'Percez les mystères des hiéroglyphes royaux',
-      participants: 156,
+      participants: 23,
       clues: 12,
       reward: 750,
       difficulty: 'Maître',
@@ -78,13 +78,13 @@ const CommunityHub: React.FC = () => {
     color: 'purple'
   };
 
-  // Groupes académiques
+  // Groupes académiques - données réalistes
   const academiqueGroups = [
     {
       id: 'historiens',
       title: 'Historiens & Archéologues',
-      members: 342,
-      online: 28,
+      members: 8,
+      online: 1,
       topic: 'Débat sur l\'origine des symboles celtiques',
       icon: History,
       color: 'blue'
@@ -92,8 +92,8 @@ const CommunityHub: React.FC = () => {
     {
       id: 'unesco',
       title: 'Experts UNESCO',
-      members: 156,
-      online: 12,
+      members: 3,
+      online: 0,
       topic: 'Classification des patrimoines mondiaux',
       icon: Building,
       color: 'green'
@@ -101,8 +101,8 @@ const CommunityHub: React.FC = () => {
     {
       id: 'symbologie',
       title: 'Chercheurs en Symbologie',
-      members: 498,
-      online: 45,
+      members: 12,
+      online: 2,
       topic: 'Nouvelles découvertes en Mésopotamie',
       icon: BookOpen,
       color: 'amber'
@@ -110,8 +110,8 @@ const CommunityHub: React.FC = () => {
     {
       id: 'patrimoine',
       title: 'Patrimoine & Culture',
-      members: 287,
-      online: 22,
+      members: 6,
+      online: 1,
       topic: 'Préservation des traditions orales',
       icon: Palette,
       color: 'pink'
@@ -119,8 +119,8 @@ const CommunityHub: React.FC = () => {
     {
       id: 'traditions',
       title: 'Traditions Ancestrales',
-      members: 193,
-      online: 15,
+      members: 4,
+      online: 0,
       topic: 'Rituels et symboles chamaniques',
       icon: Compass,
       color: 'orange'
@@ -128,29 +128,11 @@ const CommunityHub: React.FC = () => {
     {
       id: 'linguistique',
       title: 'Linguistes & Épigraphes',
-      members: 234,
-      online: 19,
+      members: 5,
+      online: 1,
       topic: 'Déchiffrage de langues anciennes',
       icon: BookOpen,
       color: 'blue'
-    },
-    {
-      id: 'anthropologie',
-      title: 'Anthropologues Culturels',
-      members: 178,
-      online: 14,
-      topic: 'Rites initiatiques et symbolisme',
-      icon: Users,
-      color: 'green'
-    },
-    {
-      id: 'archeologie',
-      title: 'Archéologie Expérimentale',
-      members: 156,
-      online: 11,
-      topic: 'Reconstitution d\'outils anciens',
-      icon: Mountain,
-      color: 'orange'
     }
   ];
 
