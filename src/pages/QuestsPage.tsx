@@ -157,40 +157,40 @@ const QuestsPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* En-tête */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-6">
-            <Badge className="px-6 py-3 bg-gradient-to-r from-amber-100 to-stone-100 text-amber-800 border-amber-200 text-lg">
-              <History className="w-5 h-5 mr-2" />
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-3">
+            <Badge className="px-4 py-2 bg-gradient-to-r from-amber-100 to-stone-100 text-amber-800 border-amber-200">
+              <History className="w-4 h-4 mr-2" />
               Recherche Collaborative
             </Badge>
           </div>
           
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
             Chasse aux Trésors Perdus
           </h1>
           
-          <p className="text-xl text-stone-600 max-w-3xl mx-auto mb-8">
+          <p className="text-stone-600 max-w-2xl mx-auto mb-4 text-sm">
             Rejoignez une communauté mondiale de chercheurs pour résoudre les plus grands mystères de l'histoire. 
             Contribuez avec des preuves, des indices, des théories et des liens d'archives pour découvrir ensemble des trésors perdus.
           </p>
 
-          {/* Statistiques améliorées avec données réelles */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-amber-700 mb-2">{stats.active}</div>
-              <div className="text-stone-600">Recherches Actives</div>
+          {/* Statistiques compactes avec données réelles */}
+          <div className="grid grid-cols-4 gap-3 max-w-2xl mx-auto mb-4">
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-amber-200/50 shadow-sm">
+              <div className="text-xl font-bold text-amber-700 mb-1">{stats.active}</div>
+              <div className="text-stone-600 text-xs">Recherches Actives</div>
             </div>
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-amber-800 mb-2">{stats.total}</div>
-              <div className="text-stone-600">Total des Quêtes</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-amber-200/50 shadow-sm">
+              <div className="text-xl font-bold text-amber-800 mb-1">{stats.total}</div>
+              <div className="text-stone-600 text-xs">Total des Quêtes</div>
             </div>
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-stone-700 mb-2">{Object.keys(stats.byRegion).length}</div>
-              <div className="text-stone-600">Régions Explorées</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-amber-200/50 shadow-sm">
+              <div className="text-xl font-bold text-stone-700 mb-1">{Object.keys(stats.byRegion).length}</div>
+              <div className="text-stone-600 text-xs">Régions Explorées</div>
             </div>
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-              <div className="text-3xl font-bold text-stone-800 mb-2">{Object.keys(stats.byCities).length}</div>
-              <div className="text-stone-600">Villes Couvertes</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-amber-200/50 shadow-sm">
+              <div className="text-xl font-bold text-stone-800 mb-1">{Object.keys(stats.byCities).length}</div>
+              <div className="text-stone-600 text-xs">Villes Couvertes</div>
             </div>
           </div>
         </div>

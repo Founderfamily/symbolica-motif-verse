@@ -248,77 +248,62 @@ const CommunityHub: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-block p-2 bg-gradient-to-r from-stone-50 to-amber-50 rounded-full mb-4">
-            <div className="bg-white/75 px-4 py-2 rounded-full text-stone-700 text-sm font-medium border border-amber-100">
+        <div className="text-center mb-6">
+          <div className="inline-block p-1 bg-gradient-to-r from-stone-50 to-amber-50 rounded-full mb-2">
+            <div className="bg-white/75 px-3 py-1 rounded-full text-stone-700 text-xs font-medium border border-amber-100">
               <I18nText translationKey="badge" ns="community">Communauté Active</I18nText>
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
             <I18nText translationKey="title" ns="community">Hub Communautaire</I18nText>
           </h1>
-          <p className="text-stone-600 max-w-2xl mx-auto">
+          <p className="text-stone-600 max-w-2xl mx-auto text-sm">
             <I18nText translationKey="description" ns="community">
               Rejoignez des groupes d'intérêt, partagez vos découvertes et collaborez avec d'autres passionnés de symboles
             </I18nText>
           </p>
         </div>
 
-        {/* Stats - subtle neutral style */}
-        <div className="mb-8">
-          <div className="bg-white/75 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-200/60">
+        {/* Stats - compact style */}
+        <div className="mb-4">
+          <div className="bg-white/75 backdrop-blur-sm rounded-xl p-4 shadow-md border border-stone-200/60">
             <CommunityStats />
           </div>
         </div>
 
-        {/* Groupe Bienvenue - Section globale au-dessus des onglets */}
-        <div className="mb-8">
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-stone-800 mb-2 flex items-center justify-center gap-2">
-                <MessageCircle className="w-6 h-6 text-purple-600" />
+        {/* Groupe Bienvenue - Compact version */}
+        <div className="mb-4">
+          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow-md border border-stone-100/50">
+            <div className="text-center mb-3">
+              <h2 className="text-lg font-bold text-stone-800 mb-1 flex items-center justify-center gap-2">
+                <MessageCircle className="w-5 h-5 text-purple-600" />
                 Nouveau sur la plateforme ?
               </h2>
-              <p className="text-stone-600">Rejoignez notre groupe d'accueil pour débuter</p>
+              <p className="text-stone-600 text-sm">Rejoignez notre groupe d'accueil pour débuter</p>
             </div>
             
-            <div className="bg-white rounded-xl p-6 border border-purple-200 shadow-sm hover:shadow-md transition-shadow max-w-2xl mx-auto">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${getColorClasses(welcomeGroup.color)}`}>
-                    <welcomeGroup.icon className="w-5 h-5" />
+            <div className="bg-white rounded-lg p-4 border border-purple-200 shadow-sm hover:shadow-md transition-shadow max-w-xl mx-auto">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className={`p-1.5 rounded-lg ${getColorClasses(welcomeGroup.color)}`}>
+                    <welcomeGroup.icon className="w-4 h-4" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-stone-800">{welcomeGroup.title}</h3>
-                    <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mt-1">
-                      Groupe d'accueil - Ouvert à tous
-                    </span>
+                    <h3 className="font-semibold text-stone-800 text-sm">{welcomeGroup.title}</h3>
                   </div>
                 </div>
-                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                  {welcomeGroup.online} en ligne
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 text-sm text-stone-600 mb-4">
-                <div className="text-center">
-                  <span className="block font-medium text-lg text-stone-800">{welcomeGroup.members}</span>
-                  <span>Membres</span>
-                </div>
-                <div className="text-center">
-                  <span className="block font-medium text-lg text-stone-800">{welcomeGroup.online}</span>
-                  <span>En ligne</span>
+                <div className="flex items-center gap-3 text-xs text-stone-600">
+                  <span>{welcomeGroup.members} membres</span>
+                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                    {welcomeGroup.online} en ligne
+                  </span>
                 </div>
               </div>
-              
-              <p className="text-stone-700 text-sm mb-4 italic text-center">
-                "Sujet actuel : {welcomeGroup.topic}"
-              </p>
               
               <Button 
                 onClick={() => navigate(`/welcome-group/${welcomeGroup.id}`)}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                size="lg"
+                size="sm"
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Rejoindre la Discussion
