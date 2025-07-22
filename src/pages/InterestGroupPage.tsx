@@ -135,13 +135,27 @@ const InterestGroupPage: React.FC = () => {
             </div>
             
             <div className="flex gap-2">
-              <Button size="sm">
-                <Users className="w-4 h-4 mr-2" />
-                Inviter des utilisateurs
-              </Button>
-              <Button variant="outline" size="sm">
-                Quitter
-              </Button>
+              {isMember ? (
+                <>
+                  <Button size="sm">
+                    <Users className="w-4 h-4 mr-2" />
+                    Inviter des utilisateurs
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Quitter
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  onClick={handleJoinGroup} 
+                  disabled={isJoining || !auth?.user}
+                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  size="sm"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  {isJoining ? 'Inscription...' : 'Rejoindre le groupe'}
+                </Button>
+              )}
             </div>
           </div>
         </div>

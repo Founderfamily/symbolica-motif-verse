@@ -1,6 +1,46 @@
 import { supabase } from '@/integrations/supabase/client';
 import { GroupPost, PostComment, GroupMember, GroupInvitation, GroupNotification, GroupDiscovery, GroupSymbol } from '@/types/interest-groups';
 
+// Functions for community groups (community_groups table)
+export const checkCommunityGroupMembership = async (groupId: string, userId: string): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('community_group_members')
+    .select('*')
+    .eq('group_id', groupId)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error checking community group membership:', error);
+    return false;
+  }
+
+  return data.length > 0;
+};
+
+export const joinCommunityGroup = async (groupId: string, userId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('community_group_members')
+    .insert([{ group_id: groupId, user_id: userId }]);
+
+  if (error) {
+    throw error;
+  }
+};
+
+export const leaveCommunityGroup = async (groupId: string, userId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('community_group_members')
+    .delete()
+    .eq('group_id', groupId)
+    .eq('user_id', userId);
+
+  if (error) {
+    throw error;
+  }
+};
+
+// Functions for interest groups (interest_groups table)
+
 export const checkGroupMembership = async (groupId: string, userId: string): Promise<boolean> => {
   const { data, error } = await supabase
     .from('group_members')
