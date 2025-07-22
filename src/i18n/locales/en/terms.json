@@ -1,0 +1,18 @@
+{
+  "terms": {
+    "title": "Terms of Use",
+    "subtitle": "Rules and conditions for using the platform",
+    "acceptance": {
+      "title": "Acceptance of Terms"
+    },
+    "community": {
+      "title": "Community Rules"
+    },
+    "intellectual": {
+      "title": "Intellectual Property"
+    },
+    "restrictions": {
+      "title": "Restrictions and Sanctions"
+    }
+  }
+}

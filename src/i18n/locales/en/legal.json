@@ -1,0 +1,15 @@
+{
+  "legal": {
+    "title": "Legal Notice",
+    "subtitle": "Legal information and terms of use",
+    "company": {
+      "title": "Company Information"
+    },
+    "terms": {
+      "title": "Terms of Use"
+    },
+    "liability": {
+      "title": "Limitation of Liability"
+    }
+  }
+}

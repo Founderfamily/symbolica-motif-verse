@@ -1,0 +1,18 @@
+{
+  "privacy": {
+    "title": "Privacy Policy",
+    "subtitle": "How we protect and use your personal data",
+    "collection": {
+      "title": "Data Collection"
+    },
+    "usage": {
+      "title": "Data Usage"
+    },
+    "protection": {
+      "title": "Data Protection"
+    },
+    "rights": {
+      "title": "Your Rights"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "legal": {
+    "title": "Mentions légales",
+    "subtitle": "Informations légales et conditions d'utilisation",
+    "company": {
+      "title": "Informations sur l'entreprise"
+    },
+    "terms": {
+      "title": "Conditions d'utilisation"
+    },
+    "liability": {
+      "title": "Limitation de responsabilité"
+    }
+  }
+}
