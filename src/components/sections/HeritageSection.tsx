@@ -132,7 +132,7 @@ const HeritageSection = () => {
 
         <div className="text-center mt-8">
           <Button 
-            onClick={() => navigate('/timeline')}
+            onClick={() => navigate('/symbols/timeline')}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             Explorer la Timeline Complète
