@@ -1,175 +1,166 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Github, Mail, Globe, Users, BookOpen, Sparkles, Trophy } from 'lucide-react';
+import { Github, Mail, Globe } from 'lucide-react';
 import { I18nText } from '@/components/ui/i18n-text';
-import { Button } from '@/components/ui/button';
-import { useTranslation } from '@/i18n/useTranslation';
 
 const Footer: React.FC = () => {
-  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-b from-background to-muted/20 border-t border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-
+    <footer className="bg-white border-t">
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        
         {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-1">12,500+</div>
-            <div className="text-sm text-muted-foreground">
-              <I18nText translationKey="footer.stats.symbols">Symboles</I18nText>
-            </div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">12,500+</div>
+            <div className="text-gray-600 text-lg">symboles</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-1">250+</div>
-            <div className="text-sm text-muted-foreground">
-              <I18nText translationKey="footer.stats.cultures">Cultures</I18nText>
-            </div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">250+</div>
+            <div className="text-gray-600 text-lg">cultures</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-1">1,200+</div>
-            <div className="text-sm text-muted-foreground">
-              <I18nText translationKey="footer.stats.contributors">Contributeurs</I18nText>
-            </div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">1,200+</div>
+            <div className="text-gray-600 text-lg">contributeurs</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-1">85+</div>
-            <div className="text-sm text-muted-foreground">
-              <I18nText translationKey="footer.stats.countries">Pays</I18nText>
-            </div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">85+</div>
+            <div className="text-gray-600 text-lg">pays</div>
           </div>
         </div>
 
-        {/* Main Footer Links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           
-          {/* Brand Section */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <Globe className="h-8 w-8 text-primary" />
-              <span className="font-bold text-xl">Symbolica</span>
+          {/* Symbolica Section */}
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <Globe className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900">Symbolica</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-gray-600 mb-6 leading-relaxed">
               <I18nText translationKey="footer.tagline">
                 Préserver et célébrer l'héritage symbolique mondial
               </I18nText>
             </p>
-            <div className="flex space-x-3">
+            <div className="flex gap-3">
               <a 
                 href="https://github.com/symbolica-museum" 
-                className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Github className="h-5 w-5" />
+                <Github className="w-5 h-5 text-gray-600" />
               </a>
               <Link 
                 to="/contact" 
-                className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors"
               >
-                <Mail className="h-5 w-5" />
+                <Mail className="w-5 h-5 text-gray-600" />
               </Link>
             </div>
           </div>
 
-          {/* Platform Links */}
+          {/* Platform Section */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">
-                <I18nText translationKey="footer.platform">Plateforme</I18nText>
-              </h3>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                <div className="w-3 h-3 bg-white rounded-sm"></div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">plateforme</h3>
             </div>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-4">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.home">Accueil</I18nText>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  accueil
                 </Link>
               </li>
               <li>
-                <Link to="/symbols" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.explore">Explorer</I18nText>
+                <Link to="/symbols" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  explorer
                 </Link>
               </li>
               <li>
-                <Link to="/collections" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.links.collections">Collections</I18nText>
+                <Link to="/collections" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  collections
                 </Link>
               </li>
               <li>
-                <Link to="/map" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.map">Carte</I18nText>
+                <Link to="/map" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  carte
                 </Link>
               </li>
               <li>
-                <Link to="/innovation" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.links.innovation">Innovation Lab</I18nText>
+                <Link to="/innovation" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  innovation
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Parcours Links */}
+          {/* Parcours Section */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">
-                <I18nText translationKey="footer.parcours.title">Parcours</I18nText>
-              </h3>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                <div className="w-3 h-3 bg-white rounded-full"></div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">parcours</h3>
             </div>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-4">
               <li>
-                <Link to="/parcours/academique" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.parcours.academic">Parcours Académique</I18nText>
+                <Link to="/parcours/academique" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  académique
                 </Link>
               </li>
               <li>
-                <Link to="/parcours/aventure" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.parcours.adventure">Parcours Aventure</I18nText>
+                <Link to="/parcours/aventure" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  aventure
                 </Link>
               </li>
               <li>
-                <Link to="/contribute" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.contribute">Contribuer</I18nText>
+                <Link to="/contribute" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  contribuer
                 </Link>
               </li>
               <li>
-                <Link to="/trending" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.links.trending">Tendances</I18nText>
+                <Link to="/trending" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  tendances
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Community & Legal */}
+          {/* Community Section */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Users className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">
-                <I18nText translationKey="footer.community">Communauté</I18nText>
-              </h3>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                <div className="w-3 h-2 bg-white rounded-sm"></div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">communauté</h3>
             </div>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-4">
               <li>
-                <Link to="/community" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.community">Communauté</I18nText>
+                <Link to="/community" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  communauté
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.about">À propos</I18nText>
+                <Link to="/about" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  à propos
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.contact">Contact</I18nText>
+                <Link to="/contact" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  contact
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors hover:underline">
-                  <I18nText translationKey="footer.privacy">Confidentialité</I18nText>
+                <Link to="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors text-lg">
+                  confidentialité
                 </Link>
               </li>
             </ul>
@@ -177,25 +168,18 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-border pt-8">
+        <div className="border-t pt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              <I18nText translationKey="footer.copyright">
-                © {currentYear} Musée Symbolica
-              </I18nText>
+            <p className="text-gray-600">
+              © {currentYear} Symbolica. Tous droits réservés.
             </p>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link to="/terms" className="hover:text-foreground transition-colors">
-                <I18nText translationKey="footer.terms_short">Conditions</I18nText>
+            <div className="flex items-center gap-6">
+              <Link to="/terms" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Conditions
               </Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">
-                <I18nText translationKey="footer.privacy_short">Confidentialité</I18nText>
+              <Link to="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Confidentialité
               </Link>
-              <div className="flex items-center gap-1">
-                <span><I18nText translationKey="footer.made_with">Fait avec</I18nText></span>
-                <Heart className="h-4 w-4 text-red-500" />
-                <span><I18nText translationKey="footer.for_heritage">pour le patrimoine culturel</I18nText></span>
-              </div>
             </div>
           </div>
         </div>
