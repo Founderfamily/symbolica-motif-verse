@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Send, MessageCircle, Wifi } from 'lucide-react';
 import { groupChatService } from '@/services/groupChatService';
+import { useGroupMessages, useSendMessage } from '@/hooks/useGroupMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -21,13 +22,18 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName, isWelcomeGrou
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
   
-  const { data: messages = [], isLoading } = useQuery({
+  // Pour les groupes de bienvenue, on utilise useGroupMessages (community_group_messages)
+  // Pour les autres groupes, on utilise groupChatService (group_chat_messages)
+  const { data: communityMessages = [], isLoading: isCommunityLoading } = useGroupMessages(groupId);
+  const communitySendMutation = useSendMessage();
+  
+  const { data: groupMessages = [], isLoading: isGroupLoading } = useQuery({
     queryKey: ['group-chat-messages', groupId],
     queryFn: () => groupChatService.getMessages(groupId),
-    enabled: !!groupId,
+    enabled: !!groupId && !isWelcomeGroup,
   });
 
-  const sendMessageMutation = useMutation({
+  const groupSendMutation = useMutation({
     mutationFn: ({ content }: { content: string }) => 
       groupChatService.sendMessage(groupId, content),
     onSuccess: () => {
@@ -38,6 +44,11 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName, isWelcomeGrou
       toast.error('Erreur lors de l\'envoi du message');
     },
   });
+
+  // Choisir les bonnes données selon le type de groupe
+  const messages = isWelcomeGroup ? communityMessages : groupMessages;
+  const isLoading = isWelcomeGroup ? isCommunityLoading : isGroupLoading;
+  const sendMessageMutation = isWelcomeGroup ? communitySendMutation : groupSendMutation;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -51,9 +62,18 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName, isWelcomeGrou
     if (!message.trim() || !user) return;
 
     try {
-      await sendMessageMutation.mutateAsync({
-        content: message,
-      });
+      if (isWelcomeGroup) {
+        // Utilise useSendMessage qui attend { groupId, content }
+        await communitySendMutation.mutateAsync({
+          groupId,
+          content: message,
+        });
+      } else {
+        // Utilise groupSendMutation qui attend { content }
+        await groupSendMutation.mutateAsync({
+          content: message,
+        });
+      }
       setMessage('');
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -209,7 +229,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName, isWelcomeGrou
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!message.trim() || sendMessageMutation.isPending}
+            disabled={!message.trim() || (isWelcomeGroup ? communitySendMutation.isPending : groupSendMutation.isPending)}
             className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white"
           >
             <Send className="w-4 h-4" />
