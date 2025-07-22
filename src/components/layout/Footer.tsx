@@ -11,23 +11,23 @@ const Footer: React.FC = () => {
     <footer className="bg-white border-t">
       <div className="max-w-7xl mx-auto px-6 py-16">
         
-        {/* Stats Section */}
+        {/* Stats Section - Realistic numbers for a launching platform */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           <div className="text-center">
-            <div className="text-4xl font-bold text-blue-600 mb-2">12,500+</div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">155</div>
             <div className="text-gray-500 text-base">symboles</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl font-bold text-blue-600 mb-2">250+</div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">98</div>
             <div className="text-gray-500 text-base">cultures</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl font-bold text-blue-600 mb-2">1,200+</div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">7</div>
             <div className="text-gray-500 text-base">contributeurs</div>
           </div>
           <div className="text-center">
-            <div className="text-4xl font-bold text-blue-600 mb-2">85+</div>
-            <div className="text-gray-500 text-base">pays</div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">5</div>
+            <div className="text-gray-500 text-base">régions</div>
           </div>
         </div>
 
