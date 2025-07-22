@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Share, MessageCircle, Hash, Eye, Calendar, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,17 +13,57 @@ import GroupSymbols from '@/components/community/GroupSymbols';
 import EnhancedGroupDiscoveries from '@/components/community/EnhancedGroupDiscoveries';
 import GroupMembersList from '@/components/community/GroupMembersList';
 import GroupChat from '@/components/community/GroupChat';
+import { checkGroupMembership, joinGroup } from '@/services/communityService';
+import { toast } from 'sonner';
 
 const InterestGroupPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('chat');
+  const [isMember, setIsMember] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const [isCheckingMembership, setIsCheckingMembership] = useState(true);
   
   const { data: group, isLoading, error } = useGroupBySlug(slug!);
   const auth = useAuth();
-  
-  // Check if user is member (simplified check for now)
-  const isMember = !!auth?.user;
+
+  // Check if user is member
+  useEffect(() => {
+    const checkMembership = async () => {
+      if (auth?.user && group) {
+        try {
+          const membership = await checkGroupMembership(group.id, auth.user.id);
+          setIsMember(membership);
+        } catch (error) {
+          console.error('Error checking membership:', error);
+        }
+      }
+      setIsCheckingMembership(false);
+    };
+
+    checkMembership();
+  }, [auth?.user, group]);
+
+  const handleJoinGroup = async () => {
+    if (!auth?.user) {
+      toast.error('Veuillez vous connecter pour rejoindre un groupe.');
+      return;
+    }
+
+    if (!group) return;
+
+    setIsJoining(true);
+    try {
+      await joinGroup(group.id, auth.user.id);
+      setIsMember(true);
+      toast.success('Vous avez rejoint le groupe avec succès !');
+    } catch (error) {
+      console.error('Error joining group:', error);
+      toast.error('Erreur lors de l\'inscription au groupe');
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -166,7 +206,14 @@ const InterestGroupPage: React.FC = () => {
                 <div className="text-center text-stone-500 py-12">
                   <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <h3 className="text-lg font-medium mb-2">Rejoignez le groupe</h3>
-                  <p>Vous devez être membre du groupe pour participer au chat.</p>
+                  <p className="mb-4">Vous devez être membre du groupe pour participer au chat.</p>
+                  <Button 
+                    onClick={handleJoinGroup} 
+                    disabled={isJoining || !auth?.user}
+                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                  >
+                    {isJoining ? 'Inscription...' : 'Rejoindre le groupe'}
+                  </Button>
                 </div>
               </div>
             )}
