@@ -15,7 +15,7 @@ import { Users, BookOpen, Crown, Compass, History, Building, Palette, Mountain, 
 
 const CommunityHub: React.FC = () => {
   const navigate = useNavigate();
-  const [activeMainTab, setActiveMainTab] = useState('aventure');
+  const [activeMainTab, setActiveMainTab] = useState('academique'); // Commencer par l'onglet académique pour voir le groupe welcome
 
   // Groupes d'aventure (quêtes)
   const aventureGroups = [
