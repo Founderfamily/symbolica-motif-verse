@@ -30,59 +30,60 @@ export interface ContributorStats {
 class PlatformStatsService {
   async getPlatformStats(): Promise<PlatformStats> {
     try {
-      console.log('📊 [PlatformStatsService] Fetching real platform stats...');
+      console.log('📊 [PlatformStatsService] Fetching real platform stats using RPC...');
       
-      // Récupérer les vraies statistiques avec un timeout
-      const timeout = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Stats fetch timeout')), 5000)
-      );
+      // Utiliser la fonction RPC pour obtenir les vraies statistiques
+      const { data: statsData, error: statsError } = await supabase.rpc('get_community_stats');
+      
+      if (statsError) {
+        console.error('❌ [PlatformStatsService] RPC Error:', statsError);
+        throw statsError;
+      }
 
-      const statsPromise = Promise.all([
-        supabase.from('user_contributions').select('id', { count: 'exact' }),
-        supabase.from('symbols').select('id, culture', { count: 'exact' }),
-        supabase.from('profiles').select('id', { count: 'exact' }),
+      const stats = statsData?.[0];
+      if (!stats) {
+        throw new Error('No stats data returned from RPC');
+      }
+
+      // Récupérer les activités récentes et contributeurs en parallèle
+      const [activitiesResult, contributorsResult] = await Promise.all([
         this.getRecentActivities(),
         this.getTopContributors()
       ]);
 
-      const [contributionsResult, symbolsResult, usersResult, activitiesResult, contributorsResult] = 
-        await Promise.race([statsPromise, timeout]);
+      // Calculer les cultures uniques si on a des symboles
+      let totalCultures = 0;
+      if (Number(stats.total_symbols) > 0) {
+        const { data: symbolsData } = await supabase
+          .from('symbols')
+          .select('culture')
+          .not('culture', 'is', null);
+        
+        const cultures = new Set(symbolsData?.map(s => s.culture).filter(Boolean) || []);
+        totalCultures = cultures.size;
+      }
 
-      const totalContributions = contributionsResult.count || 0;
-      const totalSymbols = symbolsResult.count || 0;
-      const totalUsers = usersResult.count || 0;
-      
-      // Compter les cultures uniques
-      const cultures = new Set(symbolsResult.data?.map(s => s.culture).filter(Boolean) || []);
-      const totalCultures = cultures.size;
-
-      // Pour une communauté naissante, on considère que tous les utilisateurs sont actifs
-      const activeUsers = totalUsers;
-
-      console.log('✅ [PlatformStatsService] Real stats retrieved:', {
-        totalContributions,
-        totalSymbols,
+      const result = {
+        totalContributions: Number(stats.total_contributions) || 0,
+        totalSymbols: Number(stats.total_symbols) || 0,
         totalCultures,
-        activeUsers
-      });
-
-      return {
-        totalContributions,
-        totalSymbols,
-        totalCultures,
-        activeUsers,
+        activeUsers: Number(stats.total_users) || 0,
         recentActivities: activitiesResult,
         topContributors: contributorsResult
       };
+
+      console.log('✅ [PlatformStatsService] Real stats retrieved:', result);
+      return result;
+
     } catch (error) {
       console.error('❌ [PlatformStatsService] Error fetching stats:', error);
       
       // Fallback avec des données par défaut très modestes mais cohérentes
       return {
-        totalContributions: 1,
-        totalSymbols: 20,
-        totalCultures: 6,
-        activeUsers: 6,
+        totalContributions: 0,
+        totalSymbols: 0,
+        totalCultures: 0,
+        activeUsers: 1, // Au moins l'utilisateur actuel
         recentActivities: [],
         topContributors: []
       };

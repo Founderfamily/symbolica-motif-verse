@@ -4348,6 +4348,16 @@ export type Database = {
           cultural_period_name: string
         }[]
       }
+      get_community_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_groups: number
+          total_members: number
+          total_contributions: number
+          total_symbols: number
+          total_users: number
+        }[]
+      }
       get_community_verification_comments: {
         Args: { p_symbol_id: string }
         Returns: {

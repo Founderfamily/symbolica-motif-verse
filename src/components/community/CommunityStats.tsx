@@ -34,9 +34,10 @@ const CommunityStats: React.FC = () => {
     return null;
   }
 
-  const totalGroups = stats?.totalGroups || 8;
-  const totalContributions = platformStats?.totalContributions || stats?.totalMembers || 2340;
-  const totalSymbols = platformStats?.totalSymbols || stats?.totalDiscoveries || 5670;
+  // Utiliser les vraies données de la base de données
+  const totalGroups = stats?.totalGroups || 0;
+  const totalContributions = platformStats?.totalContributions || 0;
+  const totalSymbols = platformStats?.totalSymbols || 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -63,9 +64,9 @@ const CommunityStats: React.FC = () => {
               <TrendingUp className="h-6 w-6 text-amber-700" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-stone-800">{totalContributions?.toLocaleString() || '0'}</p>
+              <p className="text-2xl font-bold text-stone-800">{totalContributions}</p>
               <p className="text-stone-600 text-sm">
-                <I18nText translationKey="community.stats.contributions">Contributions de la Communauté</I18nText>
+                <I18nText translationKey="community.stats.contributions">Contributions</I18nText>
               </p>
             </div>
           </div>
@@ -79,9 +80,9 @@ const CommunityStats: React.FC = () => {
               <Star className="h-6 w-6 text-amber-700" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-stone-800">{totalSymbols?.toLocaleString() || '0'}</p>
+              <p className="text-2xl font-bold text-stone-800">{totalSymbols}</p>
               <p className="text-stone-600 text-sm">
-                <I18nText translationKey="community.stats.discoveries">Symboles Partagés</I18nText>
+                <I18nText translationKey="community.stats.discoveries">Symboles</I18nText>
               </p>
             </div>
           </div>
