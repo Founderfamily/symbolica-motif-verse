@@ -12,52 +12,56 @@ import ActivityFeed from '@/components/community/ActivityFeed';
 import { getInterestGroups } from '@/services/interestGroupService';
 import { InterestGroup } from '@/types/interest-groups';
 import { useWelcomeGroup } from '@/hooks/useCommunityGroups';
-import { Users, BookOpen, Crown, Compass, History, Building, Palette, Mountain, MessageCircle } from 'lucide-react';
+import { Users, BookOpen, Crown, Compass, History, Building, Palette, Mountain, MessageCircle, Clock, AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const CommunityHub: React.FC = () => {
   const navigate = useNavigate();
-  const [activeMainTab, setActiveMainTab] = useState('aventure');
+  const [activeMainTab, setActiveMainTab] = useState('collections');
   const { data: welcomeGroupData, isLoading: isLoadingWelcome } = useWelcomeGroup();
+  const [realQuests, setRealQuests] = useState<any[]>([]);
+  const [isLoadingQuests, setIsLoadingQuests] = useState(true);
 
-  // Groupes d'aventure (quêtes) - données plus réalistes
-  const aventureGroups = [
-    {
-      id: '1',
-      title: 'Le Mystère des Templiers',
-      location: 'France, Europe',
-      description: 'Suivez les indices laissés par les Templiers à travers l\'Europe',
-      participants: 15,
-      clues: 8,
-      reward: 500,
-      difficulty: 'Expert',
-      icon: Crown,
-      color: 'green'
-    },
-    {
-      id: '2', 
-      title: 'Trésors Mayas Perdus',
-      location: 'Mexique, Amérique',
-      description: 'Découvrez les symboles cachés dans les temples mayas',
-      participants: 7,
-      clues: 5,
-      reward: 350,
-      difficulty: 'Intermédiaire',
-      icon: Mountain,
-      color: 'blue'
-    },
-    {
-      id: '3',
-      title: 'Secrets des Pharaons',
-      location: 'Égypte, Afrique', 
-      description: 'Percez les mystères des hiéroglyphes royaux',
-      participants: 23,
-      clues: 12,
-      reward: 750,
-      difficulty: 'Maître',
-      icon: Crown,
-      color: 'red'
-    }
-  ];
+  // Fetch real quests from database
+  useEffect(() => {
+    const fetchQuests = async () => {
+      try {
+        const { data: quests, error } = await supabase
+          .from('treasure_quests')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (error) {
+          console.error('Error fetching quests:', error);
+          setRealQuests([]);
+        } else {
+          // Get participant count for each quest (should be 0 since quest_progress is empty)
+          const questsWithStats = await Promise.all(
+            (quests || []).map(async (quest) => {
+              const { count } = await supabase
+                .from('quest_progress')
+                .select('*', { count: 'exact', head: true })
+                .eq('quest_id', quest.id);
+              
+              return {
+                ...quest,
+                participants: count || 0
+              };
+            })
+          );
+          setRealQuests(questsWithStats);
+        }
+      } catch (error) {
+        console.error('Error fetching quests:', error);
+        setRealQuests([]);
+      } finally {
+        setIsLoadingQuests(false);
+      }
+    };
+
+    fetchQuests();
+  }, []);
 
   // Utiliser les vraies données du groupe de bienvenue
   const welcomeGroup = welcomeGroupData ? {
@@ -77,64 +81,6 @@ const CommunityHub: React.FC = () => {
     icon: MessageCircle,
     color: 'purple'
   };
-
-  // Groupes académiques - données réalistes
-  const academiqueGroups = [
-    {
-      id: 'historiens',
-      title: 'Historiens & Archéologues',
-      members: 8,
-      online: 1,
-      topic: 'Débat sur l\'origine des symboles celtiques',
-      icon: History,
-      color: 'blue'
-    },
-    {
-      id: 'unesco',
-      title: 'Experts UNESCO',
-      members: 3,
-      online: 0,
-      topic: 'Classification des patrimoines mondiaux',
-      icon: Building,
-      color: 'green'
-    },
-    {
-      id: 'symbologie',
-      title: 'Chercheurs en Symbologie',
-      members: 12,
-      online: 2,
-      topic: 'Nouvelles découvertes en Mésopotamie',
-      icon: BookOpen,
-      color: 'amber'
-    },
-    {
-      id: 'patrimoine',
-      title: 'Patrimoine & Culture',
-      members: 6,
-      online: 1,
-      topic: 'Préservation des traditions orales',
-      icon: Palette,
-      color: 'pink'
-    },
-    {
-      id: 'traditions',
-      title: 'Traditions Ancestrales',
-      members: 4,
-      online: 0,
-      topic: 'Rituels et symboles chamaniques',
-      icon: Compass,
-      color: 'orange'
-    },
-    {
-      id: 'linguistique',
-      title: 'Linguistes & Épigraphes',
-      members: 5,
-      online: 1,
-      topic: 'Déchiffrage de langues anciennes',
-      icon: BookOpen,
-      color: 'blue'
-    }
-  ];
 
   // Hook pour récupérer les vrais groupes depuis la base de données
   const [collectionsGroups, setCollectionsGroups] = useState<InterestGroup[]>([]);
@@ -169,9 +115,10 @@ const CommunityHub: React.FC = () => {
     const colors = {
       'Expert': 'bg-orange-100 text-orange-800',
       'Intermédiaire': 'bg-yellow-100 text-yellow-800', 
+      'Débutant': 'bg-green-100 text-green-800',
       'Maître': 'bg-red-100 text-red-800'
     };
-    return colors[difficulty as keyof typeof colors] || colors['Intermédiaire'];
+    return colors[difficulty as keyof typeof colors] || colors['Débutant'];
   };
 
   return (
@@ -202,6 +149,19 @@ const CommunityHub: React.FC = () => {
               Rejoignez des groupes d'intérêt, partagez vos découvertes et collaborez avec d'autres passionnés de symboles
             </I18nText>
           </p>
+        </div>
+
+        {/* Launch Status Banner */}
+        <div className="mb-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Clock className="w-5 h-5 text-blue-600" />
+              <span className="text-blue-800 font-medium">Communauté en cours de lancement</span>
+            </div>
+            <p className="text-blue-700 text-sm">
+              Notre plateforme vient d'ouvrir ! Soyez parmi les premiers à rejoindre nos groupes et contribuer à cette aventure collaborative.
+            </p>
+          </div>
         </div>
 
         {/* Stats - compact style */}
@@ -252,207 +212,199 @@ const CommunityHub: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Tabs - Aventure vs Académique vs Collections */}
+        {/* Main Tabs - Collections vs Aventure */}
         <div className="mb-8">
           <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="aventure" className="flex items-center gap-2">
-                <Compass className="w-4 h-4" />
-                Aventure
-              </TabsTrigger>
-              <TabsTrigger value="academique" className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                Académique
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="collections" className="flex items-center gap-2">
                 <Palette className="w-4 h-4" />
-                Collections
+                Collections & Groupes
+              </TabsTrigger>
+              <TabsTrigger value="aventure" className="flex items-center gap-2">
+                <Compass className="w-4 h-4" />
+                Quêtes & Aventures
               </TabsTrigger>
             </TabsList>
-
-            {/* Section Aventure - Quêtes */}
-            <TabsContent value="aventure" className="mt-6">
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {aventureGroups.map(quest => (
-                    <div key={quest.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${getColorClasses(quest.color)}`}>
-                            <quest.icon className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-stone-800">{quest.title}</h3>
-                            <p className="text-sm text-stone-600 flex items-center gap-1 mt-1">
-                              <span className="w-2 h-2 bg-stone-400 rounded-full"></span>
-                              {quest.location}
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(quest.difficulty)}`}>
-                          {quest.difficulty}
-                        </span>
-                      </div>
-                      
-                      <p className="text-stone-700 text-sm mb-4">{quest.description}</p>
-                      
-                      <div className="space-y-2 text-sm text-stone-600 mb-4">
-                        <div className="flex justify-between">
-                          <span>Participants</span>
-                          <span className="font-medium">{quest.participants}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Indices</span>
-                          <span className="font-medium">{quest.clues} disponibles</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Récompense</span>
-                          <span className="font-medium text-amber-600">{quest.reward} points</span>
-                        </div>
-                      </div>
-                      
-                      <Button 
-                        onClick={() => navigate('/quests')}
-                        className="w-full bg-amber-600 hover:bg-amber-700 text-white"
-                      >
-                        Rejoindre
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="text-center">
-                  <Button 
-                    onClick={() => navigate('/quests')}
-                    size="lg"
-                    className="bg-amber-600 hover:bg-amber-700 text-white px-8"
-                  >
-                    <Compass className="w-5 h-5 mr-2" />
-                    Voir Toutes les Quêtes
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Section Académique - Discussions */}
-            <TabsContent value="academique" className="mt-6">
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-                {/* Groupes académiques */}
-                <div>
-                  <h3 className="text-lg font-semibold text-stone-800 mb-4 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-amber-600" />
-                    Groupes de recherche
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {academiqueGroups.map(group => (
-                      <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${getColorClasses(group.color)}`}>
-                              <group.icon className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-stone-800">{group.title}</h3>
-                            </div>
-                          </div>
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                            {group.online} en ligne
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-2 text-sm text-stone-600 mb-4">
-                          <div className="flex justify-between">
-                            <span>Membres</span>
-                            <span className="font-medium">{group.members}</span>
-                          </div>
-                        </div>
-                        
-                        <p className="text-stone-700 text-sm mb-4 italic">
-                          "Sujet actuel : {group.topic}"
-                        </p>
-                        
-                        <Button 
-                          onClick={() => navigate('/community')}
-                          variant="outline"
-                          className="w-full border-stone-300 hover:bg-stone-50"
-                        >
-                          Rejoindre la Discussion
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
 
             {/* Section Collections - Communautés par collection */}
             <TabsContent value="collections" className="mt-6">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {collectionsGroups.map(group => {
-                    // Fonction pour assigner une icône et couleur selon le nom du groupe
-                    const getGroupDisplay = (name: string) => {
-                      const lowerName = name.toLowerCase();
-                      if (lowerName.includes('celt')) return { icon: Compass, color: 'green' };
-                      if (lowerName.includes('nordique') || lowerName.includes('viking')) return { icon: BookOpen, color: 'blue' };
-                      if (lowerName.includes('egypt') || lowerName.includes('égypt')) return { icon: Crown, color: 'amber' };
-                      if (lowerName.includes('chin')) return { icon: History, color: 'orange' };
-                      if (lowerName.includes('japon')) return { icon: Mountain, color: 'pink' };
-                      if (lowerName.includes('grec')) return { icon: Building, color: 'blue' };
-                      if (lowerName.includes('afric')) return { icon: Users, color: 'orange' };
-                      if (lowerName.includes('océan') || lowerName.includes('pacif')) return { icon: Compass, color: 'blue' };
-                      if (lowerName.includes('slave')) return { icon: History, color: 'purple' };
-                      if (lowerName.includes('médiév') || lowerName.includes('europe')) return { icon: Crown, color: 'amber' };
-                      if (lowerName.includes('amér') || lowerName.includes('indig')) return { icon: Mountain, color: 'green' };
-                      if (lowerName.includes('arab') || lowerName.includes('islam')) return { icon: BookOpen, color: 'blue' };
-                      if (lowerName.includes('perse') || lowerName.includes('iran')) return { icon: Palette, color: 'purple' };
-                      return { icon: BookOpen, color: 'blue' };
-                    };
+                {collectionsGroups.length === 0 ? (
+                  <div className="text-center py-12">
+                    <AlertCircle className="w-12 h-12 text-stone-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-stone-700 mb-2">Aucun groupe pour le moment</h3>
+                    <p className="text-stone-600 mb-4">
+                      Les premiers groupes d'intérêt seront bientôt créés par nos membres.
+                    </p>
+                    <Button 
+                      onClick={() => navigate('/create-group')}
+                      className="bg-amber-600 hover:bg-amber-700 text-white"
+                    >
+                      Créer le Premier Groupe
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {collectionsGroups.map(group => {
+                      // Fonction pour assigner une icône et couleur selon le nom du groupe
+                      const getGroupDisplay = (name: string) => {
+                        const lowerName = name.toLowerCase();
+                        if (lowerName.includes('celt')) return { icon: Compass, color: 'green' };
+                        if (lowerName.includes('nordique') || lowerName.includes('viking')) return { icon: BookOpen, color: 'blue' };
+                        if (lowerName.includes('egypt') || lowerName.includes('égypt')) return { icon: Crown, color: 'amber' };
+                        if (lowerName.includes('chin')) return { icon: History, color: 'orange' };
+                        if (lowerName.includes('japon')) return { icon: Mountain, color: 'pink' };
+                        if (lowerName.includes('grec')) return { icon: Building, color: 'blue' };
+                        if (lowerName.includes('afric')) return { icon: Users, color: 'orange' };
+                        if (lowerName.includes('océan') || lowerName.includes('pacif')) return { icon: Compass, color: 'blue' };
+                        if (lowerName.includes('slave')) return { icon: History, color: 'purple' };
+                        if (lowerName.includes('médiév') || lowerName.includes('europe')) return { icon: Crown, color: 'amber' };
+                        if (lowerName.includes('amér') || lowerName.includes('indig')) return { icon: Mountain, color: 'green' };
+                        if (lowerName.includes('arab') || lowerName.includes('islam')) return { icon: BookOpen, color: 'blue' };
+                        if (lowerName.includes('perse') || lowerName.includes('iran')) return { icon: Palette, color: 'purple' };
+                        return { icon: BookOpen, color: 'blue' };
+                      };
 
-                    const { icon: GroupIcon, color } = getGroupDisplay(group.name);
+                      const { icon: GroupIcon, color } = getGroupDisplay(group.name);
+                      const onlineMembers = Math.max(0, Math.floor(group.members_count * 0.1)); // 10% en ligne max
 
-                    return (
-                      <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${getColorClasses(color)}`}>
-                              <GroupIcon className="w-5 h-5" />
+                      return (
+                        <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${getColorClasses(color)}`}>
+                                <GroupIcon className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-stone-800">{group.name}</h3>
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-stone-800">{group.name}</h3>
+                            {onlineMembers > 0 && (
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                {onlineMembers} en ligne
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="space-y-2 text-sm text-stone-600 mb-4">
+                            <div className="flex justify-between">
+                              <span>Membres</span>
+                              <span className="font-medium">{group.members_count}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Découvertes</span>
+                              <span className="font-medium">{group.discoveries_count}</span>
                             </div>
                           </div>
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                            {Math.floor(group.members_count * 0.15)} en ligne
-                          </span>
+                          
+                          <p className="text-stone-700 text-sm mb-4 italic">
+                            {group.description || "Description à venir..."}
+                          </p>
+                          
+                          <Button 
+                            onClick={() => navigate(`/groups/${group.slug}`)}
+                            variant="outline"
+                            className="w-full border-stone-300 hover:bg-stone-50"
+                          >
+                            {group.members_count > 0 ? 'Rejoindre la Discussion' : 'Être le Premier Membre'}
+                          </Button>
                         </div>
-                        
-                        <div className="space-y-2 text-sm text-stone-600 mb-4">
-                          <div className="flex justify-between">
-                            <span>Membres</span>
-                            <span className="font-medium">{group.members_count}</span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Section Aventure - Vraies Quêtes */}
+            <TabsContent value="aventure" className="mt-6">
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
+                {isLoadingQuests ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
+                    <p className="text-stone-600">Chargement des quêtes...</p>
+                  </div>
+                ) : realQuests.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Compass className="w-12 h-12 text-stone-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-stone-700 mb-2">Aucune quête disponible</h3>
+                    <p className="text-stone-600 mb-4">
+                      Les premières quêtes seront bientôt ajoutées par nos maîtres explorateurs.
+                    </p>
+                    <Button 
+                      onClick={() => navigate('/quests')}
+                      className="bg-amber-600 hover:bg-amber-700 text-white"
+                    >
+                      <Compass className="w-5 h-5 mr-2" />
+                      Explorer les Quêtes
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                      {realQuests.map(quest => (
+                        <div key={quest.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg bg-amber-50 border-amber-200 text-amber-900`}>
+                                <Compass className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-stone-800">{quest.title}</h3>
+                                <p className="text-sm text-stone-600 flex items-center gap-1 mt-1">
+                                  <span className="w-2 h-2 bg-stone-400 rounded-full"></span>
+                                  {quest.location || 'Lieu à découvrir'}
+                                </p>
+                              </div>
+                            </div>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(quest.difficulty || 'Débutant')}`}>
+                              {quest.difficulty || 'Débutant'}
+                            </span>
                           </div>
-                          <div className="flex justify-between">
-                            <span>Découvertes</span>
-                            <span className="font-medium">{group.discoveries_count}</span>
+                          
+                          <p className="text-stone-700 text-sm mb-4">{quest.description}</p>
+                          
+                          <div className="space-y-2 text-sm text-stone-600 mb-4">
+                            <div className="flex justify-between">
+                              <span>Participants</span>
+                              <span className="font-medium">{quest.participants}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Récompense</span>
+                              <span className="font-medium text-amber-600">{quest.reward_points || 0} points</span>
+                            </div>
+                            {quest.participants === 0 && (
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2">
+                                <p className="text-blue-700 text-xs">
+                                  <Clock className="w-3 h-3 inline mr-1" />
+                                  Soyez le premier à participer !
+                                </p>
+                              </div>
+                            )}
                           </div>
+                          
+                          <Button 
+                            onClick={() => navigate('/quests')}
+                            className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                          >
+                            {quest.participants === 0 ? 'Commencer l\'Aventure' : 'Rejoindre'}
+                          </Button>
                         </div>
-                        
-                        <p className="text-stone-700 text-sm mb-4 italic">
-                          "{group.description}"
-                        </p>
-                        
-                        <Button 
-                          onClick={() => navigate(`/groups/${group.slug}`)}
-                          variant="outline"
-                          className="w-full border-stone-300 hover:bg-stone-50"
-                        >
-                          Rejoindre la Discussion
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
+                      ))}
+                    </div>
+                    
+                    <div className="text-center">
+                      <Button 
+                        onClick={() => navigate('/quests')}
+                        size="lg"
+                        className="bg-amber-600 hover:bg-amber-700 text-white px-8"
+                      >
+                        <Compass className="w-5 h-5 mr-2" />
+                        Voir Toutes les Quêtes
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </TabsContent>
           </Tabs>
