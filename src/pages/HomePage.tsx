@@ -10,27 +10,30 @@ import { ErrorHandler } from '@/utils/errorHandler';
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Elegant adventure background */}
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50/50 to-stone-50">
+      {/* Symbolic heritage background */}
       <div className="fixed inset-0 -z-20">
-        {/* Elegant paper texture base */}
-        <div className="absolute inset-0 bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-100"></div>
+        {/* Heritage paper texture base */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-yellow-50/60 to-stone-100"></div>
         
-        {/* Subtle compass rose in background */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5">
-          <div className="w-96 h-96 rounded-full border border-stone-300">
+        {/* Ancient symbols pattern */}
+        <div className="absolute top-1/3 left-1/4 opacity-5">
+          <div className="w-64 h-64 border-2 border-amber-400 rounded-full">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-px h-full bg-stone-300"></div>
+              <div className="w-0.5 h-full bg-amber-400"></div>
             </div>
-            <div className="absolute inset-0 flex items-center justify-center transform rotate-45">
-              <div className="w-px h-full bg-stone-300"></div>
+            <div className="absolute inset-0 flex items-center justify-center transform rotate-60">
+              <div className="w-0.5 h-full bg-amber-400"></div>
             </div>
-            <div className="absolute inset-0 flex items-center justify-center transform rotate-90">
-              <div className="w-px h-full bg-stone-300"></div>
+            <div className="absolute inset-0 flex items-center justify-center transform rotate-120">
+              <div className="w-0.5 h-full bg-amber-400"></div>
             </div>
-            <div className="absolute inset-0 flex items-center justify-center transform -rotate-45">
-              <div className="w-px h-full bg-stone-300"></div>
-            </div>
+          </div>
+        </div>
+        
+        <div className="absolute bottom-1/4 right-1/4 opacity-8">
+          <div className="w-32 h-32 border border-yellow-500">
+            <div className="absolute inset-2 border border-yellow-500 transform rotate-45"></div>
           </div>
         </div>
       </div>
