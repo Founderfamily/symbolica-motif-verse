@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Settings, Users, Database, Shield, BarChart3, Flag, Lightbulb, Network, Layout, Trophy, Compass, Clock, History } from 'lucide-react'; 
+import { ChevronDown, Settings, Users, Database, Shield, BarChart3, Flag, Lightbulb, Network, Layout, Trophy, Compass, Clock, History, PenTool } from 'lucide-react'; 
 
 export const NavigationItems = () => {
   const location = useLocation();
@@ -58,10 +58,8 @@ export const NavigationItems = () => {
     },
   ];
 
-  // Navigation pour utilisateurs connectés
-  const userNavigation = user ? [
-    { name: 'Contribuer', href: '/propose-symbol', translationKey: 'contribute' },
-  ] : [];
+  // Navigation pour utilisateurs connectés - maintenant vide
+  const userNavigation = [];
 
   const allNavigation = [...navigation, ...userNavigation];
 
@@ -115,28 +113,24 @@ export const NavigationItems = () => {
   ];
 
   return (
-    <div className="hidden md:flex items-center space-x-4">
-      {allNavigation.map((item) => (
-        <Link
-          key={item.href}
-          to={item.href}
-          className={cn(
-            'px-2 py-2 text-sm font-medium transition-colors hover:text-primary relative',
-            location.pathname === item.href
-              ? 'text-primary'
-              : 'text-muted-foreground'
-          )}
-        >
-          <I18nText translationKey={item.translationKey} ns="navigation">
-            {item.name}
-          </I18nText>
-          {item.href === '/propose-symbol' && (
-            <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
-              Nouveau
-            </span>
-          )}
-        </Link>
-      ))}
+    <div className="hidden md:flex items-center justify-between w-full">
+      <div className="flex items-center space-x-4">
+        {allNavigation.map((item) => (
+          <Link
+            key={item.href}
+            to={item.href}
+            className={cn(
+              'px-2 py-2 text-sm font-medium transition-colors hover:text-primary relative',
+              location.pathname === item.href
+                ? 'text-primary'
+                : 'text-muted-foreground'
+            )}
+          >
+            <I18nText translationKey={item.translationKey} ns="navigation">
+              {item.name}
+            </I18nText>
+          </Link>
+        ))}
 
       {/* Menu Parcours dropdown */}
       <DropdownMenu>
@@ -318,6 +312,26 @@ export const NavigationItems = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+      )}
+      </div>
+
+      {/* Bouton Contribuer à droite */}
+      {user && (
+        <Link
+          to="/propose-symbol"
+          className={cn(
+            'p-2 text-sm font-medium transition-colors hover:text-primary relative',
+            location.pathname === '/propose-symbol'
+              ? 'text-primary'
+              : 'text-muted-foreground'
+          )}
+          title="Contribuer"
+        >
+          <PenTool className="h-5 w-5" />
+          <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
+            Nouveau
+          </span>
+        </Link>
       )}
     </div>
   );
