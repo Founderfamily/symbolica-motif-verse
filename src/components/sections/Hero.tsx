@@ -65,7 +65,7 @@ const Hero = () => {
               Commencer l'Exploration
             </Button>
             <Button 
-              onClick={() => navigate('/contribute')}
+              onClick={() => navigate('/contributions')}
               variant="outline"
               className="border-2 border-amber-600 text-amber-700 hover:bg-amber-50 px-8 py-4 text-lg font-semibold transition-all duration-300"
             >
