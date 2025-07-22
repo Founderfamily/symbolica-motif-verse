@@ -9,10 +9,10 @@ const PrivacyPage: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          <I18nText translationKey="privacy.title">Politique de confidentialité</I18nText>
+          <I18nText translationKey="privacy.title" ns="privacy">Politique de confidentialité</I18nText>
         </h1>
         <p className="text-muted-foreground">
-          <I18nText translationKey="privacy.subtitle">
+          <I18nText translationKey="privacy.subtitle" ns="privacy">
             Comment nous protégeons et utilisons vos données personnelles
           </I18nText>
         </p>
@@ -23,7 +23,7 @@ const PrivacyPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5 text-blue-600" />
-              <I18nText translationKey="privacy.collection.title">Collecte des données</I18nText>
+              <I18nText translationKey="privacy.collection.title" ns="privacy">Collecte des données</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -43,7 +43,7 @@ const PrivacyPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-green-600" />
-              <I18nText translationKey="privacy.usage.title">Utilisation des données</I18nText>
+              <I18nText translationKey="privacy.usage.title" ns="privacy">Utilisation des données</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -63,7 +63,7 @@ const PrivacyPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5 text-amber-600" />
-              <I18nText translationKey="privacy.protection.title">Protection des données</I18nText>
+              <I18nText translationKey="privacy.protection.title" ns="privacy">Protection des données</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -83,7 +83,7 @@ const PrivacyPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-purple-600" />
-              <I18nText translationKey="privacy.rights.title">Vos droits</I18nText>
+              <I18nText translationKey="privacy.rights.title" ns="privacy">Vos droits</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">

@@ -58,6 +58,12 @@ import enSymbolTriptych from './locales/en/symbolTriptych.json';
 import frSymbolTriptych from './locales/fr/symbolTriptych.json';
 import enQuests from './locales/en/quests.json';
 import frQuests from './locales/fr/quests.json';
+import enPrivacy from './locales/en/privacy.json';
+import frPrivacy from './locales/fr/privacy.json';
+import enTerms from './locales/en/terms.json';
+import frTerms from './locales/fr/terms.json';
+import enLegal from './locales/en/legal.json';
+import frLegal from './locales/fr/legal.json';
 
 const resources = {
   en: {
@@ -86,7 +92,10 @@ const resources = {
     gamification: enGamification,
     symbols: enSymbols,
     symbolTriptych: enSymbolTriptych,
-    quests: enQuests
+    quests: enQuests,
+    privacy: enPrivacy,
+    terms: enTerms,
+    legal: enLegal
   },
   fr: {
     translation: frTranslations,
@@ -114,7 +123,10 @@ const resources = {
     gamification: frGamification,
     symbols: frSymbols,
     symbolTriptych: frSymbolTriptych,
-    quests: frQuests
+    quests: frQuests,
+    privacy: frPrivacy,
+    terms: frTerms,
+    legal: frLegal
   }
 };
 

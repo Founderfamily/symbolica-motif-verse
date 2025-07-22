@@ -9,10 +9,10 @@ const LegalPage: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          <I18nText translationKey="legal.title">Mentions légales</I18nText>
+          <I18nText translationKey="legal.title" ns="legal">Mentions légales</I18nText>
         </h1>
         <p className="text-muted-foreground">
-          <I18nText translationKey="legal.subtitle">
+          <I18nText translationKey="legal.subtitle" ns="legal">
             Informations légales et conditions d'utilisation
           </I18nText>
         </p>
@@ -22,7 +22,7 @@ const LegalPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>
-              <I18nText translationKey="legal.company.title">Informations sur l'entreprise</I18nText>
+              <I18nText translationKey="legal.company.title" ns="legal">Informations sur l'entreprise</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -46,7 +46,7 @@ const LegalPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>
-              <I18nText translationKey="legal.terms.title">Conditions d'utilisation</I18nText>
+              <I18nText translationKey="legal.terms.title" ns="legal">Conditions d'utilisation</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -75,7 +75,7 @@ const LegalPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>
-              <I18nText translationKey="legal.liability.title">Limitation de responsabilité</I18nText>
+              <I18nText translationKey="legal.liability.title" ns="legal">Limitation de responsabilité</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent>

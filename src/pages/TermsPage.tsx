@@ -9,10 +9,10 @@ const TermsPage: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          <I18nText translationKey="terms.title">Conditions d'utilisation</I18nText>
+          <I18nText translationKey="terms.title" ns="terms">Conditions d'utilisation</I18nText>
         </h1>
         <p className="text-muted-foreground">
-          <I18nText translationKey="terms.subtitle">
+          <I18nText translationKey="terms.subtitle" ns="terms">
             Règles et conditions pour l'utilisation de Symbolica Museum
           </I18nText>
         </p>
@@ -26,7 +26,7 @@ const TermsPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-600" />
-              <I18nText translationKey="terms.acceptance.title">Acceptation des conditions</I18nText>
+              <I18nText translationKey="terms.acceptance.title" ns="terms">Acceptation des conditions</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -42,7 +42,7 @@ const TermsPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-green-600" />
-              <I18nText translationKey="terms.community.title">Règles de la communauté</I18nText>
+              <I18nText translationKey="terms.community.title" ns="terms">Règles de la communauté</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -71,7 +71,7 @@ const TermsPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Scale className="h-5 w-5 text-amber-600" />
-              <I18nText translationKey="terms.intellectual.title">Propriété intellectuelle</I18nText>
+              <I18nText translationKey="terms.intellectual.title" ns="terms">Propriété intellectuelle</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -97,7 +97,7 @@ const TermsPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-600" />
-              <I18nText translationKey="terms.restrictions.title">Restrictions et sanctions</I18nText>
+              <I18nText translationKey="terms.restrictions.title" ns="terms">Restrictions et sanctions</I18nText>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
