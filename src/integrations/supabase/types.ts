@@ -345,6 +345,83 @@ export type Database = {
           },
         ]
       }
+      community_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          is_online: boolean | null
+          joined_at: string
+          last_activity: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          is_online?: boolean | null
+          joined_at?: string
+          last_activity?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          is_online?: boolean | null
+          joined_at?: string
+          last_activity?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "community_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_groups: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_public: boolean | null
+          is_welcome_group: boolean | null
+          name: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_public?: boolean | null
+          is_welcome_group?: boolean | null
+          name: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_public?: boolean | null
+          is_welcome_group?: boolean | null
+          name?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       content_sections: {
         Row: {
           content: Json | null
