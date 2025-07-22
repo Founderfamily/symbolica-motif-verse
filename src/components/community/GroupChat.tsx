@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, MessageCircle } from 'lucide-react';
-import { useGroupMessages, useSendMessage } from '@/hooks/useGroupMessages';
 import { useAuth } from '@/hooks/useAuth';
+import { groupChatService, ChatMessage } from '@/services/groupChatService';
 import { toast } from 'sonner';
 
 interface GroupChatProps {
@@ -14,11 +14,11 @@ interface GroupChatProps {
 const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }) => {
   const { user } = useAuth();
   const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  const { data: messages = [], isLoading } = useGroupMessages(groupId);
-  const sendMessageMutation = useSendMessage();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -28,14 +28,43 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (!groupId) return;
+
+    // Load initial messages
+    const loadMessages = async () => {
+      try {
+        setIsLoading(true);
+        const initialMessages = await groupChatService.getMessages(groupId);
+        setMessages(initialMessages);
+      } catch (error) {
+        console.error('Error loading messages:', error);
+        toast.error('Erreur lors du chargement des messages');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMessages();
+
+    // Subscribe to real-time updates
+    const channel = groupChatService.subscribeToMessages(groupId, (newMessage) => {
+      setMessages(prev => [...prev, newMessage]);
+    });
+
+    channel.subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [groupId]);
+
   const handleSendMessage = async () => {
-    if (!message.trim() || !user) return;
+    if (!message.trim() || !user || isSending) return;
 
     try {
-      await sendMessageMutation.mutateAsync({
-        groupId,
-        content: message,
-      });
+      setIsSending(true);
+      await groupChatService.sendMessage(groupId, message);
       setMessage('');
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -43,6 +72,8 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Erreur lors de l\'envoi du message');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -133,7 +164,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
               >
                 {msg.user_id !== user.id && (
                   <div className="text-xs font-medium mb-1 opacity-75">
-                    Utilisateur {msg.user_id.slice(0, 8)}
+                    {msg.profiles?.full_name || msg.profiles?.username || `Utilisateur ${msg.user_id.slice(0, 8)}`}
                   </div>
                 )}
                 <div className="whitespace-pre-wrap break-words">{msg.content}</div>
@@ -163,7 +194,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!message.trim() || sendMessageMutation.isPending}
+            disabled={!message.trim() || isSending}
             className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white"
           >
             <Send className="w-4 h-4" />
