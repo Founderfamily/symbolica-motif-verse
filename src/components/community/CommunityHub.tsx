@@ -15,7 +15,7 @@ import { Users, BookOpen, Crown, Compass, History, Building, Palette, Mountain, 
 
 const CommunityHub: React.FC = () => {
   const navigate = useNavigate();
-  const [activeMainTab, setActiveMainTab] = useState('academique'); // Commencer par l'onglet académique pour voir le groupe welcome
+  const [activeMainTab, setActiveMainTab] = useState('aventure');
 
   // Groupes d'aventure (quêtes)
   const aventureGroups = [
@@ -262,6 +262,62 @@ const CommunityHub: React.FC = () => {
           </div>
         </div>
 
+        {/* Groupe Bienvenue - Section globale au-dessus des onglets */}
+        <div className="mb-8">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-stone-800 mb-2 flex items-center justify-center gap-2">
+                <MessageCircle className="w-6 h-6 text-purple-600" />
+                Nouveau sur la plateforme ?
+              </h2>
+              <p className="text-stone-600">Rejoignez notre groupe d'accueil pour débuter</p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 border border-purple-200 shadow-sm hover:shadow-md transition-shadow max-w-2xl mx-auto">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${getColorClasses(welcomeGroup.color)}`}>
+                    <welcomeGroup.icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-stone-800">{welcomeGroup.title}</h3>
+                    <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mt-1">
+                      Groupe d'accueil - Ouvert à tous
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                  {welcomeGroup.online} en ligne
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm text-stone-600 mb-4">
+                <div className="text-center">
+                  <span className="block font-medium text-lg text-stone-800">{welcomeGroup.members}</span>
+                  <span>Membres</span>
+                </div>
+                <div className="text-center">
+                  <span className="block font-medium text-lg text-stone-800">{welcomeGroup.online}</span>
+                  <span>En ligne</span>
+                </div>
+              </div>
+              
+              <p className="text-stone-700 text-sm mb-4 italic text-center">
+                "Sujet actuel : {welcomeGroup.topic}"
+              </p>
+              
+              <Button 
+                onClick={() => navigate('/community')}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                size="lg"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Rejoindre la Discussion
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Main Tabs - Aventure vs Académique vs Collections */}
         <div className="mb-8">
           <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
@@ -347,50 +403,6 @@ const CommunityHub: React.FC = () => {
             {/* Section Académique - Discussions */}
             <TabsContent value="academique" className="mt-6">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-                {/* Groupe Bienvenue - en haut et séparé */}
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-stone-800 mb-4 flex items-center gap-2">
-                    <MessageCircle className="w-5 h-5 text-purple-600" />
-                    Nouveau sur la plateforme ?
-                  </h3>
-                  <div className="bg-white rounded-xl p-6 border border-purple-200 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${getColorClasses(welcomeGroup.color)}`}>
-                          <welcomeGroup.icon className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-stone-800">{welcomeGroup.title}</h3>
-                          <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mt-1">
-                            Groupe d'accueil
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                        {welcomeGroup.online} en ligne
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-2 text-sm text-stone-600 mb-4">
-                      <div className="flex justify-between">
-                        <span>Membres</span>
-                        <span className="font-medium">{welcomeGroup.members}</span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-stone-700 text-sm mb-4 italic">
-                      "Sujet actuel : {welcomeGroup.topic}"
-                    </p>
-                    
-                    <Button 
-                      onClick={() => navigate('/community')}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      Rejoindre la Discussion
-                    </Button>
-                  </div>
-                </div>
-
                 {/* Groupes académiques */}
                 <div>
                   <h3 className="text-lg font-semibold text-stone-800 mb-4 flex items-center gap-2">
