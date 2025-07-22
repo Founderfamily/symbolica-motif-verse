@@ -177,7 +177,7 @@ const Footer: React.FC = () => {
         <div className="border-t border-gray-200 pt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-gray-500 text-base">
-              © {currentYear} Symbolica. Tous droits réservés.
+              © {currentYear} PurePlayer SAS - 266 avenue Daumesnil, 75012 Paris
             </p>
             <div className="flex items-center gap-6">
               <Link to="/terms" className="text-gray-500 hover:text-gray-900 transition-colors text-base">
