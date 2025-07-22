@@ -279,7 +279,6 @@ const GroupDetailPage: React.FC = () => {
             <TabsContent value="chat">
               <GroupChat 
                 groupId={group.id}
-                groupName={group.name}
               />
             </TabsContent>
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, ArrowLeft, Users } from 'lucide-react';
 import { useWelcomeGroup } from '@/hooks/useCommunityGroups';
+import GroupChat from '@/components/community/GroupChat';
 
 const WelcomeGroupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -76,30 +77,7 @@ const WelcomeGroupPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Discussion Area */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
-              <h2 className="text-xl font-semibold text-stone-800 mb-4">Discussion Principale</h2>
-              
-              {/* Welcome Message */}
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold text-purple-800 mb-2">👋 Bienvenue dans notre communauté !</h3>
-                <p className="text-purple-700 text-sm">
-                  Ce groupe est spécialement conçu pour accueillir les nouveaux membres. 
-                  N'hésitez pas à vous présenter, poser vos questions et partager vos premières découvertes !
-                </p>
-              </div>
-
-              {/* Discussion placeholder */}
-              <div className="space-y-4">
-                <div className="text-center py-12 text-stone-500">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">Commencez la conversation</h3>
-                  <p className="text-sm">Soyez le premier à poster un message dans ce groupe !</p>
-                  <Button className="mt-4 bg-purple-600 hover:bg-purple-700">
-                    Écrire un message
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <GroupChat groupId={welcomeGroupData.id} />
           </div>
 
           {/* Sidebar */}
