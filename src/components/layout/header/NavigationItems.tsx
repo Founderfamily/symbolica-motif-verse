@@ -51,10 +51,40 @@ export const NavigationItems = () => {
       description: 'Découvrez notre collection de symboles'
     },
     { 
+      name: 'Explorateur avancé', 
+      href: '/symbol-explorer', 
+      icon: Search,
+      description: 'Recherche et filtres avancés'
+    },
+    { 
       name: 'Timeline Interactive', 
       href: '/symbols/timeline', 
       icon: History,
       description: 'Explorez les symboles à travers l\'histoire'
+    },
+    { 
+      name: 'Recherche', 
+      href: '/search', 
+      icon: Search,
+      description: 'Recherche dans tous les symboles'
+    },
+    { 
+      name: 'Tendances', 
+      href: '/trending', 
+      icon: TrendingUp,
+      description: 'Symboles populaires'
+    },
+    { 
+      name: 'Carte Interactive', 
+      href: '/map', 
+      icon: Map,
+      description: 'Localisation des symboles'
+    },
+    { 
+      name: 'Analyse', 
+      href: '/analysis', 
+      icon: BarChart2,
+      description: 'Analyses et statistiques'
     },
   ];
 
@@ -121,24 +151,6 @@ export const NavigationItems = () => {
       description: 'Solutions pour les entreprises'
     },
     { 
-      name: 'Recherche', 
-      href: '/search', 
-      icon: Search,
-      description: 'Recherche avancée dans les symboles'
-    },
-    { 
-      name: 'Tendances', 
-      href: '/trending', 
-      icon: TrendingUp,
-      description: 'Symboles et découvertes populaires'
-    },
-    { 
-      name: 'Carte Interactive', 
-      href: '/map', 
-      icon: Map,
-      description: 'Explorez les symboles sur la carte'
-    },
-    { 
       name: 'Feuille de Route', 
       href: '/roadmap', 
       icon: Route,
@@ -155,12 +167,6 @@ export const NavigationItems = () => {
       href: '/mobile', 
       icon: Smartphone,
       description: 'Application mobile Symbolica'
-    },
-    { 
-      name: 'Analyse', 
-      href: '/analysis', 
-      icon: BarChart2,
-      description: 'Analyses et statistiques'
     },
   ];
 
@@ -369,7 +375,7 @@ export const NavigationItems = () => {
           <button
             className={cn(
               'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
-              ['/enterprise', '/search', '/trending', '/map', '/roadmap', '/contact', '/mobile', '/analysis', '/legal', '/privacy', '/terms'].some(path => location.pathname === path)
+              ['/enterprise', '/roadmap', '/contact', '/mobile'].some(path => location.pathname === path)
                 ? 'text-primary'
                 : 'text-muted-foreground'
             )}
@@ -391,29 +397,6 @@ export const NavigationItems = () => {
                 className="flex items-start gap-3 cursor-pointer p-3 hover:bg-blue-50"
               >
                 <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium">
-                    {item.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {item.description}
-                  </div>
-                </div>
-              </Link>
-            </DropdownMenuItem>
-          ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel className="text-center font-bold text-gray-600">
-            📋 Informations Légales
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {legalPagesItems.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link
-                to={item.href}
-                className="flex items-start gap-3 cursor-pointer p-3 hover:bg-gray-50"
-              >
-                <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-gray-500" />
                 <div className="flex-1">
                   <div className="text-sm font-medium">
                     {item.name}
