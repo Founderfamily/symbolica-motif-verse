@@ -8,9 +8,10 @@ import { toast } from 'sonner';
 
 interface GroupChatProps {
   groupId: string;
+  isWelcomeGroup?: boolean;
 }
 
-const GroupChat: React.FC<GroupChatProps> = ({ groupId }) => {
+const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }) => {
   const { user } = useAuth();
   const [message, setMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -88,19 +89,21 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId }) => {
         <h2 className="text-xl font-semibold text-stone-800">Discussion Principale</h2>
       </div>
 
-      {/* Welcome Message */}
-      <div className="p-4 bg-purple-50 border-b border-purple-200">
-        <div className="flex items-start gap-3">
-          <div className="text-2xl">👋</div>
-          <div>
-            <h3 className="font-semibold text-purple-800 mb-1">Bienvenue dans notre communauté !</h3>
-            <p className="text-purple-700 text-sm">
-              Ce groupe est spécialement conçu pour accueillir les nouveaux membres. 
-              N'hésitez pas à vous présenter, poser vos questions et partager vos premières découvertes !
-            </p>
+      {/* Welcome Message - Only for welcome groups */}
+      {isWelcomeGroup && (
+        <div className="p-4 bg-purple-50 border-b border-purple-200">
+          <div className="flex items-start gap-3">
+            <div className="text-2xl">👋</div>
+            <div>
+              <h3 className="font-semibold text-purple-800 mb-1">Bienvenue dans notre communauté !</h3>
+              <p className="text-purple-700 text-sm">
+                Ce groupe est spécialement conçu pour accueillir les nouveaux membres. 
+                N'hésitez pas à vous présenter, poser vos questions et partager vos premières découvertes !
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
