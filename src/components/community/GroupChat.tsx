@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, MessageCircle } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Send, MessageCircle, Wifi } from 'lucide-react';
 import { groupChatService } from '@/services/groupChatService';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,10 +10,11 @@ import { toast } from 'sonner';
 
 interface GroupChatProps {
   groupId: string;
+  groupName?: string;
   isWelcomeGroup?: boolean;
 }
 
-const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }) => {
+const GroupChat: React.FC<GroupChatProps> = ({ groupId, groupName, isWelcomeGroup = false }) => {
   const { user } = useAuth();
   const [message, setMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -101,7 +103,19 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
     <div className="bg-white rounded-xl shadow-sm border border-stone-200 flex flex-col h-[600px]">
       {/* Header */}
       <div className="p-4 border-b border-stone-200">
-        <h2 className="text-xl font-semibold text-stone-800">Discussion Principale</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MessageCircle className="w-6 h-6 text-stone-600" />
+            <h2 className="text-xl font-semibold text-stone-800">
+              Chat du groupe {groupName && `- ${groupName}`}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2 text-green-600">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <Wifi className="w-4 h-4" />
+            <span className="text-sm font-medium">En ligne</span>
+          </div>
+        </div>
       </div>
 
       {/* Welcome Message - Only for welcome groups */}
@@ -121,7 +135,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {isLoading ? (
           <div className="text-center py-8 text-stone-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
@@ -137,25 +151,42 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
           messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${msg.user_id === user.id ? 'justify-end' : 'justify-start'}`}
+              className={`flex items-start gap-3 ${msg.user_id === user.id ? 'flex-row-reverse' : ''}`}
             >
-              <div
-                className={`max-w-[70%] p-3 rounded-lg ${
-                  msg.user_id === user.id
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-stone-100 text-stone-800'
-                }`}
-              >
-                {msg.user_id !== user.id && (
-                  <div className="text-xs font-medium mb-1 opacity-75">
-                    {msg.profiles?.full_name || msg.profiles?.username || `Utilisateur ${msg.user_id.slice(0, 8)}`}
+              {/* Avatar */}
+              <Avatar className="w-10 h-10 flex-shrink-0">
+                <AvatarImage 
+                  src={msg.profiles?.avatar_url} 
+                  alt={msg.profiles?.full_name || msg.profiles?.username || 'User'} 
+                />
+                <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
+                  {(msg.profiles?.full_name || msg.profiles?.username || 'U')[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+
+              {/* Message content */}
+              <div className={`flex flex-col max-w-[70%] ${msg.user_id === user.id ? 'items-end' : 'items-start'}`}>
+                {/* Username and time */}
+                <div className={`flex items-center gap-2 mb-1 ${msg.user_id === user.id ? 'flex-row-reverse' : ''}`}>
+                  <span className="text-sm font-medium text-stone-900">
+                    {msg.profiles?.full_name || msg.profiles?.username || 'Utilisateur'}
+                  </span>
+                  <span className="text-xs text-stone-500">
+                    {formatTime(msg.created_at)}
+                  </span>
+                </div>
+                
+                {/* Message bubble */}
+                <div
+                  className={`px-4 py-3 rounded-2xl max-w-full ${
+                    msg.user_id === user.id
+                      ? 'bg-blue-500 text-white rounded-br-md'
+                      : 'bg-stone-100 text-stone-900 rounded-bl-md'
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                    {msg.content}
                   </div>
-                )}
-                <div className="whitespace-pre-wrap break-words">{msg.content}</div>
-                <div className={`text-xs mt-1 ${
-                  msg.user_id === user.id ? 'text-purple-200' : 'text-stone-500'
-                }`}>
-                  {formatTime(msg.created_at)}
                 </div>
               </div>
             </div>
