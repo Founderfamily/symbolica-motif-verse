@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, MessageCircle } from 'lucide-react';
-import { useGroupMessages, useSendMessage } from '@/hooks/useGroupMessages';
+import { groupChatService } from '@/services/groupChatService';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 interface GroupChatProps {
@@ -16,9 +17,25 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
   const [message, setMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const queryClient = useQueryClient();
   
-  const { data: messages = [], isLoading } = useGroupMessages(groupId);
-  const sendMessageMutation = useSendMessage();
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: ['group-chat-messages', groupId],
+    queryFn: () => groupChatService.getMessages(groupId),
+    enabled: !!groupId,
+  });
+
+  const sendMessageMutation = useMutation({
+    mutationFn: ({ content }: { content: string }) => 
+      groupChatService.sendMessage(groupId, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['group-chat-messages', groupId] });
+    },
+    onError: (error) => {
+      console.error('Error sending message:', error);
+      toast.error('Erreur lors de l\'envoi du message');
+    },
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -33,7 +50,6 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
 
     try {
       await sendMessageMutation.mutateAsync({
-        groupId,
         content: message,
       });
       setMessage('');
@@ -41,8 +57,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
         textareaRef.current.style.height = 'auto';
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Erreur lors de l\'envoi du message');
+      // Error handling is done in the mutation
     }
   };
 
@@ -133,7 +148,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ groupId, isWelcomeGroup = false }
               >
                 {msg.user_id !== user.id && (
                   <div className="text-xs font-medium mb-1 opacity-75">
-                    Utilisateur {msg.user_id.slice(0, 8)}
+                    {msg.profiles?.full_name || msg.profiles?.username || `Utilisateur ${msg.user_id.slice(0, 8)}`}
                   </div>
                 )}
                 <div className="whitespace-pre-wrap break-words">{msg.content}</div>
