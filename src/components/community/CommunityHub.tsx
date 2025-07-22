@@ -57,18 +57,20 @@ const CommunityHub: React.FC = () => {
     }
   ];
 
+  // Groupe de bienvenue (séparé)
+  const welcomeGroup = {
+    id: 'welcome',
+    title: 'Bienvenue - Nouveaux Membres',
+    members: 245,
+    online: 18,
+    topic: 'Présentation et conseils pour débuter',
+    icon: MessageCircle,
+    color: 'purple',
+    isWelcome: true
+  };
+
   // Groupes académiques
   const academiqueGroups = [
-    {
-      id: 'welcome',
-      title: 'Bienvenue - Nouveaux Membres',
-      members: 245,
-      online: 18,
-      topic: 'Présentation et conseils pour débuter',
-      icon: MessageCircle,
-      color: 'purple',
-      isWelcome: true
-    },
     {
       id: 'historiens',
       title: 'Historiens & Archéologues',
@@ -112,6 +114,33 @@ const CommunityHub: React.FC = () => {
       online: 15,
       topic: 'Rituels et symboles chamaniques',
       icon: Compass,
+      color: 'orange'
+    },
+    {
+      id: 'linguistique',
+      title: 'Linguistes & Épigraphes',
+      members: 234,
+      online: 19,
+      topic: 'Déchiffrage de langues anciennes',
+      icon: BookOpen,
+      color: 'blue'
+    },
+    {
+      id: 'anthropologie',
+      title: 'Anthropologues Culturels',
+      members: 178,
+      online: 14,
+      topic: 'Rites initiatiques et symbolisme',
+      icon: Users,
+      color: 'green'
+    },
+    {
+      id: 'archeologie',
+      title: 'Archéologie Expérimentale',
+      members: 156,
+      online: 11,
+      topic: 'Reconstitution d\'outils anciens',
+      icon: Mountain,
       color: 'orange'
     }
   ];
@@ -318,48 +347,94 @@ const CommunityHub: React.FC = () => {
             {/* Section Académique - Discussions */}
             <TabsContent value="academique" className="mt-6">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {academiqueGroups.map(group => (
-                    <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${getColorClasses(group.color)}`}>
-                            <group.icon className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-stone-800">{group.title}</h3>
-                            {group.isWelcome && (
-                              <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mt-1">
-                                Groupe d'accueil
-                              </span>
-                            )}
-                          </div>
+                {/* Groupe Bienvenue - en haut et séparé */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-stone-800 mb-4 flex items-center gap-2">
+                    <MessageCircle className="w-5 h-5 text-purple-600" />
+                    Nouveau sur la plateforme ?
+                  </h3>
+                  <div className="bg-white rounded-xl p-6 border border-purple-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${getColorClasses(welcomeGroup.color)}`}>
+                          <welcomeGroup.icon className="w-5 h-5" />
                         </div>
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                          {group.online} en ligne
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-2 text-sm text-stone-600 mb-4">
-                        <div className="flex justify-between">
-                          <span>Membres</span>
-                          <span className="font-medium">{group.members}</span>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-stone-800">{welcomeGroup.title}</h3>
+                          <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mt-1">
+                            Groupe d'accueil
+                          </span>
                         </div>
                       </div>
-                      
-                      <p className="text-stone-700 text-sm mb-4 italic">
-                        "Sujet actuel : {group.topic}"
-                      </p>
-                      
-                      <Button 
-                        onClick={() => navigate('/community')}
-                        variant="outline"
-                        className="w-full border-stone-300 hover:bg-stone-50"
-                      >
-                        Rejoindre la Discussion
-                      </Button>
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                        {welcomeGroup.online} en ligne
+                      </span>
                     </div>
-                  ))}
+                    
+                    <div className="space-y-2 text-sm text-stone-600 mb-4">
+                      <div className="flex justify-between">
+                        <span>Membres</span>
+                        <span className="font-medium">{welcomeGroup.members}</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-stone-700 text-sm mb-4 italic">
+                      "Sujet actuel : {welcomeGroup.topic}"
+                    </p>
+                    
+                    <Button 
+                      onClick={() => navigate('/community')}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      Rejoindre la Discussion
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Groupes académiques */}
+                <div>
+                  <h3 className="text-lg font-semibold text-stone-800 mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-amber-600" />
+                    Groupes de recherche
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {academiqueGroups.map(group => (
+                      <div key={group.id} className="bg-white rounded-xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${getColorClasses(group.color)}`}>
+                              <group.icon className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-stone-800">{group.title}</h3>
+                            </div>
+                          </div>
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                            {group.online} en ligne
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm text-stone-600 mb-4">
+                          <div className="flex justify-between">
+                            <span>Membres</span>
+                            <span className="font-medium">{group.members}</span>
+                          </div>
+                        </div>
+                        
+                        <p className="text-stone-700 text-sm mb-4 italic">
+                          "Sujet actuel : {group.topic}"
+                        </p>
+                        
+                        <Button 
+                          onClick={() => navigate('/community')}
+                          variant="outline"
+                          className="w-full border-stone-300 hover:bg-stone-50"
+                        >
+                          Rejoindre la Discussion
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </TabsContent>
