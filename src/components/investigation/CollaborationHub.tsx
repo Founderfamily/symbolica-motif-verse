@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CollaborationHubProps {
   quest: TreasureQuest;
@@ -30,24 +31,62 @@ interface CollaborationHubProps {
 
 const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
   const [message, setMessage] = useState('');
-  const [onlineCount, setOnlineCount] = useState(0);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [participants, setParticipants] = useState<any[]>([]);
   const [likes, setLikes] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
-  // Vraies données basées sur la quête
-  const realActivities = quest.clues?.map((clue, index) => ({
-    id: `clue-${index}`,
-    user: 'Équipe',
-    action: `a ajouté l'indice: ${clue.title}`,
-    time: 'Récemment',
-    type: 'clue'
-  })) || [];
-
   useEffect(() => {
-    // Données réelles uniquement
-    setOnlineCount(1); // Utilisateur actuel uniquement
-  }, []);
+    loadActivities();
+    loadParticipants();
+    joinQuest();
+  }, [quest.id]);
+
+  const loadActivities = async () => {
+    // Simuler les vraies activités basées sur la quête
+    const questActivities = quest.clues?.map((clue, index) => ({
+      id: `clue-${index}`,
+      title: `a ajouté l'indice: ${clue.title}`,
+      created_at: new Date().toISOString(),
+      profiles: {
+        username: 'System',
+        full_name: 'Équipe de Recherche',
+        avatar_url: null
+      }
+    })) || [];
+    
+    setActivities(questActivities);
+  };
+
+  const loadParticipants = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Récupérer le profil de l'utilisateur actuel
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, full_name, avatar_url')
+        .eq('id', user.id)
+        .single();
+
+      // Ajouter l'utilisateur actuel aux participants
+      setParticipants([{
+        id: user.id,
+        profiles: profile,
+        last_seen: new Date().toISOString(),
+        status: 'active'
+      }]);
+    } catch (error) {
+      console.error('Error loading participants:', error);
+    }
+  };
+
+  const joinQuest = async () => {
+    // L'utilisateur est automatiquement joint en chargeant ses données
+    console.log('User joined quest:', quest.id);
+  };
 
   const handleLike = (activityId: string) => {
     setLikes(prev => ({
@@ -98,18 +137,28 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
           </div>
 
           <div className="space-y-4">
-            {realActivities.length > 0 ? realActivities.map((activity) => (
+            {activities.length > 0 ? activities.map((activity) => (
               <div key={activity.id} className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:shadow-md transition-shadow">
-                <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-slate-600" />
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 flex items-center justify-center">
+                  {activity.profiles?.avatar_url ? (
+                    <img 
+                      src={activity.profiles.avatar_url} 
+                      alt={activity.profiles.full_name || activity.profiles.username}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Users className="w-4 h-4 text-slate-600" />
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-slate-800">{activity.user}</span>
-                    <span className="text-slate-600">{activity.action}</span>
+                    <span className="font-semibold text-slate-800">
+                      {activity.profiles?.full_name || activity.profiles?.username || 'Utilisateur'}
+                    </span>
+                    <span className="text-slate-600">{activity.title}</span>
                   </div>
                   <div className="text-sm text-slate-500 flex items-center gap-4">
-                    <span>{activity.time}</span>
+                    <span>{new Date(activity.created_at).toLocaleString('fr-FR')}</span>
                     <div className="flex items-center gap-3">
                       <button 
                         onClick={() => handleLike(activity.id)}
@@ -184,12 +233,39 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
           </h3>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-slate-600 text-sm">{onlineCount} explorateur{onlineCount > 1 ? 's' : ''} en ligne</span>
+            <span className="text-slate-600 text-sm">{participants.length} explorateur{participants.length > 1 ? 's' : ''} en ligne</span>
           </div>
-          <div className="text-center p-4 text-slate-500">
-            <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-            <p className="text-sm">Vous êtes connecté</p>
-            <p className="text-xs">D'autres explorateurs apparaîtront ici</p>
+          <div className="space-y-2">
+            {participants.length > 0 ? participants.map((participant) => (
+              <div key={participant.id} className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
+                <div className="relative">
+                  <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-300 flex items-center justify-center">
+                    {participant.profiles?.avatar_url ? (
+                      <img 
+                        src={participant.profiles.avatar_url} 
+                        alt={participant.profiles.full_name || participant.profiles.username}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Users className="w-3 h-3 text-slate-600" />
+                    )}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-slate-800 text-sm">
+                    {participant.profiles?.full_name || participant.profiles?.username || 'Utilisateur'}
+                  </div>
+                  <div className="text-slate-500 text-xs">En ligne</div>
+                </div>
+              </div>
+            )) : (
+              <div className="text-center p-4 text-slate-500">
+                <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                <p className="text-sm">Vous êtes le premier</p>
+                <p className="text-xs">D'autres explorateurs apparaîtront ici</p>
+              </div>
+            )}
           </div>
         </Card>
 

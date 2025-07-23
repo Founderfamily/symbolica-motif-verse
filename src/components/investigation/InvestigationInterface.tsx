@@ -77,12 +77,12 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
                 <p className="text-slate-600 text-sm">
                   <span className="inline-flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    156 explorateurs connectés
+                    Recherche collaborative
                   </span>
                   <span className="mx-3">•</span>
                   <span className="inline-flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    Recherche active
+                    Assistant IA actif
                   </span>
                 </p>
               </div>
@@ -106,72 +106,72 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
             <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Eye className="w-4 h-4 text-slate-600" />
-                <span className="text-slate-700 text-sm font-medium">Preuves</span>
+                <span className="text-slate-700 text-sm font-medium">Indices</span>
               </div>
-              <div className="text-xl font-bold text-slate-800">87</div>
-              <div className="text-green-600 text-xs flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +5 aujourd'hui
+              <div className="text-xl font-bold text-slate-800">{quest.clues?.length || 0}</div>
+              <div className="text-slate-600 text-xs flex items-center gap-1">
+                <FileText className="w-3 h-3" />
+                Disponibles
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="w-4 h-4 text-slate-600" />
-                <span className="text-slate-700 text-sm font-medium">Théories IA</span>
+                <span className="text-slate-700 text-sm font-medium">Type</span>
               </div>
-              <div className="text-xl font-bold text-slate-800">23</div>
+              <div className="text-sm font-bold text-slate-800 capitalize">{quest.quest_type.replace('_', ' ')}</div>
               <div className="text-slate-600 text-xs flex items-center gap-1">
-                <Zap className="w-3 h-3" />
-                3 vérifiées
+                <Target className="w-3 h-3" />
+                {quest.difficulty_level}
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Archive className="w-4 h-4 text-slate-600" />
-                <span className="text-slate-700 text-sm font-medium">Archives</span>
+                <span className="text-slate-700 text-sm font-medium">Statut</span>
               </div>
-              <div className="text-xl font-bold text-slate-800">32</div>
+              <div className="text-sm font-bold text-slate-800 capitalize">{quest.status}</div>
               <div className="text-slate-600 text-xs flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                Historiques
+                En cours
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-4 h-4 text-slate-600" />
-                <span className="text-slate-700 text-sm font-medium">Pistes Chaudes</span>
+                <span className="text-slate-700 text-sm font-medium">Symboles</span>
               </div>
-              <div className="text-xl font-bold text-slate-800">12</div>
-              <div className="text-red-600 text-xs flex items-center gap-1">
-                <Flame className="w-3 h-3" />
-                Priorité haute
+              <div className="text-xl font-bold text-slate-800">{quest.target_symbols?.length || 0}</div>
+              <div className="text-slate-600 text-xs flex items-center gap-1">
+                <Star className="w-3 h-3" />
+                Cibles
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <MessageCircle className="w-4 h-4 text-slate-600" />
-                <span className="text-slate-700 text-sm font-medium">Discussions</span>
+                <span className="text-slate-700 text-sm font-medium">Collaboration</span>
               </div>
-              <div className="text-xl font-bold text-slate-800">234</div>
+              <div className="text-xl font-bold text-slate-800">Actif</div>
               <div className="text-green-600 text-xs flex items-center gap-1">
                 <Play className="w-3 h-3" />
-                Live actif
+                En temps réel
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="w-4 h-4 text-slate-600" />
-                <span className="text-slate-700 text-sm font-medium">IA Confiance</span>
+                <span className="text-slate-700 text-sm font-medium">IA</span>
               </div>
-              <div className="text-xl font-bold text-slate-800">94%</div>
+              <div className="text-xl font-bold text-slate-800">Prêt</div>
               <div className="text-slate-600 text-xs flex items-center gap-1">
                 <Star className="w-3 h-3" />
-                Très élevée
+                Assistant actif
               </div>
             </div>
           </div>
