@@ -215,14 +215,15 @@ const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
             </Button>
           </Link>
           
-          <Button className={`flex-1 ${
-            quest.quest_type === 'unfound_treasure' 
-              ? 'bg-red-600 hover:bg-red-700 text-white' 
-              : 'bg-stone-800 hover:bg-stone-900 text-amber-100'
-          }`}>
-            <Plus className="w-4 h-4 mr-2" />
-            {quest.quest_type === 'unfound_treasure' ? 'Ajouter Indice' : 'Contribuer'}
-          </Button>
+          <ClueSubmissionDialog 
+            questId={quest.id} 
+            questType={quest.quest_type}
+            className={`flex-1 ${
+              quest.quest_type === 'unfound_treasure' 
+                ? 'bg-red-600 hover:bg-red-700 text-white' 
+                : 'bg-amber-600 hover:bg-amber-700 text-white'
+            }`}
+          />
         </div>
       </div>
     </Card>
