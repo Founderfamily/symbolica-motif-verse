@@ -39,7 +39,7 @@ import MapTab from './MapTab';
 import DiscussionsTab from './DiscussionsTab';
 import TheoriesTab from './TheoriesTab';
 import AIAnalysisInterface from './AIAnalysisInterface';
-import CollaborationHub from './CollaborationHub';
+import { CollaborationHub } from './CollaborationHub';
 import { TreasureQuest } from '@/types/quests';
 import ContributeEvidenceDialog from '../quests/ContributeEvidenceDialog';
 
