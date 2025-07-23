@@ -254,18 +254,23 @@ const QuestDetailPage = () => {
                   
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
-                      <Trophy className="w-5 h-5 text-amber-600" />
+                      <Users className="w-5 h-5 text-green-600" />
                       <div>
-                        <div className="text-sm text-stone-600">Récompense</div>
-                        <div className="font-semibold text-stone-800">{quest.reward_points} points</div>
+                        <div className="text-sm text-stone-600">Collaboration</div>
+                        <div className="font-semibold text-stone-800">
+                          {quest.collaboration_type === 'open' ? 'Ouverte à tous' : 
+                           quest.collaboration_type === 'restricted' ? 'Limitée' : 'Experts uniquement'}
+                        </div>
                       </div>
                     </div>
                     
                     <div className="flex items-center gap-3">
-                      <Users className="w-5 h-5 text-stone-600" />
+                      <Trophy className="w-5 h-5 text-blue-600" />
                       <div>
-                        <div className="text-sm text-stone-600">Participants</div>
-                        <div className="font-semibold text-stone-800">{quest.min_participants}-{quest.max_participants}</div>
+                        <div className="text-sm text-stone-600">Recherche IA</div>
+                        <div className="font-semibold text-stone-800">
+                          {quest.ai_research_enabled ? 'Activée' : 'Désactivée'}
+                        </div>
                       </div>
                     </div>
                     
@@ -444,14 +449,22 @@ const QuestDetailPage = () => {
                           )}
                           
                           <div className="flex items-center gap-4 text-sm text-stone-500">
-                            <span className="flex items-center gap-1">
-                              <Trophy className="w-4 h-4" />
-                              {clue.points} points
-                            </span>
+                            {clue.credibility_score && (
+                              <span className="flex items-center gap-1">
+                                <Trophy className="w-4 h-4" />
+                                Fiabilité: {Math.round(clue.credibility_score * 100)}%
+                              </span>
+                            )}
                             {clue.location && (
                               <span className="flex items-center gap-1">
                                 <MapPin className="w-4 h-4" />
                                 Localisation requise
+                              </span>
+                            )}
+                            {clue.ai_suggested && (
+                              <span className="flex items-center gap-1 text-blue-600">
+                                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                IA
                               </span>
                             )}
                           </div>

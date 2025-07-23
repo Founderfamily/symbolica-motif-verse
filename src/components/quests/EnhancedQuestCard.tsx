@@ -24,6 +24,8 @@ import {
   Eye
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
+import QuestJoinDialog from './QuestJoinDialog';
+import ClueSubmissionDialog from './ClueSubmissionDialog';
 import { getQuestTypeLabel, getDifficultyLabel, getQuestCluesCount } from '@/utils/questUtils';
 
 interface EnhancedQuestCardProps {

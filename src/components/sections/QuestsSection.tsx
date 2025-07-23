@@ -38,9 +38,9 @@ const QuestsSection = () => {
 
   const getQuestTypeIcon = (questType: string) => {
     switch (questType) {
-      case 'templar': return <Crown className="h-4 w-4" />;
-      case 'lost_civilization': return <Compass className="h-4 w-4" />;
-      case 'grail': return <Map className="h-4 w-4" />;
+      case 'myth': return <Crown className="h-4 w-4" />;
+      case 'found_treasure': return <Map className="h-4 w-4" />;
+      case 'unfound_treasure': return <Compass className="h-4 w-4" />;
       default: return <Map className="h-4 w-4" />;
     }
   };
@@ -152,13 +152,13 @@ const QuestsSection = () => {
 
                     <div className="space-y-3 mb-4">
                        <div className="flex items-center justify-between text-sm">
-                         <div className="flex items-center gap-1 text-stone-600">
-                           <Crown className="h-3 w-3" />
-                           <span>{quest.reward_points ?? 0} <I18nText translationKey="quests.ui.points">points</I18nText></span>
-                         </div>
-                         <div className="flex items-center gap-1 text-stone-600">
+                         <div className="flex items-center gap-1 text-green-600">
                            <Users className="h-3 w-3" />
-                           <span>{quest.max_participants ?? '-'} <I18nText translationKey={quest.max_participants === 1 ? "quests.ui.participant" : "quests.ui.participants"}>{quest.max_participants === 1 ? 'participant' : 'participants'}</I18nText></span>
+                           <span>Collaboration {quest.collaboration_type === 'open' ? 'Ouverte' : 'Limitée'}</span>
+                         </div>
+                         <div className="flex items-center gap-1 text-blue-600">
+                           <Compass className="h-3 w-3" />
+                           <span>{quest.ai_research_enabled ? 'IA Activée' : 'Manuel'}</span>
                          </div>
                        </div>
                       
@@ -174,8 +174,17 @@ const QuestsSection = () => {
                       className="w-full bg-stone-800 hover:bg-stone-900 text-amber-100"
                       onClick={() => navigate(`/quests/${quest.id}`)}
                     >
-                      <Map className="w-4 h-4 mr-2" />
-                      <I18nText translationKey="quests.join">Rejoindre la quête</I18nText>
+                      {quest.quest_type === 'unfound_treasure' ? (
+                        <>
+                          <Compass className="w-4 h-4 mr-2" />
+                          <I18nText translationKey="quests.join">Rejoindre la recherche</I18nText>
+                        </>
+                      ) : (
+                        <>
+                          <Map className="w-4 h-4 mr-2" />
+                          <I18nText translationKey="quests.explore">Explorer</I18nText>
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>

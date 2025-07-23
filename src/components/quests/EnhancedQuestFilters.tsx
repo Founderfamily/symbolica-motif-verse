@@ -169,10 +169,9 @@ const EnhancedQuestFilters: React.FC<EnhancedQuestFiltersProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les types</SelectItem>
-              <SelectItem value="templar">🏰 Templiers</SelectItem>
-              <SelectItem value="lost_civilization">🏛️ Civilisation Perdue</SelectItem>
-              <SelectItem value="grail">👑 Quête du Graal</SelectItem>
-              <SelectItem value="custom">⚡ Personnalisée</SelectItem>
+              <SelectItem value="myth">📜 Mythes & Légendes</SelectItem>
+              <SelectItem value="found_treasure">💎 Trésors Découverts</SelectItem>
+              <SelectItem value="unfound_treasure">🗝️ Trésors à Trouver</SelectItem>
             </SelectContent>
           </Select>
 

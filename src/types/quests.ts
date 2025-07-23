@@ -4,20 +4,23 @@ export interface TreasureQuest {
   title: string;
   description?: string;
   story_background?: string;
-  quest_type: 'myth' | 'found_treasure' | 'unfound_treasure' | 'custom';
+  quest_type: 'myth' | 'found_treasure' | 'unfound_treasure';
   difficulty_level: 'beginner' | 'intermediate' | 'expert' | 'master';
-  max_participants: number;
-  min_participants: number;
   status: 'upcoming' | 'active' | 'completed' | 'cancelled';
   start_date?: string;
   end_date?: string;
-  reward_points: number;
   special_rewards: any[];
   clues: QuestClue[];
   target_symbols: string[];
   created_by?: string;
   created_at: string;
   updated_at: string;
+  // Nouvelles propriétés pour la collaboration IA
+  ai_research_enabled?: boolean;
+  collaboration_type?: 'open' | 'restricted' | 'expert_only';
+  clue_submission_enabled?: boolean;
+  ai_clue_suggestions?: any[];
+  research_status?: 'active' | 'solved' | 'paused' | 'archived';
   translations: {
     en: any;
     fr: any;
@@ -37,8 +40,12 @@ export interface QuestClue {
   symbol_reference?: string;
   validation_type: 'location' | 'symbol' | 'photo' | 'code';
   validation_data: any;
-  points: number;
   unlock_condition?: string;
+  // Nouvelles propriétés pour la collaboration
+  submitted_by?: string;
+  verified_by?: string;
+  credibility_score?: number;
+  ai_suggested?: boolean;
 }
 
 export interface QuestParticipant {

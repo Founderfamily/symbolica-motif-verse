@@ -49,7 +49,8 @@ function createValidCluesFallback(originalValue: any): QuestClue[] {
       location: { latitude: 0, longitude: 0, radius: 100 },
       validation_type: 'symbol' as const,
       validation_data: {},
-      points: 10
+      credibility_score: 0.8,
+      ai_suggested: true
     }
   ];
 }

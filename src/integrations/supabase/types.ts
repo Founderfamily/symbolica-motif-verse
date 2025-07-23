@@ -3667,17 +3667,19 @@ export type Database = {
       }
       treasure_quests: {
         Row: {
+          ai_clue_suggestions: Json | null
+          ai_research_enabled: boolean | null
+          clue_submission_enabled: boolean | null
           clues: Json | null
+          collaboration_type: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
           difficulty_level: string
           end_date: string | null
           id: string
-          max_participants: number | null
-          min_participants: number | null
           quest_type: string
-          reward_points: number | null
+          research_status: string | null
           special_rewards: Json | null
           start_date: string | null
           status: string
@@ -3688,17 +3690,19 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ai_clue_suggestions?: Json | null
+          ai_research_enabled?: boolean | null
+          clue_submission_enabled?: boolean | null
           clues?: Json | null
+          collaboration_type?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           difficulty_level?: string
           end_date?: string | null
           id?: string
-          max_participants?: number | null
-          min_participants?: number | null
           quest_type?: string
-          reward_points?: number | null
+          research_status?: string | null
           special_rewards?: Json | null
           start_date?: string | null
           status?: string
@@ -3709,17 +3713,19 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ai_clue_suggestions?: Json | null
+          ai_research_enabled?: boolean | null
+          clue_submission_enabled?: boolean | null
           clues?: Json | null
+          collaboration_type?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           difficulty_level?: string
           end_date?: string | null
           id?: string
-          max_participants?: number | null
-          min_participants?: number | null
           quest_type?: string
-          reward_points?: number | null
+          research_status?: string | null
           special_rewards?: Json | null
           start_date?: string | null
           status?: string
