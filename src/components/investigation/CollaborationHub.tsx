@@ -1,80 +1,124 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   MessageCircle,
   Users,
-  Flame,
-  TrendingUp,
-  Clock,
   Heart,
-  Share2,
   Camera,
-  FileText,
   Send,
-  Paperclip,
-  Smile,
-  MoreHorizontal,
   Zap,
-  Star,
+  Brain,
+  Sparkles,
+  Activity,
+  Map,
   Eye,
   ThumbsUp
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { useQuestChatSimple } from '@/hooks/useQuestChatSimple';
+import { useQuestActivitiesSimple } from '@/hooks/useQuestActivitiesSimple';
+import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
+import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 
 interface CollaborationHubProps {
   quest: TreasureQuest;
 }
 
-const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
+export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
   const [message, setMessage] = useState('');
-  const [activities, setActivities] = useState<any[]>([]);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [aiAnalysisOpen, setAiAnalysisOpen] = useState(false);
+  const [currentAnalysis, setCurrentAnalysis] = useState<string>('');
   const [likes, setLikes] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, number>>({});
-  const { toast } = useToast();
 
-  useEffect(() => {
-    loadActivities();
-    loadParticipants();
-    joinQuest();
-  }, [quest.id]);
+  // Hooks pour les données en temps réel (versions simplifiées)
+  const { messages, sendMessage, isSending } = useQuestChatSimple(quest.id);
+  const { activities, addActivity } = useQuestActivitiesSimple(quest.id);
+  const { participants } = useQuestParticipantsSimple(quest.id);
+  const aiAnalysis = useAIAnalysis();
 
-  const loadActivities = async () => {
-    // Pour l'instant, pas d'activités - suppression des fausses données
-    setActivities([]);
+  const handleSendMessage = async () => {
+    if (!message.trim()) return;
+    
+    // Envoyer le message
+    sendMessage(message);
+    
+    // Ajouter une activité correspondante
+    addActivity({ 
+      type: 'message', 
+      data: { content: message.substring(0, 50) + '...' } 
+    });
+    
+    setMessage('');
   };
 
-  const loadParticipants = async () => {
+  const handleAIAnalysis = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Récupérer le profil de l'utilisateur actuel
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username, full_name, avatar_url')
-        .eq('id', user.id)
-        .single();
-
-      // Afficher seulement l'utilisateur actuel pour l'instant
-      setParticipants([{
-        id: user.id,
-        profiles: profile,
-        last_seen: new Date().toISOString(),
-        status: 'active'
-      }]);
+      const result = await aiAnalysis.mutateAsync({ 
+        questId: quest.id, 
+        analysisType: 'general' 
+      });
+      setCurrentAnalysis(result.analysis);
+      setAiAnalysisOpen(true);
+      
+      // Ajouter une activité
+      addActivity({ 
+        type: 'ai_analysis', 
+        data: { analysis_type: 'general' } 
+      });
     } catch (error) {
-      console.error('Error loading participants:', error);
+      console.error('Erreur analyse IA:', error);
     }
   };
 
-  const joinQuest = async () => {
-    // Pas de base de données de participants pour l'instant
-    console.log('User joined quest:', quest.id);
+  const handleGenerateTheory = async () => {
+    try {
+      const result = await aiAnalysis.mutateAsync({ 
+        questId: quest.id, 
+        analysisType: 'theory' 
+      });
+      setCurrentAnalysis(result.analysis);
+      setAiAnalysisOpen(true);
+      
+      // Ajouter une activité
+      addActivity({ 
+        type: 'theory', 
+        data: { theory_type: 'ai_generated' } 
+      });
+    } catch (error) {
+      console.error('Erreur génération théorie:', error);
+    }
+  };
+
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatActivityContent = (activity: any) => {
+    switch (activity.activity_type) {
+      case 'message':
+        return `a écrit un message dans le chat`;
+      case 'evidence':
+        return `a soumis une preuve`;
+      case 'theory':
+        return `a créé une nouvelle théorie`;
+      case 'ai_analysis':
+        return `a lancé une analyse IA`;
+      default:
+        return `a effectué une action`;
+    }
   };
 
   const handleLike = (activityId: string) => {
@@ -99,215 +143,283 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
     });
   };
 
-  const handleSendMessage = async () => {
-    if (!message.trim()) return;
-    
-    toast({
-      title: "✉️ Message envoyé",
-      description: "Votre message a été partagé",
-    });
-    setMessage('');
-  };
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Live Activity Feed */}
-      <div className="lg:col-span-2 space-y-4">
-        <Card className="p-6 bg-white border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <Flame className="w-5 h-5 text-slate-600" />
-              Activité en Direct
-            </h3>
-            <Badge className="bg-green-100 text-green-800">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              LIVE
+      {/* Live Activity Feed and Chat */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Live Activity Feed */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Flux d'Activité en Direct
+            </CardTitle>
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              En direct
             </Badge>
-          </div>
-
-          <div className="space-y-4">
-            {activities.length > 0 ? activities.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:shadow-md transition-shadow">
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 flex items-center justify-center">
-                  {activity.profiles?.avatar_url ? (
-                    <img 
-                      src={activity.profiles.avatar_url} 
-                      alt={activity.profiles.full_name || activity.profiles.username}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Users className="w-4 h-4 text-slate-600" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-slate-800">
-                      {activity.profiles?.full_name || activity.profiles?.username || 'Utilisateur'}
-                    </span>
-                    <span className="text-slate-600">{activity.title}</span>
-                  </div>
-                  <div className="text-sm text-slate-500 flex items-center gap-4">
-                    <span>{new Date(activity.created_at).toLocaleString('fr-FR')}</span>
-                    <div className="flex items-center gap-3">
-                      <button 
-                        onClick={() => handleLike(activity.id)}
-                        className="flex items-center gap-1 hover:text-slate-700 transition-colors"
-                      >
-                        <ThumbsUp className="w-3 h-3" />
-                        {likes[activity.id] || 0}
-                      </button>
-                      <button 
-                        onClick={() => handleComment(activity.id)}
-                        className="flex items-center gap-1 hover:text-slate-700 transition-colors"
-                      >
-                        <MessageCircle className="w-3 h-3" />
-                        {comments[activity.id] || 0}
-                      </button>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-80">
+              <div className="space-y-4">
+                {activities.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    Aucune activité récente. Soyez le premier à contribuer !
+                  </p>
+                ) : (
+                  activities.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg bg-background border">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={activity.profiles?.avatar_url} />
+                        <AvatarFallback>
+                          {activity.profiles?.full_name?.[0] || activity.profiles?.username?.[0] || 'A'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-medium">{activity.profiles?.full_name || activity.profiles?.username}</span>
+                          <span className="text-muted-foreground">{formatActivityContent(activity)}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {formatTime(activity.created_at)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 mt-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleLike(activity.id)}
+                            className="h-8 px-2 text-muted-foreground hover:text-red-500"
+                          >
+                            <Heart className="h-4 w-4 mr-1" />
+                            {likes[activity.id] || 0}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleComment(activity.id)}
+                            className="h-8 px-2 text-muted-foreground hover:text-blue-500"
+                          >
+                            <MessageCircle className="h-4 w-4 mr-1" />
+                            {comments[activity.id] || 0}
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  ))
+                )}
               </div>
-            )) : (
-              <div className="text-center p-8 text-slate-500">
-                <FileText className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-                <p>Aucune activité récente</p>
-                <p className="text-sm">Les interactions apparaîtront ici</p>
-              </div>
-            )}
-          </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
 
-          {/* Quick Chat */}
-          <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
-            <h4 className="font-semibold text-slate-800 mb-3">Chat Rapide</h4>
+        {/* Real-time Chat */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              Chat en Temps Réel
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Messages */}
+            <ScrollArea className="h-64">
+              <div className="space-y-3">
+                {messages.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    Aucun message. Commencez la conversation !
+                  </p>
+                ) : (
+                  messages.map((msg) => (
+                    <div key={msg.id} className="flex items-start gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={msg.profiles?.avatar_url} />
+                        <AvatarFallback>
+                          {msg.profiles?.full_name?.[0] || msg.profiles?.username?.[0] || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">
+                            {msg.profiles?.full_name || msg.profiles?.username}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatTime(msg.created_at)}
+                          </span>
+                        </div>
+                        <p className="text-sm mt-1">{msg.content}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+            
+            {/* Message Input */}
             <div className="flex gap-2">
-              <input
-                type="text"
+              <Textarea
+                placeholder="Écrivez votre message..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Partager une idée, poser une question..."
-                className="flex-1 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+                className="flex-1 min-h-[40px] max-h-[120px]"
+                rows={1}
               />
               <Button 
-                onClick={handleSendMessage}
-                className="bg-slate-800 hover:bg-slate-900 text-white"
+                onClick={handleSendMessage} 
+                disabled={!message.trim() || isSending}
+                size="sm"
               >
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex items-center gap-2 mt-2">
-              <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
-                <Paperclip className="w-4 h-4 mr-1" />
-                Fichier
-              </Button>
-              <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
-                <Camera className="w-4 h-4 mr-1" />
-                Photo
-              </Button>
-              <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
-                <Zap className="w-4 h-4 mr-1" />
-                IA
-              </Button>
-            </div>
-          </div>
+          </CardContent>
         </Card>
       </div>
 
-      {/* Sidebar - Online Users & Tools */}
-      <div className="space-y-4">
-        <Card className="p-4 bg-white border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Users className="w-5 h-5 text-slate-600" />
-            Explorateurs Connectés
-          </h3>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-slate-600 text-sm">{participants.length} explorateur{participants.length > 1 ? 's' : ''} en ligne</span>
-          </div>
-          <div className="space-y-2">
-            {participants.length > 0 ? participants.map((participant) => (
-              <div key={participant.id} className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
-                <div className="relative">
-                  <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-300 flex items-center justify-center">
-                    {participant.profiles?.avatar_url ? (
-                      <img 
-                        src={participant.profiles.avatar_url} 
-                        alt={participant.profiles.full_name || participant.profiles.username}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <Users className="w-3 h-3 text-slate-600" />
-                    )}
+      {/* Sidebar */}
+      <div className="lg:col-span-1 space-y-6">
+        {/* Connected Explorers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Explorateurs Connectés ({participants.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {participants.length === 0 ? (
+                <p className="text-muted-foreground text-sm">Aucun explorateur connecté</p>
+              ) : (
+                participants.map((participant) => (
+                  <div key={participant.id} className="flex items-center gap-3">
+                    <div className="relative">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={participant.profiles?.avatar_url} />
+                        <AvatarFallback>
+                          {participant.profiles?.full_name?.[0] || participant.profiles?.username?.[0] || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${
+                        participant.status === 'active' ? 'bg-green-500' : 
+                        participant.status === 'away' ? 'bg-yellow-500' : 'bg-gray-500'
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {participant.profiles?.full_name || participant.profiles?.username || 'Utilisateur'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {participant.status === 'active' ? 'En ligne' : 
+                         participant.status === 'away' ? 'Absent' : 'Hors ligne'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-slate-800 text-sm">
-                    {participant.profiles?.full_name || participant.profiles?.username || 'Utilisateur'}
-                  </div>
-                  <div className="text-slate-500 text-xs">En ligne</div>
-                </div>
-              </div>
-            )) : (
-              <div className="text-center p-4 text-slate-500">
-                <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                <p className="text-sm">Vous êtes le premier</p>
-                <p className="text-xs">D'autres explorateurs apparaîtront ici</p>
-              </div>
-            )}
-          </div>
+                ))
+              )}
+            </div>
+          </CardContent>
         </Card>
 
-        <Card className="p-4 bg-white border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4">Actions Rapides</h3>
-          <div className="space-y-2">
-            <Button className="w-full bg-slate-800 hover:bg-slate-900 text-white">
-              <Camera className="w-4 h-4 mr-2" />
-              Partager Preuve
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Actions IA</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button 
+              className="w-full justify-start" 
+              variant="outline"
+              onClick={handleAIAnalysis}
+              disabled={aiAnalysis.isPending}
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              {aiAnalysis.isPending ? 'Analyse en cours...' : 'Analyse IA'}
             </Button>
-            <Button className="w-full bg-slate-800 hover:bg-slate-900 text-white">
-              <Zap className="w-4 h-4 mr-2" />
-              Analyser avec IA
+            <Button 
+              className="w-full justify-start" 
+              variant="outline"
+              onClick={handleGenerateTheory}
+              disabled={aiAnalysis.isPending}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              {aiAnalysis.isPending ? 'Génération...' : 'Générer Théorie IA'}
             </Button>
-            <Button className="w-full bg-slate-800 hover:bg-slate-900 text-white">
-              <FileText className="w-4 h-4 mr-2" />
-              Nouvelle Théorie
+            <Button className="w-full justify-start" variant="outline">
+              <Camera className="h-4 w-4 mr-2" />
+              Partager une Preuve
             </Button>
-          </div>
+            <Button className="w-full justify-start" variant="outline">
+              <Map className="h-4 w-4 mr-2" />
+              Voir la Carte
+            </Button>
+          </CardContent>
         </Card>
 
-        <Card className="p-4 bg-white border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4">Progrès de la Quête</h3>
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-600">Indices disponibles</span>
-                <span className="text-slate-800 font-semibold">{quest.clues?.length || 0}</span>
+        {/* Quest Progress */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Progression de la Quête</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Indices disponibles</span>
+                <Badge variant="secondary">{quest.clues?.length || 0}</Badge>
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-2">
-                <div 
-                  className="bg-slate-600 h-2 rounded-full" 
-                  style={{ width: quest.clues?.length ? '100%' : '0%' }}
-                ></div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Statut</span>
+                <Badge 
+                  variant={quest.status === 'active' ? 'default' : 'secondary'}
+                >
+                  {quest.status === 'active' ? 'Actif' : quest.status}
+                </Badge>
               </div>
+              {quest.clues && quest.clues.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-sm font-medium">Derniers indices :</span>
+                  {quest.clues.slice(0, 3).map((clue, index) => (
+                    <div key={index} className="text-sm p-2 bg-muted rounded">
+                      <span className="font-medium">{clue.title}</span>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {clue.description?.substring(0, 100)}...
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-600">Statut</span>
-                <span className="text-slate-800 font-semibold">{quest.status}</span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2">
-                <div 
-                  className="bg-slate-600 h-2 rounded-full" 
-                  style={{ width: quest.status === 'active' ? '50%' : '0%' }}
-                ></div>
-              </div>
-            </div>
-          </div>
+          </CardContent>
         </Card>
       </div>
+
+      {/* AI Analysis Dialog */}
+      <Dialog open={aiAnalysisOpen} onOpenChange={setAiAnalysisOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5" />
+              Analyse IA de la Quête
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
+            <div className="space-y-4 pr-4">
+              {currentAnalysis ? (
+                <div className="prose prose-sm max-w-none">
+                  {currentAnalysis.split('\n').map((paragraph, index) => (
+                    <p key={index} className="mb-3 text-sm leading-relaxed">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">Aucune analyse disponible</p>
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default CollaborationHub;
