@@ -2,64 +2,38 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
-  MessageCircle,
-  Users,
   Heart,
   Camera,
-  Send,
-  Zap,
   Brain,
   Sparkles,
   Activity,
   Map,
-  Eye,
-  ThumbsUp
+  Users,
+  MessageCircle
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { toast } from '@/hooks/use-toast';
-import { useQuestChatSimple } from '@/hooks/useQuestChatSimple';
-import { useQuestActivitiesSimple } from '@/hooks/useQuestActivitiesSimple';
 import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
+import QuestChat from './QuestChat';
 
 interface CollaborationHubProps {
   quest: TreasureQuest;
 }
 
 export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
-  const [message, setMessage] = useState('');
   const [aiAnalysisOpen, setAiAnalysisOpen] = useState(false);
   const [currentAnalysis, setCurrentAnalysis] = useState<string>('');
-  const [likes, setLikes] = useState<Record<string, number>>({});
-  const [comments, setComments] = useState<Record<string, number>>({});
+  const [activities] = useState<any[]>([]); // Sera implémenté plus tard
 
-  // Hooks pour les données en temps réel (versions simplifiées)
-  const { messages, sendMessage, isSending } = useQuestChatSimple(quest.id);
-  const { activities, addActivity } = useQuestActivitiesSimple(quest.id);
+  // Hooks pour les données en temps réel
   const { participants } = useQuestParticipantsSimple(quest.id);
   const aiAnalysis = useAIAnalysis();
-
-  const handleSendMessage = async () => {
-    if (!message.trim()) return;
-    
-    // Envoyer le message
-    sendMessage(message);
-    
-    // Ajouter une activité correspondante
-    addActivity({ 
-      type: 'message', 
-      data: { content: message.substring(0, 50) + '...' } 
-    });
-    
-    setMessage('');
-  };
 
   const handleAIAnalysis = async () => {
     try {
@@ -69,12 +43,6 @@ export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => 
       });
       setCurrentAnalysis(result.analysis);
       setAiAnalysisOpen(true);
-      
-      // Ajouter une activité
-      addActivity({ 
-        type: 'ai_analysis', 
-        data: { analysis_type: 'general' } 
-      });
     } catch (error) {
       console.error('Erreur analyse IA:', error);
     }
@@ -88,12 +56,6 @@ export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => 
       });
       setCurrentAnalysis(result.analysis);
       setAiAnalysisOpen(true);
-      
-      // Ajouter une activité
-      addActivity({ 
-        type: 'theory', 
-        data: { theory_type: 'ai_generated' } 
-      });
     } catch (error) {
       console.error('Erreur génération théorie:', error);
     }
@@ -103,43 +65,6 @@ export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => 
     return new Date(timestamp).toLocaleTimeString('fr-FR', {
       hour: '2-digit',
       minute: '2-digit'
-    });
-  };
-
-  const formatActivityContent = (activity: any) => {
-    switch (activity.activity_type) {
-      case 'message':
-        return `a écrit un message dans le chat`;
-      case 'evidence':
-        return `a soumis une preuve`;
-      case 'theory':
-        return `a créé une nouvelle théorie`;
-      case 'ai_analysis':
-        return `a lancé une analyse IA`;
-      default:
-        return `a effectué une action`;
-    }
-  };
-
-  const handleLike = (activityId: string) => {
-    setLikes(prev => ({
-      ...prev,
-      [activityId]: (prev[activityId] || 0) + 1
-    }));
-    toast({
-      title: "👍 J'aime ajouté",
-      description: "Votre réaction a été enregistrée",
-    });
-  };
-
-  const handleComment = (activityId: string) => {
-    setComments(prev => ({
-      ...prev,
-      [activityId]: (prev[activityId] || 0) + 1
-    }));
-    toast({
-      title: "💬 Commentaire ajouté",
-      description: "Votre commentaire a été publié",
     });
   };
 
@@ -160,7 +85,7 @@ export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => 
             </Badge>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-80">
+            <ScrollArea className="h-60">
               <div className="space-y-4">
                 {activities.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
@@ -178,7 +103,7 @@ export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 text-sm">
                           <span className="font-medium">{activity.profiles?.full_name || activity.profiles?.username}</span>
-                          <span className="text-muted-foreground">{formatActivityContent(activity)}</span>
+                          <span className="text-muted-foreground">{activity.title}</span>
                           <span className="text-xs text-muted-foreground ml-auto">
                             {formatTime(activity.created_at)}
                           </span>
@@ -187,20 +112,18 @@ export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => 
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleLike(activity.id)}
                             className="h-8 px-2 text-muted-foreground hover:text-red-500"
                           >
                             <Heart className="h-4 w-4 mr-1" />
-                            {likes[activity.id] || 0}
+                            0
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleComment(activity.id)}
                             className="h-8 px-2 text-muted-foreground hover:text-blue-500"
                           >
                             <MessageCircle className="h-4 w-4 mr-1" />
-                            {comments[activity.id] || 0}
+                            0
                           </Button>
                         </div>
                       </div>
@@ -212,68 +135,10 @@ export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => 
           </CardContent>
         </Card>
 
-        {/* Real-time Chat */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              Chat en Temps Réel
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Messages */}
-            <ScrollArea className="h-64">
-              <div className="space-y-3">
-                {messages.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    Aucun message. Commencez la conversation !
-                  </p>
-                ) : (
-                  messages.map((msg) => (
-                    <div key={msg.id} className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.profiles?.avatar_url} />
-                        <AvatarFallback>
-                          {msg.profiles?.full_name?.[0] || msg.profiles?.username?.[0] || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">
-                            {msg.profiles?.full_name || msg.profiles?.username}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {formatTime(msg.created_at)}
-                          </span>
-                        </div>
-                        <p className="text-sm mt-1">{msg.content}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </ScrollArea>
-            
-            {/* Message Input */}
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Écrivez votre message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
-                className="flex-1 min-h-[40px] max-h-[120px]"
-                rows={1}
-              />
-              <Button 
-                onClick={handleSendMessage} 
-                disabled={!message.trim() || isSending}
-                size="sm"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <Separator />
+
+        {/* Quest Chat - Composant séparé */}
+        <QuestChat questId={quest.id} questName={quest.title} />
       </div>
 
       {/* Sidebar */}
@@ -422,4 +287,3 @@ export const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => 
     </div>
   );
 };
-
