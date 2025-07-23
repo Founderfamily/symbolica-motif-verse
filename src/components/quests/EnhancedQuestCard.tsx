@@ -20,7 +20,8 @@ import {
   Globe,
   Building,
   Landmark,
-  Navigation
+  Navigation,
+  Eye
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { getQuestTypeLabel, getDifficultyLabel, getQuestCluesCount } from '@/utils/questUtils';
@@ -42,7 +43,7 @@ const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
   const questTypeIcons = {
     myth: Scroll,
     found_treasure: Trophy,
-    unfound_treasure: Search,
+    unfound_treasure: Eye,
     custom: Crown
   };
 
