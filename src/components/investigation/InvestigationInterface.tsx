@@ -55,33 +55,33 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
 
   return (
     <div className="space-y-4">
-      {/* Live Collaboration Header - Immersive */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-amber-900 to-orange-900 rounded-3xl border border-amber-300/20">
-        <div className="absolute inset-0 opacity-20"></div>
+      {/* Live Collaboration Header - Sobre et Élégant */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-stone-100 rounded-2xl border border-stone-200">
+        <div className="absolute inset-0 opacity-10"></div>
         
         <div className="relative p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Compass className="w-8 h-8 text-white" />
+                <div className="w-12 h-12 bg-slate-600 rounded-xl flex items-center justify-center">
+                  <Compass className="w-6 h-6 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white">
+                  <div className="w-1 h-1 bg-white rounded-full"></div>
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-orange-200 bg-clip-text text-transparent">
-                  Centre d'Investigation IA
+                <h1 className="text-2xl font-bold text-slate-800">
+                  Centre d'Investigation
                 </h1>
-                <p className="text-amber-200/80 text-lg">
+                <p className="text-slate-600 text-sm">
                   <span className="inline-flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     156 explorateurs connectés
                   </span>
                   <span className="mx-3">•</span>
                   <span className="inline-flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-orange-400" />
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     Recherche active
                   </span>
                 </p>
@@ -91,7 +91,8 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
             <div className="flex items-center gap-3">
               <Button 
                 onClick={() => setAiAssistantActive(!aiAssistantActive)}
-                className={`bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg ${aiAssistantActive ? 'ring-2 ring-purple-400' : ''}`}
+                variant={aiAssistantActive ? "default" : "outline"}
+                className={aiAssistantActive ? 'bg-slate-800 text-white' : ''}
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 IA Analyste
@@ -100,123 +101,123 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
             </div>
           </div>
           
-          {/* Live Stats Dashboard */}
+          {/* Stats Dashboard Sobres */}
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Eye className="w-5 h-5 text-blue-400" />
-                <span className="text-blue-200 text-sm font-medium">Preuves</span>
+                <Eye className="w-4 h-4 text-slate-600" />
+                <span className="text-slate-700 text-sm font-medium">Preuves</span>
               </div>
-              <div className="text-2xl font-bold text-white">87</div>
-              <div className="text-green-400 text-xs flex items-center gap-1">
+              <div className="text-xl font-bold text-slate-800">87</div>
+              <div className="text-green-600 text-xs flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" />
                 +5 aujourd'hui
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Brain className="w-5 h-5 text-purple-400" />
-                <span className="text-purple-200 text-sm font-medium">Théories IA</span>
+                <Brain className="w-4 h-4 text-slate-600" />
+                <span className="text-slate-700 text-sm font-medium">Théories IA</span>
               </div>
-              <div className="text-2xl font-bold text-white">23</div>
-              <div className="text-amber-400 text-xs flex items-center gap-1">
+              <div className="text-xl font-bold text-slate-800">23</div>
+              <div className="text-slate-600 text-xs flex items-center gap-1">
                 <Zap className="w-3 h-3" />
                 3 vérifiées
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Archive className="w-5 h-5 text-amber-400" />
-                <span className="text-amber-200 text-sm font-medium">Archives</span>
+                <Archive className="w-4 h-4 text-slate-600" />
+                <span className="text-slate-700 text-sm font-medium">Archives</span>
               </div>
-              <div className="text-2xl font-bold text-white">32</div>
-              <div className="text-blue-400 text-xs flex items-center gap-1">
+              <div className="text-xl font-bold text-slate-800">32</div>
+              <div className="text-slate-600 text-xs flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 Historiques
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Target className="w-5 h-5 text-red-400" />
-                <span className="text-red-200 text-sm font-medium">Pistes Chaudes</span>
+                <Target className="w-4 h-4 text-slate-600" />
+                <span className="text-slate-700 text-sm font-medium">Pistes Chaudes</span>
               </div>
-              <div className="text-2xl font-bold text-white">12</div>
-              <div className="text-red-400 text-xs flex items-center gap-1">
+              <div className="text-xl font-bold text-slate-800">12</div>
+              <div className="text-red-600 text-xs flex items-center gap-1">
                 <Flame className="w-3 h-3" />
                 Priorité haute
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <MessageCircle className="w-5 h-5 text-green-400" />
-                <span className="text-green-200 text-sm font-medium">Discussions</span>
+                <MessageCircle className="w-4 h-4 text-slate-600" />
+                <span className="text-slate-700 text-sm font-medium">Discussions</span>
               </div>
-              <div className="text-2xl font-bold text-white">234</div>
-              <div className="text-green-400 text-xs flex items-center gap-1">
+              <div className="text-xl font-bold text-slate-800">234</div>
+              <div className="text-green-600 text-xs flex items-center gap-1">
                 <Play className="w-3 h-3" />
                 Live actif
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Shield className="w-5 h-5 text-indigo-400" />
-                <span className="text-indigo-200 text-sm font-medium">IA Confiance</span>
+                <Shield className="w-4 h-4 text-slate-600" />
+                <span className="text-slate-700 text-sm font-medium">IA Confiance</span>
               </div>
-              <div className="text-2xl font-bold text-white">94%</div>
-              <div className="text-indigo-400 text-xs flex items-center gap-1">
+              <div className="text-xl font-bold text-slate-800">94%</div>
+              <div className="text-slate-600 text-xs flex items-center gap-1">
                 <Star className="w-3 h-3" />
                 Très élevée
               </div>
             </div>
           </div>
 
-          {/* AI Status Banner */}
+          {/* AI Status Banner - Sobre */}
           {aiAssistantActive && (
-            <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 backdrop-blur-sm rounded-xl p-4 border border-purple-400/30">
+            <div className="bg-slate-100 rounded-lg p-4 border border-slate-300">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-purple-200 font-semibold">Assistant IA Activé</h3>
-                  <p className="text-purple-300/80 text-sm">Analyse en temps réel des indices, connexions automatiques, et suggestions de recherche</p>
+                  <h3 className="text-slate-800 font-semibold">Assistant IA Activé</h3>
+                  <p className="text-slate-600 text-sm">Analyse en temps réel des indices et suggestions de recherche</p>
                 </div>
-                <Badge className="bg-purple-500 text-white">ACTIF</Badge>
+                <Badge variant="secondary" className="bg-slate-800 text-white">ACTIF</Badge>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Revolutionary Tabbed Interface */}
+      {/* Interface à onglets sobre */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6 bg-gradient-to-r from-slate-50 to-amber-50 border border-amber-200/50 p-1 rounded-2xl">
-          <TabsTrigger value="live" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white rounded-xl">
+        <TabsList className="grid w-full grid-cols-6 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+          <TabsTrigger value="live" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <Flame className="w-4 h-4" />
             <span className="hidden sm:inline">Live</span>
           </TabsTrigger>
-          <TabsTrigger value="evidence" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white rounded-xl">
+          <TabsTrigger value="evidence" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <Scan className="w-4 h-4" />
             <span className="hidden sm:inline">Preuves IA</span>
           </TabsTrigger>
-          <TabsTrigger value="theories" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-xl">
+          <TabsTrigger value="theories" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <Brain className="w-4 h-4" />
             <span className="hidden sm:inline">Théories</span>
           </TabsTrigger>
-          <TabsTrigger value="map" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white rounded-xl">
+          <TabsTrigger value="map" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <MapPin className="w-4 h-4" />
             <span className="hidden sm:inline">Carte</span>
           </TabsTrigger>
-          <TabsTrigger value="documents" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-xl">
+          <TabsTrigger value="documents" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <Archive className="w-4 h-4" />
             <span className="hidden sm:inline">Archives</span>
           </TabsTrigger>
-          <TabsTrigger value="chat" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-xl">
+          <TabsTrigger value="chat" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <MessageSquare className="w-4 h-4" />
             <span className="hidden sm:inline">Chat</span>
           </TabsTrigger>
@@ -232,7 +233,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
               <Scan className="w-5 h-5 text-blue-600" />
               Preuves avec Analyse IA
             </h2>
-            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+            <Button className="bg-slate-800 hover:bg-slate-900 text-white">
               <Sparkles className="w-4 h-4 mr-2" />
               Analyser avec IA
             </Button>
@@ -243,10 +244,10 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
         <TabsContent value="theories" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Brain className="w-5 h-5 text-purple-600" />
+              <Brain className="w-5 h-5 text-slate-600" />
               Théories Assistées par IA
             </h2>
-            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+            <Button className="bg-slate-800 hover:bg-slate-900 text-white">
               <Zap className="w-4 h-4 mr-2" />
               Générer Théorie IA
             </Button>
@@ -257,10 +258,10 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
         <TabsContent value="map" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-green-600" />
+              <MapPin className="w-5 h-5 text-slate-600" />
               Carte Interactive
             </h2>
-            <Button className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+            <Button className="bg-slate-800 hover:bg-slate-900 text-white">
               <Target className="w-4 h-4 mr-2" />
               Analyser Zones
             </Button>
@@ -271,10 +272,10 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
         <TabsContent value="documents" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Archive className="w-5 h-5 text-orange-600" />
+              <Archive className="w-5 h-5 text-slate-600" />
               Archives Historiques
             </h2>
-            <Button className="bg-gradient-to-r from-orange-600 to-red-600 text-white">
+            <Button className="bg-slate-800 hover:bg-slate-900 text-white">
               <Search className="w-4 h-4 mr-2" />
               Recherche IA
             </Button>
@@ -285,7 +286,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
         <TabsContent value="chat" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-teal-600" />
+              <MessageSquare className="w-5 h-5 text-slate-600" />
               Chat Collaboratif
             </h2>
             <div className="flex gap-2">
@@ -293,7 +294,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
                 <Heart className="w-4 h-4 mr-2" />
                 Réactions
               </Button>
-              <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
+              <Button className="bg-slate-800 hover:bg-slate-900 text-white">
                 <Share2 className="w-4 h-4 mr-2" />
                 Partager
               </Button>
