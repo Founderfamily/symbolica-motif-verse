@@ -44,19 +44,8 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
   }, [quest.id]);
 
   const loadActivities = async () => {
-    // Simuler les vraies activités basées sur la quête
-    const questActivities = quest.clues?.map((clue, index) => ({
-      id: `clue-${index}`,
-      title: `a ajouté l'indice: ${clue.title}`,
-      created_at: new Date().toISOString(),
-      profiles: {
-        username: 'System',
-        full_name: 'Équipe de Recherche',
-        avatar_url: null
-      }
-    })) || [];
-    
-    setActivities(questActivities);
+    // Pour l'instant, pas d'activités - suppression des fausses données
+    setActivities([]);
   };
 
   const loadParticipants = async () => {
@@ -71,7 +60,7 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
         .eq('id', user.id)
         .single();
 
-      // Ajouter l'utilisateur actuel aux participants
+      // Afficher seulement l'utilisateur actuel pour l'instant
       setParticipants([{
         id: user.id,
         profiles: profile,
@@ -84,7 +73,7 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
   };
 
   const joinQuest = async () => {
-    // L'utilisateur est automatiquement joint en chargeant ses données
+    // Pas de base de données de participants pour l'instant
     console.log('User joined quest:', quest.id);
   };
 
@@ -110,7 +99,7 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
     });
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message.trim()) return;
     
     toast({
