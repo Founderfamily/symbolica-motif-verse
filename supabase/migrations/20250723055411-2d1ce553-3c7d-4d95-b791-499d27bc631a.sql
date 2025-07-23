@@ -1,0 +1,8 @@
+-- Créer les groupes académiques spécifiques
+INSERT INTO interest_groups (id, name, slug, description, is_public, members_count, discoveries_count, created_by) VALUES
+('10000000-0000-0000-0000-000000000001', 'Historiens & Archéologues', 'historiens-archeologues', 'Communauté d''historiens et d''archéologues spécialisés dans l''étude des civilisations anciennes', true, 8, 12, '00000000-0000-0000-0000-000000000000'),
+('10000000-0000-0000-0000-000000000002', 'Experts UNESCO', 'experts-unesco', 'Experts UNESCO travaillant sur la préservation du patrimoine culturel mondial', true, 3, 5, '00000000-0000-0000-0000-000000000000'),
+('10000000-0000-0000-0000-000000000003', 'Chercheurs en Symbologie', 'chercheurs-symbologie', 'Chercheurs spécialisés dans l''étude et l''interprétation des symboles culturels', true, 12, 18, '00000000-0000-0000-0000-000000000000'),
+('10000000-0000-0000-0000-000000000004', 'Patrimoine & Culture', 'patrimoine-culture', 'Professionnels dédiés à la préservation et valorisation du patrimoine culturel', true, 6, 9, '00000000-0000-0000-0000-000000000000'),
+('10000000-0000-0000-0000-000000000005', 'Traditions Ancestrales', 'traditions-ancestrales', 'Gardiens et étudiants des traditions ancestrales et du savoir traditionnel', true, 4, 7, '00000000-0000-0000-0000-000000000000'),
+('10000000-0000-0000-0000-000000000006', 'Linguistes & Épigraphes', 'linguistes-epigraphes', 'Linguistes et épigraphes spécialisés dans l''étude des langues et écritures anciennes', true, 5, 8, '00000000-0000-0000-0000-000000000000');
