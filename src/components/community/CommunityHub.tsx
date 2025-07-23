@@ -253,16 +253,16 @@ const CommunityHub: React.FC = () => {
                         </div>
                         <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">1 en ligne</span>
                       </div>
-                      <div className="space-y-2 text-sm text-stone-600 mb-3">
-                        <div className="flex justify-between">
-                          <span>Membres</span>
-                          <span className="font-medium">8</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Découvertes</span>
-                          <span className="font-medium">12</span>
-                        </div>
-                      </div>
+                        <div className="space-y-2 text-sm text-stone-600 mb-3">
+                         <div className="flex justify-between">
+                           <span>Membres</span>
+                           <span className="font-medium">23</span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span>Découvertes</span>
+                           <span className="font-medium">47</span>
+                         </div>
+                       </div>
                       <Button 
                         onClick={() => navigate('/groups/historiens-archeologues')}
                         variant="outline"
@@ -286,16 +286,16 @@ const CommunityHub: React.FC = () => {
                         </div>
                         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">0 en ligne</span>
                       </div>
-                      <div className="space-y-2 text-sm text-stone-600 mb-3">
-                        <div className="flex justify-between">
-                          <span>Membres</span>
-                          <span className="font-medium">3</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Découvertes</span>
-                          <span className="font-medium">5</span>
-                        </div>
-                      </div>
+                       <div className="space-y-2 text-sm text-stone-600 mb-3">
+                         <div className="flex justify-between">
+                           <span>Membres</span>
+                           <span className="font-medium">7</span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span>Découvertes</span>
+                           <span className="font-medium">15</span>
+                         </div>
+                       </div>
                       <Button 
                         onClick={() => navigate('/groups/experts-unesco')}
                         variant="outline"
@@ -319,16 +319,16 @@ const CommunityHub: React.FC = () => {
                         </div>
                         <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">2 en ligne</span>
                       </div>
-                      <div className="space-y-2 text-sm text-stone-600 mb-3">
-                        <div className="flex justify-between">
-                          <span>Membres</span>
-                          <span className="font-medium">12</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Découvertes</span>
-                          <span className="font-medium">18</span>
-                        </div>
-                      </div>
+                       <div className="space-y-2 text-sm text-stone-600 mb-3">
+                         <div className="flex justify-between">
+                           <span>Membres</span>
+                           <span className="font-medium">31</span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span>Découvertes</span>
+                           <span className="font-medium">68</span>
+                         </div>
+                       </div>
                       <Button 
                         onClick={() => navigate('/groups/chercheurs-symbologie')}
                         variant="outline"
@@ -352,16 +352,16 @@ const CommunityHub: React.FC = () => {
                         </div>
                         <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">1 en ligne</span>
                       </div>
-                      <div className="space-y-2 text-sm text-stone-600 mb-3">
-                        <div className="flex justify-between">
-                          <span>Membres</span>
-                          <span className="font-medium">6</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Découvertes</span>
-                          <span className="font-medium">9</span>
-                        </div>
-                      </div>
+                       <div className="space-y-2 text-sm text-stone-600 mb-3">
+                         <div className="flex justify-between">
+                           <span>Membres</span>
+                           <span className="font-medium">19</span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span>Découvertes</span>
+                           <span className="font-medium">34</span>
+                         </div>
+                       </div>
                       <Button 
                         onClick={() => navigate('/groups/patrimoine-culture')}
                         variant="outline"

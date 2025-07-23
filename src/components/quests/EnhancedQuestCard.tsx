@@ -164,12 +164,8 @@ const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
             {getQuestCluesCount(quest)} indices
           </div>
           <div className="flex items-center text-sm text-stone-600">
-            <Award className="w-4 h-4 mr-2 text-amber-700" />
-            {quest.reward_points || 0} points
-          </div>
-          <div className="flex items-center text-sm text-stone-600">
             <Users className="w-4 h-4 mr-2 text-stone-700" />
-            {quest.max_participants || 0} max
+            Collaboration ouverte
           </div>
           <div className="flex items-center text-sm text-stone-600">
             <Clock className="w-4 h-4 mr-2 text-stone-600" />

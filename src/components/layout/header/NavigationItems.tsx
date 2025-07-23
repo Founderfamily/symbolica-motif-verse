@@ -21,6 +21,7 @@ export const NavigationItems = () => {
   // Navigation principale
   const navigation = [
     { name: 'Accueil', href: '/', translationKey: 'home' },
+    { name: 'Symboles', href: '/symbols', translationKey: 'symbols' },
     { name: 'Collections', href: '/collections', translationKey: 'collections' },
     { name: 'Quêtes', href: '/quests', translationKey: 'quests' },
     { name: 'Communauté', href: '/community', translationKey: 'community' },
@@ -268,48 +269,48 @@ export const NavigationItems = () => {
         ))}
 
 
-      {/* Menu Symboles dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className={cn(
-              'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
-              location.pathname.startsWith('/symbols')
-                ? 'text-primary'
-                : 'text-muted-foreground'
-            )}
-          >
-            <I18nText translationKey="symbols" ns="navigation">
-              Symboles
-            </I18nText>
-            <ChevronDown className="h-3 w-3" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-72 bg-white border shadow-md z-[100]">
-          <DropdownMenuLabel className="text-center font-bold text-blue-600">
-            🔍 Exploration des Symboles
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {symbolsMenuItems.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link
-                to={item.href}
-                className="flex items-start gap-3 cursor-pointer p-3 hover:bg-blue-50"
-              >
-                <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium">
-                    {item.name}
+      {/* Menu Symboles avancés dropdown - Admin only */}
+      {isAdmin && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={cn(
+                'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
+                ['/symbol-explorer', '/search', '/trending', '/map', '/analysis'].some(path => location.pathname.startsWith(path))
+                  ? 'text-primary'
+                  : 'text-muted-foreground'
+              )}
+            >
+              Symboles avancés
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-72 bg-white border shadow-md z-[100]">
+            <DropdownMenuLabel className="text-center font-bold text-blue-600">
+              🔍 Outils Avancés (Admin)
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {symbolsMenuItems.filter(item => ['/symbol-explorer', '/search', '/trending', '/map', '/analysis'].includes(item.href)).map((item) => (
+              <DropdownMenuItem key={item.href} asChild>
+                <Link
+                  to={item.href}
+                  className="flex items-start gap-3 cursor-pointer p-3 hover:bg-blue-50"
+                >
+                  <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">
+                      {item.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {item.description}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {item.description}
-                  </div>
-                </div>
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {/* Menu Innovation dropdown */}
       <DropdownMenu>
