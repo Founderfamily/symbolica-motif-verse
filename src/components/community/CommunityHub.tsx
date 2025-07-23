@@ -229,21 +229,236 @@ const CommunityHub: React.FC = () => {
             {/* Section Collections - Groupes d'Intérêt par culture */}
             <TabsContent value="collections" className="mt-6">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-100/50">
-                {collectionsGroups.length === 0 ? (
-                  <div className="text-center py-12">
-                    <AlertCircle className="w-12 h-12 text-stone-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-stone-700 mb-2">Aucun groupe pour le moment</h3>
-                    <p className="text-stone-600 mb-4">
-                      Les premiers groupes d'intérêt seront bientôt créés par nos membres.
-                    </p>
-                    <Button 
-                      onClick={() => navigate('/create-group')}
-                      className="bg-amber-600 hover:bg-amber-700 text-white"
-                    >
-                      Créer le Premier Groupe
-                    </Button>
+                {/* Groupes Académiques */}
+                <div className="mb-8">
+                  <div className="text-center mb-6">
+                    <h2 className="text-xl font-bold text-stone-800 mb-2 flex items-center justify-center gap-2">
+                      <BookOpen className="w-6 h-6 text-blue-600" />
+                      Groupes Académiques
+                    </h2>
+                    <p className="text-stone-600 text-sm">Rejoignez des experts et chercheurs dans leur domaine</p>
                   </div>
-                ) : (
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Historiens & Archéologues */}
+                    <div className="bg-white rounded-xl p-5 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-blue-50 border-blue-200 text-blue-900">
+                            <History className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-stone-800">Historiens & Archéologues</h3>
+                          </div>
+                        </div>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">1 en ligne</span>
+                      </div>
+                      <div className="space-y-2 text-sm text-stone-600 mb-3">
+                        <div className="flex justify-between">
+                          <span>Membres</span>
+                          <span className="font-medium">8</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Découvertes</span>
+                          <span className="font-medium">12</span>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate('/groups/historiens-archeologues')}
+                        variant="outline"
+                        className="w-full border-stone-300 hover:bg-stone-50"
+                        size="sm"
+                      >
+                        Rejoindre la Discussion
+                      </Button>
+                    </div>
+
+                    {/* Experts UNESCO */}
+                    <div className="bg-white rounded-xl p-5 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-green-50 border-green-200 text-green-900">
+                            <Crown className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-stone-800">Experts UNESCO</h3>
+                          </div>
+                        </div>
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">0 en ligne</span>
+                      </div>
+                      <div className="space-y-2 text-sm text-stone-600 mb-3">
+                        <div className="flex justify-between">
+                          <span>Membres</span>
+                          <span className="font-medium">3</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Découvertes</span>
+                          <span className="font-medium">5</span>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate('/groups/experts-unesco')}
+                        variant="outline"
+                        className="w-full border-stone-300 hover:bg-stone-50"
+                        size="sm"
+                      >
+                        Rejoindre la Discussion
+                      </Button>
+                    </div>
+
+                    {/* Chercheurs en Symbologie */}
+                    <div className="bg-white rounded-xl p-5 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-purple-50 border-purple-200 text-purple-900">
+                            <Palette className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-stone-800">Chercheurs en Symbologie</h3>
+                          </div>
+                        </div>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">2 en ligne</span>
+                      </div>
+                      <div className="space-y-2 text-sm text-stone-600 mb-3">
+                        <div className="flex justify-between">
+                          <span>Membres</span>
+                          <span className="font-medium">12</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Découvertes</span>
+                          <span className="font-medium">18</span>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate('/groups/chercheurs-symbologie')}
+                        variant="outline"
+                        className="w-full border-stone-300 hover:bg-stone-50"
+                        size="sm"
+                      >
+                        Rejoindre la Discussion
+                      </Button>
+                    </div>
+
+                    {/* Patrimoine & Culture */}
+                    <div className="bg-white rounded-xl p-5 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-amber-50 border-amber-200 text-amber-900">
+                            <Building className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-stone-800">Patrimoine & Culture</h3>
+                          </div>
+                        </div>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">1 en ligne</span>
+                      </div>
+                      <div className="space-y-2 text-sm text-stone-600 mb-3">
+                        <div className="flex justify-between">
+                          <span>Membres</span>
+                          <span className="font-medium">6</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Découvertes</span>
+                          <span className="font-medium">9</span>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate('/groups/patrimoine-culture')}
+                        variant="outline"
+                        className="w-full border-stone-300 hover:bg-stone-50"
+                        size="sm"
+                      >
+                        Rejoindre la Discussion
+                      </Button>
+                    </div>
+
+                    {/* Traditions Ancestrales */}
+                    <div className="bg-white rounded-xl p-5 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-orange-50 border-orange-200 text-orange-900">
+                            <Mountain className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-stone-800">Traditions Ancestrales</h3>
+                          </div>
+                        </div>
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">0 en ligne</span>
+                      </div>
+                      <div className="space-y-2 text-sm text-stone-600 mb-3">
+                        <div className="flex justify-between">
+                          <span>Membres</span>
+                          <span className="font-medium">4</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Découvertes</span>
+                          <span className="font-medium">7</span>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate('/groups/traditions-ancestrales')}
+                        variant="outline"
+                        className="w-full border-stone-300 hover:bg-stone-50"
+                        size="sm"
+                      >
+                        Rejoindre la Discussion
+                      </Button>
+                    </div>
+
+                    {/* Linguistes & Épigraphes */}
+                    <div className="bg-white rounded-xl p-5 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-pink-50 border-pink-200 text-pink-900">
+                            <BookOpen className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-stone-800">Linguistes & Épigraphes</h3>
+                          </div>
+                        </div>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">1 en ligne</span>
+                      </div>
+                      <div className="space-y-2 text-sm text-stone-600 mb-3">
+                        <div className="flex justify-between">
+                          <span>Membres</span>
+                          <span className="font-medium">5</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Découvertes</span>
+                          <span className="font-medium">8</span>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate('/groups/linguistes-epigraphes')}
+                        variant="outline"
+                        className="w-full border-stone-300 hover:bg-stone-50"
+                        size="sm"
+                      >
+                        Rejoindre la Discussion
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Groupes Culturels */}
+                <div>
+                  <div className="text-center mb-6">
+                    <h2 className="text-xl font-bold text-stone-800 mb-2 flex items-center justify-center gap-2">
+                      <Palette className="w-6 h-6 text-amber-600" />
+                      Groupes Culturels
+                    </h2>
+                    <p className="text-stone-600 text-sm">Explorez les symboles par civilisation et époque</p>
+                  </div>
+
+                  {collectionsGroups.length === 0 ? (
+                    <div className="text-center py-8">
+                      <AlertCircle className="w-8 h-8 text-stone-400 mx-auto mb-3" />
+                      <h3 className="text-lg font-semibold text-stone-700 mb-2">Groupes culturels en préparation</h3>
+                      <p className="text-stone-600 mb-4 text-sm">
+                        Les groupes par civilisation seront bientôt créés.
+                      </p>
+                    </div>
+                  ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {collectionsGroups.map(group => {
                       // Fonction pour assigner une icône et couleur selon le nom du groupe
@@ -313,6 +528,7 @@ const CommunityHub: React.FC = () => {
                     })}
                   </div>
                 )}
+                </div>
               </div>
             </TabsContent>
 
