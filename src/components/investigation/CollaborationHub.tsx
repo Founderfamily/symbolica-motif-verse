@@ -30,30 +30,26 @@ interface CollaborationHubProps {
 
 const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
   const [message, setMessage] = useState('');
-  const [activities, setActivities] = useState<any[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
-  const [likes, setLikes] = useState<Record<number, number>>({});
-  const [comments, setComments] = useState<Record<number, number>>({});
+  const [likes, setLikes] = useState<Record<string, number>>({});
+  const [comments, setComments] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
+  // Vraies données basées sur la quête
+  const realActivities = quest.clues?.map((clue, index) => ({
+    id: `clue-${index}`,
+    user: 'Équipe',
+    action: `a ajouté l'indice: ${clue.title}`,
+    time: 'Récemment',
+    type: 'clue'
+  })) || [];
+
   useEffect(() => {
-    // Simuler des données réelles
-    setOnlineCount(Math.floor(Math.random() * 20) + 5);
-    setActivities([
-      {
-        id: 1,
-        user: 'Utilisateur A.',
-        action: 'a ajouté un indice',
-        time: 'Il y a 3 min',
-        type: 'evidence',
-        priority: 'medium'
-      }
-    ]);
-    setLikes({ 1: 2 });
-    setComments({ 1: 1 });
+    // Données réelles uniquement
+    setOnlineCount(1); // Utilisateur actuel uniquement
   }, []);
 
-  const handleLike = (activityId: number) => {
+  const handleLike = (activityId: string) => {
     setLikes(prev => ({
       ...prev,
       [activityId]: (prev[activityId] || 0) + 1
@@ -64,7 +60,7 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
     });
   };
 
-  const handleComment = (activityId: number) => {
+  const handleComment = (activityId: string) => {
     setComments(prev => ({
       ...prev,
       [activityId]: (prev[activityId] || 0) + 1
@@ -80,7 +76,7 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
     
     toast({
       title: "✉️ Message envoyé",
-      description: "Votre message a été partagé avec l'équipe",
+      description: "Votre message a été partagé",
     });
     setMessage('');
   };
@@ -102,21 +98,15 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
           </div>
 
           <div className="space-y-4">
-            {activities.map((activity) => (
+            {realActivities.length > 0 ? realActivities.map((activity) => (
               <div key={activity.id} className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:shadow-md transition-shadow">
                 <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-                  <Users className="w-4 h-4 text-slate-600" />
+                  <FileText className="w-4 h-4 text-slate-600" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-semibold text-slate-800">{activity.user}</span>
                     <span className="text-slate-600">{activity.action}</span>
-                    {activity.priority === 'high' && (
-                      <Badge className="bg-red-100 text-red-800 text-xs">
-                        <Star className="w-3 h-3 mr-1" />
-                        Important
-                      </Badge>
-                    )}
                   </div>
                   <div className="text-sm text-slate-500 flex items-center gap-4">
                     <span>{activity.time}</span>
@@ -135,14 +125,17 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
                         <MessageCircle className="w-3 h-3" />
                         {comments[activity.id] || 0}
                       </button>
-                      <button className="flex items-center gap-1 hover:text-slate-700 transition-colors">
-                        <Share2 className="w-3 h-3" />
-                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center p-8 text-slate-500">
+                <FileText className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                <p>Aucune activité récente</p>
+                <p className="text-sm">Les interactions apparaîtront ici</p>
+              </div>
+            )}
           </div>
 
           {/* Quick Chat */}
@@ -191,23 +184,12 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
           </h3>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-slate-600 text-sm">{onlineCount} explorateurs en ligne</span>
+            <span className="text-slate-600 text-sm">{onlineCount} explorateur{onlineCount > 1 ? 's' : ''} en ligne</span>
           </div>
-          <div className="space-y-2">
-            {['Utilisateur A', 'Utilisateur B', 'Utilisateur C'].map((user, index) => (
-              <div key={index} className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
-                <div className="relative">
-                  <div className="w-6 h-6 bg-slate-300 rounded-full flex items-center justify-center">
-                    <Users className="w-3 h-3 text-slate-600" />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-slate-800 text-sm">{user}</div>
-                  <div className="text-slate-500 text-xs">Actif</div>
-                </div>
-              </div>
-            ))}
+          <div className="text-center p-4 text-slate-500">
+            <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+            <p className="text-sm">Vous êtes connecté</p>
+            <p className="text-xs">D'autres explorateurs apparaîtront ici</p>
           </div>
         </Card>
 
@@ -230,36 +212,30 @@ const CollaborationHub: React.FC<CollaborationHubProps> = ({ quest }) => {
         </Card>
 
         <Card className="p-4 bg-white border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4">Progrès Collaboratif</h3>
+          <h3 className="font-bold text-slate-800 mb-4">Progrès de la Quête</h3>
           <div className="space-y-3">
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-600">Indices analysés</span>
-                <span className="text-slate-800 font-semibold">{quest.clues?.length || 0}/{(quest.clues?.length || 0) + 3}</span>
+                <span className="text-slate-600">Indices disponibles</span>
+                <span className="text-slate-800 font-semibold">{quest.clues?.length || 0}</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-2">
                 <div 
                   className="bg-slate-600 h-2 rounded-full" 
-                  style={{ width: `${Math.min(((quest.clues?.length || 0) / ((quest.clues?.length || 0) + 3)) * 100, 100)}%` }}
+                  style={{ width: quest.clues?.length ? '100%' : '0%' }}
                 ></div>
               </div>
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-600">Zones explorées</span>
-                <span className="text-slate-800 font-semibold">3/8</span>
+                <span className="text-slate-600">Statut</span>
+                <span className="text-slate-800 font-semibold">{quest.status}</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-2">
-                <div className="bg-slate-600 h-2 rounded-full" style={{ width: '37%' }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-600">Validation IA</span>
-                <span className="text-slate-800 font-semibold">En cours</span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2">
-                <div className="bg-slate-600 h-2 rounded-full" style={{ width: '60%' }}></div>
+                <div 
+                  className="bg-slate-600 h-2 rounded-full" 
+                  style={{ width: quest.status === 'active' ? '50%' : '0%' }}
+                ></div>
               </div>
             </div>
           </div>

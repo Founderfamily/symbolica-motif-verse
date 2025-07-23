@@ -103,20 +103,20 @@ const AIAnalysisInterface: React.FC<AIAnalysisInterfaceProps> = ({ quest }) => {
         <Card className="p-4 bg-slate-50 border border-slate-200">
           <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
             <Target className="w-4 h-4 text-slate-600" />
-            Pistes Prioritaires
+            Analyse de la Quête
           </h4>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-700">Lieu principal</span>
-              <Badge className="bg-slate-200 text-slate-800">En cours</Badge>
+              <span className="text-slate-700">Titre: {quest.title}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-700">Documents historiques</span>
-              <Badge className="bg-slate-200 text-slate-800">À vérifier</Badge>
+              <span className="text-slate-700">Type: {quest.quest_type}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-700">Témoignages</span>
-              <Badge className="bg-slate-200 text-slate-800">Collecte</Badge>
+              <span className="text-slate-700">Difficulté: {quest.difficulty_level}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-700">Indices: {quest.clues?.length || 0}</span>
             </div>
           </div>
         </Card>
@@ -127,9 +127,9 @@ const AIAnalysisInterface: React.FC<AIAnalysisInterfaceProps> = ({ quest }) => {
             Suggestions IA
           </h4>
           <div className="space-y-2 text-sm">
-            <p className="text-slate-700">Analyser les cartes anciennes</p>
-            <p className="text-slate-700">Consulter les archives locales</p>
-            <p className="text-slate-700">Comparer avec d'autres quêtes</p>
+            <p className="text-slate-700">Consulter les indices disponibles</p>
+            <p className="text-slate-700">Analyser les connexions historiques</p>
+            <p className="text-slate-700">Rechercher des ressources externes</p>
           </div>
         </Card>
       </div>
