@@ -1,16 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-interface QuestParticipant {
+export interface QuestParticipant {
   id: string;
-  quest_id: string;
   user_id: string;
   status: 'active' | 'away' | 'offline';
   last_seen: string;
-  created_at: string;
   profiles?: {
+    id: string;
     username?: string;
     full_name?: string;
     avatar_url?: string;
@@ -18,43 +16,41 @@ interface QuestParticipant {
 }
 
 export const useQuestParticipantsSimple = (questId: string) => {
-  const { user, profile } = useAuth();
+  const [participants, setParticipants] = useState<QuestParticipant[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: participants = [], isLoading } = useQuery({
-    queryKey: ['quest-participants', questId],
-    queryFn: async () => {
-      if (!user) return [];
-
-      // Pour l'instant, retourner seulement l'utilisateur actuel
-      const currentParticipant: QuestParticipant = {
-        id: user.id,
-        quest_id: questId,
-        user_id: user.id,
+  useEffect(() => {
+    // Simuler des participants pour l'instant
+    const mockParticipants: QuestParticipant[] = [
+      {
+        id: '1',
+        user_id: 'user-1',
         status: 'active',
         last_seen: new Date().toISOString(),
-        created_at: new Date().toISOString(),
         profiles: {
-          username: profile?.username || user.email?.split('@')[0] || 'Utilisateur',
-          full_name: profile?.full_name || user.user_metadata?.full_name || 'Utilisateur',
-          avatar_url: profile?.avatar_url || user.user_metadata?.avatar_url
+          id: 'user-1',
+          username: 'explorateur1',
+          full_name: 'Marie Dubois',
+          avatar_url: null
         }
-      };
+      },
+      {
+        id: '2',
+        user_id: 'user-2',
+        status: 'active',
+        last_seen: new Date(Date.now() - 300000).toISOString(),
+        profiles: {
+          id: 'user-2',
+          username: 'historien',
+          full_name: 'Jean Martin',
+          avatar_url: null
+        }
+      }
+    ];
 
-      return [currentParticipant];
-    },
-    enabled: !!questId && !!user,
-  });
+    setParticipants(mockParticipants);
+    setLoading(false);
+  }, [questId]);
 
-  // Auto-join quest effet (simulé pour l'instant)
-  useEffect(() => {
-    if (user && questId) {
-      console.log('User joined quest:', questId);
-    }
-  }, [user, questId]);
-
-  return {
-    participants,
-    isLoading,
-    updateStatus: () => {}, // Placeholder pour l'instant
-  };
+  return { participants, loading };
 };
