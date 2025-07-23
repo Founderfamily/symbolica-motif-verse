@@ -32,13 +32,15 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { useActiveQuests } from '@/hooks/useQuests';
+import { useQuests } from '@/hooks/useQuests';
 import { useEnhancedQuests } from '@/hooks/useEnhancedQuests';
 import { historicalQuestService } from '@/services/historicalQuestService';
 import { TreasureQuest } from '@/types/quests';
 import { getQuestTypeLabel, getDifficultyLabel } from '@/utils/questUtils';
 import EnhancedQuestFilters from '@/components/quests/EnhancedQuestFilters';
 import EnhancedQuestCard from '@/components/quests/EnhancedQuestCard';
+import ClueSubmissionDialog from '@/components/quests/ClueSubmissionDialog';
+import QuestJoinDialog from '@/components/quests/QuestJoinDialog';
 
 const QuestsPage = () => {
   // États pour les filtres
