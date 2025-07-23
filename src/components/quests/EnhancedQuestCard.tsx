@@ -40,10 +40,10 @@ interface EnhancedQuestCardProps {
 
 const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
   const questTypeIcons = {
-    templar: Sword,
-    lost_civilization: Scroll,
-    grail: Crown,
-    custom: Trophy
+    myth: Scroll,
+    found_treasure: Trophy,
+    unfound_treasure: Search,
+    custom: Crown
   };
 
   const difficultyColors = {
@@ -95,12 +95,28 @@ const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
           <h3 className="text-2xl font-bold mb-2 text-stone-800 line-clamp-2">{quest.title}</h3>
           <p className="text-stone-600 text-sm">{getQuestTypeLabel(quest.quest_type)}</p>
           
-          {/* Badge d'authenticité historique */}
-          {['templar', 'lost_civilization', 'grail'].includes(quest.quest_type) && (
+          {/* Badge de statut de recherche */}
+          {quest.quest_type === 'unfound_treasure' && (
             <div className="mt-3">
-              <Badge variant="secondary" className="bg-amber-50 text-amber-800 border-amber-300">
+              <Badge variant="secondary" className="bg-red-50 text-red-800 border-red-300">
+                <Search className="w-3 h-3 mr-1" />
+                Recherche Active
+              </Badge>
+            </div>
+          )}
+          {quest.quest_type === 'found_treasure' && (
+            <div className="mt-3">
+              <Badge variant="secondary" className="bg-green-50 text-green-800 border-green-300">
+                <Trophy className="w-3 h-3 mr-1" />
+                Déjà Découvert
+              </Badge>
+            </div>
+          )}
+          {quest.quest_type === 'myth' && (
+            <div className="mt-3">
+              <Badge variant="secondary" className="bg-purple-50 text-purple-800 border-purple-300">
                 <History className="w-3 h-3 mr-1" />
-                Basé sur l'Histoire
+                Légende Historique
               </Badge>
             </div>
           )}
@@ -157,7 +173,7 @@ const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
           </div>
         )}
         
-        {/* Métriques de contribution */}
+        {/* Métriques de recherche collaborative */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="flex items-center text-sm text-stone-600">
             <FileText className="w-4 h-4 mr-2 text-amber-600" />
@@ -168,12 +184,16 @@ const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
             Collaboration ouverte
           </div>
           <div className="flex items-center text-sm text-stone-600">
+            <Search className="w-4 h-4 mr-2 text-blue-600" />
+            Recherche IA
+          </div>
+          <div className="flex items-center text-sm text-stone-600">
             <Clock className="w-4 h-4 mr-2 text-stone-600" />
-            Multi-étapes
+            {quest.quest_type === 'unfound_treasure' ? 'En cours' : 'Multi-étapes'}
           </div>
         </div>
         
-        {/* Actions */}
+        {/* Actions selon le type de quête */}
         <div className="flex gap-3">
           <Link to={`/quests/${quest.id}`} className="flex-1">
             <Button 
@@ -181,13 +201,17 @@ const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
               className="w-full border-2 border-amber-300 text-amber-700 hover:bg-amber-50"
             >
               <Search className="w-4 h-4 mr-2" />
-              Explorer
+              Voir Détails
             </Button>
           </Link>
           
-          <Button className="flex-1 bg-stone-800 hover:bg-stone-900 text-amber-100">
+          <Button className={`flex-1 ${
+            quest.quest_type === 'unfound_treasure' 
+              ? 'bg-red-600 hover:bg-red-700 text-white' 
+              : 'bg-stone-800 hover:bg-stone-900 text-amber-100'
+          }`}>
             <Plus className="w-4 h-4 mr-2" />
-            Contribuer
+            {quest.quest_type === 'unfound_treasure' ? 'Ajouter Indice' : 'Contribuer'}
           </Button>
         </div>
       </div>

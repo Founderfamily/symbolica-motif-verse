@@ -4,7 +4,7 @@ export interface TreasureQuest {
   title: string;
   description?: string;
   story_background?: string;
-  quest_type: 'templar' | 'lost_civilization' | 'grail' | 'custom';
+  quest_type: 'myth' | 'found_treasure' | 'unfound_treasure' | 'custom';
   difficulty_level: 'beginner' | 'intermediate' | 'expert' | 'master';
   max_participants: number;
   min_participants: number;
