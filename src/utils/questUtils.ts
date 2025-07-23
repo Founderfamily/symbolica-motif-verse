@@ -9,10 +9,16 @@ export const getQuestCluesCount = (quest: TreasureQuest): number => {
 
 export const getQuestTypeLabel = (questType: string): string => {
   switch (questType) {
+    // Nouveaux types
     case 'myth': return 'Mythe & Légende';
     case 'found_treasure': return 'Trésor Découvert';
     case 'unfound_treasure': return 'Trésor Recherché';
     case 'custom': return 'Personnalisée';
+    // Anciens types pour compatibilité
+    case 'templar': return 'Templiers';
+    case 'lost_civilization': return 'Civilisation Perdue';
+    case 'graal': 
+    case 'grail': return 'Quête du Graal';
     default: return questType;
   }
 };

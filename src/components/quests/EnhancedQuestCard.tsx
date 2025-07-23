@@ -41,10 +41,15 @@ interface EnhancedQuestCardProps {
 
 const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
   const questTypeIcons = {
+    // Nouveaux types
     myth: Scroll,
     found_treasure: Trophy,
     unfound_treasure: Eye,
-    custom: Crown
+    custom: Crown,
+    // Anciens types pour compatibilité
+    templar: Sword,
+    lost_civilization: Scroll,
+    grail: Crown
   };
 
   const difficultyColors = {
@@ -68,8 +73,10 @@ const EnhancedQuestCard: React.FC<EnhancedQuestCardProps> = ({ quest }) => {
     cancelled: 'Annulée'
   };
 
-  const TypeIcon = questTypeIcons[quest.quest_type];
+  const TypeIcon = questTypeIcons[quest.quest_type] || Crown; // Fallback si type inconnu
   const location = quest.locationData;
+
+  console.log('Quest type:', quest.quest_type, 'Icon found:', !!questTypeIcons[quest.quest_type]);
 
   return (
     <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-white/95 backdrop-blur-sm border border-amber-200/50">
