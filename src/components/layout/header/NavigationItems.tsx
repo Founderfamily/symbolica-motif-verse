@@ -50,41 +50,43 @@ export const NavigationItems = () => {
       icon: Database,
       description: 'Découvrez notre collection de symboles'
     },
-    { 
-      name: 'Explorateur avancé', 
-      href: '/symbol-explorer', 
-      icon: Search,
-      description: 'Recherche et filtres avancés'
-    },
+    ...(isAdmin ? [
+      { 
+        name: 'Explorateur avancé', 
+        href: '/symbol-explorer', 
+        icon: Search,
+        description: 'Recherche et filtres avancés'
+      },
+      { 
+        name: 'Recherche', 
+        href: '/search', 
+        icon: Search,
+        description: 'Recherche dans tous les symboles'
+      },
+      { 
+        name: 'Tendances', 
+        href: '/trending', 
+        icon: TrendingUp,
+        description: 'Symboles populaires'
+      },
+      { 
+        name: 'Carte Interactive', 
+        href: '/map', 
+        icon: Map,
+        description: 'Localisation des symboles'
+      },
+      { 
+        name: 'Analyse', 
+        href: '/analysis', 
+        icon: BarChart2,
+        description: 'Analyses et statistiques'
+      },
+    ] : []),
     { 
       name: 'Timeline Interactive', 
       href: '/symbols/timeline', 
       icon: History,
       description: 'Explorez les symboles à travers l\'histoire'
-    },
-    { 
-      name: 'Recherche', 
-      href: '/search', 
-      icon: Search,
-      description: 'Recherche dans tous les symboles'
-    },
-    { 
-      name: 'Tendances', 
-      href: '/trending', 
-      icon: TrendingUp,
-      description: 'Symboles populaires'
-    },
-    { 
-      name: 'Carte Interactive', 
-      href: '/map', 
-      icon: Map,
-      description: 'Localisation des symboles'
-    },
-    { 
-      name: 'Analyse', 
-      href: '/analysis', 
-      icon: BarChart2,
-      description: 'Analyses et statistiques'
     },
   ];
 
@@ -369,47 +371,49 @@ export const NavigationItems = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Menu "Plus" avec toutes les pages supplémentaires */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className={cn(
-              'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
-              ['/enterprise', '/roadmap', '/contact', '/mobile'].some(path => location.pathname === path)
-                ? 'text-primary'
-                : 'text-muted-foreground'
-            )}
-          >
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="text-xs">Plus</span>
-            <ChevronDown className="h-3 w-3" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 bg-white border shadow-md z-[100] max-h-96 overflow-y-auto">
-          <DropdownMenuLabel className="text-center font-bold text-blue-600">
-            🔗 Pages Supplémentaires
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {additionalPagesItems.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link
-                to={item.href}
-                className="flex items-start gap-3 cursor-pointer p-3 hover:bg-blue-50"
-              >
-                <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium">
-                    {item.name}
+      {/* Menu "Plus" avec toutes les pages supplémentaires - Restreint aux admins */}
+      {isAdmin && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={cn(
+                'px-2 py-2 text-sm font-medium transition-colors hover:text-primary flex items-center gap-1',
+                ['/enterprise', '/roadmap', '/contact', '/mobile'].some(path => location.pathname === path)
+                  ? 'text-primary'
+                  : 'text-muted-foreground'
+              )}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="text-xs">Plus</span>
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 bg-white border shadow-md z-[100] max-h-96 overflow-y-auto">
+            <DropdownMenuLabel className="text-center font-bold text-blue-600">
+              🔗 Pages Supplémentaires
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {additionalPagesItems.map((item) => (
+              <DropdownMenuItem key={item.href} asChild>
+                <Link
+                  to={item.href}
+                  className="flex items-start gap-3 cursor-pointer p-3 hover:bg-blue-50"
+                >
+                  <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">
+                      {item.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {item.description}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {item.description}
-                  </div>
-                </div>
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {/* Menu Admin dropdown pour les administrateurs */}
       {isAdmin && (
