@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,9 +17,11 @@ import {
   Sparkles,
   Calendar,
   MapPin,
-  User
+  User,
+  Upload
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
+import { investigationService } from '@/services/investigationService';
 
 interface ArchivesTabProps {
   quest: TreasureQuest;
@@ -28,6 +30,26 @@ interface ArchivesTabProps {
 const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load quest documents
+  useEffect(() => {
+    const loadDocuments = async () => {
+      try {
+        const result = await investigationService.getQuestDocuments(quest.id);
+        if (result.success) {
+          setDocuments(result.data);
+        }
+      } catch (error) {
+        console.error('Error loading documents:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDocuments();
+  }, [quest.id]);
 
   // Simuler des documents d'archives
   const mockArchives = [
@@ -136,158 +158,163 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
                 Filtres
               </Button>
               <Button size="sm">
-                <Sparkles className="h-4 w-4 mr-2" />
-                Recherche IA
+                <Upload className="h-4 w-4 mr-2" />
+                Ajouter Document
               </Button>
             </div>
           </div>
 
           {/* Filtres par type */}
-          <div className="flex gap-2 mb-4">
-            <Button 
-              variant={selectedFilter === 'all' ? 'default' : 'outline'} 
-              size="sm"
-              onClick={() => setSelectedFilter('all')}
-            >
-              Tous
-            </Button>
-            <Button 
-              variant={selectedFilter === 'manuscript' ? 'default' : 'outline'} 
-              size="sm"
-              onClick={() => setSelectedFilter('manuscript')}
-            >
-              Manuscrits
-            </Button>
-            <Button 
-              variant={selectedFilter === 'map' ? 'default' : 'outline'} 
-              size="sm"
-              onClick={() => setSelectedFilter('map')}
-            >
-              Cartes
-            </Button>
-            <Button 
-              variant={selectedFilter === 'chronicle' ? 'default' : 'outline'} 
-              size="sm"
-              onClick={() => setSelectedFilter('chronicle')}
-            >
-              Chroniques
-            </Button>
-            <Button 
-              variant={selectedFilter === 'inventory' ? 'default' : 'outline'} 
-              size="sm"
-              onClick={() => setSelectedFilter('inventory')}
-            >
-              Inventaires
-            </Button>
-          </div>
+          {!loading && documents.length > 0 && (
+            <div className="flex gap-2 mb-4">
+              <Button 
+                variant={selectedFilter === 'all' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setSelectedFilter('all')}
+              >
+                Tous ({documents.length})
+              </Button>
+              {['manuscript', 'map', 'chronicle', 'inventory'].map(type => {
+                const count = documents.filter(doc => doc.document_type === type).length;
+                if (count === 0) return null;
+                return (
+                  <Button 
+                    key={type}
+                    variant={selectedFilter === type ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setSelectedFilter(type)}
+                  >
+                    {type === 'manuscript' && 'Manuscrits'}
+                    {type === 'map' && 'Cartes'}
+                    {type === 'chronicle' && 'Chroniques'}
+                    {type === 'inventory' && 'Inventaires'}
+                    {' '}({count})
+                  </Button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Statistiques */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-muted/50 rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Archive className="h-4 w-4 text-blue-500" />
-                <span className="text-sm font-medium">Documents</span>
+          {!loading && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-muted/50 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Archive className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-medium">Documents</span>
+                </div>
+                <div className="text-2xl font-bold">{documents.length}</div>
               </div>
-              <div className="text-2xl font-bold">{mockArchives.length}</div>
+              <div className="bg-muted/50 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Sparkles className="h-4 w-4 text-purple-500" />
+                  <span className="text-sm font-medium">Crédibilité Moy.</span>
+                </div>
+                <div className="text-2xl font-bold">
+                  {documents.length > 0 
+                    ? Math.round(documents.reduce((acc, d) => acc + (d.credibility_score || 0), 0) / documents.length)
+                    : 0}%
+                </div>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <User className="h-4 w-4 text-green-500" />
+                  <span className="text-sm font-medium">Sources</span>
+                </div>
+                <div className="text-2xl font-bold">
+                  {new Set(documents.map(d => d.source)).size}
+                </div>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Calendar className="h-4 w-4 text-orange-500" />
+                  <span className="text-sm font-medium">Types</span>
+                </div>
+                <div className="text-2xl font-bold">
+                  {new Set(documents.map(d => d.document_type)).size}
+                </div>
+              </div>
             </div>
-            <div className="bg-muted/50 rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="h-4 w-4 text-purple-500" />
-                <span className="text-sm font-medium">Pertinence IA</span>
-              </div>
-              <div className="text-2xl font-bold">
-                {Math.round(mockArchives.reduce((acc, a) => acc + a.aiRelevance, 0) / mockArchives.length)}%
-              </div>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <User className="h-4 w-4 text-green-500" />
-                <span className="text-sm font-medium">Crédibilité</span>
-              </div>
-              <div className="text-2xl font-bold">
-                {Math.round(mockArchives.reduce((acc, a) => acc + a.credibility, 0) / mockArchives.length)}%
-              </div>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Calendar className="h-4 w-4 text-orange-500" />
-                <span className="text-sm font-medium">Période</span>
-              </div>
-              <div className="text-2xl font-bold">XIIe-XIVe</div>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Liste des archives */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredArchives.map((archive) => (
-          <Card key={archive.id} className="overflow-hidden">
+      {loading ? (
+        <Card>
+          <CardContent className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p>Chargement des documents...</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {documents
+            .filter(doc => {
+              const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                 (doc.description && doc.description.toLowerCase().includes(searchTerm.toLowerCase()));
+              const matchesFilter = selectedFilter === 'all' || doc.document_type === selectedFilter;
+              return matchesSearch && matchesFilter;
+            })
+            .map((doc) => (
+          <Card key={doc.id} className="overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  {getTypeIcon(archive.type)}
-                  <CardTitle className="text-lg">{archive.title}</CardTitle>
+                  {getTypeIcon(doc.document_type)}
+                  <CardTitle className="text-lg">{doc.title}</CardTitle>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">
-                    IA: {archive.aiRelevance}%
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    {archive.credibility}% fiable
+                    {Math.round((doc.credibility_score || 0) * 100)}% fiable
                   </Badge>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Image du document */}
-              <div className="relative">
-                <img 
-                  src={archive.url} 
-                  alt={archive.title}
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-                <div className="absolute top-2 right-2 flex gap-1">
-                  <Button size="sm" variant="secondary" className="h-8 px-2">
-                    <Eye className="h-3 w-3" />
-                  </Button>
-                  <Button size="sm" variant="secondary" className="h-8 px-2">
-                    <Download className="h-3 w-3" />
-                  </Button>
+              {/* Document preview */}
+              {doc.document_url && (
+                <div className="relative">
+                  <img 
+                    src={doc.document_url} 
+                    alt={doc.title}
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    <Button size="sm" variant="secondary" className="h-8 px-2">
+                      <Eye className="h-3 w-3" />
+                    </Button>
+                    <Button size="sm" variant="secondary" className="h-8 px-2">
+                      <Download className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Métadonnées */}
               <div className="space-y-2">
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    {archive.author}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {new Date(archive.date).toLocaleDateString('fr-FR')}
-                  </span>
+                  {doc.author && (
+                    <span className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {doc.author}
+                    </span>
+                  )}
+                  {doc.date_created && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {doc.date_created}
+                    </span>
+                  )}
                 </div>
-                <p className="text-sm">{archive.description}</p>
-                <div className="text-xs text-muted-foreground">
-                  <strong>Source:</strong> {archive.source}
-                </div>
-              </div>
-
-              {/* Contenu */}
-              <div className="bg-muted/50 rounded-lg p-3">
-                <div className="text-sm font-medium mb-1">Extrait:</div>
-                <p className="text-sm italic text-muted-foreground">{archive.content}</p>
-              </div>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1">
-                {archive.tags.map((tag, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
+                {doc.description && (
+                  <p className="text-sm">{doc.description}</p>
+                )}
+                {doc.source && (
+                  <div className="text-xs text-muted-foreground">
+                    <strong>Source:</strong> {doc.source}
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
@@ -311,14 +338,15 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
           </Card>
         ))}
       </div>
+      )}
 
-      {filteredArchives.length === 0 && (
+      {documents.length === 0 && !loading && (
         <Card>
           <CardContent className="text-center py-8">
-            <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <Archive className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-lg font-medium mb-2">Aucun document trouvé</p>
             <p className="text-sm text-muted-foreground">
-              Essayez de modifier vos critères de recherche ou utilisez l'IA pour une recherche plus approfondie
+              Les documents d'archives pour cette quête n'ont pas encore été ajoutés
             </p>
           </CardContent>
         </Card>

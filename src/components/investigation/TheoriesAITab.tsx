@@ -168,12 +168,11 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={theory.authorAvatar} />
                     <AvatarFallback>
-                      {theory.author === 'Assistant IA' ? (
+                      {theory.author_profile?.username === 'AI Assistant' ? (
                         <Sparkles className="h-5 w-5 text-purple-500" />
                       ) : (
-                        theory.author[0]
+                        (theory.author_profile?.username || 'A')[0].toUpperCase()
                       )}
                     </AvatarFallback>
                   </Avatar>
