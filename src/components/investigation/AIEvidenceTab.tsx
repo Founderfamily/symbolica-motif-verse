@@ -20,9 +20,12 @@ import {
   AlertTriangle,
   Clock,
   FileText,
-  Box
+  Box,
+  MapPin
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
+import { useQuestEvidence } from '@/hooks/useQuestEvidence';
+import EvidenceUploadDialog from './EvidenceUploadDialog';
 
 interface AIEvidenceTabProps {
   quest: TreasureQuest;
@@ -31,9 +34,8 @@ interface AIEvidenceTabProps {
 const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
-
-  // Preuves vides pour l'instant - à connecter avec vraies données
-  const mockEvidences: any[] = [];
+  
+  const { evidence, isLoading, refetch, validateEvidence, isValidating } = useQuestEvidence(quest.id);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -53,10 +55,15 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
     }
   };
 
-  const filteredEvidences = mockEvidences.filter(evidence =>
-    evidence.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    evidence.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEvidences = evidence.filter(item =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const validatedCount = evidence.filter(e => e.validation_status === 'validated').length;
+  const averageScore = evidence.length > 0 
+    ? Math.round(evidence.reduce((acc, e) => acc + (e.validation_score || 0), 0) / evidence.length * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -84,10 +91,12 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
                 <Filter className="h-4 w-4 mr-2" />
                 Filtres
               </Button>
-              <Button size="sm">
-                <Upload className="h-4 w-4 mr-2" />
-                Nouvelle Preuve
-              </Button>
+              <EvidenceUploadDialog questId={quest.id} onEvidenceUploaded={refetch}>
+                <Button size="sm">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Nouvelle Preuve
+                </Button>
+              </EvidenceUploadDialog>
             </div>
           </div>
 
@@ -98,21 +107,21 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
                 <Brain className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-medium">Analysées IA</span>
               </div>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{evidence.length}</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">Validées</span>
               </div>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{validatedCount}</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="h-4 w-4 text-yellow-500" />
                 <span className="text-sm font-medium">Confiance Moy.</span>
               </div>
-              <div className="text-2xl font-bold">-</div>
+              <div className="text-2xl font-bold">{averageScore}%</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
@@ -126,107 +135,124 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
       </Card>
 
       {/* Liste des preuves */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredEvidences.map((evidence) => (
-          <Card key={evidence.id} className="overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  {getTypeIcon(evidence.type)}
-                  <CardTitle className="text-lg">{evidence.title}</CardTitle>
-                </div>
-                <div className="flex items-center gap-2">
-                  {getStatusIcon(evidence.aiAnalysis.status)}
-                  <Badge variant="outline" className="text-xs">
-                    {evidence.aiAnalysis.confidence}% confiance
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Image de la preuve */}
-              <div className="relative">
-                <img 
-                  src={evidence.imageUrl} 
-                  alt={evidence.title}
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-                <div className="absolute top-2 right-2">
-                  <Button size="sm" variant="secondary" className="h-8 px-2">
-                    <Eye className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Informations */}
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">{evidence.description}</p>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>Par {evidence.submittedBy}</span>
-                  <span>•</span>
-                  <span>{evidence.location}</span>
-                  <span>•</span>
-                  <span>{new Date(evidence.submittedAt).toLocaleDateString('fr-FR')}</span>
-                </div>
-              </div>
-
-              {/* Analyse IA */}
-              <div className="bg-muted/50 rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Brain className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm font-medium">Analyse IA</span>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-xs font-medium text-muted-foreground">Découvertes:</span>
-                    <ul className="text-xs text-muted-foreground mt-1">
-                      {evidence.aiAnalysis.findings.map((finding, index) => (
-                        <li key={index} className="flex items-start gap-1">
-                          <span className="text-green-500">•</span>
-                          <span>{finding}</span>
-                        </li>
-                      ))}
-                    </ul>
+      {isLoading ? (
+        <Card>
+          <CardContent className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p>Chargement des preuves...</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredEvidences.map((evidenceItem) => (
+            <Card key={evidenceItem.id} className="overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    {getTypeIcon(evidenceItem.evidence_type)}
+                    <CardTitle className="text-lg">{evidenceItem.title}</CardTitle>
                   </div>
-                  <div>
-                    <span className="text-xs font-medium text-muted-foreground">Suggestions:</span>
-                    <ul className="text-xs text-muted-foreground mt-1">
-                      {evidence.aiAnalysis.suggestions.map((suggestion, index) => (
-                        <li key={index} className="flex items-start gap-1">
-                          <span className="text-blue-500">→</span>
-                          <span>{suggestion}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(evidenceItem.validation_status)}
+                    <Badge variant="outline" className="text-xs">
+                      {Math.round((evidenceItem.validation_score || 0) * 100)}% confiance
+                    </Badge>
                   </div>
                 </div>
-              </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Image de la preuve */}
+                {evidenceItem.image_url && (
+                  <div className="relative">
+                    <img 
+                      src={evidenceItem.image_url} 
+                      alt={evidenceItem.title}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <div className="absolute top-2 right-2">
+                      <Button size="sm" variant="secondary" className="h-8 px-2">
+                        <Eye className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" className="h-8 px-2">
-                    <ThumbsUp className="h-3 w-3 mr-1" />
-                    {evidence.votes.up}
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-8 px-2">
-                    <ThumbsDown className="h-3 w-3 mr-1" />
-                    {evidence.votes.down}
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-8 px-2">
-                    <MessageCircle className="h-3 w-3 mr-1" />
-                    {evidence.comments}
-                  </Button>
+                {/* Informations */}
+                <div>
+                  {evidenceItem.description && (
+                    <p className="text-sm text-muted-foreground mb-2">{evidenceItem.description}</p>
+                  )}
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>Par {evidenceItem.submitted_by_profile?.username || 'Anonyme'}</span>
+                    {evidenceItem.location_name && (
+                      <>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {evidenceItem.location_name}
+                        </span>
+                      </>
+                    )}
+                    <span>•</span>
+                    <span>{new Date(evidenceItem.created_at).toLocaleDateString('fr-FR')}</span>
+                  </div>
                 </div>
-                <Button size="sm" variant="outline">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Réanalyser
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+
+                {/* Statut de validation */}
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm font-medium">Validation</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Score: {Math.round((evidenceItem.validation_score || 0) * 100)}%</span>
+                    <span>Votes: {evidenceItem.validation_count}</span>
+                    <span className="capitalize">{evidenceItem.validation_status}</span>
+                  </div>
+                </div>
+
+                {/* Actions de validation */}
+                {evidenceItem.validation_status === 'pending' && (
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 px-2"
+                        onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'validate' })}
+                        disabled={isValidating}
+                      >
+                        <ThumbsUp className="h-3 w-3 mr-1" />
+                        Valider
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 px-2"
+                        onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'dispute' })}
+                        disabled={isValidating}
+                      >
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        Contester
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 px-2"
+                        onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'reject' })}
+                        disabled={isValidating}
+                      >
+                        <ThumbsDown className="h-3 w-3 mr-1" />
+                        Rejeter
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {filteredEvidences.length === 0 && (
         <Card>

@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
+import { useQuestTheories } from '@/hooks/useQuestTheories';
+import CreateTheoryDialog from './CreateTheoryDialog';
 
 interface TheoriesAITabProps {
   quest: TreasureQuest;
@@ -33,9 +35,7 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const aiAnalysis = useAIAnalysis();
-
-  // Théories vides pour l'instant - à connecter avec vraies données
-  const mockTheories: any[] = [];
+  const { theories, isLoading, refetch } = useQuestTheories(quest.id);
 
   const handleGenerateTheory = async () => {
     try {
@@ -64,10 +64,16 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
     return null;
   };
 
-  const filteredTheories = mockTheories.filter(theory =>
+  const filteredTheories = theories.filter(theory =>
     theory.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     theory.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const aiGeneratedCount = theories.filter(t => t.author_profile?.username === 'AI Assistant').length;
+  const validatedCount = theories.filter(t => t.status === 'validated').length;
+  const averageScore = theories.length > 0 
+    ? Math.round(theories.reduce((acc, t) => acc + (t.community_score || 0), 0) / theories.length)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -103,10 +109,12 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
                 <Sparkles className="h-4 w-4 mr-2" />
                 {aiAnalysis.isPending ? 'Génération...' : 'Générer Théorie IA'}
               </Button>
-              <Button size="sm" onClick={() => setShowCreateForm(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nouvelle Théorie
-              </Button>
+              <CreateTheoryDialog questId={quest.id}>
+                <Button size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouvelle Théorie
+                </Button>
+              </CreateTheoryDialog>
             </div>
           </div>
 
@@ -117,36 +125,44 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
                 <Brain className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-medium">Théories</span>
               </div>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{theories.length}</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="h-4 w-4 text-purple-500" />
                 <span className="text-sm font-medium">Générées IA</span>
               </div>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{aiGeneratedCount}</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Target className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">Score IA Moy.</span>
               </div>
-              <div className="text-2xl font-bold">-</div>
+              <div className="text-2xl font-bold">{averageScore}</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">Validées</span>
               </div>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{validatedCount}</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Liste des théories */}
-      <div className="space-y-6">
-        {filteredTheories.map((theory) => (
+      {isLoading ? (
+        <Card>
+          <CardContent className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p>Chargement des théories...</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          {filteredTheories.map((theory) => (
           <Card key={theory.id} className="overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
@@ -164,20 +180,20 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
                   <div>
                     <CardTitle className="text-lg">{theory.title}</CardTitle>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>Par {theory.author}</span>
-                      {getAuthorIcon(theory.author)}
+                      <span>Par {theory.author_profile?.username || 'Anonyme'}</span>
+                      {getAuthorIcon(theory.author_profile?.username || '')}
                       <span>•</span>
-                      <span>{new Date(theory.createdAt).toLocaleDateString('fr-FR')}</span>
+                      <span>{new Date(theory.created_at).toLocaleDateString('fr-FR')}</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(theory.status)}
                   <Badge variant="outline" className="text-xs">
-                    IA: {theory.aiScore}%
+                    Score: {theory.community_score}
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
-                    {theory.evidenceCount} preuves
+                    {theory.supporting_evidence?.length || 0} preuves
                   </Badge>
                 </div>
               </div>
@@ -193,7 +209,7 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
                   <span className="text-sm font-medium">Faits supportant</span>
                 </div>
                 <ul className="space-y-1">
-                  {theory.supportingFacts.map((fact, index) => (
+                  {theory.supporting_evidence.map((fact, index) => (
                     <li key={index} className="flex items-start gap-2 text-sm">
                       <span className="text-green-500 mt-1">•</span>
                       <span>{fact}</span>
@@ -205,15 +221,15 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
               {/* Métriques */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <div className="text-lg font-bold">{theory.confidence}%</div>
+                  <div className="text-lg font-bold">{theory.confidence_level}%</div>
                   <div className="text-xs text-muted-foreground">Confiance</div>
                 </div>
                 <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <div className="text-lg font-bold">{theory.aiScore}%</div>
-                  <div className="text-xs text-muted-foreground">Score IA</div>
+                  <div className="text-lg font-bold">{theory.community_score}</div>
+                  <div className="text-xs text-muted-foreground">Score Communauté</div>
                 </div>
                 <div className="text-center p-3 bg-muted/50 rounded-lg">
-                  <div className="text-lg font-bold">{theory.evidenceCount}</div>
+                  <div className="text-lg font-bold">{theory.supporting_evidence?.length || 0}</div>
                   <div className="text-xs text-muted-foreground">Preuves</div>
                 </div>
               </div>
@@ -223,15 +239,11 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="outline" className="h-8 px-2">
                     <ThumbsUp className="h-3 w-3 mr-1" />
-                    {theory.votes.up}
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-8 px-2">
-                    <ThumbsDown className="h-3 w-3 mr-1" />
-                    {theory.votes.down}
+                    {theory.votes_count}
                   </Button>
                   <Button size="sm" variant="outline" className="h-8 px-2">
                     <MessageCircle className="h-3 w-3 mr-1" />
-                    {theory.comments}
+                    Discuter
                   </Button>
                 </div>
                 <div className="flex gap-2">
@@ -247,8 +259,9 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {filteredTheories.length === 0 && (
         <Card>
