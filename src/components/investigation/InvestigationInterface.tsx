@@ -22,7 +22,7 @@ import { TreasureQuest } from '@/types/quests';
 import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import LiveActivityFeed from './LiveActivityFeed';
-import QuestChat from './QuestChat';
+import QuestChatReal from './QuestChatReal';
 import AIEvidenceTab from './AIEvidenceTab';
 import TheoriesAITab from './TheoriesAITab';
 import QuestMapTab from './QuestMapTab';
@@ -203,9 +203,9 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
           <LiveActivityFeed questId={quest.id} />
         </TabsContent>
 
-        <TabsContent value="chat" className="space-y-4">
-          <QuestChat questId={quest.id} questName={quest.title} />
-        </TabsContent>
+              <TabsContent value="chat" className="space-y-4">
+                <QuestChatReal questId={quest.id} questName={quest.title} />
+              </TabsContent>
 
         <TabsContent value="evidence" className="space-y-4">
           <AIEvidenceTab quest={quest} />

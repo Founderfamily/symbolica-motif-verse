@@ -36,43 +36,9 @@ const LiveActivityFeed: React.FC<LiveActivityFeedProps> = ({ questId }) => {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
 
   useEffect(() => {
-    // Simuler des activités en temps réel
-    const mockActivities: ActivityItem[] = [
-      {
-        id: '1',
-        type: 'evidence',
-        user: { id: 'user-1', name: 'Marie Dubois' },
-        content: 'a partagé une nouvelle preuve photographique',
-        timestamp: new Date(Date.now() - 120000).toISOString(),
-        questId
-      },
-      {
-        id: '2',
-        type: 'message',
-        user: { id: 'user-2', name: 'Jean Martin' },
-        content: 'a posté un message dans le chat',
-        timestamp: new Date(Date.now() - 300000).toISOString(),
-        questId
-      },
-      {
-        id: '3',
-        type: 'theory',
-        user: { id: 'user-3', name: 'Sophie Legrand' },
-        content: 'a proposé une nouvelle théorie',
-        timestamp: new Date(Date.now() - 600000).toISOString(),
-        questId
-      },
-      {
-        id: '4',
-        type: 'user_join',
-        user: { id: 'user-4', name: 'Pierre Durand' },
-        content: 'a rejoint la quête',
-        timestamp: new Date(Date.now() - 900000).toISOString(),
-        questId
-      }
-    ];
-
-    setActivities(mockActivities);
+    // Les activités réelles seront chargées depuis la base de données
+    // Pour l'instant, afficher une liste vide car aucune activité n'a eu lieu
+    setActivities([]);
   }, [questId]);
 
   const getActivityIcon = (type: string) => {

@@ -188,7 +188,7 @@ const QuestDetailPage = () => {
           {/* Stats compactes */}
           <div className="grid grid-cols-4 gap-3">
             <div className="text-center">
-              <div className="text-lg font-bold text-amber-800">127</div>
+              <div className="text-lg font-bold text-amber-800">0</div>
               <div className="text-xs text-stone-600">Participants</div>
             </div>
             <div className="text-center">
@@ -196,11 +196,11 @@ const QuestDetailPage = () => {
               <div className="text-xs text-stone-600">Indices</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-bold text-amber-800">89</div>
+              <div className="text-lg font-bold text-amber-800">0</div>
               <div className="text-xs text-stone-600">Preuves</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-bold text-stone-800">234</div>
+              <div className="text-lg font-bold text-stone-800">0</div>
               <div className="text-xs text-stone-600">Discussions</div>
             </div>
           </div>
@@ -212,11 +212,25 @@ const QuestDetailPage = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-stone-800">Espace de Collaboration</h2>
               <div className="flex gap-2">
-                <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
+                <Button 
+                  size="sm" 
+                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  onClick={() => {
+                    const chatTab = document.querySelector('[data-value="chat"]') as HTMLElement;
+                    chatTab?.click();
+                  }}
+                >
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Discuter
                 </Button>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    const evidenceTab = document.querySelector('[data-value="evidence"]') as HTMLElement;
+                    evidenceTab?.click();
+                  }}
+                >
                   <Camera className="w-4 h-4 mr-2" />
                   Partager
                 </Button>
