@@ -18,7 +18,9 @@ import {
   Brain,
   CheckCircle,
   AlertTriangle,
-  Clock
+  Clock,
+  FileText,
+  Box
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 
@@ -30,63 +32,8 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
 
-  // Simuler des preuves avec analyse IA
-  const mockEvidences = [
-    {
-      id: '1',
-      title: 'Inscription sur Pierre Tombale',
-      type: 'photo',
-      submittedBy: 'Marie Dubois',
-      submittedAt: '2024-01-15T10:30:00Z',
-      description: 'Symboles gravés sur une pierre tombale du XIIe siècle',
-      imageUrl: '/api/placeholder/300/200',
-      location: 'Église Saint-Martin',
-      aiAnalysis: {
-        confidence: 85,
-        findings: ['Symboles templiers identifiés', 'Période médiévale confirmée', 'Connexion avec autres preuves détectée'],
-        suggestions: ['Analyser la pierre adjacent', 'Comparer avec le manuscrit de 1204'],
-        status: 'validated'
-      },
-      votes: { up: 12, down: 2 },
-      comments: 8
-    },
-    {
-      id: '2',
-      title: 'Manuscrit Ancien',
-      type: 'document',
-      submittedBy: 'Jean Martin',
-      submittedAt: '2024-01-14T16:45:00Z',
-      description: 'Page d\'un manuscrit mentionnant le trésor',
-      imageUrl: '/api/placeholder/300/200',
-      location: 'Archives Départementales',
-      aiAnalysis: {
-        confidence: 92,
-        findings: ['Texte en latin médiéval', 'Référence géographique précise', 'Authentification positive'],
-        suggestions: ['Traduire passage lignes 15-18', 'Rechercher autres pages du manuscrit'],
-        status: 'validated'
-      },
-      votes: { up: 18, down: 1 },
-      comments: 15
-    },
-    {
-      id: '3',
-      title: 'Objet Métallique',
-      type: 'artifact',
-      submittedBy: 'Sophie Legrand',
-      submittedAt: '2024-01-13T14:20:00Z',
-      description: 'Petite croix en bronze trouvée sur le site',
-      imageUrl: '/api/placeholder/300/200',
-      location: 'Ancien Château',
-      aiAnalysis: {
-        confidence: 67,
-        findings: ['Métal : bronze du XIIIe siècle', 'Motifs religieux', 'Usure cohérente avec l\'âge'],
-        suggestions: ['Analyse métallurgique approfondie', 'Comparaison avec objets similaires'],
-        status: 'pending'
-      },
-      votes: { up: 8, down: 3 },
-      comments: 5
-    }
-  ];
+  // Preuves vides pour l'instant - à connecter avec vraies données
+  const mockEvidences: any[] = [];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -151,34 +98,28 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
                 <Brain className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-medium">Analysées IA</span>
               </div>
-              <div className="text-2xl font-bold">{mockEvidences.length}</div>
+              <div className="text-2xl font-bold">0</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">Validées</span>
               </div>
-              <div className="text-2xl font-bold">
-                {mockEvidences.filter(e => e.aiAnalysis.status === 'validated').length}
-              </div>
+              <div className="text-2xl font-bold">0</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="h-4 w-4 text-yellow-500" />
                 <span className="text-sm font-medium">Confiance Moy.</span>
               </div>
-              <div className="text-2xl font-bold">
-                {Math.round(mockEvidences.reduce((acc, e) => acc + e.aiAnalysis.confidence, 0) / mockEvidences.length)}%
-              </div>
+              <div className="text-2xl font-bold">-</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <MessageCircle className="h-4 w-4 text-purple-500" />
                 <span className="text-sm font-medium">Discussions</span>
               </div>
-              <div className="text-2xl font-bold">
-                {mockEvidences.reduce((acc, e) => acc + e.comments, 0)}
-              </div>
+              <div className="text-2xl font-bold">0</div>
             </div>
           </div>
         </CardContent>

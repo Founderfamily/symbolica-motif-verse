@@ -19,7 +19,8 @@ import {
   TrendingUp,
   Lightbulb,
   Target,
-  CheckCircle
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
@@ -33,66 +34,8 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const aiAnalysis = useAIAnalysis();
 
-  // Simuler des théories avec score IA
-  const mockTheories = [
-    {
-      id: '1',
-      title: 'Théorie du Trésor des Templiers',
-      author: 'Marie Dubois',
-      authorAvatar: null,
-      createdAt: '2024-01-15T10:30:00Z',
-      description: 'Basée sur l\'analyse des symboles trouvés dans l\'église Saint-Martin et les références du manuscrit de 1204, cette théorie suggère que le trésor serait caché dans les souterrains de l\'ancien château.',
-      confidence: 87,
-      aiScore: 92,
-      evidenceCount: 5,
-      supportingFacts: [
-        'Symboles templiers confirmés par analyse IA',
-        'Datation cohérente avec la période historique',
-        'Références géographiques précises dans le manuscrit'
-      ],
-      votes: { up: 23, down: 3 },
-      comments: 12,
-      status: 'active'
-    },
-    {
-      id: '2',
-      title: 'Hypothèse de la Cache Monastique',
-      author: 'Jean Martin',
-      authorAvatar: null,
-      createdAt: '2024-01-14T16:45:00Z',
-      description: 'Les moines auraient dissimulé des reliques précieuses dans un réseau de tunnels sous l\'abbaye. Les inscriptions latines pointent vers une chambre secrète.',
-      confidence: 73,
-      aiScore: 78,
-      evidenceCount: 3,
-      supportingFacts: [
-        'Inscription latine traduite avec précision',
-        'Architecture monastique compatible',
-        'Témoignages historiques convergents'
-      ],
-      votes: { up: 18, down: 7 },
-      comments: 8,
-      status: 'disputed'
-    },
-    {
-      id: '3',
-      title: 'Théorie Générée par IA',
-      author: 'Assistant IA',
-      authorAvatar: null,
-      createdAt: '2024-01-13T14:20:00Z',
-      description: 'L\'analyse croisée des données suggère une localisation alternative basée sur les patterns géographiques et les corrélations temporelles des indices découverts.',
-      confidence: 95,
-      aiScore: 96,
-      evidenceCount: 8,
-      supportingFacts: [
-        'Analyse géospatiale des indices',
-        'Corrélations temporelles détectées',
-        'Patterns reconnus dans d\'autres quêtes similaires'
-      ],
-      votes: { up: 31, down: 2 },
-      comments: 18,
-      status: 'validated'
-    }
-  ];
+  // Théories vides pour l'instant - à connecter avec vraies données
+  const mockTheories: any[] = [];
 
   const handleGenerateTheory = async () => {
     try {
@@ -174,34 +117,28 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
                 <Brain className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-medium">Théories</span>
               </div>
-              <div className="text-2xl font-bold">{mockTheories.length}</div>
+              <div className="text-2xl font-bold">0</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="h-4 w-4 text-purple-500" />
                 <span className="text-sm font-medium">Générées IA</span>
               </div>
-              <div className="text-2xl font-bold">
-                {mockTheories.filter(t => t.author === 'Assistant IA').length}
-              </div>
+              <div className="text-2xl font-bold">0</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Target className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">Score IA Moy.</span>
               </div>
-              <div className="text-2xl font-bold">
-                {Math.round(mockTheories.reduce((acc, t) => acc + t.aiScore, 0) / mockTheories.length)}%
-              </div>
+              <div className="text-2xl font-bold">-</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium">Validées</span>
               </div>
-              <div className="text-2xl font-bold">
-                {mockTheories.filter(t => t.status === 'validated').length}
-              </div>
+              <div className="text-2xl font-bold">0</div>
             </div>
           </div>
         </CardContent>
