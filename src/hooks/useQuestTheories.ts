@@ -36,12 +36,15 @@ export const useQuestTheories = (questId: string) => {
         ...theoryData,
       });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['quest-theories', questId] });
       toast({
         title: "Théorie créée",
         description: "Votre théorie a été soumise avec succès",
       });
+      
+      // Refresh theories list
+      refetch();
     },
     onError: (error) => {
       toast({

@@ -18,6 +18,8 @@ import {
 import { TreasureQuest } from '@/types/quests';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { investigationService } from '@/services/investigationService';
+import AddLocationDialog from './AddLocationDialog';
 
 interface MapTabProps {
   quest: TreasureQuest;
@@ -29,6 +31,7 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [questLocations, setQuestLocations] = useState<any[]>([]);
   const { toast } = useToast();
   
   const mapContainer = React.useRef<HTMLDivElement>(null);
@@ -66,6 +69,42 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
     fetchMapboxToken();
   }, []);
 
+  // Load quest locations
+  useEffect(() => {
+    const loadQuestLocations = async () => {
+      try {
+        const result = await investigationService.getQuestLocations(quest.id);
+        if (result.success) {
+          setQuestLocations(result.data);
+        }
+      } catch (error) {
+        console.error('Error loading quest locations:', error);
+      }
+    };
+
+    loadQuestLocations();
+  }, [quest.id]);
+
+  const refreshLocations = async () => {
+    try {
+      const result = await investigationService.getQuestLocations(quest.id);
+      if (result.success) {
+        setQuestLocations(result.data);
+        
+        // Update map markers
+        if (map.current) {
+          // Remove existing markers and add new ones
+          // This is a simplified approach - in production you'd want to manage markers more efficiently
+          map.current.remove();
+          // Re-initialize map with new data
+          // The useEffect will handle this
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing locations:', error);
+    }
+  };
+
   // Initialize map when token is available
   useEffect(() => {
     if (!mapToken || !mapContainer.current || map.current) return;
@@ -94,46 +133,77 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
       'top-right'
     );
 
-    // Parse quest clues to extract locations
+    // Add markers for quest clues (from quest.clues)
     if (quest.clues && Array.isArray(quest.clues)) {
       quest.clues.forEach((clue: any, index: number) => {
-        if (clue.coordinates) {
-          const [lng, lat] = clue.coordinates;
+        if (clue.location && clue.location.latitude && clue.location.longitude) {
+          const { latitude, longitude } = clue.location;
             
-            // Create marker
-            const marker = new mapboxgl.Marker({ color: '#3B82F6' })
-              .setLngLat([lng, lat])
-              .setPopup(
-                new mapboxgl.Popup({ offset: 25 })
-                  .setHTML(`
-                    <div class="p-2">
-                      <h3 class="font-semibold">Indice ${index + 1}</h3>
-                      <p class="text-sm">${clue.description || 'Emplacement d\'intérêt'}</p>
-                    </div>
-                  `)
-              )
-              .addTo(map.current!);
-          }
-        });
-
-        // Fit map to show all markers if there are coordinates
-        const coordinates = quest.clues
-          .filter((clue: any) => clue.coordinates)
-          .map((clue: any) => clue.coordinates);
-          
-        if (coordinates.length > 0) {
-          const bounds = new mapboxgl.LngLatBounds();
-          coordinates.forEach((coord: [number, number]) => {
-            bounds.extend(coord);
-          });
-          map.current!.fitBounds(bounds, { padding: 50 });
+          // Create marker for quest clue
+          const marker = new mapboxgl.Marker({ color: '#EF4444' })
+            .setLngLat([longitude, latitude])
+            .setPopup(
+              new mapboxgl.Popup({ offset: 25 })
+                .setHTML(`
+                  <div class="p-2">
+                    <h3 class="font-semibold text-red-600">Indice ${index + 1}</h3>
+                    <p class="text-sm">${clue.description || clue.hint || 'Emplacement d\'indice'}</p>
+                    ${clue.title ? `<p class="text-xs text-gray-600">${clue.title}</p>` : ''}
+                  </div>
+                `)
+            )
+            .addTo(map.current!);
         }
-      }
+      });
+    }
+
+    // Add markers for quest locations (from database)
+    questLocations.forEach((location) => {
+      const marker = new mapboxgl.Marker({ color: '#10B981' })
+        .setLngLat([location.longitude, location.latitude])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 })
+            .setHTML(`
+              <div class="p-2">
+                <h3 class="font-semibold text-green-600">${location.name}</h3>
+                <p class="text-sm">${location.description || 'Lieu d\'intérêt'}</p>
+                <p class="text-xs text-gray-600">${location.location_type}</p>
+                ${location.historical_significance ? `<p class="text-xs mt-1">${location.historical_significance}</p>` : ''}
+              </div>
+            `)
+        )
+        .addTo(map.current!);
+    });
+
+    // Fit map to show all markers
+    const allCoordinates = [];
+    
+    // Add clue coordinates
+    if (quest.clues) {
+      quest.clues.forEach((clue: any) => {
+        if (clue.location && clue.location.latitude && clue.location.longitude) {
+          allCoordinates.push([clue.location.longitude, clue.location.latitude]);
+        }
+      });
+    }
+    
+    // Add quest location coordinates
+    questLocations.forEach(location => {
+      allCoordinates.push([location.longitude, location.latitude]);
+    });
+      
+    if (allCoordinates.length > 0) {
+      const bounds = new mapboxgl.LngLatBounds();
+      allCoordinates.forEach((coord: [number, number]) => {
+        bounds.extend(coord);
+      });
+      map.current!.fitBounds(bounds, { padding: 50 });
+    }
 
     return () => {
       map.current?.remove();
     };
-  }, [mapToken, quest]);
+  }, [mapToken, quest, questLocations]);
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -225,10 +295,12 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
                 <Filter className="h-4 w-4 mr-2" />
                 Filtres
               </Button>
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter Lieu
-              </Button>
+              <AddLocationDialog questId={quest.id} onLocationAdded={refreshLocations}>
+                <Button size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter Lieu
+                </Button>
+              </AddLocationDialog>
             </div>
           </div>
 

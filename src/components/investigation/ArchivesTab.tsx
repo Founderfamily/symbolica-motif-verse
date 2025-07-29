@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { investigationService } from '@/services/investigationService';
+import DocumentUploadDialog from './DocumentUploadDialog';
 
 interface ArchivesTabProps {
   quest: TreasureQuest;
@@ -33,21 +34,22 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const loadDocuments = async () => {
+    try {
+      setLoading(true);
+      const result = await investigationService.getQuestDocuments(quest.id);
+      if (result.success) {
+        setDocuments(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading documents:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load quest documents
   useEffect(() => {
-    const loadDocuments = async () => {
-      try {
-        const result = await investigationService.getQuestDocuments(quest.id);
-        if (result.success) {
-          setDocuments(result.data);
-        }
-      } catch (error) {
-        console.error('Error loading documents:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadDocuments();
   }, [quest.id]);
 
@@ -157,10 +159,12 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
                 <Filter className="h-4 w-4 mr-2" />
                 Filtres
               </Button>
-              <Button size="sm">
-                <Upload className="h-4 w-4 mr-2" />
-                Ajouter Document
-              </Button>
+              <DocumentUploadDialog questId={quest.id} onDocumentAdded={loadDocuments}>
+                <Button size="sm">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Ajouter Document
+                </Button>
+              </DocumentUploadDialog>
             </div>
           </div>
 
