@@ -21,6 +21,7 @@ import {
 import { TreasureQuest } from '@/types/quests';
 import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
+import { useAuth } from '@/hooks/useAuth';
 import LiveActivityFeed from './LiveActivityFeed';
 import QuestChatReal from './QuestChatReal';
 import AIEvidenceTab from './AIEvidenceTab';
@@ -39,6 +40,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
 
   const { participants } = useQuestParticipantsSimple(quest.id);
   const aiAnalysis = useAIAnalysis();
+  const { isAdmin } = useAuth();
 
   const handleAIAnalysis = async () => {
     try {
@@ -82,14 +84,16 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
           </div>
           
           <div className="flex items-center gap-3">
-            <Button 
-              onClick={handleAIAnalysis}
-              disabled={aiAnalysis.isPending}
-              variant="outline"
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              {aiAnalysis.isPending ? 'Analyse...' : 'Analyse IA'}
-            </Button>
+            {isAdmin && (
+              <Button 
+                onClick={handleAIAnalysis}
+                disabled={aiAnalysis.isPending}
+                variant="outline"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {aiAnalysis.isPending ? 'Analyse...' : 'Analyse IA'}
+              </Button>
+            )}
             <ContributeEvidenceDialog questId={quest.id} />
           </div>
         </div>

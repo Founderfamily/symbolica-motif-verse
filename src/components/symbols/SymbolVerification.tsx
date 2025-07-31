@@ -77,7 +77,7 @@ const API_CONFIGS = {
 };
 
 export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }) => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [results, setResults] = useState<Record<string, VerificationResult>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('overview');
@@ -362,6 +362,19 @@ export const SymbolVerification: React.FC<SymbolVerificationProps> = ({ symbol }
     if (validResults.length === 0) return 0;
     return Math.round(validResults.reduce((acc, r) => acc + r.confidence, 0) / validResults.length);
   };
+
+  // Only show verification interface to admins
+  if (!isAdmin) {
+    return (
+      <div className="space-y-6">
+        <Alert>
+          <AlertDescription>
+            Cette fonctionnalité de vérification IA est réservée aux administrateurs.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

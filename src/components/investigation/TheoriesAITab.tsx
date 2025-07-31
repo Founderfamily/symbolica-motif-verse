@@ -25,6 +25,7 @@ import {
 import { TreasureQuest } from '@/types/quests';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useQuestTheories } from '@/hooks/useQuestTheories';
+import { useAuth } from '@/hooks/useAuth';
 import CreateTheoryDialog from './CreateTheoryDialog';
 
 interface TheoriesAITabProps {
@@ -36,6 +37,7 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const aiAnalysis = useAIAnalysis();
   const { theories, isLoading, refetch } = useQuestTheories(quest.id);
+  const { isAdmin } = useAuth();
 
   const handleGenerateTheory = async () => {
     try {
@@ -103,14 +105,16 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
                 <Filter className="h-4 w-4 mr-2" />
                 Filtres
               </Button>
-              <Button 
-                size="sm" 
-                onClick={handleGenerateTheory}
-                disabled={aiAnalysis.isPending}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                {aiAnalysis.isPending ? 'Génération...' : 'Générer Théorie IA'}
-              </Button>
+              {isAdmin && (
+                <Button 
+                  size="sm" 
+                  onClick={handleGenerateTheory}
+                  disabled={aiAnalysis.isPending}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {aiAnalysis.isPending ? 'Génération...' : 'Générer Théorie IA'}
+                </Button>
+              )}
               <CreateTheoryDialog questId={quest.id}>
                 <Button size="sm">
                   <Plus className="h-4 w-4 mr-2" />

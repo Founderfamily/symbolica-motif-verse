@@ -18,6 +18,7 @@ import { SymbolVerificationAdmin } from '@/components/admin/SymbolVerificationAd
 import { SourceVoting } from '@/components/symbols/SourceVoting';
 import { CommunityModeration } from '@/components/symbols/CommunityModeration';
 import { TaxonomyDisplay } from '@/components/symbols/TaxonomyDisplay';
+import { useAuth } from '@/hooks/useAuth';
 
 // Helper functions for legacy UUID mapping
 const LEGACY_INDEX_TO_UUID_MAP: Record<number, string> = {
@@ -45,6 +46,7 @@ const getLegacyUuidFromIndex = (index: number): string | null => {
 const SymbolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   // Gestion de la rétrocompatibilité pour les anciens liens avec indices
   const resolvedId = React.useMemo(() => {
@@ -359,16 +361,18 @@ const SymbolDetailPage: React.FC = () => {
                 >
                   Informations
                 </button>
-                <button
-                  onClick={() => setActiveSection('verification')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeSection === 'verification'
-                      ? 'border-amber-500 text-amber-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  Vérification
-                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => setActiveSection('verification')}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeSection === 'verification'
+                        ? 'border-amber-500 text-amber-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    Vérification
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveSection('community')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
