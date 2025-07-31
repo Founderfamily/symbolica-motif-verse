@@ -16,7 +16,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Users
+  Users,
+  Sparkles
 } from 'lucide-react';
 import { investigationService } from '@/services/investigationService';
 import { QuestEvidence } from '@/types/investigation';
@@ -285,6 +286,10 @@ const EvidenceTab: React.FC<EvidenceTabProps> = ({ quest }) => {
                         <Button variant="ghost" size="sm">
                           <Users className="w-3 h-3 mr-1" />
                           Voir Validations
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-purple-600">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Analyse IA
                         </Button>
                       </div>
                     </div>
