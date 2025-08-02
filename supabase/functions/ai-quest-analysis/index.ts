@@ -105,14 +105,15 @@ Deno.serve(async (req) => {
 
     // If generating a theory, save it to database
     if (analysisType === 'theory') {
-      // Get or create AI assistant user
-      let aiUserId = '00000000-0000-0000-0000-000000000001'; // System AI user
+      // Use current user or admin as author
+      const { data: { user } } = await supabase.auth.getUser();
+      let authorId = user?.id || 'db68da96-d289-425b-9162-a474c1805eb3'; // fallback to admin
       
       const { error: theoryError } = await supabase
         .from('quest_theories')
         .insert({
           quest_id: questId,
-          author_id: aiUserId,
+          author_id: authorId,
           title: `Théorie IA - ${new Date().toLocaleDateString('fr-FR')}`,
           description: analysis,
           theory_type: 'ai_generated',

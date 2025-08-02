@@ -105,22 +105,21 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
                 <Filter className="h-4 w-4 mr-2" />
                 Filtres
               </Button>
-              {isAdmin && (
-                <Button 
-                  size="sm" 
-                  onClick={handleGenerateTheory}
-                  disabled={aiAnalysis.isPending}
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {aiAnalysis.isPending ? 'Génération...' : 'Générer Théorie IA'}
-                </Button>
-              )}
               <CreateTheoryDialog questId={quest.id}>
                 <Button size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Nouvelle Théorie
                 </Button>
               </CreateTheoryDialog>
+              <Button 
+                size="sm" 
+                onClick={handleGenerateTheory}
+                disabled={aiAnalysis.isPending}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                {aiAnalysis.isPending ? 'Génération...' : 'Générer Théorie IA'}
+              </Button>
             </div>
           </div>
 
