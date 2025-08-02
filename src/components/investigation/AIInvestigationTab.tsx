@@ -123,13 +123,55 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
         investigationProgress={65}
       />
 
-      {/* En-tête avec insights IA proactifs */}
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+      {/* En-tête avec actions proactives */}
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-blue-600" />
-            Assistant IA Investigation - Insights en Temps Réel
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-primary animate-pulse" />
+              <CardTitle>🤖 IA Enquêteur Proactif</CardTitle>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => proactiveAI.searchHistoricalSources?.()}
+                disabled={proactiveAI.isSearchingSources}
+              >
+                <Search className={`h-4 w-4 mr-2 ${proactiveAI.isSearchingSources ? 'animate-spin' : ''}`} />
+                {proactiveAI.isSearchingSources ? 'Fouille...' : 'Fouiller Archives'}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => proactiveAI.generateTheories?.()}
+                disabled={proactiveAI.isGeneratingTheories}
+              >
+                <Lightbulb className={`h-4 w-4 mr-2 ${proactiveAI.isGeneratingTheories ? 'animate-pulse' : ''}`} />
+                {proactiveAI.isGeneratingTheories ? 'Analyse...' : 'Générer Théories'}
+              </Button>
+              <Button 
+                size="sm"
+                onClick={() => proactiveAI.startProactiveInvestigation?.('full_investigation')}
+                disabled={proactiveAI.isInvestigating}
+                className="bg-gradient-to-r from-primary to-primary/80"
+              >
+                <Sparkles className={`h-4 w-4 mr-2 ${proactiveAI.isInvestigating ? 'animate-spin' : ''}`} />
+                {proactiveAI.isInvestigating ? 'Investigation...' : 'Investigation IA'}
+              </Button>
+            </div>
+          </div>
+          {proactiveAI.isInvestigating && (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Search className="h-4 w-4 animate-bounce" />
+                L'IA enquête activement... Recherche de sources, génération de théories, détection d'anomalies
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '65%' }}></div>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {proactiveAI.insights.length === 0 && !proactiveAI.isLoading && (
@@ -163,20 +205,12 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
             </div>
           )}
 
-          {/* Actions IA proactives */}
-          <div className="flex flex-wrap gap-3">
-            <Button 
-              size="sm" 
-              onClick={() => setAiSuggestionsDialog(true)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Lightbulb className="h-4 w-4 mr-2" />
-              Suggestions IA
-            </Button>
+          {/* Actions IA secondaires */}
+          <div className="flex flex-wrap gap-3 pt-4 border-t">
             <Button 
               size="sm" 
               variant="outline"
-              onClick={() => proactiveAI.analyzeConnections()}
+              onClick={() => proactiveAI.analyzeConnections?.()}
               disabled={proactiveAI.isAnalyzingConnections}
             >
               <Zap className="h-4 w-4 mr-2" />
@@ -185,7 +219,7 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
             <Button 
               size="sm" 
               variant="outline"
-              onClick={() => proactiveAI.regenerateInsights()}
+              onClick={() => proactiveAI.regenerateInsights?.()}
               disabled={proactiveAI.isRegeneratingInsights}
             >
               <Target className="h-4 w-4 mr-2" />
