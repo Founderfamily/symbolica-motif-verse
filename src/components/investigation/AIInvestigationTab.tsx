@@ -95,10 +95,10 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'high': return 'bg-red-50 text-red-700 border border-red-200';
+      case 'medium': return 'bg-amber-50 text-amber-700 border border-amber-200';
+      case 'low': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+      default: return 'bg-muted/50 text-muted-foreground border border-border';
     }
   };
 
@@ -124,19 +124,19 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             {proactiveAI.insights.map((insight, index) => (
-              <div key={index} className={`p-4 rounded-lg border ${getPriorityColor(insight.priority)}`}>
-                <div className="flex items-center gap-2 mb-2">
+              <Card key={index} className={`p-4 ${getPriorityColor(insight.priority)}`}>
+                <div className="flex items-center gap-2 mb-3">
                   {insight.type === 'missing_evidence' && <FileX className="h-4 w-4" />}
                   {insight.type === 'pattern_detected' && <TrendingUp className="h-4 w-4" />}
                   {insight.type === 'location_correlation' && <MapPin className="h-4 w-4" />}
                   <span className="font-medium text-sm">{insight.title}</span>
                 </div>
-                <p className="text-xs mb-2">{insight.description}</p>
-                <Button size="sm" variant="outline" className="h-6 text-xs">
+                <p className="text-xs text-muted-foreground mb-3">{insight.description}</p>
+                <Button size="sm" variant="outline" className="h-7 text-xs border-current">
                   <ArrowRight className="h-3 w-3 mr-1" />
                   {insight.action}
                 </Button>
-              </div>
+              </Card>
             ))}
           </div>
 
