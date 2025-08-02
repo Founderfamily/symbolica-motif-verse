@@ -24,8 +24,7 @@ import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useAuth } from '@/hooks/useAuth';
 import LiveActivityFeed from './LiveActivityFeed';
 import QuestChatReal from './QuestChatReal';
-import AIEvidenceTab from './AIEvidenceTab';
-import TheoriesAITab from './TheoriesAITab';
+import AIInvestigationTab from './AIInvestigationTab';
 import MapTab from './MapTab';
 import ArchivesTab from './ArchivesTab';
 import ContributeEvidenceDialog from '../quests/ContributeEvidenceDialog';
@@ -176,7 +175,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
 
       {/* Interface à onglets */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+        <TabsList className="grid w-full grid-cols-5 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
           <TabsTrigger value="live" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <Activity className="w-4 h-4" />
             <span className="hidden sm:inline">Live</span>
@@ -185,13 +184,9 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
             <MessageSquare className="w-4 h-4" />
             <span className="hidden sm:inline">Chat</span>
           </TabsTrigger>
-          <TabsTrigger value="evidence" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
-            <Scan className="w-4 h-4" />
-            <span className="hidden sm:inline">Preuves IA</span>
-          </TabsTrigger>
-          <TabsTrigger value="theories" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
+          <TabsTrigger value="investigation" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <Brain className="w-4 h-4" />
-            <span className="hidden sm:inline">Théories</span>
+            <span className="hidden sm:inline">Investigation IA</span>
           </TabsTrigger>
           <TabsTrigger value="map" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <MapPin className="w-4 h-4" />
@@ -211,12 +206,8 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
                 <QuestChatReal questId={quest.id} questName={quest.title} />
               </TabsContent>
 
-        <TabsContent value="evidence" className="space-y-4">
-          <AIEvidenceTab quest={quest} />
-        </TabsContent>
-
-        <TabsContent value="theories" className="space-y-4">
-          <TheoriesAITab quest={quest} />
+        <TabsContent value="investigation" className="space-y-4">
+          <AIInvestigationTab quest={quest} />
         </TabsContent>
 
         <TabsContent value="map" className="space-y-4">
