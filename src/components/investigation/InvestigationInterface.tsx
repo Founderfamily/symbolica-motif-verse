@@ -26,7 +26,7 @@ import LiveActivityFeed from './LiveActivityFeed';
 import QuestChatReal from './QuestChatReal';
 import AIEvidenceTab from './AIEvidenceTab';
 import TheoriesAITab from './TheoriesAITab';
-import QuestMapTab from './QuestMapTab';
+import MapTab from './MapTab';
 import ArchivesTab from './ArchivesTab';
 import ContributeEvidenceDialog from '../quests/ContributeEvidenceDialog';
 
@@ -220,7 +220,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
         </TabsContent>
 
         <TabsContent value="map" className="space-y-4">
-          <QuestMapTab quest={quest} />
+          <MapTab quest={quest} />
         </TabsContent>
 
         <TabsContent value="archives" className="space-y-4">
