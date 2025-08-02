@@ -41,13 +41,21 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
   useEffect(() => {
     const fetchMapboxToken = async () => {
       try {
+        console.log('🗺️ [MapTab] Fetching Mapbox token...');
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
         
-        if (error) throw error;
+        console.log('🗺️ [MapTab] Token response:', { data, error });
         
-        if (data.token) {
+        if (error) {
+          console.error('🗺️ [MapTab] Token fetch error:', error);
+          throw error;
+        }
+        
+        if (data && data.token) {
+          console.log('✅ [MapTab] Token obtained successfully');
           setMapToken(data.token);
         } else {
+          console.error('❌ [MapTab] No token in response:', data);
           toast({
             title: "Token Mapbox manquant",
             description: "La carte interactive nécessite un token Mapbox",
@@ -55,7 +63,7 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
           });
         }
       } catch (error) {
-        console.error('Error fetching Mapbox token:', error);
+        console.error('❌ [MapTab] Error fetching Mapbox token:', error);
         toast({
           title: "Erreur de configuration",
           description: "Impossible de charger la carte interactive",
