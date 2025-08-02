@@ -25,7 +25,9 @@ import {
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { useQuestEvidence } from '@/hooks/useQuestEvidence';
+import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import EvidenceUploadDialog from './EvidenceUploadDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface AIEvidenceTabProps {
   quest: TreasureQuest;
@@ -34,8 +36,11 @@ interface AIEvidenceTabProps {
 const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
+  const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   
   const { evidence, isLoading, refetch, validateEvidence, isValidating } = useQuestEvidence(quest.id);
+  const aiAnalysis = useAIAnalysis();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -64,6 +69,20 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
   const averageScore = evidence.length > 0 
     ? Math.round(evidence.reduce((acc, e) => acc + (e.validation_score || 0), 0) / evidence.length * 100)
     : 0;
+
+  const handleEvidenceAnalysis = async (evidenceItem: any) => {
+    try {
+      setSelectedEvidence(evidenceItem.id);
+      const result = await aiAnalysis.mutateAsync({ 
+        questId: quest.id, 
+        analysisType: 'general' // Using general for evidence analysis
+      });
+      setAnalysisResult(result.analysis);
+      setAnalysisDialogOpen(true);
+    } catch (error) {
+      console.error('Error analyzing evidence:', error);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -211,43 +230,55 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
                   </div>
                 </div>
 
-                {/* Actions de validation */}
-                {evidenceItem.validation_status === 'pending' && (
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 px-2"
-                        onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'validate' })}
-                        disabled={isValidating}
-                      >
-                        <ThumbsUp className="h-3 w-3 mr-1" />
-                        Valider
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 px-2"
-                        onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'dispute' })}
-                        disabled={isValidating}
-                      >
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        Contester
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 px-2"
-                        onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'reject' })}
-                        disabled={isValidating}
-                      >
-                        <ThumbsDown className="h-3 w-3 mr-1" />
-                        Rejeter
-                      </Button>
-                    </div>
+                {/* Actions de validation et analyse */}
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2">
+                    {evidenceItem.validation_status === 'pending' && (
+                      <>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 px-2"
+                          onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'validate' })}
+                          disabled={isValidating}
+                        >
+                          <ThumbsUp className="h-3 w-3 mr-1" />
+                          Valider
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 px-2"
+                          onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'dispute' })}
+                          disabled={isValidating}
+                        >
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Contester
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 px-2"
+                          onClick={() => validateEvidence({ evidenceId: evidenceItem.id, voteType: 'reject' })}
+                          disabled={isValidating}
+                        >
+                          <ThumbsDown className="h-3 w-3 mr-1" />
+                          Rejeter
+                        </Button>
+                      </>
+                    )}
                   </div>
-                )}
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-8 px-2 bg-blue-50 hover:bg-blue-100"
+                    onClick={() => handleEvidenceAnalysis(evidenceItem)}
+                    disabled={aiAnalysis.isPending}
+                  >
+                    <Brain className="h-3 w-3 mr-1" />
+                    {aiAnalysis.isPending && selectedEvidence === evidenceItem.id ? 'Analyse...' : 'Analyse IA'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -265,6 +296,32 @@ const AIEvidenceTab: React.FC<AIEvidenceTabProps> = ({ quest }) => {
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog d'analyse IA */}
+      <Dialog open={analysisDialogOpen} onOpenChange={setAnalysisDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-blue-500" />
+              Analyse IA de la Preuve
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {analysisResult ? (
+              <div className="prose prose-sm max-w-none">
+                <div className="whitespace-pre-wrap bg-muted/50 p-4 rounded-lg">
+                  {analysisResult}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p>Analyse en cours...</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

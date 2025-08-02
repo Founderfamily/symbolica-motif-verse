@@ -151,6 +151,26 @@ Deno.serve(async (req) => {
   }
 });
 
+function buildEvidencePrompt(context: any): string {
+  return `Analyse cette preuve spécifique pour la quête "${context.quest.title}" :
+
+**Preuve analysée :** ${context.evidence[0]?.title || 'Preuve non spécifiée'}
+**Description :** ${context.evidence[0]?.description || 'Aucune description'}
+**Type :** ${context.evidence[0]?.evidence_type || 'Type non spécifié'}
+
+**Contexte de la quête :**
+${context.quest.description || 'Non spécifiée'}
+
+Fournis une analyse détaillée de cette preuve incluant :
+1. **Authenticité** - évaluation de la crédibilité
+2. **Pertinence historique** - lien avec la période concernée  
+3. **Signification** - que révèle cette preuve
+4. **Recommandations** - prochaines étapes d'investigation
+5. **Liens potentiels** - avec d'autres preuves ou indices
+
+Sois objectif et factuel dans ton analyse.`;
+}
+
 function buildTheoryPrompt(context: any): string {
   return `Analyse cette quête de trésor et génère une nouvelle théorie basée sur les données suivantes :
 

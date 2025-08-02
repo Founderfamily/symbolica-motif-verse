@@ -45,8 +45,8 @@ const TheoriesAITab: React.FC<TheoriesAITabProps> = ({ quest }) => {
         questId: quest.id, 
         analysisType: 'theory' 
       });
-      // Refresh theories after AI generation
-      refetch();
+      // Force refresh of theories after successful generation
+      setTimeout(() => refetch(), 1000);
     } catch (error) {
       console.error('Erreur génération théorie:', error);
     }
