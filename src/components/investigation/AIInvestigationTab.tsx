@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AIInvestigationStatusBar } from './AIInvestigationStatusBar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -33,7 +34,8 @@ import {
   ArrowRight,
   Link,
   BookOpen,
-  Compass
+  Compass,
+  Bot
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { useQuestEvidence } from '@/hooks/useQuestEvidence';
@@ -113,6 +115,14 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
   return (
     <div className="space-y-6">
+      {/* Barre de statut IA */}
+      <AIInvestigationStatusBar 
+        isInvestigating={proactiveAI.isInvestigating}
+        isSearchingSources={proactiveAI.isSearchingSources}
+        isGeneratingTheories={proactiveAI.isGeneratingTheories}
+        investigationProgress={65}
+      />
+
       {/* En-tête avec insights IA proactifs */}
       <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader>
@@ -122,23 +132,36 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {proactiveAI.insights.map((insight, index) => (
-              <Card key={index} className={`p-4 ${getPriorityColor(insight.priority)}`}>
-                <div className="flex items-center gap-2 mb-3">
-                  {insight.type === 'missing_evidence' && <FileX className="h-4 w-4" />}
-                  {insight.type === 'pattern_detected' && <TrendingUp className="h-4 w-4" />}
-                  {insight.type === 'location_correlation' && <MapPin className="h-4 w-4" />}
-                  <span className="font-medium text-sm">{insight.title}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mb-3">{insight.description}</p>
-                <Button size="sm" variant="outline" className="h-7 text-xs border-current">
-                  <ArrowRight className="h-3 w-3 mr-1" />
-                  {insight.action}
-                </Button>
-              </Card>
-            ))}
-          </div>
+          {proactiveAI.insights.length === 0 && !proactiveAI.isLoading && (
+            <div className="text-center py-8">
+              <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-4">L'IA n'a pas encore commencé l'investigation</p>
+              <Button onClick={() => proactiveAI.startProactiveInvestigation?.('full_investigation')}>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Démarrer l'Investigation IA
+              </Button>
+            </div>
+          )}
+          
+          {proactiveAI.insights.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              {proactiveAI.insights.map((insight, index) => (
+                <Card key={index} className={`p-4 ${getPriorityColor(insight.priority)}`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    {insight.type === 'missing_evidence' && <FileX className="h-4 w-4" />}
+                    {insight.type === 'pattern_detected' && <TrendingUp className="h-4 w-4" />}
+                    {insight.type === 'location_correlation' && <MapPin className="h-4 w-4" />}
+                    <span className="font-medium text-sm">{insight.title}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">{insight.description}</p>
+                  <Button size="sm" variant="outline" className="h-7 text-xs border-current">
+                    <ArrowRight className="h-3 w-3 mr-1" />
+                    {insight.action}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Actions IA proactives */}
           <div className="flex flex-wrap gap-3">
