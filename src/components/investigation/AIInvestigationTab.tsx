@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SimpleAITest } from './SimpleAITest';
 import { Button } from '@/components/ui/button';
 import { Brain, Search, Lightbulb, Network } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
@@ -70,28 +69,8 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
   return (
     <div className="space-y-6">
-      {/* Section Diagnostic - Tests IA */}
+      {/* Investigation IA Avancée */}
       <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Brain className="h-6 w-6 text-primary animate-pulse" />
-            <div>
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Diagnostic IA - Tests de Connectivité
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Vérification de l'état de fonctionnement du système IA
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <SimpleAITest questId={quest.id} />
-        </CardContent>
-      </Card>
-
-      {/* Section Fonctionnalités IA */}
-      <Card className="border-2 border-secondary/20 bg-gradient-to-r from-secondary/5 to-accent/5">
         <CardHeader>
           <div className="flex items-center gap-3">
             <Brain className="h-6 w-6 text-secondary" />
