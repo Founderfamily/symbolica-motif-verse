@@ -89,7 +89,7 @@ export type Database = {
       ai_investigations: {
         Row: {
           created_at: string
-          created_by: string
+          created_by: string | null
           evidence_used: Json | null
           id: string
           investigation_type: string
@@ -99,7 +99,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string | null
           evidence_used?: Json | null
           id?: string
           investigation_type: string
@@ -109,7 +109,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           evidence_used?: Json | null
           id?: string
           investigation_type?: string
@@ -4651,6 +4651,16 @@ export type Database = {
           p_details?: Json
         }
         Returns: undefined
+      }
+      insert_ai_investigation: {
+        Args: {
+          p_quest_id: string
+          p_investigation_type: string
+          p_request_data: Json
+          p_result: Json
+          p_user_id?: string
+        }
+        Returns: string
       }
       is_admin: {
         Args: Record<PropertyKey, never>

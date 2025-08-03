@@ -222,38 +222,37 @@ Réponds en français avec une analyse structurée et détaillée.`;
         const investigationResult = openaiData.choices[0].message.content;
         console.log('✅ [AI-INVESTIGATION-V2] Investigation complète générée');
         
-        // Sauvegarder l'investigation dans la base de données si l'utilisateur est authentifié
+        // Sauvegarder l'investigation en utilisant la fonction SECURITY DEFINER
         let savedInvestigation = null;
         let saveError = null;
         
-        if (canSave) {
-          console.log('💾 [AI-INVESTIGATION-V2] Sauvegarde en base...');
-          const { data: saved, error: error } = await supabase
-            .from('ai_investigations')
-            .insert({
-              quest_id: questId,
-              investigation_type: 'full_investigation',
-              result_content: {
-                investigation: investigationResult,
+        try {
+          console.log('💾 [AI-INVESTIGATION-V2] Sauvegarde en base avec fonction sécurisée...');
+          const { data: investigationId, error: error } = await supabase
+            .rpc('insert_ai_investigation', {
+              p_quest_id: questId,
+              p_investigation_type: 'full_investigation',
+              p_request_data: {
                 quest_data: questData,
                 evidence_count: existingEvidence?.length || 0
               },
-              evidence_used: existingEvidence || [],
-              created_by: userId
-            })
-            .select()
-            .single();
+              p_result: {
+                investigation: investigationResult,
+                evidence_used: existingEvidence || []
+              },
+              p_user_id: canSave ? userId : null
+            });
 
-          savedInvestigation = saved;
-          saveError = error;
-
-          if (saveError) {
-            console.error('❌ [AI-INVESTIGATION-V2] Erreur sauvegarde:', saveError);
+          if (error) {
+            console.error('❌ [AI-INVESTIGATION-V2] Erreur sauvegarde:', error);
+            saveError = error;
           } else {
-            console.log('✅ [AI-INVESTIGATION-V2] Investigation sauvegardée avec l\'ID:', savedInvestigation.id);
+            savedInvestigation = { id: investigationId };
+            console.log('✅ [AI-INVESTIGATION-V2] Investigation sauvegardée avec l\'ID:', investigationId);
           }
-        } else {
-          console.log('⚠️ [AI-INVESTIGATION-V2] Pas de sauvegarde - utilisateur non authentifié');
+        } catch (error) {
+          console.error('❌ [AI-INVESTIGATION-V2] Erreur lors de la sauvegarde:', error);
+          saveError = error;
         }
         
         // Réponse ultra-robuste avec fallbacks multiples
