@@ -83,6 +83,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
           </div>
           
           <div className="flex items-center gap-3">
+            <ContributeEvidenceDialog questId={quest.id} />
             {isAdmin && (
               <Button 
                 onClick={handleAIAnalysis}
@@ -93,7 +94,6 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
                 {aiAnalysis.isPending ? 'Analyse...' : 'Analyse IA'}
               </Button>
             )}
-            <ContributeEvidenceDialog questId={quest.id} />
           </div>
         </div>
         
