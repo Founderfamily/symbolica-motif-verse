@@ -1,6 +1,9 @@
 
 project_id = "djczgpmhrbirbqrycodq"
 
+[functions.ai-investigation-v2]
+verify_jwt = false
+
 [functions.proactive-investigation]
 verify_jwt = false
 
