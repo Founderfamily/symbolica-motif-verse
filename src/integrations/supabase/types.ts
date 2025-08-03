@@ -86,6 +86,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_investigations: {
+        Row: {
+          created_at: string
+          created_by: string
+          evidence_used: Json | null
+          id: string
+          investigation_type: string
+          quest_id: string
+          result_content: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          evidence_used?: Json | null
+          id?: string
+          investigation_type: string
+          quest_id: string
+          result_content: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          evidence_used?: Json | null
+          id?: string
+          investigation_type?: string
+          quest_id?: string
+          result_content?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_pattern_suggestions: {
         Row: {
           ai_model_version: string | null

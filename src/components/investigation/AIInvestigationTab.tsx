@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Brain, Search, Lightbulb, Network } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Brain, Search, Lightbulb, Network, History } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { useProactiveAI } from '@/hooks/useProactiveAI';
+import { AIInvestigationHistory } from './AIInvestigationHistory';
 
 interface AIInvestigationTabProps {
   quest: TreasureQuest;
@@ -109,22 +111,35 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
   return (
     <div className="space-y-6">
-      {/* Investigation IA Avancée */}
-      <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Brain className="h-6 w-6 text-secondary" />
-            <div>
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">
-                Investigation IA Avancée
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Outils d'investigation intelligente pour analyser la quête
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <Tabs defaultValue="tools" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="tools" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            Outils IA
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
+            <History className="h-4 w-4" />
+            Historique
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tools" className="space-y-6">
+          {/* Investigation IA Avancée */}
+          <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <Brain className="h-6 w-6 text-secondary" />
+                <div>
+                  <CardTitle className="text-xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">
+                    Investigation IA Avancée
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Outils d'investigation intelligente pour analyser la quête
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
           {/* Boutons d'action IA */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Button
@@ -232,8 +247,14 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
               </CardContent>
             </Card>
           )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-6">
+          <AIInvestigationHistory questId={quest.id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

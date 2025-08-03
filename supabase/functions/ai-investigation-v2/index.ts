@@ -107,6 +107,9 @@ serve(async (req) => {
       console.log('🔍 [AI-INVESTIGATION-V2] Investigation complète demandée');
       
       const openaiKey = Deno.env.get('OPENAI_API_KEY');
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
+      const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+      
       if (!openaiKey) {
         return new Response(JSON.stringify({ 
           status: 'error', 
@@ -116,8 +119,35 @@ serve(async (req) => {
         });
       }
 
+      // Créer client Supabase
+      const supabase = createClient(supabaseUrl!, supabaseKey!);
+      
       const questData = body.questData || {};
+      const questId = body.questId;
+      const userId = body.userId || 'anonymous';
+      
       console.log('📝 [AI-INVESTIGATION-V2] Données quête reçues:', Object.keys(questData));
+
+      // Récupérer les preuves existantes pour cette quête
+      console.log('🔍 [AI-INVESTIGATION-V2] Récupération des preuves existantes...');
+      const { data: existingEvidence, error: evidenceError } = await supabase
+        .from('quest_evidence')
+        .select('*')
+        .eq('quest_id', questId);
+
+      if (evidenceError) {
+        console.error('❌ [AI-INVESTIGATION-V2] Erreur récupération preuves:', evidenceError);
+      }
+
+      const evidenceContext = existingEvidence && existingEvidence.length > 0 
+        ? `\n\nPREUVES EXISTANTES SOUMISES PAR LA COMMUNAUTÉ :\n${existingEvidence.map((evidence: any, index: number) => 
+            `${index + 1}. ${evidence.title} (${evidence.evidence_type})
+               - Description: ${evidence.description || 'Non spécifiée'}
+               - Localisation: ${evidence.location_name || 'Non spécifiée'}
+               - Statut de validation: ${evidence.validation_status}
+               - Score: ${evidence.validation_score}`
+          ).join('\n')}`
+        : '\n\nAucune preuve n\'a encore été soumise par la communauté pour cette quête.';
 
       const investigationPrompt = `Tu es un expert en recherche historique et symbolique. Analyse cette quête de trésor et fournis une investigation complète.
 
@@ -128,12 +158,21 @@ Données de la quête:
 - Description: ${questData.description || 'Non spécifié'}
 - Contexte historique: ${questData.story_background || 'Non spécifié'}
 
+Indices de la quête :
+${questData.clues?.map((clue: any, index: number) => 
+  `${index + 1}. ${clue.title}: ${clue.description} (Indice: ${clue.hint})`
+).join('\n')}
+
+${evidenceContext}
+
 Instructions:
 1. Analyse les éléments historiques et symboliques
 2. Identifie les connexions potentielles entre les indices
-3. Suggère des pistes de recherche supplémentaires
-4. Propose des théories sur la localisation
-5. Recommande des sources à consulter
+3. Intègre et analyse les preuves existantes soumises par la communauté
+4. Suggère des pistes de recherche supplémentaires basées sur les éléments historiques et les preuves
+5. Propose des théories sur la localisation
+6. Recommande des sources à consulter
+7. Identifie les types de preuves supplémentaires à rechercher
 
 Réponds en français avec une analyse structurée et détaillée.`;
 
@@ -160,12 +199,38 @@ Réponds en français avec une analyse structurée et détaillée.`;
         }
 
         const openaiData = await openaiResponse.json();
+        const investigationResult = openaiData.choices[0].message.content;
         console.log('✅ [AI-INVESTIGATION-V2] Investigation complète générée');
+        
+        // Sauvegarder l'investigation dans la base de données
+        console.log('💾 [AI-INVESTIGATION-V2] Sauvegarde en base...');
+        const { data: savedInvestigation, error: saveError } = await supabase
+          .from('ai_investigations')
+          .insert({
+            quest_id: questId,
+            investigation_type: 'full_investigation',
+            result_content: {
+              investigation: investigationResult,
+              quest_data: questData,
+              evidence_count: existingEvidence?.length || 0
+            },
+            evidence_used: existingEvidence || [],
+            created_by: userId
+          })
+          .select()
+          .single();
+
+        if (saveError) {
+          console.error('❌ [AI-INVESTIGATION-V2] Erreur sauvegarde:', saveError);
+        } else {
+          console.log('✅ [AI-INVESTIGATION-V2] Investigation sauvegardée avec l\'ID:', savedInvestigation.id);
+        }
         
         return new Response(JSON.stringify({ 
           status: 'success', 
           message: 'Investigation complète générée',
-          investigation: openaiData.choices[0].message.content,
+          investigation: investigationResult,
+          investigation_id: savedInvestigation?.id,
           timestamp: new Date().toISOString()
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

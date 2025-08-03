@@ -55,11 +55,15 @@ export const useProactiveAI = (questId: string) => {
     mutationFn: async ({ questId, questData }: { questId: string, questData?: any }) => {
       console.log('🚀 Starting proactive investigation for quest:', questId);
       
+      // Récupérer l'ID utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
         body: { 
           action: 'full_investigation',
           questId,
           questData,
+          userId: user?.id || 'anonymous',
           timestamp: new Date().toISOString()
         }
       });
