@@ -1,36 +1,32 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
-import { investigationService } from '@/services/investigationService';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { errorRecoveryService } from '@/services/errorRecoveryService';
 
 export const useProactiveAI = (questId: string) => {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   
   // Protection contre double-clic et états de verrous
-  const [actionLocks, setActionLocks] = useState({
-    investigating: false,
-    searchingSources: false,
-    generatingTheories: false,
-    analyzing: false,
-    regenerating: false
+  const actionLocks = useRef({
+    investigation: false,
+    sources: false,
+    theories: false,
+    connections: false,
   });
   
   // Références pour le debouncing
   const debounceTimers = useRef<{ [key: string]: NodeJS.Timeout }>({});
   const lastActionTime = useRef<{ [key: string]: number }>({});
   
-  // Fonction de debouncing optimisée pour une meilleure responsivité (200ms)
-  const debounceAction = useCallback((actionKey: string, action: () => void, delay = 200) => {
+  // Fonction de debouncing optimisée
+  const debounceAction = useCallback((actionKey: string, action: () => Promise<any>, delay = 200) => {
     const now = Date.now();
     const lastTime = lastActionTime.current[actionKey] || 0;
     
     // Si la dernière action était il y a moins de 200ms, ignorer
     if (now - lastTime < delay) {
       console.log(`⏱️ Action ${actionKey} trop rapide - dernière: ${now - lastTime}ms`);
-      return;
+      return Promise.resolve();
     }
     
     // Clear le timer précédent s'il existe
@@ -38,373 +34,219 @@ export const useProactiveAI = (questId: string) => {
       clearTimeout(debounceTimers.current[actionKey]);
     }
     
-    // Exécuter immédiatement sans timer supplémentaire
+    // Exécuter immédiatement
     console.log(`🚀 Exécution action ${actionKey}`);
     lastActionTime.current[actionKey] = now;
-    action();
+    return action();
   }, []);
 
   // Fonction de récupération d'erreur
-  const handleError = useCallback(async (error: Error, context: string) => {
+  const handleError = useCallback((error: Error, context: string) => {
     console.error(`Erreur ${context}:`, error);
-    
-    const recovered = await errorRecoveryService.recoverFromError(error, context);
-    if (!recovered) {
-      toast({
-        title: "Erreur",
-        description: `${context}: ${error.message}`,
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Erreur",
+      description: `${context}: ${error.message}`,
+      variant: "destructive",
+    });
   }, [toast]);
 
-  // Insights IA proactifs
-  const {
-    data: insights,
-    isLoading: insightsLoading,
-    refetch: refetchInsights,
-    error: insightsError
-  } = useQuery({
-    queryKey: ['proactive-insights', questId],
-    queryFn: () => investigationService.generateProactiveInsights(questId),
-    enabled: !!questId,
-    refetchInterval: 30000,
-    retry: (failureCount, error) => {
-      if (failureCount >= 3) return false;
-      handleError(error as Error, 'fetch-insights');
-      return true;
-    }
-  });
-
-  // Suggestions de zones d'investigation
-  const {
-    data: investigationAreas,
-    isLoading: areasLoading,
-    refetch: refetchAreas
-  } = useQuery({
-    queryKey: ['investigation-areas', questId],
-    queryFn: () => investigationService.suggestInvestigationAreas(questId),
-    enabled: !!questId,
-    retry: 2
-  });
-
-  // Analyse des connexions
-  const {
-    data: connections,
-    isLoading: connectionsLoading,
-    refetch: refetchConnections
-  } = useQuery({
-    queryKey: ['evidence-theory-connections', questId],
-    queryFn: () => investigationService.analyzeEvidenceTheoryConnections(questId),
-    enabled: !!questId,
-    retry: 2
-  });
-
-  // Détection de patterns
-  const {
-    data: patterns,
-    isLoading: patternsLoading,
-    refetch: refetchPatterns
-  } = useQuery({
-    queryKey: ['investigation-patterns', questId],
-    queryFn: () => investigationService.detectPatterns(questId),
-    enabled: !!questId,
-    retry: 2
-  });
-
-  // Mutation pour forcer une nouvelle analyse
-  const regenerateInsightsMutation = useMutation({
-    mutationFn: () => investigationService.generateProactiveInsights(questId),
-    onMutate: () => {
-      setActionLocks(prev => ({ ...prev, regenerating: true }));
-    },
-    onSuccess: () => {
-      setActionLocks(prev => ({ ...prev, regenerating: false }));
-      refetchInsights();
-      toast({
-        title: "Analyse terminée",
-        description: "Les insights IA ont été mis à jour",
-      });
-    },
-    onError: async (error) => {
-      setActionLocks(prev => ({ ...prev, regenerating: false }));
-      await handleError(error as Error, 'regenerate-insights');
-    },
-  });
-
-  // Mutation pour analyser les connexions
-  const analyzeConnectionsMutation = useMutation({
-    mutationFn: () => investigationService.analyzeEvidenceTheoryConnections(questId),
-    onMutate: () => {
-      setActionLocks(prev => ({ ...prev, analyzing: true }));
-    },
-    onSuccess: () => {
-      setActionLocks(prev => ({ ...prev, analyzing: false }));
-      refetchConnections();
-      toast({
-        title: "Analyse des connexions terminée",
-        description: "Les relations entre preuves et théories ont été analysées",
-      });
-    },
-    onError: async (error) => {
-      setActionLocks(prev => ({ ...prev, analyzing: false }));
-      await handleError(error as Error, 'analyze-connections');
-    },
-  });
-
-  // Mutation pour investigation proactive complète avec diagnostics améliorés
+  // Mutation pour investigation proactive complète
   const startProactiveInvestigationMutation = useMutation({
-    mutationFn: async (investigationType?: string) => {
-      // Vérifier si une investigation est déjà en cours
-      if (actionLocks.investigating) {
-        throw new Error('Investigation déjà en cours');
-      }
+    mutationFn: async ({ questId, questData }: { questId: string, questData?: any }) => {
+      console.log('🚀 Starting proactive investigation for quest:', questId);
       
-      console.log('🚀 [DEBUG] Démarrage Edge Function avec params:', {
-        questId,
-        investigationType: investigationType || 'full_investigation',
-        timestamp: new Date().toISOString()
-      });
-      
-      const { data, error } = await supabase.functions.invoke('proactive-investigation', {
-        body: {
+      const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
+        body: { 
+          action: 'full_investigation',
           questId,
-          investigationType: investigationType || 'full_investigation',
-          context: {
-            location: 'France',
-            period: '1850-1900',
-            coordinates: { latitude: 46.2, longitude: 2.3 }
-          }
+          questData,
+          timestamp: new Date().toISOString()
         }
       });
-      
-      console.log('📊 [DEBUG] Edge Function Response:', { data, error });
-      
+
       if (error) {
-        console.error('🔥 [DEBUG] Edge Function Error Details:', {
-          message: error.message,
-          status: error.status,
-          details: error.details,
-          hint: error.hint
-        });
-        throw error;
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Erreur lors de l\'investigation proactive');
       }
-      
+
+      if (!data || data.status !== 'success') {
+        throw new Error(data?.message || 'Erreur lors de l\'investigation proactive');
+      }
+
       return data;
     },
-    onMutate: () => {
-      console.log('🚀 [DEBUG] Mutation onMutate - Démarrage investigation IA');
-      setActionLocks(prev => ({ ...prev, investigating: true }));
-    },
     onSuccess: (data) => {
-      console.log('✅ [DEBUG] Investigation IA terminée avec succès:', data);
-      setActionLocks(prev => ({ ...prev, investigating: false }));
-      
-      // Rafraîchir toutes les données après l'investigation
-      refetchInsights();
-      refetchAreas();
-      refetchConnections();
-      refetchPatterns();
-      
-      const resultCount = data?.data?.results ? Object.keys(data.data.results).length : 'plusieurs';
-      
       toast({
         title: "🔍 Investigation IA terminée",
-        description: `L'IA a trouvé ${resultCount} nouvelles pistes`,
+        description: "L'analyse complète a été générée avec succès",
       });
     },
-    onError: async (error) => {
-      console.error('❌ [DEBUG] Erreur investigation IA complète:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-      
-      setActionLocks(prev => ({ ...prev, investigating: false }));
-      
-      // Gérer les erreurs spécifiques d'OpenAI
-      if (error.message?.includes('OpenAI API key not configured')) {
-        toast({
-          title: "🔧 Configuration requise",
-          description: "Pour utiliser l'IA avancée, veuillez configurer votre clé OpenAI dans les paramètres Supabase.",
-          variant: "destructive",
-        });
-      } else if (error.message?.includes('Failed to fetch') || error.message?.includes('network')) {
-        toast({
-          title: "🌐 Problème réseau",
-          description: "Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.",
-          variant: "destructive",
-        });
-      } else if (error.message?.includes('timeout')) {
-        toast({
-          title: "⏱️ Timeout",
-          description: "L'investigation a pris trop de temps. Réessayez avec une analyse plus ciblée.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "❌ Erreur Investigation",
-          description: `Erreur: ${error.message}`,
-          variant: "destructive",
-        });
-        await handleError(error as Error, 'proactive-investigation');
-      }
+    onError: (error) => {
+      handleError(error as Error, 'Investigation proactive');
     },
   });
 
   // Mutation pour recherche de sources historiques
   const searchHistoricalSourcesMutation = useMutation({
-    mutationFn: async () => {
-      if (actionLocks.searchingSources) {
-        throw new Error('Recherche de sources déjà en cours');
-      }
+    mutationFn: async ({ questId, questData }: { questId: string, questData?: any }) => {
+      console.log('📚 Searching historical sources for quest:', questId);
       
-      const { data, error } = await supabase.functions.invoke('proactive-investigation', {
-        body: {
+      const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
+        body: { 
+          action: 'search_historical_sources',
           questId,
-          investigationType: 'search_historical_sources',
-          context: {
-            location: 'France',
-            period: '1850-1900',
-            coordinates: { latitude: 46.2, longitude: 2.3 }
-          }
+          questData,
+          timestamp: new Date().toISOString()
         }
       });
-      
-      if (error) throw error;
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Erreur lors de la recherche de sources');
+      }
+
+      if (!data || data.status !== 'success') {
+        throw new Error(data?.message || 'Erreur lors de la recherche de sources');
+      }
+
       return data;
     },
-    onMutate: () => {
-      setActionLocks(prev => ({ ...prev, searchingSources: true }));
-    },
-    onSuccess: () => {
-      setActionLocks(prev => ({ ...prev, searchingSources: false }));
+    onSuccess: (data) => {
       toast({
-        title: "🏛️ Sources historiques trouvées",
-        description: "L'IA a découvert de nouvelles sources d'archives",
+        title: "📚 Sources historiques trouvées",
+        description: "L'IA a identifié des sources pertinentes",
       });
     },
-    onError: async (error) => {
-      setActionLocks(prev => ({ ...prev, searchingSources: false }));
-      await handleError(error as Error, 'search-sources');
+    onError: (error) => {
+      handleError(error as Error, 'Recherche de sources');
     },
   });
 
   // Mutation pour génération de théories
   const generateTheoriesMutation = useMutation({
-    mutationFn: async () => {
-      if (actionLocks.generatingTheories) {
-        throw new Error('Génération de théories déjà en cours');
-      }
+    mutationFn: async ({ questId, questData, evidenceData }: { questId: string, questData?: any, evidenceData?: any[] }) => {
+      console.log('💡 Generating theories for quest:', questId);
       
-      const { data, error } = await supabase.functions.invoke('proactive-investigation', {
-        body: {
+      const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
+        body: { 
+          action: 'generate_theories',
           questId,
-          investigationType: 'generate_theories',
-          context: {
-            location: 'France',
-            period: '1850-1900',
-            coordinates: { latitude: 46.2, longitude: 2.3 }
-          }
+          questData,
+          evidenceData,
+          timestamp: new Date().toISOString()
         }
       });
-      
-      if (error) throw error;
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Erreur lors de la génération de théories');
+      }
+
+      if (!data || data.status !== 'success') {
+        throw new Error(data?.message || 'Erreur lors de la génération de théories');
+      }
+
       return data;
     },
-    onMutate: () => {
-      setActionLocks(prev => ({ ...prev, generatingTheories: true }));
-    },
-    onSuccess: () => {
-      setActionLocks(prev => ({ ...prev, generatingTheories: false }));
+    onSuccess: (data) => {
       toast({
-        title: "🧠 Théories générées",
-        description: "L'IA a élaboré de nouvelles théories d'investigation",
+        title: "💡 Théories générées",
+        description: "L'IA a élaboré des théories d'investigation",
       });
     },
-    onError: async (error) => {
-      setActionLocks(prev => ({ ...prev, generatingTheories: false }));
-      await handleError(error as Error, 'generate-theories');
+    onError: (error) => {
+      handleError(error as Error, 'Génération de théories');
+    },
+  });
+
+  // Mutation pour analyse des connexions
+  const analyzeConnectionsMutation = useMutation({
+    mutationFn: async ({ questId, questData, evidenceData, theoriesData }: { questId: string, questData?: any, evidenceData?: any[], theoriesData?: any[] }) => {
+      console.log('🔗 Analyzing connections for quest:', questId);
+      
+      const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
+        body: { 
+          action: 'analyze_connections',
+          questId,
+          questData,
+          evidenceData,
+          theoriesData,
+          timestamp: new Date().toISOString()
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Erreur lors de l\'analyse des connexions');
+      }
+
+      if (!data || data.status !== 'success') {
+        throw new Error(data?.message || 'Erreur lors de l\'analyse des connexions');
+      }
+
+      return data;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "🔗 Analyse des connexions terminée",
+        description: "L'IA a analysé les relations entre les éléments",
+      });
+    },
+    onError: (error) => {
+      handleError(error as Error, 'Analyse des connexions');
     },
   });
 
   // Actions protégées avec debouncing
   const protectedActions = {
-    startProactiveInvestigation: useCallback((investigationType?: string) => {
-      debounceAction('investigation', () => {
-        if (!actionLocks.investigating) {
-          startProactiveInvestigationMutation.mutate(investigationType);
-        }
-      });
-    }, [debounceAction, actionLocks.investigating, startProactiveInvestigationMutation.mutate]),
-    
-    searchHistoricalSources: useCallback(() => {
-      debounceAction('search-sources', () => {
-        if (!actionLocks.searchingSources) {
-          searchHistoricalSourcesMutation.mutate();
-        }
-      });
-    }, [debounceAction, actionLocks.searchingSources, searchHistoricalSourcesMutation.mutate]),
-    
-    generateTheories: useCallback(() => {
-      debounceAction('generate-theories', () => {
-        if (!actionLocks.generatingTheories) {
-          generateTheoriesMutation.mutate();
-        }
-      });
-    }, [debounceAction, actionLocks.generatingTheories, generateTheoriesMutation.mutate]),
-    
-    analyzeConnections: useCallback(() => {
-      debounceAction('analyze-connections', () => {
-        if (!actionLocks.analyzing) {
-          analyzeConnectionsMutation.mutate();
-        }
-      });
-    }, [debounceAction, actionLocks.analyzing, analyzeConnectionsMutation.mutate]),
-    
-    regenerateInsights: useCallback(() => {
-      debounceAction('regenerate-insights', () => {
-        if (!actionLocks.regenerating) {
-          regenerateInsightsMutation.mutate();
-        }
-      });
-    }, [debounceAction, actionLocks.regenerating, regenerateInsightsMutation.mutate])
+    startProactiveInvestigation: (params: { questId: string, questData?: any }) => debounceAction('investigation', () => {
+      if (actionLocks.current.investigation) return Promise.resolve();
+      actionLocks.current.investigation = true;
+      setTimeout(() => actionLocks.current.investigation = false, 30000);
+      return startProactiveInvestigationMutation.mutateAsync(params);
+    }),
+
+    searchHistoricalSources: (params: { questId: string, questData?: any }) => debounceAction('sources', () => {
+      if (actionLocks.current.sources) return Promise.resolve();
+      actionLocks.current.sources = true;
+      setTimeout(() => actionLocks.current.sources = false, 20000);
+      return searchHistoricalSourcesMutation.mutateAsync(params);
+    }),
+
+    generateTheories: (params: { questId: string, questData?: any, evidenceData?: any[] }) => debounceAction('theories', () => {
+      if (actionLocks.current.theories) return Promise.resolve();
+      actionLocks.current.theories = true;
+      setTimeout(() => actionLocks.current.theories = false, 25000);
+      return generateTheoriesMutation.mutateAsync(params);
+    }),
+
+    analyzeConnections: (params: { questId: string, questData?: any, evidenceData?: any[], theoriesData?: any[] }) => debounceAction('connections', () => {
+      if (actionLocks.current.connections) return Promise.resolve();
+      actionLocks.current.connections = true;
+      setTimeout(() => actionLocks.current.connections = false, 20000);
+      return analyzeConnectionsMutation.mutateAsync(params);
+    }),
   };
 
   return {
-    // Données
-    insights: insights?.success ? insights.data : [],
-    investigationAreas: investigationAreas?.success ? investigationAreas.data : [],
-    connections: connections?.success ? connections.data : null,
-    patterns: patterns?.success ? patterns.data : [],
-    
-    // États de chargement consolidés
-    isLoading: insightsLoading || areasLoading || connectionsLoading || patternsLoading,
-    insightsLoading,
-    areasLoading,
-    connectionsLoading,
-    patternsLoading,
-    
-    // États des verrous pour UI
-    isInvestigating: actionLocks.investigating || startProactiveInvestigationMutation.isPending,
-    isSearchingSources: actionLocks.searchingSources || searchHistoricalSourcesMutation.isPending,
-    isGeneratingTheories: actionLocks.generatingTheories || generateTheoriesMutation.isPending,
-    isAnalyzingConnections: actionLocks.analyzing || analyzeConnectionsMutation.isPending,
-    isRegeneratingInsights: actionLocks.regenerating || regenerateInsightsMutation.isPending,
-    
-    // Actions protégées
+    // Actions avec paramètres
     ...protectedActions,
+    
+    // États de chargement
+    isInvestigating: startProactiveInvestigationMutation.isPending,
+    isSearchingSources: searchHistoricalSourcesMutation.isPending,
+    isGeneratingTheories: generateTheoriesMutation.isPending,
+    isAnalyzingConnections: analyzeConnectionsMutation.isPending,
     
     // Fonction de récupération d'interface
     resetInterface: useCallback(() => {
       console.log('🔄 Reset interface IA');
-      setActionLocks({
-        investigating: false,
-        searchingSources: false,
-        generatingTheories: false,
-        analyzing: false,
-        regenerating: false
-      });
+      actionLocks.current = {
+        investigation: false,
+        sources: false,
+        theories: false,
+        connections: false,
+      };
       
       // Clear tous les timers
       Object.values(debounceTimers.current).forEach(timer => clearTimeout(timer));
@@ -416,18 +258,5 @@ export const useProactiveAI = (questId: string) => {
         description: "L'interface IA a été remise à zéro",
       });
     }, [toast]),
-    
-    // Méthodes de rafraîchissement
-    refetchAll: useCallback(() => {
-      refetchInsights();
-      refetchAreas();
-      refetchConnections();
-      refetchPatterns();
-    }, [refetchInsights, refetchAreas, refetchConnections, refetchPatterns]),
-    
-    refetchInsights,
-    refetchAreas,
-    refetchConnections,
-    refetchPatterns,
   };
 };
