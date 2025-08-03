@@ -48,12 +48,16 @@ export const useEdgeFunctionDiagnostics = () => {
   const testEdgeFunctionPing = useCallback(async (): Promise<DiagnosticResult> => {
     const start = Date.now();
     try {
+      console.log('🏓 [DIAGNOSTIC] Test ping Edge Function...');
+      
       // Test avec un appel minimal
       const { data, error } = await supabase.functions.invoke('proactive-investigation', {
         body: { test: 'ping' }
       });
       
       const duration = Date.now() - start;
+      
+      console.log('📊 [DIAGNOSTIC] Ping response:', { data, error, duration });
       
       if (error) {
         logger.error('Edge Function Ping Error:', error);
@@ -74,6 +78,49 @@ export const useEdgeFunctionDiagnostics = () => {
         name: 'Edge Function Ping',
         status: 'error',
         message: `Fonction inaccessible: ${error.message}`,
+        timestamp: new Date().toISOString(),
+        duration: Date.now() - start,
+        details: error
+      };
+    }
+  }, []);
+
+  const testDirectCall = useCallback(async (): Promise<DiagnosticResult> => {
+    const start = Date.now();
+    try {
+      console.log('🔧 [DIAGNOSTIC] Test appel direct Edge Function...');
+      
+      // Test ultra minimal juste pour vérifier la connectivité
+      const { data, error } = await supabase.functions.invoke('proactive-investigation', {
+        body: { 
+          action: 'direct_test',
+          timestamp: Date.now() 
+        }
+      });
+      
+      const duration = Date.now() - start;
+      
+      console.log('📡 [DIAGNOSTIC] Direct call response:', { data, error, duration });
+      
+      if (error) {
+        console.error('🔥 [DIAGNOSTIC] Direct call error:', error);
+        throw error;
+      }
+      
+      return {
+        name: 'Test Appel Direct',
+        status: 'success',
+        message: `Appel direct réussi (${duration}ms)`,
+        timestamp: new Date().toISOString(),
+        duration,
+        details: data
+      };
+    } catch (error: any) {
+      console.error('❌ [DIAGNOSTIC] Direct call failed:', error);
+      return {
+        name: 'Test Appel Direct',
+        status: 'error',
+        message: `Échec appel direct: ${error.message}`,
         timestamp: new Date().toISOString(),
         duration: Date.now() - start,
         details: error
@@ -133,29 +180,41 @@ export const useEdgeFunctionDiagnostics = () => {
     setDiagnostics([]);
     
     try {
+      console.log('🔍 [DIAGNOSTIC] === DÉBUT DIAGNOSTIC COMPLET ===');
+      
       // Test 1: Connexion Supabase
+      console.log('🔹 [DIAGNOSTIC] Test 1/4: Connexion Supabase');
       const supabaseResult = await testSupabaseConnection();
       addResult(supabaseResult);
       
-      // Test 2: Edge Function Ping
+      // Test 2: Appel direct
+      console.log('🔹 [DIAGNOSTIC] Test 2/4: Appel direct Edge Function');
+      const directResult = await testDirectCall();
+      addResult(directResult);
+      
+      // Test 3: Edge Function Ping
+      console.log('🔹 [DIAGNOSTIC] Test 3/4: Ping Edge Function');
       const pingResult = await testEdgeFunctionPing();
       addResult(pingResult);
       
-      // Test 3: Investigation complète seulement si ping OK
-      if (pingResult.status === 'success') {
+      // Test 4: Investigation complète seulement si tout OK
+      if (pingResult.status === 'success' || directResult.status === 'success') {
+        console.log('🔹 [DIAGNOSTIC] Test 4/4: Investigation complète');
         const investigationResult = await testFullInvestigation(questId);
         addResult(investigationResult);
       } else {
         addResult({
           name: 'Investigation Complète',
           status: 'warning',
-          message: 'Non testée - ping failed',
+          message: 'Non testée - tests préliminaires échoués',
           timestamp: new Date().toISOString()
         });
       }
       
+      console.log('✅ [DIAGNOSTIC] === DIAGNOSTIC TERMINÉ ===');
+      
     } catch (error: any) {
-      logger.error('Diagnostics failed:', error);
+      logger.error('❌ [DIAGNOSTIC] Diagnostics failed:', error);
       addResult({
         name: 'Diagnostic Global',
         status: 'error',
@@ -165,7 +224,7 @@ export const useEdgeFunctionDiagnostics = () => {
     } finally {
       setIsRunning(false);
     }
-  }, [testSupabaseConnection, testEdgeFunctionPing, testFullInvestigation]);
+  }, [testSupabaseConnection, testDirectCall, testEdgeFunctionPing, testFullInvestigation]);
 
   return {
     diagnostics,
@@ -173,6 +232,7 @@ export const useEdgeFunctionDiagnostics = () => {
     runFullDiagnostics,
     testSupabaseConnection,
     testEdgeFunctionPing,
+    testDirectCall,
     testFullInvestigation
   };
 };

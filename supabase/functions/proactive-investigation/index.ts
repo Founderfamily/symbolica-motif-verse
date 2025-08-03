@@ -8,9 +8,10 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('🚀 [EDGE] Proactive Investigation Edge Function called');
+  console.log('🚀 [EDGE] === DÉBUT EDGE FUNCTION PROACTIVE INVESTIGATION ===');
   console.log('📝 [EDGE] Request method:', req.method);
   console.log('📍 [EDGE] Request URL:', req.url);
+  console.log('🕐 [EDGE] Timestamp:', new Date().toISOString());
   
   if (req.method === 'OPTIONS') {
     console.log('✅ [EDGE] Handling CORS preflight request');
