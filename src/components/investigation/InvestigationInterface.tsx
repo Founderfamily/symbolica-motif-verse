@@ -23,6 +23,7 @@ import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useAuth } from '@/hooks/useAuth';
 import LiveActivityFeed from './LiveActivityFeed';
+import CluesTab from './CluesTab';
 import QuestChatReal from './QuestChatReal';
 import AIInvestigationTab from './AIInvestigationTab';
 import MapTab from './MapTab';
@@ -175,10 +176,14 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
 
       {/* Interface à onglets */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+        <TabsList className="grid w-full grid-cols-6 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
           <TabsTrigger value="live" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <Activity className="w-4 h-4" />
             <span className="hidden sm:inline">Live</span>
+          </TabsTrigger>
+          <TabsTrigger value="clues" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
+            <Scan className="w-4 h-4" />
+            <span className="hidden sm:inline">Indices</span>
           </TabsTrigger>
           <TabsTrigger value="chat" className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white rounded-lg">
             <MessageSquare className="w-4 h-4" />
@@ -202,9 +207,13 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
           <LiveActivityFeed questId={quest.id} />
         </TabsContent>
 
-              <TabsContent value="chat" className="space-y-4">
-                <QuestChatReal questId={quest.id} questName={quest.title} />
-              </TabsContent>
+        <TabsContent value="clues" className="space-y-4">
+          <CluesTab quest={quest} />
+        </TabsContent>
+
+        <TabsContent value="chat" className="space-y-4">
+          <QuestChatReal questId={quest.id} questName={quest.title} />
+        </TabsContent>
 
         <TabsContent value="investigation" className="space-y-4">
           <AIInvestigationTab quest={quest} />
