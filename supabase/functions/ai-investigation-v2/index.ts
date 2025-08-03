@@ -126,6 +126,9 @@ serve(async (req) => {
       const questId = body.questId;
       const userId = body.userId || 'anonymous';
       
+      // Vérifier l'authentification pour la sauvegarde
+      const canSave = userId !== 'anonymous' && userId && userId.length > 0;
+      
       console.log('📝 [AI-INVESTIGATION-V2] Données quête reçues:', Object.keys(questData));
 
       // Récupérer les preuves existantes pour cette quête
@@ -202,35 +205,48 @@ Réponds en français avec une analyse structurée et détaillée.`;
         const investigationResult = openaiData.choices[0].message.content;
         console.log('✅ [AI-INVESTIGATION-V2] Investigation complète générée');
         
-        // Sauvegarder l'investigation dans la base de données
-        console.log('💾 [AI-INVESTIGATION-V2] Sauvegarde en base...');
-        const { data: savedInvestigation, error: saveError } = await supabase
-          .from('ai_investigations')
-          .insert({
-            quest_id: questId,
-            investigation_type: 'full_investigation',
-            result_content: {
-              investigation: investigationResult,
-              quest_data: questData,
-              evidence_count: existingEvidence?.length || 0
-            },
-            evidence_used: existingEvidence || [],
-            created_by: userId
-          })
-          .select()
-          .single();
+        // Sauvegarder l'investigation dans la base de données si l'utilisateur est authentifié
+        let savedInvestigation = null;
+        let saveError = null;
+        
+        if (canSave) {
+          console.log('💾 [AI-INVESTIGATION-V2] Sauvegarde en base...');
+          const { data: saved, error: error } = await supabase
+            .from('ai_investigations')
+            .insert({
+              quest_id: questId,
+              investigation_type: 'full_investigation',
+              result_content: {
+                investigation: investigationResult,
+                quest_data: questData,
+                evidence_count: existingEvidence?.length || 0
+              },
+              evidence_used: existingEvidence || [],
+              created_by: userId
+            })
+            .select()
+            .single();
 
-        if (saveError) {
-          console.error('❌ [AI-INVESTIGATION-V2] Erreur sauvegarde:', saveError);
+          savedInvestigation = saved;
+          saveError = error;
+
+          if (saveError) {
+            console.error('❌ [AI-INVESTIGATION-V2] Erreur sauvegarde:', saveError);
+          } else {
+            console.log('✅ [AI-INVESTIGATION-V2] Investigation sauvegardée avec l\'ID:', savedInvestigation.id);
+          }
         } else {
-          console.log('✅ [AI-INVESTIGATION-V2] Investigation sauvegardée avec l\'ID:', savedInvestigation.id);
+          console.log('⚠️ [AI-INVESTIGATION-V2] Pas de sauvegarde - utilisateur non authentifié');
         }
         
         return new Response(JSON.stringify({ 
           status: 'success', 
-          message: 'Investigation complète générée',
+          message: canSave ? 'Investigation complète générée et sauvegardée' : 'Investigation générée (non sauvegardée - connexion requise)',
           investigation: investigationResult,
           investigation_id: savedInvestigation?.id,
+          saved: !!savedInvestigation,
+          save_error: saveError?.message,
+          auth_required: !canSave,
           timestamp: new Date().toISOString()
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

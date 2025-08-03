@@ -35,7 +35,18 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
       console.log('📊 Résultat investigation reçu:', result);
       
       if (result && result.investigation) {
-        setInvestigationResult(result.investigation);
+        let displayResult = result.investigation;
+        
+        // Ajouter des informations sur le statut de sauvegarde
+        if (result.auth_required) {
+          displayResult += "\n\n⚠️ Note: Ce résultat n'a pas été sauvegardé car vous n'êtes pas connecté. Connectez-vous pour que vos investigations soient automatiquement sauvegardées dans l'historique.";
+        } else if (!result.saved && result.save_error) {
+          displayResult += `\n\n❌ Erreur de sauvegarde: ${result.save_error}`;
+        } else if (result.saved) {
+          displayResult += "\n\n✅ Investigation sauvegardée dans l'historique.";
+        }
+        
+        setInvestigationResult(displayResult);
         console.log('✅ Investigation stockée avec succès');
       } else {
         console.warn('⚠️ Pas de contenu investigation dans la réponse:', result);

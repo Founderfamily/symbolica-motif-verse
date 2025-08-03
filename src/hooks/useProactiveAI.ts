@@ -81,10 +81,25 @@ export const useProactiveAI = (questId: string) => {
     },
     onSuccess: (data) => {
       console.log('✅ Investigation data received:', data);
-      toast({
-        title: "🔍 Investigation IA terminée",
-        description: "L'analyse complète a été générée avec succès",
-      });
+      
+      if (data.auth_required) {
+        toast({
+          title: "⚠️ Investigation IA générée",
+          description: "Résultat généré mais non sauvegardé. Connectez-vous pour sauvegarder.",
+          variant: "default",
+        });
+      } else if (data.saved) {
+        toast({
+          title: "🔍 Investigation IA terminée",
+          description: "L'analyse complète a été générée et sauvegardée avec succès",
+        });
+      } else {
+        toast({
+          title: "🔍 Investigation IA générée",
+          description: data.save_error ? `Erreur de sauvegarde: ${data.save_error}` : "Résultat généré",
+          variant: data.save_error ? "destructive" : "default",
+        });
+      }
     },
     onError: (error) => {
       handleError(error as Error, 'Investigation proactive');
