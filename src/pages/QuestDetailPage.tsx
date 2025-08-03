@@ -29,11 +29,15 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuestById } from '@/hooks/useQuests';
+import { useAuth } from '@/hooks/useAuth';
 import InvestigationInterface from '@/components/investigation/InvestigationInterface';
+import AINotificationService from '@/components/investigation/AINotificationService';
+import AIInsightsWidget from '@/components/investigation/AIInsightsWidget';
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
 
 const QuestDetailPage = () => {
   const { questId } = useParams<{ questId: string }>();
+  const { user } = useAuth();
   
   console.log('QuestDetailPage - Quest ID from params:', questId);
   
@@ -166,43 +170,55 @@ const QuestDetailPage = () => {
       <div className="bg-white/90 backdrop-blur-sm border-b border-amber-200/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between">
-            <Link to="/quests" className="flex items-center text-stone-600 hover:text-stone-800 transition-colors">
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Retour
-            </Link>
-            <Badge className={difficultyColors[quest.difficulty_level]}>
-              {difficultyLabels[quest.difficulty_level]}
-            </Badge>
+            <div className="flex items-center gap-4">
+              <Link to="/quests" className="flex items-center text-stone-600 hover:text-stone-800 transition-colors">
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Retour
+              </Link>
+              <Badge className={difficultyColors[quest.difficulty_level]}>
+                {difficultyLabels[quest.difficulty_level]}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              {user && <AINotificationService userId={user.id} questId={quest.id} />}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Titre et intro compacte */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg mb-6">
-          <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
-            {quest.title}
-          </h1>
-          <p className="text-stone-600 mb-4">{quest.description}</p>
-          
-          {/* Stats compactes */}
-          <div className="grid grid-cols-4 gap-3">
-            <div className="text-center">
-              <div className="text-lg font-bold text-amber-800">0</div>
-              <div className="text-xs text-stone-600">Participants</div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+          {/* Titre et intro compacte */}
+          <div className="lg:col-span-3 bg-white/95 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
+            <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
+              {quest.title}
+            </h1>
+            <p className="text-stone-600 mb-4">{quest.description}</p>
+            
+            {/* Stats compactes */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="text-center">
+                <div className="text-lg font-bold text-amber-800">0</div>
+                <div className="text-xs text-stone-600">Participants</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-stone-800">{questCluesCount}</div>
+                <div className="text-xs text-stone-600">Indices</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-amber-800">0</div>
+                <div className="text-xs text-stone-600">Preuves</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-stone-800">0</div>
+                <div className="text-xs text-stone-600">Discussions</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-stone-800">{questCluesCount}</div>
-              <div className="text-xs text-stone-600">Indices</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-amber-800">0</div>
-              <div className="text-xs text-stone-600">Preuves</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-stone-800">0</div>
-              <div className="text-xs text-stone-600">Discussions</div>
-            </div>
+          </div>
+
+          {/* Widget Insights IA */}
+          <div className="lg:col-span-1">
+            <AIInsightsWidget questId={quest.id} compact={true} />
           </div>
         </div>
 

@@ -22,11 +22,11 @@ import { TreasureQuest } from '@/types/quests';
 import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useAuth } from '@/hooks/useAuth';
-import LiveActivityFeed from './LiveActivityFeed';
-import CluesTab from './CluesTab';
-import QuestChatReal from './QuestChatReal';
+import EnhancedLiveActivityFeed from './EnhancedLiveActivityFeed';
+import EnhancedCluesTab from './EnhancedCluesTab';
+import AIEnhancedChatTab from './AIEnhancedChatTab';
 import AIInvestigationTab from './AIInvestigationTab';
-import MapTab from './MapTab';
+import EnhancedMapTab from './EnhancedMapTab';
 import ArchivesTab from './ArchivesTab';
 import ContributeEvidenceDialog from '../quests/ContributeEvidenceDialog';
 
@@ -204,15 +204,15 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
         </TabsList>
 
         <TabsContent value="live" className="space-y-4">
-          <LiveActivityFeed questId={quest.id} />
+          <EnhancedLiveActivityFeed questId={quest.id} />
         </TabsContent>
 
         <TabsContent value="clues" className="space-y-4">
-          <CluesTab quest={quest} />
+          <EnhancedCluesTab quest={quest} />
         </TabsContent>
 
         <TabsContent value="chat" className="space-y-4">
-          <QuestChatReal questId={quest.id} questName={quest.title} />
+          <AIEnhancedChatTab questId={quest.id} questName={quest.title} />
         </TabsContent>
 
         <TabsContent value="investigation" className="space-y-4">
@@ -220,7 +220,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
         </TabsContent>
 
         <TabsContent value="map" className="space-y-4">
-          <MapTab quest={quest} />
+          <EnhancedMapTab quest={quest} />
         </TabsContent>
 
         <TabsContent value="archives" className="space-y-4">
