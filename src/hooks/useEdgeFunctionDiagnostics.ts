@@ -50,7 +50,6 @@ export const useEdgeFunctionDiagnostics = () => {
     try {
       console.log('🏓 [DIAGNOSTIC] Test ping Edge Function...');
       
-      // Test avec un appel minimal
       const { data, error } = await supabase.functions.invoke('proactive-investigation', {
         body: { test: 'ping' }
       });
@@ -90,7 +89,6 @@ export const useEdgeFunctionDiagnostics = () => {
     try {
       console.log('🔧 [DIAGNOSTIC] Test appel direct Edge Function...');
       
-      // Test ultra minimal juste pour vérifier la connectivité
       const { data, error } = await supabase.functions.invoke('proactive-investigation', {
         body: { 
           action: 'direct_test',
