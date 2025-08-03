@@ -76,6 +76,7 @@ export const useProactiveAI = (questId: string) => {
       return data;
     },
     onSuccess: (data) => {
+      console.log('✅ Investigation data received:', data);
       toast({
         title: "🔍 Investigation IA terminée",
         description: "L'analyse complète a été générée avec succès",

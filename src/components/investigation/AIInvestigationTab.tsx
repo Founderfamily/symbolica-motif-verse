@@ -28,42 +28,82 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
   const handleFullInvestigation = async () => {
     try {
+      console.log('🔍 Démarrage investigation complète pour:', quest.id);
       const result = await startProactiveInvestigation({ questId: quest.id, questData: quest });
-      setInvestigationResult(result.investigation || 'Investigation terminée');
+      console.log('📊 Résultat investigation reçu:', result);
+      
+      if (result && result.investigation) {
+        setInvestigationResult(result.investigation);
+        console.log('✅ Investigation stockée avec succès');
+      } else {
+        console.warn('⚠️ Pas de contenu investigation dans la réponse:', result);
+        setInvestigationResult("Aucun résultat d'investigation généré");
+      }
     } catch (error) {
-      console.error('Erreur investigation:', error);
+      console.error('❌ Erreur investigation:', error);
+      setInvestigationResult(`Erreur: ${error.message}`);
     }
   };
 
   const handleSearchSources = async () => {
     try {
+      console.log('📚 Démarrage recherche sources pour:', quest.id);
       const result = await searchHistoricalSources({ questId: quest.id, questData: quest });
-      setSourcesResult(result.sources || 'Recherche terminée');
+      console.log('📊 Résultat sources reçu:', result);
+      
+      if (result && result.sources) {
+        setSourcesResult(result.sources);
+        console.log('✅ Sources stockées avec succès');
+      } else {
+        console.warn('⚠️ Pas de contenu sources dans la réponse:', result);
+        setSourcesResult("Aucune source trouvée");
+      }
     } catch (error) {
-      console.error('Erreur recherche sources:', error);
+      console.error('❌ Erreur sources:', error);
+      setSourcesResult(`Erreur: ${error.message}`);
     }
   };
 
   const handleGenerateTheories = async () => {
     try {
+      console.log('💡 Démarrage génération théories pour:', quest.id);
       const result = await generateTheories({ questId: quest.id, questData: quest, evidenceData: [] });
-      setTheoriesResult(result.theories || 'Théories générées');
+      console.log('📊 Résultat théories reçu:', result);
+      
+      if (result && result.theories) {
+        setTheoriesResult(result.theories);
+        console.log('✅ Théories stockées avec succès');
+      } else {
+        console.warn('⚠️ Pas de contenu théories dans la réponse:', result);
+        setTheoriesResult("Aucune théorie générée");
+      }
     } catch (error) {
-      console.error('Erreur génération théories:', error);
+      console.error('❌ Erreur théories:', error);
+      setTheoriesResult(`Erreur: ${error.message}`);
     }
   };
 
   const handleAnalyzeConnections = async () => {
     try {
+      console.log('🔗 Démarrage analyse connexions pour:', quest.id);
       const result = await analyzeConnections({ 
         questId: quest.id, 
         questData: quest, 
         evidenceData: [], 
         theoriesData: [] 
       });
-      setConnectionsResult(result.connections || 'Analyse terminée');
+      console.log('📊 Résultat connexions reçu:', result);
+      
+      if (result && result.connections) {
+        setConnectionsResult(result.connections);
+        console.log('✅ Connexions stockées avec succès');
+      } else {
+        console.warn('⚠️ Pas de contenu connexions dans la réponse:', result);
+        setConnectionsResult("Aucune connexion analysée");
+      }
     } catch (error) {
-      console.error('Erreur analyse connexions:', error);
+      console.error('❌ Erreur connexions:', error);
+      setConnectionsResult(`Erreur: ${error.message}`);
     }
   };
 
