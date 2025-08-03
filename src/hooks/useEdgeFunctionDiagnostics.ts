@@ -48,10 +48,10 @@ export const useEdgeFunctionDiagnostics = () => {
   const testEdgeFunctionPing = useCallback(async (): Promise<DiagnosticResult> => {
     const start = Date.now();
     try {
-      console.log('🏓 [DIAGNOSTIC] Test ping Edge Function...');
+      console.log('🏓 [DIAGNOSTIC] Test ping Edge Function AI-v2...');
       
-      const { data, error } = await supabase.functions.invoke('proactive-investigation', {
-        body: { test: 'ping' }
+      const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
+        body: { action: 'ping' }
       });
       
       const duration = Date.now() - start;
@@ -64,19 +64,19 @@ export const useEdgeFunctionDiagnostics = () => {
       }
       
       return {
-        name: 'Edge Function Ping',
+        name: 'AI Edge Function Ping',
         status: 'success',
-        message: `Fonction accessible (${duration}ms)`,
+        message: `Fonction AI accessible (${duration}ms)`,
         timestamp: new Date().toISOString(),
         duration,
         details: data
       };
     } catch (error: any) {
-      logger.error('Edge Function Ping Failed:', error);
+      logger.error('AI Edge Function Ping Failed:', error);
       return {
-        name: 'Edge Function Ping',
+        name: 'AI Edge Function Ping',
         status: 'error',
-        message: `Fonction inaccessible: ${error.message}`,
+        message: `Fonction AI inaccessible: ${error.message}`,
         timestamp: new Date().toISOString(),
         duration: Date.now() - start,
         details: error
@@ -87,12 +87,11 @@ export const useEdgeFunctionDiagnostics = () => {
   const testDirectCall = useCallback(async (): Promise<DiagnosticResult> => {
     const start = Date.now();
     try {
-      console.log('🔧 [DIAGNOSTIC] Test appel direct Edge Function...');
+      console.log('🔧 [DIAGNOSTIC] Test appel direct Edge Function AI...');
       
-      const { data, error } = await supabase.functions.invoke('proactive-investigation', {
+      const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
         body: { 
-          action: 'direct_test',
-          timestamp: Date.now() 
+          action: 'test_openai'
         }
       });
       
@@ -106,9 +105,9 @@ export const useEdgeFunctionDiagnostics = () => {
       }
       
       return {
-        name: 'Test Appel Direct',
+        name: 'Test OpenAI via Edge Function',
         status: 'success',
-        message: `Appel direct réussi (${duration}ms)`,
+        message: `Test OpenAI réussi (${duration}ms)`,
         timestamp: new Date().toISOString(),
         duration,
         details: data
@@ -116,9 +115,9 @@ export const useEdgeFunctionDiagnostics = () => {
     } catch (error: any) {
       console.error('❌ [DIAGNOSTIC] Direct call failed:', error);
       return {
-        name: 'Test Appel Direct',
+        name: 'Test OpenAI via Edge Function',
         status: 'error',
-        message: `Échec appel direct: ${error.message}`,
+        message: `Échec test OpenAI: ${error.message}`,
         timestamp: new Date().toISOString(),
         duration: Date.now() - start,
         details: error
@@ -131,15 +130,16 @@ export const useEdgeFunctionDiagnostics = () => {
     try {
       logger.log('🔍 Test investigation complète pour quest:', questId);
       
-      const { data, error } = await supabase.functions.invoke('proactive-investigation', {
+      const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
         body: {
+          action: 'full_investigation',
           questId,
-          investigationType: 'full_investigation',
-          context: {
-            location: 'Test',
-            period: '2024',
-            coordinates: { latitude: 46.2, longitude: 2.3 }
-          }
+          questData: {
+            title: 'Test Quest',
+            description: 'Quest de test pour diagnostic',
+            clues: [{ title: 'Test Clue', description: 'Test description' }]
+          },
+          userId: 'test-diagnostic'
         }
       });
       
@@ -153,9 +153,9 @@ export const useEdgeFunctionDiagnostics = () => {
       logger.log('✅ Investigation terminée:', data);
       
       return {
-        name: 'Investigation Complète',
+        name: 'Investigation Complète AI',
         status: 'success',
-        message: `Investigation OK (${duration}ms)`,
+        message: `Investigation AI OK (${duration}ms)`,
         timestamp: new Date().toISOString(),
         duration,
         details: data
@@ -163,9 +163,9 @@ export const useEdgeFunctionDiagnostics = () => {
     } catch (error: any) {
       logger.error('Investigation Failed:', error);
       return {
-        name: 'Investigation Complète',
+        name: 'Investigation Complète AI',
         status: 'error',
-        message: `Investigation échouée: ${error.message}`,
+        message: `Investigation AI échouée: ${error.message}`,
         timestamp: new Date().toISOString(),
         duration: Date.now() - start,
         details: error

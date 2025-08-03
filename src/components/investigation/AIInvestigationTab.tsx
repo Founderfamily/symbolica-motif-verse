@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Search, Lightbulb, Network, History } from 'lucide-react';
+import { Brain, Search, Lightbulb, Network, History, Settings } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { useProactiveAI } from '@/hooks/useProactiveAI';
 import { AIInvestigationHistory } from './AIInvestigationHistory';
+import { AIConnectivityTest } from './AIConnectivityTest';
 
 interface AIInvestigationTabProps {
   quest: TreasureQuest;
@@ -123,10 +124,14 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="tools" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="tools" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
             Outils IA
+          </TabsTrigger>
+          <TabsTrigger value="diagnostics" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Diagnostic
           </TabsTrigger>
           <TabsTrigger value="history" className="flex items-center gap-2">
             <History className="h-4 w-4" />
@@ -260,6 +265,10 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
           )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="diagnostics" className="space-y-6">
+          <AIConnectivityTest />
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
