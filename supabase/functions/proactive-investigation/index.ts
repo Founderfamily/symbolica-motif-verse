@@ -34,6 +34,17 @@ serve(async (req) => {
 
     if (!openAIApiKey) {
       console.warn('⚠️ Clé OpenAI manquante - utilisation de données simulées');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'OpenAI API key not configured',
+        message: 'Pour utiliser l\'IA avancée, veuillez configurer votre clé OpenAI dans les paramètres Supabase.',
+        simulatedAvailable: true,
+        timestamp: new Date().toISOString(),
+        aiPowered: false
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
     }
 
     // Récupérer les données de la quête et preuves existantes

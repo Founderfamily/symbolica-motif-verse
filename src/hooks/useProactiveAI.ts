@@ -197,7 +197,17 @@ export const useProactiveAI = (questId: string) => {
     onError: async (error) => {
       console.error('❌ Erreur investigation IA:', error);
       setActionLocks(prev => ({ ...prev, investigating: false }));
-      await handleError(error as Error, 'proactive-investigation');
+      
+      // Gérer les erreurs spécifiques d'OpenAI
+      if (error.message?.includes('OpenAI API key not configured')) {
+        toast({
+          title: "🔧 Configuration requise",
+          description: "Pour utiliser l'IA avancée, veuillez configurer votre clé OpenAI dans les paramètres Supabase.",
+          variant: "destructive",
+        });
+      } else {
+        await handleError(error as Error, 'proactive-investigation');
+      }
     },
   });
 

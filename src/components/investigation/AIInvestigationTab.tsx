@@ -174,6 +174,12 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
                 <Sparkles className={`h-4 w-4 mr-2 ${proactiveAI.isInvestigating ? 'animate-spin' : ''}`} />
                 {proactiveAI.isInvestigating ? 'Investigation...' : 'Investigation IA'}
               </Button>
+              {proactiveAI.isInvestigating && (
+                <div className="text-sm text-muted-foreground ml-3 flex items-center gap-2">
+                  <Activity className="h-4 w-4 animate-pulse" />
+                  L'IA analyse les données...
+                </div>
+              )}
               {/* Bouton de récupération d'urgence */}
               {(proactiveAI.isInvestigating || proactiveAI.isSearchingSources || proactiveAI.isGeneratingTheories) && (
                 <Button 
