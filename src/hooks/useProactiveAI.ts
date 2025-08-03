@@ -58,6 +58,10 @@ export const useProactiveAI = (questId: string) => {
       // Récupérer l'ID utilisateur actuel
       const { data: { user } } = await supabase.auth.getUser();
       
+      if (!user?.id) {
+        console.log('⚠️ Utilisateur non authentifié - investigation sans sauvegarde');
+      }
+      
       const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
         body: { 
           action: 'full_investigation',

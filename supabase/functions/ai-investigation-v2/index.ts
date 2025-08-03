@@ -126,8 +126,8 @@ serve(async (req) => {
       const questId = body.questId;
       const userId = body.userId || 'anonymous';
       
-      // Vérifier l'authentification pour la sauvegarde
-      const canSave = userId !== 'anonymous' && userId && userId.length > 0;
+      // Vérifier l'authentification pour la sauvegarde - plus strict
+      const canSave = userId !== 'anonymous' && userId && userId.length > 30; // UUID valide
       
       console.log('📝 [AI-INVESTIGATION-V2] Données quête reçues:', Object.keys(questData));
 
