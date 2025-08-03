@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AIInvestigationStatusBar } from './AIInvestigationStatusBar';
+import { AIProactiveDiagnosticPanel } from './AIProactiveDiagnosticPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +58,7 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
   const [selectedDossier, setSelectedDossier] = useState<string | null>(null);
   const [newTheoryDialog, setNewTheoryDialog] = useState(false);
   const [aiSuggestionsDialog, setAiSuggestionsDialog] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const { evidence, isLoading: evidenceLoading, refetch: refetchEvidence, validateEvidence } = useQuestEvidence(quest.id);
   const { theories, isLoading: theoriesLoading, refetch: refetchTheories, createTheory } = useQuestTheories(quest.id);
   const aiAnalysis = useAIAnalysis();
@@ -130,6 +132,12 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
   return (
     <div className="space-y-6">
+      {/* Panneau de diagnostic IA */}
+      <AIProactiveDiagnosticPanel 
+        questId={quest.id}
+        isVisible={showDiagnostics || proactiveAI.isInvestigating || !proactiveAI.insights.length}
+      />
+
       {/* Barre de statut IA */}
       <AIInvestigationStatusBar 
         isInvestigating={proactiveAI.isInvestigating}
@@ -193,6 +201,17 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
                   Reset
                 </Button>
               )}
+              {/* Bouton de diagnostic */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowDiagnostics(!showDiagnostics)}
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                title="Afficher/masquer le panneau de diagnostic"
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                Diagnostic
+              </Button>
             </div>
           </div>
           {proactiveAI.isInvestigating && (

@@ -8,39 +8,65 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('🚀 Proactive Investigation Edge Function called');
+  console.log('🚀 [EDGE] Proactive Investigation Edge Function called');
+  console.log('📝 [EDGE] Request method:', req.method);
+  console.log('📍 [EDGE] Request URL:', req.url);
   
   if (req.method === 'OPTIONS') {
-    console.log('✅ Handling CORS preflight request');
+    console.log('✅ [EDGE] Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('🔧 Initializing Supabase client...');
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
-
-    console.log('📨 Parsing request body...');
-    const { questId, investigationType, context } = await req.json();
+    console.log('🔧 [EDGE] Initializing Supabase client...');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
     
-    console.log(`🔍 Début d'investigation proactive IA pour quête ${questId}`);
-    console.log(`📋 Type d'investigation: ${investigationType}`);
-    console.log(`🌍 Contexte:`, context);
+    console.log('🔑 [EDGE] Environment check:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseKey,
+      urlLength: supabaseUrl?.length || 0,
+      keyLength: supabaseKey?.length || 0
+    });
+    
+    const supabase = createClient(supabaseUrl ?? '', supabaseKey ?? '');
+
+    console.log('📨 [EDGE] Parsing request body...');
+    const requestBody = await req.json();
+    console.log('📊 [EDGE] Request body parsed:', requestBody);
+    
+    const { questId, investigationType, context } = requestBody;
+    
+    console.log(`🔍 [EDGE] Début d'investigation proactive IA pour quête ${questId}`);
+    console.log(`📋 [EDGE] Type d'investigation: ${investigationType}`);
+    console.log(`🌍 [EDGE] Contexte:`, context);
+    
+    // Vérification spéciale pour tests de diagnostic
+    if (requestBody.test === 'ping') {
+      console.log('🏓 [EDGE] Test ping détecté - réponse immédiate');
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Edge Function opérationnelle',
+        timestamp: new Date().toISOString(),
+        testMode: true
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    console.log(`🧠 Utilisation OpenAI: ${openAIApiKey ? '✅ Activé' : '❌ Désactivé'}`);
+    console.log(`🧠 [EDGE] Utilisation OpenAI: ${openAIApiKey ? '✅ Activé' : '❌ Désactivé'}`);
 
     if (!openAIApiKey) {
-      console.warn('⚠️ Clé OpenAI manquante - utilisation de données simulées');
+      console.warn('⚠️ [EDGE] Clé OpenAI manquante - utilisation de données simulées');
       return new Response(JSON.stringify({
         success: false,
         error: 'OpenAI API key not configured',
         message: 'Pour utiliser l\'IA avancée, veuillez configurer votre clé OpenAI dans les paramètres Supabase.',
         simulatedAvailable: true,
         timestamp: new Date().toISOString(),
-        aiPowered: false
+        aiPowered: false,
+        fallbackMode: true
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
@@ -48,10 +74,17 @@ serve(async (req) => {
     }
 
     // Récupérer les données de la quête et preuves existantes
+    console.log(`📊 [EDGE] Récupération des données pour quest ${questId}`);
     const questData = await getQuestData(supabase, questId);
+    console.log(`✅ [EDGE] Données récupérées:`, {
+      questTitle: questData.title,
+      evidenceCount: questData.evidence?.length || 0,
+      theoriesCount: questData.theories?.length || 0
+    });
     
     let result;
 
+    console.log(`🎯 [EDGE] Routing vers investigation type: ${investigationType}`);
     switch (investigationType) {
       case 'search_historical_sources':
         result = await searchHistoricalSources(questData, context);
@@ -72,22 +105,42 @@ serve(async (req) => {
         result = await fullInvestigation(questData, context);
     }
 
-    console.log(`✅ Investigation IA terminée avec ${result.findings?.length || result.theories?.length || result.clues?.length || 0} découvertes`);
+    const discoveryCount = result.findings?.length || result.theories?.length || result.clues?.length || 0;
+    console.log(`✅ [EDGE] Investigation IA terminée avec ${discoveryCount} découvertes`);
+    console.log(`📤 [EDGE] Envoi de la réponse finale:`, {
+      success: true,
+      resultType: investigationType,
+      discoveryCount,
+      aiPowered: !!openAIApiKey
+    });
 
     return new Response(JSON.stringify({
       success: true,
       data: result,
       timestamp: new Date().toISOString(),
-      aiPowered: !!openAIApiKey
+      aiPowered: !!openAIApiKey,
+      investigationType,
+      discoveryCount
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('❌ Erreur investigation IA:', error);
+    console.error('❌ [EDGE] Erreur investigation IA complète:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
     return new Response(JSON.stringify({
       success: false,
-      error: error.message
+      error: error.message,
+      errorType: error.name,
+      timestamp: new Date().toISOString(),
+      debugInfo: {
+        stack: error.stack,
+        functionName: 'proactive-investigation'
+      }
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -152,13 +152,19 @@ export const useProactiveAI = (questId: string) => {
     },
   });
 
-  // Mutation pour investigation proactive complète
+  // Mutation pour investigation proactive complète avec diagnostics améliorés
   const startProactiveInvestigationMutation = useMutation({
     mutationFn: async (investigationType?: string) => {
       // Vérifier si une investigation est déjà en cours
       if (actionLocks.investigating) {
         throw new Error('Investigation déjà en cours');
       }
+      
+      console.log('🚀 [DEBUG] Démarrage Edge Function avec params:', {
+        questId,
+        investigationType: investigationType || 'full_investigation',
+        timestamp: new Date().toISOString()
+      });
       
       const { data, error } = await supabase.functions.invoke('proactive-investigation', {
         body: {
@@ -172,15 +178,26 @@ export const useProactiveAI = (questId: string) => {
         }
       });
       
-      if (error) throw error;
+      console.log('📊 [DEBUG] Edge Function Response:', { data, error });
+      
+      if (error) {
+        console.error('🔥 [DEBUG] Edge Function Error Details:', {
+          message: error.message,
+          status: error.status,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
+      
       return data;
     },
     onMutate: () => {
-      console.log('🚀 Démarrage investigation IA');
+      console.log('🚀 [DEBUG] Mutation onMutate - Démarrage investigation IA');
       setActionLocks(prev => ({ ...prev, investigating: true }));
     },
     onSuccess: (data) => {
-      console.log('✅ Investigation IA terminée avec succès');
+      console.log('✅ [DEBUG] Investigation IA terminée avec succès:', data);
       setActionLocks(prev => ({ ...prev, investigating: false }));
       
       // Rafraîchir toutes les données après l'investigation
@@ -189,13 +206,20 @@ export const useProactiveAI = (questId: string) => {
       refetchConnections();
       refetchPatterns();
       
+      const resultCount = data?.data?.results ? Object.keys(data.data.results).length : 'plusieurs';
+      
       toast({
         title: "🔍 Investigation IA terminée",
-        description: `L'IA a trouvé ${data?.data?.results ? Object.keys(data.data.results).length : 'plusieurs'} nouvelles pistes`,
+        description: `L'IA a trouvé ${resultCount} nouvelles pistes`,
       });
     },
     onError: async (error) => {
-      console.error('❌ Erreur investigation IA:', error);
+      console.error('❌ [DEBUG] Erreur investigation IA complète:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
       setActionLocks(prev => ({ ...prev, investigating: false }));
       
       // Gérer les erreurs spécifiques d'OpenAI
@@ -205,7 +229,24 @@ export const useProactiveAI = (questId: string) => {
           description: "Pour utiliser l'IA avancée, veuillez configurer votre clé OpenAI dans les paramètres Supabase.",
           variant: "destructive",
         });
+      } else if (error.message?.includes('Failed to fetch') || error.message?.includes('network')) {
+        toast({
+          title: "🌐 Problème réseau",
+          description: "Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.",
+          variant: "destructive",
+        });
+      } else if (error.message?.includes('timeout')) {
+        toast({
+          title: "⏱️ Timeout",
+          description: "L'investigation a pris trop de temps. Réessayez avec une analyse plus ciblée.",
+          variant: "destructive",
+        });
       } else {
+        toast({
+          title: "❌ Erreur Investigation",
+          description: `Erreur: ${error.message}`,
+          variant: "destructive",
+        });
         await handleError(error as Error, 'proactive-investigation');
       }
     },
