@@ -57,3 +57,32 @@ export class ErrorRecoveryService {
 }
 
 export const errorRecoveryService = new ErrorRecoveryService();
+
+// Stratégies de récupération pour l'IA proactive
+const uiRecoveryStrategy: RecoveryStrategy = {
+  name: 'UI Recovery',
+  priority: 1,
+  canRecover: (error: Error) => error.message.includes('Investigation déjà en cours') || error.message.includes('déjà en cours'),
+  recover: async () => {
+    console.log('🔄 Tentative de récupération UI');
+    // Force une remise à zéro des états
+    window.dispatchEvent(new CustomEvent('reset-ai-interface'));
+    return true;
+  }
+};
+
+const networkRecoveryStrategy: RecoveryStrategy = {
+  name: 'Network Recovery',
+  priority: 2,
+  canRecover: (error: Error) => error.message.includes('fetch') || error.message.includes('network'),
+  recover: async () => {
+    console.log('🌐 Tentative de récupération réseau');
+    // Attendre un peu puis retry
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return true;
+  }
+};
+
+// Ajouter les stratégies au service
+errorRecoveryService.addStrategy(uiRecoveryStrategy);
+errorRecoveryService.addStrategy(networkRecoveryStrategy);

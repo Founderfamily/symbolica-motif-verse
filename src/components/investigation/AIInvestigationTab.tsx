@@ -35,7 +35,9 @@ import {
   Link,
   BookOpen,
   Compass,
-  Bot
+  Bot,
+  RotateCcw,
+  AlertCircle
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { useQuestEvidence } from '@/hooks/useQuestEvidence';
@@ -60,6 +62,19 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
   const aiAnalysis = useAIAnalysis();
   const proactiveAI = useProactiveAI(quest.id);
   const { user, isAdmin } = useAuth();
+
+  // Écouter les événements de reset d'interface
+  useEffect(() => {
+    const handleResetInterface = () => {
+      console.log('💡 Événement reset détecté dans l\'interface');
+      if (proactiveAI.resetInterface) {
+        proactiveAI.resetInterface();
+      }
+    };
+
+    window.addEventListener('reset-ai-interface', handleResetInterface);
+    return () => window.removeEventListener('reset-ai-interface', handleResetInterface);
+  }, [proactiveAI.resetInterface]);
 
   // Grouper les preuves et théories en dossiers d'investigation
   const investigationDossiers = React.useMemo(() => {
@@ -159,6 +174,19 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
                 <Sparkles className={`h-4 w-4 mr-2 ${proactiveAI.isInvestigating ? 'animate-spin' : ''}`} />
                 {proactiveAI.isInvestigating ? 'Investigation...' : 'Investigation IA'}
               </Button>
+              {/* Bouton de récupération d'urgence */}
+              {(proactiveAI.isInvestigating || proactiveAI.isSearchingSources || proactiveAI.isGeneratingTheories) && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => proactiveAI.resetInterface?.()}
+                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  title="Réinitialiser l'interface en cas de problème"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reset
+                </Button>
+              )}
             </div>
           </div>
           {proactiveAI.isInvestigating && (
