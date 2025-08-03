@@ -22,14 +22,14 @@ export const useProactiveAI = (questId: string) => {
   const debounceTimers = useRef<{ [key: string]: NodeJS.Timeout }>({});
   const lastActionTime = useRef<{ [key: string]: number }>({});
   
-  // Fonction de debouncing généralisée
-  const debounceAction = useCallback((actionKey: string, action: () => void, delay = 2000) => {
+  // Fonction de debouncing optimisée pour une meilleure responsivité
+  const debounceAction = useCallback((actionKey: string, action: () => void, delay = 500) => {
     const now = Date.now();
     const lastTime = lastActionTime.current[actionKey] || 0;
     
-    // Si la dernière action était il y a moins de 2 secondes, ignorer
+    // Si la dernière action était il y a moins de 500ms, ignorer
     if (now - lastTime < delay) {
-      console.warn(`Action ${actionKey} ignorée - trop rapide`);
+      console.log(`⏱️ Action ${actionKey} trop rapide - dernière: ${now - lastTime}ms`);
       return;
     }
     
@@ -38,11 +38,10 @@ export const useProactiveAI = (questId: string) => {
       clearTimeout(debounceTimers.current[actionKey]);
     }
     
-    // Set le nouveau timer
-    debounceTimers.current[actionKey] = setTimeout(() => {
-      lastActionTime.current[actionKey] = Date.now();
-      action();
-    }, 100);
+    // Exécuter immédiatement sans timer supplémentaire
+    console.log(`🚀 Exécution action ${actionKey}`);
+    lastActionTime.current[actionKey] = now;
+    action();
   }, []);
 
   // Fonction de récupération d'erreur
