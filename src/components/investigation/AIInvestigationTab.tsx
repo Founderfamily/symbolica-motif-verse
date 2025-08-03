@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SimpleAITest } from './SimpleAITest';
 import { AIInvestigationStatusBar } from './AIInvestigationStatusBar';
-import { AIProactiveDiagnosticPanel } from './AIProactiveDiagnosticPanel';
-import EdgeFunctionTestPanel from './EdgeFunctionTestPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -133,16 +132,8 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
   return (
     <div className="space-y-6">
-      {/* Panneau de diagnostic IA */}
-      <AIProactiveDiagnosticPanel 
-        questId={quest.id}
-        isVisible={showDiagnostics || proactiveAI.isInvestigating || !proactiveAI.insights.length}
-      />
-
-      {/* Panneau de test Edge Function */}
-      {showDiagnostics && (
-        <EdgeFunctionTestPanel questId={quest.id} />
-      )}
+      {/* Test IA Simplifié */}
+      <SimpleAITest questId={quest.id} />
 
       {/* Barre de statut IA */}
       <AIInvestigationStatusBar 
