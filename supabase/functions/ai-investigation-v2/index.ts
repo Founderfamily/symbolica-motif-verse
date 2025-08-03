@@ -21,8 +21,25 @@ serve(async (req) => {
 
   try {
     console.log('🔍 [AI-INVESTIGATION-V2] Parsing body...');
-    const body = await req.json();
-    console.log('📝 [AI-INVESTIGATION-V2] Body reçu:', JSON.stringify(body));
+    
+    // Protection contre les timeouts et erreurs de parsing
+    let body;
+    try {
+      const bodyText = await req.text();
+      console.log('📄 [AI-INVESTIGATION-V2] Body text length:', bodyText.length);
+      body = JSON.parse(bodyText);
+      console.log('📝 [AI-INVESTIGATION-V2] Body parsé avec succès. Action:', body?.action);
+    } catch (parseError) {
+      console.error('❌ [AI-INVESTIGATION-V2] Erreur parsing body:', parseError);
+      return new Response(JSON.stringify({ 
+        status: 'error', 
+        message: 'Erreur de format de requête',
+        error: parseError.message
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Test de base - répondre "pong"
     if (body.action === 'ping') {
@@ -239,7 +256,8 @@ Réponds en français avec une analyse structurée et détaillée.`;
           console.log('⚠️ [AI-INVESTIGATION-V2] Pas de sauvegarde - utilisateur non authentifié');
         }
         
-        return new Response(JSON.stringify({ 
+        // Réponse ultra-robuste avec fallbacks multiples
+        const responseData = {
           status: 'success', 
           message: canSave ? 'Investigation complète générée et sauvegardée' : 'Investigation générée (non sauvegardée - connexion requise)',
           investigation: investigationResult,
@@ -247,8 +265,18 @@ Réponds en français avec une analyse structurée et détaillée.`;
           saved: !!savedInvestigation,
           save_error: saveError?.message,
           auth_required: !canSave,
-          timestamp: new Date().toISOString()
-        }), {
+          timestamp: new Date().toISOString(),
+          // Fallbacks pour compatibilité
+          content: investigationResult, // Alias pour investigation
+          result: investigationResult,  // Autre alias
+          success: true,
+          data: investigationResult
+        };
+
+        console.log('🎯 [AI-INVESTIGATION-V2] Envoi réponse robuste. Clés:', Object.keys(responseData));
+
+        return new Response(JSON.stringify(responseData), {
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
 

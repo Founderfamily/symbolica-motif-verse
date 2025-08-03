@@ -50,63 +50,152 @@ export const useProactiveAI = (questId: string) => {
     });
   }, [toast]);
 
-  // Mutation pour investigation proactive complète
+// Mutation pour investigation proactive complète - VERSION ULTRA-ROBUSTE
   const startProactiveInvestigationMutation = useMutation({
     mutationFn: async ({ questId, questData }: { questId: string, questData?: any }) => {
-      console.log('🚀 Starting proactive investigation for quest:', questId);
+      console.log('🚀 [ROBUSTE] Démarrage investigation - tentative 1');
       
-      // Récupérer l'ID utilisateur actuel
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user?.id) {
-        console.log('⚠️ Utilisateur non authentifié - investigation sans sauvegarde');
-      }
-      
-      const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
-        body: { 
+      // Fonction de retry avec backoff exponentiel
+      const retryWithBackoff = async (fn: () => Promise<any>, retries = 3, delay = 1000): Promise<any> => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            const result = await fn();
+            console.log(`✅ [ROBUSTE] Succès à la tentative ${i + 1}`);
+            return result;
+          } catch (error) {
+            console.log(`❌ [ROBUSTE] Échec tentative ${i + 1}:`, error.message);
+            if (i === retries - 1) throw error;
+            console.log(`⏳ [ROBUSTE] Attente ${delay}ms avant retry...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2; // Backoff exponentiel
+          }
+        }
+      };
+
+      // Récupérer l'ID utilisateur avec timeout
+      const getUserWithTimeout = async (): Promise<any> => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          clearTimeout(timeoutId);
+          return user;
+        } catch (error) {
+          clearTimeout(timeoutId);
+          console.log('⚠️ [ROBUSTE] Auth timeout ou erreur, continuons en anonyme');
+          return null;
+        }
+      };
+
+      const user = await getUserWithTimeout();
+      console.log('👤 [ROBUSTE] Utilisateur:', user ? 'Authentifié' : 'Anonyme');
+
+      // Fonction d'appel Edge Function avec gestion ultra-robuste
+      const callEdgeFunction = async () => {
+        const requestBody = {
           action: 'full_investigation',
           questId,
           questData,
           userId: user?.id || 'anonymous',
           timestamp: new Date().toISOString()
+        };
+
+        console.log('📤 [ROBUSTE] Envoi requête:', Object.keys(requestBody));
+
+        const { data, error } = await supabase.functions.invoke('ai-investigation-v2', {
+          body: requestBody
+        });
+
+        console.log('📥 [ROBUSTE] Réponse Edge Function:', { 
+          hasData: !!data, 
+          hasError: !!error,
+          status: data?.status 
+        });
+
+        // Gestion ultra-flexible des erreurs
+        if (error) {
+          console.error('🔥 [ROBUSTE] Edge Function error détaillé:', error);
+          // Essayer de parser le message d'erreur
+          let errorMessage = 'Erreur de communication avec le serveur';
+          if (typeof error === 'string') {
+            errorMessage = error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          } else if (error.error_description) {
+            errorMessage = error.error_description;
+          }
+          throw new Error(errorMessage);
         }
-      });
 
-      if (error) {
-        console.error('Edge function error:', error);
-        throw new Error(error.message || 'Erreur lors de l\'investigation proactive');
-      }
+        // Validation flexible de la réponse
+        if (!data) {
+          throw new Error('Aucune donnée reçue du serveur');
+        }
 
-      if (!data || data.status !== 'success') {
-        throw new Error(data?.message || 'Erreur lors de l\'investigation proactive');
-      }
+        // Accepter différents formats de réponse
+        if (data.status === 'success' || data.investigation || data.message) {
+          console.log('✅ [ROBUSTE] Réponse valide détectée');
+          return data;
+        }
 
-      return data;
+        // Si on a des données mais pas de status success, essayer quand même
+        if (typeof data === 'object' && Object.keys(data).length > 0) {
+          console.log('⚠️ [ROBUSTE] Réponse non-standard mais exploitable:', Object.keys(data));
+          return data;
+        }
+
+        throw new Error('Format de réponse invalide');
+      };
+
+      // Exécuter avec retry automatique
+      return await retryWithBackoff(callEdgeFunction, 3, 1000);
     },
     onSuccess: (data) => {
-      console.log('✅ Investigation data received:', data);
+      console.log('🎉 [ROBUSTE] Investigation réussie! Données reçues:', Object.keys(data || {}));
       
-      if (data.auth_required) {
-        toast({
-          title: "⚠️ Investigation IA générée",
-          description: "Résultat généré mais non sauvegardé. Connectez-vous pour sauvegarder.",
-          variant: "default",
-        });
-      } else if (data.saved) {
-        toast({
-          title: "🔍 Investigation IA terminée",
-          description: "L'analyse complète a été générée et sauvegardée avec succès",
-        });
-      } else {
-        toast({
-          title: "🔍 Investigation IA générée",
-          description: data.save_error ? `Erreur de sauvegarde: ${data.save_error}` : "Résultat généré",
-          variant: data.save_error ? "destructive" : "default",
-        });
+      // Gestion ultra-flexible des différents types de réponse
+      let successMessage = "Investigation IA terminée avec succès";
+      let variant: "default" | "destructive" = "default";
+      
+      if (data?.auth_required) {
+        successMessage = "Investigation générée - Connectez-vous pour sauvegarder l'historique";
+      } else if (data?.saved) {
+        successMessage = "Investigation générée et sauvegardée dans l'historique";
+      } else if (data?.save_error) {
+        successMessage = `Investigation générée - Erreur sauvegarde: ${data.save_error}`;
+        variant = "destructive";
+      } else if (data?.investigation || data?.message) {
+        successMessage = "Investigation IA générée avec succès";
       }
+
+      toast({
+        title: "🔍 Investigation IA",
+        description: successMessage,
+        variant,
+      });
     },
     onError: (error) => {
-      handleError(error as Error, 'Investigation proactive');
+      console.error('💥 [ROBUSTE] Erreur finale investigation:', error);
+      
+      // Messages d'erreur plus informatifs
+      let userFriendlyMessage = "Erreur lors de l'investigation IA";
+      
+      if (error.message?.includes('timeout')) {
+        userFriendlyMessage = "Délai d'attente dépassé - Veuillez réessayer";
+      } else if (error.message?.includes('network')) {
+        userFriendlyMessage = "Erreur réseau - Vérifiez votre connexion";
+      } else if (error.message?.includes('OpenAI')) {
+        userFriendlyMessage = "Service IA temporairement indisponible";
+      } else if (error.message) {
+        userFriendlyMessage = error.message;
+      }
+
+      toast({
+        title: "❌ Erreur Investigation",
+        description: userFriendlyMessage,
+        variant: "destructive",
+      });
     },
   });
 

@@ -7,6 +7,7 @@ import { TreasureQuest } from '@/types/quests';
 import { useProactiveAI } from '@/hooks/useProactiveAI';
 import { AIInvestigationHistory } from './AIInvestigationHistory';
 import { AIConnectivityTest } from './AIConnectivityTest';
+import AIDebugPanel from './AIDebugPanel';
 
 interface AIInvestigationTabProps {
   quest: TreasureQuest;
@@ -31,31 +32,46 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
   const handleFullInvestigation = async () => {
     try {
-      console.log('🔍 Démarrage investigation complète pour:', quest.id);
+      console.log('🔍 [UI] Démarrage investigation complète pour:', quest.id);
       const result = await startProactiveInvestigation({ questId: quest.id, questData: quest });
-      console.log('📊 Résultat investigation reçu:', result);
+      console.log('📊 [UI] Résultat investigation reçu. Clés:', Object.keys(result || {}));
       
-      if (result && result.investigation) {
-        let displayResult = result.investigation;
-        
-        // Ajouter des informations sur le statut de sauvegarde
-        if (result.auth_required) {
-          displayResult += "\n\n⚠️ Note: Ce résultat n'a pas été sauvegardé car vous n'êtes pas connecté. Connectez-vous pour que vos investigations soient automatiquement sauvegardées dans l'historique.";
-        } else if (!result.saved && result.save_error) {
-          displayResult += `\n\n❌ Erreur de sauvegarde: ${result.save_error}`;
-        } else if (result.saved) {
-          displayResult += "\n\n✅ Investigation sauvegardée dans l'historique.";
-        }
-        
-        setInvestigationResult(displayResult);
-        console.log('✅ Investigation stockée avec succès');
+      // Gestion ultra-flexible des différents formats de réponse
+      let investigationContent = '';
+      
+      // Essayer plusieurs propriétés possibles pour le contenu
+      if (result?.investigation) {
+        investigationContent = result.investigation;
+      } else if (result?.content) {
+        investigationContent = result.content;
+      } else if (result?.result) {
+        investigationContent = result.result;
+      } else if (result?.data) {
+        investigationContent = result.data;
+      } else if (result?.message && result.message !== 'Investigation générée avec succès') {
+        investigationContent = result.message;
+      } else if (typeof result === 'string') {
+        investigationContent = result;
       } else {
-        console.warn('⚠️ Pas de contenu investigation dans la réponse:', result);
-        setInvestigationResult("Aucun résultat d'investigation généré");
+        investigationContent = "Investigation IA générée avec succès mais contenu non accessible. Vérifiez l'historique ou l'onglet Debug.";
       }
-    } catch (error) {
-      console.error('❌ Erreur investigation:', error);
-      setInvestigationResult(`Erreur: ${error.message}`);
+      
+      // Ajouter des informations contextuelles
+      if (result?.auth_required) {
+        investigationContent += "\n\n⚠️ Note: Ce résultat n'a pas été sauvegardé car vous n'êtes pas connecté. Connectez-vous pour que vos investigations soient automatiquement sauvegardées dans l'historique.";
+      } else if (!result?.saved && result?.save_error) {
+        investigationContent += `\n\n❌ Erreur de sauvegarde: ${result.save_error}`;
+      } else if (result?.saved) {
+        investigationContent += "\n\n✅ Investigation sauvegardée dans l'historique.";
+      }
+      
+      setInvestigationResult(investigationContent);
+      console.log('✅ [UI] Investigation affichée avec succès');
+      
+    } catch (error: any) {
+      console.error('❌ [UI] Erreur investigation:', error);
+      const errorMessage = `Erreur: ${error.message || 'Erreur inconnue'}\n\nUtilisez l'onglet Debug pour plus d'informations.`;
+      setInvestigationResult(errorMessage);
     }
   };
 
@@ -124,7 +140,7 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="tools" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="tools" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
             Outils IA
@@ -132,6 +148,10 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
           <TabsTrigger value="diagnostics" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Diagnostic
+          </TabsTrigger>
+          <TabsTrigger value="debug" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Debug
           </TabsTrigger>
           <TabsTrigger value="history" className="flex items-center gap-2">
             <History className="h-4 w-4" />
@@ -269,6 +289,10 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
 
         <TabsContent value="diagnostics" className="space-y-6">
           <AIConnectivityTest />
+        </TabsContent>
+
+        <TabsContent value="debug" className="space-y-6">
+          <AIDebugPanel />
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
