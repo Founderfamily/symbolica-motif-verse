@@ -232,11 +232,11 @@ Réponds en français avec une analyse structurée et détaillée.`;
             .rpc('insert_ai_investigation', {
               p_quest_id: questId,
               p_investigation_type: 'full_investigation',
-              p_request_data: {
+              p_evidence_used: {
                 quest_data: questData,
                 evidence_count: existingEvidence?.length || 0
               },
-              p_result: {
+              p_result_content: {
                 investigation: investigationResult,
                 evidence_used: existingEvidence || []
               },

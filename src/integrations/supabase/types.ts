@@ -4656,8 +4656,8 @@ export type Database = {
         Args: {
           p_quest_id: string
           p_investigation_type: string
-          p_request_data: Json
-          p_result: Json
+          p_evidence_used: Json
+          p_result_content: Json
           p_user_id?: string
         }
         Returns: string
