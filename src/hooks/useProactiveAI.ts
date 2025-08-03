@@ -22,12 +22,12 @@ export const useProactiveAI = (questId: string) => {
   const debounceTimers = useRef<{ [key: string]: NodeJS.Timeout }>({});
   const lastActionTime = useRef<{ [key: string]: number }>({});
   
-  // Fonction de debouncing optimisée pour une meilleure responsivité
-  const debounceAction = useCallback((actionKey: string, action: () => void, delay = 500) => {
+  // Fonction de debouncing optimisée pour une meilleure responsivité (200ms)
+  const debounceAction = useCallback((actionKey: string, action: () => void, delay = 200) => {
     const now = Date.now();
     const lastTime = lastActionTime.current[actionKey] || 0;
     
-    // Si la dernière action était il y a moins de 500ms, ignorer
+    // Si la dernière action était il y a moins de 200ms, ignorer
     if (now - lastTime < delay) {
       console.log(`⏱️ Action ${actionKey} trop rapide - dernière: ${now - lastTime}ms`);
       return;

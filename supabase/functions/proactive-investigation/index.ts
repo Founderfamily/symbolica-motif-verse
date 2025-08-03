@@ -7,23 +7,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-
 serve(async (req) => {
+  console.log('🚀 Proactive Investigation Edge Function called');
+  
   if (req.method === 'OPTIONS') {
+    console.log('✅ Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('🔧 Initializing Supabase client...');
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
+    console.log('📨 Parsing request body...');
     const { questId, investigationType, context } = await req.json();
     
-    console.log(`🔍 Début d'investigation proactive IA pour quête ${questId}, type: ${investigationType}`);
-    console.log(`🧠 Utilisation OpenAI: ${openAIApiKey ? 'Activé' : 'Désactivé'}`);
+    console.log(`🔍 Début d'investigation proactive IA pour quête ${questId}`);
+    console.log(`📋 Type d'investigation: ${investigationType}`);
+    console.log(`🌍 Contexte:`, context);
+    
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log(`🧠 Utilisation OpenAI: ${openAIApiKey ? '✅ Activé' : '❌ Désactivé'}`);
 
     if (!openAIApiKey) {
       console.warn('⚠️ Clé OpenAI manquante - utilisation de données simulées');
@@ -123,6 +130,8 @@ async function getQuestData(supabase: any, questId: string) {
 
 // Fonction pour appeler OpenAI
 async function callOpenAI(prompt: string, systemMessage: string = "Tu es un expert archéologue et historien qui analyse des quêtes de trésors historiques.") {
+  const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+  
   if (!openAIApiKey) {
     console.warn('⚠️ OpenAI non disponible - génération de contenu simulé');
     return null;
