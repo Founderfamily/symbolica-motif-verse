@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import ActionModals from '@/components/actions/ActionModals';
 import { 
   Camera, 
   MessageSquare, 
@@ -24,6 +26,49 @@ interface AdaptiveActionsProps {
 }
 
 const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction }) => {
+  const { toast } = useToast();
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleActionClick = async (actionId: string) => {
+    // Actions qui ouvrent des modales spécialisées
+    const modalActions = [
+      'take_photo', 'verify_coordinates', 'validate_sources', 
+      'online_research', 'chat', 'document_discovery'
+    ];
+    
+    if (modalActions.includes(actionId)) {
+      setSelectedAction(actionId);
+      return;
+    }
+
+    // Actions avec feedback immédiat
+    setLoading(actionId);
+    
+    // Feedback spécifique selon l'action
+    const feedbackMessages = {
+      'explore_map': 'Carte interactive chargée ! Explore les zones découvertes.',
+      'tutorial': 'Tutoriel démarré ! Suis le guide pas-à-pas.',
+      'field_search': 'Zone de recherche activée ! Secteur Nord-Est priorisé.',
+      'validate_clue': 'Interface de validation ouverte ! Commence l\'authentification.',
+      'review_methodology': 'Protocole d\'analyse affiché ! Révision méthodologique en cours.',
+      'cross_reference': 'Bases de données connectées ! Recoupement bibliographique actif.',
+      'publish_findings': 'Éditeur collaboratif ouvert ! Commence la rédaction.',
+      'photo_analysis': 'Interface d\'analyse chargée ! Sélectionne les images à classifier.',
+      'transcription': 'Éditeur de transcription prêt ! Documents manuscrits chargés.',
+      'community_support': 'Panneau de modération ouvert ! Nouveaux messages à traiter.',
+    };
+
+    setTimeout(() => {
+      toast({
+        title: "Action activée !",
+        description: feedbackMessages[actionId as keyof typeof feedbackMessages] || "Action en cours de traitement...",
+      });
+      setLoading(null);
+      // Garder l'appel original pour la navigation
+      onAction(actionId);
+    }, 800);
+  };
   const getActionsConfig = () => {
     switch (profile.type) {
       case 'beginner':
@@ -230,11 +275,16 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction }) 
                 action.remote ? 'border-l-cyan-500 bg-cyan-50/50' :
                 'border-l-blue-500 bg-blue-50/50'
               }`}
-              onClick={() => onAction(action.id)}
+              onClick={() => handleActionClick(action.id)}
             >
               <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-lg ${action.color} text-white`}>
-                  <IconComponent className="w-6 h-6" />
+                <div className={`p-3 rounded-lg ${action.color} text-white relative`}>
+                  <IconComponent className={`w-6 h-6 ${loading === action.id ? 'animate-pulse' : ''}`} />
+                  {loading === action.id && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex-1 space-y-2">
@@ -309,6 +359,13 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction }) 
           );
         })}
       </div>
+
+      <ActionModals
+        isOpen={selectedAction !== null}
+        onClose={() => setSelectedAction(null)}
+        actionType={selectedAction || ''}
+        userProfile={profile.type}
+      />
     </div>
   );
 };
