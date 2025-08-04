@@ -96,18 +96,12 @@ class AIDataExtractionService {
 
       investigations?.forEach(investigation => {
         if (investigation.result_content) {
-          // Le result_content est un JSON, on tente d'extraire le texte
-          let analysisText = '';
-          if (typeof investigation.result_content === 'string') {
-            analysisText = investigation.result_content;
-          } else if (investigation.result_content && typeof investigation.result_content === 'object') {
-            // Si c'est un objet JSON, on cherche les champs texte
-            const content = investigation.result_content as any;
-            analysisText = content.analysis || content.content || content.result || JSON.stringify(content);
-          }
-          
-          if (analysisText) {
-            this.parseAnalysisResult(analysisText, investigation.created_at, extractedData);
+          if (typeof investigation.result_content === 'object') {
+            // Si c'est déjà un objet JSON, l'utiliser directement
+            this.extractFromJSON(investigation.result_content as any, investigation.created_at, extractedData);
+          } else if (typeof investigation.result_content === 'string') {
+            // Si c'est une string, tenter de parser le JSON ou utiliser le parsing texte
+            this.parseAnalysisResult(investigation.result_content, investigation.created_at, extractedData);
           }
         }
       });
@@ -127,28 +121,142 @@ class AIDataExtractionService {
   }
 
   /**
-   * Parse le contenu texte d'une analyse pour extraire des données structurées
+   * Parse le contenu JSON d'une analyse pour extraire des données structurées
    */
   private parseAnalysisResult(analysisText: string, timestamp: string, extractedData: AIExtractedData) {
-    const text = analysisText.toLowerCase();
+    try {
+      // Essayer de parser le JSON first
+      const jsonData = JSON.parse(analysisText);
+      
+      if (jsonData && typeof jsonData === 'object') {
+        this.extractFromJSON(jsonData, timestamp, extractedData);
+        return;
+      }
+    } catch (e) {
+      // Si ce n'est pas du JSON valide, utiliser l'ancien parsing texte
+    }
 
-    // Extraire les personnages historiques mentionnés
+    // Fallback sur l'ancien parsing textuel
+    const text = analysisText.toLowerCase();
     this.extractHistoricalFigures(analysisText, timestamp, extractedData);
-    
-    // Extraire les lieux mentionnés
     this.extractLocations(analysisText, timestamp, extractedData);
-    
-    // Extraire les théories
     this.extractTheories(analysisText, timestamp, extractedData);
-    
-    // Extraire les sources
     this.extractSources(analysisText, timestamp, extractedData);
-    
-    // Extraire les connexions
     this.extractConnections(analysisText, timestamp, extractedData);
-    
-    // Générer des insights
     this.generateInsights(analysisText, timestamp, extractedData);
+  }
+
+  /**
+   * Extrait les données depuis la structure JSON réelle
+   */
+  private extractFromJSON(data: any, timestamp: string, extractedData: AIExtractedData) {
+    // Extraire le titre de la quête
+    if (data.quest_title) {
+      extractedData.theories.push({
+        id: `quest-title-${timestamp}`,
+        title: data.quest_title,
+        description: data.quest_title,
+        confidence: 1.0,
+        timestamp,
+        evidence: [],
+        category: 'historical'
+      });
+    }
+
+    // Extraire l'analyse générale
+    if (data.analysis) {
+      extractedData.insights.push({
+        id: `analysis-${timestamp}`,
+        type: 'discovery',
+        title: 'Analyse IA',
+        description: data.analysis,
+        confidence: 0.9,
+        timestamp,
+        relatedEntities: []
+      });
+    }
+
+    // Extraire les preuves soumises
+    if (data.submitted_proofs && Array.isArray(data.submitted_proofs)) {
+      data.submitted_proofs.forEach((proof: any, index: number) => {
+        if (proof.description) {
+          extractedData.sources.push({
+            id: `proof-${timestamp}-${index}`,
+            title: proof.type || `Preuve #${index + 1}`,
+            excerpt: proof.description,
+            relevance: 0.8,
+            type: 'document',
+            date: proof.date
+          });
+        }
+      });
+    }
+
+    // Extraire les connexions historiques
+    if (data.historical_connections && Array.isArray(data.historical_connections)) {
+      data.historical_connections.forEach((connection: any, index: number) => {
+        // Ajouter les personnages historiques
+        if (connection.figure && connection.period) {
+          const existingFigure = extractedData.historicalFigures.find(f => f.name === connection.figure);
+          if (!existingFigure) {
+            extractedData.historicalFigures.push({
+              id: `figure-${connection.figure.replace(/\s+/g, '-').toLowerCase()}`,
+              name: connection.figure,
+              period: connection.period,
+              role: connection.role || 'Personnage historique',
+              relevance: 0.9,
+              connections: [],
+              description: connection.significance || `Personnage lié à ${data.quest_title || 'cette quête'}`
+            });
+          }
+        }
+
+        // Ajouter les lieux
+        if (connection.location) {
+          const existingLocation = extractedData.locations.find(l => l.name === connection.location);
+          if (!existingLocation) {
+            extractedData.locations.push({
+              id: `location-${connection.location.replace(/\s+/g, '-').toLowerCase()}`,
+              name: connection.location,
+              period: connection.period || 'Historique',
+              significance: connection.significance || 'Lieu d\'intérêt historique',
+              confidence: 0.8,
+              description: connection.significance || `Lieu lié à ${connection.figure || 'cette investigation'}`
+            });
+          }
+        }
+
+        // Ajouter la connexion elle-même
+        if (connection.figure && connection.location) {
+          extractedData.connections.push({
+            id: `connection-${timestamp}-${index}`,
+            fromEntity: connection.figure,
+            toEntity: connection.location,
+            relationshipType: 'historical_link',
+            strength: 0.8,
+            description: connection.significance || `Connexion entre ${connection.figure} et ${connection.location}`,
+            evidence: [connection.significance || '']
+          });
+        }
+      });
+    }
+
+    // Extraire les artefacts et objets
+    if (data.submitted_proofs) {
+      data.submitted_proofs.forEach((proof: any, index: number) => {
+        if (proof.type && proof.type.includes('Fragment')) {
+          extractedData.theories.push({
+            id: `artifact-${timestamp}-${index}`,
+            title: proof.type,
+            description: proof.description || 'Artefact historique identifié',
+            confidence: 0.7,
+            timestamp,
+            evidence: [proof.description || ''],
+            category: 'archaeological'
+          });
+        }
+      });
+    }
   }
 
   private extractHistoricalFigures(text: string, timestamp: string, data: AIExtractedData) {
