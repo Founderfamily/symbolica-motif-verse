@@ -132,20 +132,20 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
             {
               id: 'verify_coordinates',
               title: '📍 Vérifier coordonnées GPS',
-              description: 'Escalier secret signalé - confirmation requise',
+              description: 'Escalier secret signalé - exploration recommandée',
               icon: Target,
-              color: 'bg-red-500',
-              urgent: true,
-              timeLeft: '2h restantes'
+              color: 'bg-emerald-500',
+              priority: 'high',
+              status: 'Nouvelle découverte'
             },
             {
               id: 'document_discovery',
               title: '📋 Documenter découverte',
-              description: 'Fragment métallique - photos haute définition',
+              description: 'Fragment métallique - documentation en cours',
               icon: FileText,
-              color: 'bg-orange-500',
-              urgent: true,
-              timeLeft: 'En cours'
+              color: 'bg-blue-500',
+              priority: 'medium',
+              status: 'Analyse active'
             },
             {
               id: 'field_search',
@@ -170,8 +170,8 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
 
       case 'historian':
         return {
-          title: '📚 VALIDATIONS ACADÉMIQUES REQUISES',
-          subtitle: 'Expertise historique demandée',
+          title: '📚 DÉCOUVERTES PASSIONNANTES',
+          subtitle: 'Votre expertise historique enrichit l\'enquête',
           actions: [
             {
               id: 'validate_sources',
@@ -466,7 +466,7 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
             <Card 
               key={action.id} 
               className={`p-3 hover:shadow-md transition-all cursor-pointer border-l-2 ${
-                action.urgent ? 'border-l-red-500 bg-red-50/30' : 
+                action.priority === 'high' ? 'border-l-emerald-500 bg-emerald-50/30' : 
                 action.academic ? 'border-l-emerald-500 bg-emerald-50/30' :
                 action.educational ? 'border-l-blue-500 bg-blue-50/30' :
                 action.remote ? 'border-l-cyan-500 bg-cyan-50/30' :
@@ -489,9 +489,9 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
                     {action.title}
                   </h3>
                   <div className="flex items-center gap-1 mt-1">
-                    {action.urgent && (
-                      <Badge variant="destructive" className="text-xs px-1 py-0">
-                        URGENT
+                    {action.priority === 'high' && (
+                      <Badge variant="default" className="text-xs px-1 py-0 bg-emerald-500">
+                        NOUVELLE
                       </Badge>
                     )}
                     {action.points && (

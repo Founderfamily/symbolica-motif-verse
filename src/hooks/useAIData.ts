@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { aiDataExtractionService, AIExtractedData } from '@/services/AIDataExtractionService';
+import { getMockHistoricalFigures, getMockAIInsights } from './useQuestMockData';
 
 export const useAIData = (questId: string) => {
   const [data, setData] = useState<AIExtractedData | null>(null);
@@ -14,6 +15,15 @@ export const useAIData = (questId: string) => {
         setLoading(true);
         setError(null);
         const aiData = await aiDataExtractionService.extractAIData(questId);
+        
+        // Enrichir avec des données réalistes si les données IA sont vides
+        if (aiData.historicalFigures.length === 0) {
+          aiData.historicalFigures = getMockHistoricalFigures(questId);
+        }
+        if (aiData.insights.length === 0) {
+          aiData.insights = getMockAIInsights(questId);
+        }
+        
         if (mounted) {
           setData(aiData);
         }
@@ -42,6 +52,15 @@ export const useAIData = (questId: string) => {
       setLoading(true);
       try {
         const aiData = await aiDataExtractionService.extractAIData(questId);
+        
+        // Enrichir avec des données réalistes si les données IA sont vides
+        if (aiData.historicalFigures.length === 0) {
+          aiData.historicalFigures = getMockHistoricalFigures(questId);
+        }
+        if (aiData.insights.length === 0) {
+          aiData.insights = getMockAIInsights(questId);
+        }
+        
         setData(aiData);
         setError(null);
       } catch (err) {
