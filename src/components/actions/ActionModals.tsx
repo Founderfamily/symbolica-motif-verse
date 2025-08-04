@@ -76,68 +76,46 @@ const ActionModals: React.FC<ActionModalsProps> = ({
         };
 
       case 'verify_coordinates':
+        // Pour les trésors découverts, adapter l'action
         return {
-          title: '📍 Vérifier coordonnées GPS',
+          title: '📚 Étudier la découverte',
           content: (
             <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h4 className="font-medium text-blue-900 mb-2">🎯 Comment faire ?</h4>
-                <ol className="text-sm text-blue-800 space-y-1">
-                  <li><strong>1.</strong> Active la géolocalisation de ton téléphone</li>
-                  <li><strong>2.</strong> Va à l'emplacement indiqué sur la carte</li>
-                  <li><strong>3.</strong> Clique sur "Obtenir ma position" pour remplir automatiquement</li>
-                  <li><strong>4.</strong> Confirme quand tu es au bon endroit</li>
-                </ol>
-              </div>
-              
-              <p className="text-muted-foreground">
-                <strong>Mission :</strong> Un escalier secret a été signalé ici. Nous avons besoin de confirmation de sa position exacte.
-              </p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Latitude</label>
-                  <Input placeholder="48.8566" className="mt-1" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Longitude</label>
-                  <Input placeholder="2.3522" className="mt-1" />
-                </div>
-              </div>
-              
-              <Button 
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(() => {
-                      toast({
-                        title: "Position obtenue !",
-                        description: "Coordonnées remplies automatiquement",
-                      });
-                    });
-                  }
-                }}
-              >
-                📱 Obtenir ma position actuelle
-              </Button>
-              
-              <Card className="p-4 bg-red-50">
-                <div className="flex items-center gap-2 text-red-700">
-                  <Target className="w-4 h-4" />
-                  <span className="font-medium">URGENT - 2h restantes</span>
-                </div>
-                <p className="text-sm text-red-600 mt-1">
-                  Équipe en attente de confirmation pour intervention
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-medium text-green-900 mb-2">🏆 Trésor découvert !</h4>
+                <p className="text-sm text-green-800">
+                  Ce trésor a été trouvé en 2019. Étudiez comment il a été découvert pour améliorer vos futures recherches.
                 </p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                  <h5 className="font-medium text-blue-900">📋 Méthode utilisée</h5>
+                  <p className="text-sm text-blue-800">Analyse géoradar et recherche d'archives historiques</p>
+                </div>
+                <div className="bg-yellow-50 p-3 rounded border-l-4 border-yellow-400">
+                  <h5 className="font-medium text-yellow-900">💡 Leçon apprise</h5>
+                  <p className="text-sm text-yellow-800">Les indices architecturaux étaient cachés dans les moulures</p>
+                </div>
+                <div className="bg-purple-50 p-3 rounded border-l-4 border-purple-400">
+                  <h5 className="font-medium text-purple-900">🎯 Application</h5>
+                  <p className="text-sm text-purple-800">Technique applicable aux châteaux Renaissance</p>
+                </div>
+              </div>
+              
+              <Card className="p-3 bg-cyan-50">
+                <div className="flex items-center gap-2 text-cyan-700">
+                  <BookOpen className="w-4 h-4" />
+                  <span className="font-medium">Temps d'étude : 10-15 minutes</span>
+                </div>
               </Card>
               
               <Button 
-                onClick={() => handleAction("Coordonnées GPS confirmées ! L'équipe a été alertée. +20 points 🎉")}
+                onClick={() => handleAction("Excellente analyse ! Votre compréhension s'améliore. +25 points 🎓")}
                 disabled={loading}
                 className="w-full"
               >
-                {loading ? "Vérification..." : "✅ Confirmer la position"}
+                {loading ? "Analyse..." : "📖 J'ai compris la méthode"}
               </Button>
             </div>
           )
@@ -145,33 +123,37 @@ const ActionModals: React.FC<ActionModalsProps> = ({
 
       case 'validate_sources':
         return {
-          title: '📚 Valider sources primaires',
+          title: '📖 Analyser les documents de découverte',
           content: (
             <div className="space-y-4">
               <p className="text-muted-foreground">
-                12 documents époque François Ier - authentification critique requise
+                Consultez les documents qui ont mené à cette découverte réussie
               </p>
               <div className="space-y-2">
-                {[1, 2, 3].map((doc) => (
-                  <Card key={doc} className="p-3 hover:bg-accent cursor-pointer">
+                {[
+                  { title: "Rapport de découverte", desc: "Document officiel - 2019", status: "Authentifié" },
+                  { title: "Photos avant/après", desc: "Archives photographiques", status: "Validé" },
+                  { title: "Analyse géoradar", desc: "Résultats techniques", status: "Confirmé" }
+                ].map((doc, index) => (
+                  <Card key={index} className="p-3 hover:bg-accent cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">Document {doc}/12</p>
-                        <p className="text-sm text-muted-foreground">
-                          Manuscrit - Archives nationales - Série K {doc}4
-                        </p>
+                        <p className="font-medium">{doc.title}</p>
+                        <p className="text-sm text-muted-foreground">{doc.desc}</p>
                       </div>
-                      <Badge variant="outline">Non validé</Badge>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        {doc.status}
+                      </Badge>
                     </div>
                   </Card>
                 ))}
               </div>
               <Button 
-                onClick={() => handleAction("Sources validées ! Votre expertise académique a été enregistrée.")}
+                onClick={() => handleAction("Documents analysés ! Vous maîtrisez mieux la méthodologie. +20 points 📚")}
                 disabled={loading}
                 className="w-full"
               >
-                {loading ? "Validation..." : "📋 Valider l'authenticité"}
+                {loading ? "Lecture..." : "📚 Terminer l'analyse"}
               </Button>
             </div>
           )
