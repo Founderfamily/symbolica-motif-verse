@@ -2,7 +2,7 @@ import { AIHistoricalFigure, AIInsight } from '@/services/AIDataExtractionServic
 
 export const getMockHistoricalFigures = (questId: string): AIHistoricalFigure[] => {
   // Pour la quête Fontainebleau - François Ier
-  if (questId === 'a0434f67-6a97-4510-b8a5-6ad80375438e') {
+  if (questId === 'a0434f67-6a97-4510-b8a5-6ad80375438e' || questId === '0b58fcc0-f40e-4762-a4f7-9bc074824820') {
     return [
       {
         id: 'francois-ier',
@@ -48,7 +48,7 @@ export const getMockHistoricalFigures = (questId: string): AIHistoricalFigure[] 
 
 export const getMockAIInsights = (questId: string): AIInsight[] => {
   // Pour la quête Fontainebleau - François Ier
-  if (questId === 'a0434f67-6a97-4510-b8a5-6ad80375438e') {
+  if (questId === 'a0434f67-6a97-4510-b8a5-6ad80375438e' || questId === '0b58fcc0-f40e-4762-a4f7-9bc074824820') {
     return [
       {
         id: 'insight-salamandre',
