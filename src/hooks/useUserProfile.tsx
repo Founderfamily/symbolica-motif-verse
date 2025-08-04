@@ -38,19 +38,19 @@ const detectUserProfile = (profile: any, userActivity: any): UserProfileType => 
     return 'remote_helper';
   }
 
-  // Par défaut, nouveau utilisateur
-  return 'beginner';
+  // Par défaut, chasseur de trésor
+  return 'treasure_hunter';
 };
 
 export const useUserProfile = () => {
   const { user, profile } = useAuth();
   const [adaptiveProfile, setAdaptiveProfile] = useState<AdaptiveProfile>({
-    type: 'beginner',
+    type: 'treasure_hunter',
     isFirstTime: true,
     preferences: {
-      gamification: true,
+      gamification: false,
       academicMode: false,
-      fieldMode: false,
+      fieldMode: true,
     }
   });
 
