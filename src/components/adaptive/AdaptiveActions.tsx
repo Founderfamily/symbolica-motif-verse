@@ -448,111 +448,57 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
   const config = getActionsConfig();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-foreground mb-2">
+        <h2 className="text-xl font-bold text-foreground mb-1">
           {config.title}
         </h2>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-sm">
           {config.subtitle}
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        {config.actions.map((action) => {
+      <div className="grid md:grid-cols-3 gap-3">
+        {config.actions.slice(0, 3).map((action) => {
           const IconComponent = action.icon;
           
           return (
             <Card 
               key={action.id} 
-              className={`p-6 hover:shadow-lg transition-all cursor-pointer border-l-4 ${
-                action.urgent ? 'border-l-red-500 bg-red-50/50' : 
-                action.academic ? 'border-l-emerald-500 bg-emerald-50/50' :
-                action.educational ? 'border-l-blue-500 bg-blue-50/50' :
-                action.remote ? 'border-l-cyan-500 bg-cyan-50/50' :
-                'border-l-blue-500 bg-blue-50/50'
+              className={`p-3 hover:shadow-md transition-all cursor-pointer border-l-2 ${
+                action.urgent ? 'border-l-red-500 bg-red-50/30' : 
+                action.academic ? 'border-l-emerald-500 bg-emerald-50/30' :
+                action.educational ? 'border-l-blue-500 bg-blue-50/30' :
+                action.remote ? 'border-l-cyan-500 bg-cyan-50/30' :
+                'border-l-blue-500 bg-blue-50/30'
               }`}
               onClick={() => handleActionClick(action.id)}
             >
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-lg ${action.color} text-white relative`}>
-                  <IconComponent className={`w-6 h-6 ${loading === action.id ? 'animate-pulse' : ''}`} />
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${action.color} text-white relative`}>
+                  <IconComponent className={`w-4 h-4 ${loading === action.id ? 'animate-pulse' : ''}`} />
                   {loading === action.id && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
                 
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-foreground">
-                      {action.title}
-                    </h3>
-                    <div className="flex gap-2">
-                      {action.urgent && (
-                        <Badge variant="destructive" className="text-xs">
-                          URGENT
-                        </Badge>
-                      )}
-                      {action.academic && (
-                        <Badge variant="secondary" className="text-xs">
-                          ACADÉMIQUE
-                        </Badge>
-                      )}
-                      {action.educational && (
-                        <Badge variant="secondary" className="text-xs">
-                          ÉDUCATIF
-                        </Badge>
-                      )}
-                      {action.remote && (
-                        <Badge variant="outline" className="text-xs">
-                          DISTANCE
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <p className="text-muted-foreground text-sm">
-                    {action.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-3 text-xs text-muted-foreground">
-                      {action.points && (
-                        <div className="flex items-center gap-1">
-                          <Award className="w-3 h-3" />
-                          {action.points}
-                        </div>
-                      )}
-                      {action.timeLeft && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {action.timeLeft}
-                        </div>
-                      )}
-                      {action.timeEstimate && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {action.timeEstimate}
-                        </div>
-                      )}
-                      {action.difficulty && (
-                        <Badge variant="outline" className="text-xs">
-                          {action.difficulty}
-                        </Badge>
-                      )}
-                      {action.complexity && (
-                        <Badge variant="outline" className="text-xs">
-                          {action.complexity}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    {(action.reward || action.urgent) && (
-                      <div className="text-xs font-medium text-primary">
-                        {action.reward || 'Action prioritaire'}
-                      </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-foreground text-sm truncate">
+                    {action.title}
+                  </h3>
+                  <div className="flex items-center gap-1 mt-1">
+                    {action.urgent && (
+                      <Badge variant="destructive" className="text-xs px-1 py-0">
+                        URGENT
+                      </Badge>
+                    )}
+                    {action.points && (
+                      <span className="text-xs text-muted-foreground">{action.points}</span>
+                    )}
+                    {action.timeLeft && (
+                      <span className="text-xs text-muted-foreground">{action.timeLeft}</span>
                     )}
                   </div>
                 </div>

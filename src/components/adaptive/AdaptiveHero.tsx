@@ -10,7 +10,8 @@ import {
   Trophy,
   Target,
   Compass,
-  FileText
+  FileText,
+  Users
 } from 'lucide-react';
 import { AdaptiveProfile } from '@/hooks/useUserProfile';
 
@@ -107,102 +108,53 @@ const AdaptiveHero: React.FC<AdaptiveHeroProps> = ({ profile, quest, onStartAdve
   return (
     <div className={`relative bg-gradient-to-br ${config.color} text-white overflow-hidden`}>
       <div className="absolute inset-0 bg-black/20" />
-      <div className="relative max-w-7xl mx-auto px-4 py-12">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
-          {/* Contenu principal */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+      <div className="relative max-w-7xl mx-auto px-4 py-4">
+        <div className="flex flex-col lg:flex-row gap-6 items-center">
+          {/* Contenu principal condensé */}
+          <div className="flex-1 space-y-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 text-xs">
                 {config.badge}
               </Badge>
               {profile.isFirstTime && (
-                <Badge variant="outline" className="border-white/30 text-white">
+                <Badge variant="outline" className="border-white/30 text-white text-xs">
                   🌟 PREMIÈRE FOIS
                 </Badge>
               )}
             </div>
             
-            <h1 className="text-4xl lg:text-5xl font-bold leading-tight">
+            <h1 className="text-2xl lg:text-3xl font-bold leading-tight">
               {config.title}
             </h1>
             
-            <p className="text-xl opacity-90">
+            <p className="text-base opacity-90">
               {config.subtitle}
             </p>
-            
-            <p className="text-white/80 text-lg">
-              {config.description}
-            </p>
-
-            {/* Étapes rapides */}
-            <div className="flex flex-wrap gap-4 pt-4">
-              {getSteps().map((step, index) => (
-                <div key={index} className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
-                  <span className="text-lg">{step.icon}</span>
-                  <span className="text-sm font-medium">{step.text}</span>
-                </div>
-              ))}
-            </div>
 
             <Button 
-              size="lg" 
-              className="bg-white text-gray-900 hover:bg-white/90 shadow-lg font-semibold px-8 py-3 text-lg"
+              size="sm" 
+              className="bg-white text-gray-900 hover:bg-white/90 shadow-lg font-semibold px-6 py-2"
               onClick={onStartAdventure}
             >
-              <IconComponent className="w-5 h-5 mr-2" />
+              <IconComponent className="w-4 h-4 mr-2" />
               {config.cta}
             </Button>
           </div>
 
-          {/* Stats visuelles */}
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-white/10 border-white/20 text-white p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Compass className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">4</div>
-                  <div className="text-sm opacity-80">🔍 Indices trouvés</div>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="bg-white/10 border-white/20 text-white p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Trophy className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">12</div>
-                  <div className="text-sm opacity-80">⚡ Explorateurs</div>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="bg-white/10 border-white/20 text-white p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <MapPin className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">3</div>
-                  <div className="text-sm opacity-80">📍 Lieux actifs</div>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="bg-white/10 border-white/20 text-white p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <FileText className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">75%</div>
-                  <div className="text-sm opacity-80">📋 Progression</div>
-                </div>
-              </div>
-            </Card>
+          {/* Stats essentielles en ligne */}
+          <div className="flex items-center gap-4 text-white/90">
+            <div className="flex items-center gap-2">
+              <Compass className="w-4 h-4" />
+              <span className="text-sm font-medium">4 indices</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              <span className="text-sm font-medium">12 explorateurs</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              <span className="text-sm font-medium">75% progression</span>
+            </div>
           </div>
         </div>
       </div>

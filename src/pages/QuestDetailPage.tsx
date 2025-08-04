@@ -295,9 +295,9 @@ const QuestDetailPage = () => {
         onStartAdventure={handleStartAdventure}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Actions Rapides Adaptatives */}
-        <div className="mb-8">
+        <div className="mb-4">
           <AdaptiveActions 
             profile={adaptiveProfile}
             onAction={handleAction}
@@ -314,7 +314,7 @@ const QuestDetailPage = () => {
             onTabChange={setActiveTab}
           >
             {/* Contenu des onglets */}
-            <div className="p-6">
+            <div className="p-4">
               {activeTab === 'adventure' && adaptiveProfile.type === 'beginner' && (
                 <div className="space-y-6">
                   <div className="text-center">
