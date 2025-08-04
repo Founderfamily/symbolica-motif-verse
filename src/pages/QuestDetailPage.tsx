@@ -34,6 +34,7 @@ import InvestigationInterface from '@/components/investigation/InvestigationInte
 import AINotificationService from '@/components/investigation/AINotificationService';
 import AIInsightsWidget from '@/components/investigation/AIInsightsWidget';
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
+import { useAIData } from '@/hooks/useAIData';
 
 const QuestDetailPage = () => {
   const { questId } = useParams<{ questId: string }>();
@@ -43,10 +44,14 @@ const QuestDetailPage = () => {
   
   // Utiliser le hook spécialisé pour récupérer une seule quête
   const { data: quest, isLoading, error } = useQuestById(questId || '');
+  
+  // Récupérer les données IA pour enrichir l'objectif
+  const { data: aiData, theories, sources, historicalFigures, locations } = useAIData(questId || '');
 
   console.log('QuestDetailPage - Quest data:', quest);
   console.log('QuestDetailPage - Loading state:', isLoading);
   console.log('QuestDetailPage - Error state:', error);
+  console.log('QuestDetailPage - AI data:', aiData);
 
   // Normaliser les clues de manière sécurisée
   const questClues = quest ? normalizeQuestClues(quest.clues) : [];
@@ -195,30 +200,64 @@ const QuestDetailPage = () => {
             </h1>
             <p className="text-stone-600 mb-4">{quest.description}</p>
             
-            {/* Objectif clair de la quête */}
+            {/* Objectif clair de la quête avec données IA */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
               <div className="flex items-start gap-3">
                 <Target className="w-5 h-5 text-amber-600 mt-1 flex-shrink-0" />
-                <div>
+                <div className="flex-1">
                   <h3 className="font-semibold text-amber-800 mb-1">Objectif de la quête</h3>
-                  <p className="text-amber-700 text-sm">
-                    {quest.quest_type === 'unfound_treasure' && 'Découvrir l\'emplacement d\'un trésor historique non retrouvé'}
-                    {quest.quest_type === 'found_treasure' && 'Explorer et documenter un trésor historique connu'}
-                    {quest.quest_type === 'myth' && 'Analyser les légendes et séparer mythe de réalité historique'}
-                    {!['unfound_treasure', 'found_treasure', 'myth'].includes(quest.quest_type) && 'Résoudre cette énigme historique grâce à la collaboration'}
-                  </p>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-amber-600">
+                  
+                  {/* Objectif principal enrichi par l'IA */}
+                  <div className="space-y-2">
+                    <p className="text-amber-700 text-sm">
+                      {quest.quest_type === 'unfound_treasure' && (
+                        theories.length > 0 ? (
+                          <>Découvrir l'emplacement de <strong>{theories[0]?.title || 'ce trésor historique'}</strong></>
+                        ) : 'Découvrir l\'emplacement d\'un trésor historique non retrouvé'
+                      )}
+                      {quest.quest_type === 'found_treasure' && (
+                        historicalFigures.length > 0 ? (
+                          <>Explorer le trésor lié à <strong>{historicalFigures[0]?.name}</strong> et documenter ses origines</>
+                        ) : 'Explorer et documenter un trésor historique connu'
+                      )}
+                      {quest.quest_type === 'myth' && (
+                        sources.length > 0 ? (
+                          <>Analyser les sources historiques comme <strong>{sources[0]?.title}</strong> pour séparer mythe de réalité</>
+                        ) : 'Analyser les légendes et séparer mythe de réalité historique'
+                      )}
+                    </p>
+                    
+                    {/* Détails spécifiques basés sur l'IA */}
+                    {(theories.length > 0 || historicalFigures.length > 0 || locations.length > 0) && (
+                      <div className="bg-amber-100/50 rounded p-2 text-xs text-amber-800">
+                        <div className="font-medium mb-1">Pistes identifiées par l'IA :</div>
+                        <ul className="space-y-1">
+                          {theories.slice(0, 1).map(theory => (
+                            <li key={theory.id}>• {theory.title}</li>
+                          ))}
+                          {historicalFigures.slice(0, 1).map(figure => (
+                            <li key={figure.id}>• Personnage clé : {figure.name} ({figure.period})</li>
+                          ))}
+                          {locations.slice(0, 1).map(location => (
+                            <li key={location.id}>• Lieu d'intérêt : {location.name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-4 mt-3 text-xs text-amber-600">
                     <span className="flex items-center gap-1">
                       <BookOpen className="w-3 h-3" />
-                      Recherche historique
+                      {sources.length} source{sources.length > 1 ? 's' : ''}
                     </span>
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
-                      Géolocalisation
+                      {locations.length} lieu{locations.length > 1 ? 'x' : ''}
                     </span>
                     <span className="flex items-center gap-1">
                       <Users className="w-3 h-3" />
-                      Collaboration IA
+                      {historicalFigures.length} personnage{historicalFigures.length > 1 ? 's' : ''}
                     </span>
                   </div>
                 </div>
