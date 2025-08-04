@@ -23,9 +23,11 @@ import { AdaptiveProfile } from '@/hooks/useUserProfile';
 interface AdaptiveActionsProps {
   profile: AdaptiveProfile;
   onAction: (action: string) => void;
+  questType?: string;
+  questStatus?: string;
 }
 
-const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction }) => {
+const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, questType, questStatus }) => {
   const { toast } = useToast();
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -70,6 +72,13 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction }) 
     }, 800);
   };
   const getActionsConfig = () => {
+    // Actions spéciales pour les trésors découverts
+    const isDiscoveredTreasure = questType === 'found_treasure' || questStatus === 'completed';
+    
+    if (isDiscoveredTreasure) {
+      return getDiscoveredTreasureActions();
+    }
+    
     switch (profile.type) {
       case 'beginner':
         return {
@@ -249,6 +258,193 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction }) 
     }
   };
 
+  const getDiscoveredTreasureActions = () => {
+    switch (profile.type) {
+      case 'beginner':
+        return {
+          title: '📚 DÉCOUVERTE ÉDUCATIVE',
+          subtitle: 'Apprends comment ce trésor a été trouvé !',
+          actions: [
+            {
+              id: 'study_discovery',
+              title: '📚 Étudier la découverte',
+              description: 'Comprends comment ce trésor a été localisé et excavé',
+              icon: BookOpen,
+              color: 'bg-blue-500',
+              points: '+15 pts',
+              difficulty: 'Éducatif'
+            },
+            {
+              id: 'understand_clues',
+              title: '💡 Comprendre les indices',
+              description: 'Analyse comment chaque indice a mené à la découverte',
+              icon: Search,
+              color: 'bg-green-500',
+              points: '+20 pts',
+              difficulty: 'Facile'
+            },
+            {
+              id: 'view_location',
+              title: '🗺️ Voir l\'emplacement trouvé',
+              description: 'Explore virtuellement le lieu de la découverte',
+              icon: Map,
+              color: 'bg-purple-500',
+              points: '+10 pts',
+              difficulty: 'Très facile'
+            },
+            {
+              id: 'learn_method',
+              title: '🎓 Apprendre la méthode',
+              description: 'Découvre les techniques utilisées par les chercheurs',
+              icon: Target,
+              color: 'bg-orange-500',
+              points: '+25 pts',
+              difficulty: 'Tutoriel'
+            }
+          ]
+        };
+
+      case 'treasure_hunter':
+        return {
+          title: '🔍 ANALYSE TECHNIQUE',
+          subtitle: 'Étudie les méthodes de découverte',
+          actions: [
+            {
+              id: 'analyze_techniques',
+              title: '📖 Analyser les techniques utilisées',
+              description: 'Méthodes de détection et d\'excavation employées',
+              icon: Search,
+              color: 'bg-emerald-500',
+              educational: true,
+              complexity: 'Technique'
+            },
+            {
+              id: 'study_tools',
+              title: '🔍 Étudier les outils employés',
+              description: 'Détecteurs, GPS, matériel d\'excavation utilisés',
+              icon: Target,
+              color: 'bg-blue-500',
+              educational: true,
+              complexity: 'Pratique'
+            },
+            {
+              id: 'view_discovery_photos',
+              title: '📸 Voir les photos de découverte',
+              description: 'Documentation photographique complète du processus',
+              icon: Camera,
+              color: 'bg-purple-500',
+              educational: true,
+              complexity: 'Visuel'
+            },
+            {
+              id: 'apply_to_quests',
+              title: '🎯 Appliquer à d\'autres quêtes',
+              description: 'Utilise ces méthodes pour tes prochaines recherches',
+              icon: Award,
+              color: 'bg-orange-500',
+              educational: true,
+              complexity: 'Application'
+            }
+          ]
+        };
+
+      case 'historian':
+        return {
+          title: '📋 ÉTUDE HISTORIQUE',
+          subtitle: 'Analyse académique de la découverte',
+          actions: [
+            {
+              id: 'analyze_official_report',
+              title: '📋 Analyser le rapport officiel',
+              description: 'Rapport scientifique complet de la découverte',
+              icon: FileText,
+              color: 'bg-emerald-500',
+              academic: true,
+              complexity: 'Expert'
+            },
+            {
+              id: 'study_methodology',
+              title: '🔬 Étudier la méthodologie',
+              description: 'Protocoles scientifiques et archéologiques employés',
+              icon: Eye,
+              color: 'bg-teal-500',
+              academic: true,
+              complexity: 'Avancé'
+            },
+            {
+              id: 'historical_context',
+              title: '📖 Contextualisation historique',
+              description: 'Replacer la découverte dans son contexte historique',
+              icon: BookOpen,
+              color: 'bg-blue-500',
+              academic: true,
+              complexity: 'Recherche'
+            },
+            {
+              id: 'discovery_impact',
+              title: '📝 Impact de la découverte',
+              description: 'Conséquences historiques et scientifiques',
+              icon: Award,
+              color: 'bg-purple-500',
+              academic: true,
+              complexity: 'Analyse'
+            }
+          ]
+        };
+
+      case 'remote_helper':
+        return {
+          title: '📚 ARCHIVES DÉCOUVERTE',
+          subtitle: 'Aide à documenter et partager',
+          actions: [
+            {
+              id: 'archives_discovery',
+              title: '📚 Consulter les archives de découverte',
+              description: 'Documentation complète de la recherche et découverte',
+              icon: BookOpen,
+              color: 'bg-cyan-500',
+              remote: true,
+              timeEstimate: '20-30 min'
+            },
+            {
+              id: 'analyze_historical_photos',
+              title: '📊 Analyser les photos historiques',
+              description: 'Classification et annotation des images de découverte',
+              icon: Camera,
+              color: 'bg-blue-500',
+              remote: true,
+              timeEstimate: '15-25 min'
+            },
+            {
+              id: 'transcribe_testimonies',
+              title: '✍️ Transcription des témoignages',
+              description: 'Témoignages des découvreurs et experts impliqués',
+              icon: FileText,
+              color: 'bg-green-500',
+              remote: true,
+              timeEstimate: '25-40 min'
+            },
+            {
+              id: 'help_newcomers_understand',
+              title: '🤝 Aider les nouveaux à comprendre',
+              description: 'Guide les débutants dans l\'étude de cette découverte',
+              icon: Users,
+              color: 'bg-purple-500',
+              remote: true,
+              timeEstimate: '30+ min'
+            }
+          ]
+        };
+
+      default:
+        return {
+          title: '📚 TRÉSOR DÉCOUVERT',
+          subtitle: 'Ce trésor a déjà été trouvé',
+          actions: []
+        };
+    }
+  };
+
   const config = getActionsConfig();
 
   return (
@@ -272,6 +468,7 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction }) 
               className={`p-6 hover:shadow-lg transition-all cursor-pointer border-l-4 ${
                 action.urgent ? 'border-l-red-500 bg-red-50/50' : 
                 action.academic ? 'border-l-emerald-500 bg-emerald-50/50' :
+                action.educational ? 'border-l-blue-500 bg-blue-50/50' :
                 action.remote ? 'border-l-cyan-500 bg-cyan-50/50' :
                 'border-l-blue-500 bg-blue-50/50'
               }`}
@@ -301,6 +498,11 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction }) 
                       {action.academic && (
                         <Badge variant="secondary" className="text-xs">
                           ACADÉMIQUE
+                        </Badge>
+                      )}
+                      {action.educational && (
+                        <Badge variant="secondary" className="text-xs">
+                          ÉDUCATIF
                         </Badge>
                       )}
                       {action.remote && (

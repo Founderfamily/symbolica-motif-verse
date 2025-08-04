@@ -299,6 +299,8 @@ const QuestDetailPage = () => {
           <AdaptiveActions 
             profile={adaptiveProfile}
             onAction={handleAction}
+            questType={quest.quest_type}
+            questStatus={quest.status}
           />
         </div>
 
