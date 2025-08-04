@@ -20,6 +20,10 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import AIInsightsWidget from './AIInsightsWidget';
+import { aiDataExtractionService, AIInsight } from '@/services/AIDataExtractionService';
+import HistoricalFiguresWidget from './widgets/HistoricalFiguresWidget';
+import AILocationsWidget from './widgets/AILocationsWidget';
+import AIConnectionsWidget from './widgets/AIConnectionsWidget';
 
 interface ActivityItem {
   id: string;
@@ -48,6 +52,7 @@ const EnhancedLiveActivityFeed: React.FC<EnhancedLiveActivityFeedProps> = ({ que
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [nextSteps, setNextSteps] = useState<NextStep[]>([]);
   const [aiConnections, setAiConnections] = useState<any[]>([]);
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,6 +61,10 @@ const EnhancedLiveActivityFeed: React.FC<EnhancedLiveActivityFeedProps> = ({ que
 
   const loadEnhancedActivityData = async () => {
     try {
+      // Charger les insights IA en temps réel
+      const latestInsights = await aiDataExtractionService.getLatestAIInsights(questId, 5);
+      setAiInsights(latestInsights);
+      
       // Charger les analyses IA récentes
       const { data: aiData } = await supabase
         .from('ai_investigations')
@@ -316,6 +325,11 @@ const EnhancedLiveActivityFeed: React.FC<EnhancedLiveActivityFeedProps> = ({ que
       <div className="space-y-6">
         {/* Widget Insights IA */}
         <AIInsightsWidget questId={questId} compact={true} />
+        
+        {/* Widgets IA Intelligents */}
+        <HistoricalFiguresWidget questId={questId} compact />
+        <AILocationsWidget questId={questId} compact />
+        <AIConnectionsWidget questId={questId} compact />
 
         {/* Prochaines étapes suggérées */}
         <Card>
