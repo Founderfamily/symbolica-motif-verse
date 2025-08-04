@@ -34,7 +34,9 @@ import InvestigationInterface from '@/components/investigation/InvestigationInte
 import AINotificationService from '@/components/investigation/AINotificationService';
 import AIInsightsWidget from '@/components/investigation/AIInsightsWidget';
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
+import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
 import { useAIData } from '@/hooks/useAIData';
+import { useQuestStats } from '@/hooks/useQuestStats';
 import { aiDataExtractionService } from '@/services/AIDataExtractionService';
 
 const QuestDetailPage = () => {
@@ -48,6 +50,14 @@ const QuestDetailPage = () => {
   
   // Récupérer les données IA pour enrichir l'objectif
   const { data: aiData, theories, sources, historicalFigures, locations } = useAIData(questId || '');
+  const { participants, loading: participantsLoading } = useQuestParticipantsSimple(questId || '');
+  
+  // Normaliser les clues de manière sécurisée
+  const questClues = quest ? normalizeQuestClues(quest.clues) : [];
+  const questCluesCount = quest ? getQuestCluesCount(quest) : 0;
+  
+  // Hook pour les statistiques réelles
+  const questStats = useQuestStats(questId || '', questCluesCount);
   
   // State pour l'objectif spécifique du trésor
   const [specificObjective, setSpecificObjective] = useState<string>('');
@@ -75,9 +85,6 @@ const QuestDetailPage = () => {
   console.log('QuestDetailPage - AI data:', aiData);
   console.log('QuestDetailPage - Specific objective:', specificObjective);
 
-  // Normaliser les clues de manière sécurisée
-  const questClues = quest ? normalizeQuestClues(quest.clues) : [];
-  const questCluesCount = quest ? getQuestCluesCount(quest) : 0;
   const questCluesPreview = quest ? getQuestCluesPreview(quest).slice(0, 3) : [];
 
   console.log('QuestDetailPage - Normalized clues:', questClues);
@@ -284,22 +291,22 @@ const QuestDetailPage = () => {
               </div>
             </div>
             
-            {/* Stats compactes */}
+            {/* Stats compactes avec vraies données */}
             <div className="grid grid-cols-4 gap-3">
               <div className="text-center">
-                <div className="text-lg font-bold text-amber-800">0</div>
+                <div className="text-lg font-bold text-amber-800">{questStats.participantsCount}</div>
                 <div className="text-xs text-stone-600">Participants</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold text-stone-800">{questCluesCount}</div>
+                <div className="text-lg font-bold text-stone-800">{questStats.cluesCount}</div>
                 <div className="text-xs text-stone-600">Indices</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold text-amber-800">0</div>
+                <div className="text-lg font-bold text-amber-800">{questStats.evidenceCount}</div>
                 <div className="text-xs text-stone-600">Preuves</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold text-stone-800">0</div>
+                <div className="text-lg font-bold text-stone-800">{questStats.discussionsCount}</div>
                 <div className="text-xs text-stone-600">Discussions</div>
               </div>
             </div>
