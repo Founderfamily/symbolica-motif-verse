@@ -20,12 +20,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { investigationService } from '@/services/investigationService';
 import AddLocationDialog from './AddLocationDialog';
+import { useArchiveMap } from '@/contexts/ArchiveMapContext';
 
 interface MapTabProps {
   quest: TreasureQuest;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
-const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
+const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveTab }) => {
   const [mapToken, setMapToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,6 +36,7 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [questLocations, setQuestLocations] = useState<any[]>([]);
   const { toast } = useToast();
+  const { selectedArchive, archiveLocations, setSelectedLocation: setMapSelectedLocation } = useArchiveMap();
   
   const mapContainer = React.useRef<HTMLDivElement>(null);
   const map = React.useRef<mapboxgl.Map | null>(null);
@@ -165,6 +169,31 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
       });
     }
 
+    // Add markers for archive locations (from context)
+    archiveLocations.forEach((location) => {
+      const marker = new mapboxgl.Marker({ color: '#8B5CF6' })
+        .setLngLat([location.longitude, location.latitude])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 })
+            .setHTML(`
+              <div class="p-2">
+                <h3 class="font-semibold text-purple-600">${location.name}</h3>
+                <p class="text-sm">Site historique documenté</p>
+                <p class="text-xs text-gray-600">${location.relatedDocuments?.length || 0} document(s) associé(s)</p>
+                <button onclick="window.viewArchives('${location.id}')" class="text-xs text-blue-500 hover:underline mt-1">
+                  📚 Voir archives →
+                </button>
+              </div>
+            `)
+        )
+        .addTo(map.current!);
+      
+      // Store marker reference for later updates
+      marker.getElement().addEventListener('click', () => {
+        setMapSelectedLocation(location);
+      });
+    });
+
     // Add markers for quest locations (from database)
     questLocations.forEach((location) => {
       const marker = new mapboxgl.Marker({ color: '#10B981' })
@@ -183,6 +212,17 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
         .addTo(map.current!);
     });
 
+    // Add function to window for popup button
+    (window as any).viewArchives = (locationId: string) => {
+      if (setActiveTab) {
+        const location = archiveLocations.find(loc => loc.id === locationId);
+        if (location) {
+          setMapSelectedLocation(location);
+          setActiveTab('archives');
+        }
+      }
+    };
+
     // Fit map to show all markers
     const allCoordinates = [];
     
@@ -194,6 +234,11 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
         }
       });
     }
+    
+    // Add archive location coordinates
+    archiveLocations.forEach(location => {
+      allCoordinates.push([location.longitude, location.latitude]);
+    });
     
     // Add quest location coordinates
     questLocations.forEach(location => {
@@ -210,8 +255,27 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest }) => {
 
     return () => {
       map.current?.remove();
+      // Clean up window function
+      delete (window as any).viewArchives;
     };
-  }, [mapToken, quest, questLocations]);
+  }, [mapToken, quest, questLocations, archiveLocations]);
+
+  // Handle selectedArchive change - center map on corresponding location
+  React.useEffect(() => {
+    if (selectedArchive && map.current) {
+      const location = archiveLocations.find(loc => 
+        loc.relatedDocuments?.includes(selectedArchive)
+      );
+      if (location) {
+        map.current.flyTo({
+          center: [location.longitude, location.latitude],
+          zoom: 18,
+          essential: true
+        });
+        setMapSelectedLocation(location);
+      }
+    }
+  }, [selectedArchive, archiveLocations]);
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {

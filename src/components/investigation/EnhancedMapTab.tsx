@@ -47,9 +47,11 @@ interface CorrelationZone {
 
 interface EnhancedMapTabProps {
   quest: TreasureQuest;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
-const EnhancedMapTab: React.FC<EnhancedMapTabProps> = ({ quest }) => {
+const EnhancedMapTab: React.FC<EnhancedMapTabProps> = ({ quest, activeTab, setActiveTab }) => {
   const [mapToken, setMapToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

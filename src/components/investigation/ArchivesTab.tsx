@@ -23,16 +23,20 @@ import {
 import { TreasureQuest } from '@/types/quests';
 import { investigationService } from '@/services/investigationService';
 import DocumentUploadDialog from './DocumentUploadDialog';
+import { useArchiveMap } from '@/contexts/ArchiveMapContext';
 
 interface ArchivesTabProps {
   quest: TreasureQuest;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
-const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
+const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTab }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { setSelectedArchive, archiveLocations } = useArchiveMap();
 
   const loadDocuments = async () => {
     try {
@@ -69,7 +73,8 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
       aiRelevance: 95,
       tags: ['François Ier', 'galerie', 'construction', 'Rosso'],
       archiveLink: 'https://www.archives-nationales.culture.gouv.fr',
-      physicalLocation: 'Pierrefitte-sur-Seine'
+      physicalLocation: 'Pierrefitte-sur-Seine',
+      locationId: '1' // Lié à la Galerie François Ier
     },
     {
       id: '2',
@@ -85,7 +90,8 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
       aiRelevance: 98,
       tags: ['architecture', 'plans', 'passages secrets', 'Le Breton'],
       archiveLink: 'https://gallica.bnf.fr',
-      physicalLocation: 'Paris, site François Mitterrand'
+      physicalLocation: 'Paris, site François Mitterrand',
+      locationId: '1' // Lié à la Galerie François Ier
     },
     {
       id: '3',
@@ -101,7 +107,8 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
       aiRelevance: 92,
       tags: ['correspondance', 'Primatice', 'décoration', 'symboles'],
       archiveLink: 'http://www.musee-chateau-fontainebleau.fr',
-      physicalLocation: 'Château de Fontainebleau'
+      physicalLocation: 'Château de Fontainebleau',
+      locationId: '1' // Lié à la Galerie François Ier
     },
     {
       id: '4',
@@ -117,7 +124,8 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
       aiRelevance: 99,
       tags: ['inventaire', 'mobilier', 'trésors', 'post-mortem'],
       archiveLink: 'https://www.archives-nationales.culture.gouv.fr',
-      physicalLocation: 'Pierrefitte-sur-Seine'
+      physicalLocation: 'Pierrefitte-sur-Seine',
+      locationId: '4' // Lié à la Cour du Cheval Blanc
     },
     {
       id: '5',
@@ -133,7 +141,8 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
       aiRelevance: 87,
       tags: ['chronique', 'témoignage', 'cachettes', 'Brantôme'],
       archiveLink: 'https://mazarine.bibliotheque-mazarine.fr',
-      physicalLocation: 'Paris, 6e arrondissement'
+      physicalLocation: 'Paris, 6e arrondissement',
+      locationId: '4' // Lié à la Cour du Cheval Blanc
     },
     {
       id: '6',
@@ -149,7 +158,8 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
       aiRelevance: 94,
       tags: ['Napoléon', 'bureau', 'aménagement', 'secrets'],
       archiveLink: 'https://www.archives-nationales.culture.gouv.fr',
-      physicalLocation: 'Pierrefitte-sur-Seine'
+      physicalLocation: 'Pierrefitte-sur-Seine',
+      locationId: '2' // Lié au Bureau de Napoléon
     },
     {
       id: '7',
@@ -165,7 +175,8 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
       aiRelevance: 88,
       tags: ['Joséphine', 'mémoires', 'Napoléon', 'habitudes'],
       archiveLink: 'https://www.chateaumalmaison.fr',
-      physicalLocation: 'Rueil-Malmaison'
+      physicalLocation: 'Rueil-Malmaison',
+      locationId: '2' // Lié au Bureau de Napoléon
     },
     {
       id: '8',
@@ -181,7 +192,8 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
       aiRelevance: 97,
       tags: ['escalier secret', 'Fontaine', 'modifications', 'mécanismes'],
       archiveLink: 'https://www.ensba.fr',
-      physicalLocation: 'Paris, École des Beaux-Arts'
+      physicalLocation: 'Paris, École des Beaux-Arts',
+      locationId: '3' // Lié à l'Escalier Secret
     }
   ];
 
@@ -430,9 +442,21 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest }) => {
                     Télécharger
                   </Button>
                 </div>
-                <Button size="sm" variant="outline">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Recherche IA
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    const location = archiveLocations.find(loc => 
+                      loc.relatedDocuments?.includes(doc.id)
+                    );
+                    if (location && setActiveTab) {
+                      setSelectedArchive(doc.id);
+                      setActiveTab('map');
+                    }
+                  }}
+                >
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Voir sur carte
                 </Button>
               </div>
             </CardContent>
