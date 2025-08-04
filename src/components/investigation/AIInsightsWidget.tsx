@@ -52,16 +52,43 @@ const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({ questId, compact = 
 
       if (error) throw error;
 
-      // Transformer les données en insights
+      // Transformer les données en insights structurés
       const transformedInsights: AIInsight[] = data?.map(investigation => {
         const result = investigation.result_content as any;
         
+        // Extraire les insights depuis la nouvelle structure
+        if (result?.investigation) {
+          return {
+            id: investigation.id,
+            type: 'pattern',
+            title: 'Investigation IA',
+            description: result.investigation,
+            confidence: 90,
+            created_at: investigation.created_at,
+            metadata: result
+          };
+        }
+
+        // Fallback pour les connexions historiques
+        if (result?.historical_connections?.[0]) {
+          const connection = result.historical_connections[0];
+          return {
+            id: investigation.id,
+            type: 'historical',
+            title: connection.period || 'Connexion historique',
+            description: `${connection.figure}: ${connection.connection}`,
+            confidence: 85,
+            created_at: investigation.created_at,
+            metadata: result
+          };
+        }
+
         return {
           id: investigation.id,
           type: 'suggestion',
-          title: result?.investigation?.historical_connections?.[0]?.period || 'Nouvelle analyse',
-          description: result?.investigation?.summary || 'Analyse IA disponible',
-          confidence: 85,
+          title: 'Analyse IA',
+          description: 'Nouvelle analyse disponible',
+          confidence: 75,
           created_at: investigation.created_at,
           metadata: result
         };

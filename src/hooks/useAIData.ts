@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { aiDataExtractionService, AIExtractedData } from '@/services/AIDataExtractionService';
 
 export const useAIData = (questId: string) => {
@@ -37,7 +37,7 @@ export const useAIData = (questId: string) => {
     };
   }, [questId]);
 
-  const refetch = async () => {
+  const refetch = useCallback(async () => {
     if (questId) {
       setLoading(true);
       try {
@@ -50,7 +50,7 @@ export const useAIData = (questId: string) => {
         setLoading(false);
       }
     }
-  };
+  }, [questId]);
 
   return {
     data,
