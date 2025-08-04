@@ -80,9 +80,20 @@ const ActionModals: React.FC<ActionModalsProps> = ({
           title: '📍 Vérifier coordonnées GPS',
           content: (
             <div className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-900 mb-2">🎯 Comment faire ?</h4>
+                <ol className="text-sm text-blue-800 space-y-1">
+                  <li><strong>1.</strong> Active la géolocalisation de ton téléphone</li>
+                  <li><strong>2.</strong> Va à l'emplacement indiqué sur la carte</li>
+                  <li><strong>3.</strong> Clique sur "Obtenir ma position" pour remplir automatiquement</li>
+                  <li><strong>4.</strong> Confirme quand tu es au bon endroit</li>
+                </ol>
+              </div>
+              
               <p className="text-muted-foreground">
-                Escalier secret signalé - position exacte à confirmer
+                <strong>Mission :</strong> Un escalier secret a été signalé ici. Nous avons besoin de confirmation de sa position exacte.
               </p>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Latitude</label>
@@ -93,6 +104,24 @@ const ActionModals: React.FC<ActionModalsProps> = ({
                   <Input placeholder="2.3522" className="mt-1" />
                 </div>
               </div>
+              
+              <Button 
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(() => {
+                      toast({
+                        title: "Position obtenue !",
+                        description: "Coordonnées remplies automatiquement",
+                      });
+                    });
+                  }
+                }}
+              >
+                📱 Obtenir ma position actuelle
+              </Button>
+              
               <Card className="p-4 bg-red-50">
                 <div className="flex items-center gap-2 text-red-700">
                   <Target className="w-4 h-4" />
@@ -102,8 +131,9 @@ const ActionModals: React.FC<ActionModalsProps> = ({
                   Équipe en attente de confirmation pour intervention
                 </p>
               </Card>
+              
               <Button 
-                onClick={() => handleAction("Coordonnées GPS confirmées ! L'équipe a été alertée.")}
+                onClick={() => handleAction("Coordonnées GPS confirmées ! L'équipe a été alertée. +20 points 🎉")}
                 disabled={loading}
                 className="w-full"
               >
