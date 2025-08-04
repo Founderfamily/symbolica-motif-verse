@@ -212,7 +212,7 @@ const QuestDetailPage = () => {
                     <p className="text-amber-700 text-sm">
                       {quest.quest_type === 'unfound_treasure' && (
                         theories.length > 0 ? (
-                          <>Découvrir l'emplacement de <strong>{theories[0]?.title || 'ce trésor historique'}</strong></>
+                          <>Découvrir l'emplacement du <strong>{theories[0]?.description?.split('.')[0] || quest.title}</strong></>
                         ) : 'Découvrir l\'emplacement d\'un trésor historique non retrouvé'
                       )}
                       {quest.quest_type === 'found_treasure' && (
@@ -222,24 +222,24 @@ const QuestDetailPage = () => {
                       )}
                       {quest.quest_type === 'myth' && (
                         sources.length > 0 ? (
-                          <>Analyser les sources historiques comme <strong>{sources[0]?.title}</strong> pour séparer mythe de réalité</>
+                          <>Analyser les sources historiques pour séparer mythe de réalité</>
                         ) : 'Analyser les légendes et séparer mythe de réalité historique'
                       )}
                     </p>
                     
                     {/* Détails spécifiques basés sur l'IA */}
-                    {(theories.length > 0 || historicalFigures.length > 0 || locations.length > 0) && (
+                    {(historicalFigures.length > 0 || locations.length > 0) && (
                       <div className="bg-amber-100/50 rounded p-2 text-xs text-amber-800">
-                        <div className="font-medium mb-1">Pistes identifiées par l'IA :</div>
+                        <div className="font-medium mb-1">Pistes de recherche :</div>
                         <ul className="space-y-1">
-                          {theories.slice(0, 1).map(theory => (
-                            <li key={theory.id}>• {theory.title}</li>
-                          ))}
-                          {historicalFigures.slice(0, 1).map(figure => (
-                            <li key={figure.id}>• Personnage clé : {figure.name} ({figure.period})</li>
+                          {historicalFigures.slice(0, 2).map(figure => (
+                            <li key={figure.id}>• <strong>{figure.name}</strong> ({figure.period}) - {figure.role}</li>
                           ))}
                           {locations.slice(0, 1).map(location => (
-                            <li key={location.id}>• Lieu d'intérêt : {location.name}</li>
+                            <li key={location.id}>• <strong>{location.name}</strong> - {location.description?.split('.')[0]}</li>
+                          ))}
+                          {theories.slice(0, 1).map(theory => (
+                            <li key={theory.id}>• {theory.description?.split('.').slice(0, 2).join('.') || theory.title}</li>
                           ))}
                         </ul>
                       </div>
