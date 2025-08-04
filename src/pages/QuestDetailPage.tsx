@@ -270,16 +270,18 @@ const QuestDetailPage = () => {
               </Badge>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowProfileSelector(true)}
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Profil: {adaptiveProfile.type === 'beginner' ? 'Débutant' : 
-                         adaptiveProfile.type === 'treasure_hunter' ? 'Terrain' :
-                         adaptiveProfile.type === 'historian' ? 'Historien' : 'Distance'}
-              </Button>
+              {user && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowProfileSelector(true)}
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Profil: {adaptiveProfile.type === 'beginner' ? 'Débutant' : 
+                           adaptiveProfile.type === 'treasure_hunter' ? 'Terrain' :
+                           adaptiveProfile.type === 'historian' ? 'Historien' : 'Distance'}
+                </Button>
+              )}
               {user && <AINotificationService userId={user.id} questId={quest.id} />}
             </div>
           </div>
@@ -376,12 +378,14 @@ const QuestDetailPage = () => {
       </div>
 
       {/* Sélecteur de Profil */}
-      <UserProfileSelector
-        currentProfile={adaptiveProfile.type}
-        onProfileChange={setUserProfileType}
-        isOpen={showProfileSelector}
-        onClose={() => setShowProfileSelector(false)}
-      />
+      {user && (
+        <UserProfileSelector
+          currentProfile={adaptiveProfile.type}
+          onProfileChange={setUserProfileType}
+          isOpen={showProfileSelector && isAuthenticated}
+          onClose={() => setShowProfileSelector(false)}
+        />
+      )}
     </div>
   );
 };
