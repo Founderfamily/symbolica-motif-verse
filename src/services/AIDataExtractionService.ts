@@ -474,6 +474,55 @@ class AIDataExtractionService {
     const data = await this.extractAIData(questId);
     return data.theories.sort((a, b) => b.confidence - a.confidence);
   }
+
+  /**
+   * Extrait l'objectif spécifique du trésor depuis les données IA
+   */
+  async getSpecificTreasureObjective(questId: string): Promise<string> {
+    const data = await this.extractAIData(questId);
+    const defaultObjective = "Découvrir l'emplacement d'un trésor historique";
+    
+    // Chercher dans les insights pour des mentions spécifiques
+    const treasureInsight = data.insights.find(insight => 
+      insight.description.toLowerCase().includes('cache') ||
+      insight.description.toLowerCase().includes('trésor') ||
+      insight.description.toLowerCase().includes('fortune') ||
+      insight.description.toLowerCase().includes('royal') ||
+      insight.description.toLowerCase().includes('secret')
+    );
+
+    if (treasureInsight) {
+      const description = treasureInsight.description;
+      
+      // Extraire les éléments spécifiques
+      const cacheMatch = description.match(/cache\s+([^.!?]+)/i);
+      const treasureMatch = description.match(/trésor\s+([^.!?]+)/i);
+      const fortuneMatch = description.match(/fortune\s+([^.!?]+)/i);
+      
+      if (cacheMatch) return `Découvrir la cache ${cacheMatch[1].trim()}`;
+      if (treasureMatch) return `Découvrir le trésor ${treasureMatch[1].trim()}`;
+      if (fortuneMatch) return `Découvrir la fortune ${fortuneMatch[1].trim()}`;
+    }
+
+    // Si on a des personnages et lieux, construire un objectif spécifique
+    if (data.locations.length > 0 && data.historicalFigures.length > 0) {
+      const mainLocation = data.locations[0]?.name || "lieu secret";
+      const mainFigure = data.historicalFigures[0]?.name || "personnage historique";
+      
+      // Construire un objectif spécifique basé sur les données
+      if (mainFigure.includes('François') && mainFigure.includes('Napoléon')) {
+        return `Découvrir la cache royale de François Ier et Napoléon dans ${mainLocation}`;
+      } else if (mainFigure.includes('François')) {
+        return `Découvrir les trésors cachés de François Ier dans ${mainLocation}`;
+      } else if (mainFigure.includes('Napoléon')) {
+        return `Découvrir la fortune secrète de Napoléon dans ${mainLocation}`;
+      } else {
+        return `Découvrir les trésors cachés de ${mainFigure} dans ${mainLocation}`;
+      }
+    }
+
+    return defaultObjective;
+  }
 }
 
 export const aiDataExtractionService = new AIDataExtractionService();

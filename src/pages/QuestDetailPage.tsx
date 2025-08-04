@@ -35,6 +35,7 @@ import AINotificationService from '@/components/investigation/AINotificationServ
 import AIInsightsWidget from '@/components/investigation/AIInsightsWidget';
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
 import { useAIData } from '@/hooks/useAIData';
+import { aiDataExtractionService } from '@/services/AIDataExtractionService';
 
 const QuestDetailPage = () => {
   const { questId } = useParams<{ questId: string }>();
@@ -47,11 +48,32 @@ const QuestDetailPage = () => {
   
   // Récupérer les données IA pour enrichir l'objectif
   const { data: aiData, theories, sources, historicalFigures, locations } = useAIData(questId || '');
+  
+  // State pour l'objectif spécifique du trésor
+  const [specificObjective, setSpecificObjective] = useState<string>('');
+
+  // Charger l'objectif spécifique du trésor
+  useEffect(() => {
+    const loadSpecificObjective = async () => {
+      if (questId) {
+        try {
+          const objective = await aiDataExtractionService.getSpecificTreasureObjective(questId);
+          setSpecificObjective(objective);
+        } catch (error) {
+          console.error('Erreur lors du chargement de l\'objectif spécifique:', error);
+          setSpecificObjective(quest?.description || 'Découvrir l\'emplacement d\'un trésor historique');
+        }
+      }
+    };
+    
+    loadSpecificObjective();
+  }, [questId, quest]);
 
   console.log('QuestDetailPage - Quest data:', quest);
   console.log('QuestDetailPage - Loading state:', isLoading);
   console.log('QuestDetailPage - Error state:', error);
   console.log('QuestDetailPage - AI data:', aiData);
+  console.log('QuestDetailPage - Specific objective:', specificObjective);
 
   // Normaliser les clues de manière sécurisée
   const questClues = quest ? normalizeQuestClues(quest.clues) : [];
@@ -207,25 +229,11 @@ const QuestDetailPage = () => {
                 <div className="flex-1">
                   <h3 className="font-semibold text-amber-800 mb-1">Objectif de la quête</h3>
                   
-                  {/* Objectif principal enrichi par l'IA */}
-                  <div className="space-y-2">
-                    <p className="text-amber-700 text-sm">
-                      {quest.quest_type === 'unfound_treasure' && (
-                        theories.length > 0 ? (
-                          <>Découvrir l'emplacement du <strong>{theories[0]?.description?.split('.')[0] || quest.title}</strong></>
-                        ) : 'Découvrir l\'emplacement d\'un trésor historique non retrouvé'
-                      )}
-                      {quest.quest_type === 'found_treasure' && (
-                        historicalFigures.length > 0 ? (
-                          <>Explorer le trésor lié à <strong>{historicalFigures[0]?.name}</strong> et documenter ses origines</>
-                        ) : 'Explorer et documenter un trésor historique connu'
-                      )}
-                      {quest.quest_type === 'myth' && (
-                        sources.length > 0 ? (
-                          <>Analyser les sources historiques pour séparer mythe de réalité</>
-                        ) : 'Analyser les légendes et séparer mythe de réalité historique'
-                      )}
-                    </p>
+                   {/* Objectif principal enrichi par l'IA */}
+                   <div className="space-y-2">
+                     <p className="text-amber-700 text-sm">
+                       {specificObjective || quest.description || 'Découvrir l\'emplacement d\'un trésor historique'}
+                     </p>
                     
                     {/* Détails spécifiques basés sur l'IA */}
                     {(historicalFigures.length > 0 || locations.length > 0) && (
