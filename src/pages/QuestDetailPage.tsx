@@ -22,7 +22,8 @@ import {
   Eye,
   ThumbsUp,
   Share2,
-  Flag
+  Flag,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -30,9 +31,14 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuestById } from '@/hooks/useQuests';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import InvestigationInterface from '@/components/investigation/InvestigationInterface';
 import AINotificationService from '@/components/investigation/AINotificationService';
 import AIInsightsWidget from '@/components/investigation/AIInsightsWidget';
+import AdaptiveHero from '@/components/adaptive/AdaptiveHero';
+import AdaptiveActions from '@/components/adaptive/AdaptiveActions';
+import AdaptiveNavigation from '@/components/adaptive/AdaptiveNavigation';
+import UserProfileSelector from '@/components/adaptive/UserProfileSelector';
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
 import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
 import { useAIData } from '@/hooks/useAIData';
@@ -42,6 +48,11 @@ import { aiDataExtractionService } from '@/services/AIDataExtractionService';
 const QuestDetailPage = () => {
   const { questId } = useParams<{ questId: string }>();
   const { user } = useAuth();
+  const { adaptiveProfile, setUserProfileType, isAuthenticated } = useUserProfile();
+  
+  // États pour l'interface adaptative
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
+  const [activeTab, setActiveTab] = useState('adventure');
   
   console.log('QuestDetailPage - Quest ID from params:', questId);
   
@@ -198,14 +209,59 @@ const QuestDetailPage = () => {
     cancelled: 'Annulée'
   };
 
+  // Fonctions pour gérer les actions
+  const handleStartAdventure = () => {
+    if (adaptiveProfile.isFirstTime) {
+      setActiveTab('adventure');
+    } else {
+      // Rediriger selon le profil
+      const tabMap = {
+        beginner: 'adventure',
+        treasure_hunter: 'field',
+        historian: 'sources',
+        remote_helper: 'tasks'
+      };
+      setActiveTab(tabMap[adaptiveProfile.type] || 'adventure');
+    }
+  };
+
+  const handleAction = (actionId: string) => {
+    console.log('Action déclenchée:', actionId);
+    // Implémenter les actions spécifiques selon le profil
+    switch (actionId) {
+      case 'take_photo':
+      case 'verify_coordinates':
+      case 'document_discovery':
+        setActiveTab('field');
+        break;
+      case 'chat':
+      case 'community_support':
+        setActiveTab('chat');
+        break;
+      case 'explore_map':
+        setActiveTab('map');
+        break;
+      case 'validate_sources':
+      case 'cross_reference':
+        setActiveTab('sources');
+        break;
+      case 'online_research':
+      case 'photo_analysis':
+        setActiveTab('research');
+        break;
+      default:
+        setActiveTab('adventure');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
-      {/* En-tête minimaliste */}
-      <div className="bg-white/90 backdrop-blur-sm border-b border-amber-200/50 sticky top-0 z-40">
+    <div className="min-h-screen bg-background">
+      {/* En-tête adaptatif */}
+      <div className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link to="/quests" className="flex items-center text-stone-600 hover:text-stone-800 transition-colors">
+              <Link to="/quests" className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Retour
               </Link>
@@ -214,221 +270,116 @@ const QuestDetailPage = () => {
               </Badge>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowProfileSelector(true)}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Profil: {adaptiveProfile.type === 'beginner' ? 'Débutant' : 
+                         adaptiveProfile.type === 'treasure_hunter' ? 'Terrain' :
+                         adaptiveProfile.type === 'historian' ? 'Historien' : 'Distance'}
+              </Button>
               {user && <AINotificationService userId={user.id} questId={quest.id} />}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Hero Section Adaptatif */}
+      <AdaptiveHero 
+        profile={adaptiveProfile}
+        quest={quest}
+        onStartAdventure={handleStartAdventure}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-          {/* Titre et intro compacte */}
-          <div className="lg:col-span-3 bg-white/95 backdrop-blur-sm rounded-2xl p-6 border border-amber-200/50 shadow-lg">
-            <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-stone-800 to-amber-700 bg-clip-text text-transparent">
-              {quest.title}
-            </h1>
-            <p className="text-stone-600 mb-4">{quest.description}</p>
-            
-            {/* Marqueur de Quête Témoin */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Trophy className="w-4 h-4 text-green-600" />
-                <span className="text-green-800 font-semibold text-sm">Quête Témoin Référence</span>
-                <Badge className="bg-green-100 text-green-800 border-green-300 text-xs">Modèle</Badge>
-              </div>
-              <p className="text-green-700 text-xs">
-                Cette quête sert de modèle de référence pour la méthodologie de recherche collaborative : 
-                croisement sources historiques, validation communautaire, progression documentée.
-              </p>
-            </div>
-
-            {/* Objectif clair de la quête avec données IA */}
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <Target className="w-5 h-5 text-amber-600 mt-1 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-amber-800 mb-1">Objectif de la quête</h3>
-                  
-                   {/* Objectif principal enrichi par l'IA */}
-                   <div className="space-y-2">
-                     <p className="text-amber-700 text-sm">
-                       {specificObjective || quest.description || 'Découvrir l\'emplacement d\'un trésor historique'}
-                     </p>
-                    
-                    {/* Détails spécifiques basés sur l'IA */}
-                    {(historicalFigures.length > 0 || locations.length > 0) && (
-                      <div className="bg-amber-100/50 rounded p-2 text-xs text-amber-800">
-                        <div className="font-medium mb-1">Pistes de recherche :</div>
-                        <ul className="space-y-1">
-                          {historicalFigures.slice(0, 2).map(figure => (
-                            <li key={figure.id}>• <strong>{figure.name}</strong> ({figure.period}) - {figure.role}</li>
-                          ))}
-                          {locations.slice(0, 1).map(location => (
-                            <li key={location.id}>• <strong>{location.name}</strong> - {location.description?.split('.')[0]}</li>
-                          ))}
-                          {theories.slice(0, 1).map(theory => (
-                            <li key={theory.id}>• {theory.description?.split('.').slice(0, 2).join('.') || theory.title}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  
-                    <div className="flex items-center gap-4 mt-3 text-xs text-amber-600">
-                      <span className="flex items-center gap-1">
-                        <BookOpen className="w-3 h-3" />
-                        {sources.length > 0 ? (
-                          <>{sources.length} preuve{sources.length > 1 ? 's' : ''} analysée{sources.length > 1 ? 's' : ''} : {sources.slice(0, 2).map(s => s.title).join(', ')}{sources.length > 2 && '...'}</>
-                        ) : (
-                          '4 preuves analysées : Salamandre de François Ier, Plan architectural du bureau de Napoléon...'
-                        )}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {locations.length > 0 ? (
-                          <>{locations.length} lieu{locations.length > 1 ? 'x' : ''} identifié{locations.length > 1 ? 's' : ''} : {locations.slice(0, 2).map(l => l.name).join(', ')}{locations.length > 2 && '...'}</>
-                        ) : (
-                          '3 lieux identifiés : Galerie François Ier, Bureau de Napoléon, Escalier Secret'
-                        )}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {historicalFigures.length > 0 ? (
-                          <>{historicalFigures.length} personnage{historicalFigures.length > 1 ? 's' : ''} : {historicalFigures.slice(0, 2).map(f => f.name).join(', ')}{historicalFigures.length > 2 && '...'}</>
-                        ) : (
-                          '2 personnages : François Ier (Renaissance), Napoléon Bonaparte (Empire)'
-                        )}
-                      </span>
-                    </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline des Découvertes */}
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">
-              <div className="flex items-start gap-3">
-                <History className="w-5 h-5 text-slate-600 mt-1 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800 mb-3">Timeline des Découvertes</h3>
-                  
-                  <div className="space-y-3">
-                    {/* Période Historique */}
-                    <div className="border-l-2 border-amber-300 pl-3">
-                      <div className="text-xs text-slate-500 mb-1">1420-1450 • Guerre de Cent Ans</div>
-                      <div className="text-sm text-slate-700">Constitution des réserves stratégiques royales</div>
-                    </div>
-                    
-                    <div className="border-l-2 border-amber-400 pl-3">
-                      <div className="text-xs text-slate-500 mb-1">1519-1547 • Renaissance</div>
-                      <div className="text-sm text-slate-700">François Ier intègre les symboles salamandre et aménage les passages secrets</div>
-                    </div>
-                    
-                    <div className="border-l-2 border-stone-400 pl-3">
-                      <div className="text-xs text-slate-500 mb-1">1814 • Empire</div>
-                      <div className="text-sm text-slate-700">Napoléon modifie son bureau et annote les plans des passages secrets</div>
-                    </div>
-                    
-                    {/* Découvertes Modernes */}
-                    <div className="border-l-2 border-green-400 pl-3">
-                      <div className="text-xs text-green-600 mb-1">Août 2025 • Découvertes Actuelles</div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="w-3 h-3 text-green-600" />
-                          <span className="text-slate-700">Salamandre de François Ier validée (Score: 0.8/1.0)</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="w-3 h-3 text-green-600" />
-                          <span className="text-slate-700">Fragment de clé royale authentifié (Score: 0.9/1.0)</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="w-3 h-3 text-amber-600" />
-                          <span className="text-slate-700">Plans du bureau de Napoléon en validation (Score: 0.6/1.0)</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <AlertTriangle className="w-3 h-3 text-red-500" />
-                          <span className="text-slate-700">Coordonnées GPS escalier secret contestées (Score: 0.4/1.0)</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Prochaines Étapes */}
-                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded p-3">
-                    <div className="font-medium text-blue-800 text-sm mb-2">Prochaines étapes nécessaires :</div>
-                    <ul className="text-xs text-blue-700 space-y-1">
-                      <li>• Validation définitive des plans de Napoléon (Archives Nationales)</li>
-                      <li>• Résolution du conflit GPS de l'escalier secret</li>
-                      <li>• Déchiffrage du code FONTAINEBLEAU_1814</li>
-                      <li>• Autorisation de fouilles dans les zones identifiées</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Stats compactes avec vraies données */}
-            <div className="grid grid-cols-4 gap-3">
-              <div className="text-center">
-                <div className="text-lg font-bold text-amber-800">{questStats.participantsCount}</div>
-                <div className="text-xs text-stone-600">Participants</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-stone-800">{questStats.cluesCount}</div>
-                <div className="text-xs text-stone-600">Indices</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-amber-800">{questStats.evidenceCount}</div>
-                <div className="text-xs text-stone-600">Preuves</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-stone-800">{questStats.discussionsCount}</div>
-                <div className="text-xs text-stone-600">Discussions</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Widget Insights IA */}
-          <div className="lg:col-span-1">
-            <AIInsightsWidget questId={quest.id} compact={true} />
-          </div>
+        {/* Actions Rapides Adaptatives */}
+        <div className="mb-8">
+          <AdaptiveActions 
+            profile={adaptiveProfile}
+            onAction={handleAction}
+          />
         </div>
 
-        {/* Interface collaborative immédiate */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-amber-200/50 shadow-lg">
-          <div className="p-4 border-b border-stone-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-stone-800">Espace de Collaboration</h2>
-              <div className="flex gap-2">
-                <Button 
-                  size="sm" 
-                  className="bg-amber-600 hover:bg-amber-700 text-white"
-                  onClick={() => {
-                    const chatTab = document.querySelector('[data-value="chat"]') as HTMLElement;
-                    chatTab?.click();
-                  }}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Discuter
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    const evidenceTab = document.querySelector('[data-value="evidence"]') as HTMLElement;
-                    evidenceTab?.click();
-                  }}
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Partager
-                </Button>
-              </div>
+        {/* Navigation et Contenu Adaptatifs */}
+        <div className="bg-background rounded-2xl border border-border shadow-lg overflow-hidden">
+          <AdaptiveNavigation
+            profile={adaptiveProfile}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          >
+            {/* Contenu des onglets */}
+            <div className="p-6">
+              {activeTab === 'adventure' && adaptiveProfile.type === 'beginner' && (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-foreground mb-4">
+                      🎮 Bienvenue dans ton Aventure !
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Tu es sur le point de découvrir comment fonctionnent les quêtes de trésors.
+                    </p>
+                  </div>
+                  
+                  {/* Interface simplifiée pour débutants */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Card className="p-6">
+                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-amber-500" />
+                        Progression
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Tutoriel</span>
+                          <Badge variant="outline">0/4</Badge>
+                        </div>
+                        <div className="w-full bg-secondary rounded-full h-2">
+                          <div className="bg-primary h-2 rounded-full w-0"></div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Commence par faire le tutoriel pour gagner tes premiers points !
+                        </p>
+                      </div>
+                    </Card>
+                    
+                    <Card className="p-6">
+                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <Users className="w-5 h-5 text-blue-500" />
+                        Communauté
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="text-2xl font-bold text-foreground">12</div>
+                        <p className="text-sm text-muted-foreground">
+                          explorateurs participent à cette quête
+                        </p>
+                        <Button size="sm" variant="outline" className="w-full">
+                          Rejoindre le chat
+                        </Button>
+                      </div>
+                    </Card>
+                  </div>
+                  
+                  <InvestigationInterface quest={quest} />
+                </div>
+              )}
+              
+              {/* Interface complète pour les autres profils */}
+              {(activeTab !== 'adventure' || adaptiveProfile.type !== 'beginner') && (
+                <InvestigationInterface quest={quest} />
+              )}
             </div>
-          </div>
-          
-          {/* Interface de collaboration directe */}
-          <InvestigationInterface quest={quest} />
+          </AdaptiveNavigation>
         </div>
       </div>
+
+      {/* Sélecteur de Profil */}
+      <UserProfileSelector
+        currentProfile={adaptiveProfile.type}
+        onProfileChange={setUserProfileType}
+        isOpen={showProfileSelector}
+        onClose={() => setShowProfileSelector(false)}
+      />
     </div>
   );
 };
