@@ -56,45 +56,62 @@ const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({ questId, compact = 
       const transformedInsights: AIInsight[] = data?.map(investigation => {
         const result = investigation.result_content as any;
         
-        // Extraire les insights depuis la nouvelle structure
+        // Structure if-else-if pour éviter les doublons
         if (result?.investigation) {
+          // Extraire les preuves utilisées pour un titre plus informatif
+          const evidenceUsed = result?.evidence_used || [];
+          const evidenceCount = evidenceUsed.length;
+          
+          let title = 'Investigation IA';
+          let description = result.investigation;
+          
+          if (evidenceCount > 0) {
+            title = `${evidenceCount} preuve${evidenceCount > 1 ? 's' : ''} analysée${evidenceCount > 1 ? 's' : ''}`;
+            const evidenceNames = evidenceUsed.slice(0, 3).map((e: any) => e.name || e.title || e).join(', ');
+            description = `${evidenceNames}${evidenceCount > 3 ? '...' : ''} - ${result.investigation.substring(0, 100)}${result.investigation.length > 100 ? '...' : ''}`;
+          }
+          
           return {
             id: investigation.id,
             type: 'pattern',
-            title: 'Investigation IA',
-            description: result.investigation,
+            title,
+            description,
             confidence: 90,
             created_at: investigation.created_at,
             metadata: result
           };
-        }
-
-        // Fallback pour les connexions historiques
-        if (result?.historical_connections?.[0]) {
+        } else if (result?.historical_connections?.[0]) {
+          // Connexions historiques
           const connection = result.historical_connections[0];
           return {
             id: investigation.id,
             type: 'historical',
-            title: connection.period || 'Connexion historique',
+            title: `Connexion ${connection.period || 'historique'}`,
             description: `${connection.figure}: ${connection.connection}`,
             confidence: 85,
             created_at: investigation.created_at,
             metadata: result
           };
+        } else {
+          // Fallback
+          return {
+            id: investigation.id,
+            type: 'suggestion',
+            title: 'Analyse IA',
+            description: 'Nouvelle analyse disponible',
+            confidence: 75,
+            created_at: investigation.created_at,
+            metadata: result
+          };
         }
-
-        return {
-          id: investigation.id,
-          type: 'suggestion',
-          title: 'Analyse IA',
-          description: 'Nouvelle analyse disponible',
-          confidence: 75,
-          created_at: investigation.created_at,
-          metadata: result
-        };
       }) || [];
 
-      setInsights(transformedInsights);
+      // Déduplication par ID pour éviter les doublons
+      const uniqueInsights = transformedInsights.filter((insight, index, self) => 
+        index === self.findIndex(i => i.id === insight.id)
+      );
+
+      setInsights(uniqueInsights);
     } catch (error) {
       console.error('Erreur chargement insights:', error);
     } finally {
