@@ -163,30 +163,30 @@ class AIDataExtractionService {
       });
     }
 
-    // Extraire l'analyse générale
-    if (data.analysis) {
+    // Extraire l'analyse de l'investigation
+    if (data.investigation) {
       extractedData.insights.push({
-        id: `analysis-${timestamp}`,
+        id: `investigation-${timestamp}`,
         type: 'discovery',
-        title: 'Analyse IA',
-        description: data.analysis,
+        title: 'Analyse détaillée',
+        description: data.investigation,
         confidence: 0.9,
         timestamp,
         relatedEntities: []
       });
     }
 
-    // Extraire les preuves soumises
-    if (data.submitted_proofs && Array.isArray(data.submitted_proofs)) {
-      data.submitted_proofs.forEach((proof: any, index: number) => {
-        if (proof.description) {
+    // Extraire les preuves utilisées (evidence_used au lieu de submitted_proofs)
+    if (data.evidence_used && Array.isArray(data.evidence_used)) {
+      data.evidence_used.forEach((evidence: any, index: number) => {
+        if (evidence.title && evidence.description) {
           extractedData.sources.push({
-            id: `proof-${timestamp}-${index}`,
-            title: proof.type || `Preuve #${index + 1}`,
-            excerpt: proof.description,
-            relevance: 0.8,
+            id: `evidence-${timestamp}-${index}`,
+            title: evidence.title,
+            excerpt: evidence.description,
+            relevance: 0.9,
             type: 'document',
-            date: proof.date
+            date: evidence.period || evidence.date
           });
         }
       });
