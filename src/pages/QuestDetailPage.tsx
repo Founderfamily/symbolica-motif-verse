@@ -246,20 +246,32 @@ const QuestDetailPage = () => {
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-4 mt-3 text-xs text-amber-600">
-                    <span className="flex items-center gap-1">
-                      <BookOpen className="w-3 h-3" />
-                      {sources.length} source{sources.length > 1 ? 's' : ''}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {locations.length} lieu{locations.length > 1 ? 'x' : ''}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {historicalFigures.length} personnage{historicalFigures.length > 1 ? 's' : ''}
-                    </span>
-                  </div>
+                   <div className="flex items-center gap-4 mt-3 text-xs text-amber-600">
+                     <span className="flex items-center gap-1">
+                       <BookOpen className="w-3 h-3" />
+                       {sources.length > 0 ? (
+                         <>{sources.length} preuve{sources.length > 1 ? 's' : ''} analysée{sources.length > 1 ? 's' : ''} : {sources.slice(0, 2).map(s => s.title).join(', ')}{sources.length > 2 && '...'}</>
+                       ) : (
+                         '0 preuves'
+                       )}
+                     </span>
+                     <span className="flex items-center gap-1">
+                       <MapPin className="w-3 h-3" />
+                       {locations.length > 0 ? (
+                         <>{locations.length} lieu{locations.length > 1 ? 'x' : ''} : {locations.slice(0, 2).map(l => l.name).join(', ')}{locations.length > 2 && '...'}</>
+                       ) : (
+                         '0 lieux'
+                       )}
+                     </span>
+                     <span className="flex items-center gap-1">
+                       <Users className="w-3 h-3" />
+                       {historicalFigures.length > 0 ? (
+                         <>{historicalFigures.length} personnage{historicalFigures.length > 1 ? 's' : ''} : {historicalFigures.slice(0, 2).map(f => f.name).join(', ')}{historicalFigures.length > 2 && '...'}</>
+                       ) : (
+                         '0 personnages'
+                       )}
+                     </span>
+                   </div>
                 </div>
               </div>
             </div>
