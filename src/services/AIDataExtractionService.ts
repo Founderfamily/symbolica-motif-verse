@@ -480,48 +480,46 @@ class AIDataExtractionService {
    */
   async getSpecificTreasureObjective(questId: string): Promise<string> {
     const data = await this.extractAIData(questId);
-    const defaultObjective = "Découvrir l'emplacement d'un trésor historique";
     
-    // Chercher dans les insights pour des mentions spécifiques
-    const treasureInsight = data.insights.find(insight => 
-      insight.description.toLowerCase().includes('cache') ||
-      insight.description.toLowerCase().includes('trésor') ||
-      insight.description.toLowerCase().includes('fortune') ||
-      insight.description.toLowerCase().includes('royal') ||
-      insight.description.toLowerCase().includes('secret')
-    );
-
-    if (treasureInsight) {
-      const description = treasureInsight.description;
+    // Construire un objectif spécifique basé sur les données disponibles
+    if (data.historicalFigures.length > 0 && data.locations.length > 0) {
+      const figures = data.historicalFigures.map(f => f.name);
+      const locations = data.locations.map(l => l.name);
       
-      // Extraire les éléments spécifiques
-      const cacheMatch = description.match(/cache\s+([^.!?]+)/i);
-      const treasureMatch = description.match(/trésor\s+([^.!?]+)/i);
-      const fortuneMatch = description.match(/fortune\s+([^.!?]+)/i);
-      
-      if (cacheMatch) return `Découvrir la cache ${cacheMatch[1].trim()}`;
-      if (treasureMatch) return `Découvrir le trésor ${treasureMatch[1].trim()}`;
-      if (fortuneMatch) return `Découvrir la fortune ${fortuneMatch[1].trim()}`;
+      // Objectif spécifique pour François Ier et Napoléon à Fontainebleau
+      if (figures.some(f => f.includes('François')) && figures.some(f => f.includes('Napoléon'))) {
+        return "Découvrir les trésors cachés entre la Galerie François Ier, le Bureau de Napoléon et l'Escalier Secret du Château de Fontainebleau";
+      } 
+      // Objectif pour François Ier uniquement
+      else if (figures.some(f => f.includes('François'))) {
+        const mainLocation = locations[0] || "Château de Fontainebleau";
+        return `Découvrir les secrets de François Ier dans ${mainLocation}`;
+      } 
+      // Objectif pour Napoléon uniquement
+      else if (figures.some(f => f.includes('Napoléon'))) {
+        const mainLocation = locations[0] || "Château de Fontainebleau";
+        return `Percer les mystères de Napoléon dans ${mainLocation}`;
+      } 
+      // Objectif générique avec les données disponibles
+      else {
+        const mainFigure = figures[0];
+        const mainLocation = locations[0];
+        return `Découvrir les trésors de ${mainFigure} dans ${mainLocation}`;
+      }
     }
-
-    // Si on a des personnages et lieux, construire un objectif spécifique
-    if (data.locations.length > 0 && data.historicalFigures.length > 0) {
-      const mainLocation = data.locations[0]?.name || "lieu secret";
-      const mainFigure = data.historicalFigures[0]?.name || "personnage historique";
-      
-      // Construire un objectif spécifique basé sur les données
-      if (mainFigure.includes('François') && mainFigure.includes('Napoléon')) {
-        return `Découvrir la cache royale de François Ier et Napoléon dans ${mainLocation}`;
-      } else if (mainFigure.includes('François')) {
-        return `Découvrir les trésors cachés de François Ier dans ${mainLocation}`;
-      } else if (mainFigure.includes('Napoléon')) {
-        return `Découvrir la fortune secrète de Napoléon dans ${mainLocation}`;
-      } else {
-        return `Découvrir les trésors cachés de ${mainFigure} dans ${mainLocation}`;
+    
+    // Chercher dans les insights pour un objectif spécifique
+    for (const insight of data.insights) {
+      const description = insight.description.toLowerCase();
+      if (description.includes('fontainebleau') && description.includes('passage')) {
+        return "Découvrir les passages secrets du Château de Fontainebleau";
+      }
+      if (description.includes('renaissance') && description.includes('empire')) {
+        return "Révéler les liens secrets entre la Renaissance et l'Empire";
       }
     }
 
-    return defaultObjective;
+    return "Découvrir l'emplacement d'un trésor historique";
   }
 }
 
