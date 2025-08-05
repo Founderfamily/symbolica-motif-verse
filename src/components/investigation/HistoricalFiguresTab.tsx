@@ -45,10 +45,15 @@ const HistoricalFiguresTab: React.FC<HistoricalFiguresTabProps> = ({ questId }) 
   const loadHistoricalFigures = async () => {
     try {
       setLoading(true);
+      console.log('Loading historical figures for quest:', questId);
+      
       const [figuresData, metadataData] = await Promise.all([
         aiDataExtractionService.getHistoricalFigures(questId),
         historicalFiguresService.getHistoricalFiguresMetadata(questId)
       ]);
+      
+      console.log('Figures data:', figuresData);
+      console.log('Metadata data:', metadataData);
       
       // Enrichir les figures avec les métadonnées Wikipedia
       const enrichedFigures = figuresData.map(figure => {
@@ -66,6 +71,7 @@ const HistoricalFiguresTab: React.FC<HistoricalFiguresTabProps> = ({ questId }) 
       setMetadata(metadataData);
     } catch (error) {
       console.error('Erreur lors du chargement des personnages historiques:', error);
+      setFigures([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
