@@ -13,7 +13,8 @@ import {
   Search,
   Filter,
   Crosshair,
-  Settings
+  Settings,
+  Users
 } from 'lucide-react';
 import { TreasureQuest } from '@/types/quests';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +22,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { investigationService } from '@/services/investigationService';
 import AddLocationDialog from './AddLocationDialog';
 import { useArchiveMap } from '@/contexts/ArchiveMapContext';
+import CommunityMapContribution from './CommunityMapContribution';
 
 interface MapTabProps {
   quest: TreasureQuest;
@@ -35,6 +37,7 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
   const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [questLocations, setQuestLocations] = useState<any[]>([]);
+  const [showCommunityTab, setShowCommunityTab] = useState(false);
   const { toast } = useToast();
   const { selectedArchive, archiveLocations, setSelectedLocation: setMapSelectedLocation } = useArchiveMap();
   
@@ -307,6 +310,14 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
     }
   };
 
+  const handleCommunityContribution = (contribution: any) => {
+    toast({
+      title: "Contribution reçue",
+      description: `Merci pour votre contribution: ${contribution.title}`,
+    });
+    // Ici on pourrait envoyer vers une API de validation communautaire
+  };
+
   if (loading) {
     return (
       <Card>
@@ -339,14 +350,36 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
 
   return (
     <div className="space-y-6">
-      {/* Contrôles */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Carte Interactive
-          </CardTitle>
-        </CardHeader>
+      {/* Navigation tabs */}
+      <div className="flex gap-2 mb-4">
+        <Button 
+          variant={!showCommunityTab ? "default" : "outline"}
+          onClick={() => setShowCommunityTab(false)}
+        >
+          <MapPin className="h-4 w-4 mr-2" />
+          Carte Interactive
+        </Button>
+        <Button 
+          variant={showCommunityTab ? "default" : "outline"}
+          onClick={() => setShowCommunityTab(true)}
+        >
+          <Users className="h-4 w-4 mr-2" />
+          Contributions Communautaires
+        </Button>
+      </div>
+
+      {showCommunityTab ? (
+        <CommunityMapContribution onContributionSubmit={handleCommunityContribution} />
+      ) : (
+        <>
+          {/* Contrôles */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Carte Interactive
+              </CardTitle>
+            </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="flex-1 relative">
@@ -429,6 +462,8 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
             </div>
           </CardContent>
         </Card>
+      )}
+        </>
       )}
     </div>
   );
