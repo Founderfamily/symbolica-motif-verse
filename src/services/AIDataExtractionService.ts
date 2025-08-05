@@ -530,8 +530,43 @@ class AIDataExtractionService {
    * Obtient les personnages historiques identifiés
    */
   async getHistoricalFigures(questId: string): Promise<AIHistoricalFigure[]> {
-    const data = await this.extractAIData(questId);
-    return data.historicalFigures.sort((a, b) => b.relevance - a.relevance);
+    // Ne retourner que les personnages historiques réellement extraits des données de la quête
+    // Pas de données fictives ou de patterns prédéfinis
+    const { data: investigations, error } = await supabase
+      .from('ai_investigations')
+      .select('result_content')
+      .eq('quest_id', questId)
+      .not('result_content', 'is', null);
+
+    if (error || !investigations?.length) {
+      return []; // Retourner une liste vide si pas de données réelles
+    }
+
+    const figures: AIHistoricalFigure[] = [];
+    
+    // Extraire uniquement des vrais résultats d'investigation IA
+    investigations.forEach((investigation, index) => {
+      if (investigation.result_content && typeof investigation.result_content === 'object') {
+        const content = investigation.result_content as any;
+        if (content.historical_figures && Array.isArray(content.historical_figures)) {
+          content.historical_figures.forEach((figure: any) => {
+            if (figure.name && figure.period && figure.role) {
+              figures.push({
+                id: `real-figure-${index}-${figure.name.replace(/\s+/g, '-').toLowerCase()}`,
+                name: figure.name,
+                period: figure.period,
+                role: figure.role,
+                relevance: figure.relevance || 0.8,
+                connections: figure.connections || [],
+                description: figure.description || `Personnage historique identifié dans l'investigation`
+              });
+            }
+          });
+        }
+      }
+    });
+
+    return figures.sort((a, b) => b.relevance - a.relevance);
   }
 
   /**
