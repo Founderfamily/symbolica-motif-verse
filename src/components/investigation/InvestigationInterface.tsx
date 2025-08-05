@@ -29,6 +29,7 @@ import AIEnhancedChatTab from './AIEnhancedChatTab';
 import AIInvestigationTab from './AIInvestigationTab';
 import InteractiveMapTab from './InteractiveMapTab';
 import ArchivesTab from './ArchivesTab';
+import HistoricalFiguresTab from './HistoricalFiguresTab';
 import ContributeEvidenceDialog from '../quests/ContributeEvidenceDialog';
 import ExplorationJournal from './ExplorationJournal';
 import { ArchiveMapProvider } from '@/contexts/ArchiveMapContext';
@@ -61,7 +62,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-slate-100">
         {/* Interface à onglets - Style Journal */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 bg-white/80 backdrop-blur-sm border border-amber-200 rounded-xl shadow-lg m-6 mb-0">
+          <TabsList className="grid w-full grid-cols-7 bg-white/80 backdrop-blur-sm border border-amber-200 rounded-xl shadow-lg m-6 mb-0">
             <TabsTrigger 
               value="journal" 
               className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-900 data-[state=active]:shadow-md transition-all duration-200 flex items-center gap-2"
@@ -98,6 +99,13 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
               <span className="hidden sm:inline">Carte</span>
             </TabsTrigger>
             <TabsTrigger 
+              value="personnages" 
+              className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-900 data-[state=active]:shadow-md transition-all duration-200 flex items-center gap-2"
+            >
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Personnages</span>
+            </TabsTrigger>
+            <TabsTrigger 
               value="archives" 
               className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-900 data-[state=active]:shadow-md transition-all duration-200 flex items-center gap-2"
             >
@@ -124,6 +132,10 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
 
           <TabsContent value="map" className="space-y-4 p-6">
             <InteractiveMapTab quest={quest} activeTab={activeTab} setActiveTab={setActiveTab} />
+          </TabsContent>
+
+          <TabsContent value="personnages" className="space-y-4 p-6">
+            <HistoricalFiguresTab questId={quest.id} />
           </TabsContent>
 
           <TabsContent value="archives" className="space-y-4 p-6">

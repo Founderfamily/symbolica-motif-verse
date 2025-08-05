@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { User, Crown, Star, TrendingUp, ExternalLink, Plus } from 'lucide-react';
+import { User, Users, Crown, Star, TrendingUp, ExternalLink, Plus } from 'lucide-react';
 import { aiDataExtractionService, AIHistoricalFigure } from '@/services/AIDataExtractionService';
 import { historicalFiguresService, HistoricalFigureMetadata } from '@/services/historicalFiguresService';
 import WikipediaLinkDialog from './WikipediaLinkDialog';
@@ -47,7 +47,7 @@ const HistoricalFiguresWidget: React.FC<HistoricalFiguresWidgetProps> = ({
         };
       });
       
-      setFigures(enrichedFigures.slice(0, compact ? 3 : 10));
+      setFigures(enrichedFigures.slice(0, 3));
       setMetadata(metadataData);
     } catch (error) {
       console.error('Erreur lors du chargement des personnages historiques:', error);
@@ -192,13 +192,20 @@ const HistoricalFiguresWidget: React.FC<HistoricalFiguresWidgetProps> = ({
           );
         })}
         
-        {compact && figures.length > 3 && (
-          <div className="text-center pt-2">
-            <Badge variant="outline" className="text-xs">
-              +{figures.length - 3} autres personnages
-            </Badge>
-          </div>
-        )}
+        <div className="text-center pt-3 border-t">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={() => {
+              // Navigate to personnages tab - this would need to be passed as prop
+              console.log('Navigate to personnages tab');
+            }}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Voir tous les personnages
+          </Button>
+        </div>
       </CardContent>
       
       {selectedFigure && (
