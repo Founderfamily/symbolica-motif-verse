@@ -1,15 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TreasureQuest } from '@/types/quests';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, Users, BookOpen, Camera } from 'lucide-react';
 import HistoricalFiguresWidget from './widgets/HistoricalFiguresWidget';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ExplorationJournalProps {
   quest: TreasureQuest;
 }
 
 const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
+  const [activeExplorers, setActiveExplorers] = useState<Array<{
+    name: string;
+    location: string;
+    lastSeen: string;
+  }>>([]);
+
+  useEffect(() => {
+    loadActiveExplorers();
+  }, [quest.id]);
+
+  const loadActiveExplorers = async () => {
+    try {
+      // Récupérer les profils des utilisateurs récemment actifs
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, updated_at')
+        .not('updated_at', 'is', null)
+        .gte('updated_at', new Date(Date.now() - 60 * 60 * 1000).toISOString()) // Dernière heure
+        .order('updated_at', { ascending: false })
+        .limit(3);
+
+      if (error) {
+        console.error('Erreur lors du chargement des explorateurs actifs:', error);
+        return;
+      }
+
+      // Mapper les profils vers le format d'affichage
+      const explorers = profiles?.map(profile => {
+        const timeDiff = Date.now() - new Date(profile.updated_at || '').getTime();
+        const minutesAgo = Math.floor(timeDiff / (1000 * 60));
+        
+        return {
+          name: profile.full_name || profile.username || 'Explorateur',
+          location: quest.title || 'Exploration en cours',
+          lastSeen: minutesAgo < 1 ? 'À l\'instant' : `${minutesAgo} min`
+        };
+      }) || [];
+
+      setActiveExplorers(explorers);
+    } catch (error) {
+      console.error('Erreur lors du chargement des explorateurs actifs:', error);
+    }
+  };
+
   const treasures = [
     {
       id: 1,
@@ -38,12 +83,6 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
       status: 'locked',
       historicalContext: 'Cet escalier permettait aux favorites royales de rejoindre discrètement les appartements du roi.'
     }
-  ];
-
-  const activeExplorers = [
-    { name: 'Marie L.', location: 'Galerie François Ier', lastSeen: '2 min' },
-    { name: 'Paul R.', location: 'Cour des Adieux', lastSeen: '5 min' },
-    { name: 'Sophie M.', location: 'Appartements Napoléon', lastSeen: '12 min' }
   ];
 
   return (
@@ -141,18 +180,25 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
               </h3>
               
               <div className="space-y-3">
-                {activeExplorers.map((explorer, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      {explorer.name.charAt(0)}
+                {activeExplorers.length > 0 ? (
+                  activeExplorers.map((explorer, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        {explorer.name.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-800">{explorer.name}</p>
+                        <p className="text-xs text-slate-600">{explorer.location}</p>
+                      </div>
+                      <span className="text-xs text-green-600">il y a {explorer.lastSeen}</span>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-800">{explorer.name}</p>
-                      <p className="text-xs text-slate-600">{explorer.location}</p>
-                    </div>
-                    <span className="text-xs text-green-600">il y a {explorer.lastSeen}</span>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-slate-500">
+                    <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Aucun explorateur actif actuellement</p>
                   </div>
-                ))}
+                )}
               </div>
               
               <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -168,13 +214,10 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
               </h3>
               
               <div className="space-y-3">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm font-medium text-slate-800">Marie a trouvé un indice !</p>
-                  <p className="text-xs text-slate-600">Galerie François Ier - il y a 2 min</p>
-                </div>
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-sm font-medium text-slate-800">Paul partage une photo</p>
-                  <p className="text-xs text-slate-600">Escalier du Roi - il y a 15 min</p>
+                <div className="text-center py-4 text-slate-500">
+                  <Camera className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Aucune découverte récente</p>
+                  <p className="text-xs">Les découvertes de l'équipe apparaîtront ici</p>
                 </div>
               </div>
             </div>
