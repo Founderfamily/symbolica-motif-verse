@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { getMockHistoricalFigures } from '@/hooks/useQuestMockData';
 
 export interface AIExtractedData {
   theories: AITheory[];
@@ -450,6 +451,13 @@ class AIDataExtractionService {
    */
   async getHistoricalFigures(questId: string): Promise<AIHistoricalFigure[]> {
     const data = await this.extractAIData(questId);
+    
+    // Si aucune donnée IA n'est disponible, utiliser les données de test
+    if (data.historicalFigures.length === 0) {
+      const mockFigures = getMockHistoricalFigures(questId);
+      return mockFigures.sort((a, b) => b.relevance - a.relevance);
+    }
+    
     return data.historicalFigures.sort((a, b) => b.relevance - a.relevance);
   }
 
