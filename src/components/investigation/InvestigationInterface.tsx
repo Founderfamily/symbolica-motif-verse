@@ -62,7 +62,7 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-slate-100">
         {/* Interface à onglets - Style Journal */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="flex w-full flex-wrap bg-white/80 backdrop-blur-sm border border-amber-200 rounded-xl shadow-lg m-6 mb-0">
+          <TabsList className="flex w-full overflow-x-auto bg-white/80 backdrop-blur-sm border border-amber-200 rounded-xl shadow-lg m-6 mb-0 min-w-0">
             <TabsTrigger 
               value="journal" 
               className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-900 data-[state=active]:shadow-md transition-all duration-200 flex items-center gap-2"
