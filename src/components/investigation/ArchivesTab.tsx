@@ -26,6 +26,8 @@ import DocumentUploadDialog from './DocumentUploadDialog';
 import { useArchiveMap } from '@/contexts/ArchiveMapContext';
 import { ArchiveEnrichmentDialog } from './ArchiveEnrichmentDialog';
 import { ArchiveContributionsList } from './ArchiveContributionsList';
+import { ArchiveEditDialog } from '../admin/ArchiveEditDialog';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ArchivesTabProps {
   quest: TreasureQuest;
@@ -40,6 +42,7 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
   const [loading, setLoading] = useState(true);
   const [contributionsRefresh, setContributionsRefresh] = useState(0);
   const { setSelectedArchive, archiveLocations } = useArchiveMap();
+  const { isAdmin } = useAuth();
 
   const loadDocuments = async () => {
     try {
@@ -367,6 +370,12 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
                   <Badge variant="outline" className="text-xs">
                     {Math.round((doc.credibility_score || doc.credibility || 0) * (documents.length > 0 ? 100 : 1))}% fiable
                   </Badge>
+                  {isAdmin && (
+                    <ArchiveEditDialog 
+                      archive={doc}
+                      onArchiveUpdated={loadDocuments}
+                    />
+                  )}
                 </div>
               </div>
             </CardHeader>
