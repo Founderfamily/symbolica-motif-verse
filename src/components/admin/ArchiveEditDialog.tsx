@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit, Upload, Image, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { historicalArchiveService, type HistoricalArchive } from '@/services/historicalArchiveService';
 
 interface ArchiveEditDialogProps {
-  archive: any;
+  archive: HistoricalArchive;
   onArchiveUpdated?: () => void;
 }
 
@@ -29,8 +30,8 @@ export const ArchiveEditDialog: React.FC<ArchiveEditDialogProps> = ({
     source: '',
     type: '',
     document_url: '',
-    archiveLink: '',
-    physicalLocation: ''
+    archive_link: '',
+    physical_location: ''
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -40,12 +41,12 @@ export const ArchiveEditDialog: React.FC<ArchiveEditDialogProps> = ({
         title: archive.title || '',
         description: archive.description || '',
         author: archive.author || '',
-        date: archive.date || archive.date_created || '',
+        date: archive.date || '',
         source: archive.source || '',
-        type: archive.type || archive.document_type || '',
-        document_url: archive.document_url || archive.url || '',
-        archiveLink: archive.archiveLink || '',
-        physicalLocation: archive.physicalLocation || ''
+        type: archive.type || '',
+        document_url: archive.document_url || '',
+        archive_link: archive.archive_link || '',
+        physical_location: archive.physical_location || ''
       });
     }
   }, [archive]);
@@ -76,21 +77,26 @@ export const ArchiveEditDialog: React.FC<ArchiveEditDialogProps> = ({
 
     setIsSubmitting(true);
     try {
-      // Ici, vous devrez implémenter la logique de mise à jour
-      // Pour l'instant, on simule juste la mise à jour
-      
       let imageUrl = formData.document_url;
       
       if (selectedFile) {
-        // Upload de la nouvelle image
-        // TODO: Implémenter l'upload vers Supabase Storage
-        // const uploadResult = await uploadArchiveImage(selectedFile);
-        // imageUrl = uploadResult.publicUrl;
-        toast.success('Image mise à jour (simulation)');
+        // Upload de la nouvelle image vers Supabase Storage
+        imageUrl = await historicalArchiveService.uploadImage(selectedFile);
+        toast.success('Image mise à jour avec succès');
       }
 
-      // Mettre à jour l'archive
-      // TODO: Implémenter la mise à jour en base de données
+      // Mettre à jour l'archive dans la base de données
+      await historicalArchiveService.updateArchive(archive.id, {
+        title: formData.title,
+        description: formData.description,
+        author: formData.author,
+        date: formData.date,
+        source: formData.source,
+        type: formData.type,
+        document_url: imageUrl,
+        archive_link: formData.archive_link,
+        physical_location: formData.physical_location
+      });
       
       toast.success('Archive mise à jour avec succès');
       setIsOpen(false);
@@ -188,25 +194,25 @@ export const ArchiveEditDialog: React.FC<ArchiveEditDialogProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="physicalLocation">Localisation physique</Label>
-            <Input
-              id="physicalLocation"
-              value={formData.physicalLocation}
-              onChange={(e) => setFormData({ ...formData, physicalLocation: e.target.value })}
-              placeholder="ex: Pierrefitte-sur-Seine"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="physical_location">Localisation physique</Label>
+              <Input
+                id="physical_location"
+                value={formData.physical_location}
+                onChange={(e) => setFormData({ ...formData, physical_location: e.target.value })}
+                placeholder="ex: Pierrefitte-sur-Seine"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="archiveLink">Lien vers les archives</Label>
-            <Input
-              id="archiveLink"
-              value={formData.archiveLink}
-              onChange={(e) => setFormData({ ...formData, archiveLink: e.target.value })}
-              placeholder="https://..."
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="archive_link">Lien vers les archives</Label>
+              <Input
+                id="archive_link"
+                value={formData.archive_link}
+                onChange={(e) => setFormData({ ...formData, archive_link: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
 
           <div className="space-y-2">
             <Label htmlFor="document_url">URL de l'image actuelle</Label>

@@ -1377,6 +1377,57 @@ export type Database = {
           },
         ]
       }
+      historical_archives: {
+        Row: {
+          archive_link: string | null
+          author: string | null
+          created_at: string
+          created_by: string | null
+          date: string | null
+          description: string | null
+          document_url: string | null
+          id: string
+          physical_location: string | null
+          source: string | null
+          title: string
+          type: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archive_link?: string | null
+          author?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string | null
+          description?: string | null
+          document_url?: string | null
+          id?: string
+          physical_location?: string | null
+          source?: string | null
+          title: string
+          type?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archive_link?: string | null
+          author?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string | null
+          description?: string | null
+          document_url?: string | null
+          id?: string
+          physical_location?: string | null
+          source?: string | null
+          title?: string
+          type?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       historical_events: {
         Row: {
           collection_slug: string

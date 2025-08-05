@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +27,7 @@ import { ArchiveEnrichmentDialog } from './ArchiveEnrichmentDialog';
 import { ArchiveContributionsList } from './ArchiveContributionsList';
 import { ArchiveEditDialog } from '../admin/ArchiveEditDialog';
 import { useAuth } from '@/hooks/useAuth';
+import { historicalArchiveService, type HistoricalArchive } from '@/services/historicalArchiveService';
 
 interface ArchivesTabProps {
   quest: TreasureQuest;
@@ -39,6 +39,7 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [documents, setDocuments] = useState<any[]>([]);
+  const [archives, setArchives] = useState<HistoricalArchive[]>([]);
   const [loading, setLoading] = useState(true);
   const [contributionsRefresh, setContributionsRefresh] = useState(0);
   const { setSelectedArchive, archiveLocations } = useArchiveMap();
@@ -58,153 +59,27 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
     }
   };
 
-  // Load quest documents
+  const loadArchives = async () => {
+    try {
+      const data = await historicalArchiveService.getArchives();
+      setArchives(data);
+    } catch (error) {
+      console.error('Error loading archives:', error);
+    }
+  };
+
+  // Load quest documents and historical archives
   useEffect(() => {
-    loadDocuments();
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([loadDocuments(), loadArchives()]);
+      setLoading(false);
+    };
+    loadData();
   }, [quest.id]);
 
-  // Sources historiques authentiques pour Les Trésors Cachés de Fontainebleau
-  const fontainebleauArchives = [
-    {
-      id: '1',
-      title: 'Comptes des Bâtiments du Roi (1528-1547)',
-      type: 'registry',
-      author: 'Pierre Nepveu dit Trinqueau',
-      date: '1528-04-15',
-      source: 'Archives Nationales - O1 1363',
-      description: 'Registres détaillés des dépenses pour la construction de la Galerie François Ier',
-      content: 'Mentions des travaux de Rosso Fiorentino et commandes de matériaux précieux',
-      url: '/api/placeholder/400/300',
-      credibility: 98,
-      aiRelevance: 95,
-      tags: ['François Ier', 'galerie', 'construction', 'Rosso'],
-      archiveLink: 'https://www.archives-nationales.culture.gouv.fr',
-      physicalLocation: 'Pierrefitte-sur-Seine',
-      locationId: '1' // Lié à la Galerie François Ier
-    },
-    {
-      id: '2',
-      title: 'Plans originaux de Gilles Le Breton (1528)',
-      type: 'map',
-      author: 'Gilles Le Breton',
-      date: '1528-09-20',
-      source: 'Bibliothèque Nationale - Est Va 77',
-      description: 'Plans architecturaux originaux montrant les passages secrets de la galerie',
-      content: 'Détails techniques des mécanismes cachés et accès dérobés',
-      url: '/api/placeholder/400/300',
-      credibility: 94,
-      aiRelevance: 98,
-      tags: ['architecture', 'plans', 'passages secrets', 'Le Breton'],
-      archiveLink: 'https://gallica.bnf.fr',
-      physicalLocation: 'Paris, site François Mitterrand',
-      locationId: '1' // Lié à la Galerie François Ier
-    },
-    {
-      id: '3',
-      title: 'Correspondance de François Ier avec Primatice (1532)',
-      type: 'manuscript',
-      author: 'François Ier de France',
-      date: '1532-06-12',
-      source: 'Archives du Château de Fontainebleau',
-      description: 'Lettres révélant les instructions secrètes pour la décoration de la galerie',
-      content: 'Mentions d\'éléments cachés et de symboles secrets dans les fresques',
-      url: '/api/placeholder/400/300',
-      credibility: 96,
-      aiRelevance: 92,
-      tags: ['correspondance', 'Primatice', 'décoration', 'symboles'],
-      archiveLink: 'http://www.musee-chateau-fontainebleau.fr',
-      physicalLocation: 'Château de Fontainebleau',
-      locationId: '1' // Lié à la Galerie François Ier
-    },
-    {
-      id: '4',
-      title: 'Inventaire du Mobilier Royal (1547)',
-      type: 'inventory',
-      author: 'Pierre du Chastel',
-      date: '1547-03-31',
-      source: 'Archives Nationales - KK 291',
-      description: 'Inventaire post-mortem répertoriant les trésors cachés de François Ier',
-      content: 'Liste mystérieuse d\'objets "non localisés" dans la galerie royale',
-      url: '/api/placeholder/400/300',
-      credibility: 97,
-      aiRelevance: 99,
-      tags: ['inventaire', 'mobilier', 'trésors', 'post-mortem'],
-      archiveLink: 'https://www.archives-nationales.culture.gouv.fr',
-      physicalLocation: 'Pierrefitte-sur-Seine',
-      locationId: '4' // Lié à la Cour du Cheval Blanc
-    },
-    {
-      id: '5',
-      title: 'Journal de Pierre de Bourdeille (1540)',
-      type: 'chronicle',
-      author: 'Pierre de Bourdeille, abbé de Brantôme',
-      date: '1540-11-08',
-      source: 'Bibliothèque Mazarine - Ms 2659',
-      description: 'Chronique rapportant les rumeurs de cachettes secrètes à Fontainebleau',
-      content: 'Témoignage direct sur les mystères entourant les appartements royaux',
-      url: '/api/placeholder/400/300',
-      credibility: 89,
-      aiRelevance: 87,
-      tags: ['chronique', 'témoignage', 'cachettes', 'Brantôme'],
-      archiveLink: 'https://mazarine.bibliotheque-mazarine.fr',
-      physicalLocation: 'Paris, 6e arrondissement',
-      locationId: '4' // Lié à la Cour du Cheval Blanc
-    },
-    {
-      id: '6',
-      title: 'Décret d\'Aménagement des Appartements Impériaux (1804)',
-      type: 'official',
-      author: 'Napoléon Bonaparte',
-      date: '1804-05-18',
-      source: 'Archives Nationales - AF IV 1050',
-      description: 'Instructions pour l\'aménagement du bureau de travail de l\'Empereur',
-      content: 'Spécifications techniques incluant des compartiments secrets',
-      url: '/api/placeholder/400/300',
-      credibility: 99,
-      aiRelevance: 94,
-      tags: ['Napoléon', 'bureau', 'aménagement', 'secrets'],
-      archiveLink: 'https://www.archives-nationales.culture.gouv.fr',
-      physicalLocation: 'Pierrefitte-sur-Seine',
-      locationId: '2' // Lié au Bureau de Napoléon
-    },
-    {
-      id: '7',
-      title: 'Mémoires de Joséphine de Beauharnais (1809)',
-      type: 'memoir',
-      author: 'Joséphine de Beauharnais',
-      date: '1809-12-15',
-      source: 'Archives Privées Malmaison',
-      description: 'Récit personnel évoquant les habitudes secrètes de Napoléon à Fontainebleau',
-      content: 'Description des rituels matinaux et des cachettes personnelles',
-      url: '/api/placeholder/400/300',
-      credibility: 91,
-      aiRelevance: 88,
-      tags: ['Joséphine', 'mémoires', 'Napoléon', 'habitudes'],
-      archiveLink: 'https://www.chateaumalmaison.fr',
-      physicalLocation: 'Rueil-Malmaison',
-      locationId: '2' // Lié au Bureau de Napoléon
-    },
-    {
-      id: '8',
-      title: 'Plans des Modifications Structurelles (1808)',
-      type: 'map',
-      author: 'Pierre-François-Léonard Fontaine',
-      date: '1808-07-22',
-      source: 'École des Beaux-Arts - AJ 52 441',
-      description: 'Plans détaillés révélant l\'escalier secret reliant les appartements',
-      content: 'Schémas techniques de l\'escalier dérobé et ses mécanismes',
-      url: '/api/placeholder/400/300',
-      credibility: 95,
-      aiRelevance: 97,
-      tags: ['escalier secret', 'Fontaine', 'modifications', 'mécanismes'],
-      archiveLink: 'https://www.ensba.fr',
-      physicalLocation: 'Paris, École des Beaux-Arts',
-      locationId: '3' // Lié à l'Escalier Secret
-    }
-  ];
-
-  // Utiliser les archives de Fontainebleau ou les documents chargés
-  const archivesToDisplay = documents.length > 0 ? documents : fontainebleauArchives;
+  // Combine documents and archives for display
+  const archivesToDisplay = [...documents, ...archives];
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -219,7 +94,6 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
     }
   };
 
-  // Mise à jour des filtres pour afficher les archives de Fontainebleau si pas de documents chargés
   const filteredArchives = archivesToDisplay.filter(archive => {
     const title = archive.title || '';
     const description = archive.description || '';
@@ -317,13 +191,9 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
               <div className="bg-muted/50 rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-1">
                   <Sparkles className="h-4 w-4 text-purple-500" />
-                  <span className="text-sm font-medium">Crédibilité Moy.</span>
+                  <span className="text-sm font-medium">Archives</span>
                 </div>
-                <div className="text-2xl font-bold">
-                  {archivesToDisplay.length > 0 
-                    ? Math.round(archivesToDisplay.reduce((acc, d) => acc + ((d.credibility_score || d.credibility || 0) * (documents.length > 0 ? 1 : 0.01)), 0) / archivesToDisplay.length)
-                    : 0}%
-                </div>
+                <div className="text-2xl font-bold">{archives.length}</div>
               </div>
               <div className="bg-muted/50 rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-1">
@@ -368,12 +238,15 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">
-                    {Math.round((doc.credibility_score || doc.credibility || 0) * (documents.length > 0 ? 100 : 1))}% fiable
+                    {Math.round((doc.credibility_score || doc.credibility || 95))}% fiable
                   </Badge>
                   {isAdmin && (
                     <ArchiveEditDialog 
                       archive={doc}
-                      onArchiveUpdated={loadDocuments}
+                      onArchiveUpdated={() => {
+                        loadDocuments();
+                        loadArchives();
+                      }}
                     />
                   )}
                 </div>
@@ -387,6 +260,10 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
                     src={doc.document_url || doc.url} 
                     alt={doc.title}
                     className="w-full h-48 object-cover rounded-lg"
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = 'none';
+                    }}
                   />
                   <div className="absolute top-2 right-2 flex gap-1">
                     <Button size="sm" variant="secondary" className="h-8 px-2">
@@ -423,10 +300,10 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
                     <strong>Source:</strong> {doc.source}
                   </div>
                 )}
-                {doc.archiveLink && (
+                {(doc.archive_link || doc.archiveLink) && (
                   <div className="text-xs">
                     <a 
-                      href={doc.archiveLink} 
+                      href={doc.archive_link || doc.archiveLink} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-500 hover:underline"
@@ -435,9 +312,9 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
                     </a>
                   </div>
                 )}
-                {doc.physicalLocation && (
+                {(doc.physical_location || doc.physicalLocation) && (
                   <div className="text-xs text-muted-foreground">
-                    📍 <strong>Localisation:</strong> {doc.physicalLocation}
+                    📍 <strong>Localisation:</strong> {doc.physical_location || doc.physicalLocation}
                   </div>
                 )}
               </div>
@@ -486,11 +363,11 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
 
-      {documents.length === 0 && !loading && (
+      {archivesToDisplay.length === 0 && !loading && (
         <Card>
           <CardContent className="text-center py-8">
             <Archive className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
