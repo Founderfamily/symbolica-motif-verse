@@ -530,41 +530,64 @@ class AIDataExtractionService {
    * Obtient les personnages historiques identifiés
    */
   async getHistoricalFigures(questId: string): Promise<AIHistoricalFigure[]> {
-    // Ne retourner que les personnages historiques réellement extraits des données de la quête
-    // Pas de données fictives ou de patterns prédéfinis
-    const { data: investigations, error } = await supabase
+    const figures: AIHistoricalFigure[] = [];
+    
+    // 1. Récupérer les figures de la table historical_figures_metadata (données réelles vérifiées)
+    const { data: metadataFigures, error: metadataError } = await supabase
+      .from('historical_figures_metadata')
+      .select('*')
+      .eq('quest_id', questId)
+      .eq('status', 'verified');
+
+    if (!metadataError && metadataFigures) {
+      metadataFigures.forEach(figure => {
+        figures.push({
+          id: `metadata-${figure.id}`,
+          name: figure.figure_name,
+          period: figure.figure_period,
+          role: figure.figure_role,
+          relevance: 0.9, // Haute relevance pour les données vérifiées
+          connections: [],
+          description: figure.description || `Personnage historique vérifié`,
+          wikipediaUrl: figure.wikipedia_url,
+          imageUrl: figure.image_url
+        });
+      });
+    }
+
+    // 2. Récupérer les figures des investigations IA (si elles n'existent pas déjà)
+    const { data: investigations, error: investigationError } = await supabase
       .from('ai_investigations')
       .select('result_content')
       .eq('quest_id', questId)
       .not('result_content', 'is', null);
 
-    if (error || !investigations?.length) {
-      return []; // Retourner une liste vide si pas de données réelles
-    }
-
-    const figures: AIHistoricalFigure[] = [];
-    
-    // Extraire uniquement des vrais résultats d'investigation IA
-    investigations.forEach((investigation, index) => {
-      if (investigation.result_content && typeof investigation.result_content === 'object') {
-        const content = investigation.result_content as any;
-        if (content.historical_figures && Array.isArray(content.historical_figures)) {
-          content.historical_figures.forEach((figure: any) => {
-            if (figure.name && figure.period && figure.role) {
-              figures.push({
-                id: `real-figure-${index}-${figure.name.replace(/\s+/g, '-').toLowerCase()}`,
-                name: figure.name,
-                period: figure.period,
-                role: figure.role,
-                relevance: figure.relevance || 0.8,
-                connections: figure.connections || [],
-                description: figure.description || `Personnage historique identifié dans l'investigation`
-              });
-            }
-          });
+    if (!investigationError && investigations) {
+      investigations.forEach((investigation, index) => {
+        if (investigation.result_content && typeof investigation.result_content === 'object') {
+          const content = investigation.result_content as any;
+          if (content.historical_figures && Array.isArray(content.historical_figures)) {
+            content.historical_figures.forEach((figure: any) => {
+              if (figure.name && figure.period && figure.role) {
+                // Vérifier si cette figure n'existe pas déjà dans les métadonnées
+                const existingFigure = figures.find(f => f.name === figure.name);
+                if (!existingFigure) {
+                  figures.push({
+                    id: `ai-figure-${index}-${figure.name.replace(/\s+/g, '-').toLowerCase()}`,
+                    name: figure.name,
+                    period: figure.period,
+                    role: figure.role,
+                    relevance: figure.relevance || 0.7,
+                    connections: figure.connections || [],
+                    description: figure.description || `Personnage historique identifié par l'IA`
+                  });
+                }
+              }
+            });
+          }
         }
-      }
-    });
+      });
+    }
 
     return figures.sort((a, b) => b.relevance - a.relevance);
   }
