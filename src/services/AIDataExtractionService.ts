@@ -165,7 +165,7 @@ class AIDataExtractionService {
       });
     }
 
-    // Extraire l'analyse de l'investigation
+    // Extraire l'analyse de l'investigation et en extraire les personnages historiques
     if (data.investigation) {
       extractedData.insights.push({
         id: `investigation-${timestamp}`,
@@ -176,6 +176,28 @@ class AIDataExtractionService {
         timestamp,
         relatedEntities: []
       });
+
+      // Extraire les personnages historiques mentionnés dans l'analyse
+      this.extractHistoricalFigures(data.investigation, timestamp, extractedData);
+    }
+
+    // Extraire des données du quest_data si disponible
+    if (data.quest_data) {
+      // Extraire le titre du quest_data aussi
+      if (data.quest_data.title) {
+        const questTitle = data.quest_data.title;
+        // Extraire les personnages historiques du titre
+        this.extractHistoricalFigures(questTitle, timestamp, extractedData);
+        
+        // Extraire des indices si disponibles
+        if (data.quest_data.clues && Array.isArray(data.quest_data.clues)) {
+          data.quest_data.clues.forEach((clue: any) => {
+            if (clue.title && clue.description) {
+              this.extractHistoricalFigures(`${clue.title} ${clue.description}`, timestamp, extractedData);
+            }
+          });
+        }
+      }
     }
 
     // Extraire les preuves utilisées (evidence_used au lieu de submitted_proofs)
@@ -190,6 +212,9 @@ class AIDataExtractionService {
             type: 'document',
             date: evidence.period || evidence.date
           });
+          
+          // Extraire les personnages historiques des preuves
+          this.extractHistoricalFigures(`${evidence.title} ${evidence.description}`, timestamp, extractedData);
         }
       });
     }

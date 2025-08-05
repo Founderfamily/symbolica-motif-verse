@@ -23,35 +23,57 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
 
   const loadActiveExplorers = async () => {
     try {
-      // Récupérer les profils des utilisateurs récemment actifs
-      const { data: profiles, error } = await supabase
+      // Récupérer les utilisateurs récemment connectés/actifs
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Créer une liste d'explorateurs actifs incluant l'utilisateur connecté
+      const explorers = [];
+      
+      if (user) {
+        // Ajouter l'utilisateur connecté comme actif
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, full_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          explorers.push({
+            name: profile.full_name || profile.username || 'Vous',
+            location: quest.title || 'Exploration en cours',
+            lastSeen: 'En ligne'
+          });
+        }
+      }
+      
+      // Récupérer d'autres profils récemment actifs (excluant l'utilisateur connecté)
+      const { data: otherProfiles, error } = await supabase
         .from('profiles')
         .select('id, username, full_name, updated_at')
         .not('updated_at', 'is', null)
-        .gte('updated_at', new Date(Date.now() - 60 * 60 * 1000).toISOString()) // Dernière heure
+        .neq('id', user?.id || '')
+        .gte('updated_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()) // Dernières 6 heures
         .order('updated_at', { ascending: false })
-        .limit(3);
+        .limit(2);
 
-      if (error) {
-        console.error('Erreur lors du chargement des explorateurs actifs:', error);
-        return;
+      if (!error && otherProfiles) {
+        // Ajouter les autres utilisateurs actifs
+        otherProfiles.forEach(profile => {
+          const timeDiff = Date.now() - new Date(profile.updated_at || '').getTime();
+          const minutesAgo = Math.floor(timeDiff / (1000 * 60));
+          
+          explorers.push({
+            name: profile.full_name || profile.username || 'Explorateur',
+            location: quest.title || 'Exploration en cours',
+            lastSeen: minutesAgo < 60 ? `${minutesAgo} min` : `${Math.floor(minutesAgo / 60)}h`
+          });
+        });
       }
-
-      // Mapper les profils vers le format d'affichage
-      const explorers = profiles?.map(profile => {
-        const timeDiff = Date.now() - new Date(profile.updated_at || '').getTime();
-        const minutesAgo = Math.floor(timeDiff / (1000 * 60));
-        
-        return {
-          name: profile.full_name || profile.username || 'Explorateur',
-          location: quest.title || 'Exploration en cours',
-          lastSeen: minutesAgo < 1 ? 'À l\'instant' : `${minutesAgo} min`
-        };
-      }) || [];
 
       setActiveExplorers(explorers);
     } catch (error) {
       console.error('Erreur lors du chargement des explorateurs actifs:', error);
+      setActiveExplorers([]);
     }
   };
 
