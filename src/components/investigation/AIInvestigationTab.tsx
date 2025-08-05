@@ -8,6 +8,9 @@ import { useProactiveAI } from '@/hooks/useProactiveAI';
 import { AIInvestigationHistory } from './AIInvestigationHistory';
 import { AIConnectivityTest } from './AIConnectivityTest';
 import AIDebugPanel from './AIDebugPanel';
+import HistoricalFiguresWidget from './widgets/HistoricalFiguresWidget';
+import AILocationsWidget from './widgets/AILocationsWidget';
+import AIConnectionsWidget from './widgets/AIConnectionsWidget';
 
 interface AIInvestigationTabProps {
   quest: TreasureQuest;
@@ -160,6 +163,13 @@ const AIInvestigationTab: React.FC<AIInvestigationTabProps> = ({ quest }) => {
         </TabsList>
 
         <TabsContent value="tools" className="space-y-6">
+          {/* Widgets d'analyse IA */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <HistoricalFiguresWidget questId={quest.id} />
+            <AILocationsWidget questId={quest.id} />
+            <AIConnectionsWidget questId={quest.id} />
+          </div>
+
           {/* Investigation IA Avancée */}
           <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
             <CardHeader>
