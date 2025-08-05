@@ -63,47 +63,99 @@ const AIEnhancedChatTab: React.FC<AIEnhancedChatTabProps> = ({ questId, questNam
         .order('created_at', { ascending: false })
         .limit(3);
 
-      // Générer des suggestions de discussion basées sur l'IA
-      const mockSuggestions: AISuggestion[] = [
-        {
-          id: '1',
-          type: 'topic',
-          title: 'François Ier et la Salamandre Royale',
-          description: 'Discussion sur la symbolique de la salamandre dans l\'art Renaissance',
-          priority: 'high',
-          context: 'L\'IA a détecté des connexions fortes entre les symboles découverts et la salamandre de François Ier',
-          auto_post: false
-        },
-        {
-          id: '2',
-          type: 'question',
-          title: 'Lien Fontainebleau-Napoléon ?',
-          description: 'Que pensez-vous du lien entre le bureau de Napoléon et les appartements de François Ier ?',
-          priority: 'medium',
-          context: 'Analyse géographique suggère une corrélation entre ces deux lieux historiques',
-          auto_post: false
-        },
-        {
-          id: '3',
-          type: 'research_direction',
-          title: 'Archives Nationales',
-          description: 'Quelqu\'un peut-il vérifier les documents de François Ier aux Archives Nationales ?',
-          priority: 'high',
-          context: 'Sources documentaires manquantes pour confirmer les hypothèses actuelles',
-          auto_post: false
-        },
-        {
-          id: '4',
-          type: 'collaboration',
-          title: 'Expert en Histoire Renaissance',
-          description: 'Cherchons un spécialiste de la Renaissance française pour validation',
-          priority: 'medium',
-          context: 'Expertise externe nécessaire pour confirmer les découvertes',
-          auto_post: false
-        }
-      ];
+      // Charger les personnages historiques de la quête
+      const { data: historicalFigures } = await supabase
+        .from('historical_figures_metadata')
+        .select('*')
+        .eq('quest_id', questId)
+        .eq('status', 'verified')
+        .order('created_at', { ascending: false });
 
-      setAiSuggestions(mockSuggestions);
+      // Générer des suggestions dynamiques basées sur les vraies données
+      const dynamicSuggestions: AISuggestion[] = [];
+
+      if (historicalFigures && historicalFigures.length > 0) {
+        // Suggestions basées sur les personnages historiques réels
+        const renaissanceFigures = historicalFigures.filter(f => 
+          f.figure_period.includes('Renaissance') || f.figure_period.includes('1500')
+        );
+        
+        const classicFigures = historicalFigures.filter(f => 
+          f.figure_period.includes('Classique') || f.figure_period.includes('1600')
+        );
+
+        if (renaissanceFigures.length > 0) {
+          dynamicSuggestions.push({
+            id: 'renaissance_discussion',
+            type: 'topic',
+            title: `${renaissanceFigures[0].figure_name} et l'art Renaissance`,
+            description: `Discussion sur l'influence de ${renaissanceFigures[0].figure_name} dans l'architecture de Fontainebleau`,
+            priority: 'high',
+            context: `${renaissanceFigures.length} personnage(s) de la Renaissance identifié(s) dans les archives`,
+            auto_post: false
+          });
+        }
+
+        if (classicFigures.length > 0) {
+          const louisXIV = classicFigures.find(f => f.figure_name.includes('Louis XIV'));
+          if (louisXIV) {
+            dynamicSuggestions.push({
+              id: 'louis_xiv_works',
+              type: 'question',
+              title: 'Travaux de Louis XIV à Fontainebleau',
+              description: 'Quels sont les liens entre les modifications de Louis XIV et les éléments d\'origine ?',
+              priority: 'medium',
+              context: 'Le Roi-Soleil a entrepris de nombreux travaux de restauration documentés',
+              auto_post: false
+            });
+          }
+        }
+
+        // Suggestion de recherche archivistique
+        if (historicalFigures.some(f => f.figure_role.includes('Jésuite'))) {
+          dynamicSuggestions.push({
+            id: 'symbolic_research',
+            type: 'research_direction',
+            title: 'Recherche symbolique avec Père Ménestrier',
+            description: 'Explorer les écrits du Père Ménestrier sur la symbolique des châteaux royaux',
+            priority: 'high',
+            context: 'Spécialiste de l\'héraldique mentionné dans les archives',
+            auto_post: false
+          });
+        }
+
+        // Suggestion de collaboration d'expert
+        const architects = historicalFigures.filter(f => 
+          f.figure_role.includes('architecte') || f.figure_role.includes('Architecte')
+        );
+        
+        if (architects.length > 0) {
+          dynamicSuggestions.push({
+            id: 'architecture_expert',
+            type: 'collaboration',
+            title: 'Expert en architecture Renaissance-Classique',
+            description: `Cherchons un spécialiste pour analyser les œuvres de ${architects.map(a => a.figure_name).join(', ')}`,
+            priority: 'medium',
+            context: `${architects.length} architecte(s) historique(s) identifié(s)`,
+            auto_post: false
+          });
+        }
+      }
+
+      // Ajouter des suggestions génériques si pas assez de données
+      if (dynamicSuggestions.length < 4) {
+        dynamicSuggestions.push({
+          id: 'general_archives',
+          type: 'research_direction',
+          title: 'Recherche aux Archives Nationales',
+          description: 'Vérifier les documents historiques manquants pour cette période',
+          priority: 'medium',
+          context: 'Documentation archivistique à compléter',
+          auto_post: false
+        });
+      }
+
+      setAiSuggestions(dynamicSuggestions);
 
       // Générer des découvertes à partager
       const mockDiscoveries: AIDiscoveryShare[] = [];
