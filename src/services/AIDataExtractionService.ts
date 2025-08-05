@@ -74,19 +74,10 @@ export interface AIInsight {
 
 class AIDataExtractionService {
   /**
-   * Extrait et structure les données IA d'une quête
+   * Extrait et structure les données IA d'une quête, incluant les archives et documents
    */
   async extractAIData(questId: string): Promise<AIExtractedData> {
     try {
-      // Récupérer toutes les investigations IA pour cette quête
-      const { data: investigations, error } = await supabase
-        .from('ai_investigations')
-        .select('*')
-        .eq('quest_id', questId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
       const extractedData: AIExtractedData = {
         theories: [],
         sources: [],
@@ -96,17 +87,77 @@ class AIDataExtractionService {
         insights: []
       };
 
+      // 1. Récupérer les investigations IA
+      const { data: investigations, error: investigationError } = await supabase
+        .from('ai_investigations')
+        .select('*')
+        .eq('quest_id', questId)
+        .order('created_at', { ascending: false });
+
+      if (investigationError) throw investigationError;
+
       investigations?.forEach(investigation => {
         if (investigation.result_content) {
           if (typeof investigation.result_content === 'object') {
-            // Si c'est déjà un objet JSON, l'utiliser directement
             this.extractFromJSON(investigation.result_content as any, investigation.created_at, extractedData);
           } else if (typeof investigation.result_content === 'string') {
-            // Si c'est une string, tenter de parser le JSON ou utiliser le parsing texte
             this.parseAnalysisResult(investigation.result_content, investigation.created_at, extractedData);
           }
         }
       });
+
+      // 2. Récupérer les archives historiques
+      const { data: archives, error: archiveError } = await supabase
+        .from('historical_archives')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!archiveError && archives) {
+        archives.forEach(archive => {
+          // Ajouter l'archive comme source
+          extractedData.sources.push({
+            id: `archive-${archive.id}`,
+            title: archive.title,
+            author: archive.author,
+            date: archive.date,
+            url: archive.archive_link || archive.document_url,
+            excerpt: archive.description || '',
+            relevance: 0.8,
+            type: 'archive'
+          });
+
+          // Extraire les personnages historiques des archives
+          const archiveText = `${archive.title} ${archive.description || ''} ${archive.author || ''}`;
+          this.extractHistoricalFigures(archiveText, archive.created_at || '', extractedData, 'archive');
+        });
+      }
+
+      // 3. Récupérer les documents de quête
+      const { data: questDocuments, error: documentError } = await supabase
+        .from('quest_documents')
+        .select('*')
+        .eq('quest_id', questId)
+        .order('created_at', { ascending: false });
+
+      if (!documentError && questDocuments) {
+        questDocuments.forEach(doc => {
+          // Ajouter le document comme source
+          extractedData.sources.push({
+            id: `quest-doc-${doc.id}`,
+            title: doc.title,
+            author: doc.author,
+            date: doc.date_created,
+            url: doc.document_url,
+            excerpt: doc.description || '',
+            relevance: 0.9,
+            type: 'document'
+          });
+
+          // Extraire les personnages historiques des documents
+          const documentText = `${doc.title} ${doc.description || ''} ${doc.author || ''}`;
+          this.extractHistoricalFigures(documentText, doc.created_at || '', extractedData, 'document');
+        });
+      }
 
       return extractedData;
     } catch (error) {
@@ -286,13 +337,18 @@ class AIDataExtractionService {
     }
   }
 
-  private extractHistoricalFigures(text: string, timestamp: string, data: AIExtractedData) {
+  private extractHistoricalFigures(text: string, timestamp: string, data: AIExtractedData, source?: string) {
     const figurePatterns = [
       { name: 'François Ier', pattern: /françois\s*i(er)?/gi, period: 'Renaissance', role: 'Roi de France' },
       { name: 'Napoléon Bonaparte', pattern: /napoléon/gi, period: 'Empire', role: 'Empereur' },
       { name: 'Louis XIV', pattern: /louis\s*xiv/gi, period: 'Ancien Régime', role: 'Roi-Soleil' },
       { name: 'Catherine de Médicis', pattern: /catherine\s*de\s*médicis/gi, period: 'Renaissance', role: 'Reine de France' },
-      { name: 'Cardinal de Richelieu', pattern: /richelieu/gi, period: 'XVIIe siècle', role: 'Cardinal' }
+      { name: 'Cardinal de Richelieu', pattern: /richelieu/gi, period: 'XVIIe siècle', role: 'Cardinal' },
+      { name: 'Pierre Bontemps', pattern: /pierre\s*bontemps/gi, period: 'Renaissance', role: 'Architecte royal' },
+      { name: 'Henri II', pattern: /henri\s*ii/gi, period: 'Renaissance', role: 'Roi de France' },
+      { name: 'Henri IV', pattern: /henri\s*iv/gi, period: 'Renaissance', role: 'Roi de France' },
+      { name: 'Marie-Antoinette', pattern: /marie[-\s]*antoinette/gi, period: 'XVIIIe siècle', role: 'Reine de France' },
+      { name: 'Louis XVI', pattern: /louis\s*xvi/gi, period: 'XVIIIe siècle', role: 'Roi de France' }
     ];
 
     figurePatterns.forEach(({ name, pattern, period, role }) => {
@@ -307,7 +363,7 @@ class AIDataExtractionService {
             role,
             relevance: matches.length * 0.2,
             connections: [],
-            description: `Personnage historique mentionné ${matches.length} fois dans l'analyse`
+            description: `Personnage historique mentionné ${matches.length} fois dans ${source || 'l\'analyse'}`
           });
         }
       }
