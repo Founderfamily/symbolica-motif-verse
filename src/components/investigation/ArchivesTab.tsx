@@ -24,6 +24,8 @@ import { TreasureQuest } from '@/types/quests';
 import { investigationService } from '@/services/investigationService';
 import DocumentUploadDialog from './DocumentUploadDialog';
 import { useArchiveMap } from '@/contexts/ArchiveMapContext';
+import { ArchiveEnrichmentDialog } from './ArchiveEnrichmentDialog';
+import { ArchiveContributionsList } from './ArchiveContributionsList';
 
 interface ArchivesTabProps {
   quest: TreasureQuest;
@@ -36,6 +38,7 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contributionsRefresh, setContributionsRefresh] = useState(0);
   const { setSelectedArchive, archiveLocations } = useArchiveMap();
 
   const loadDocuments = async () => {
@@ -441,23 +444,36 @@ const ArchivesTab: React.FC<ArchivesTabProps> = ({ quest, activeTab, setActiveTa
                     <Download className="h-3 w-3 mr-1" />
                     Télécharger
                   </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => {
+                      const location = archiveLocations.find(loc => 
+                        loc.relatedDocuments?.includes(doc.id)
+                      );
+                      if (location && setActiveTab) {
+                        setSelectedArchive(doc.id);
+                        setActiveTab('map');
+                      }
+                    }}
+                  >
+                    <MapPin className="h-3 w-3 mr-1" />
+                    Voir sur carte
+                  </Button>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    const location = archiveLocations.find(loc => 
-                      loc.relatedDocuments?.includes(doc.id)
-                    );
-                    if (location && setActiveTab) {
-                      setSelectedArchive(doc.id);
-                      setActiveTab('map');
-                    }
-                  }}
-                >
-                  <MapPin className="h-3 w-3 mr-1" />
-                  Voir sur carte
-                </Button>
+                <ArchiveEnrichmentDialog 
+                  archiveId={doc.id}
+                  archiveTitle={doc.title}
+                  onContributionAdded={() => setContributionsRefresh(prev => prev + 1)}
+                />
+              </div>
+
+              {/* Archive Contributions Section */}
+              <div className="mt-4 pt-4 border-t">
+                <ArchiveContributionsList 
+                  archiveId={doc.id}
+                  refreshTrigger={contributionsRefresh}
+                />
               </div>
             </CardContent>
           </Card>

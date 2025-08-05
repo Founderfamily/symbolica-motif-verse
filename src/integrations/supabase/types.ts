@@ -197,6 +197,60 @@ export type Database = {
         }
         Relationships: []
       }
+      archive_contributions: {
+        Row: {
+          archive_id: string
+          contribution_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          metadata: Json | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          score: number | null
+          status: string
+          title: string | null
+          updated_at: string | null
+          user_id: string
+          votes_count: number | null
+        }
+        Insert: {
+          archive_id: string
+          contribution_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          score?: number | null
+          status?: string
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+          votes_count?: number | null
+        }
+        Update: {
+          archive_id?: string
+          contribution_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          score?: number | null
+          status?: string
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
+          votes_count?: number | null
+        }
+        Relationships: []
+      }
       collection_items: {
         Row: {
           added_by: string
@@ -631,6 +685,38 @@ export type Database = {
             columns: ["contribution_id"]
             isOneToOne: false
             referencedRelation: "user_contributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contribution_votes: {
+        Row: {
+          contribution_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          contribution_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          contribution_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contribution_votes_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "archive_contributions"
             referencedColumns: ["id"]
           },
         ]
