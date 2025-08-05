@@ -22,45 +22,9 @@ interface AdminNotification {
   actionUrl?: string;
 }
 
-const mockNotifications: AdminNotification[] = [
-  {
-    id: '1',
-    type: 'moderation',
-    title: 'Nouveau contenu signalé',
-    message: 'Un commentaire a été signalé par 3 utilisateurs',
-    timestamp: '2024-01-20T10:30:00Z',
-    read: false,
-    actionUrl: '/admin/moderation'
-  },
-  {
-    id: '2',
-    type: 'user',
-    title: 'Nouveau contributeur actif',
-    message: 'sarah_symbols a atteint 50 contributions',
-    timestamp: '2024-01-20T09:15:00Z',
-    read: false
-  },
-  {
-    id: '3',
-    type: 'warning',
-    title: 'Pic de trafic détecté',
-    message: 'Le serveur enregistre une charge inhabituellement élevée',
-    timestamp: '2024-01-20T08:45:00Z',
-    read: true
-  },
-  {
-    id: '4',
-    type: 'info',
-    title: 'Mise à jour système',
-    message: 'La mise à jour v1.2.3 a été appliquée avec succès',
-    timestamp: '2024-01-19T16:20:00Z',
-    read: true
-  }
-];
-
 export default function AdminNotifications() {
   const { t } = useTranslation();
-  const [notifications, setNotifications] = useState<AdminNotification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;

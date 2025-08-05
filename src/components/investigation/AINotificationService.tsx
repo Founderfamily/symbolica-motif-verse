@@ -51,60 +51,9 @@ const AINotificationService: React.FC<AINotificationServiceProps> = ({ userId, q
 
   const loadNotifications = async () => {
     try {
-      // Simuler des notifications IA
-      const mockNotifications: AINotification[] = [
-        {
-          id: '1',
-          type: 'new_connection',
-          title: 'Nouvelle connexion détectée',
-          message: 'L\'IA a identifié un lien fort entre François Ier et les symboles de votre quête',
-          priority: 'high',
-          quest_id: questId || '',
-          metadata: { confidence: 92, connection_type: 'historical' },
-          created_at: new Date(Date.now() - 5 * 60000).toISOString(),
-          read: false,
-          actionable: true
-        },
-        {
-          id: '2',
-          type: 'location_suggestion',
-          title: 'Lieu d\'intérêt suggéré',
-          message: 'Château de Fontainebleau ajouté comme point d\'investigation prioritaire',
-          priority: 'medium',
-          quest_id: questId || '',
-          metadata: { location: 'Château de Fontainebleau', coordinates: [2.7000, 48.4000] },
-          created_at: new Date(Date.now() - 15 * 60000).toISOString(),
-          read: false,
-          actionable: true
-        },
-        {
-          id: '3',
-          type: 'analysis_complete',
-          title: 'Analyse IA terminée',
-          message: 'Investigation complète disponible avec 12 nouvelles découvertes',
-          priority: 'medium',
-          quest_id: questId || '',
-          metadata: { discoveries_count: 12, analysis_id: 'ai_001' },
-          created_at: new Date(Date.now() - 25 * 60000).toISOString(),
-          read: true,
-          actionable: true
-        },
-        {
-          id: '4',
-          type: 'expert_needed',
-          title: 'Expertise recommandée',
-          message: 'Un historien spécialisé en Renaissance pourrait valider vos découvertes',
-          priority: 'low',
-          quest_id: questId || '',
-          metadata: { expertise_area: 'Renaissance française' },
-          created_at: new Date(Date.now() - 60 * 60000).toISOString(),
-          read: true,
-          actionable: true
-        }
-      ];
-
-      setNotifications(mockNotifications);
-      setUnreadCount(mockNotifications.filter(n => !n.read).length);
+      // TODO: Load real AI notifications from database
+      setNotifications([]);
+      setUnreadCount(0);
     } catch (error) {
       console.error('Erreur chargement notifications:', error);
     }

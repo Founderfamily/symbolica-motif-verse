@@ -29,55 +29,18 @@ const RealTimeNotifications: React.FC<RealTimeNotificationsProps> = ({ contribut
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Simulate real-time notifications based on contributions
-    const generateNotifications = () => {
-      const mockNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'status_change',
-          title: 'Contribution approuvée',
-          message: 'Votre contribution "Symbole aztèque" a été approuvée',
-          timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-          read: false,
-          priority: 'high',
-          contributionId: 'contrib-1'
-        },
-        {
-          id: '2',
-          type: 'comment',
-          title: 'Nouveau commentaire',
-          message: 'Dr. Marie Dubois a commenté votre contribution',
-          timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
-          read: false,
-          priority: 'medium',
-          contributionId: 'contrib-2'
-        },
-        {
-          id: '3',
-          type: 'review',
-          title: 'Révision demandée',
-          message: 'Votre contribution nécessite des informations supplémentaires',
-          timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-          read: true,
-          priority: 'medium',
-          contributionId: 'contrib-3'
-        },
-        {
-          id: '4',
-          type: 'system',
-          title: 'Nouvelle fonctionnalité',
-          message: 'Les rapports avancés sont maintenant disponibles',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-          read: true,
-          priority: 'low'
-        }
-      ];
-
-      setNotifications(mockNotifications);
-      setUnreadCount(mockNotifications.filter(n => !n.read).length);
+    // Load real notifications from API instead of mock data
+    const loadNotifications = async () => {
+      try {
+        // TODO: Replace with actual API call
+        setNotifications([]);
+        setUnreadCount(0);
+      } catch (error) {
+        console.error('Erreur lors du chargement des notifications:', error);
+      }
     };
 
-    generateNotifications();
+    loadNotifications();
 
     // Simulate real-time updates
     const interval = setInterval(() => {
