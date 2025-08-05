@@ -48,6 +48,8 @@ export interface AIHistoricalFigure {
   relevance: number;
   connections: string[];
   description: string;
+  wikipediaUrl?: string;
+  imageUrl?: string;
 }
 
 export interface AILocation {

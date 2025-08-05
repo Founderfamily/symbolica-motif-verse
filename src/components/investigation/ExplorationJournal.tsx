@@ -3,6 +3,7 @@ import { TreasureQuest } from '@/types/quests';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, Users, BookOpen, Camera } from 'lucide-react';
+import HistoricalFiguresWidget from './widgets/HistoricalFiguresWidget';
 
 interface ExplorationJournalProps {
   quest: TreasureQuest;
@@ -176,6 +177,11 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                   <p className="text-xs text-slate-600">Escalier du Roi - il y a 15 min</p>
                 </div>
               </div>
+            </div>
+
+            {/* Personnages Historiques */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <HistoricalFiguresWidget questId={quest.id} compact={true} />
             </div>
 
             {/* Help & Guidance */}

@@ -1470,6 +1470,60 @@ export type Database = {
         }
         Relationships: []
       }
+      historical_figures_metadata: {
+        Row: {
+          created_at: string
+          description: string | null
+          figure_name: string
+          figure_period: string
+          figure_role: string
+          id: string
+          image_url: string | null
+          quest_id: string
+          status: string
+          suggested_by: string | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+          wikidata_id: string | null
+          wikipedia_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          figure_name: string
+          figure_period: string
+          figure_role: string
+          id?: string
+          image_url?: string | null
+          quest_id: string
+          status?: string
+          suggested_by?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          wikidata_id?: string | null
+          wikipedia_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          figure_name?: string
+          figure_period?: string
+          figure_role?: string
+          id?: string
+          image_url?: string | null
+          quest_id?: string
+          status?: string
+          suggested_by?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          wikidata_id?: string | null
+          wikipedia_url?: string | null
+        }
+        Relationships: []
+      }
       image_annotations: {
         Row: {
           annotation_data: Json
