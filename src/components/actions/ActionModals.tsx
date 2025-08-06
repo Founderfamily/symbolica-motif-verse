@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Camera, FileText, Eye, Users, CheckCircle, Clock } from 'lucide-react';
+import { Camera, FileText, Eye, Users, CheckCircle, Clock, MapPin } from 'lucide-react';
 
 interface ActionModalsProps {
   isOpen: boolean;
@@ -130,6 +130,114 @@ const ActionModals: React.FC<ActionModalsProps> = ({ isOpen, onClose, actionType
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className="bg-orange-500 h-2 rounded-full w-0"></div>
                 </div>
+              </div>
+            </div>
+          )
+        };
+
+      case 'study_discovery':
+        return {
+          title: "📚 Documentation de découverte",
+          content: (
+            <div className="space-y-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <h4 className="font-medium mb-2">📋 Rapport de fouille</h4>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Cette découverte a été documentée selon les standards archéologiques internationaux.
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="font-medium">Date :</span> Mars 2024
+                  </div>
+                  <div>
+                    <span className="font-medium">Équipe :</span> 4 archéologues
+                  </div>
+                  <div>
+                    <span className="font-medium">Méthode :</span> Géoradar + fouille
+                  </div>
+                  <div>
+                    <span className="font-medium">Profondeur :</span> 1.2m
+                  </div>
+                </div>
+              </div>
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm">
+                  💡 <strong>Astuce :</strong> Observez comment les indices historiques ont guidé la localisation précise.
+                </p>
+              </div>
+            </div>
+          )
+        };
+
+      case 'understand_clues':
+        return {
+          title: "💡 Analyse des indices",
+          content: (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="bg-green-50 p-3 rounded-lg border-l-4 border-green-500">
+                  <h4 className="font-medium text-green-800">Indice #1 - Document historique</h4>
+                  <p className="text-sm text-green-700">
+                    Carte du 18ème siècle mentionnant "le chêne aux sept branches"
+                  </p>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                  <h4 className="font-medium text-blue-800">Indice #2 - Témoignage local</h4>
+                  <p className="text-sm text-blue-700">
+                    Récit oral transmis sur 3 générations parlant d'un "trésor sous l'arbre"
+                  </p>
+                </div>
+                <div className="bg-purple-50 p-3 rounded-lg border-l-4 border-purple-500">
+                  <h4 className="font-medium text-purple-800">Indice #3 - Géologie</h4>
+                  <p className="text-sm text-purple-700">
+                    Anomalie magnétique détectée par prospection géophysique
+                  </p>
+                </div>
+              </div>
+              <div className="bg-yellow-50 p-3 rounded-lg">
+                <p className="text-sm">
+                  🔍 Ces trois indices convergents ont permis de localiser précisément le trésor.
+                </p>
+              </div>
+            </div>
+          )
+        };
+
+      case 'view_location':
+        return {
+          title: "🗺️ Lieu de découverte",
+          content: (
+            <div className="space-y-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <div className="aspect-video bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                  <div className="text-center">
+                    <MapPin className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                    <p className="text-sm text-green-700">Vue satellite du site</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="font-medium">Coordonnées :</span><br />
+                    <span className="text-muted-foreground">47.2184° N, 1.5536° W</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Altitude :</span><br />
+                    <span className="text-muted-foreground">98m</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Végétation :</span><br />
+                    <span className="text-muted-foreground">Chênaie centenaire</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Accès :</span><br />
+                    <span className="text-muted-foreground">Sentier balisé 2km</span>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-amber-50 p-3 rounded-lg">
+                <p className="text-sm">
+                  📍 Le site est désormais protégé et accessible aux visiteurs sur rendez-vous.
+                </p>
               </div>
             </div>
           )

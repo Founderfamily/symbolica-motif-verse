@@ -38,8 +38,8 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
   const handleActionClick = async (actionId: string) => {
     console.log('Action activée:', actionId);
     
-    // Actions principales avec modales détaillées
-    const mainActions = ['take_photo', 'chat', 'explore_map', 'tutorial'];
+    // Actions principales avec modales détaillées - ajout des actions de découverte
+    const mainActions = ['take_photo', 'chat', 'explore_map', 'tutorial', 'study_discovery', 'understand_clues', 'view_location'];
     
     if (mainActions.includes(actionId)) {
       setModalAction(actionId);
@@ -47,24 +47,13 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
       return;
     }
 
-    // Actions directes (pour les trésors découverts)
+    // Actions directes restantes
     setLoading(actionId);
     
-    const feedbackMessages = {
-      'study_discovery': 'Documentation de découverte ouverte !',
-      'understand_clues': 'Analyse des indices en cours...',
-      'view_location': 'Carte du lieu de découverte chargée !',
-      'learn_method': 'Guide méthodologique démarré !',
-    };
-
     setTimeout(() => {
-      toast({
-        title: "Action activée !",
-        description: feedbackMessages[actionId as keyof typeof feedbackMessages] || "Action en cours de traitement...",
-      });
       setLoading(null);
       onAction(actionId);
-    }, 800);
+    }, 300);
   };
   const getActionsConfig = () => {
     // Actions spéciales pour les trésors découverts
