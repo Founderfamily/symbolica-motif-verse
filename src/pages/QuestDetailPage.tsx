@@ -36,7 +36,7 @@ import AINotificationService from '@/components/investigation/AINotificationServ
 import AIInsightsWidget from '@/components/investigation/AIInsightsWidget';
 import AdaptiveHero from '@/components/adaptive/AdaptiveHero';
 import AdaptiveActions from '@/components/adaptive/AdaptiveActions';
-import AdaptiveNavigation from '@/components/adaptive/AdaptiveNavigation';
+
 
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
 import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
@@ -292,74 +292,9 @@ const QuestDetailPage = () => {
           />
         </div>
 
-        {/* Navigation et Contenu Adaptatifs */}
+        {/* Interface d'investigation principale */}
         <div className="bg-background rounded-2xl border border-border shadow-lg overflow-hidden">
-          <AdaptiveNavigation
-            profile={adaptiveProfile}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          >
-            {/* Contenu des onglets */}
-            <div className="p-4">
-              {activeTab === 'adventure' && adaptiveProfile.type === 'beginner' && (
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <h3 className="text-2xl font-bold text-foreground mb-4">
-                      🎮 Bienvenue dans ton Aventure !
-                    </h3>
-                    <p className="text-muted-foreground">
-                      Tu es sur le point de découvrir comment fonctionnent les quêtes de trésors.
-                    </p>
-                  </div>
-                  
-                  {/* Interface simplifiée pour débutants */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <Card className="p-6">
-                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                        <Trophy className="w-5 h-5 text-amber-500" />
-                        Progression
-                      </h4>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Tutoriel</span>
-                          <Badge variant="outline">0/4</Badge>
-                        </div>
-                        <div className="w-full bg-secondary rounded-full h-2">
-                          <div className="bg-primary h-2 rounded-full w-0"></div>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Commence par faire le tutoriel pour gagner tes premiers points !
-                        </p>
-                      </div>
-                    </Card>
-                    
-                    <Card className="p-6">
-                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                        <Users className="w-5 h-5 text-blue-500" />
-                        Communauté
-                      </h4>
-                      <div className="space-y-3">
-                        <div className="text-2xl font-bold text-foreground">12</div>
-                        <p className="text-sm text-muted-foreground">
-                          explorateurs participent à cette quête
-                        </p>
-                        <Button size="sm" variant="outline" className="w-full">
-                          Rejoindre le chat
-                        </Button>
-                      </div>
-                    </Card>
-                  </div>
-                  
-                  <InvestigationInterface quest={quest} />
-                </div>
-              )}
-              
-              {/* Interface complète pour les autres profils */}
-              {(activeTab !== 'adventure' || adaptiveProfile.type !== 'beginner') && (
-                <InvestigationInterface quest={quest} />
-              )}
-            </div>
-          </AdaptiveNavigation>
+          <InvestigationInterface quest={quest} />
         </div>
       </div>
 
