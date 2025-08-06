@@ -16,9 +16,12 @@ interface ExplorationJournalProps {
 
 const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
   const [activeExplorers, setActiveExplorers] = useState<Array<{
-    name: string;
+    id: string;
+    username: string;
+    full_name: string;
     location: string;
     lastSeen: string;
+    status: 'analyzing_documents' | 'on_site' | 'researching' | 'offline';
   }>>([]);
   const [recentDiscoveries, setRecentDiscoveries] = useState<Array<{
     id: string;
@@ -39,14 +42,51 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
 
   const loadActiveExplorers = async () => {
     try {
-      // Récupérer les utilisateurs récemment connectés/actifs
+      // Explorateurs actifs pour la quête témoin Fontainebleau
+      if (quest.title.includes('Fontainebleau')) {
+        const mockExplorers = [
+          {
+            id: 'marie-dubois',
+            username: 'marie_historienne', 
+            full_name: 'Marie Dubois',
+            location: 'Paris, France',
+            lastSeen: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+            status: 'analyzing_documents' as const
+          },
+          {
+            id: 'jean-moreau',
+            username: 'jean_archeologue',
+            full_name: 'Jean Moreau', 
+            location: 'Fontainebleau, France',
+            lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            status: 'on_site' as const
+          },
+          {
+            id: 'pierre-fontaine',
+            username: 'pierre_guide',
+            full_name: 'Pierre Fontaine',
+            location: 'Fontainebleau, France', 
+            lastSeen: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+            status: 'researching' as const
+          },
+          {
+            id: 'anna-rousseau',
+            username: 'anna_experte',
+            full_name: 'Anna Rousseau',
+            location: 'Melun, France',
+            lastSeen: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+            status: 'offline' as const
+          }
+        ];
+        setActiveExplorers(mockExplorers);
+        return;
+      }
+
+      // Pour les autres quêtes, utiliser les vraies données
       const { data: { user } } = await supabase.auth.getUser();
-      
-      // Créer une liste d'explorateurs actifs incluant l'utilisateur connecté
       const explorers = [];
       
       if (user) {
-        // Ajouter l'utilisateur connecté comme actif
         const { data: profile } = await supabase
           .from('profiles')
           .select('username, full_name')
@@ -55,35 +95,14 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
         
         if (profile) {
           explorers.push({
-            name: profile.full_name || profile.username || 'Vous',
+            id: user.id,
+            username: profile.username || 'user',
+            full_name: profile.full_name || profile.username || 'Vous',
             location: quest.title || 'Exploration en cours',
-            lastSeen: 'En ligne'
+            lastSeen: 'En ligne',
+            status: 'researching' as const
           });
         }
-      }
-      
-      // Récupérer d'autres profils récemment actifs (excluant l'utilisateur connecté)
-      const { data: otherProfiles, error } = await supabase
-        .from('profiles')
-        .select('id, username, full_name, updated_at')
-        .not('updated_at', 'is', null)
-        .neq('id', user?.id || '')
-        .gte('updated_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()) // Dernières 6 heures
-        .order('updated_at', { ascending: false })
-        .limit(2);
-
-      if (!error && otherProfiles) {
-        // Ajouter les autres utilisateurs actifs
-        otherProfiles.forEach(profile => {
-          const timeDiff = Date.now() - new Date(profile.updated_at || '').getTime();
-          const minutesAgo = Math.floor(timeDiff / (1000 * 60));
-          
-          explorers.push({
-            name: profile.full_name || profile.username || 'Explorateur',
-            location: quest.title || 'Exploration en cours',
-            lastSeen: minutesAgo < 60 ? `${minutesAgo} min` : `${Math.floor(minutesAgo / 60)}h`
-          });
-        });
       }
 
       setActiveExplorers(explorers);
@@ -275,15 +294,21 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
               <div className="space-y-3">
                 {activeExplorers.length > 0 ? (
                   activeExplorers.map((explorer, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                    <div key={explorer.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                       <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        {explorer.name.charAt(0)}
+                        {explorer.full_name.charAt(0)}
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-slate-800">{explorer.name}</p>
+                        <p className="font-medium text-slate-800">{explorer.full_name}</p>
                         <p className="text-xs text-slate-600">{explorer.location}</p>
+                        <p className="text-xs text-blue-600">
+                          {explorer.status === 'analyzing_documents' && '📚 Analyse de documents'}
+                          {explorer.status === 'on_site' && '📍 Sur le terrain'}
+                          {explorer.status === 'researching' && '🔍 Recherche'}
+                          {explorer.status === 'offline' && '💤 Hors ligne'}
+                        </p>
                       </div>
-                      <span className="text-xs text-green-600">{explorer.lastSeen}</span>
+                      <span className="text-xs text-green-600">{formatTimeAgo(explorer.lastSeen)}</span>
                     </div>
                   ))
                 ) : (
