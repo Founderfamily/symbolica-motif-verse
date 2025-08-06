@@ -65,44 +65,65 @@ const EnhancedCluesTab: React.FC<EnhancedCluesTabProps> = ({ quest }) => {
         .order('created_at', { ascending: false })
         .limit(1);
 
-      // Simuler des enrichissements IA pour chaque indice
-      const mockEnrichments: Record<number, AIClueEnrichment> = {};
+      // Générer des enrichissements IA basés sur les vraies données IA
+      const enrichments: Record<number, AIClueEnrichment> = {};
       
-      normalizedClues.forEach((clue, index) => {
-        mockEnrichments[clue.id] = {
+      normalizedClues.forEach((clue) => {
+        // Extraire le contexte historique des données IA disponibles
+        const aiContexts = aiData?.map(data => {
+          const result = data.result_content as any;
+          return result?.investigation || result?.summary || 'Analyse IA non disponible';
+        }) || [];
+
+        const historicalContext = aiContexts.length > 0 
+          ? aiContexts[0] 
+          : `Indice "${clue.title}" en cours d'analyse par l'IA. Le contexte historique sera enrichi automatiquement.`;
+
+        // Extraire les connexions potentielles du titre et description
+        const connections = [];
+        const text = `${clue.title} ${clue.description} ${clue.hint}`.toLowerCase();
+        
+        if (text.includes('françois') || text.includes('salamandre')) {
+          connections.push('François Ier', 'Renaissance française', 'Château de Fontainebleau');
+        }
+        if (text.includes('napoléon') || text.includes('empire')) {
+          connections.push('Napoléon Bonaparte', 'Premier Empire', 'Château de Fontainebleau');
+        }
+        if (text.includes('château') || text.includes('fontainebleau')) {
+          connections.push('Château de Fontainebleau', 'Architecture royale');
+        }
+
+        enrichments[clue.id] = {
           clue_id: clue.id,
-          historical_context: index === 0 
-            ? "Cet indice fait référence à la période de François Ier (1515-1547), notamment à son règne et à ses symboles personnels comme la salamandre."
-            : "Possible lien avec l'époque napoléonienne et les modifications apportées aux châteaux royaux.",
-          potential_connections: [
-            "Château de Fontainebleau",
-            "Symbole de la Salamandre",
-            "François Ier",
-            "Renaissance française"
-          ],
-          confidence_score: Math.floor(Math.random() * 30) + 70,
-          suggested_locations: [
+          historical_context: historicalContext,
+          potential_connections: connections.length > 0 ? connections : [quest.title, 'Recherche historique'],
+          confidence_score: aiData?.length > 0 ? 85 : 60,
+          suggested_locations: clue.location ? [
+            {
+              name: "Localisation de l'indice",
+              coordinates: [clue.location.longitude, clue.location.latitude],
+              relevance: 0.95
+            }
+          ] : [
             {
               name: "Château de Fontainebleau",
               coordinates: [2.7000, 48.4000],
-              relevance: 0.92
-            },
-            {
-              name: "Château de Chambord",
-              coordinates: [1.5170, 47.6160],
-              relevance: 0.76
+              relevance: 0.80
             }
           ],
-          related_figures: ["François Ier", "Léonard de Vinci", "Pierre Lescot"],
+          related_figures: connections.filter(c => 
+            c.includes('François') || c.includes('Napoléon') || c.includes('Louis')
+          ),
           research_suggestions: [
-            "Rechercher dans les archives de Fontainebleau",
-            "Examiner les symboles sculptés dans la galerie François Ier",
-            "Consulter les correspondances royales de l'époque"
+            `Analyser l'indice: "${clue.title}"`,
+            `Étudier la description: "${clue.description}"`,
+            clue.location ? `Visiter les coordonnées: ${clue.location.latitude}, ${clue.location.longitude}` : 'Localiser géographiquement cet indice',
+            'Consulter les archives historiques associées'
           ]
         };
       });
 
-      setAiEnrichments(mockEnrichments);
+      setAiEnrichments(enrichments);
     } catch (error) {
       console.error('Erreur chargement indices enrichis:', error);
     } finally {

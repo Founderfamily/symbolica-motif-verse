@@ -233,6 +233,33 @@ const AIEnhancedChatTab: React.FC<AIEnhancedChatTabProps> = ({ questId, questNam
     return `${Math.floor(diffMins / 1440)}j`;
   };
 
+  const generateRelevantQuestions = (questName: string): string[] => {
+    const baseQuestions = [
+      `Avez-vous des informations sur ${questName} ?`,
+      `Quelqu'un a-t-il exploré des lieux liés à cette quête ?`,
+      `Y a-t-il des documents historiques pertinents ?`,
+      `Avez-vous remarqué des symboles ou indices particuliers ?`
+    ];
+
+    // Questions spécifiques selon le nom de la quête
+    if (questName.toLowerCase().includes('fontainebleau')) {
+      baseQuestions.push(
+        'Connaissez-vous l\'histoire des appartements de François Ier ?',
+        'Avez-vous vu des salamandres sculptées dans le château ?',
+        'Où trouve-t-on les traces de Napoléon à Fontainebleau ?'
+      );
+    }
+
+    if (questName.toLowerCase().includes('templar') || questName.toLowerCase().includes('templier')) {
+      baseQuestions.push(
+        'Avez-vous trouvé des symboles templiers ?',
+        'Connaissez-vous des sites templiers dans la région ?'
+      );
+    }
+
+    return baseQuestions.slice(0, 4); // Garder 4 questions max
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Chat principal */}
@@ -385,7 +412,7 @@ const AIEnhancedChatTab: React.FC<AIEnhancedChatTabProps> = ({ questId, questNam
           </Card>
         )}
 
-        {/* Questions pertinentes */}
+        {/* Questions pertinentes générées dynamiquement */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -395,12 +422,7 @@ const AIEnhancedChatTab: React.FC<AIEnhancedChatTabProps> = ({ questId, questNam
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {[
-                "Avez-vous trouvé d'autres symboles de salamandre ?",
-                "Quelqu'un connaît-il l'histoire du bureau de Napoléon ?",
-                "Où peut-on consulter les archives de François Ier ?",
-                "Y a-t-il des liens avec d'autres châteaux Renaissance ?"
-              ].map((question, index) => (
+              {generateRelevantQuestions(questName).map((question, index) => (
                 <Button 
                   key={index}
                   variant="ghost" 

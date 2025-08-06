@@ -6,6 +6,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, Users, BookOpen, Camera, HelpCircle } from 'lucide-react';
 import HistoricalFiguresWidget from './widgets/HistoricalFiguresWidget';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeQuestClues } from '@/utils/questUtils';
+import { useQuestActivitiesSimple } from '@/hooks/useQuestActivitiesSimple';
+import { useQuestStats } from '@/hooks/useQuestStats';
 
 interface ExplorationJournalProps {
   quest: TreasureQuest;
@@ -17,10 +20,22 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
     location: string;
     lastSeen: string;
   }>>([]);
+  const [recentDiscoveries, setRecentDiscoveries] = useState<Array<{
+    id: string;
+    type: string;
+    description: string;
+    user: string;
+    timestamp: string;
+  }>>([]);
+
+  // Hooks pour les vraies données  
+  const { activities } = useQuestActivitiesSimple(quest.id);
+  const stats = useQuestStats(quest.id, normalizeQuestClues(quest.clues).length);
 
   useEffect(() => {
     loadActiveExplorers();
-  }, [quest.id]);
+    loadRecentDiscoveries();
+  }, [quest.id, activities]);
 
   const loadActiveExplorers = async () => {
     try {
@@ -78,35 +93,66 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
     }
   };
 
-  const treasures = [
-    {
-      id: 1,
-      name: 'La Galerie François Ier',
-      description: 'Cherchez le symbole de la salamandre dans les fresques Renaissance',
-      location: 'Galerie François Ier, Château de Fontainebleau',
-      clue: 'La salamandre royale garde un secret dans son regard de feu',
-      status: 'current',
-      historicalContext: 'François Ier fit décorer cette galerie par les maîtres italiens. Selon la légende, il y aurait caché un panneau secret contenant des documents précieux.'
-    },
-    {
-      id: 2,
-      name: 'Le Bureau de Napoléon',
-      description: 'Trouvez la cachette secrète de l\'Empereur',
-      location: 'Appartements de Napoléon',
-      clue: 'FONTAINEBLEAU_1814 - Le code de ses derniers jours',
-      status: 'locked',
-      historicalContext: 'Dans ses appartements, Napoléon aurait dissimulé des objets personnels avant son abdication en 1814.'
-    },
-    {
-      id: 3,
-      name: 'L\'Escalier Secret',
-      description: 'Découvrez le passage secret des courtisans',
-      location: 'Escalier du Roi, aile Renaissance',
-      clue: 'Géolocalisation précise requise - 48.4024°N, 2.7000°E',
-      status: 'locked',
-      historicalContext: 'Cet escalier permettait aux favorites royales de rejoindre discrètement les appartements du roi.'
+  const loadRecentDiscoveries = async () => {
+    try {
+      // Transformer les activités en découvertes
+      const discoveries = activities.slice(0, 5).map((activity, index) => {
+        const timeAgo = formatTimeAgo(activity.created_at);
+        return {
+          id: activity.id,
+          type: getActivityTypeLabel(activity.activity_type),
+          description: getActivityDescription(activity),
+          user: activity.profiles?.full_name || activity.profiles?.username || 'Explorateur',
+          timestamp: timeAgo
+        };
+      });
+
+      setRecentDiscoveries(discoveries);
+    } catch (error) {
+      console.error('Erreur lors du chargement des découvertes:', error);
+      setRecentDiscoveries([]);
     }
-  ];
+  };
+
+  const getActivityTypeLabel = (type: string): string => {
+    switch (type) {
+      case 'clue_submitted': return 'Nouvel indice';
+      case 'location_visited': return 'Lieu exploré';
+      case 'theory_shared': return 'Théorie partagée';
+      case 'evidence_found': return 'Preuve découverte';
+      default: return 'Activité';
+    }
+  };
+
+  const getActivityDescription = (activity: any): string => {
+    if (activity.activity_data?.description) {
+      return activity.activity_data.description;
+    }
+    return `Nouvelle activité ${activity.activity_type}`;
+  };
+
+  const formatTimeAgo = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'À l\'instant';
+    if (diffMins < 60) return `il y a ${diffMins}min`;
+    if (diffMins < 1440) return `il y a ${Math.floor(diffMins / 60)}h`;
+    return `il y a ${Math.floor(diffMins / 1440)}j`;
+  };
+
+  // Utiliser les vrais indices de la quête
+  const treasures = normalizeQuestClues(quest.clues).map((clue, index) => ({
+    id: clue.id,
+    name: clue.title,
+    description: clue.description,
+    location: clue.location ? `${clue.location.latitude}, ${clue.location.longitude}` : 'Localisation à déterminer',
+    clue: clue.hint,
+    status: index === 0 ? 'current' : 'locked', // Premier indice actif, autres verrouillés
+    historicalContext: clue.description || 'Contexte historique à enrichir par l\'IA'
+  }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-slate-100 p-6">
@@ -118,7 +164,7 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
               <BookOpen className="w-8 h-8 text-amber-600" />
               <div>
                 <h1 className="text-3xl font-bold text-slate-800">Journal d'Exploration</h1>
-                <p className="text-slate-600">Les Trésors Cachés de Fontainebleau</p>
+                <p className="text-slate-600">{quest.title}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -134,8 +180,8 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
           
           <div className="bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400">
             <p className="text-slate-700 italic">
-              "Dans les couloirs de Fontainebleau, trois trésors attendent d'être découverts. 
-              Suivez les traces de François Ier et de Napoléon pour percer leurs secrets..."
+              {quest.story_background || `"Dans les couloirs de ${quest.title}, des secrets attendent d'être découverts. 
+              Suivez les indices et percez leurs mystères..."`}
             </p>
           </div>
         </div>
@@ -149,14 +195,17 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                   <MapPin className="w-5 h-5 text-amber-600" />
                   Progression de la Quête
                 </h2>
-                <Button variant="ghost" size="sm">
-                  <HelpCircle className="w-4 h-4 mr-1" />
-                  Aide
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{treasures.length} indices</Badge>
+                  <Button variant="ghost" size="sm">
+                    <HelpCircle className="w-4 h-4 mr-1" />
+                    Aide
+                  </Button>
+                </div>
               </div>
               
               <div className="space-y-4">
-                {treasures.map((treasure, index) => (
+                {treasures.length > 0 ? treasures.map((treasure, index) => (
                   <div 
                     key={treasure.id}
                     className={`border rounded-lg p-4 transition-all ${
@@ -200,7 +249,13 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                       <p><strong>Contexte historique :</strong> {treasure.historicalContext}</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center py-8 text-slate-500">
+                    <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun indice disponible pour cette quête</p>
+                    <p className="text-sm">Les indices apparaîtront ici une fois ajoutés</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -214,9 +269,7 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                   <Users className="w-5 h-5 text-blue-600" />
                   Explorateurs Actifs
                 </h3>
-                <Button variant="ghost" size="sm">
-                  <HelpCircle className="w-4 h-4" />
-                </Button>
+                <Badge variant="outline">{stats.participantsCount}</Badge>
               </div>
               
               <div className="space-y-3">
@@ -230,7 +283,7 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                         <p className="font-medium text-slate-800">{explorer.name}</p>
                         <p className="text-xs text-slate-600">{explorer.location}</p>
                       </div>
-                      <span className="text-xs text-green-600">il y a {explorer.lastSeen}</span>
+                      <span className="text-xs text-green-600">{explorer.lastSeen}</span>
                     </div>
                   ))
                 ) : (
@@ -250,17 +303,34 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                   <Camera className="w-5 h-5 text-green-600" />
                   Découvertes Récentes
                 </h3>
-                <Button variant="ghost" size="sm">
-                  <HelpCircle className="w-4 h-4" />
-                </Button>
+                <Badge variant="outline">{recentDiscoveries.length}</Badge>
               </div>
               
               <div className="space-y-3">
-                <div className="text-center py-4 text-slate-500">
-                  <Camera className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Aucune découverte récente</p>
-                  <p className="text-xs">Les découvertes de l'équipe apparaîtront ici</p>
-                </div>
+                {recentDiscoveries.length > 0 ? (
+                  recentDiscoveries.map((discovery) => (
+                    <div key={discovery.id} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
+                        <Camera className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-800 text-sm">{discovery.type}</p>
+                        <p className="text-xs text-slate-600">{discovery.description}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-green-600">{discovery.user}</span>
+                          <span className="text-xs text-slate-400">•</span>
+                          <span className="text-xs text-slate-500">{discovery.timestamp}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-slate-500">
+                    <Camera className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Aucune découverte récente</p>
+                    <p className="text-xs">Les découvertes de l'équipe apparaîtront ici</p>
+                  </div>
+                )}
               </div>
             </div>
 
