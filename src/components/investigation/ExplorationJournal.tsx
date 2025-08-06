@@ -223,9 +223,6 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                 )}
               </div>
               
-              <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Rejoindre le chat d'équipe
-              </button>
             </div>
 
             {/* Recent Discoveries */}
@@ -249,21 +246,6 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
               <HistoricalFiguresWidget questId={quest.id} compact={true} />
             </div>
 
-            {/* Help & Guidance */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">Besoin d'aide ?</h3>
-              <div className="space-y-2">
-                <button className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded">
-                  📖 Guide du château
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded">
-                  🗺️ Plan interactif
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded">
-                  👥 Demander de l'aide
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

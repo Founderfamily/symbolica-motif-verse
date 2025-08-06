@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import ActionModals from '@/components/actions/ActionModals';
+
 import { 
   Camera, 
   MessageSquare, 
@@ -33,32 +33,19 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleActionClick = async (actionId: string) => {
-    // Actions qui ouvrent des modales spécialisées
-    const modalActions = [
-      'take_photo', 'verify_coordinates', 'validate_sources', 
-      'online_research', 'chat', 'document_discovery'
-    ];
-    
-    if (modalActions.includes(actionId)) {
-      setSelectedAction(actionId);
-      return;
-    }
+    // Actions simples - pas de modales factices
+    console.log('Action simple:', actionId);
 
     // Actions avec feedback immédiat
     setLoading(actionId);
     
-    // Feedback spécifique selon l'action
+    // Messages d'action réels
     const feedbackMessages = {
-      'explore_map': 'Carte interactive chargée ! Explore les zones découvertes.',
-      'tutorial': 'Tutoriel démarré ! Suis le guide pas-à-pas.',
-      'field_search': 'Zone de recherche activée ! Secteur Nord-Est priorisé.',
-      'validate_clue': 'Interface de validation ouverte ! Commence l\'authentification.',
-      'review_methodology': 'Protocole d\'analyse affiché ! Révision méthodologique en cours.',
-      'cross_reference': 'Bases de données connectées ! Recoupement bibliographique actif.',
-      'publish_findings': 'Éditeur collaboratif ouvert ! Commence la rédaction.',
-      'photo_analysis': 'Interface d\'analyse chargée ! Sélectionne les images à classifier.',
-      'transcription': 'Éditeur de transcription prêt ! Documents manuscrits chargés.',
-      'community_support': 'Panneau de modération ouvert ! Nouveaux messages à traiter.',
+      'take_photo': 'Appareil photo ouvert ! Capturez vos découvertes.',
+      'chat': 'Chat ouvert ! Partagez vos théories avec l\'équipe.',
+      'explore_map': 'Carte interactive ouverte ! Explorez les lieux.',
+      'tutorial': 'Guide interactif démarré !',
+      'study_discovery': 'Documentation de découverte ouverte !',
     };
 
     setTimeout(() => {
@@ -126,44 +113,35 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
 
       case 'treasure_hunter':
         return {
-          title: '⚡ ACTIONS TERRAIN PRIORITAIRES',
-          subtitle: 'Missions actives sur le site',
+          title: '⚡ ACTIONS PRIORITAIRES',
+          subtitle: 'Explorez et documentez vos découvertes',
           actions: [
             {
-              id: 'verify_coordinates',
-              title: '📍 Vérifier coordonnées GPS',
-              description: 'Escalier secret signalé - exploration recommandée',
-              icon: Target,
+              id: 'take_photo',
+              title: '📸 Photographier indices',
+              description: 'Capturez les symboles et détails importants',
+              icon: Camera,
               color: 'bg-emerald-500',
-              priority: 'high',
-              status: 'Nouvelle découverte'
+              points: '+20 pts',
+              difficulty: 'Terrain'
             },
             {
-              id: 'document_discovery',
-              title: '📋 Documenter découverte',
-              description: 'Fragment métallique - documentation en cours',
-              icon: FileText,
+              id: 'chat',
+              title: '💭 Partager théorie',
+              description: 'Discutez de vos découvertes avec l\'équipe',
+              icon: MessageSquare,
               color: 'bg-blue-500',
-              priority: 'medium',
-              status: 'Analyse active'
+              points: '+15 pts',
+              difficulty: 'Facile'
             },
             {
-              id: 'field_search',
-              title: '🔍 Recherche guidée',
-              description: 'Secteur Nord-Est non exploré - potentiel élevé',
-              icon: Search,
-              color: 'bg-yellow-500',
-              urgent: false,
-              reward: 'Bonus découverte'
-            },
-            {
-              id: 'validate_clue',
-              title: '✅ Valider sur terrain',
-              description: 'Salamandre sculptée - authentification requise',
-              icon: CheckCircle,
-              color: 'bg-green-500',
-              urgent: false,
-              reward: '+50 pts'
+              id: 'explore_map',
+              title: '🗺️ Consulter la carte',
+              description: 'Vérifiez votre position et les zones d\'intérêt',
+              icon: Map,
+              color: 'bg-purple-500',
+              points: '+10 pts',
+              difficulty: 'Navigation'
             }
           ]
         };
@@ -306,44 +284,35 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
 
       case 'treasure_hunter':
         return {
-          title: '🔍 ANALYSE TECHNIQUE',
-          subtitle: 'Étudie les méthodes de découverte',
+          title: '📚 ÉTUDE DE DÉCOUVERTE',
+          subtitle: 'Analysez cette découverte historique',
           actions: [
             {
-              id: 'analyze_techniques',
-              title: '📖 Analyser les techniques utilisées',
-              description: 'Méthodes de détection et d\'excavation employées',
-              icon: Search,
+              id: 'study_discovery',
+              title: '📚 Étudier la découverte',
+              description: 'Comprenez comment ce trésor a été localisé',
+              icon: BookOpen,
               color: 'bg-emerald-500',
-              educational: true,
-              complexity: 'Technique'
+              points: '+25 pts',
+              difficulty: 'Éducatif'
             },
             {
-              id: 'study_tools',
-              title: '🔍 Étudier les outils employés',
-              description: 'Détecteurs, GPS, matériel d\'excavation utilisés',
-              icon: Target,
+              id: 'chat',
+              title: '💭 Discuter méthodes',
+              description: 'Échangez sur les techniques de recherche',
+              icon: MessageSquare,
               color: 'bg-blue-500',
-              educational: true,
-              complexity: 'Pratique'
+              points: '+15 pts',
+              difficulty: 'Collaboratif'
             },
             {
-              id: 'view_discovery_photos',
-              title: '📸 Voir les photos de découverte',
-              description: 'Documentation photographique complète du processus',
-              icon: Camera,
+              id: 'explore_map',
+              title: '🗺️ Voir l\'emplacement',
+              description: 'Explorez le lieu de la découverte sur la carte',
+              icon: Map,
               color: 'bg-purple-500',
-              educational: true,
-              complexity: 'Visuel'
-            },
-            {
-              id: 'apply_to_quests',
-              title: '🎯 Appliquer à d\'autres quêtes',
-              description: 'Utilise ces méthodes pour tes prochaines recherches',
-              icon: Award,
-              color: 'bg-orange-500',
-              educational: true,
-              complexity: 'Application'
+              points: '+10 pts',
+              difficulty: 'Navigation'
             }
           ]
         };
@@ -508,12 +477,6 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
         })}
       </div>
 
-      <ActionModals
-        isOpen={selectedAction !== null}
-        onClose={() => setSelectedAction(null)}
-        actionType={selectedAction || ''}
-        userProfile={profile.type}
-      />
     </div>
   );
 };

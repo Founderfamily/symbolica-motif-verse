@@ -141,20 +141,12 @@ const AdaptiveHero: React.FC<AdaptiveHeroProps> = ({ profile, quest, onStartAdve
             </Button>
           </div>
 
-          {/* Stats essentielles en ligne */}
-          <div className="flex items-center gap-4 text-white/90">
-            <div className="flex items-center gap-2">
-              <Compass className="w-4 h-4" />
-              <span className="text-sm font-medium">4 indices</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              <span className="text-sm font-medium">12 explorateurs</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4" />
-              <span className="text-sm font-medium">75% progression</span>
-            </div>
+          {/* Badge de statut simplifié */}
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-white/30 text-white text-xs">
+              <FileText className="w-3 h-3 mr-1" />
+              Quête Active
+            </Badge>
           </div>
         </div>
       </div>

@@ -23,7 +23,6 @@ import {
   ThumbsUp,
   Share2,
   Flag,
-  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -38,7 +37,7 @@ import AIInsightsWidget from '@/components/investigation/AIInsightsWidget';
 import AdaptiveHero from '@/components/adaptive/AdaptiveHero';
 import AdaptiveActions from '@/components/adaptive/AdaptiveActions';
 import AdaptiveNavigation from '@/components/adaptive/AdaptiveNavigation';
-import UserProfileSelector from '@/components/adaptive/UserProfileSelector';
+
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
 import { useQuestParticipantsSimple } from '@/hooks/useQuestParticipantsSimple';
 import { useAIData } from '@/hooks/useAIData';
@@ -50,8 +49,7 @@ const QuestDetailPage = () => {
   const { user } = useAuth();
   const { adaptiveProfile, setUserProfileType, isAuthenticated } = useUserProfile();
   
-  // États pour l'interface adaptative
-  const [showProfileSelector, setShowProfileSelector] = useState(false);
+  // État pour l'interface adaptative
   const [activeTab, setActiveTab] = useState('adventure');
   
   console.log('QuestDetailPage - Quest ID from params:', questId);
@@ -270,18 +268,6 @@ const QuestDetailPage = () => {
               </Badge>
             </div>
             <div className="flex items-center gap-2">
-              {user && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowProfileSelector(true)}
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Profil: {adaptiveProfile.type === 'beginner' ? 'Débutant' : 
-                           adaptiveProfile.type === 'treasure_hunter' ? 'Terrain' :
-                           adaptiveProfile.type === 'historian' ? 'Historien' : 'Distance'}
-                </Button>
-              )}
               {user && <AINotificationService userId={user.id} questId={quest.id} />}
             </div>
           </div>
@@ -377,15 +363,6 @@ const QuestDetailPage = () => {
         </div>
       </div>
 
-      {/* Sélecteur de Profil */}
-      {user && (
-        <UserProfileSelector
-          currentProfile={adaptiveProfile.type}
-          onProfileChange={setUserProfileType}
-          isOpen={showProfileSelector && isAuthenticated}
-          onClose={() => setShowProfileSelector(false)}
-        />
-      )}
     </div>
   );
 };
