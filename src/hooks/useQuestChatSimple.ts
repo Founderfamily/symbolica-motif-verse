@@ -26,7 +26,11 @@ export const useQuestChatSimple = (questId: string) => {
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['quest-chat', questId],
     queryFn: async () => {
-      // Simuler des messages pour l'instant
+      // Import des messages simulés pour la quête Fontainebleau
+      if (questId === '0b58fcc0-f40e-4762-a4f7-9bc074824820') {
+        const { simulatedFontainebleauMessages } = await import('@/data/simulatedFontainebleauChat');
+        return simulatedFontainebleauMessages;
+      }
       return [] as QuestChatMessage[];
     },
     enabled: !!questId,

@@ -18,8 +18,11 @@ export const questChatService = {
   // Récupérer les messages d'une quête avec les profils
   async getMessages(questId: string, limit = 50): Promise<QuestChatMessage[]> {
     try {
-      // Pour l'instant, utiliser une table existante ou simuler
-      // En attendant que les nouvelles tables soient dans les types
+      // Import des messages simulés pour la quête Fontainebleau
+      if (questId === '0b58fcc0-f40e-4762-a4f7-9bc074824820') {
+        const { simulatedFontainebleauMessages } = await import('@/data/simulatedFontainebleauChat');
+        return simulatedFontainebleauMessages.slice(-limit);
+      }
       return [];
     } catch (error) {
       console.error('Error fetching quest messages:', error);
