@@ -114,7 +114,36 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
 
   const loadRecentDiscoveries = async () => {
     try {
-      // Transformer les activités en découvertes
+      // Pour la quête témoin Fontainebleau, utiliser des données enrichies
+      if (quest.title.includes('Fontainebleau') && quest.status === 'completed') {
+        const witnessDiscoveries = [
+          {
+            id: 'discovery-1',
+            type: 'Indice résolu',
+            description: 'Manuscrit royal découvert aux Archives Nationales révélant l\'emplacement du premier indice',
+            user: 'Marie Dubois',
+            timestamp: 'il y a 3 semaines'
+          },
+          {
+            id: 'discovery-2', 
+            type: 'Preuve photographique',
+            description: 'Pierre gravée dans les jardins du château confirmant la théorie historique',
+            user: 'Jean Moreau',
+            timestamp: 'il y a 2 semaines'
+          },
+          {
+            id: 'discovery-3',
+            type: 'Validation finale',
+            description: 'Médaillon royal authentifié par expertise - quête complétée avec succès',
+            user: 'Anna Rousseau', 
+            timestamp: 'il y a 1 semaine'
+          }
+        ];
+        setRecentDiscoveries(witnessDiscoveries);
+        return;
+      }
+
+      // Transformer les activités en découvertes pour les autres quêtes
       const discoveries = activities.slice(0, 5).map((activity, index) => {
         const timeAgo = formatTimeAgo(activity.created_at);
         return {
