@@ -71,11 +71,10 @@ const ActionModals: React.FC<ActionModalsProps> = ({ isOpen, onClose, actionType
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-blue-500" />
-                  <span className="text-sm font-medium">Participants actifs</span>
-                  <Badge variant="secondary" className="text-xs">3 en ligne</Badge>
+                  <span className="text-sm font-medium">Interface de communication</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  Marie (Terrain), Thomas (Historien), IA Assistant
+                  Connectez-vous pour rejoindre les discussions en temps réel
                 </div>
               </div>
             </div>
@@ -97,12 +96,12 @@ const ActionModals: React.FC<ActionModalsProps> = ({ isOpen, onClose, actionType
               
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center p-3 bg-gray-50 rounded">
-                  <div className="font-medium text-sm">Zones explorées</div>
-                  <div className="text-2xl font-bold text-blue-600">3/7</div>
+                  <div className="font-medium text-sm">Interface cartographique</div>
+                  <div className="text-xs text-muted-foreground mt-1">Géolocalisation en temps réel</div>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded">
-                  <div className="font-medium text-sm">Indices marqués</div>
-                  <div className="text-2xl font-bold text-green-600">12</div>
+                  <div className="font-medium text-sm">Marqueurs personnalisés</div>
+                  <div className="text-xs text-muted-foreground mt-1">Points d'intérêt interactifs</div>
                 </div>
               </div>
             </div>
