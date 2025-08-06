@@ -46,6 +46,11 @@ const EnhancedCluesTab: React.FC<EnhancedCluesTabProps> = ({ quest }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClue, setSelectedClue] = useState<QuestClue | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Nouveaux états pour le système intelligent
+  const [sources, setSources] = useState<any[]>([]);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [activeView, setActiveView] = useState<'overview' | 'clues' | 'progression' | 'sources' | 'chat'>('overview');
 
   useEffect(() => {
     loadEnhancedClues();
