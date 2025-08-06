@@ -85,36 +85,21 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
               title: '📸 Prendre une photo',
               description: 'Trouve un symbole ou indice et photographie-le',
               icon: Camera,
-              color: 'bg-blue-500',
-              points: '+10 pts',
-              difficulty: 'Facile'
+              color: 'bg-blue-500'
             },
             {
               id: 'chat',
               title: '💭 Proposer une théorie',
               description: 'Partage ton idée sur ce que tu penses avoir trouvé',
               icon: MessageSquare,
-              color: 'bg-green-500',
-              points: '+15 pts',
-              difficulty: 'Facile'
+              color: 'bg-green-500'
             },
             {
               id: 'explore_map',
               title: '🗺️ Explorer la carte',
               description: 'Découvre les lieux déjà explorés par la communauté',
               icon: Map,
-              color: 'bg-purple-500',
-              points: '+5 pts',
-              difficulty: 'Très facile'
-            },
-            {
-              id: 'tutorial',
-              title: '🎯 Faire le tutoriel',
-              description: 'Apprends les bases en 5 minutes (recommandé !)',
-              icon: Target,
-              color: 'bg-orange-500',
-              points: '+25 pts',
-              difficulty: 'Tutoriel'
+              color: 'bg-purple-500'
             }
           ]
         };
@@ -129,27 +114,21 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
               title: '📸 Photographier indices',
               description: 'Capturez les symboles et détails importants',
               icon: Camera,
-              color: 'bg-emerald-500',
-              points: '+20 pts',
-              difficulty: 'Terrain'
+              color: 'bg-emerald-500'
             },
             {
               id: 'chat',
               title: '💭 Partager théorie',
               description: 'Discutez de vos découvertes avec l\'équipe',
               icon: MessageSquare,
-              color: 'bg-blue-500',
-              points: '+15 pts',
-              difficulty: 'Facile'
+              color: 'bg-blue-500'
             },
             {
               id: 'explore_map',
               title: '🗺️ Consulter la carte',
               description: 'Vérifiez votre position et les zones d\'intérêt',
               icon: Map,
-              color: 'bg-purple-500',
-              points: '+10 pts',
-              difficulty: 'Navigation'
+              color: 'bg-purple-500'
             }
           ]
         };
@@ -166,27 +145,21 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
               title: '📸 Photographier indices',
               description: 'Capturez les symboles et détails importants',
               icon: Camera,
-              color: 'bg-emerald-500',
-              points: '+20 pts',
-              difficulty: 'Terrain'
+              color: 'bg-emerald-500'
             },
             {
               id: 'chat',
               title: '💭 Partager théorie',
               description: 'Discutez de vos découvertes avec l\'équipe',
               icon: MessageSquare,
-              color: 'bg-blue-500',
-              points: '+15 pts',
-              difficulty: 'Facile'
+              color: 'bg-blue-500'
             },
             {
               id: 'explore_map',
               title: '🗺️ Consulter la carte',
               description: 'Vérifiez votre position et les zones d\'intérêt',
               icon: Map,
-              color: 'bg-purple-500',
-              points: '+10 pts',
-              difficulty: 'Navigation'
+              color: 'bg-purple-500'
             }
           ]
         };
@@ -205,36 +178,21 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
               title: '📚 Étudier la découverte',
               description: 'Comprends comment ce trésor a été localisé et excavé',
               icon: BookOpen,
-              color: 'bg-blue-500',
-              points: '+15 pts',
-              difficulty: 'Éducatif'
+              color: 'bg-blue-500'
             },
             {
               id: 'understand_clues',
               title: '💡 Comprendre les indices',
               description: 'Analyse comment chaque indice a mené à la découverte',
               icon: Search,
-              color: 'bg-green-500',
-              points: '+20 pts',
-              difficulty: 'Facile'
+              color: 'bg-green-500'
             },
             {
               id: 'view_location',
               title: '🗺️ Voir l\'emplacement trouvé',
               description: 'Explore virtuellement le lieu de la découverte',
               icon: Map,
-              color: 'bg-purple-500',
-              points: '+10 pts',
-              difficulty: 'Très facile'
-            },
-            {
-              id: 'learn_method',
-              title: '🎓 Apprendre la méthode',
-              description: 'Découvre les techniques utilisées par les chercheurs',
-              icon: Target,
-              color: 'bg-orange-500',
-              points: '+25 pts',
-              difficulty: 'Tutoriel'
+              color: 'bg-purple-500'
             }
           ]
         };
@@ -249,115 +207,51 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
               title: '📚 Étudier la découverte',
               description: 'Comprenez comment ce trésor a été localisé',
               icon: BookOpen,
-              color: 'bg-emerald-500',
-              points: '+25 pts',
-              difficulty: 'Éducatif'
+              color: 'bg-emerald-500'
             },
             {
               id: 'chat',
               title: '💭 Discuter méthodes',
               description: 'Échangez sur les techniques de recherche',
               icon: MessageSquare,
-              color: 'bg-blue-500',
-              points: '+15 pts',
-              difficulty: 'Collaboratif'
+              color: 'bg-blue-500'
             },
             {
               id: 'explore_map',
               title: '🗺️ Voir l\'emplacement',
               description: 'Explorez le lieu de la découverte sur la carte',
               icon: Map,
-              color: 'bg-purple-500',
-              points: '+10 pts',
-              difficulty: 'Navigation'
+              color: 'bg-purple-500'
             }
           ]
         };
 
       case 'historian':
-        return {
-          title: '📋 ÉTUDE HISTORIQUE',
-          subtitle: 'Analyse académique de la découverte',
-          actions: [
-            {
-              id: 'analyze_official_report',
-              title: '📋 Analyser le rapport officiel',
-              description: 'Rapport scientifique complet de la découverte',
-              icon: FileText,
-              color: 'bg-emerald-500',
-              academic: true,
-              complexity: 'Expert'
-            },
-            {
-              id: 'study_methodology',
-              title: '🔬 Étudier la méthodologie',
-              description: 'Protocoles scientifiques et archéologiques employés',
-              icon: Eye,
-              color: 'bg-teal-500',
-              academic: true,
-              complexity: 'Avancé'
-            },
-            {
-              id: 'historical_context',
-              title: '📖 Contextualisation historique',
-              description: 'Replacer la découverte dans son contexte historique',
-              icon: BookOpen,
-              color: 'bg-blue-500',
-              academic: true,
-              complexity: 'Recherche'
-            },
-            {
-              id: 'discovery_impact',
-              title: '📝 Impact de la découverte',
-              description: 'Conséquences historiques et scientifiques',
-              icon: Award,
-              color: 'bg-purple-500',
-              academic: true,
-              complexity: 'Analyse'
-            }
-          ]
-        };
-
       case 'remote_helper':
         return {
-          title: '📚 ARCHIVES DÉCOUVERTE',
-          subtitle: 'Aide à documenter et partager',
+          title: '📚 DÉCOUVERTE ÉDUCATIVE',
+          subtitle: 'Apprends comment ce trésor a été trouvé !',
           actions: [
             {
-              id: 'archives_discovery',
-              title: '📚 Consulter les archives de découverte',
-              description: 'Documentation complète de la recherche et découverte',
+              id: 'study_discovery',
+              title: '📚 Étudier la découverte',
+              description: 'Comprends comment ce trésor a été localisé et excavé',
               icon: BookOpen,
-              color: 'bg-cyan-500',
-              remote: true,
-              timeEstimate: '20-30 min'
+              color: 'bg-blue-500'
             },
             {
-              id: 'analyze_historical_photos',
-              title: '📊 Analyser les photos historiques',
-              description: 'Classification et annotation des images de découverte',
-              icon: Camera,
-              color: 'bg-blue-500',
-              remote: true,
-              timeEstimate: '15-25 min'
+              id: 'understand_clues',
+              title: '💡 Comprendre les indices',
+              description: 'Analyse comment chaque indice a mené à la découverte',
+              icon: Search,
+              color: 'bg-green-500'
             },
             {
-              id: 'transcribe_testimonies',
-              title: '✍️ Transcription des témoignages',
-              description: 'Témoignages des découvreurs et experts impliqués',
-              icon: FileText,
-              color: 'bg-green-500',
-              remote: true,
-              timeEstimate: '25-40 min'
-            },
-            {
-              id: 'help_newcomers_understand',
-              title: '🤝 Aider les nouveaux à comprendre',
-              description: 'Guide les débutants dans l\'étude de cette découverte',
-              icon: Users,
-              color: 'bg-purple-500',
-              remote: true,
-              timeEstimate: '30+ min'
+              id: 'view_location',
+              title: '🗺️ Voir l\'emplacement trouvé',
+              description: 'Explore virtuellement le lieu de la découverte',
+              icon: Map,
+              color: 'bg-purple-500'
             }
           ]
         };
@@ -391,13 +285,7 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
           return (
             <Card 
               key={action.id} 
-              className={`p-3 hover:shadow-md transition-all cursor-pointer border-l-2 ${
-                action.priority === 'high' ? 'border-l-emerald-500 bg-emerald-50/30' : 
-                action.academic ? 'border-l-emerald-500 bg-emerald-50/30' :
-                action.educational ? 'border-l-blue-500 bg-blue-50/30' :
-                action.remote ? 'border-l-cyan-500 bg-cyan-50/30' :
-                'border-l-blue-500 bg-blue-50/30'
-              }`}
+              className="p-3 hover:shadow-md transition-all cursor-pointer border-l-2 border-l-blue-500 bg-blue-50/30"
               onClick={() => handleActionClick(action.id)}
             >
               <div className="flex items-center gap-3">
@@ -414,19 +302,6 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
                   <h3 className="font-medium text-foreground text-sm truncate">
                     {action.title}
                   </h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    {action.priority === 'high' && (
-                      <Badge variant="default" className="text-xs px-1 py-0 bg-emerald-500">
-                        NOUVELLE
-                      </Badge>
-                    )}
-                    {action.points && (
-                      <span className="text-xs text-muted-foreground">{action.points}</span>
-                    )}
-                    {action.timeLeft && (
-                      <span className="text-xs text-muted-foreground">{action.timeLeft}</span>
-                    )}
-                  </div>
                 </div>
               </div>
             </Card>
