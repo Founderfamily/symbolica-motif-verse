@@ -963,7 +963,7 @@ export const historicalQuests = [
   {
     title: "Les Trésors Cachés de Fontainebleau",
     description: "Explorez les passages secrets du château de Fontainebleau et découvrez les trésors dissimulés par les rois de France.",
-    story_background: "Le château de Fontainebleau, résidence favorite de nombreux rois de France, recèle de nombreux passages secrets et cachettes. François Ier, Napoléon et d'autres souverains y ont dissimulé des trésors, des documents secrets et des œuvres d'art pour les protéger des troubles politiques.",
+    story_background: "Le château de Fontainebleau, résidence favorite de nombreux rois de France, recèle de nombreux passages secrets et cachettes. François Ier, Napoléon et d'autres souverains y ont dissimulé des trésors, des documents secrets et des œuvres d'art pour les protéger des troubles politiques. Cette quête nécessite une autorisation spéciale du château (contact : guide@chateaudefontainebleau.fr) et doit être effectuée uniquement lors des créneaux réservés aux explorateurs (mardis et jeudis, 14h-17h).",
     quest_type: "templar",
     difficulty_level: "intermediate",
     max_participants: 8,
@@ -973,32 +973,46 @@ export const historicalQuests = [
     end_date: "2024-12-31T23:59:59Z",
     reward_points: 600,
     special_rewards: [
-      "Badge Garde Royale",
-      "Clé du château (réplique)",
-      "Accès aux appartements secrets"
+      "Badge Garde Royale authentique",
+      "Clé du château (réplique métal précieux)",
+      "Accès aux appartements secrets avec guide privé",
+      "Document historique authentifié",
+      "Médaille commémorative gravée"
     ],
     clues: [
       {
         id: 1,
         title: "La Galerie François Ier",
-        description: "Trouvez le panneau secret dans la célèbre galerie Renaissance",
-        hint: "Parmi les fresques du roi-mécène, un passage se dissimule",
+        description: "Trouvez le panneau secret dans la célèbre galerie Renaissance. Placez-vous face à la fresque centrale représentant 'l'Éducation d'Achille'. Cherchez la salamandre dorée située à droite de la troisième fenêtre, à exactement 1m20 de hauteur. Appuyez fermement sur l'œil de la créature mythologique pendant 3 secondes jusqu'à entendre un déclic.",
+        hint: "La salamandre de François Ier garde ses secrets. Son regard doré révèle le premier mystère quand on sait où regarder. Photo de référence disponible au bureau d'accueil.",
         location: {
           latitude: 48.4024,
           longitude: 2.7004,
           radius: 50
         },
         symbol_reference: "fontainebleau_fresco",
-        validation_type: "symbol",
-        validation_data: { expected_symbol: "salamander_francois" },
+        validation_type: "photo",
+        validation_data: { 
+          expected_symbol: "salamander_francois",
+          photo_required: true,
+          qr_code_location: "derrière_panneau_secret"
+        },
         points: 150,
-        unlock_condition: "start"
+        unlock_condition: "start",
+        intermediate_steps: [
+          "Localisez la fresque 'Éducation d'Achille'",
+          "Trouvez la salamandre dorée (3ème fenêtre)",
+          "Vérifiez la hauteur : 1m20 exactement",
+          "Appuyez sur l'œil pendant 3 secondes",
+          "Photographiez le panneau qui s'ouvre",
+          "Scannez le QR code révélé"
+        ]
       },
       {
         id: 2,
         title: "Le Bureau de Napoléon",
-        description: "Découvrez la cachette secrète de l'Empereur",
-        hint: "Là où l'Aigle signait ses victoires, ses secrets se cachent",
+        description: "Découvrez la cachette secrète de l'Empereur dans son bureau privé. Dirigez-vous vers le bureau en acajou massif au centre de la pièce. Sous le plateau, côté droit, se trouve une serrure dissimulée dans un compartiment secret. Le code à composer est EMPEREUR suivi de l'année de l'abdication. Tournez la clé trois fois dans le sens horaire après validation.",
+        hint: "L'Aigle a caché ses derniers secrets là où il signait ses décrets. La date de sa chute déverrouille son héritage. Attention : seules 3 tentatives sont autorisées.",
         location: {
           latitude: 48.4020,
           longitude: 2.7008,
@@ -1006,15 +1020,28 @@ export const historicalQuests = [
         },
         symbol_reference: "napoleon_desk",
         validation_type: "code",
-        validation_data: { expected_code: "FONTAINEBLEAU_1814" },
+        validation_data: { 
+          expected_code: "EMPEREUR1814",
+          mechanism: "serrure_numerique",
+          max_attempts: 3
+        },
         points: 200,
-        unlock_condition: "clue_1_completed"
+        unlock_condition: "clue_1_completed",
+        intermediate_steps: [
+          "Entrez dans le bureau privé de Napoléon",
+          "Localisez le bureau en acajou central",
+          "Cherchez le compartiment sous le plateau (côté droit)",
+          "Composez le code : EMPEREUR + année abdication",
+          "Tournez la clé 3 fois dans le sens horaire",
+          "Récupérez le document caché",
+          "Photographiez le sceau impérial révélé"
+        ]
       },
       {
         id: 3,
         title: "L'Escalier Secret",
-        description: "Accédez au trésor caché dans l'escalier dérobé",
-        hint: "Par l'escalier que seuls les rois empruntaient, la fortune royale attend",
+        description: "Accédez au trésor final dans l'escalier dérobé situé derrière la tapisserie des appartements royaux. Tirez simultanément sur les deux glands dorés de la tapisserie 'Les Saisons'. L'escalier se révèle derrière le mur. Descendez 12 marches exactement. Dans la niche murette, appuyez sur la pierre gravée d'une fleur de lys pour découvrir le coffre royal.",
+        hint: "Par l'escalier que seuls les rois empruntaient, la fortune royale attend celui qui connaît le geste ancestral. Les quatre saisons gardent l'entrée du dernier secret.",
         location: {
           latitude: 48.4022,
           longitude: 2.7006,
@@ -1022,9 +1049,24 @@ export const historicalQuests = [
         },
         symbol_reference: "royal_staircase",
         validation_type: "location",
-        validation_data: { royal_cache: true },
+        validation_data: { 
+          royal_cache: true,
+          physical_proof: "medaille_or",
+          coordinates_precise: true
+        },
         points: 250,
-        unlock_condition: "all_previous_completed"
+        unlock_condition: "all_previous_completed",
+        intermediate_steps: [
+          "Trouvez la tapisserie 'Les Saisons' (appartements royaux)",
+          "Tirez simultanément les deux glands dorés",
+          "Pénétrez dans l'escalier secret révélé",
+          "Descendez exactement 12 marches (comptez-les)",
+          "Localisez la niche murette à mi-hauteur",
+          "Appuyez sur la pierre à fleur de lys",
+          "Ouvrez le coffre royal",
+          "Récupérez la médaille d'or authentique",
+          "Photographiez l'inscription gravée à l'intérieur"
+        ]
       }
     ],
     target_symbols: ["salamander_francois", "napoleon_eagle", "royal_crown"],
