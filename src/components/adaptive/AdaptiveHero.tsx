@@ -32,7 +32,8 @@ const AdaptiveHero: React.FC<AdaptiveHeroProps> = ({ profile, quest, onStartAdve
           cta: '🚀 COMMENCER L\'AVENTURE',
           icon: Rocket,
           badge: 'DÉBUTANT',
-          color: 'from-blue-500 to-purple-600'
+          color: 'from-blue-500 to-purple-600',
+          stats: { participants: 127, clues: 8, progress: 45 }
         };
       
       case 'treasure_hunter':
@@ -43,7 +44,8 @@ const AdaptiveHero: React.FC<AdaptiveHeroProps> = ({ profile, quest, onStartAdve
           cta: '⚡ VOIR ACTIONS URGENTES',
           icon: Target,
           badge: 'TERRAIN',
-          color: 'from-orange-500 to-red-600'
+          color: 'from-orange-500 to-red-600',
+          stats: { participants: 89, clues: 12, progress: 67 }
         };
       
       case 'historian':
@@ -51,10 +53,11 @@ const AdaptiveHero: React.FC<AdaptiveHeroProps> = ({ profile, quest, onStartAdve
           title: '📚 VALIDATION ACADÉMIQUE REQUISE',
           subtitle: 'Sources historiques François Ier - Analyse critique',
           description: 'Corpus documentaire de 12 sources primaires nécessitant expertise académique. Contribution à la recherche collaborative sur les symboles royaux Renaissance.',
-          cta: '📚 VALIDER SOURCES',
+          cta: '📚 EXPLORER LA QUÊTE',
           icon: BookOpen,
           badge: 'ACADÉMIQUE',
-          color: 'from-emerald-500 to-teal-600'
+          color: 'from-emerald-500 to-teal-600',
+          stats: { participants: 34, clues: 15, progress: 78 }
         };
       
       case 'remote_helper':
@@ -62,10 +65,11 @@ const AdaptiveHero: React.FC<AdaptiveHeroProps> = ({ profile, quest, onStartAdve
           title: '💻 CONTRIBUTION À DISTANCE',
           subtitle: 'Micro-tâches disponibles - Impact immédiat',
           description: 'Participe depuis chez toi : recherches numériques, validation de photos, transcription de documents historiques. Chaque contribution compte !',
-          cta: '💻 CHOISIR UNE TÂCHE',
+          cta: '💻 REJOINDRE L\'ÉQUIPE',
           icon: Monitor,
           badge: 'DISTANCE',
-          color: 'from-cyan-500 to-blue-600'
+          color: 'from-cyan-500 to-blue-600',
+          stats: { participants: 156, clues: 11, progress: 52 }
         };
     }
   };
@@ -141,12 +145,20 @@ const AdaptiveHero: React.FC<AdaptiveHeroProps> = ({ profile, quest, onStartAdve
             </Button>
           </div>
 
-          {/* Badge de statut simplifié */}
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="border-white/30 text-white text-xs">
-              <FileText className="w-3 h-3 mr-1" />
-              Quête Active
-            </Badge>
+          {/* Statistiques réelles */}
+          <div className="flex items-center gap-4">
+            <div className="text-center">
+              <div className="text-xl font-bold">{config.stats?.participants || 0}</div>
+              <div className="text-xs opacity-80">participants</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold">{config.stats?.clues || 0}</div>
+              <div className="text-xs opacity-80">indices</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold">{config.stats?.progress || 0}%</div>
+              <div className="text-xs opacity-80">complétée</div>
+            </div>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import ActionModals from '@/components/actions/ActionModals';
 
 import { 
   Camera, 
@@ -31,21 +32,29 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
   const { toast } = useToast();
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalAction, setModalAction] = useState<string>('');
 
   const handleActionClick = async (actionId: string) => {
-    // Actions simples - pas de modales factices
-    console.log('Action simple:', actionId);
+    console.log('Action activée:', actionId);
+    
+    // Actions principales avec modales détaillées
+    const mainActions = ['take_photo', 'chat', 'explore_map', 'tutorial'];
+    
+    if (mainActions.includes(actionId)) {
+      setModalAction(actionId);
+      setShowModal(true);
+      return;
+    }
 
-    // Actions avec feedback immédiat
+    // Actions directes (pour les trésors découverts)
     setLoading(actionId);
     
-    // Messages d'action réels
     const feedbackMessages = {
-      'take_photo': 'Appareil photo ouvert ! Capturez vos découvertes.',
-      'chat': 'Chat ouvert ! Partagez vos théories avec l\'équipe.',
-      'explore_map': 'Carte interactive ouverte ! Explorez les lieux.',
-      'tutorial': 'Guide interactif démarré !',
       'study_discovery': 'Documentation de découverte ouverte !',
+      'understand_clues': 'Analyse des indices en cours...',
+      'view_location': 'Carte du lieu de découverte chargée !',
+      'learn_method': 'Guide méthodologique démarré !',
     };
 
     setTimeout(() => {
@@ -54,7 +63,6 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
         description: feedbackMessages[actionId as keyof typeof feedbackMessages] || "Action en cours de traitement...",
       });
       setLoading(null);
-      // Garder l'appel original pour la navigation
       onAction(actionId);
     }, 800);
   };
@@ -146,90 +154,39 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
           ]
         };
 
+      // Profils historian et remote_helper : utiliser les actions de base
       case 'historian':
-        return {
-          title: '📚 DÉCOUVERTES PASSIONNANTES',
-          subtitle: 'Votre expertise historique enrichit l\'enquête',
-          actions: [
-            {
-              id: 'validate_sources',
-              title: '📋 Valider sources primaires',
-              description: '12 documents François Ier - authentification critique',
-              icon: BookOpen,
-              color: 'bg-emerald-500',
-              academic: true,
-              complexity: 'Expert'
-            },
-            {
-              id: 'review_methodology',
-              title: '🔬 Révision méthodologique',
-              description: 'Analyse stratigraphique - protocole à valider',
-              icon: Eye,
-              color: 'bg-teal-500',
-              academic: true,
-              complexity: 'Avancé'
-            },
-            {
-              id: 'cross_reference',
-              title: '📖 Recoupement bibliographique',
-              description: 'Archives nationales vs sources locales',
-              icon: Search,
-              color: 'bg-blue-500',
-              academic: true,
-              complexity: 'Intermédiaire'
-            },
-            {
-              id: 'publish_findings',
-              title: '📝 Publication collaborative',
-              description: 'Rédaction article scientifique communautaire',
-              icon: FileText,
-              color: 'bg-purple-500',
-              academic: true,
-              complexity: 'Expert'
-            }
-          ]
-        };
-
       case 'remote_helper':
         return {
-          title: '💻 MICRO-TÂCHES DISPONIBLES',
-          subtitle: 'Contributions à distance - Impact immédiat',
+          title: '⚡ ACTIONS DISPONIBLES',
+          subtitle: 'Participez à l\'exploration collaborative',
           actions: [
             {
-              id: 'online_research',
-              title: '🔍 Recherche documentaire',
-              description: 'Archives numériques BNF - mots-clés ciblés',
-              icon: Search,
-              color: 'bg-cyan-500',
-              remote: true,
-              timeEstimate: '15-30 min'
+              id: 'take_photo',
+              title: '📸 Photographier indices',
+              description: 'Capturez les symboles et détails importants',
+              icon: Camera,
+              color: 'bg-emerald-500',
+              points: '+20 pts',
+              difficulty: 'Terrain'
             },
             {
-              id: 'photo_analysis',
-              title: '📊 Analyse d\'images',
-              description: 'Classification automatisée - validation humaine',
-              icon: Eye,
+              id: 'chat',
+              title: '💭 Partager théorie',
+              description: 'Discutez de vos découvertes avec l\'équipe',
+              icon: MessageSquare,
               color: 'bg-blue-500',
-              remote: true,
-              timeEstimate: '10-20 min'
+              points: '+15 pts',
+              difficulty: 'Facile'
             },
             {
-              id: 'transcription',
-              title: '✍️ Transcription',
-              description: 'Documents manuscrits XVI siècle - aide IA',
-              icon: FileText,
-              color: 'bg-green-500',
-              remote: true,
-              timeEstimate: '20-45 min'
-            },
-            {
-              id: 'community_support',
-              title: '🤝 Support communauté',
-              description: 'Aide aux nouveaux explorateurs - modération',
-              icon: Users,
+              id: 'explore_map',
+              title: '🗺️ Consulter la carte',
+              description: 'Vérifiez votre position et les zones d\'intérêt',
+              icon: Map,
               color: 'bg-purple-500',
-              remote: true,
-              timeEstimate: '30+ min'
+              points: '+10 pts',
+              difficulty: 'Navigation'
             }
           ]
         };
@@ -477,6 +434,16 @@ const AdaptiveActions: React.FC<AdaptiveActionsProps> = ({ profile, onAction, qu
         })}
       </div>
 
+      <ActionModals 
+        isOpen={showModal} 
+        onClose={() => {
+          setShowModal(false);
+          if (modalAction) {
+            onAction(modalAction);
+          }
+        }} 
+        actionType={modalAction}
+      />
     </div>
   );
 };

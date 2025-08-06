@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { TreasureQuest } from '@/types/quests';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Users, BookOpen, Camera } from 'lucide-react';
+import { MapPin, Users, BookOpen, Camera, HelpCircle } from 'lucide-react';
 import HistoricalFiguresWidget from './widgets/HistoricalFiguresWidget';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -112,7 +113,7 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
       <div className="max-w-6xl mx-auto">
         {/* Header - Journal Style */}
         <div className="bg-white rounded-xl shadow-xl p-8 mb-6 border-l-4 border-amber-500">
-          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <BookOpen className="w-8 h-8 text-amber-600" />
               <div>
@@ -120,9 +121,15 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                 <p className="text-slate-600">Les Trésors Cachés de Fontainebleau</p>
               </div>
             </div>
-            <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-              Exploration en cours
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <HelpCircle className="w-4 h-4 mr-1" />
+                Guide
+              </Button>
+              <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                Exploration en cours
+              </Badge>
+            </div>
           </div>
           
           <div className="bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400">
@@ -137,10 +144,16 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
           {/* Main Quest Progress */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-amber-600" />
-                Progression de la Quête
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-amber-600" />
+                  Progression de la Quête
+                </h2>
+                <Button variant="ghost" size="sm">
+                  <HelpCircle className="w-4 h-4 mr-1" />
+                  Aide
+                </Button>
+              </div>
               
               <div className="space-y-4">
                 {treasures.map((treasure, index) => (
@@ -196,10 +209,15 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
           <div className="space-y-6">
             {/* Active Explorers */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-600" />
-                Explorateurs Actifs
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  Explorateurs Actifs
+                </h3>
+                <Button variant="ghost" size="sm">
+                  <HelpCircle className="w-4 h-4" />
+                </Button>
+              </div>
               
               <div className="space-y-3">
                 {activeExplorers.length > 0 ? (
@@ -227,10 +245,15 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
 
             {/* Recent Discoveries */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Camera className="w-5 h-5 text-green-600" />
-                Découvertes Récentes
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <Camera className="w-5 h-5 text-green-600" />
+                  Découvertes Récentes
+                </h3>
+                <Button variant="ghost" size="sm">
+                  <HelpCircle className="w-4 h-4" />
+                </Button>
+              </div>
               
               <div className="space-y-3">
                 <div className="text-center py-4 text-slate-500">
