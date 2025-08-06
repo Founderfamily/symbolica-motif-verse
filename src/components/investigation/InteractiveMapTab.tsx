@@ -23,6 +23,7 @@ import { investigationService } from '@/services/investigationService';
 import AddLocationDialog from './AddLocationDialog';
 import { useArchiveMap } from '@/contexts/ArchiveMapContext';
 import CommunityMapContribution from './CommunityMapContribution';
+import MapLegend from '@/components/map/MapLegend';
 
 interface MapTabProps {
   quest: TreasureQuest;
@@ -38,6 +39,11 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [questLocations, setQuestLocations] = useState<any[]>([]);
   const [showCommunityTab, setShowCommunityTab] = useState(false);
+  const [visibleLayers, setVisibleLayers] = useState({
+    clues: true,
+    archives: true,
+    community: true
+  });
   const { toast } = useToast();
   const { selectedArchive, archiveLocations, setSelectedLocation: setMapSelectedLocation } = useArchiveMap();
   
@@ -168,6 +174,9 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
                 `)
             )
             .addTo(map.current!);
+
+          // Store marker with type for layer management
+          marker.getElement().setAttribute('data-layer', 'clues');
         }
       });
     }
@@ -195,6 +204,7 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
       marker.getElement().addEventListener('click', () => {
         setMapSelectedLocation(location);
       });
+      marker.getElement().setAttribute('data-layer', 'archives');
     });
 
     // Add markers for quest locations (from database)
@@ -213,6 +223,7 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
             `)
         )
         .addTo(map.current!);
+      marker.getElement().setAttribute('data-layer', 'community');
     });
 
     // Add function to window for popup button
@@ -318,6 +329,27 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
     // Ici on pourrait envoyer vers une API de validation communautaire
   };
 
+  const handleToggleLayer = (type: 'clues' | 'archives' | 'community') => {
+    setVisibleLayers(prev => ({
+      ...prev,
+      [type]: !prev[type]
+    }));
+
+    // Toggle markers visibility on map
+    if (map.current) {
+      const markers = document.querySelectorAll(`[data-layer="${type}"]`);
+      markers.forEach(marker => {
+        const element = marker as HTMLElement;
+        element.style.display = visibleLayers[type] ? 'none' : 'block';
+      });
+    }
+  };
+
+  // Calculate counts
+  const clueCount = quest.clues?.filter((clue: any) => clue.location).length || 0;
+  const archiveCount = archiveLocations.length;
+  const communityCount = questLocations.length;
+
   if (loading) {
     return (
       <Card>
@@ -409,31 +441,40 @@ const InteractiveMapTab: React.FC<MapTabProps> = ({ quest, activeTab, setActiveT
             </div>
           </div>
 
-          {/* Fonctionnalités */}
+          {/* Résumé des données */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Navigation className="w-4 h-4" />
-              Navigation GPS
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              {clueCount} Indice{clueCount > 1 ? 's' : ''}
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Layers className="w-4 h-4" />
-              Couches Historiques
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              {archiveCount} Site{archiveCount > 1 ? 's' : ''} historique{archiveCount > 1 ? 's' : ''}
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="w-4 h-4" />
-              Points d'Intérêt
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              {communityCount} Lieu{communityCount > 1 ? 'x' : ''} communautaire{communityCount > 1 ? 's' : ''}
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Carte */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden relative">
         <div 
           ref={mapContainer} 
           className="w-full h-[600px]"
           style={{ minHeight: '600px' }}
         />
+        {mapToken && (
+          <MapLegend 
+            clueCount={clueCount}
+            archiveCount={archiveCount}
+            communityCount={communityCount}
+            visibleLayers={visibleLayers}
+            onToggleLayer={handleToggleLayer}
+          />
+        )}
       </Card>
 
       {/* Informations sur la localisation sélectionnée */}
