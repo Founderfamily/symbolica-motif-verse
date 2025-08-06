@@ -162,16 +162,32 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
     return `il y a ${Math.floor(diffMins / 1440)}j`;
   };
 
-  // Utiliser les vrais indices de la quête
-  const treasures = normalizeQuestClues(quest.clues).map((clue, index) => ({
-    id: clue.id,
-    name: clue.title,
-    description: clue.description,
-    location: clue.location ? `${clue.location.latitude}, ${clue.location.longitude}` : 'Localisation à déterminer',
-    clue: clue.hint,
-    status: index === 0 ? 'current' : 'locked', // Premier indice actif, autres verrouillés
-    historicalContext: clue.description || 'Contexte historique à enrichir par l\'IA'
-  }));
+  // Utiliser les vrais indices de la quête avec logique de statut selon l'état de la quête
+  const treasures = normalizeQuestClues(quest.clues).map((clue, index) => {
+    let status: 'current' | 'locked' | 'completed';
+    
+    if (quest.status === 'completed') {
+      // Si la quête est terminée, tous les indices sont résolus
+      status = 'completed';
+    } else {
+      // Logique normale pour les quêtes en cours
+      status = index === 0 ? 'current' : 'locked';
+    }
+    
+    return {
+      id: clue.id,
+      name: clue.title,
+      description: clue.description,
+      location: clue.location ? `${clue.location.latitude}, ${clue.location.longitude}` : 'Localisation à déterminer',
+      clue: clue.hint,
+      status,
+      historicalContext: clue.description || 'Contexte historique à enrichir par l\'IA',
+      // Ajouter des dates de résolution pour les quêtes terminées
+      resolvedAt: quest.status === 'completed' ? 
+        new Date(Date.now() - (24 * 60 * 60 * 1000) * (3 - index)).toISOString() : 
+        undefined
+    };
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-slate-100 p-6">
@@ -191,8 +207,12 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                 <HelpCircle className="w-4 h-4 mr-1" />
                 Guide
               </Button>
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-                Exploration en cours
+              <Badge variant="secondary" className={
+                quest.status === 'completed' 
+                  ? "bg-green-100 text-green-800" 
+                  : "bg-amber-100 text-amber-800"
+              }>
+                {quest.status === 'completed' ? 'Quête terminée' : 'Exploration en cours'}
               </Badge>
             </div>
           </div>
@@ -253,6 +273,11 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                           En cours
                         </Badge>
                       )}
+                      {treasure.status === 'completed' && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          ✓ Résolu
+                        </Badge>
+                      )}
                     </div>
                     
                     <p className="text-slate-700 mb-3">{treasure.description}</p>
@@ -261,6 +286,18 @@ const ExplorationJournal: React.FC<ExplorationJournalProps> = ({ quest }) => {
                       <div className="bg-white rounded-lg p-3 border-l-4 border-amber-400">
                         <p className="font-medium text-amber-800 mb-1">Indice actuel :</p>
                         <p className="text-slate-700 italic">"{treasure.clue}"</p>
+                      </div>
+                    )}
+                    
+                    {treasure.status === 'completed' && (
+                      <div className="bg-white rounded-lg p-3 border-l-4 border-green-400">
+                        <p className="font-medium text-green-800 mb-1">Indice résolu :</p>
+                        <p className="text-slate-700 italic">"{treasure.clue}"</p>
+                        {treasure.resolvedAt && (
+                          <p className="text-xs text-green-600 mt-2">
+                            Résolu le {new Date(treasure.resolvedAt).toLocaleDateString('fr-FR')}
+                          </p>
+                        )}
                       </div>
                     )}
                     
