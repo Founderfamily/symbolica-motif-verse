@@ -84,8 +84,8 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
     consensus_score: event.consensus_score,
     debate_status: event.debate_status,
     total_participants: event.total_participants,
-    community_votes: event.community_votes || [],
-    propositions: [] // Real propositions will be loaded from actual data
+    community_votes: Array.isArray(event.community_votes) ? event.community_votes : [],
+    propositions: Array.isArray(event.propositions) ? event.propositions : []
   }));
 
   const getEntryIcon = (type: string) => {
@@ -326,15 +326,15 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
                               </CardTitle>
                             </div>
                             <div className="text-right">
-                              {entry.consensus_score && (
+                              {entry.consensus_score !== undefined && (
                                 <div className="text-sm font-medium text-foreground">
-                                  {entry.consensus_score}%
+                                  {Number(entry.consensus_score) || 0}%
                                 </div>
                               )}
-                              {entry.total_participants && (
+                              {entry.total_participants !== undefined && (
                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                                   <Users className="h-3 w-3" />
-                                  {entry.total_participants}
+                                  {Number(entry.total_participants) || 0}
                                 </div>
                               )}
                             </div>
@@ -347,13 +347,13 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
                           </p>
 
                           {/* Métriques de consensus */}
-                          {entry.consensus_score && (
+                          {entry.consensus_score !== undefined && (
                             <div className="space-y-2">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="text-muted-foreground">Consensus communautaire</span>
-                                <span className="font-medium">{entry.consensus_score}%</span>
+                                <span className="font-medium">{Number(entry.consensus_score) || 0}%</span>
                               </div>
-                              <Progress value={entry.consensus_score} className="h-1.5" />
+                              <Progress value={Number(entry.consensus_score) || 0} className="h-1.5" />
                             </div>
                           )}
 
@@ -400,11 +400,11 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
                                          </Button>
                                       </div>
                                       <div className="text-xs text-muted-foreground">
-                                        {Math.round(forPercentage)}% d'accord
+                                        {Math.round(Number(forPercentage) || 0)}% d'accord
                                       </div>
                                     </div>
                                     
-                                    <Progress value={forPercentage} className="h-1" />
+                                    <Progress value={Number(forPercentage) || 0} className="h-1" />
                                   </div>
                                 );
                               })}

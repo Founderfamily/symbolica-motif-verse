@@ -13,6 +13,13 @@ export interface TimelineEvent {
   consensus_score?: number;
   debate_status?: 'active' | 'consensus' | 'controversial' | 'resolved';
   total_participants?: number;
+  propositions?: {
+    id: string;
+    content: string;
+    votes_for: number;
+    votes_against: number;
+    author: string;
+  }[];
   user_data?: {
     submitted_by?: string;
     validated_by?: string;
@@ -65,6 +72,15 @@ export const useTimelineData = ({
         debate_status: clue.validation_score > 0.8 ? 'consensus' : 
                      clue.validation_score > 0.6 ? 'active' : 'controversial',
         total_participants: clue.votes || 0,
+        propositions: [
+          {
+            id: 'prop1',
+            content: 'Ce document semble authentique',
+            votes_for: Math.floor(Math.random() * 20) + 5,
+            votes_against: Math.floor(Math.random() * 10) + 2,
+            author: 'Expert'
+          }
+        ],
         user_data: {
           submitted_by: clue.submitted_by,
           validated_by: clue.verified_by,
