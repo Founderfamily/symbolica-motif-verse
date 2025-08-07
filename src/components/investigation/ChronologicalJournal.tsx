@@ -167,10 +167,10 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
     }
   };
 
-  const probabilityLabel = () => {
-    if (currentProbability < 20) return { text: "Fausse piste probable", color: "text-destructive" };
-    if (currentProbability < 50) return { text: "Investigation en cours", color: "text-muted-foreground" };
-    if (currentProbability < 80) return { text: "Piste prometteuse", color: "text-warning" };
+  const getProbabilityLabel = (probability: number) => {
+    if (probability < 20) return { text: "Fausse piste probable", color: "text-destructive" };
+    if (probability < 50) return { text: "Investigation en cours", color: "text-muted-foreground" };
+    if (probability < 80) return { text: "Piste prometteuse", color: "text-warning" };
     return { text: "Action terrain recommandée", color: "text-green-600" };
   };
 
@@ -224,8 +224,8 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
             </div>
           </div>
           <Progress value={currentProbability} className="h-3 mb-2" />
-          <p className={`text-sm ${probabilityLabel().color}`}>
-            {probabilityLabel().text} - Investigation Nicolas Flamel & Jean de Montclair
+          <p className={`text-sm ${getProbabilityLabel(currentProbability).color}`}>
+            {getProbabilityLabel(currentProbability).text} - Investigation Nicolas Flamel & Jean de Montclair
           </p>
         </CardContent>
       </Card>
@@ -365,16 +365,18 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
                                 Propositions communautaires
                               </div>
                               {entry.propositions?.slice(0, 2).map((prop) => {
-                                const totalVotes = prop.votes_for + prop.votes_against;
-                                const forPercentage = totalVotes > 0 ? (prop.votes_for / totalVotes) * 100 : 0;
+                                const votesFor = Number(prop.votes_for) || 0;
+                                const votesAgainst = Number(prop.votes_against) || 0;
+                                const totalVotes = votesFor + votesAgainst;
+                                const forPercentage = totalVotes > 0 ? (votesFor / totalVotes) * 100 : 0;
                                 const userVoteKey = `${entry.id}_${prop.id}`;
                                 const userVote = userVotes[userVoteKey];
                                 
                                 return (
                                   <div key={prop.id} className="space-y-2 p-3 bg-muted/30 rounded-lg">
-                                    <div className="text-xs leading-relaxed">
-                                      <span className="font-medium">{prop.author}</span> propose: "{prop.content}"
-                                    </div>
+                                     <div className="text-xs leading-relaxed">
+                                       <span className="font-medium">{String(prop.author || 'Utilisateur')}</span> propose: "{String(prop.content || 'Proposition')}"
+                                     </div>
                                     
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
@@ -385,17 +387,17 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
                                           onClick={() => handleVote(entry.id, prop.id, 'for')}
                                         >
                                           <ThumbsUp className="h-3 w-3" />
-                                          {prop.votes_for}
+                                          {votesFor}
                                         </Button>
-                                        <Button
-                                          variant={userVote === 'against' ? 'destructive' : 'outline'}
-                                          size="sm"
-                                          className="h-6 px-2 gap-1"
-                                          onClick={() => handleVote(entry.id, prop.id, 'against')}
-                                        >
-                                          <ThumbsDown className="h-3 w-3" />
-                                          {prop.votes_against}
-                                        </Button>
+                                         <Button
+                                           variant={userVote === 'against' ? 'destructive' : 'outline'}
+                                           size="sm"
+                                           className="h-6 px-2 gap-1"
+                                           onClick={() => handleVote(entry.id, prop.id, 'against')}
+                                         >
+                                           <ThumbsDown className="h-3 w-3" />
+                                           {votesAgainst}
+                                         </Button>
                                       </div>
                                       <div className="text-xs text-muted-foreground">
                                         {Math.round(forPercentage)}% d'accord
