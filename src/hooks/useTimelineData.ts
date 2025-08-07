@@ -55,90 +55,80 @@ export const useTimelineData = ({
 }: UseTimelineDataProps) => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
 
-  // Historical events for Nicolas Flamel timeline
+  // Historical events for Fontainebleau timeline
   const generateTimelineEvents = useMemo(() => {
     const events: TimelineEvent[] = [];
 
-    // Authentic historical events of Nicolas Flamel
+    // Authentic historical events of Château de Fontainebleau
     const historicalEvents: TimelineEvent[] = [
       {
-        id: 'flamel-birth',
-        timestamp: '1330-01-01T00:00:00Z',
-        type: 'personnage',
-        title: 'Naissance de Nicolas Flamel',
-        description: 'Naissance de Nicolas Flamel à Pontoise, futur libraire et alchimiste parisien.',
+        id: 'fontainebleau-origins',
+        timestamp: '1137-01-01T00:00:00Z',
+        type: 'archive',
+        title: 'Première mention historique',
+        description: 'Première mention documentée d\'une résidence royale à Fontainebleau sous Louis VII le Jeune.',
         metadata: {
-          location: 'Pontoise, France'
+          location: 'Fontainebleau, France'
         }
       },
       {
-        id: 'flamel-librarian',
-        timestamp: '1357-01-01T00:00:00Z',
-        type: 'source',
-        title: 'Installation comme libraire-juré',
-        description: 'Nicolas Flamel s\'installe comme libraire-juré et copiste dans la rue de Marivaux à Paris.',
+        id: 'francois-transformation',
+        timestamp: '1528-01-01T00:00:00Z',
+        type: 'decouverte',
+        title: 'Transformation Renaissance par François Ier',
+        description: 'François Ier lance la transformation complète du château médiéval en magnifique résidence Renaissance.',
         metadata: {
-          location: 'Rue de Marivaux, Paris'
+          location: 'Château de Fontainebleau'
         }
       },
       {
-        id: 'flamel-marriage',
-        timestamp: '1368-01-01T00:00:00Z',
-        type: 'personnage',
-        title: 'Mariage avec Pernelle',
-        description: 'Mariage de Nicolas Flamel avec Pernelle, veuve aisée qui contribuera à sa fortune.',
-        metadata: {
-          location: 'Paris, France'
-        }
-      },
-      {
-        id: 'flamel-discovery',
-        timestamp: '1382-01-01T00:00:00Z',
+        id: 'secret-passages',
+        timestamp: '1547-01-01T00:00:00Z',
         type: 'indice',
-        title: 'Découverte du "Livre d\'Abraham le Juif"',
-        description: 'Selon la légende, Nicolas Flamel acquiert un mystérieux manuscrit alchimique pour deux florins.',
+        title: 'Construction des passages secrets',
+        description: 'Aménagement de passages secrets et cachettes dans les murs épais du château sous Henri II.',
         metadata: {
-          location: 'Paris, France'
+          location: 'Ailes du château'
         }
       },
       {
-        id: 'flamel-transmutation',
-        timestamp: '1383-01-17T00:00:00Z',
-        type: 'archive',
-        title: 'Première transmutation réussie',
-        description: 'Selon ses écrits, première réussite de la transmutation alchimique le 17 janvier.',
-        metadata: {
-          location: 'Paris, France'
-        }
-      },
-      {
-        id: 'flamel-hieroglyphics',
-        timestamp: '1399-01-01T00:00:00Z',
+        id: 'louis-xiii-hunts',
+        timestamp: '1610-01-01T00:00:00Z',
         type: 'source',
-        title: 'Rédaction des "Figures hiéroglyphiques"',
-        description: 'Nicolas Flamel rédige son célèbre traité d\'alchimie "Le Livre des figures hiéroglyphiques".',
+        title: 'Chasses royales et cachettes',
+        description: 'Louis XIII organise de grandes chasses et fait aménager des cachettes pour ses objets précieux.',
         metadata: {
-          location: 'Paris, France'
+          location: 'Forêt de Fontainebleau'
         }
       },
       {
-        id: 'flamel-foundations',
-        timestamp: '1407-01-01T00:00:00Z',
-        type: 'archive',
-        title: 'Fondations pieuses et testament',
-        description: 'Nicolas Flamel fait de nombreuses donations et fonde des œuvres de charité, témoignant de sa richesse.',
-        metadata: {
-          location: 'Paris, France'
-        }
-      },
-      {
-        id: 'flamel-death',
-        timestamp: '1418-03-22T00:00:00Z',
+        id: 'napoleon-residence',
+        timestamp: '1804-01-01T00:00:00Z',
         type: 'personnage',
-        title: 'Mort officielle de Nicolas Flamel',
-        description: 'Décès officiel de Nicolas Flamel, bien que certaines légendes prétendent qu\'il a simulé sa mort.',
+        title: 'Résidence favorite de Napoléon',
+        description: 'Napoléon Ier fait de Fontainebleau sa résidence préférée et y cache des trésors de ses campagnes.',
         metadata: {
-          location: 'Paris, France'
+          location: 'Appartements impériaux'
+        }
+      },
+      {
+        id: 'napoleon-abdication',
+        timestamp: '1814-04-06T00:00:00Z',
+        type: 'archive',
+        title: 'Abdication de Napoléon',
+        description: 'Napoléon signe son abdication dans la cour d\'honneur. Des témoins rapportent des cachettes précipitées.',
+        metadata: {
+          location: 'Cour d\'honneur'
+        }
+      },
+      {
+        id: 'hidden-rooms-discovery',
+        timestamp: '1962-01-01T00:00:00Z',
+        type: 'decouverte',
+        title: 'Découverte de salles cachées',
+        description: 'Des travaux de restauration révèlent des pièces murées contenant des indices de trésors royaux.',
+        metadata: {
+          location: 'Sous-sols du château'
         }
       }
     ];

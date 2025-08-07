@@ -217,13 +217,13 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">{currentProbability}%</div>
-              <div className="text-xs text-muted-foreground">Pierre localisée</div>
-              <div className="text-[10px] text-muted-foreground/70">Flamel laboratory</div>
+              <div className="text-xs text-muted-foreground">Trésor localisé</div>
+              <div className="text-[10px] text-muted-foreground/70">Château Fontainebleau</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">{totalActiveDebates}</div>
               <div className="text-xs text-muted-foreground">Débats actifs</div>
-              <div className="text-[10px] text-muted-foreground/70">Manuscrits • Sites</div>
+              <div className="text-[10px] text-muted-foreground/70">Passages • Cachettes</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-accent">423</div>
@@ -233,7 +233,7 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
           </div>
           <Progress value={currentProbability} className="h-3 mb-2" />
           <p className={`text-sm ${getProbabilityLabel(currentProbability).color}`}>
-            {getProbabilityLabel(currentProbability).text} - Investigation Nicolas Flamel & Jean de Montclair
+            {getProbabilityLabel(currentProbability).text} - Investigation Château de Fontainebleau
           </p>
         </CardContent>
       </Card>
@@ -243,10 +243,10 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Journal Nicolas Flamel - Investigation Collaborative
+            Journal de Quête - Château de Fontainebleau
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Chronologie des découvertes historiques • Manuscrits authentifiés • Sites alchimiques • Communautés A2CO & Sans Hulotte
+            Chronologie historique des trésors cachés • Documents royaux • Passages secrets • Investigation collaborative
           </p>
         </CardHeader>
         <CardContent>
