@@ -36,6 +36,7 @@ import AINotificationService from '@/components/investigation/AINotificationServ
 import AIInsightsWidget from '@/components/investigation/AIInsightsWidget';
 import AdaptiveHero from '@/components/adaptive/AdaptiveHero';
 import AdaptiveActions from '@/components/adaptive/AdaptiveActions';
+import { ArchiveMapProvider } from '@/contexts/ArchiveMapContext';
 
 
 import { normalizeQuestClues, getQuestCluesPreview, getQuestCluesCount } from '@/utils/questUtils';
@@ -294,7 +295,9 @@ const QuestDetailPage = () => {
 
         {/* Interface d'investigation principale */}
         <div className="bg-background rounded-2xl border border-border shadow-lg overflow-hidden">
-          <InvestigationInterface quest={quest} />
+          <ArchiveMapProvider>
+            <InvestigationInterface quest={quest} />
+          </ArchiveMapProvider>
         </div>
       </div>
 
