@@ -47,8 +47,18 @@ const SourceTrackingWidget: React.FC<SourceTrackingWidgetProps> = ({
   onSourceVote
 }) => {
   const [isAddingSource, setIsAddingSource] = useState(false);
-  const [newSource, setNewSource] = useState({
-    type: 'documentary' as const,
+  const [newSource, setNewSource] = useState<{
+    type: 'documentary' | 'field' | 'community';
+    title: string;
+    content: string;
+    url: string;
+    location: string;
+    submitted_by: string;
+    verified: boolean;
+    confidence: number;
+    votes: number;
+  }>({
+    type: 'documentary',
     title: '',
     content: '',
     url: '',
