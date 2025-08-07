@@ -463,6 +463,12 @@ const InvestigationInterface: React.FC<InvestigationInterfaceProps> = ({ quest }
             quest={quest}
             onNavigateToTab={handleNavigateToTab}
             currentProbability={currentProbability}
+            sources={mockSources}
+            clues={mockClues}
+            documents={[]}
+            discussions={[]}
+            figures={[]}
+            archives={[]}
           />
         </TabsContent>
 
