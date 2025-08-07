@@ -84,8 +84,8 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
     consensus_score: event.consensus_score,
     debate_status: event.debate_status,
     total_participants: event.total_participants,
-    community_votes: event.community_votes,
-    propositions: [] // Will be filled from real data when available
+    community_votes: event.community_votes || [],
+    propositions: [] // Real propositions will be loaded from actual data
   }));
 
   const getEntryIcon = (type: string) => {
@@ -248,8 +248,14 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
             <div className="absolute left-16 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-transparent"></div>
             
             <div className="space-y-8">
-              {journalEntries.map((entry, index) => {
-                const eventDate = new Date(entry.timestamp);
+              {journalEntries.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Aucun événement dans la timeline pour le moment
+                </div>
+              ) : (
+                journalEntries.map((entry, index) => {
+                  console.log('Timeline entry:', entry); // Debug log
+                  const eventDate = new Date(entry.timestamp);
                 const isFirstOfDay = index === 0 || 
                   new Date(journalEntries[index - 1].timestamp).toDateString() !== eventDate.toDateString();
                 
@@ -352,13 +358,13 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
                           )}
 
                           {/* Propositions et votes */}
-                          {entry.propositions && entry.propositions.length > 0 && (
+                          {entry.propositions && Array.isArray(entry.propositions) && entry.propositions.length > 0 && (
                             <div className="space-y-3 border-t pt-3">
                               <div className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                                 <MessageCircle className="h-3 w-3" />
                                 Propositions communautaires
                               </div>
-                              {entry.propositions.slice(0, 2).map((prop) => {
+                              {entry.propositions?.slice(0, 2).map((prop) => {
                                 const totalVotes = prop.votes_for + prop.votes_against;
                                 const forPercentage = totalVotes > 0 ? (prop.votes_for / totalVotes) * 100 : 0;
                                 const userVoteKey = `${entry.id}_${prop.id}`;
@@ -429,7 +435,8 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
                     </div>
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
 
             {/* Fin de timeline */}
