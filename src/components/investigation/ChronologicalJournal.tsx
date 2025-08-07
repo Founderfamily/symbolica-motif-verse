@@ -242,159 +242,207 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
           </p>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {journalEntries
-              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-              .map((entry) => (
-                <div
-                  key={entry.id}
-                  className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                >
-                  {/* En-tête de l'entrée */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                      {getEntryIcon(entry.type)}
-                    </div>
-                    
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant={getEntryBadgeVariant(entry.type)} className="text-xs">
-                          {entry.type.toUpperCase()}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(entry.timestamp)}
-                        </span>
-                        {entry.debate_status && (
-                          <Badge className={`text-xs ${getDebateStatusColor(entry.debate_status)}`}>
-                            {getDebateStatusText(entry.debate_status)}
-                          </Badge>
-                        )}
-                        {entry.probability_impact && (
-                          <Badge variant="outline" className="text-xs">
-                            +{entry.probability_impact}%
-                          </Badge>
-                        )}
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Users className="h-3 w-3" />
-                          {entry.total_participants?.toLocaleString()}
+          {/* Timeline visuelle */}
+          <div className="relative">
+            {/* Ligne de temps principale */}
+            <div className="absolute left-16 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-transparent"></div>
+            
+            <div className="space-y-8">
+              {journalEntries.map((entry, index) => {
+                const eventDate = new Date(entry.timestamp);
+                const isFirstOfDay = index === 0 || 
+                  new Date(journalEntries[index - 1].timestamp).toDateString() !== eventDate.toDateString();
+                
+                return (
+                  <div key={entry.id} className="relative flex items-start gap-6">
+                    {/* Date à gauche */}
+                    <div className="flex-shrink-0 w-14 text-right">
+                      {isFirstOfDay && (
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <div className="font-semibold text-foreground">
+                            {eventDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                          </div>
+                          <div className="text-[10px]">
+                            {eventDate.getFullYear()}
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-sm">{entry.title}</h4>
-                        <p className="text-sm text-muted-foreground">{entry.description}</p>
-                      </div>
+                      )}
                     </div>
-                  </div>
 
-                  {/* Consensus global */}
-                  {entry.consensus_score !== undefined && (
-                    <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Consensus communautaire</span>
-                        <span className="text-sm font-bold">{entry.consensus_score}%</span>
+                    {/* Point sur la timeline */}
+                    <div className="relative flex-shrink-0">
+                      <div className={`w-4 h-4 rounded-full border-2 border-background flex items-center justify-center z-10
+                        ${entry.debate_status === 'consensus' ? 'bg-green-500' :
+                          entry.debate_status === 'controversial' ? 'bg-red-500' :
+                          entry.debate_status === 'resolved' ? 'bg-blue-500' :
+                          'bg-orange-500'
+                        }`}>
+                        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                       </div>
-                      <Progress value={entry.consensus_score} className="h-2" />
+                      <div className="absolute top-1/2 -translate-y-1/2 left-6 w-6 h-px bg-border"></div>
                     </div>
-                  )}
 
-                  {/* Propositions et votes */}
-                  {entry.propositions && entry.propositions.length > 0 && (
-                    <div className="space-y-3 mb-4">
-                      {entry.propositions.map((prop) => {
-                        const totalVotes = prop.votes_for + prop.votes_against;
-                        const supportPercentage = totalVotes > 0 ? (prop.votes_for / totalVotes) * 100 : 0;
-                        const userVoteKey = `${entry.id}_${prop.id}`;
-                        const userVote = userVotes[userVoteKey];
-                        
-                        return (
-                          <div key={prop.id} className="p-3 border rounded-lg bg-background">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">{prop.content}</p>
-                                <p className="text-xs text-muted-foreground">par {prop.author}</p>
-                              </div>
-                              <div className="flex gap-1 ml-2">
-                                <Button
-                                  variant={userVote === 'for' ? 'default' : 'outline'}
-                                  size="sm"
-                                  onClick={() => handleVote(entry.id, prop.id, 'for')}
-                                  className="h-8 px-2"
+                    {/* Heure */}
+                    <div className="flex-shrink-0 w-12 text-xs text-muted-foreground">
+                      {eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+
+                    {/* Contenu de l'événement */}
+                    <div className="flex-1">
+                      <Card className={`transition-all duration-200 hover:shadow-md border-l-4 
+                        ${entry.debate_status === 'consensus' ? 'border-l-green-500' :
+                          entry.debate_status === 'controversial' ? 'border-l-red-500' :
+                          entry.debate_status === 'resolved' ? 'border-l-blue-500' :
+                          'border-l-orange-500'
+                        }`}>
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                {getEntryIcon(entry.type)}
+                                <Badge variant={getEntryBadgeVariant(entry.type)}>
+                                  {entry.type === 'carte' ? 'Carte' :
+                                   entry.type === 'indice' ? 'Indice' :
+                                   entry.type === 'discussion' ? 'Discussion' :
+                                   entry.type === 'source' ? 'Source' :
+                                   entry.type === 'personnage' ? 'Personnage' :
+                                   entry.type === 'archive' ? 'Archive' :
+                                   'Découverte'}
+                                </Badge>
+                                <Badge 
+                                  className={`text-xs px-2 py-0.5 ${getDebateStatusColor(entry.debate_status || 'active')}`}
                                 >
-                                  <ThumbsUp className="h-3 w-3" />
-                                  <span className="ml-1 text-xs">{prop.votes_for}</span>
-                                </Button>
-                                <Button
-                                  variant={userVote === 'against' ? 'default' : 'outline'}
-                                  size="sm"
-                                  onClick={() => handleVote(entry.id, prop.id, 'against')}
-                                  className="h-8 px-2"
-                                >
-                                  <ThumbsDown className="h-3 w-3" />
-                                  <span className="ml-1 text-xs">{prop.votes_against}</span>
-                                </Button>
+                                  {getDebateStatusText(entry.debate_status || 'active')}
+                                </Badge>
                               </div>
+                              <CardTitle className="text-base leading-tight">
+                                {entry.title}
+                              </CardTitle>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Progress value={supportPercentage} className="h-1 flex-1" />
-                              <span className="text-xs text-muted-foreground">
-                                {Math.round(supportPercentage)}% de soutien
-                              </span>
+                            <div className="text-right">
+                              {entry.consensus_score && (
+                                <div className="text-sm font-medium text-foreground">
+                                  {entry.consensus_score}%
+                                </div>
+                              )}
+                              {entry.total_participants && (
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  {entry.total_participants}
+                                </div>
+                              )}
                             </div>
                           </div>
-                        );
-                      })}
+                        </CardHeader>
+                        
+                        <CardContent className="space-y-4">
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {entry.description}
+                          </p>
+
+                          {/* Métriques de consensus */}
+                          {entry.consensus_score && (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground">Consensus communautaire</span>
+                                <span className="font-medium">{entry.consensus_score}%</span>
+                              </div>
+                              <Progress value={entry.consensus_score} className="h-1.5" />
+                            </div>
+                          )}
+
+                          {/* Propositions et votes */}
+                          {entry.propositions && entry.propositions.length > 0 && (
+                            <div className="space-y-3 border-t pt-3">
+                              <div className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                                <MessageCircle className="h-3 w-3" />
+                                Propositions communautaires
+                              </div>
+                              {entry.propositions.slice(0, 2).map((prop) => {
+                                const totalVotes = prop.votes_for + prop.votes_against;
+                                const forPercentage = totalVotes > 0 ? (prop.votes_for / totalVotes) * 100 : 0;
+                                const userVoteKey = `${entry.id}_${prop.id}`;
+                                const userVote = userVotes[userVoteKey];
+                                
+                                return (
+                                  <div key={prop.id} className="space-y-2 p-3 bg-muted/30 rounded-lg">
+                                    <div className="text-xs leading-relaxed">
+                                      <span className="font-medium">{prop.author}</span> propose: "{prop.content}"
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <Button
+                                          variant={userVote === 'for' ? 'default' : 'outline'}
+                                          size="sm"
+                                          className="h-6 px-2 gap-1"
+                                          onClick={() => handleVote(entry.id, prop.id, 'for')}
+                                        >
+                                          <ThumbsUp className="h-3 w-3" />
+                                          {prop.votes_for}
+                                        </Button>
+                                        <Button
+                                          variant={userVote === 'against' ? 'destructive' : 'outline'}
+                                          size="sm"
+                                          className="h-6 px-2 gap-1"
+                                          onClick={() => handleVote(entry.id, prop.id, 'against')}
+                                        >
+                                          <ThumbsDown className="h-3 w-3" />
+                                          {prop.votes_against}
+                                        </Button>
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        {Math.round(forPercentage)}% d'accord
+                                      </div>
+                                    </div>
+                                    
+                                    <Progress value={forPercentage} className="h-1" />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Actions */}
+                          <div className="flex items-center justify-between pt-2">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {formatDate(entry.timestamp)}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onNavigateToTab(getTargetTab(entry), entry.relatedTabData)}
+                              className="h-8 px-3 flex items-center gap-2"
+                            >
+                              {getEntryIcon(entry.type)}
+                              Voir dans {getTargetTab(entry) === 'map' ? 'Carte' : 
+                                       getTargetTab(entry) === 'clues' ? 'Indices' :
+                                       getTargetTab(entry) === 'chat' ? 'Chat' :
+                                       getTargetTab(entry) === 'investigation' ? 'Investigation' :
+                                       getTargetTab(entry) === 'personnages' ? 'Personnages' :
+                                       getTargetTab(entry) === 'archives' ? 'Archives' : 'Journal'}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                  )}
-
-                  {/* Action pour voir les détails */}
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onNavigateToTab(getTargetTab(entry), entry.relatedTabData)}
-                      className="h-8 text-xs"
-                    >
-                      Voir détails et voter →
-                    </Button>
-                    {entry.debate_status === 'active' && (
-                      <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-600">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        Vote critique
-                      </Badge>
-                    )}
                   </div>
-                </div>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
+                );
+              })}
+            </div>
 
-      {/* Résumé et prochaines étapes */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Prochaines étapes recommandées</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {currentProbability < 50 && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
-                <Search className="h-4 w-4" />
-                <span className="text-sm">Rechercher plus de sources documentaires</span>
+            {/* Fin de timeline */}
+            <div className="flex items-center gap-6 mt-8">
+              <div className="w-14"></div>
+              <div className="w-4 h-4 rounded-full bg-muted border-2 border-background flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-muted-foreground rounded-full"></div>
               </div>
-            )}
-            {currentProbability >= 50 && currentProbability < 80 && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
-                <MessageCircle className="h-4 w-4" />
-                <span className="text-sm">Valider les hypothèses avec la communauté</span>
+              <div className="w-12"></div>
+              <div className="text-sm text-muted-foreground">
+                Début de l'investigation...
               </div>
-            )}
-            {currentProbability >= 80 && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-950">
-                <MapPin className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-600">Préparer l'expédition terrain</span>
-              </div>
-            )}
+            </div>
           </div>
         </CardContent>
       </Card>
