@@ -55,151 +55,142 @@ export const useTimelineData = ({
 }: UseTimelineDataProps) => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
 
-  // Convert different data sources to timeline events
+  // Historical events for Nicolas Flamel timeline
   const generateTimelineEvents = useMemo(() => {
-    const timelineEvents: TimelineEvent[] = [];
+    const events: TimelineEvent[] = [];
 
-    // Convert clues to timeline events
-    clues.forEach((clue, index) => {
-      const clueEvent: TimelineEvent = {
-        id: `clue-${clue.id || index}`,
-        timestamp: clue.created_at || clue.submitted_at || new Date().toISOString(),
-        type: 'indice',
-        title: `Indice découvert: ${clue.title || clue.content?.substring(0, 50) + '...'}`,
-        description: clue.description || clue.content || clue.hint || '',
-        relatedTabData: { clueId: clue.id, tabTarget: 'clues' },
-        consensus_score: clue.validation_score ? Math.round(clue.validation_score * 100) : undefined,
-        debate_status: clue.validation_score > 0.8 ? 'consensus' : 
-                     clue.validation_score > 0.6 ? 'active' : 'controversial',
-        total_participants: clue.votes || 0,
-        propositions: [
-          {
-            id: 'prop1',
-            content: 'Ce document semble authentique',
-            votes_for: Math.floor(Math.random() * 20) + 5,
-            votes_against: Math.floor(Math.random() * 10) + 2,
-            author: 'Expert'
-          }
-        ],
-        user_data: {
-          submitted_by: clue.submitted_by,
-          validated_by: clue.verified_by,
-          votes: clue.votes,
-          confidence: clue.credibility_score
-        }
-      };
-      timelineEvents.push(clueEvent);
-    });
-
-    // Convert sources to timeline events
-    sources.forEach((source, index) => {
-      const sourceEvent: TimelineEvent = {
-        id: `source-${source.id || index}`,
-        timestamp: source.submitted_at?.toISOString() || source.created_at || new Date().toISOString(),
-        type: 'source',
-        title: `Source documentaire: ${source.title}`,
-        description: source.content || source.description || '',
-        relatedTabData: { sourceId: source.id, tabTarget: 'investigation' },
-        consensus_score: source.confidence ? Math.round(source.confidence * 100) : undefined,
-        debate_status: source.verified ? 'consensus' : 'active',
-        total_participants: source.votes || 0,
-        user_data: {
-          submitted_by: source.submitted_by,
-          votes: source.votes,
-          confidence: source.confidence
-        },
-        metadata: {
-          location: source.location,
-          source: source.type
-        }
-      };
-      timelineEvents.push(sourceEvent);
-    });
-
-    // Convert documents/archives to timeline events
-    documents.forEach((doc, index) => {
-      const docEvent: TimelineEvent = {
-        id: `doc-${doc.id || index}`,
-        timestamp: doc.created_at || doc.date_created || new Date().toISOString(),
-        type: 'archive',
-        title: `Document authentifié: ${doc.title}`,
-        description: doc.description || doc.content || '',
-        relatedTabData: { documentId: doc.id, tabTarget: 'archives' },
-        consensus_score: doc.credibility_score ? Math.round(doc.credibility_score) : undefined,
-        debate_status: 'resolved',
-        user_data: {
-          submitted_by: doc.uploaded_by || doc.author
-        },
-        metadata: {
-          author: doc.author,
-          date_created: doc.date_created,
-          source: doc.source
-        }
-      };
-      timelineEvents.push(docEvent);
-    });
-
-    // Convert archives to timeline events
-    archives.forEach((archive, index) => {
-      const archiveEvent: TimelineEvent = {
-        id: `archive-${archive.id || index}`,
-        timestamp: archive.created_at || archive.date || new Date().toISOString(),
-        type: 'archive',
-        title: `Archive historique: ${archive.title}`,
-        description: archive.description || archive.content || '',
-        relatedTabData: { archiveId: archive.id, tabTarget: 'archives' },
-        consensus_score: archive.credibility ? Math.round(archive.credibility) : 95,
-        debate_status: 'resolved',
-        metadata: {
-          author: archive.author,
-          date_created: archive.date,
-          source: archive.source,
-          location: archive.physical_location || archive.physicalLocation
-        }
-      };
-      timelineEvents.push(archiveEvent);
-    });
-
-    // Convert historical figures to timeline events
-    figures.forEach((figure, index) => {
-      const figureEvent: TimelineEvent = {
-        id: `figure-${figure.id || index}`,
-        timestamp: figure.created_at || new Date().toISOString(),
+    // Authentic historical events of Nicolas Flamel
+    const historicalEvents: TimelineEvent[] = [
+      {
+        id: 'flamel-birth',
+        timestamp: '1330-01-01T00:00:00Z',
         type: 'personnage',
-        title: `Personnage historique identifié: ${figure.name}`,
-        description: `${figure.role} (${figure.period}) - ${figure.description}`,
-        relatedTabData: { figureId: figure.id, tabTarget: 'personnages' },
-        consensus_score: figure.relevance ? Math.round(figure.relevance * 100) : undefined,
-        debate_status: figure.relevance > 0.8 ? 'consensus' : 'active',
+        title: 'Naissance de Nicolas Flamel',
+        description: 'Naissance de Nicolas Flamel à Pontoise, futur libraire et alchimiste parisien.',
         metadata: {
-          author: figure.role,
-          date_created: figure.period
+          location: 'Pontoise, France'
         }
-      };
-      timelineEvents.push(figureEvent);
+      },
+      {
+        id: 'flamel-librarian',
+        timestamp: '1357-01-01T00:00:00Z',
+        type: 'source',
+        title: 'Installation comme libraire-juré',
+        description: 'Nicolas Flamel s\'installe comme libraire-juré et copiste dans la rue de Marivaux à Paris.',
+        metadata: {
+          location: 'Rue de Marivaux, Paris'
+        }
+      },
+      {
+        id: 'flamel-marriage',
+        timestamp: '1368-01-01T00:00:00Z',
+        type: 'personnage',
+        title: 'Mariage avec Pernelle',
+        description: 'Mariage de Nicolas Flamel avec Pernelle, veuve aisée qui contribuera à sa fortune.',
+        metadata: {
+          location: 'Paris, France'
+        }
+      },
+      {
+        id: 'flamel-discovery',
+        timestamp: '1382-01-01T00:00:00Z',
+        type: 'indice',
+        title: 'Découverte du "Livre d\'Abraham le Juif"',
+        description: 'Selon la légende, Nicolas Flamel acquiert un mystérieux manuscrit alchimique pour deux florins.',
+        metadata: {
+          location: 'Paris, France'
+        }
+      },
+      {
+        id: 'flamel-transmutation',
+        timestamp: '1383-01-17T00:00:00Z',
+        type: 'archive',
+        title: 'Première transmutation réussie',
+        description: 'Selon ses écrits, première réussite de la transmutation alchimique le 17 janvier.',
+        metadata: {
+          location: 'Paris, France'
+        }
+      },
+      {
+        id: 'flamel-hieroglyphics',
+        timestamp: '1399-01-01T00:00:00Z',
+        type: 'source',
+        title: 'Rédaction des "Figures hiéroglyphiques"',
+        description: 'Nicolas Flamel rédige son célèbre traité d\'alchimie "Le Livre des figures hiéroglyphiques".',
+        metadata: {
+          location: 'Paris, France'
+        }
+      },
+      {
+        id: 'flamel-foundations',
+        timestamp: '1407-01-01T00:00:00Z',
+        type: 'archive',
+        title: 'Fondations pieuses et testament',
+        description: 'Nicolas Flamel fait de nombreuses donations et fonde des œuvres de charité, témoignant de sa richesse.',
+        metadata: {
+          location: 'Paris, France'
+        }
+      },
+      {
+        id: 'flamel-death',
+        timestamp: '1418-03-22T00:00:00Z',
+        type: 'personnage',
+        title: 'Mort officielle de Nicolas Flamel',
+        description: 'Décès officiel de Nicolas Flamel, bien que certaines légendes prétendent qu\'il a simulé sa mort.',
+        metadata: {
+          location: 'Paris, France'
+        }
+      }
+    ];
+
+    // Add historical events first
+    events.push(...historicalEvents);
+
+    // Convert modern clues to simplified timeline events
+    clues?.forEach((clue, index) => {
+      events.push({
+        id: `clue-${clue.id || index}`,
+        timestamp: clue.created_at || new Date().toISOString(),
+        type: 'indice',
+        title: clue.description || 'Indice découvert',
+        description: clue.content || 'Un indice lié à la quête de Nicolas Flamel.',
+        metadata: {
+          location: clue.location
+        }
+      });
     });
 
-    // Convert discussions to timeline events
-    discussions.forEach((discussion, index) => {
-      const discussionEvent: TimelineEvent = {
-        id: `discussion-${discussion.id || index}`,
-        timestamp: discussion.created_at || discussion.last_activity_at || new Date().toISOString(),
-        type: 'discussion',
-        title: `Discussion communautaire: ${discussion.title}`,
-        description: discussion.content || `Discussion ${discussion.topic_type} avec ${discussion.replies_count || 0} réponses`,
-        relatedTabData: { discussionId: discussion.id, tabTarget: 'chat' },
-        total_participants: discussion.replies_count || 0,
-        debate_status: discussion.pinned ? 'consensus' : 'active',
-        user_data: {
-          submitted_by: discussion.created_by
+    // Convert sources to simplified timeline events
+    sources?.forEach((source, index) => {
+      events.push({
+        id: `source-${source.id || index}`,
+        timestamp: source.created_at || new Date().toISOString(),
+        type: 'source',
+        title: source.title || 'Source documentaire',
+        description: source.content || 'Document historique référencé.',
+        metadata: {
+          location: source.location
         }
-      };
-      timelineEvents.push(discussionEvent);
+      });
     });
 
-    // Sort events by timestamp (most recent first)
-    return timelineEvents.sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    // Convert documents to simplified timeline events
+    documents?.forEach((document, index) => {
+      events.push({
+        id: `document-${document.id || index}`,
+        timestamp: document.created_at || new Date().toISOString(),
+        type: 'archive',
+        title: document.title || 'Document archivé',
+        description: document.description || 'Archive historique.',
+        metadata: {
+          location: document.origin
+        }
+      });
+    });
+
+    // Sort events chronologically (oldest first for historical perspective)
+    return events.sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
   }, [quest, sources, clues, documents, discussions, figures, archives]);
 

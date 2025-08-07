@@ -130,11 +130,19 @@ const ChronologicalJournal: React.FC<ChronologicalJournalProps> = ({
   };
 
   const formatDate = (timestamp: string) => {
-    return new Date(timestamp).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    
+    // For historical dates (before 1500), show only the year
+    if (year < 1500) {
+      return year.toString();
+    }
+    
+    // For modern dates, show full date
+    return date.toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
